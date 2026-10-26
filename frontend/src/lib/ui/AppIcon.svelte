@@ -1,0 +1,168 @@
+<script lang="ts">
+  import type { AppId } from '../../apps/types'
+  import Icon from './Icon.svelte'
+
+  interface Props {
+    id: AppId
+    size?: number
+  }
+
+  let { id, size = 56 }: Props = $props()
+
+  // Gradient ids must be unique per instance, or icons rendered twice would
+  // reference each other's definitions.
+  const uid = $props.id()
+  const ref = (name: string) => `${uid}-${name}`
+  const url = (name: string) => `url(#${ref(name)})`
+</script>
+
+<!--
+  App icons (docs/adr/0003-app-icon-artwork.md) on a 64×64 grid. Davish's own
+  apps get drawn artwork: one bold, filled shape on a rich gradient. Apps that
+  manage a third-party tool show that tool's official mark. Colors here are
+  artwork, not UI tokens.
+-->
+<svg viewBox="0 0 64 64" width={size} height={size} aria-hidden="true">
+  {#if id === 'terminal'}
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#3b404c" />
+        <stop offset="1" stop-color="#121418" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    <rect x="9" y="14" width="46" height="36" rx="10" fill="#08090c" />
+    <rect x="9.5" y="14.5" width="45" height="35" rx="9.5" fill="none" stroke="#ffffff14" />
+    <path
+      d="M19 24.5 27.5 32 19 39.5"
+      fill="none"
+      stroke="#5ef0a0"
+      stroke-width="5.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <rect x="31" y="36.5" width="14" height="5.5" rx="2.75" fill="#fff" />
+  {:else if id === 'files'}
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#5ab1ff" />
+        <stop offset="1" stop-color="#1d58d4" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    <path
+      d="M11 21a5 5 0 0 1 5-5h10.5a4 4 0 0 1 3 1.3l3.2 3.7H48a5 5 0 0 1 5 5v20a5 5 0 0 1-5 5H16a5 5 0 0 1-5-5Z"
+      fill="#bfdcff"
+    />
+    <rect x="11" y="28" width="42" height="24" rx="5" fill="#0b3a9e" opacity="0.25" />
+    <rect x="11" y="26" width="42" height="25" rx="5" fill="#fff" />
+  {:else if id === 'monitor'}
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#22242b" />
+        <stop offset="1" stop-color="#050506" />
+      </linearGradient>
+      <radialGradient id={ref('glow')} cx="0.2" cy="1" r="0.9">
+        <stop offset="0" stop-color="#ff5a1f" stop-opacity="0.55" />
+        <stop offset="1" stop-color="#ff5a1f" stop-opacity="0" />
+      </radialGradient>
+      <linearGradient id={ref('line')} x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#ffd23f" />
+        <stop offset="0.55" stop-color="#ff5a1f" />
+        <stop offset="1" stop-color="#ff2d6f" />
+      </linearGradient>
+      <filter id={ref('blur')} x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="2.5" />
+      </filter>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    <rect width="64" height="64" fill={url('glow')} />
+    {#each [true, false] as glow (glow)}
+      <path
+        d="M9 35h9.5l5.5-14 8.5 25 6-16 3.5 5H55"
+        fill="none"
+        stroke={url('line')}
+        stroke-width="6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        filter={glow ? url('blur') : undefined}
+        opacity={glow ? 0.7 : 1}
+      />
+    {/each}
+  {:else if id === 'services'}
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffc04a" />
+        <stop offset="1" stop-color="#e2670c" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    {#each [{ y: 39, o: 0.5 }, { y: 31, o: 0.75 }, { y: 23, o: 1 }] as layer (layer.y)}
+      <path
+        d="M32 {layer.y - 10} 52 {layer.y} 32 {layer.y + 10} 12 {layer.y}Z"
+        fill="#fff"
+        fill-opacity={layer.o}
+        stroke="#ef8a1c"
+        stroke-width="2.5"
+        stroke-linejoin="round"
+      />
+    {/each}
+  {:else if id === 'docker'}
+    <!-- Third-party tool: its official mark, unmodified, in its brand color (ADR 0003). -->
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff" />
+        <stop offset="1" stop-color="#e3ecf7" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    <g transform="translate(12 12)" style:color="#2496ed">
+      <Icon name="brandDocker" size={40} />
+    </g>
+  {:else if id === 'logs'}
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#b18bff" />
+        <stop offset="1" stop-color="#5426cc" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    <g transform="rotate(-7 32 32)">
+      <rect x="15" y="11" width="34" height="45" rx="7" fill="#2b0f7a" opacity="0.3" />
+      <rect x="15" y="9" width="34" height="45" rx="7" fill="#fff" />
+      <rect x="21" y="18" width="22" height="4.5" rx="2.25" fill="#d3c4fb" />
+      <rect x="21" y="27" width="17" height="4.5" rx="2.25" fill="#ffc83d" />
+      <rect x="21" y="36" width="20" height="4.5" rx="2.25" fill="#d3c4fb" />
+      <rect x="21" y="45" width="12" height="4.5" rx="2.25" fill="#d3c4fb" />
+    </g>
+  {:else if id === 'editor'}
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ff5c8f" />
+        <stop offset="1" stop-color="#d9103c" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    <g transform="rotate(40 32 32)">
+      <rect x="25.5" y="6" width="13" height="38" rx="3.5" fill="#fff" />
+      <rect x="25.5" y="6" width="13" height="8" rx="3.5" fill="#ffc2d3" />
+      <path d="M25.5 44h13L32 57Z" fill="#ffe0c2" stroke="#ffe0c2" stroke-linejoin="round" />
+      <path d="M29.6 52.2h4.8L32 57Z" fill="#2b2b33" />
+    </g>
+  {:else if id === 'settings'}
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#f5f6f9" />
+        <stop offset="1" stop-color="#b3b7c2" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    <g fill="#474b56">
+      {#each [0, 45, 90, 135, 180, 225, 270, 315] as angle (angle)}
+        <rect x="27.5" y="10" width="9" height="12" rx="2.5" transform="rotate({angle} 32 32)" />
+      {/each}
+      <circle cx="32" cy="32" r="16" />
+    </g>
+    <circle cx="32" cy="32" r="6.5" fill="#dfe1e7" />
+  {/if}
+</svg>

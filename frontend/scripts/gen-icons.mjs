@@ -46,9 +46,12 @@ const ICONS = {
   check: 'FiCheck',
   plus: 'FiPlus',
   copy: 'FiCopy',
+  // Official marks (Simple Icons) for third-party tools; see ADR 0003.
+  brandDocker: 'SiDocker',
+  brandNginx: 'SiNginx',
 }
 
-const PACKS = { Dv: 'dv', Fi: 'fi', Lu: 'lu', Hi: 'hi', Bi: 'bi', Ri: 'ri', Md: 'md', Px: 'px' }
+const PACKS = { Dv: 'dv', Fi: 'fi', Lu: 'lu', Hi: 'hi', Bi: 'bi', Ri: 'ri', Md: 'md', Px: 'px', Si: 'si' }
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)))
 // The package's exports map does not expose package.json, so read it directly.

@@ -2,7 +2,7 @@
   import type { AppDef } from '../../apps/types'
   import { t } from '../i18n/vi'
   import { ms } from '../motion'
-  import Icon from '../ui/Icon.svelte'
+  import AppIcon from '../ui/AppIcon.svelte'
   import { approach, magnify, MAX_LIFT, MAX_SCALE } from './magnify'
 
   interface Props {
@@ -95,11 +95,10 @@
         class:bounce={bouncing === app.id}
         data-dock-app={app.id}
         aria-label={app.label}
-        style:--tile={app.color}
         onclick={() => launch(app)}
         onanimationend={() => (bouncing = null)}
       >
-        <span class="plate"><Icon name={app.icon} size={24} strokeWidth={2} /></span>
+        <AppIcon id={app.id} />
       </button>
       <span class="dot" class:on={isOpen(app.id)}></span>
     </div>
@@ -139,9 +138,8 @@
   }
 
   /*
-   * App icon rule (docs/DESIGN.md, "Icon app"): every tile derives from one base
-   * color (--tile): a light-to-deep gradient, a diagonal sheen, and the white
-   * glyph sitting on a frosted glass plate.
+   * The artwork (AppIcon) fills the tile; the tile adds what every icon shares:
+   * the squircle, a soft top sheen, a hairline bevel and the drop shadow.
    */
   .tile {
     position: relative;
@@ -150,43 +148,27 @@
     border: 0;
     padding: 0;
     border-radius: var(--dock-tile-radius);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: block;
     overflow: hidden;
-    color: var(--fg-on-accent);
-    background: linear-gradient(
-      180deg,
-      color-mix(in oklab, var(--tile), white 24%),
-      color-mix(in oklab, var(--tile), black 14%)
-    );
-    box-shadow:
-      var(--tile-edge),
-      0 4px 10px color-mix(in oklab, var(--tile), transparent 55%),
-      0 1px 2px rgba(0, 0, 0, 0.2);
+    background: none;
+    box-shadow: var(--tile-shadow);
     transform-origin: bottom center;
     transform: translateY(calc(-1 * var(--lift))) scale(var(--scale));
     transition: filter var(--dur-fast) var(--ease-out);
   }
 
-  .tile::before {
+  .tile :global(svg) {
+    display: block;
+  }
+
+  .tile::after {
     content: '';
     position: absolute;
     inset: 0;
+    border-radius: inherit;
     background: var(--tile-sheen);
-  }
-
-  .plate {
-    position: relative;
-    width: var(--tile-plate);
-    height: var(--tile-plate);
-    border-radius: var(--tile-plate-radius);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--tile-plate-bg);
-    border: 1px solid var(--tile-plate-border);
-    box-shadow: var(--tile-plate-shadow);
+    box-shadow: var(--tile-edge);
+    pointer-events: none;
   }
 
   .tile:active {

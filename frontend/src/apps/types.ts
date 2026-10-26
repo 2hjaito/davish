@@ -14,8 +14,6 @@ export interface AppDef {
   id: AppId
   label: string
   icon: IconName
-  /** CSS variable for the dock tile color. */
-  color: string
   theme: 'light' | 'dark'
   size: { w: number; h: number }
   component: Component<AppProps>
