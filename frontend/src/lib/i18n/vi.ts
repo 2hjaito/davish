@@ -91,5 +91,9 @@ export const t = {
     CONN_AUTH_FAILED: 'Xác thực thất bại.',
     FS_PERMISSION_DENIED: 'Không có quyền truy cập.',
     CMD_NEEDS_ROOT: 'Lệnh này cần quyền root.',
+    INVALID_INPUT: 'Thông tin chưa hợp lệ.',
+    NOT_FOUND: 'Không tìm thấy.',
+    STORE_CORRUPT: 'File cấu hình bị hỏng. Hãy kiểm tra lại servers.json.',
+    KEYCHAIN_UNAVAILABLE: 'Không truy cập được keychain của hệ điều hành.',
   },
 } as const
