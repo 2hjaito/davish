@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -74,3 +75,29 @@ jobs:
         with:
           name: davish-${{ runner.os }}
           path: build/bin/
+
+  # Talks to the throwaway sshd container from test/sshd (never a real server).
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      # The main package links Wails, which needs these to compile on Linux.
+      - name: Linux build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev
+
+      - name: Start test sshd
+        run: make sshd-up
+
+      - name: Integration tests
+        run: make test-integration
+
+      - name: Stop test sshd
+        if: always()
+        run: make sshd-down
