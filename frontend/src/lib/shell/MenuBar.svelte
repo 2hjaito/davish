@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { hasRuntime } from '../api/runtime'
   import { formatClock, formatGB, formatRate } from '../format'
   import { t } from '../i18n/vi'
   import { metrics } from '../stores/metrics.svelte'
@@ -10,7 +11,9 @@
   import SystemMenu from './SystemMenu.svelte'
 
   let now = $state(new Date())
-  const online = $derived(servers.active?.state === 'connected')
+  // Metrics are still mock data (real ones arrive with sysmon in M4), so they
+  // only show in the browser preview, never next to a real server.
+  const online = $derived(!hasRuntime && servers.active?.state === 'connected')
   const m = $derived(metrics.current)
   const memPct = $derived((m.memUsed / m.memTotal) * 100)
 

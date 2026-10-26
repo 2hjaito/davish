@@ -3,6 +3,7 @@ import '@fontsource-variable/jetbrains-mono'
 import './lib/styles/tokens.css'
 import './lib/styles/reset.css'
 import './lib/styles/glass.css'
+import './lib/styles/controls.css'
 
 import { mount } from 'svelte'
 

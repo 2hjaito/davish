@@ -1,11 +1,15 @@
 <script lang="ts">
   import { apps, getApp } from '../../apps/registry'
   import type { AppDef } from '../../apps/types'
+  import { hasRuntime } from '../api/runtime'
   import { servers } from '../stores/servers.svelte'
+  import { ui } from '../stores/ui.svelte'
   import Window from '../wm/Window.svelte'
   import { wm } from '../wm/windowManager.svelte'
   import Dock from './Dock.svelte'
   import MenuBar from './MenuBar.svelte'
+  import HostKeyDialog from './HostKeyDialog.svelte'
+  import ServerDialog from './ServerDialog.svelte'
   import SleepScreen from './SleepScreen.svelte'
   import { fadeOut } from '../motion'
   import { hasPrimaryModifier, isMac } from './platform'
@@ -33,17 +37,39 @@
     return wm.openOrFocus(app.id, serverID, { title: app.label, size: app.size })
   }
 
-  // Start like the mockup: Terminal and Files open on the first server.
-  const first = servers.list[0]
-  if (first && wm.windows.length === 0) {
-    for (const [id, at] of [
-      ['terminal', { x: 120, y: 120 }],
-      ['files', { x: 790, y: 200 }],
-    ] as const) {
-      const app = getApp(id)
-      if (app) wm.open(app.id, first.id, { title: app.label, size: app.size, at })
+  // Load saved servers and follow connection events for the app's lifetime.
+  $effect(() => {
+    let stop = () => {}
+    let disposed = false
+    void servers.init().then((off) => (disposed ? off() : (stop = off)))
+    return () => {
+      disposed = true
+      stop()
     }
-  }
+  })
+
+  // First run: ask for a server. Otherwise open a terminal on the active one,
+  // like the mockup's Terminal + Files in the browser preview.
+  let opened = false
+  $effect(() => {
+    if (!servers.ready || opened) return
+    opened = true
+    if (servers.list.length === 0) {
+      ui.addServer()
+      return
+    }
+    const id = servers.activeId
+    const start = hasRuntime
+      ? ([['terminal', { x: 120, y: 120 }]] as const)
+      : ([
+          ['terminal', { x: 120, y: 120 }],
+          ['files', { x: 790, y: 200 }],
+        ] as const)
+    for (const [appId, at] of start) {
+      const app = getApp(appId)
+      if (app) wm.open(app.id, id, { title: app.label, size: app.size, at })
+    }
+  })
 
   function onKeyDown(e: KeyboardEvent) {
     if (!hasPrimaryModifier(e) || e.altKey || e.shiftKey) return
@@ -101,6 +127,8 @@
     bind:height={dockHeight}
   />
 
+  <ServerDialog />
+  <HostKeyDialog />
   <SleepScreen />
 </div>
 

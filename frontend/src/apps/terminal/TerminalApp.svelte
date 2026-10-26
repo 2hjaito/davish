@@ -1,6 +1,9 @@
 <script lang="ts">
   import type { Terminal } from '@xterm/xterm'
 
+  import { onTermData, onTermExit } from '../../lib/api/events'
+  import { hasRuntime } from '../../lib/api/runtime'
+  import { decodeOutput, termClose, termResize, termStart, termWrite } from '../../lib/api/terminal'
   import { t } from '../../lib/i18n/vi'
   import { servers } from '../../lib/stores/servers.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
@@ -15,24 +18,51 @@
 
   const ctx = getWindowContext()
   const server = $derived(servers.list.find((s) => s.id === win.serverID))
+  const online = $derived(server?.state === 'connected')
 
   interface Tab {
     id: number
     cwd: string
+    /** Title the remote shell sets (bash sets "user@host: cwd" for xterm). */
+    title?: string
+    /** Remote PTY session, while one is open. */
+    session?: string
+    starting?: boolean
+    /** Set once its xterm exists; reactive, unlike the terms map below. */
+    ready?: boolean
   }
 
   let nextId = 1
   let tabs = $state<Tab[]>([{ id: nextId++, cwd: '~' }])
   let activeId = $state(1)
-  // Component instances stay out of $state; they are only used to focus.
+  // Component and xterm instances stay out of $state, which would proxy them.
   const views: Record<number, XTerm> = {}
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity -- holds xterm instances; Tab.ready carries the reactivity
+  const terms = new Map<number, Terminal>()
 
   function title(tab: Tab) {
-    return `${server?.user ?? ''}@${server?.name ?? ''}: ${tab.cwd}`
+    return tab.title || `${server?.user ?? ''}@${server?.name ?? ''}: ${tab.cwd}`
   }
 
   function connect(tab: Tab, term: Terminal) {
-    // TODO(M3): replace MockShell with a PTY session from internal/term.
+    if (!hasRuntime) {
+      mock(tab, term)
+      return
+    }
+    terms.set(tab.id, term)
+    term.onData((data) => {
+      if (tab.session) void termWrite(tab.session, data)
+    })
+    term.onResize(({ cols, rows }) => {
+      if (tab.session) void termResize(tab.session, cols, rows)
+    })
+    term.onTitleChange((title) => (tab.title = title))
+    tab.ready = true
+    if (!online) term.write(`\x1b[2m${t.terminal.waiting}\x1b[0m\r\n`)
+  }
+
+  // The browser preview has no Go side: run the scripted shell instead.
+  function mock(tab: Tab, term: Terminal) {
     const shell = new MockShell({
       user: server?.user ?? 'user',
       host: server?.name ?? 'server',
@@ -45,6 +75,42 @@
     shell.start()
   }
 
+  // Open a remote shell for every tab that lacks one while the server is up;
+  // after a dropped connection this reopens them once it reconnects.
+  $effect(() => {
+    if (!hasRuntime || !online) return
+    for (const tab of tabs) {
+      const term = terms.get(tab.id)
+      if (!tab.ready || !term || tab.session || tab.starting) continue
+      tab.starting = true
+      termStart(win.serverID, term.cols, term.rows)
+        .then((id) => (tab.session = id))
+        .catch(() => term.write(`\r\n\x1b[31m${t.terminal.startFailed}\x1b[0m\r\n`))
+        .finally(() => (tab.starting = false))
+    }
+  })
+
+  $effect(() => {
+    if (!hasRuntime) return
+    const offData = onTermData(({ id, b64 }) => {
+      const tab = tabs.find((x) => x.session === id)
+      if (tab) terms.get(tab.id)?.write(decodeOutput(b64))
+    })
+    const offExit = onTermExit(({ id, code }) => {
+      const tab = tabs.find((x) => x.session === id)
+      if (!tab) return
+      tab.session = undefined
+      // -1: the connection dropped, not the shell; keep the tab to reopen it.
+      if (code === -1) terms.get(tab.id)?.write(`\r\n\x1b[33m${t.terminal.lost}\x1b[0m\r\n`)
+      else closeTab(tab.id)
+    })
+    return () => {
+      offData()
+      offExit()
+      for (const tab of tabs) if (tab.session) void termClose(tab.session)
+    }
+  })
+
   function newTab() {
     const tab: Tab = { id: nextId++, cwd: '~' }
     tabs.push(tab)
@@ -54,6 +120,9 @@
   function closeTab(id: number) {
     const i = tabs.findIndex((tb) => tb.id === id)
     if (i === -1) return
+    const session = tabs[i]?.session
+    if (session) void termClose(session)
+    terms.delete(id)
     tabs.splice(i, 1)
     const next = tabs[Math.min(i, tabs.length - 1)]
     if (next) activeId = next.id

@@ -1,0 +1,66 @@
+/* Shared form controls for dialogs and app toolbars. */
+.btn {
+  border: 0;
+  border-radius: var(--control-radius);
+  padding: 6px 14px;
+  background: var(--fill-soft);
+  font-weight: 500;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    filter var(--dur-fast) var(--ease-out);
+}
+
+.btn:hover:not(:disabled) {
+  filter: brightness(0.95);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--fg-on-accent);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: var(--fg-on-accent);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: var(--text-sm);
+}
+
+.field > span {
+  color: var(--fg-label);
+  font-weight: 500;
+}
+
+.field small {
+  color: var(--fg-muted);
+  font-size: var(--text-xs);
+}
+
+.input {
+  width: 100%;
+  border: 1px solid var(--divider);
+  border-radius: var(--control-radius);
+  padding: 6px 9px;
+  background: var(--content-bg);
+  outline: none;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}

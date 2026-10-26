@@ -1,3 +1,5 @@
+import { hasRuntime } from '../api/runtime'
+
 export type Level = 'info' | 'warn' | 'error'
 
 export interface Notification {
@@ -9,18 +11,23 @@ export interface Notification {
   at: Date
 }
 
+// Mock data matching the mockup, for the browser preview only; the real app
+// starts empty until notify:new is wired up (M4/M7).
+const demo: Notification[] = hasRuntime
+  ? []
+  : [
+      {
+        id: 'n1',
+        level: 'warn',
+        title: 'lightrag đang khởi động lại liên tục',
+        body: 'Container restart 6 lần trong 2 phút.',
+        serverID: 'tsc-vps',
+        at: new Date(),
+      },
+    ]
+
 class Notifications {
-  // Mock data matching the mockup until notify:new is wired up.
-  list = $state<Notification[]>([
-    {
-      id: 'n1',
-      level: 'warn',
-      title: 'lightrag đang khởi động lại liên tục',
-      body: 'Container restart 6 lần trong 2 phút.',
-      serverID: 'tsc-vps',
-      at: new Date(),
-    },
-  ])
+  list = $state<Notification[]>(demo)
 
   unread = $derived(this.list.length)
 
