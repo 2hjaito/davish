@@ -1,0 +1,183 @@
+/* Design tokens. Source of truth: docs/DESIGN.md. Components use only these. */
+:root {
+  /* Font */
+  --font-ui: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+  --text-xxs: 10.5px;
+  --text-xs: 11px;
+  --text-sm: 12.5px;
+  --text-md: 13px;
+  --text-lg: 15px;
+
+  /* Text */
+  --fg: #1c1d22;
+  --fg-label: #3f4350;
+  --fg-muted: #4a4f5c;
+  --fg-subtle: #8a8f9b;
+  --fg-on-dark: #e7e9ee;
+  --fg-on-dark-muted: #a4a9b6;
+  --fg-on-accent: #fff;
+
+  /* Accent */
+  --accent: #0a64d8;
+  --accent-strong: #0848a0;
+  --accent-soft: rgba(10, 100, 216, 0.14);
+  --row-hover: rgba(10, 100, 216, 0.08);
+  --row-stripe: rgba(0, 0, 0, 0.035);
+  --selection-inactive: rgba(0, 0, 0, 0.1);
+  --sidebar-active: rgba(0, 0, 0, 0.08);
+  /* Content pane beside a translucent sidebar (Files): nearly opaque for legibility. */
+  --content-bg: rgba(255, 255, 255, 0.9);
+
+  /* Status */
+  --ok: #1a9d4b;
+  --ok-on-dark: #7ee2a8;
+  --ok-on-accent: #7ef0a5;
+  --warn: #e08a12;
+  --warn-on-dark: #ffb86b;
+  --danger: #d4380d;
+  --offline: #9aa0ab;
+
+  /* Traffic lights */
+  --tl-close: #ff5f57;
+  --tl-min: #febc2e;
+  --tl-max: #28c840;
+  --tl-inactive: #c7cad1;
+  --tl-glyph: rgba(0, 0, 0, 0.5);
+
+  /* Light glass */
+  --glass-bg: rgba(255, 255, 255, 0.22);
+  --glass-bg-strong: rgba(255, 255, 255, 0.55);
+  --glass-bg-menu: rgba(255, 255, 255, 0.5);
+  --glass-highlight: rgba(255, 255, 255, 0.38);
+  --glass-hover: rgba(255, 255, 255, 0.3);
+  --glass-border: rgba(255, 255, 255, 0.45);
+  --glass-blur: blur(28px) saturate(180%);
+  --glass-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -1px 0 rgba(255, 255, 255, 0.12),
+    0 12px 40px rgba(20, 30, 60, 0.22);
+  --glass-shadow-inactive:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -1px 0 rgba(255, 255, 255, 0.12),
+    0 12px 40px rgba(20, 30, 60, 0.11);
+
+  /* Dark glass (Terminal, Logs) */
+  --glass-dark-bg: rgba(22, 24, 30, 0.62);
+  --glass-dark-border: rgba(255, 255, 255, 0.16);
+  --glass-dark-blur: blur(30px) saturate(160%);
+  --glass-dark-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 20px 60px rgba(10, 15, 35, 0.38);
+  --glass-dark-shadow-inactive:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 20px 60px rgba(10, 15, 35, 0.19);
+
+  /* Lines and fills */
+  --divider: rgba(0, 0, 0, 0.1);
+  --divider-soft: rgba(0, 0, 0, 0.06);
+  --divider-dark: rgba(255, 255, 255, 0.08);
+  --fill-soft: rgba(0, 0, 0, 0.06);
+  --fill-track: rgba(0, 0, 0, 0.12);
+  --switch-knob: #fff;
+  --switch-knob-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --tab-active-light: rgba(0, 0, 0, 0.06);
+  --tab-active-dark: rgba(255, 255, 255, 0.12);
+  --overlay: rgba(0, 0, 0, 0.3);
+  --sleep-bg: rgba(8, 10, 16, 0.86);
+  --snap-preview: rgba(10, 100, 216, 0.16);
+  --snap-preview-border: rgba(10, 100, 216, 0.45);
+
+  /* Wallpaper */
+  --wallpaper-base: #cdd7ea;
+  --wallpaper-accent: #8fb2ff;
+  --wallpaper-pink: #f2a7c3;
+  --wallpaper-teal: #8fd3c4;
+  --wallpaper-gold: #f6cf8f;
+
+  /* App tiles */
+  --app-terminal: #24262d;
+  --app-files: #2f7de1;
+  --app-monitor: #16a067;
+  --app-services: #e08a12;
+  --app-docker: #1e95d6;
+  --app-logs: #7a52d6;
+  --app-editor: #d6455a;
+  --app-settings: #6b7180;
+  /* App icon rule: see docs/DESIGN.md "Icon app". */
+  --tile-edge: inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(0, 0, 0, 0.18);
+  --tile-sheen: linear-gradient(135deg, rgba(255, 255, 255, 0.28), transparent 45%);
+  --tile-plate: 38px;
+  --tile-plate-radius: 12px;
+  --tile-plate-bg: rgba(255, 255, 255, 0.2);
+  --tile-plate-border: rgba(255, 255, 255, 0.45);
+  --tile-plate-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 2px 6px rgba(0, 0, 0, 0.15);
+  --dock-dot: rgba(28, 29, 34, 0.75);
+
+  /* Files */
+  --folder-fill: #5b9cf0;
+  --folder-stroke: #3a7fd8;
+  --file-stroke: #6b7180;
+
+  /* Terminal */
+  --term-user: #7ee2a8;
+  --term-path: #8ab4ff;
+  --term-warn: #ffb86b;
+
+  /* Terminal selection, tab hover */
+  --term-selection: rgba(138, 180, 255, 0.35);
+  --tab-hover-dark: rgba(255, 255, 255, 0.06);
+
+  /* Motion */
+  --dur-fast: 120ms;
+  --dur: 180ms;
+  --dur-slow: 260ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+  /* Sizes */
+  --menubar-h: 30px;
+  --dock-tile: 56px;
+  --dock-gap: 10px;
+  --dock-radius: 24px;
+  --dock-bottom: 14px;
+  --dock-tile-radius: 15px;
+  --window-radius: 14px;
+  --window-titlebar-h: 38px;
+  --menu-radius: 14px;
+  --item-radius: 9px;
+  --control-radius: 7px;
+  --sidebar-w: 180px;
+}
+
+/* Reduced glass: Settings toggle, or the OS preference. */
+:root[data-reduce-glass='true'] {
+  --glass-bg: rgba(246, 247, 250, 0.96);
+  --glass-bg-strong: rgba(246, 247, 250, 0.96);
+  --glass-bg-menu: rgba(246, 247, 250, 0.96);
+  --glass-dark-bg: rgba(24, 26, 32, 0.97);
+  --glass-blur: none;
+  --glass-dark-blur: none;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root:not([data-reduce-glass='false']) {
+    --glass-bg: rgba(246, 247, 250, 0.96);
+    --glass-bg-strong: rgba(246, 247, 250, 0.96);
+    --glass-bg-menu: rgba(246, 247, 250, 0.96);
+    --glass-dark-bg: rgba(24, 26, 32, 0.97);
+    --glass-blur: none;
+    --glass-dark-blur: none;
+  }
+}
+
+/* Reduced motion: Settings toggle, or the OS preference. */
+:root[data-reduce-motion='true'] {
+  --dur-fast: 0ms;
+  --dur: 0ms;
+  --dur-slow: 0ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur: 0ms;
+    --dur-slow: 0ms;
+  }
+}

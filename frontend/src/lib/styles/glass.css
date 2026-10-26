@@ -1,0 +1,20 @@
+.glass {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+.glass-strong {
+  background: var(--glass-bg-strong);
+}
+
+.glass-dark {
+  background: var(--glass-dark-bg);
+  -webkit-backdrop-filter: var(--glass-dark-blur);
+  backdrop-filter: var(--glass-dark-blur);
+  border: 1px solid var(--glass-dark-border);
+  box-shadow: var(--glass-dark-shadow);
+  color: var(--fg-on-dark);
+}

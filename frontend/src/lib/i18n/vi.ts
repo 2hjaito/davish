@@ -1,0 +1,95 @@
+// Every user-facing string lives here.
+export const t = {
+  app: {
+    name: 'Davish',
+  },
+  apps: {
+    terminal: 'Terminal',
+    files: 'Files',
+    monitor: 'Monitor',
+    services: 'Services',
+    docker: 'Docker',
+    logs: 'Logs',
+    editor: 'Editor',
+    settings: 'Cài đặt',
+  },
+  menubar: {
+    label: 'Menu chính',
+    system: 'Menu hệ thống',
+    menus: ['Tệp', 'Xem', 'Dịch vụ', 'Cửa sổ', 'Trợ giúp'],
+    cpu: 'CPU',
+    ram: 'RAM',
+    disk: 'Disk',
+    network: 'Mạng',
+    notifications: (n: number) => (n > 0 ? `Thông báo: ${n} cảnh báo` : 'Thông báo'),
+    weekdays: ['CN', 'Th 2', 'Th 3', 'Th 4', 'Th 5', 'Th 6', 'Th 7'],
+  },
+  system: {
+    settings: 'Cài đặt…',
+    sleep: 'Ngủ màn hình',
+    quit: 'Thoát Davish',
+    wakeHint: 'Bấm chuột hoặc nhấn phím bất kỳ để tiếp tục',
+  },
+  servers: {
+    picker: 'Chọn server',
+    header: 'SERVER',
+    add: 'Thêm server qua SSH…',
+    status: {
+      connected: 'đang kết nối',
+      connecting: 'đang kết nối lại…',
+      disconnected: 'chưa kết nối',
+    },
+  },
+  notifications: {
+    title: 'Thông báo',
+    empty: 'Không có thông báo',
+  },
+  window: {
+    close: 'Đóng',
+    minimize: 'Thu nhỏ',
+    maximize: 'Phóng to',
+    label: (title: string) => `Cửa sổ ${title}`,
+  },
+  dock: {
+    label: 'Dock',
+  },
+  terminal: {
+    newTab: 'Tab mới',
+    closeTab: 'Đóng tab',
+    mockBanner:
+      '\x1b[33mPhiên mô phỏng:\x1b[0m chưa kết nối SSH thật (có từ M2/M3). Gõ \x1b[1mhelp\x1b[0m để xem lệnh.',
+  },
+  files: {
+    places: 'Vị trí',
+    back: 'Quay lại',
+    forward: 'Đi tới',
+    path: 'Đường dẫn',
+    search: 'Tìm',
+    searchLabel: 'Tìm file',
+    name: 'Tên',
+    size: 'Kích thước',
+    modified: 'Sửa đổi',
+    empty: 'Thư mục trống',
+    noMatch: 'Không có file khớp',
+  },
+  settings: {
+    appearance: 'Giao diện',
+    reduceGlass: 'Giảm hiệu ứng kính',
+    reduceGlassHint: 'Dùng nền đặc thay cho kính mờ. Nên bật trên máy yếu hoặc Linux.',
+    reduceMotion: 'Giảm chuyển động',
+    reduceMotionHint: 'Tắt hiệu ứng mở, đóng, thu nhỏ cửa sổ và dock.',
+    wallpaper: 'Màu hình nền',
+    wallpaperColor: (c: string) => `Màu ${c}`,
+  },
+  placeholder: {
+    title: 'Đang phát triển',
+    body: 'App này sẽ có ở các bản sau.',
+  },
+  errors: {
+    INTERNAL: 'Đã có lỗi xảy ra.',
+    CONN_HOSTKEY_CHANGED: 'Host key của server đã thay đổi. Kết nối bị từ chối để bảo vệ bạn.',
+    CONN_AUTH_FAILED: 'Xác thực thất bại.',
+    FS_PERMISSION_DENIED: 'Không có quyền truy cập.',
+    CMD_NEEDS_ROOT: 'Lệnh này cần quyền root.',
+  },
+} as const

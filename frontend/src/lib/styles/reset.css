@@ -1,0 +1,50 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-ui);
+  font-size: var(--text-md);
+  color: var(--fg);
+  background: var(--wallpaper-base);
+  -webkit-font-smoothing: antialiased;
+  cursor: default;
+}
+
+/* Desktop-app behaviour: UI chrome is not selectable or draggable like a web
+   page. WebKit (macOS, Linux) still needs the prefixed property. */
+body {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+input,
+textarea,
+[contenteditable],
+.selectable,
+.xterm {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: default;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}

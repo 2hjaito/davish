@@ -1,0 +1,90 @@
+# ---------- Secrets: never commit ----------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+*.jks
+*.mobileprovision
+*.provisionprofile
+*.cer
+*.crt
+*.csr
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+*_rsa
+*_ecdsa
+*_ed25519
+*.ppk
+credentials*.json
+secrets.*
+*.secret
+.netrc
+.npmrc
+# Test-only keys for the local sshd container stay on the developer machine.
+test/sshd/keys/
+
+# Personal app config copied in for debugging
+servers.json
+settings.json
+known_hosts
+known_hosts.old
+
+# ---------- Build output ----------
+build/bin/
+frontend/dist/*
+!frontend/dist/.gitkeep
+frontend/node_modules/
+node_modules/
+*.exe
+*.dmg
+*.app/
+*.AppImage
+*.syso
+
+# ---------- Go ----------
+*.test
+*.out
+coverage.*
+cover.html
+go.work
+go.work.sum
+/vendor/
+
+# ---------- Frontend ----------
+frontend/.vite/
+frontend/coverage/
+*.tsbuildinfo
+npm-debug.log*
+
+# ---------- Logs & temp ----------
+*.log
+/logs/
+/tmp/
+*.tmp
+*.davish-tmp
+*.bak-*
+
+# ---------- OS / editors ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!frontend/.vscode/
+*.swp
+*~
+
+# ---------- Claude Code: keep shared config, ignore personal ----------
+.claude/settings.local.json
+CLAUDE.local.md
+
+# ---------- Kept private: project plans and agent instructions ----------
+/docs/
+/CLAUDE.md

@@ -1,0 +1,185 @@
+import { load, save } from '../stores/persist'
+import { clampRect, type Rect, type SnapZone, zoneRect } from './geometry'
+
+export interface WindowState {
+  id: string
+  appId: string
+  serverID: string
+  title: string
+  /** Normal (unsnapped, unmaximized) geometry. */
+  rect: Rect
+  z: number
+  minimized: boolean
+  /** 'top' means maximized. */
+  snap: SnapZone | null
+  /** True briefly after a snap/maximize so geometry changes are animated. */
+  animating: boolean
+}
+
+export interface OpenOptions {
+  title: string
+  size: { w: number; h: number }
+  /** Preferred position when the app has no saved geometry. */
+  at?: { x: number; y: number }
+}
+
+let nextId = 1
+/** Slightly longer than --dur-slow so the CSS transition can finish. */
+const ANIMATION_MS = 320
+
+export class WindowManager {
+  windows = $state<WindowState[]>([])
+  area = $state<Rect>({ x: 0, y: 30, w: 1280, h: 670 })
+  snapPreview = $state<Rect | null>(null)
+
+  #saved: Record<string, Rect>
+  // Plain record: timer handles are bookkeeping, not UI state.
+  #animTimers: Record<string, ReturnType<typeof setTimeout>> = {}
+
+  constructor(saved: Record<string, Rect> = {}) {
+    this.#saved = saved
+  }
+
+  /** Effective on-screen geometry, accounting for snap and maximize. */
+  frame(w: WindowState): Rect {
+    return w.snap ? zoneRect(w.snap, this.area) : w.rect
+  }
+
+  visible(serverID: string): WindowState[] {
+    return this.windows.filter((w) => w.serverID === serverID)
+  }
+
+  focused(serverID: string): WindowState | undefined {
+    let top: WindowState | undefined
+    for (const w of this.windows) {
+      if (w.serverID !== serverID || w.minimized) continue
+      if (!top || w.z > top.z) top = w
+    }
+    return top
+  }
+
+  isOpen(appId: string, serverID: string): boolean {
+    return this.windows.some((w) => w.appId === appId && w.serverID === serverID)
+  }
+
+  /** Focuses the app's window on this server, or opens a new one. Returns true if opened. */
+  openOrFocus(appId: string, serverID: string, opts: OpenOptions): boolean {
+    const existing = this.windows.find((w) => w.appId === appId && w.serverID === serverID)
+    if (existing) {
+      this.focus(existing.id)
+      return false
+    }
+    this.open(appId, serverID, opts)
+    return true
+  }
+
+  open(appId: string, serverID: string, opts: OpenOptions): WindowState {
+    const cascade = this.visible(serverID).length * 28
+    const start = this.#saved[appId] ?? {
+      x: opts.at?.x ?? this.area.x + 80 + cascade,
+      y: opts.at?.y ?? this.area.y + 40 + cascade,
+      ...opts.size,
+    }
+    const win: WindowState = {
+      id: `w${nextId++}`,
+      appId,
+      serverID,
+      title: opts.title,
+      rect: clampRect(start, this.area),
+      z: this.#topZ() + 1,
+      minimized: false,
+      snap: null,
+      animating: false,
+    }
+    this.windows.push(win)
+    return win
+  }
+
+  close(id: string) {
+    const w = this.#get(id)
+    if (w) this.#remember(w)
+    this.windows = this.windows.filter((w) => w.id !== id)
+  }
+
+  focus(id: string) {
+    const w = this.#get(id)
+    if (!w) return
+    w.minimized = false
+    if (w.z !== this.#topZ()) w.z = this.#topZ() + 1
+  }
+
+  minimize(id: string) {
+    const w = this.#get(id)
+    if (w) w.minimized = true
+  }
+
+  toggleMaximize(id: string) {
+    const w = this.#get(id)
+    if (w) this.snap(id, w.snap === 'top' ? null : 'top')
+  }
+
+  /** Snaps with an animated transition between the old and new frame. */
+  snap(id: string, zone: SnapZone | null) {
+    const w = this.#get(id)
+    if (!w || w.snap === zone) return
+    w.snap = zone
+    w.animating = true
+    clearTimeout(this.#animTimers[id])
+    this.#animTimers[id] = setTimeout(() => {
+      const cur = this.#get(id)
+      if (cur) cur.animating = false
+    }, ANIMATION_MS)
+  }
+
+  /** Leaves snap/maximize keeping the current frame, e.g. before a resize. */
+  unsnapInPlace(id: string) {
+    const w = this.#get(id)
+    if (!w?.snap) return
+    w.rect = this.frame(w)
+    w.snap = null
+    w.animating = false
+  }
+
+  setRect(id: string, rect: Rect) {
+    const w = this.#get(id)
+    if (w) w.rect = rect
+  }
+
+  /** Persists the window's normal geometry for the next time its app opens. */
+  commit(id: string) {
+    const w = this.#get(id)
+    if (!w) return
+    w.rect = clampRect(w.rect, this.area)
+    this.#remember(w)
+  }
+
+  /**
+   * Leaves snap/maximize at the start of a drag, keeping the pointer at the
+   * same relative spot on the title bar. Returns the new normal rect.
+   */
+  unsnapForDrag(id: string, px: number): Rect | undefined {
+    const w = this.#get(id)
+    if (!w?.snap) return w?.rect
+    const f = this.frame(w)
+    const ratio = (px - f.x) / f.w
+    w.rect = { ...w.rect, x: Math.round(px - w.rect.w * ratio), y: f.y }
+    w.snap = null
+    w.animating = false
+    return w.rect
+  }
+
+  #get(id: string) {
+    return this.windows.find((w) => w.id === id)
+  }
+
+  #topZ() {
+    return this.windows.reduce((m, w) => Math.max(m, w.z), 0)
+  }
+
+  #remember(w: WindowState) {
+    this.#saved[w.appId] = { ...w.rect }
+    save('windows', this.#saved)
+  }
+}
+
+export const wm = new WindowManager(load<Record<string, Rect>>('windows', {}))

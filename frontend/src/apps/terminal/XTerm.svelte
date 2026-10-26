@@ -1,0 +1,149 @@
+<script lang="ts">
+  import '@xterm/xterm/css/xterm.css'
+
+  import { FitAddon } from '@xterm/addon-fit'
+  import { type ITheme, Terminal } from '@xterm/xterm'
+
+  import { isMac } from '../../lib/shell/platform'
+
+  interface Props {
+    /** Whether this terminal is the visible tab; hidden ones keep their buffer. */
+    active: boolean
+    onready: (term: Terminal) => void
+  }
+
+  let { active, onready }: Props = $props()
+
+  const LINE_HEIGHT = 1.35
+
+  let host = $state<HTMLDivElement>()
+  let term: Terminal | undefined
+  let fit: FitAddon | undefined
+
+  function token(name: string): string {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+  }
+
+  function theme(): ITheme {
+    return {
+      background: '#00000000',
+      foreground: token('--fg-on-dark'),
+      cursor: token('--fg-on-dark'),
+      cursorAccent: token('--app-terminal'),
+      selectionBackground: token('--term-selection'),
+      green: token('--term-user'),
+      brightGreen: token('--term-user'),
+      blue: token('--term-path'),
+      brightBlue: token('--term-path'),
+      yellow: token('--term-warn'),
+      brightYellow: token('--term-warn'),
+    }
+  }
+
+  // Ctrl+Shift+C/V on Windows and Linux, where plain Ctrl+C must reach the shell.
+  // macOS uses ⌘C/⌘V through the native Edit menu.
+  function clipboardKeys(e: KeyboardEvent): boolean {
+    if (isMac || e.type !== 'keydown' || !e.ctrlKey || !e.shiftKey) return true
+    const key = e.key.toLowerCase()
+    if (key === 'c' && term?.hasSelection()) {
+      void navigator.clipboard.writeText(term.getSelection())
+      return false
+    }
+    if (key === 'v') {
+      void navigator.clipboard.readText().then((text) => term?.paste(text))
+      return false
+    }
+    return true
+  }
+
+  /**
+   * The block cursor fills the whole row, which lineHeight makes taller than the
+   * text. Keep the row height but paint only the glyph's own height (see CSS).
+   */
+  function fitCursor(t: Terminal) {
+    const row = t.element?.querySelector<HTMLElement>('.xterm-rows > div')
+    if (!row || !host) return
+    const glyph = row.offsetHeight / LINE_HEIGHT
+    host.style.setProperty('--cursor-h', `${glyph}px`)
+    host.style.setProperty('--cursor-inset', `${(row.offsetHeight - glyph) / 2}px`)
+  }
+
+  $effect(() => {
+    if (!host) return
+    const t = new Terminal({
+      allowTransparency: true,
+      cursorBlink: true,
+      fontFamily: token('--font-mono'),
+      fontSize: 12.5,
+      lineHeight: LINE_HEIGHT,
+      scrollback: 5000,
+      macOptionIsMeta: true,
+      theme: theme(),
+    })
+    const f = new FitAddon()
+    t.loadAddon(f)
+    t.attachCustomKeyEventHandler(clipboardKeys)
+    t.open(host)
+    term = t
+    fit = f
+
+    // Measure after the bundled font is ready, or cell widths come out wrong.
+    void document.fonts.ready.then(() => {
+      if (term !== t) return
+      f.fit()
+      fitCursor(t)
+      onready(t)
+    })
+
+    const ro = new ResizeObserver(() => {
+      if (host?.offsetParent) f.fit()
+    })
+    ro.observe(host)
+
+    return () => {
+      ro.disconnect()
+      t.dispose()
+      term = undefined
+      fit = undefined
+    }
+  })
+
+  $effect(() => {
+    if (active && term) {
+      fit?.fit()
+      term.focus()
+    }
+  })
+
+  /** Focuses the terminal so typing goes to it. */
+  export function focus() {
+    term?.focus()
+  }
+</script>
+
+<div class="host" class:hidden={!active} bind:this={host}></div>
+
+<style>
+  .host {
+    position: absolute;
+    inset: 10px 6px 6px 16px;
+  }
+
+  .hidden {
+    visibility: hidden;
+  }
+
+  .host :global(.xterm) {
+    height: 100%;
+  }
+
+  .host :global(.xterm-rows .xterm-cursor.xterm-cursor-block) {
+    line-height: var(--cursor-h);
+    padding-block: var(--cursor-inset);
+    background-clip: content-box;
+  }
+
+  .host :global(.xterm-viewport) {
+    background: transparent !important;
+  }
+</style>

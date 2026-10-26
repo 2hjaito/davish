@@ -1,0 +1,30 @@
+version: "2"
+
+run:
+  tests: true
+
+linters:
+  default: none
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - revive
+    - gosec
+    - bodyclose
+    - contextcheck
+    - errorlint
+    - ineffassign
+    - unused
+  exclusions:
+    paths:
+      - frontend
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - davish
