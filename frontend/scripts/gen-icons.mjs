@@ -51,7 +51,17 @@ const ICONS = {
   brandNginx: 'SiNginx',
 }
 
-const PACKS = { Dv: 'dv', Fi: 'fi', Lu: 'lu', Hi: 'hi', Bi: 'bi', Ri: 'ri', Md: 'md', Px: 'px', Si: 'si' }
+const PACKS = {
+  Dv: 'dv',
+  Fi: 'fi',
+  Lu: 'lu',
+  Hi: 'hi',
+  Bi: 'bi',
+  Ri: 'ri',
+  Md: 'md',
+  Px: 'px',
+  Si: 'si',
+}
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)))
 // The package's exports map does not expose package.json, so read it directly.
