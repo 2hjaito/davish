@@ -20,9 +20,12 @@ import (
 var assets embed.FS
 
 func main() {
-	a := app.New()
+	a, err := app.New()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	err := wails.Run(&options.App{
+	err = wails.Run(&options.App{
 		Title:     "Davish",
 		Width:     1280,
 		Height:    800,
