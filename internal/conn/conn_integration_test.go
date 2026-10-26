@@ -270,3 +270,36 @@ func TestDisconnect(t *testing.T) {
 		t.Errorf("state = %s", e.m.State(e.id))
 	}
 }
+
+func TestAutomaticUsesDefaultKeyLikeSSH(t *testing.T) {
+	// No agent, but ~/.ssh/id_ed25519 exists: the ssh command would log in,
+	// so automatic mode must too.
+	home := t.TempDir()
+	key, err := os.ReadFile(testsshd.KeyPath())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(home, ".ssh"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(home, ".ssh", "id_ed25519"), key, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("HOME", home)
+	t.Setenv("SSH_AUTH_SOCK", "")
+
+	srv := testServer()
+	srv.Auth, srv.KeyPath = store.AuthAgent, ""
+	e := setup(t, srv, conn.Options{})
+	pin(t, e.hostKeys, testsshd.HostKey(t))
+	if err := e.m.Connect(context.Background(), e.id); err != nil {
+		t.Fatalf("automatic auth with a default key: %v", err)
+	}
+
+	t.Setenv("HOME", t.TempDir()) // no keys at all
+	e2 := setup(t, srv, conn.Options{})
+	pin(t, e2.hostKeys, testsshd.HostKey(t))
+	if err := e2.m.Connect(context.Background(), e2.id); code(err) != apperr.ConnAgentUnavailable {
+		t.Fatalf("no keys anywhere: err = %v; want CONN_AGENT_UNAVAILABLE", err)
+	}
+}

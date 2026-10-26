@@ -21,15 +21,15 @@ func (m *Manager) authMethods(srv store.Server) ([]ssh.AuthMethod, func(), error
 	noop := func() {}
 	switch srv.Auth {
 	case store.AuthAgent:
-		sock := os.Getenv("SSH_AUTH_SOCK")
-		if sock == "" {
-			return nil, noop, apperr.New(apperr.ConnAgentUnavailable, "SSH_AUTH_SOCK is not set")
+		// "Automatic", like the ssh command: agent keys first, then the
+		// default key files in ~/.ssh. Most users never load the agent.
+		signers, release := m.agentSigners()
+		signers = append(signers, m.defaultKeySigners(srv)...)
+		if len(signers) == 0 {
+			release()
+			return nil, noop, apperr.New(apperr.ConnAgentUnavailable, "no SSH agent keys and no default key in ~/.ssh")
 		}
-		c, err := net.Dial("unix", sock) //nolint:gosec // SSH_AUTH_SOCK is how the user's agent is found
-		if err != nil {
-			return nil, noop, apperr.Wrap(apperr.ConnAgentUnavailable, "cannot reach the SSH agent", err)
-		}
-		return []ssh.AuthMethod{ssh.PublicKeysCallback(agent.NewClient(c).Signers)}, func() { c.Close() }, nil //nolint:errcheck,gosec // best effort
+		return []ssh.AuthMethod{ssh.PublicKeys(signers...)}, release, nil
 
 	case store.AuthKey:
 		signer, err := m.loadKey(srv)
@@ -57,6 +57,42 @@ func (m *Manager) authMethods(srv store.Server) ([]ssh.AuthMethod, func(), error
 		return []ssh.AuthMethod{ssh.Password(pw), ssh.KeyboardInteractive(answer)}, noop, nil
 	}
 	return nil, noop, apperr.New(apperr.InvalidInput, "unknown auth method")
+}
+
+// agentSigners returns the keys loaded in the SSH agent, if one is running.
+func (m *Manager) agentSigners() ([]ssh.Signer, func()) {
+	sock := os.Getenv("SSH_AUTH_SOCK")
+	if sock == "" {
+		return nil, func() {}
+	}
+	c, err := net.Dial("unix", sock) //nolint:gosec // SSH_AUTH_SOCK is how the user's agent is found
+	if err != nil {
+		return nil, func() {}
+	}
+	release := func() { c.Close() } //nolint:errcheck,gosec // best effort
+	signers, err := agent.NewClient(c).Signers()
+	if err != nil {
+		return nil, release
+	}
+	return signers, release
+}
+
+// defaultKeyFiles are tried in the same order as OpenSSH.
+var defaultKeyFiles = []string{"id_ed25519", "id_ecdsa", "id_rsa"}
+
+// defaultKeySigners loads the default keys in ~/.ssh. An encrypted key is
+// used only when its passphrase is saved for this server; others are skipped.
+func (m *Manager) defaultKeySigners(srv store.Server) []ssh.Signer {
+	var signers []ssh.Signer
+	for _, name := range defaultKeyFiles {
+		s := srv
+		s.KeyPath = filepath.Join("~", ".ssh", name)
+		signer, err := m.loadKey(s)
+		if err == nil {
+			signers = append(signers, signer)
+		}
+	}
+	return signers
 }
 
 func (m *Manager) loadKey(srv store.Server) (ssh.Signer, error) {

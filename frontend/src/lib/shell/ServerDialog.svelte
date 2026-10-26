@@ -150,7 +150,9 @@
       </div>
     </div>
 
-    {#if draft.auth === 'key'}
+    {#if draft.auth === 'agent'}
+      <p class="hint">{t.serverDialog.authAgentHint}</p>
+    {:else if draft.auth === 'key'}
       <label class="field">
         <span>{t.serverDialog.keyPath}</span>
         <input class="input mono" required spellcheck="false" bind:value={draft.keyPath} />
@@ -293,6 +295,12 @@
   .swatch[aria-checked='true'] {
     border-color: var(--accent);
     box-shadow: 0 0 0 2px var(--accent-soft);
+  }
+
+  .hint {
+    margin: -4px 0 0;
+    font-size: var(--text-xs);
+    color: var(--fg-muted);
   }
 
   .error {
