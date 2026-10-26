@@ -26,7 +26,7 @@ wails dev               # phát triển, hot reload
 make check              # lint + test (Go và frontend)
 wails build             # đóng gói, kết quả ở build/bin/
 
-make sshd-up            # bật SSH server test ở 127.0.0.1:2222
+make sshd-up            # bật SSH server test ở 127.0.0.1:2222 (lần đầu tự sinh key test)
 make test-integration
 make sshd-down
 ```
