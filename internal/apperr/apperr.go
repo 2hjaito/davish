@@ -9,15 +9,22 @@ type Code string
 
 // Known error codes. Keep in sync with frontend/src/lib/api/errors.ts.
 const (
-	Internal            Code = "INTERNAL"
-	ConnHostKeyChanged  Code = "CONN_HOSTKEY_CHANGED"
-	ConnAuthFailed      Code = "CONN_AUTH_FAILED"
-	FSPermissionDenied  Code = "FS_PERMISSION_DENIED"
-	CmdNeedsRoot        Code = "CMD_NEEDS_ROOT"
-	InvalidInput        Code = "INVALID_INPUT"
-	NotFound            Code = "NOT_FOUND"
-	StoreCorrupt        Code = "STORE_CORRUPT"
-	KeychainUnavailable Code = "KEYCHAIN_UNAVAILABLE"
+	Internal             Code = "INTERNAL"
+	ConnHostKeyChanged   Code = "CONN_HOSTKEY_CHANGED"
+	ConnAuthFailed       Code = "CONN_AUTH_FAILED"
+	ConnHostKeyUnknown   Code = "CONN_HOSTKEY_UNKNOWN"
+	ConnUnreachable      Code = "CONN_UNREACHABLE"
+	ConnSecretMissing    Code = "CONN_SECRET_MISSING"
+	ConnAgentUnavailable Code = "CONN_AGENT_UNAVAILABLE"
+	ConnKeyUnreadable    Code = "CONN_KEY_UNREADABLE"
+	ConnNotConnected     Code = "CONN_NOT_CONNECTED"
+	TermClosed           Code = "TERM_CLOSED"
+	FSPermissionDenied   Code = "FS_PERMISSION_DENIED"
+	CmdNeedsRoot         Code = "CMD_NEEDS_ROOT"
+	InvalidInput         Code = "INVALID_INPUT"
+	NotFound             Code = "NOT_FOUND"
+	StoreCorrupt         Code = "STORE_CORRUPT"
+	KeychainUnavailable  Code = "KEYCHAIN_UNAVAILABLE"
 )
 
 // Error is the only error type allowed to cross into the frontend.

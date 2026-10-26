@@ -93,6 +93,19 @@ func (s *Store) Servers(ctx context.Context) ([]Server, error) {
 	return f.Servers, nil
 }
 
+// Server returns one saved server, or NOT_FOUND.
+func (s *Store) Server(ctx context.Context, id string) (Server, error) {
+	all, err := s.Servers(ctx)
+	if err != nil {
+		return Server{}, err
+	}
+	i := slices.IndexFunc(all, func(x Server) bool { return x.ID == id })
+	if i < 0 {
+		return Server{}, apperr.New(apperr.NotFound, "server not found")
+	}
+	return all[i], nil
+}
+
 // Save adds srv, or replaces the server with the same ID. A new server gets
 // an ID and goes to the end of the list. It returns the stored server.
 func (s *Store) Save(ctx context.Context, srv Server) (Server, error) {

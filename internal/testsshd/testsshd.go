@@ -1,0 +1,57 @@
+//go:build integration
+
+// Package testsshd points integration tests at the throwaway SSH server in
+// test/sshd (make sshd-up). It never targets a real server.
+package testsshd
+
+import (
+	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
+	"testing"
+
+	"golang.org/x/crypto/ssh"
+)
+
+// Container address, user and port, as in test/sshd/compose.yml.
+const (
+	Host = "127.0.0.1"
+	Port = 2222
+	User = "tester"
+)
+
+// Root is the repository root.
+func Root() string {
+	_, file, _, _ := runtime.Caller(0)
+	return filepath.Join(filepath.Dir(file), "..", "..")
+}
+
+// KeyPath is the test client's private key.
+func KeyPath() string {
+	return filepath.Join(Root(), "test", "sshd", "keys", "client_ed25519")
+}
+
+// HostKey is the container's fixed host key.
+func HostKey(t *testing.T) ssh.PublicKey {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join(Root(), "test", "sshd", "keys", "host_ed25519.pub"))
+	if err != nil {
+		t.Fatalf("read test host key (run make sshd-up): %v", err)
+	}
+	key, _, _, _, err := ssh.ParseAuthorizedKey(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return key
+}
+
+// Restart restarts the container, dropping every connection to it.
+func Restart(t *testing.T) {
+	t.Helper()
+	compose := filepath.Join(Root(), "test", "sshd", "compose.yml")
+	out, err := exec.Command("docker", "compose", "-f", compose, "restart").CombinedOutput() //nolint:gosec // fixed test command
+	if err != nil {
+		t.Fatalf("restart test sshd: %v\n%s", err, out)
+	}
+}
