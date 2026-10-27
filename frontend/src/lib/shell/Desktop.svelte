@@ -108,8 +108,16 @@
     }
   })
 
-  // First run: ask for a server. Otherwise open a terminal on the active one,
-  // like the mockup's Terminal + Files in the browser preview.
+  // Each server reopens the windows it had (docs/ARCHITECTURE.md §5.1).
+  wm.keepInLayout((appId) => getApp(appId)?.layout !== false)
+  function openOptions(appId: string) {
+    const app = getApp(appId)
+    return app && { title: app.label, size: app.size }
+  }
+
+  // First run: ask for a server. Otherwise the active server comes back as
+  // it was left; one never seen before opens a terminal, like the mockup's
+  // Terminal + Files in the browser preview.
   let opened = false
   $effect(() => {
     if (!servers.ready || opened) return
@@ -119,6 +127,11 @@
       return
     }
     const id = servers.activeId
+    restored.add(id)
+    if (wm.hasLayout(id)) {
+      wm.restoreLayout(id, openOptions)
+      return
+    }
     const start = hasRuntime
       ? ([['terminal', { x: 120, y: 120 }]] as const)
       : ([
@@ -129,6 +142,17 @@
       const app = getApp(appId)
       if (app) wm.open(app.id, id, { title: app.label, size: app.size, at })
     }
+  })
+
+  // Switching to a workspace for the first time this session brings back
+  // its windows.
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity -- bookkeeping, never rendered
+  const restored = new Set<string>()
+  $effect(() => {
+    const id = servers.activeId
+    if (!opened || !id || restored.has(id)) return
+    restored.add(id)
+    wm.restoreLayout(id, openOptions)
   })
 
   function onKeyDown(e: KeyboardEvent) {
