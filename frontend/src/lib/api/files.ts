@@ -95,3 +95,41 @@ export const filesCompress = (
   format: ArchiveFormat,
   plan: CompressPlan,
 ): Promise<CompressPlan> => App.FilesCompress(serverID, path, format, plan.command)
+
+export interface SaveResult {
+  entry: Entry
+  /** Path of the copy made of the previous version, when asked for. */
+  backup?: string
+}
+
+/**
+ * Saves editor text atomically. With backup, the current file is first
+ * copied to "<name>.bak-<UTC time>" next to it.
+ */
+export const filesSave = (
+  serverID: string,
+  path: string,
+  data: Uint8Array,
+  opts: {
+    backup: boolean
+    /** The file as it was opened; saving fails with FS_CHANGED if the server copy differs. */
+    expect?: { modTime: number; size: number }
+  },
+): Promise<SaveResult> =>
+  App.FilesSave(
+    serverID,
+    path,
+    encodeBase64(data) as unknown as number[],
+    // Plain data is what crosses the bridge; the generated class only adds helpers.
+    opts as Parameters<typeof App.FilesSave>[3],
+  ) as Promise<SaveResult>
+
+export interface Access {
+  /** Saving would work: file and folder writable, owner kept. */
+  writable: boolean
+  /** Command to prefill in a terminal to edit the file as root. */
+  sudoEdit: string
+}
+
+export const filesAccess = (serverID: string, path: string): Promise<Access> =>
+  App.FilesAccess(serverID, path)

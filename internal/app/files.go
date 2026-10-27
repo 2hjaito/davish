@@ -59,3 +59,15 @@ func (a *App) FilesPlanCompress(serverID, path, format string) (fs.CompressPlan,
 func (a *App) FilesCompress(serverID, path, format, command string) (fs.CompressPlan, error) {
 	return a.files.Compress(a.ctx, serverID, path, format, command)
 }
+
+// FilesSave writes a file from the Editor atomically, keeping a backup of
+// the previous version when opts.Backup is set.
+func (a *App) FilesSave(serverID, path string, data []byte, opts fs.SaveOptions) (fs.SaveResult, error) {
+	return a.files.Save(a.ctx, serverID, path, data, opts)
+}
+
+// FilesAccess reports whether the Editor can save over path; when not, it
+// opens the file read-only and offers the sudoedit command.
+func (a *App) FilesAccess(serverID, path string) (fs.Access, error) {
+	return a.files.Access(a.ctx, serverID, path)
+}

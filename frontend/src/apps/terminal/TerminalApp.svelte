@@ -10,7 +10,7 @@
   import { settings } from '../../lib/stores/settings.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import { getWindowContext } from '../../lib/wm/context'
-  import { terminalRequests } from '../../lib/wm/intents.svelte'
+  import { type TerminalRequest, terminalRequests } from '../../lib/wm/intents.svelte'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import { wm } from '../../lib/wm/windowManager.svelte'
   import type { AppProps } from '../types'
@@ -28,6 +28,8 @@
     cwd: string
     /** Where the shell starts, when another app asked for a folder. */
     startDir?: string
+    /** Typed at the first prompt, not run. */
+    startInput?: string
     /** Title the remote shell sets (bash sets "user@host: cwd" for xterm). */
     title?: string
     /** Remote PTY session, while one is open. */
@@ -40,7 +42,12 @@
   }
 
   let nextId = 1
-  const tabAt = (dir?: string): Tab => ({ id: nextId++, cwd: dir ?? '~', startDir: dir })
+  const tabAt = (req?: TerminalRequest): Tab => ({
+    id: nextId++,
+    cwd: req?.dir ?? '~',
+    startDir: req?.dir,
+    startInput: req?.input,
+  })
   // A window opened to show a folder starts there instead of at home.
   const asked = untrack(() => terminalRequests.take(win.serverID))
   let tabs = $state<Tab[]>(asked.length > 0 ? asked.map(tabAt) : [tabAt()])
@@ -99,7 +106,12 @@
       if (!tab.ready || !term || tab.session || tab.starting || tab.lost) continue
       tab.starting = true
       termStart(win.serverID, term.cols, term.rows, settings.terminalPrompt, tab.startDir)
-        .then((id) => (tab.session = id))
+        .then((id) => {
+          tab.session = id
+          // The shell buffers it and shows it at its prompt.
+          if (tab.startInput) void termWrite(id, tab.startInput)
+          tab.startInput = undefined
+        })
         .catch(() => {
           term.write(`\r\n\x1b[31m${t.terminal.startFailed}\x1b[0m\r\n`)
           tab.lost = 'failed'
@@ -142,8 +154,8 @@
     }
   })
 
-  function newTab(dir?: string) {
-    const tab = tabAt(dir)
+  function newTab(req?: TerminalRequest) {
+    const tab = tabAt(req)
     tabs.push(tab)
     activeId = tab.id
   }
@@ -152,7 +164,7 @@
   $effect(() => {
     if (!terminalRequests.list.some((r) => r.serverID === win.serverID)) return
     untrack(() => {
-      for (const dir of terminalRequests.take(win.serverID)) newTab(dir)
+      for (const req of terminalRequests.take(win.serverID)) newTab(req)
     })
   })
 

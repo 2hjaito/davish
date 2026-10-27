@@ -12,7 +12,7 @@
   import { notifications } from '../../lib/stores/notifications.svelte'
   import { hitTest, type Hit, NO_HIT } from '../../lib/ui/radial/radial'
   import RadialMenu, { type RadialItem } from '../../lib/ui/radial/RadialMenu.svelte'
-  import { openTerminalAt } from '../../lib/wm/intents.svelte'
+  import { openFileInEditor, openTerminalAt } from '../../lib/wm/intents.svelte'
   import { ACTIONS, type ActionId, FORMATS, petalsFor } from './actions'
   import CompressDialog from './CompressDialog.svelte'
   import DeleteDialog from './DeleteDialog.svelte'
@@ -41,11 +41,8 @@
     menu
       ? petalsFor(menu.entry).map((id) => ({
           id,
-          label: ACTIONS[id].soon
-            ? `${t.files.actions[id]} (${t.files.soon})`
-            : t.files.actions[id],
+          label: t.files.actions[id],
           icon: ACTIONS[id].icon,
-          disabled: ACTIONS[id].soon,
           children:
             id === 'compress' ? FORMATS.map((f) => ({ id: f.id, label: f.label })) : undefined,
         }))
@@ -92,7 +89,10 @@
    * open their confirmation dialog first.
    */
   export function act(id: ActionId, entry: Entry | null, format?: ArchiveFormat) {
-    if (ACTIONS[id].soon) return
+    if (id === 'editor') {
+      if (entry && !entry.dir) openFileInEditor(serverID, entry.path)
+      return
+    }
     if (id === 'terminal') {
       const dir = entry?.dir ? entry.path : cwd
       if (dir) openTerminalAt(serverID, dir)

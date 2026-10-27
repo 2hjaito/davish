@@ -7,6 +7,8 @@ import (
 	"io"
 	"os"
 	"path"
+	"strconv"
+	"time"
 
 	"github.com/pkg/sftp"
 
@@ -125,4 +127,109 @@ func fileMode(mode uint32) os.FileMode {
 		m |= os.ModeSticky
 	}
 	return m
+}
+
+// SaveOptions tunes Save.
+type SaveOptions struct {
+	// Backup keeps a copy of the current file as <name>.bak-<UTC time>
+	// next to it before replacing it.
+	Backup bool `json:"backup"`
+	// Expect, when set, is the file as the editor read it. If the server
+	// copy no longer matches (someone else saved it, or it was deleted),
+	// Save fails with FS_CHANGED and writes nothing.
+	Expect *Expect `json:"expect,omitempty"`
+}
+
+// Expect identifies a version of a file. SFTP times have one-second
+// precision, so the size is compared too.
+type Expect struct {
+	ModTime int64 `json:"modTime"`
+	Size    int64 `json:"size"`
+}
+
+// SaveResult is the saved file, and the backup made, if any.
+type SaveResult struct {
+	Entry  Entry  `json:"entry"`
+	Backup string `json:"backup,omitempty"`
+}
+
+// Save writes data to p like Write, first keeping a backup when asked and
+// the file exists. The backup never replaces an earlier one.
+func (s *Service) Save(ctx context.Context, serverID, p string, data []byte, opts SaveOptions) (SaveResult, error) {
+	if err := CheckPath(p); err != nil {
+		return SaveResult{}, err
+	}
+	var res SaveResult
+	if opts.Backup || opts.Expect != nil {
+		sc, err := s.conns.SFTP(serverID)
+		if err != nil {
+			return SaveResult{}, err
+		}
+		target, orig, err := writeTarget(sc, p)
+		if err != nil {
+			return SaveResult{}, err
+		}
+		if e := opts.Expect; e != nil && (orig == nil || int64(orig.Mtime) != e.ModTime || int64(orig.Size) != e.Size) { //nolint:gosec // sizes and times fit int64
+			return SaveResult{}, apperr.New(apperr.FSChanged, "the file changed on the server since it was opened")
+		}
+		if opts.Backup && orig != nil {
+			if res.Backup, err = backup(ctx, sc, target, time.Now()); err != nil {
+				return SaveResult{}, err
+			}
+		}
+	}
+	e, err := s.Write(ctx, serverID, p, data)
+	if err != nil {
+		return SaveResult{}, err
+	}
+	res.Entry = e
+	return res, nil
+}
+
+// backupName is "<name>.bak-20261027T081000Z" next to p.
+func backupName(p string, at time.Time) string {
+	return p + ".bak-" + at.UTC().Format("20060102T150405Z")
+}
+
+// backup copies p to its backup name, keeping mode and times, and returns
+// the backup's path. Two saves in the same second get "-2", "-3"…
+func backup(ctx context.Context, sc *sftp.Client, p string, at time.Time) (string, error) {
+	src, err := sc.Open(p)
+	if err != nil {
+		return "", mapErr("backup", err)
+	}
+	defer src.Close() //nolint:errcheck // read only
+	fi, err := src.Stat()
+	if err != nil {
+		return "", mapErr("backup", err)
+	}
+
+	base := backupName(p, at)
+	var dst *sftp.File
+	name := base
+	for n := 2; ; n++ {
+		dst, err = sc.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_EXCL)
+		if err == nil {
+			break
+		}
+		if _, serr := sc.Lstat(name); serr != nil || n > 100 {
+			return "", mapErr("backup", err) // not a name clash: permission and the like
+		}
+		name = base + "-" + strconv.Itoa(n)
+	}
+	_, err = io.Copy(dst, ctxReader{ctx, src})
+	if cerr := dst.Close(); err == nil {
+		err = cerr
+	}
+	if err == nil {
+		err = sc.Chmod(name, fi.Mode().Perm())
+	}
+	if err == nil {
+		err = sc.Chtimes(name, fi.ModTime(), fi.ModTime())
+	}
+	if err != nil {
+		sc.Remove(name) //nolint:errcheck,gosec // best effort cleanup
+		return "", mapErr("backup", err)
+	}
+	return name, nil
 }

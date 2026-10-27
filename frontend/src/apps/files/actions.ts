@@ -7,12 +7,10 @@ export type ActionId = 'editor' | 'terminal' | 'rename' | 'delete' | 'copyPath' 
 export interface ActionDef {
   id: ActionId
   icon: IconName
-  /** Not built yet: shown, but cannot be chosen. */
-  soon?: boolean
 }
 
 export const ACTIONS: Record<ActionId, ActionDef> = {
-  editor: { id: 'editor', icon: 'editor', soon: true }, // the Editor arrives in M6
+  editor: { id: 'editor', icon: 'editor' },
   terminal: { id: 'terminal', icon: 'terminal' },
   rename: { id: 'rename', icon: 'rename' },
   delete: { id: 'delete', icon: 'trash' },

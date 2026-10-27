@@ -344,3 +344,133 @@ func TestCompress(t *testing.T) {
 	}
 	e.run(t, "chmod 644 "+shellx.Quote(locked+"/secret"))
 }
+
+// The M6 acceptance: edit nginx.conf, save, the mode stays and a backup
+// holds the previous version.
+func TestSaveNginxConfWithBackup(t *testing.T) {
+	e := setup(t)
+	ctx := context.Background()
+	const conf = "/etc/nginx/nginx.conf"
+	orig, err := e.svc.Read(ctx, e.id, conf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if _, err := e.svc.Write(ctx, e.id, conf, orig.Data); err != nil {
+			t.Errorf("restore nginx.conf: %v", err)
+		}
+		e.run(t, "rm -f /etc/nginx/nginx.conf.bak-*")
+	})
+
+	edited := append(append([]byte(nil), orig.Data...), []byte("\n# edited by davish test\n")...)
+	res, err := e.svc.Save(ctx, e.id, conf, edited, fs.SaveOptions{Backup: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Entry.Perm != orig.Perm {
+		t.Errorf("mode = %o; want %o", res.Entry.Perm, orig.Perm)
+	}
+	if !strings.HasPrefix(res.Backup, conf+".bak-") {
+		t.Fatalf("backup = %q", res.Backup)
+	}
+	bak, err := e.svc.Read(ctx, e.id, res.Backup)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(bak.Data, orig.Data) || bak.Perm != orig.Perm || bak.ModTime != orig.ModTime {
+		t.Errorf("backup differs from the previous file: perm %o, mtime %d", bak.Perm, bak.ModTime)
+	}
+	now, _ := e.svc.Read(ctx, e.id, conf)
+	if !bytes.Equal(now.Data, edited) {
+		t.Error("saved content differs")
+	}
+
+	// A second save in the same second keeps both backups.
+	res2, err := e.svc.Save(ctx, e.id, conf, orig.Data, fs.SaveOptions{Backup: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res2.Backup == res.Backup || res2.Backup == "" {
+		t.Errorf("second backup = %q, first = %q", res2.Backup, res.Backup)
+	}
+
+	// Without the option, or for a new file, no backup is made.
+	res3, err := e.svc.Save(ctx, e.id, e.path("new.conf"), []byte("x"), fs.SaveOptions{Backup: true})
+	if err != nil || res3.Backup != "" {
+		t.Errorf("new file: %+v, %v", res3, err)
+	}
+	res4, err := e.svc.Save(ctx, e.id, e.path("new.conf"), []byte("y"), fs.SaveOptions{})
+	if err != nil || res4.Backup != "" {
+		t.Errorf("no backup asked: %+v, %v", res4, err)
+	}
+}
+
+func TestSaveRefusesWhenChangedOnServer(t *testing.T) {
+	e := setup(t)
+	ctx := context.Background()
+	p := e.path("app.conf")
+	if _, err := e.svc.Write(ctx, e.id, p, []byte("a=1\n")); err != nil {
+		t.Fatal(err)
+	}
+	opened, err := e.svc.Read(ctx, e.id, p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expect := &fs.Expect{ModTime: opened.ModTime, Size: opened.Size}
+
+	// Unchanged: saves, and the new stat is what the next save expects.
+	res, err := e.svc.Save(ctx, e.id, p, []byte("a=2\n"), fs.SaveOptions{Expect: expect})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Someone else writes it; a save based on our copy is refused.
+	e.run(t, "echo 'b=9' >> "+shellx.Quote(p))
+	_, err = e.svc.Save(ctx, e.id, p, []byte("a=3\n"), fs.SaveOptions{Expect: &fs.Expect{ModTime: res.Entry.ModTime, Size: res.Entry.Size}})
+	wantCode(t, err, apperr.FSChanged)
+	if got := e.run(t, "cat "+shellx.Quote(p)); got != "a=2\nb=9" {
+		t.Errorf("file after refused save: %q", got)
+	}
+
+	// Deleted meanwhile counts as changed too.
+	e.run(t, "rm "+shellx.Quote(p))
+	_, err = e.svc.Save(ctx, e.id, p, []byte("a=4\n"), fs.SaveOptions{Expect: expect})
+	wantCode(t, err, apperr.FSChanged)
+
+	// Without Expect (the user chose to overwrite), it writes.
+	if _, err := e.svc.Save(ctx, e.id, p, []byte("a=5\n"), fs.SaveOptions{}); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestWritable(t *testing.T) {
+	e := setup(t)
+	ctx := context.Background()
+	mine := e.path("mine.conf")
+	e.run(t, "touch "+shellx.Quote(mine))
+	locked := e.path("locked")
+	e.run(t, "mkdir "+shellx.Quote(locked)+" && touch "+shellx.Quote(locked+"/f")+" && chmod 555 "+shellx.Quote(locked))
+	t.Cleanup(func() { e.run(t, "chmod 755 "+shellx.Quote(locked)) })
+
+	tests := []struct {
+		p    string
+		want bool
+	}{
+		{mine, true},
+		{"/etc/nginx/nginx.conf", true}, // owned by tester in the test image
+		{"/etc/hostname", false},        // root's
+		{"/etc/passwd", false},
+		{locked + "/f", false}, // file writable, folder not: no room for the temporary file
+		{e.path("missing"), false},
+	}
+	for _, tt := range tests {
+		got, err := e.svc.Access(ctx, e.id, tt.p)
+		if err != nil || got.Writable != tt.want {
+			t.Errorf("Access(%s) = %+v, %v; want writable %v", tt.p, got, err, tt.want)
+		}
+	}
+	a, _ := e.svc.Access(ctx, e.id, "/etc/my site.conf")
+	if a.SudoEdit != "sudoedit -- '/etc/my site.conf'" {
+		t.Errorf("SudoEdit = %q", a.SudoEdit)
+	}
+}

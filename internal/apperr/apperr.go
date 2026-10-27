@@ -23,6 +23,7 @@ const (
 	FSExists             Code = "FS_EXISTS"
 	FSTooLarge           Code = "FS_TOO_LARGE"
 	FSStale              Code = "FS_STALE"
+	FSChanged            Code = "FS_CHANGED"
 	CmdNeedsRoot         Code = "CMD_NEEDS_ROOT"
 	CmdMissing           Code = "CMD_MISSING"
 	InvalidInput         Code = "INVALID_INPUT"

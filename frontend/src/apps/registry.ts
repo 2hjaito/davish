@@ -1,11 +1,12 @@
 import { t } from '../lib/i18n/vi'
+import EditorApp from './editor/EditorApp.svelte'
 import FilesApp from './files/FilesApp.svelte'
 import MonitorApp from './monitor/MonitorApp.svelte'
 import PlaceholderApp from './PlaceholderApp.svelte'
 import SettingsApp from './settings/SettingsApp.svelte'
 import TerminalApp from './terminal/TerminalApp.svelte'
 import TransfersApp from './transfers/TransfersApp.svelte'
-import { TERMINAL_SIZE, TRANSFERS_SIZE } from '../lib/wm/intents.svelte'
+import { EDITOR_SIZE, TERMINAL_SIZE, TRANSFERS_SIZE } from '../lib/wm/intents.svelte'
 import type { AppDef, AppId } from './types'
 
 export const apps: AppDef[] = [
@@ -62,8 +63,8 @@ export const apps: AppDef[] = [
     label: t.apps.editor,
     icon: 'editor',
     theme: 'light',
-    size: { w: 720, h: 500 },
-    component: PlaceholderApp,
+    size: EDITOR_SIZE,
+    component: EditorApp,
   },
   {
     id: 'settings',
