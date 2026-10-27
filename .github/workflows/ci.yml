@@ -43,16 +43,16 @@ jobs:
           go install github.com/wailsapp/wails/v2/cmd/wails@v2.17.0
           go install golang.org/x/vuln/cmd/govulncheck@latest
 
-      - uses: golangci/golangci-lint-action@v8
-        with:
-          version: v2.15.0
-
       - name: Install frontend deps
         run: make frontend-install
 
-      # go:embed needs frontend/dist to exist before vet/test.
+      # go:embed needs frontend/dist to exist before lint, vet and test.
       - name: Build frontend
         run: cd frontend && npm run build
+
+      - uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.15.0
 
       - name: Check
         run: |
