@@ -230,6 +230,10 @@ export function TransferCancel(arg1) {
   return window['go']['app']['App']['TransferCancel'](arg1);
 }
 
+export function TransferCopy(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['TransferCopy'](arg1, arg2, arg3, arg4);
+}
+
 export function TransferDownload(arg1, arg2) {
   return window['go']['app']['App']['TransferDownload'](arg1, arg2);
 }

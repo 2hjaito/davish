@@ -14,11 +14,13 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// Container address, user and port, as in test/sshd/compose.yml.
+// Container address, user and ports of servers A and B, as in
+// test/sshd/compose.yml.
 const (
-	Host = "127.0.0.1"
-	Port = 2222
-	User = "tester"
+	Host  = "127.0.0.1"
+	Port  = 2222
+	PortB = 2223
+	User  = "tester"
 )
 
 // Root is the repository root.
