@@ -226,7 +226,9 @@ func (m *Manager) SFTP(id string) (*sftp.Client, error) {
 	m.mu.Unlock()
 
 	// Opening the subsystem is a round trip; do it outside the lock.
-	sc, err := sftp.NewClient(client)
+	// Concurrent writes can land out of order if a transfer fails midway;
+	// that is safe because every write goes to a temporary file first.
+	sc, err := sftp.NewClient(client, sftp.UseConcurrentWrites(true))
 	if err != nil {
 		return nil, apperr.Wrap(apperr.ConnNotConnected, "cannot open sftp", err)
 	}

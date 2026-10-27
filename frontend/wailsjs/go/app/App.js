@@ -97,3 +97,27 @@ export function TermStart(arg1, arg2, arg3, arg4) {
 export function TermWrite(arg1, arg2) {
   return window['go']['app']['App']['TermWrite'](arg1, arg2);
 }
+
+export function TransferCancel(arg1) {
+  return window['go']['app']['App']['TransferCancel'](arg1);
+}
+
+export function TransferDownload(arg1, arg2) {
+  return window['go']['app']['App']['TransferDownload'](arg1, arg2);
+}
+
+export function TransferPickFiles(arg1) {
+  return window['go']['app']['App']['TransferPickFiles'](arg1);
+}
+
+export function TransferPickFolder(arg1) {
+  return window['go']['app']['App']['TransferPickFolder'](arg1);
+}
+
+export function TransferPlanUpload(arg1, arg2, arg3) {
+  return window['go']['app']['App']['TransferPlanUpload'](arg1, arg2, arg3);
+}
+
+export function TransferUpload(arg1, arg2, arg3) {
+  return window['go']['app']['App']['TransferUpload'](arg1, arg2, arg3);
+}

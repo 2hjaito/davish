@@ -93,7 +93,7 @@ const linkWorkers = 16
 // List returns the entries of dir sorted by name. Links are resolved so
 // that links to directories can be opened like one.
 func (s *Service) List(ctx context.Context, serverID, dir string) ([]Entry, error) {
-	if err := checkPath(dir); err != nil {
+	if err := CheckPath(dir); err != nil {
 		return nil, err
 	}
 	sc, err := s.conns.SFTP(serverID)
@@ -148,7 +148,7 @@ func resolveLinks(ctx context.Context, sc *sftp.Client, out []Entry, idx []int) 
 
 // Stat describes p without following a final link.
 func (s *Service) Stat(_ context.Context, serverID, p string) (Entry, error) {
-	if err := checkPath(p); err != nil {
+	if err := CheckPath(p); err != nil {
 		return Entry{}, err
 	}
 	sc, err := s.conns.SFTP(serverID)
@@ -176,7 +176,7 @@ func stat(sc *sftp.Client, p string) (Entry, error) {
 // Read returns the content of the file at p, following links. Files over
 // MaxRead fail with FS_TOO_LARGE.
 func (s *Service) Read(ctx context.Context, serverID, p string) (File, error) {
-	if err := checkPath(p); err != nil {
+	if err := CheckPath(p); err != nil {
 		return File{}, err
 	}
 	sc, err := s.conns.SFTP(serverID)
@@ -211,7 +211,7 @@ func (s *Service) Read(ctx context.Context, serverID, p string) (File, error) {
 
 // Mkdir creates the directory p; its parent must exist.
 func (s *Service) Mkdir(_ context.Context, serverID, p string) error {
-	if err := checkPath(p); err != nil {
+	if err := CheckPath(p); err != nil {
 		return err
 	}
 	sc, err := s.conns.SFTP(serverID)
@@ -229,10 +229,10 @@ func (s *Service) Mkdir(_ context.Context, serverID, p string) error {
 
 // Rename moves from to to. It never replaces an existing to.
 func (s *Service) Rename(_ context.Context, serverID, from, to string) error {
-	if err := checkPath(from); err != nil {
+	if err := CheckPath(from); err != nil {
 		return err
 	}
-	if err := checkPath(to); err != nil {
+	if err := CheckPath(to); err != nil {
 		return err
 	}
 	if from == "/" || from == to {
@@ -263,9 +263,9 @@ func mustNotExist(sc *sftp.Client, p string) error {
 	return mapErr("stat", err)
 }
 
-// checkPath accepts only clean absolute paths, so that what the user
+// CheckPath accepts only clean absolute paths, so that what the user
 // confirmed is exactly what gets touched.
-func checkPath(p string) error {
+func CheckPath(p string) error {
 	if !path.IsAbs(p) || path.Clean(p) != p || strings.ContainsRune(p, 0) {
 		return apperr.New(apperr.InvalidInput, "path must be absolute and clean")
 	}

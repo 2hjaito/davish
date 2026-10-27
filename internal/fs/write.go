@@ -24,7 +24,7 @@ func tmpName(p string) string {
 // keeps pointing at the file it pointed to. Asking the user before
 // overwriting is the caller's job.
 func (s *Service) Write(ctx context.Context, serverID, p string, data []byte) (Entry, error) {
-	if err := checkPath(p); err != nil {
+	if err := CheckPath(p); err != nil {
 		return Entry{}, err
 	}
 	sc, err := s.conns.SFTP(serverID)

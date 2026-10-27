@@ -25,7 +25,7 @@ type RemovePlan struct {
 // PlanRemove describes how p would be deleted. Remove only runs the
 // command the user saw, so the plan must be shown first.
 func (s *Service) PlanRemove(_ context.Context, serverID, p string) (RemovePlan, error) {
-	if err := checkPath(p); err != nil {
+	if err := CheckPath(p); err != nil {
 		return RemovePlan{}, err
 	}
 	if p == "/" {

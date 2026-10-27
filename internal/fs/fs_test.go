@@ -66,9 +66,9 @@ func TestCheckPath(t *testing.T) {
 		{"/tmp/a\x00b", false},
 	}
 	for _, tt := range tests {
-		err := checkPath(tt.p)
+		err := CheckPath(tt.p)
 		if (err == nil) != tt.ok {
-			t.Errorf("checkPath(%q) = %v; want ok=%v", tt.p, err, tt.ok)
+			t.Errorf("CheckPath(%q) = %v; want ok=%v", tt.p, err, tt.ok)
 		}
 	}
 }

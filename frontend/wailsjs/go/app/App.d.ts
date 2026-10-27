@@ -3,6 +3,7 @@
 import {fs} from '../models';
 import {app} from '../models';
 import {sysmon} from '../models';
+import {transfer} from '../models';
 
 export function AcceptHostKey(arg1:string,arg2:string):Promise<void>;
 
@@ -51,3 +52,15 @@ export function TermResize(arg1:string,arg2:number,arg3:number):Promise<void>;
 export function TermStart(arg1:string,arg2:number,arg3:number,arg4:boolean):Promise<string>;
 
 export function TermWrite(arg1:string,arg2:string):Promise<void>;
+
+export function TransferCancel(arg1:string):Promise<void>;
+
+export function TransferDownload(arg1:string,arg2:Array<string>):Promise<Array<transfer.Job>>;
+
+export function TransferPickFiles(arg1:string):Promise<Array<string>>;
+
+export function TransferPickFolder(arg1:string):Promise<string>;
+
+export function TransferPlanUpload(arg1:string,arg2:string,arg3:Array<string>):Promise<Array<transfer.UploadItem>>;
+
+export function TransferUpload(arg1:string,arg2:string,arg3:Array<transfer.UploadRequest>):Promise<Array<transfer.Job>>;

@@ -263,3 +263,70 @@ export namespace sysmon {
 
 }
 
+export namespace transfer {
+	
+	export class Job {
+	    id: string;
+	    kind: string;
+	    serverID: string;
+	    name: string;
+	    src: string;
+	    dst: string;
+	    dir: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Job(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.kind = source["kind"];
+	        this.serverID = source["serverID"];
+	        this.name = source["name"];
+	        this.src = source["src"];
+	        this.dst = source["dst"];
+	        this.dir = source["dir"];
+	    }
+	}
+	export class UploadItem {
+	    local: string;
+	    name: string;
+	    dir: boolean;
+	    size: number;
+	    exists: boolean;
+	    existsDir: boolean;
+	    replaceCommand?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new UploadItem(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.local = source["local"];
+	        this.name = source["name"];
+	        this.dir = source["dir"];
+	        this.size = source["size"];
+	        this.exists = source["exists"];
+	        this.existsDir = source["existsDir"];
+	        this.replaceCommand = source["replaceCommand"];
+	    }
+	}
+	export class UploadRequest {
+	    local: string;
+	    replace: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new UploadRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.local = source["local"];
+	        this.replace = source["replace"];
+	    }
+	}
+
+}
+
