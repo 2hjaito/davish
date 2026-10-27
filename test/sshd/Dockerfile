@@ -1,13 +1,17 @@
 # Local SSH server for integration tests only. Never expose it outside localhost.
 # systemd runs as PID 1 so Services and Logs tests talk to a real systemctl
 # and journald (docs/adr/0005-systemd-test-sshd.md).
+# busybox's whole root to build the test containers from, with no registry
+# pull when tests run (docs/adr/0006-docker-in-test-sshd.md).
+FROM busybox:1.37 AS busybox
+
 FROM ubuntu:24.04
 
 ENV container=docker
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends systemd systemd-sysv dbus polkitd \
-      openssh-server procps zip nginx \
+      openssh-server procps zip nginx docker.io \
  && rm -rf /var/lib/apt/lists/* \
  && useradd -m -s /bin/bash -G systemd-journal tester \
  && rm -f /etc/ssh/ssh_host_*
@@ -33,12 +37,18 @@ RUN chmod 600 /etc/ssh/ssh_host_ed25519_key \
 # file to change. Test container only.
 RUN chown -R tester:tester /etc/nginx
 
+# Docker runs inside this container, never the host's. tester is in the
+# docker group, as on most servers that use Docker.
+COPY --from=busybox / /opt/davish/busybox/
+COPY containers.sh /opt/davish/containers.sh
+RUN usermod -aG docker tester
+
 # Units for the Services tests: one that keeps running, one that always
 # fails. tester may start, stop and restart davish-* units without sudo,
 # and nothing else, so tests cover both success and "needs root".
 COPY units/ /etc/systemd/system/
 COPY polkit-tester.rules /etc/polkit-1/rules.d/50-davish-tester.rules
-RUN systemctl enable davish-ok.service davish-crash.service
+RUN systemctl enable davish-ok.service davish-crash.service davish-containers.service docker.service
 
 EXPOSE 22
 STOPSIGNAL SIGRTMIN+3

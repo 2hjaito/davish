@@ -1,0 +1,12 @@
+[Unit]
+Description=Davish test containers
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/opt/davish/containers.sh
+
+[Install]
+WantedBy=multi-user.target
