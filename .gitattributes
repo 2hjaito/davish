@@ -1,0 +1,3 @@
+# Check out text files with LF everywhere. Windows runners otherwise get
+# CRLF, and gofmt and Prettier then reject every file.
+* text=auto eol=lf
