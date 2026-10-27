@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { untrack } from 'svelte'
+
   import { dockApps, getApp } from '../../apps/registry'
   import type { AppDef } from '../../apps/types'
   import { monitorSetThresholds } from '../api/monitor'
@@ -25,6 +27,7 @@
   import { wm } from '../wm/windowManager.svelte'
   import Spotlight from '../spotlight/Spotlight.svelte'
   import Dock from './Dock.svelte'
+  import Welcome from './Welcome.svelte'
   import MenuBar from './MenuBar.svelte'
   import HostKeyDialog from './HostKeyDialog.svelte'
   import ServerDialog from './ServerDialog.svelte'
@@ -130,23 +133,17 @@
     return app && { title: app.label, size: app.size }
   }
 
-  // First run: ask for a server. Otherwise the active server comes back as
-  // it was left; one never seen before opens a terminal, like the mockup's
-  // Terminal + Files in the browser preview.
-  let opened = false
-  $effect(() => {
-    if (!servers.ready || opened) return
-    opened = true
-    if (servers.list.length === 0) {
-      ui.addServer()
-      return
-    }
-    const id = servers.activeId
-    restored.add(id)
+  /**
+   * A workspace showing for the first time this session comes back as it
+   * was left; one never seen before opens a terminal (and, in the browser
+   * preview, Files, like the mockup).
+   */
+  function showWorkspace(id: string) {
     if (wm.hasLayout(id)) {
       wm.restoreLayout(id, openOptions)
       return
     }
+    if (wm.visible(id).length > 0) return
     const start = hasRuntime
       ? ([['terminal', { x: 120, y: 120 }]] as const)
       : ([
@@ -157,17 +154,17 @@
       const app = getApp(appId)
       if (app) wm.open(app.id, id, { title: app.label, size: app.size, at })
     }
-  })
+  }
 
-  // Switching to a workspace for the first time this session brings back
-  // its windows.
+  // Once servers are known, and on every switch (including to a server just
+  // added): with no server yet, the welcome page asks for one.
   // eslint-disable-next-line svelte/prefer-svelte-reactivity -- bookkeeping, never rendered
-  const restored = new Set<string>()
+  const shown = new Set<string>()
   $effect(() => {
     const id = servers.activeId
-    if (!opened || !id || restored.has(id)) return
-    restored.add(id)
-    wm.restoreLayout(id, openOptions)
+    if (!servers.ready || !id || !servers.list.some((s) => s.id === id) || shown.has(id)) return
+    shown.add(id)
+    untrack(() => showWorkspace(id))
   })
 
   let spotlight = $state(false)
@@ -228,12 +225,16 @@
     {/if}
   {/each}
 
-  <Dock
-    apps={dockApps}
-    isOpen={(id) => wm.isOpen(id, serverID)}
-    onlaunch={launch}
-    bind:height={dockHeight}
-  />
+  {#if servers.ready && servers.list.length === 0}
+    <Welcome onadd={() => ui.addServer()} />
+  {:else}
+    <Dock
+      apps={dockApps}
+      isOpen={(id) => wm.isOpen(id, serverID)}
+      onlaunch={launch}
+      bind:height={dockHeight}
+    />
+  {/if}
 
   <Banners />
   <ServerDialog />

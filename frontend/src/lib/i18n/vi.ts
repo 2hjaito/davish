@@ -5,6 +5,29 @@ export const t = {
   app: {
     name: 'Davish',
   },
+  welcome: {
+    title: 'Chào mừng đến Davish',
+    lead: 'Quản lý server Linux qua SSH trong một desktop: Terminal, Files, dịch vụ, Docker, log.',
+    points: [
+      {
+        icon: 'server' as const,
+        title: 'Không cài gì lên server',
+        body: 'Mọi thứ đi qua SSH và SFTP từ máy này. Chỉ cần sshd.',
+      },
+      {
+        icon: 'list' as const,
+        title: 'Thấy trước mọi lệnh',
+        body: 'Thao tác phá hủy hiện đúng lệnh sẽ chạy để bạn xác nhận; Nhật ký lệnh ghi lại tất cả.',
+      },
+      {
+        icon: 'lock' as const,
+        title: 'Bí mật nằm trong keychain',
+        body: 'Mật khẩu và passphrase chỉ lưu trong keychain của hệ điều hành. Không lưu mật khẩu sudo.',
+      },
+    ],
+    add: 'Thêm server qua SSH…',
+    foot: 'Có thể thêm nhiều server; mỗi server là một workspace (⌘1…⌘9).',
+  },
   spotlight: {
     label: 'Spotlight',
     placeholder: 'Mở app, dịch vụ, container, thư mục… hoặc /đường/dẫn, > lệnh',
