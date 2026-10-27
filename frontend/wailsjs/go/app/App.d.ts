@@ -7,6 +7,7 @@ import {fs} from '../models';
 import {app} from '../models';
 import {logs} from '../models';
 import {sysmon} from '../models';
+import {nginx} from '../models';
 import {svc} from '../models';
 import {transfer} from '../models';
 
@@ -81,6 +82,20 @@ export function MonitorSystemInfo(arg1:string):Promise<sysmon.SystemInfo>;
 export function MonitorUnwatch(arg1:string):Promise<void>;
 
 export function MonitorWatch(arg1:string):Promise<void>;
+
+export function NginxCheckCerts(arg1:string):Promise<void>;
+
+export function NginxList(arg1:string):Promise<Array<nginx.Site>>;
+
+export function NginxPlanToggle(arg1:string,arg2:string,arg3:boolean):Promise<nginx.TogglePlan>;
+
+export function NginxReload(arg1:string):Promise<nginx.ReloadResult>;
+
+export function NginxReloadCommand():Promise<string>;
+
+export function NginxTest(arg1:string):Promise<nginx.TestResult>;
+
+export function NginxToggle(arg1:string,arg2:string,arg3:boolean,arg4:string):Promise<void>;
 
 export function ReorderServers(arg1:Array<string>):Promise<void>;
 

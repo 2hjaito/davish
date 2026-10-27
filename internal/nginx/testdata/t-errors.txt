@@ -1,0 +1,7 @@
+2026/10/27 16:43:44 [warn] 1140#1140: the "user" directive makes sense only if the master process runs with super-user privileges, ignored in /etc/nginx/nginx.conf:1
+2026/10/27 16:43:44 [emerg] 1140#1140: unknown directive "bogus_directive" in /etc/nginx/conf.d/broken.conf:3
+nginx: configuration file /etc/nginx/nginx.conf test failed
+exit=1
+2026/10/27 16:43:44 [warn] 1141#1141: the "user" directive makes sense only if the master process runs with super-user privileges, ignored in /etc/nginx/nginx.conf:1
+2026/10/27 16:43:44 [emerg] 1141#1141: unexpected "}" in /etc/nginx/conf.d/broken.conf:3
+nginx: configuration file /etc/nginx/nginx.conf test failed

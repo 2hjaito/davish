@@ -703,6 +703,208 @@ export namespace logs {
 
 }
 
+export namespace nginx {
+	
+	export class Cert {
+	    path: string;
+	    notAfter: number;
+	    names: string[];
+	    error?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Cert(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.notAfter = source["notAfter"];
+	        this.names = source["names"];
+	        this.error = source["error"];
+	    }
+	}
+	export class Issue {
+	    level: string;
+	    message: string;
+	    file?: string;
+	    line?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Issue(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.level = source["level"];
+	        this.message = source["message"];
+	        this.file = source["file"];
+	        this.line = source["line"];
+	    }
+	}
+	export class TestResult {
+	    ok: boolean;
+	    needsRoot: boolean;
+	    issues: Issue[];
+	    output: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TestResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ok = source["ok"];
+	        this.needsRoot = source["needsRoot"];
+	        this.issues = this.convertValues(source["issues"], Issue);
+	        this.output = source["output"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class ReloadResult {
+	    test: TestResult;
+	    reloaded: boolean;
+	    needsRoot: boolean;
+	    sudo: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ReloadResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.test = this.convertValues(source["test"], TestResult);
+	        this.reloaded = source["reloaded"];
+	        this.needsRoot = source["needsRoot"];
+	        this.sudo = source["sudo"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Server {
+	    names: string[];
+	    listen: string[];
+	    root?: string;
+	    ssl: boolean;
+	    certs: string[];
+	    proxyPass: string[];
+	    line: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Server(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.names = source["names"];
+	        this.listen = source["listen"];
+	        this.root = source["root"];
+	        this.ssl = source["ssl"];
+	        this.certs = source["certs"];
+	        this.proxyPass = source["proxyPass"];
+	        this.line = source["line"];
+	    }
+	}
+	export class Site {
+	    name: string;
+	    path: string;
+	    kind: string;
+	    enabled: boolean;
+	    toggleable: boolean;
+	    servers: Server[];
+	    upstreams: string[];
+	    certs: Cert[];
+	    error?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Site(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.path = source["path"];
+	        this.kind = source["kind"];
+	        this.enabled = source["enabled"];
+	        this.toggleable = source["toggleable"];
+	        this.servers = this.convertValues(source["servers"], Server);
+	        this.upstreams = source["upstreams"];
+	        this.certs = this.convertValues(source["certs"], Cert);
+	        this.error = source["error"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	export class TogglePlan {
+	    name: string;
+	    enable: boolean;
+	    command: string;
+	    sudo: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TogglePlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.enable = source["enable"];
+	        this.command = source["command"];
+	        this.sudo = source["sudo"];
+	    }
+	}
+
+}
+
 export namespace svc {
 	
 	export class Journal {
