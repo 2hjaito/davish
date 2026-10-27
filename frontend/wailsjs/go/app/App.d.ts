@@ -3,6 +3,7 @@
 import {docker} from '../models';
 import {fs} from '../models';
 import {app} from '../models';
+import {logs} from '../models';
 import {sysmon} from '../models';
 import {svc} from '../models';
 import {transfer} from '../models';
@@ -54,6 +55,10 @@ export function FilesStat(arg1:string,arg2:string):Promise<fs.Entry>;
 export function FilesWrite(arg1:string,arg2:string,arg3:Array<number>):Promise<fs.Entry>;
 
 export function ListServers():Promise<Array<app.ServerView>>;
+
+export function LogsStart(arg1:string,arg2:logs.Source):Promise<string>;
+
+export function LogsStop(arg1:string):Promise<void>;
 
 export function MonitorProcesses(arg1:string,arg2:string):Promise<sysmon.ProcessList>;
 

@@ -15,6 +15,7 @@ import (
 	"davish/internal/conn"
 	"davish/internal/docker"
 	"davish/internal/fs"
+	"davish/internal/logs"
 	"davish/internal/store"
 	"davish/internal/svc"
 	"davish/internal/sysmon"
@@ -40,6 +41,7 @@ type App struct {
 	audit     *audit.Log
 	services  *svc.Service
 	docker    *docker.Service
+	logs      *logs.Service
 }
 
 // New wires the services with their config under os.UserConfigDir()/davish.
@@ -64,6 +66,7 @@ func New() (*App, error) {
 	runner := audit.NewRunner(a.conns, a.audit)
 	a.services = svc.New(runner)
 	a.docker = docker.New(runner)
+	a.logs = logs.New(a.conns, a.audit, emitter{a}, log)
 	if a.transfers, err = transfer.New(a.conns, emitter{a}, log, transfer.Options{}); err != nil {
 		return nil, err
 	}
@@ -79,6 +82,7 @@ func (a *App) Startup(ctx context.Context) {
 // Shutdown is called by Wails before the process exits.
 func (a *App) Shutdown(_ context.Context) {
 	a.sysmon.Close()
+	a.logs.Close()
 	a.transfers.Close()
 	a.terms.CloseAll()
 	a.conns.Close()

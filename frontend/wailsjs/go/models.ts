@@ -431,6 +431,25 @@ export namespace fs {
 
 }
 
+export namespace logs {
+	
+	export class Source {
+	    kind: string;
+	    target: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Source(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.target = source["target"];
+	    }
+	}
+
+}
+
 export namespace svc {
 	
 	export class Journal {
