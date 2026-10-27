@@ -1,4 +1,5 @@
-// Package sysmon collects system metrics by reading /proc over a long-lived SSH session.
+// Package sysmon collects system metrics by reading /proc over a long-lived
+// SSH session, and lists processes and system details on request.
 package sysmon
 
 import (
@@ -48,6 +49,10 @@ type Service struct {
 	mu       sync.Mutex
 	watchers map[string]*watcher
 	wg       sync.WaitGroup
+
+	// procsMu guards procs, the last process sample per server.
+	procsMu sync.Mutex
+	procs   map[string]procSample
 }
 
 type watcher struct {
@@ -60,7 +65,10 @@ func New(clients ClientSource, emit Emitter, log *slog.Logger, opts Options) *Se
 	if opts.RetryEvery <= 0 {
 		opts.RetryEvery = 3 * time.Second
 	}
-	return &Service{clients: clients, emit: emit, log: log, opts: opts, watchers: map[string]*watcher{}}
+	return &Service{
+		clients: clients, emit: emit, log: log, opts: opts,
+		watchers: map[string]*watcher{}, procs: map[string]procSample{},
+	}
 }
 
 // Watch starts emitting sysmon:tick for serverID until every Watch has a

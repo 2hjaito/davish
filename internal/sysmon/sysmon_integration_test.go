@@ -206,3 +206,63 @@ func TestResumesAfterReconnect(t *testing.T) {
 	n := rec.count()
 	rec.waitCount(t, n)
 }
+
+func TestProcessesMatchTop(t *testing.T) {
+	m, id := connect(t)
+	svc := sysmon.New(m, discard{}, quiet(), sysmon.Options{})
+	t.Cleanup(svc.Close)
+	ctx := context.Background()
+
+	// A busy loop that stops by itself: closing a session without a PTY
+	// does not kill what it started.
+	client, err := m.Client(id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	busy, err := client.NewSession()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = busy.Close() })
+	if err := busy.Start("timeout 10 sh -c 'while :; do :; done'"); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := svc.Processes(ctx, id, sysmon.SortCPU); err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(2 * time.Second)
+	list, err := svc.Processes(ctx, id, sysmon.SortCPU)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if list.Total < len(list.Procs) || len(list.Procs) == 0 {
+		t.Fatalf("list = %+v", list)
+	}
+	top := list.Procs[0]
+	if top.Command != "sh -c while :; do :; done" || top.User != testsshd.User {
+		t.Errorf("busiest = %+v; want the busy loop", top)
+	}
+	// One core, give or take scheduling noise.
+	if top.CPU < 80 || top.CPU > 105 {
+		t.Errorf("busy loop at %v%% CPU; want about 100", top.CPU)
+	}
+
+	if _, err := svc.Processes(ctx, id, "name"); err == nil {
+		t.Error("unknown sort key accepted")
+	}
+}
+
+func TestSystemInfo(t *testing.T) {
+	m, id := connect(t)
+	svc := sysmon.New(m, discard{}, quiet(), sysmon.Options{})
+	t.Cleanup(svc.Close)
+
+	info, err := svc.SystemInfo(context.Background(), id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasPrefix(info.OS, "Ubuntu") || info.Kernel != run(t, m, id, "uname -r") || info.Hostname == "" {
+		t.Errorf("info = %+v", info)
+	}
+}
