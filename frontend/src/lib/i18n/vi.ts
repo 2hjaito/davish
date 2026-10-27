@@ -5,6 +5,13 @@ export const t = {
   app: {
     name: 'Davish',
   },
+  common: {
+    cancel: 'Hủy',
+    needsRoot: 'Server cần quyền root cho thao tác này.',
+    needsRootHint:
+      'Davish không lưu mật khẩu sudo. Mở Terminal với lệnh đã điền sẵn, kiểm tra rồi tự nhấn Enter.',
+    runInTerminal: 'Chạy trong Terminal',
+  },
   apps: {
     terminal: 'Terminal',
     files: 'Files',
@@ -458,11 +465,6 @@ export const t = {
       restart:
         'Dịch vụ sẽ dừng rồi chạy lại; kết nối đang mở tới nó có thể bị ngắt trong giây lát. Lệnh sẽ chạy:',
     },
-    cancel: 'Hủy',
-    needsRoot: 'Server cần quyền root cho thao tác này.',
-    needsRootHint:
-      'Davish không lưu mật khẩu sudo. Mở Terminal với lệnh đã điền sẵn, kiểm tra rồi tự nhấn Enter.',
-    runInTerminal: 'Chạy trong Terminal',
     failedHint: 'Xem log bên dưới để biết lý do.',
     log: 'Log gần nhất',
     logEmpty: 'Dịch vụ chưa ghi log nào.',

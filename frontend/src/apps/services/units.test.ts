@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { Unit } from '../../lib/api/services'
-import { canDo, counts, health, lineLevel, shortName, visible } from './units'
+import { canDo, counts, health, shortName, visible } from './units'
 
 const unit = (name: string, active: string, description = ''): Unit => ({
   name,
@@ -62,15 +62,4 @@ it('drops the .service suffix', () => {
   expect(shortName('nginx.service')).toBe('nginx')
   expect(shortName('getty@tty1.service')).toBe('getty@tty1')
   expect(shortName('odd')).toBe('odd')
-})
-
-describe('lineLevel', () => {
-  it.each([
-    ['sh[34]: error: cannot open /etc/nginx/nginx.conf', 'error'],
-    ["x.service: Failed with result 'exit-code'.", 'error'],
-    ['nginx: [emerg] unknown directive', 'error'],
-    ['PHP Warning: deprecated', 'warn'],
-    ['Started nginx.service', null],
-    ['terrorist mode off', null],
-  ])('%s', (line, want) => expect(lineLevel(line)).toBe(want))
 })

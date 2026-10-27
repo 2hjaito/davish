@@ -67,15 +67,3 @@ export function canDo(active: string, action: ServiceAction): boolean {
   }
   return true
 }
-
-export type LineLevel = 'error' | 'warn' | null
-
-const ERROR = /\b(error|err|failed|failure|fatal|crit(ical)?|emerg|alert|panic|segfault)\b/i
-const WARN = /\b(warn(ing)?|deprecated)\b/i
-
-/** Highlight level of a log line, from the words in it. */
-export function lineLevel(line: string): LineLevel {
-  if (ERROR.test(line)) return 'error'
-  if (WARN.test(line)) return 'warn'
-  return null
-}

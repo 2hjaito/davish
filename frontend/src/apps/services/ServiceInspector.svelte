@@ -6,10 +6,12 @@
   import { formatBytes, formatDuration } from '../../lib/format'
   import { t } from '../../lib/i18n/vi'
   import Icon from '../../lib/ui/Icon.svelte'
-  import { openFileInEditor, openTerminalAt } from '../../lib/wm/intents.svelte'
+  import { openFileInEditor } from '../../lib/wm/intents.svelte'
   import { backend } from './backend'
-  import ConfirmDialog from './ConfirmDialog.svelte'
-  import { canDo, health, lineLevel, shortName } from './units'
+  import { lineLevel } from '../../lib/logLevel'
+  import ConfirmCommand from '../../lib/ui/ConfirmCommand.svelte'
+  import NeedsRoot from '../../lib/ui/NeedsRoot.svelte'
+  import { canDo, health, shortName } from './units'
 
   interface Props {
     serverID: string
@@ -26,6 +28,8 @@
   let logError = $state('')
   let busy = $state<ServiceAction | null>(null)
   let confirming = $state.raw<ActionPlan | null>(null)
+  // Only stop and restart are confirmed; start runs right away.
+  const confirmKind = $derived(confirming?.action === 'stop' ? 'stop' : 'restart')
   /** The server refused for lack of root: what to run with sudo instead. */
   let needsRoot = $state('')
   let flash = $state<{ text: string; ok: boolean } | null>(null)
@@ -143,21 +147,7 @@
   </div>
 
   {#if needsRoot}
-    <div class="root" role="alert">
-      <Icon name="lock" size={14} />
-      <div>
-        <strong>{t.services.needsRoot}</strong>
-        <p>{t.services.needsRootHint}</p>
-        <pre class="command">{needsRoot}</pre>
-        <button
-          type="button"
-          class="btn btn-primary"
-          onclick={() => openTerminalAt(serverID, undefined, needsRoot)}
-        >
-          {t.services.runInTerminal}
-        </button>
-      </div>
-    </div>
+    <NeedsRoot {serverID} command={needsRoot} />
   {:else if flash}
     <p class="flash" class:ok={flash.ok} role="status">{flash.text}</p>
   {/if}
@@ -211,19 +201,7 @@
   {:else if !journal}
     <p class="muted small">{t.services.logLoading}</p>
   {:else if journal.restricted}
-    <div class="root">
-      <Icon name="lock" size={14} />
-      <div>
-        <p>{t.services.logRestricted}</p>
-        <button
-          type="button"
-          class="btn"
-          onclick={() => journal && openTerminalAt(serverID, undefined, journal.sudo)}
-        >
-          {t.services.runInTerminal}
-        </button>
-      </div>
-    </div>
+    <NeedsRoot {serverID} command={journal.sudo} message={t.services.logRestricted} />
   {:else if journal.lines.length === 0}
     <p class="muted small">{t.services.logEmpty}</p>
   {:else}
@@ -234,10 +212,13 @@
   {/if}
 </section>
 
-<ConfirmDialog
-  plan={confirming}
+<ConfirmCommand
+  command={confirming?.command ?? null}
+  title={confirming ? t.services.confirmTitle[confirmKind](shortName(confirming.unit)) : ''}
+  body={t.services.confirmBody[confirmKind]}
+  action={t.services.actions[confirmKind]}
   onclose={() => (confirming = null)}
-  onconfirm={(p) => void run(p)}
+  onconfirm={() => confirming && void run(confirming)}
 />
 
 <style>
@@ -345,39 +326,6 @@
 
   .flash.ok {
     color: var(--ok);
-  }
-
-  .root {
-    display: flex;
-    gap: 8px;
-    padding: 10px 12px;
-    border-radius: var(--control-radius);
-    background: var(--fill-soft);
-    font-size: var(--text-sm);
-  }
-
-  .root > :global(svg) {
-    flex-shrink: 0;
-    margin-top: 2px;
-    color: var(--warn);
-  }
-
-  .root p {
-    margin: 4px 0 8px;
-    color: var(--fg-muted);
-    line-height: 1.4;
-  }
-
-  .command {
-    margin: 0 0 8px;
-    padding: 6px 8px;
-    border-radius: var(--control-radius);
-    background: var(--fill-soft);
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    white-space: pre-wrap;
-    word-break: break-all;
-    user-select: text;
   }
 
   .facts {
