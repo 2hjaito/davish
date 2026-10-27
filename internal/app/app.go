@@ -13,6 +13,7 @@ import (
 
 	"davish/internal/audit"
 	"davish/internal/conn"
+	"davish/internal/docker"
 	"davish/internal/fs"
 	"davish/internal/store"
 	"davish/internal/svc"
@@ -38,6 +39,7 @@ type App struct {
 	transfers *transfer.Service
 	audit     *audit.Log
 	services  *svc.Service
+	docker    *docker.Service
 }
 
 // New wires the services with their config under os.UserConfigDir()/davish.
@@ -59,7 +61,9 @@ func New() (*App, error) {
 	a.sysmon = sysmon.New(a.conns, emitter{a}, log, sysmon.Options{})
 	a.files = fs.New(a.conns, log)
 	a.audit = audit.New(emitter{a})
-	a.services = svc.New(audit.NewRunner(a.conns, a.audit))
+	runner := audit.NewRunner(a.conns, a.audit)
+	a.services = svc.New(runner)
+	a.docker = docker.New(runner)
 	if a.transfers, err = transfer.New(a.conns, emitter{a}, log, transfer.Options{}); err != nil {
 		return nil, err
 	}

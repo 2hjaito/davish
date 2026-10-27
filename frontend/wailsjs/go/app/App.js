@@ -18,6 +18,30 @@ export function Disconnect(arg1) {
   return window['go']['app']['App']['Disconnect'](arg1);
 }
 
+export function DockerAct(arg1, arg2, arg3) {
+  return window['go']['app']['App']['DockerAct'](arg1, arg2, arg3);
+}
+
+export function DockerInspect(arg1, arg2) {
+  return window['go']['app']['App']['DockerInspect'](arg1, arg2);
+}
+
+export function DockerList(arg1) {
+  return window['go']['app']['App']['DockerList'](arg1);
+}
+
+export function DockerLogs(arg1, arg2) {
+  return window['go']['app']['App']['DockerLogs'](arg1, arg2);
+}
+
+export function DockerPlan(arg1, arg2) {
+  return window['go']['app']['App']['DockerPlan'](arg1, arg2);
+}
+
+export function DockerStats(arg1) {
+  return window['go']['app']['App']['DockerStats'](arg1);
+}
+
 export function FilesAccess(arg1, arg2) {
   return window['go']['app']['App']['FilesAccess'](arg1, arg2);
 }
