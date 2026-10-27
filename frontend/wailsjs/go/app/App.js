@@ -22,6 +22,14 @@ export function ListServers() {
   return window['go']['app']['App']['ListServers']();
 }
 
+export function MonitorUnwatch(arg1) {
+  return window['go']['app']['App']['MonitorUnwatch'](arg1);
+}
+
+export function MonitorWatch(arg1) {
+  return window['go']['app']['App']['MonitorWatch'](arg1);
+}
+
 export function ReorderServers(arg1) {
   return window['go']['app']['App']['ReorderServers'](arg1);
 }

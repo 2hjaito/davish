@@ -12,6 +12,10 @@ export function Disconnect(arg1:string):Promise<void>;
 
 export function ListServers():Promise<Array<app.ServerView>>;
 
+export function MonitorUnwatch(arg1:string):Promise<void>;
+
+export function MonitorWatch(arg1:string):Promise<void>;
+
 export function ReorderServers(arg1:Array<string>):Promise<void>;
 
 export function SaveServer(arg1:app.ServerInput):Promise<app.ServerView>;
