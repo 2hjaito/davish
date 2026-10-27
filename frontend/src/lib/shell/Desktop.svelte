@@ -140,7 +140,9 @@
   .desktop {
     position: fixed;
     inset: 0;
-    overflow: hidden;
+    /* clip, not hidden: focusing something in a window that hangs off
+       screen must not scroll the whole desktop sideways. */
+    overflow: clip;
     background-color: var(--wallpaper-base);
     background-image:
       radial-gradient(circle at 18% 22%, var(--wallpaper-accent) 0, transparent 38%),
