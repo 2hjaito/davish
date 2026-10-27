@@ -1,0 +1,16 @@
+# Edit this file to introduce tasks to be run by cron.
+#
+# m h  dom mon dow   command
+MAILTO=ops@example.com
+PATH=/usr/local/bin:/usr/bin:/bin
+SHELL = /bin/bash
+
+# Back up the database every night.
+0 3 * * * /usr/local/bin/backup-db.sh >> /var/log/backup.log 2>&1
+*/5 * * * * curl -fsS https://example.com/health > /dev/null
+@reboot /home/deploy/start-worker.sh
+@daily find /tmp -name '*.tmp' -mtime +7 -delete
+#30 2 * * 0 /usr/local/bin/rotate-old.sh
+# 15 4 * * mon-fri cd /srv/app && ./report.sh
+# this is just a note, not a job
+0 9 1 * * echo "monthly at 9" | mail -s report ops@example.com
