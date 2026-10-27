@@ -34,6 +34,8 @@
     file?: Omit<FileContent, 'data'>
     line?: number
     dirty: boolean
+    /** Bumped when the text is reloaded, so the editor starts over. */
+    version: number
     saving?: boolean
     /** The outcome of the last save, shown in the status bar until the next edit. */
     notice?: { text: string; error?: boolean }
@@ -46,6 +48,9 @@
   const views: Record<number, CodeEditor> = {}
   /** Tabs with unsaved work waiting on "save or discard"; window means closing it all. */
   let closing = $state<{ ids: number[]; window: boolean } | null>(null)
+  /** The tab whose file changed on the server while being edited. */
+  let changedId = $state<number | null>(null)
+  const changedTab = $derived(tabs.find((x) => x.id === changedId))
 
   const server = $derived(servers.list.find((s) => s.id === win.serverID))
   const active = $derived(tabs.find((x) => x.id === activeId))
@@ -67,6 +72,7 @@
       language: detectLanguage(req.path),
       line: req.line,
       dirty: false,
+      version: 0,
       cursor: { line: 1, col: 1 },
     }
     tabs.push(tab)
@@ -83,6 +89,8 @@
       const nl = text.indexOf('\n')
       tab.language = detectLanguage(tab.path, nl === -1 ? text : text.slice(0, nl))
       tab.doc = text
+      tab.dirty = false
+      tab.version++
       tab.state = 'ready'
     } catch (e) {
       tab.error =
@@ -99,8 +107,11 @@
     return text
   }
 
-  /** Writes the tab's text; true when it is saved. */
-  async function save(tab: Tab): Promise<boolean> {
+  /**
+   * Writes the tab's text; true when it is saved. Unless overwrite is set,
+   * it refuses when the server copy changed since it was read.
+   */
+  async function save(tab: Tab, overwrite = false): Promise<boolean> {
     const view = views[tab.id]
     if (tab.state !== 'ready' || !view || tab.saving) return false
     if (!hasRuntime) {
@@ -112,8 +123,11 @@
     tab.notice = { text: t.editor.saving }
     try {
       const data = new TextEncoder().encode(view.getText())
+      const expect =
+        overwrite || !tab.file ? undefined : { modTime: tab.file.modTime, size: tab.file.size }
       const res = await filesSave(win.serverID, tab.path, data, {
         backup: backupByDefault(tab.path),
+        expect,
       })
       tab.file = res.entry
       tab.dirty = false
@@ -124,7 +138,9 @@
       }
       return true
     } catch (e) {
-      tab.notice = { text: t.editor.saveFailed(toUserError(e).message), error: true }
+      const ue = toUserError(e)
+      tab.notice = { text: t.editor.saveFailed(ue.message), error: true }
+      if (ue.code === 'FS_CHANGED') changedId = tab.id
       return false
     } finally {
       tab.saving = false
@@ -162,6 +178,17 @@
     }
     if (c.window) wm.close(win.id, { force: true })
     else for (const id of c.ids) closeTab(id)
+  }
+
+  async function resolveChanged(choice: 'overwrite' | 'reload' | 'cancel') {
+    const tab = changedTab
+    changedId = null
+    if (!tab) return
+    if (choice === 'overwrite') await save(tab, true)
+    else if (choice === 'reload') {
+      tab.notice = undefined
+      await load(tab.id)
+    }
   }
 
   const closingTabs = $derived(closing ? tabs.filter((x) => closing?.ids.includes(x.id)) : [])
@@ -224,20 +251,22 @@
           <button class="btn" onclick={() => void load(tab.id)}>{t.editor.retry}</button>
         </div>
       {:else}
-        <CodeEditor
-          bind:this={views[tab.id]}
-          doc={tab.doc}
-          language={tab.language}
-          line={tab.line}
-          onchange={(c) => {
-            tab.cursor = { line: c.line, col: c.col }
-            if (c.edited) {
-              tab.dirty = true
-              tab.notice = undefined
-            }
-          }}
-          onsave={() => void save(tab)}
-        />
+        {#key tab.version}
+          <CodeEditor
+            bind:this={views[tab.id]}
+            doc={tab.doc}
+            language={tab.language}
+            line={tab.line}
+            onchange={(c) => {
+              tab.cursor = { line: c.line, col: c.col }
+              if (c.edited) {
+                tab.dirty = true
+                tab.notice = undefined
+              }
+            }}
+            onsave={() => void save(tab)}
+          />
+        {/key}
       {/if}
     </div>
   {/each}
@@ -282,6 +311,28 @@
     >
     <button type="button" class="btn btn-primary" onclick={() => void resolveClosing('save')}
       >{t.editor.save}</button
+    >
+  {/snippet}
+</Dialog>
+
+<Dialog
+  open={changedTab !== undefined}
+  title={changedTab ? t.editor.changedTitle(changedTab.name) : ''}
+  width={460}
+  onclose={() => void resolveChanged('cancel')}
+>
+  <p class="dialog-text">{t.editor.changedBody}</p>
+  {#snippet footer()}
+    <button type="button" class="btn" onclick={() => void resolveChanged('reload')}
+      >{t.editor.reload}</button
+    >
+    <span class="grow"></span>
+    <!-- svelte-ignore a11y_autofocus -->
+    <button type="button" class="btn" autofocus onclick={() => void resolveChanged('cancel')}
+      >{t.editor.cancel}</button
+    >
+    <button type="button" class="btn btn-danger" onclick={() => void resolveChanged('overwrite')}
+      >{t.editor.overwrite}</button
     >
   {/snippet}
 </Dialog>

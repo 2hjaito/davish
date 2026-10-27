@@ -134,6 +134,17 @@ type SaveOptions struct {
 	// Backup keeps a copy of the current file as <name>.bak-<UTC time>
 	// next to it before replacing it.
 	Backup bool `json:"backup"`
+	// Expect, when set, is the file as the editor read it. If the server
+	// copy no longer matches (someone else saved it, or it was deleted),
+	// Save fails with FS_CHANGED and writes nothing.
+	Expect *Expect `json:"expect,omitempty"`
+}
+
+// Expect identifies a version of a file. SFTP times have one-second
+// precision, so the size is compared too.
+type Expect struct {
+	ModTime int64 `json:"modTime"`
+	Size    int64 `json:"size"`
 }
 
 // SaveResult is the saved file, and the backup made, if any.
@@ -149,7 +160,7 @@ func (s *Service) Save(ctx context.Context, serverID, p string, data []byte, opt
 		return SaveResult{}, err
 	}
 	var res SaveResult
-	if opts.Backup {
+	if opts.Backup || opts.Expect != nil {
 		sc, err := s.conns.SFTP(serverID)
 		if err != nil {
 			return SaveResult{}, err
@@ -158,7 +169,10 @@ func (s *Service) Save(ctx context.Context, serverID, p string, data []byte, opt
 		if err != nil {
 			return SaveResult{}, err
 		}
-		if orig != nil {
+		if e := opts.Expect; e != nil && (orig == nil || int64(orig.Mtime) != e.ModTime || int64(orig.Size) != e.Size) { //nolint:gosec // sizes and times fit int64
+			return SaveResult{}, apperr.New(apperr.FSChanged, "the file changed on the server since it was opened")
+		}
+		if opts.Backup && orig != nil {
 			if res.Backup, err = backup(ctx, sc, target, time.Now()); err != nil {
 				return SaveResult{}, err
 			}

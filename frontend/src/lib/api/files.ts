@@ -110,11 +110,16 @@ export const filesSave = (
   serverID: string,
   path: string,
   data: Uint8Array,
-  opts: { backup: boolean },
+  opts: {
+    backup: boolean
+    /** The file as it was opened; saving fails with FS_CHANGED if the server copy differs. */
+    expect?: { modTime: number; size: number }
+  },
 ): Promise<SaveResult> =>
   App.FilesSave(
     serverID,
     path,
     encodeBase64(data) as unknown as number[],
-    opts,
+    // Plain data is what crosses the bridge; the generated class only adds helpers.
+    opts as Parameters<typeof App.FilesSave>[3],
   ) as Promise<SaveResult>

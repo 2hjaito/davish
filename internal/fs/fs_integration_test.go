@@ -404,3 +404,41 @@ func TestSaveNginxConfWithBackup(t *testing.T) {
 		t.Errorf("no backup asked: %+v, %v", res4, err)
 	}
 }
+
+func TestSaveRefusesWhenChangedOnServer(t *testing.T) {
+	e := setup(t)
+	ctx := context.Background()
+	p := e.path("app.conf")
+	if _, err := e.svc.Write(ctx, e.id, p, []byte("a=1\n")); err != nil {
+		t.Fatal(err)
+	}
+	opened, err := e.svc.Read(ctx, e.id, p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expect := &fs.Expect{ModTime: opened.ModTime, Size: opened.Size}
+
+	// Unchanged: saves, and the new stat is what the next save expects.
+	res, err := e.svc.Save(ctx, e.id, p, []byte("a=2\n"), fs.SaveOptions{Expect: expect})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Someone else writes it; a save based on our copy is refused.
+	e.run(t, "echo 'b=9' >> "+shellx.Quote(p))
+	_, err = e.svc.Save(ctx, e.id, p, []byte("a=3\n"), fs.SaveOptions{Expect: &fs.Expect{ModTime: res.Entry.ModTime, Size: res.Entry.Size}})
+	wantCode(t, err, apperr.FSChanged)
+	if got := e.run(t, "cat "+shellx.Quote(p)); got != "a=2\nb=9" {
+		t.Errorf("file after refused save: %q", got)
+	}
+
+	// Deleted meanwhile counts as changed too.
+	e.run(t, "rm "+shellx.Quote(p))
+	_, err = e.svc.Save(ctx, e.id, p, []byte("a=4\n"), fs.SaveOptions{Expect: expect})
+	wantCode(t, err, apperr.FSChanged)
+
+	// Without Expect (the user chose to overwrite), it writes.
+	if _, err := e.svc.Save(ctx, e.id, p, []byte("a=5\n"), fs.SaveOptions{}); err != nil {
+		t.Fatal(err)
+	}
+}

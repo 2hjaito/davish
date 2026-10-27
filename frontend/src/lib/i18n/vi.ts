@@ -204,6 +204,11 @@ export const t = {
     unsavedTitle: (name: string) => `Lưu thay đổi của “${name}”?`,
     unsavedMany: (n: number) => `${n} file có thay đổi chưa lưu`,
     unsavedBody: 'Nếu không lưu, các thay đổi sẽ mất.',
+    changedTitle: (name: string) => `“${name}” đã bị thay đổi trên server`,
+    changedBody:
+      'Ai đó (hoặc một chương trình) đã sửa file này từ lúc bạn mở. Ghi đè sẽ làm mất thay đổi đó; tải lại sẽ làm mất thay đổi của bạn.',
+    overwrite: 'Ghi đè',
+    reload: 'Tải lại bản trên server',
     retry: 'Thử lại',
     /** CodeMirror's own UI text (search panel, folding). */
     phrases: {
@@ -393,6 +398,7 @@ export const t = {
     FS_EXISTS: 'Đã có file hoặc thư mục trùng tên.',
     FS_TOO_LARGE: 'File quá lớn để mở trực tiếp. Hãy tải về.',
     FS_STALE: 'File hoặc thư mục đã thay đổi từ lúc bạn xác nhận. Hãy thử lại.',
+    FS_CHANGED: 'File đã bị thay đổi trên server từ lúc bạn mở.',
     CMD_NEEDS_ROOT: 'Lệnh này cần quyền root.',
     CMD_MISSING: 'Server chưa cài chương trình cần cho thao tác này (ví dụ zip).',
     INVALID_INPUT: 'Thông tin chưa hợp lệ.',
