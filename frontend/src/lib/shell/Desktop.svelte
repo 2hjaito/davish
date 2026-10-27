@@ -16,7 +16,7 @@
     transferNoticeId,
     transfers,
   } from '../stores/transfers.svelte'
-  import { openLogs, openTransfers } from '../wm/intents.svelte'
+  import { openFilesAt, openLogs, openTransfers } from '../wm/intents.svelte'
   import Banners from './Banners.svelte'
   import { ui } from '../stores/ui.svelte'
   import Window from '../wm/Window.svelte'
@@ -73,6 +73,8 @@
   $effect(() => {
     const actions: TransferActions = {
       showProgress: () => openTransfers(serverID),
+      showCopy: (j) => openFilesAt(j.serverID, j.dst.slice(0, j.dst.lastIndexOf('/')) || '/'),
+      nameOf: (id) => servers.list.find((s) => s.id === id)?.name ?? id,
       reveal: (j) =>
         void transferReveal(j.dst).catch((e: unknown) =>
           notifications.add({

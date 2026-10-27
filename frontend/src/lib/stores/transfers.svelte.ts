@@ -22,7 +22,7 @@ export interface Transfer extends Job {
   error?: string
 }
 
-/** Where a finished upload landed: Files reloads that folder. */
+/** Where a finished upload or copy landed: Files reloads that folder. */
 export function landingKey(serverID: string, dir: string): string {
   return `${serverID}\n${dir}`
 }
@@ -58,6 +58,10 @@ export interface TransferActions {
   showProgress: (j: Transfer) => void
   /** Shows a finished download in the system file manager. */
   reveal: (j: Transfer) => void
+  /** Opens a finished copy's folder in the destination's Files. */
+  showCopy?: (j: Transfer) => void
+  /** A server's name, for copies between servers. */
+  nameOf?: (serverID: string) => string
 }
 
 /**
@@ -72,6 +76,7 @@ export function describeTransfer(
   at = Date.now(),
 ): Notification | null {
   const base = { id: transferNoticeId(j), serverID: j.serverID, at }
+  if (j.kind === 'copy') return describeCopy(j, actions, base)
   switch (j.state) {
     case 'failed': {
       const title = j.kind === 'upload' ? t.transfers.uploadFailed : t.transfers.downloadFailed
@@ -93,6 +98,40 @@ export function describeTransfer(
         level: 'info',
         title: t.transfers.downloading(j.name),
         body: t.transfers.savingTo,
+        action: { label: t.transfers.showProgress, run: () => actions.showProgress(j) },
+      }
+  }
+  return null
+}
+
+// A copy between servers can run for minutes and lands out of sight, so
+// it says when it starts and how it ends, like a download.
+function describeCopy(
+  j: Transfer,
+  actions: TransferActions,
+  base: { id: string; serverID: string; at: number },
+): Notification | null {
+  const to = actions.nameOf?.(j.serverID) ?? j.serverID
+  switch (j.state) {
+    case 'failed':
+      return { ...base, level: 'error', title: t.transfers.copyFailed(j.name), body: j.error ?? '' }
+    case 'done':
+      return {
+        ...base,
+        level: 'info',
+        title: t.transfers.copied(j.name),
+        body: t.transfers.copiedTo(to, parentOf(j.dst)),
+        action: actions.showCopy && {
+          label: t.transfers.openFolder,
+          run: () => actions.showCopy?.(j),
+        },
+      }
+    case 'running':
+      return {
+        ...base,
+        level: 'info',
+        title: t.transfers.copying(j.name),
+        body: t.transfers.copyingTo(to),
         action: { label: t.transfers.showProgress, run: () => actions.showProgress(j) },
       }
   }
@@ -203,7 +242,7 @@ class Transfers {
       j.error = toUserError(d.error).message
     } else {
       j.state = 'done'
-      if (j.kind === 'upload') {
+      if (j.kind === 'upload' || j.kind === 'copy') {
         const key = landingKey(j.serverID, parentOf(j.dst))
         this.landed[key] = (this.landed[key] ?? 0) + 1
       }
