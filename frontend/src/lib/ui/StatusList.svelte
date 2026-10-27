@@ -1,15 +1,26 @@
-<script lang="ts">
-  import type { Unit } from '../../lib/api/services'
-  import { t } from '../../lib/i18n/vi'
-  import { health, shortName } from './units'
+<script lang="ts" module>
+  /** One row: a status dot, a name and a short note on the right. */
+  export interface StatusItem {
+    key: string
+    name: string
+    health: 'ok' | 'busy' | 'failed' | 'off'
+    note: string
+    /** Tooltip of the row. */
+    title?: string
+  }
+</script>
 
+<script lang="ts">
+  // The selectable list of Services and Docker, styled like Files.
   interface Props {
-    units: readonly Unit[]
+    items: readonly StatusItem[]
     selected: string | null
-    onselect: (name: string) => void
+    label: string
+    empty: string
+    onselect: (key: string) => void
   }
 
-  let { units, selected, onselect }: Props = $props()
+  let { items, selected, label, empty, onselect }: Props = $props()
 
   // Must match .row's height in CSS, for paging and scrolling into view.
   const ROW_H = 30
@@ -17,13 +28,14 @@
   let scroller = $state<HTMLDivElement>()
   let viewport = $state(0)
   const listId = $props.id()
-  const selectedIndex = $derived(units.findIndex((u) => u.name === selected))
+  const selectedIndex = $derived(items.findIndex((u) => u.key === selected))
 
   function move(i: number) {
-    const u = units[Math.max(0, Math.min(units.length - 1, i))]
+    const at = Math.max(0, Math.min(items.length - 1, i))
+    const u = items[at]
     if (!u) return
-    onselect(u.name)
-    document.getElementById(`${listId}-${units.indexOf(u)}`)?.scrollIntoView({ block: 'nearest' })
+    onselect(u.key)
+    document.getElementById(`${listId}-${at}`)?.scrollIntoView({ block: 'nearest' })
   }
 
   function onkeydown(ev: KeyboardEvent) {
@@ -35,7 +47,7 @@
       PageDown: () => move(selectedIndex + page),
       PageUp: () => move(selectedIndex - page),
       Home: () => move(0),
-      End: () => move(units.length - 1),
+      End: () => move(items.length - 1),
     }
     const action = keys[ev.key]
     if (!action) return
@@ -48,33 +60,33 @@
   class="scroller"
   role="listbox"
   tabindex="0"
-  aria-label={t.services.search}
+  aria-label={label}
   aria-activedescendant={selectedIndex >= 0 ? `${listId}-${selectedIndex}` : undefined}
   bind:this={scroller}
   bind:clientHeight={viewport}
   {onkeydown}
 >
-  {#each units as u, i (u.name)}
+  {#each items as u, i (u.key)}
     <button
       id="{listId}-{i}"
       class="row"
       class:odd={i % 2 === 1}
-      class:selected={u.name === selected}
+      class:selected={u.key === selected}
       role="option"
-      aria-selected={u.name === selected}
+      aria-selected={u.key === selected}
       tabindex="-1"
-      title={u.description}
+      title={u.title}
       onclick={() => {
         scroller?.focus({ preventScroll: true })
-        onselect(u.name)
+        onselect(u.key)
       }}
     >
-      <span class="dot {health(u.active)}" aria-hidden="true"></span>
-      <span class="name">{shortName(u.name)}</span>
-      <span class="sub">{t.services.states[u.active] ?? u.active}</span>
+      <span class="dot {u.health}" aria-hidden="true"></span>
+      <span class="name">{u.name}</span>
+      <span class="sub">{u.note}</span>
     </button>
   {:else}
-    <p class="none">{t.services.noMatch}</p>
+    <p class="none">{empty}</p>
   {/each}
 </div>
 
@@ -156,6 +168,7 @@
     font-size: var(--text-xs);
     color: var(--fg-muted);
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
   }
 
   .scroller:focus-within .selected :is(.name, .sub) {

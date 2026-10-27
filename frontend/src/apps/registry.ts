@@ -1,4 +1,5 @@
 import { t } from '../lib/i18n/vi'
+import DockerApp from './docker/DockerApp.svelte'
 import EditorApp from './editor/EditorApp.svelte'
 import FilesApp from './files/FilesApp.svelte'
 import MonitorApp from './monitor/MonitorApp.svelte'
@@ -40,7 +41,7 @@ export const apps: AppDef[] = [
     label: t.apps.services,
     icon: 'services',
     theme: 'light',
-    size: { w: 900, h: 560 },
+    size: { w: 900, h: 580 },
     component: ServicesApp,
   },
   {
@@ -48,8 +49,8 @@ export const apps: AppDef[] = [
     label: t.apps.docker,
     icon: 'docker',
     theme: 'light',
-    size: { w: 640, h: 420 },
-    component: PlaceholderApp,
+    size: { w: 900, h: 580 },
+    component: DockerApp,
   },
   {
     id: 'logs',
