@@ -94,6 +94,194 @@ export namespace audit {
 
 }
 
+export namespace cron {
+	
+	export class Change {
+	    op: string;
+	    id: string;
+	    schedule: string;
+	    command: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Change(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.op = source["op"];
+	        this.id = source["id"];
+	        this.schedule = source["schedule"];
+	        this.command = source["command"];
+	    }
+	}
+	export class Env {
+	    source: string;
+	    name: string;
+	    value: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Env(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.source = source["source"];
+	        this.name = source["name"];
+	        this.value = source["value"];
+	    }
+	}
+	export class Schedule {
+	    raw: string;
+	    reboot: boolean;
+	    minute: number[];
+	    hour: number[];
+	    dom: number[];
+	    month: number[];
+	    dow: number[];
+	    domAny: boolean;
+	    dowAny: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Schedule(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.raw = source["raw"];
+	        this.reboot = source["reboot"];
+	        this.minute = source["minute"];
+	        this.hour = source["hour"];
+	        this.dom = source["dom"];
+	        this.month = source["month"];
+	        this.dow = source["dow"];
+	        this.domAny = source["domAny"];
+	        this.dowAny = source["dowAny"];
+	    }
+	}
+	export class Job {
+	    id: string;
+	    source: string;
+	    line: number;
+	    schedule: Schedule;
+	    user?: string;
+	    command: string;
+	    enabled: boolean;
+	    next: number[];
+	    editable: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Job(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.source = source["source"];
+	        this.line = source["line"];
+	        this.schedule = this.convertValues(source["schedule"], Schedule);
+	        this.user = source["user"];
+	        this.command = source["command"];
+	        this.enabled = source["enabled"];
+	        this.next = source["next"];
+	        this.editable = source["editable"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Plan {
+	    command: string;
+	    before: string;
+	    after: string;
+	    backup: string;
+	    version: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Plan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.command = source["command"];
+	        this.before = source["before"];
+	        this.after = source["after"];
+	        this.backup = source["backup"];
+	        this.version = source["version"];
+	    }
+	}
+	export class Runs {
+	    lines: string[];
+	    restricted: boolean;
+	    sudo: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Runs(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.lines = source["lines"];
+	        this.restricted = source["restricted"];
+	        this.sudo = source["sudo"];
+	    }
+	}
+	
+	export class Table {
+	    jobs: Job[];
+	    env: Env[];
+	    zone: string;
+	    unreadable: string[];
+	    version: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Table(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.jobs = this.convertValues(source["jobs"], Job);
+	        this.env = this.convertValues(source["env"], Env);
+	        this.zone = source["zone"];
+	        this.unreadable = source["unreadable"];
+	        this.version = source["version"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
 export namespace docker {
 	
 	export class Container {

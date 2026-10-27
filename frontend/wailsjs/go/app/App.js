@@ -14,6 +14,22 @@ export function Connect(arg1) {
   return window['go']['app']['App']['Connect'](arg1);
 }
 
+export function CronApply(arg1, arg2, arg3) {
+  return window['go']['app']['App']['CronApply'](arg1, arg2, arg3);
+}
+
+export function CronList(arg1) {
+  return window['go']['app']['App']['CronList'](arg1);
+}
+
+export function CronPlan(arg1, arg2) {
+  return window['go']['app']['App']['CronPlan'](arg1, arg2);
+}
+
+export function CronRuns(arg1, arg2) {
+  return window['go']['app']['App']['CronRuns'](arg1, arg2);
+}
+
 export function DeleteServer(arg1) {
   return window['go']['app']['App']['DeleteServer'](arg1);
 }
