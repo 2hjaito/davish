@@ -240,6 +240,9 @@ func TestReconnectsAfterServerRestart(t *testing.T) {
 	if err := e.m.Connect(context.Background(), e.id); err != nil {
 		t.Fatal(err)
 	}
+	if _, err := e.m.SFTP(e.id); err != nil {
+		t.Fatal(err)
+	}
 
 	testsshd.Restart(t)
 
@@ -248,6 +251,14 @@ func TestReconnectsAfterServerRestart(t *testing.T) {
 		if e.rec.sawState(conn.StateReconnecting) && e.m.State(e.id) == conn.StateConnected {
 			if got := run(t, e.m, e.id, "echo back"); got != "back" {
 				t.Fatalf("after reconnect: %q", got)
+			}
+			// The SFTP client of the dead connection must not be reused.
+			sc, err := e.m.SFTP(e.id)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := sc.Getwd(); err != nil {
+				t.Fatalf("sftp after reconnect: %v", err)
 			}
 			return
 		}

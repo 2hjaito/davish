@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 
 	"davish/internal/apperr"
@@ -112,6 +113,8 @@ type link struct {
 	state  State
 	client *ssh.Client // nil unless connected
 	cancel context.CancelFunc
+	// sftp is opened on first use over client and dropped with it.
+	sftp *sftp.Client
 }
 
 // pendingKey is a host key shown to the user and not yet accepted.
@@ -205,6 +208,58 @@ func (m *Manager) Client(id string) (*ssh.Client, error) {
 	return nil, apperr.New(apperr.ConnNotConnected, "server is not connected")
 }
 
+// SFTP returns the server's shared SFTP client, opening it on first use.
+// A reconnect replaces the SSH client, and the next call opens a new one.
+func (m *Manager) SFTP(id string) (*sftp.Client, error) {
+	m.mu.Lock()
+	l, ok := m.conns[id]
+	if !ok || l.client == nil || l.state != StateConnected {
+		m.mu.Unlock()
+		return nil, apperr.New(apperr.ConnNotConnected, "server is not connected")
+	}
+	if l.sftp != nil {
+		sc := l.sftp
+		m.mu.Unlock()
+		return sc, nil
+	}
+	client := l.client
+	m.mu.Unlock()
+
+	// Opening the subsystem is a round trip; do it outside the lock.
+	sc, err := sftp.NewClient(client)
+	if err != nil {
+		return nil, apperr.Wrap(apperr.ConnNotConnected, "cannot open sftp", err)
+	}
+	m.mu.Lock()
+	switch {
+	case l.client != client || m.conns[id] != l: // reconnected or dropped meanwhile
+		m.mu.Unlock()
+		sc.Close() //nolint:errcheck,gosec // unwanted
+		return nil, apperr.New(apperr.ConnNotConnected, "server is not connected")
+	case l.sftp != nil: // another caller won the race
+		other := l.sftp
+		m.mu.Unlock()
+		sc.Close() //nolint:errcheck,gosec // duplicate
+		return other, nil
+	}
+	l.sftp = sc
+	m.mu.Unlock()
+
+	// The subsystem can end on its own (sftp-server killed); forget it so
+	// the next call opens a fresh one.
+	m.wg.Add(1)
+	go func() {
+		defer m.wg.Done()
+		sc.Wait() //nolint:errcheck,gosec // only the end matters
+		m.mu.Lock()
+		if l.sftp == sc {
+			l.sftp = nil
+		}
+		m.mu.Unlock()
+	}()
+	return sc, nil
+}
+
 // State reports a server's connection state.
 func (m *Manager) State(id string) State {
 	m.mu.Lock()
@@ -257,7 +312,7 @@ func (m *Manager) supervise(ctx context.Context, id string, l *link, client *ssh
 		}
 		m.log.Warn("connection lost", "server", id)
 		m.mu.Lock()
-		l.state, l.client = StateReconnecting, nil
+		l.state, l.client, l.sftp = StateReconnecting, nil, nil
 		m.mu.Unlock()
 		m.publish(id, StateReconnecting, nil)
 
@@ -421,7 +476,7 @@ func (m *Manager) handshakeError(id, addr string, res *hostKeyResult, err error)
 func (m *Manager) setFailed(id string, l *link, err error) {
 	m.mu.Lock()
 	if m.conns[id] == l {
-		l.state, l.client = StateFailed, nil
+		l.state, l.client, l.sftp = StateFailed, nil, nil
 	}
 	m.mu.Unlock()
 	m.publish(id, StateFailed, err)
