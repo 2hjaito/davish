@@ -22,6 +22,8 @@ export function CronList(arg1:string):Promise<cron.Table>;
 
 export function CronPlan(arg1:string,arg2:cron.Change):Promise<cron.Plan>;
 
+export function CronPreview(arg1:string,arg2:string):Promise<cron.Preview>;
+
 export function CronRuns(arg1:string,arg2:string):Promise<cron.Runs>;
 
 export function DeleteServer(arg1:string):Promise<void>;

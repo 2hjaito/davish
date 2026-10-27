@@ -199,3 +199,30 @@ func (s Schedule) dayMatches(t time.Time) bool {
 	}
 	return dom || dow
 }
+
+// Preview is a schedule being typed, parsed, with its next runs.
+type Preview struct {
+	Schedule Schedule `json:"schedule"`
+	Next     []int64  `json:"next"` // unix seconds, up to three
+}
+
+// PreviewSchedule parses raw and lists its next runs in zone (the
+// server's, from Table.Zone), from now.
+func PreviewSchedule(raw, zone string, now time.Time) (Preview, error) {
+	s, err := ParseSchedule(raw)
+	if err != nil {
+		return Preview{}, err
+	}
+	loc, err := time.LoadLocation(zone)
+	if err != nil {
+		loc = time.UTC
+	}
+	p := Preview{Schedule: s, Next: []int64{}}
+	for at := now.In(loc); len(p.Next) < 3; {
+		if at = s.Next(at); at.IsZero() {
+			break
+		}
+		p.Next = append(p.Next, at.Unix())
+	}
+	return p, nil
+}

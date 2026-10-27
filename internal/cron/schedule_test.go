@@ -104,3 +104,17 @@ func TestNext(t *testing.T) {
 		t.Error("@reboot has a next time")
 	}
 }
+
+func TestPreviewSchedule(t *testing.T) {
+	now := time.Date(2026, 10, 27, 7, 7, 0, 0, time.UTC) // 14:07 in Ho Chi Minh City
+	p, err := PreviewSchedule("0 15 * * *", "Asia/Ho_Chi_Minh", now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(p.Next) != 3 || time.Unix(p.Next[0], 0).UTC().Hour() != 8 {
+		t.Errorf("next = %v", p.Next)
+	}
+	if _, err := PreviewSchedule("nope", "UTC", now); err == nil {
+		t.Error("bad schedule previewed")
+	}
+}

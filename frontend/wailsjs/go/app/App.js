@@ -26,6 +26,10 @@ export function CronPlan(arg1, arg2) {
   return window['go']['app']['App']['CronPlan'](arg1, arg2);
 }
 
+export function CronPreview(arg1, arg2) {
+  return window['go']['app']['App']['CronPreview'](arg1, arg2);
+}
+
 export function CronRuns(arg1, arg2) {
   return window['go']['app']['App']['CronRuns'](arg1, arg2);
 }
