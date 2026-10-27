@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Icon from '../../lib/ui/Icon.svelte'
-  import type { IconName } from '../../lib/ui/icons'
+  import Icon from './Icon.svelte'
+  import type { IconName } from './icons'
 
   interface Props {
     icon: IconName

@@ -5,7 +5,7 @@
   import { formatBytes, formatDuration, formatPct } from '../../lib/format'
   import { t } from '../../lib/i18n/vi'
   import Icon from '../../lib/ui/Icon.svelte'
-  import Empty from './Empty.svelte'
+  import Empty from '../../lib/ui/Empty.svelte'
   import { mockProcesses } from './mock'
   import { nextOrder, orderProcs, type ProcColumn, type ProcOrder, serverSort } from './procSort'
 
