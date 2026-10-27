@@ -151,3 +151,11 @@ func TestBackupName(t *testing.T) {
 		t.Errorf("backupName = %q", got)
 	}
 }
+
+func TestWritableCommand(t *testing.T) {
+	got := writableCommand("/etc/my site.conf")
+	want := `test -w '/etc/my site.conf' && test -w /etc && { test -O '/etc/my site.conf' || test "$(id -u)" = 0; }`
+	if got != want {
+		t.Errorf("got  %s\nwant %s", got, want)
+	}
+}

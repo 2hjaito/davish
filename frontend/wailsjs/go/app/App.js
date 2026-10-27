@@ -18,6 +18,10 @@ export function Disconnect(arg1) {
   return window['go']['app']['App']['Disconnect'](arg1);
 }
 
+export function FilesAccess(arg1, arg2) {
+  return window['go']['app']['App']['FilesAccess'](arg1, arg2);
+}
+
 export function FilesCompress(arg1, arg2, arg3, arg4) {
   return window['go']['app']['App']['FilesCompress'](arg1, arg2, arg3, arg4);
 }

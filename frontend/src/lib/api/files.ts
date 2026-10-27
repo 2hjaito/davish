@@ -123,3 +123,13 @@ export const filesSave = (
     // Plain data is what crosses the bridge; the generated class only adds helpers.
     opts as Parameters<typeof App.FilesSave>[3],
   ) as Promise<SaveResult>
+
+export interface Access {
+  /** Saving would work: file and folder writable, owner kept. */
+  writable: boolean
+  /** Command to prefill in a terminal to edit the file as root. */
+  sudoEdit: string
+}
+
+export const filesAccess = (serverID: string, path: string): Promise<Access> =>
+  App.FilesAccess(serverID, path)

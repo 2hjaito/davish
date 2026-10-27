@@ -208,6 +208,10 @@ export const t = {
     changedBody:
       'Ai đó (hoặc một chương trình) đã sửa file này từ lúc bạn mở. Ghi đè sẽ làm mất thay đổi đó; tải lại sẽ làm mất thay đổi của bạn.',
     overwrite: 'Ghi đè',
+    readOnly: 'Chỉ đọc',
+    readOnlyBody: 'Bạn không có quyền ghi file này nên nó được mở ở chế độ chỉ đọc.',
+    sudo: 'Mở trong Terminal với sudo',
+    sudoHint: 'Lệnh sudoedit được điền sẵn; xem lại, nhấn Enter và nhập mật khẩu trong Terminal.',
     reload: 'Tải lại bản trên server',
     retry: 'Thử lại',
     /** CodeMirror's own UI text (search panel, folding). */

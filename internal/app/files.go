@@ -65,3 +65,9 @@ func (a *App) FilesCompress(serverID, path, format, command string) (fs.Compress
 func (a *App) FilesSave(serverID, path string, data []byte, opts fs.SaveOptions) (fs.SaveResult, error) {
 	return a.files.Save(a.ctx, serverID, path, data, opts)
 }
+
+// FilesAccess reports whether the Editor can save over path; when not, it
+// opens the file read-only and offers the sudoedit command.
+func (a *App) FilesAccess(serverID, path string) (fs.Access, error) {
+	return a.files.Access(a.ctx, serverID, path)
+}

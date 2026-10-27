@@ -13,28 +13,34 @@ export function openTransfers(serverID: string) {
   wm.openOrFocus('transfers', serverID, { title: t.apps.transfers, size: TRANSFERS_SIZE })
 }
 
-interface TerminalRequest {
+export interface TerminalRequest {
   serverID: string
   dir: string
+  /** Typed at the prompt without Enter, for the user to check and run. */
+  input?: string
 }
 
 /** Folders waiting for a terminal tab; the Terminal app takes them. */
 class TerminalRequests {
   list = $state<TerminalRequest[]>([])
 
-  /** Removes and returns the folders asked for on serverID. */
-  take(serverID: string): string[] {
+  /** Removes and returns the requests for serverID. */
+  take(serverID: string): TerminalRequest[] {
     const mine = this.list.filter((r) => r.serverID === serverID)
     if (mine.length > 0) this.list = this.list.filter((r) => r.serverID !== serverID)
-    return mine.map((r) => r.dir)
+    return mine
   }
 }
 
 export const terminalRequests = new TerminalRequests()
 
-/** Opens a terminal tab in dir, in serverID's Terminal window. */
-export function openTerminalAt(serverID: string, dir: string) {
-  terminalRequests.list.push({ serverID, dir })
+/**
+ * Opens a terminal tab in dir, in serverID's Terminal window. input is
+ * typed at the prompt but not run: commands needing root are prefilled
+ * this way and the user presses Enter (docs/SECURITY.md).
+ */
+export function openTerminalAt(serverID: string, dir: string, input?: string) {
+  terminalRequests.list.push({ serverID, dir, input })
   wm.openOrFocus('terminal', serverID, { title: t.apps.terminal, size: TERMINAL_SIZE })
 }
 

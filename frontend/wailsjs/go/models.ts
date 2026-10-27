@@ -67,6 +67,20 @@ export namespace app {
 
 export namespace fs {
 	
+	export class Access {
+	    writable: boolean;
+	    sudoEdit: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Access(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.writable = source["writable"];
+	        this.sudoEdit = source["sudoEdit"];
+	    }
+	}
 	export class CompressPlan {
 	    output: string;
 	    command: string;

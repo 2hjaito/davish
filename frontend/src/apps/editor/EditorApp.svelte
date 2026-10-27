@@ -2,14 +2,20 @@
   import { untrack } from 'svelte'
 
   import { toUserError } from '../../lib/api/errors'
-  import { type FileContent, filesRead, filesSave } from '../../lib/api/files'
+  import {
+    type Access,
+    type FileContent,
+    filesAccess,
+    filesRead,
+    filesSave,
+  } from '../../lib/api/files'
   import { hasRuntime } from '../../lib/api/runtime'
   import { t } from '../../lib/i18n/vi'
   import { servers } from '../../lib/stores/servers.svelte'
   import Dialog from '../../lib/ui/Dialog.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
-  import { type EditorRequest, editorRequests } from '../../lib/wm/intents.svelte'
+  import { type EditorRequest, editorRequests, openTerminalAt } from '../../lib/wm/intents.svelte'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import { wm } from '../../lib/wm/windowManager.svelte'
   import { mockRead } from '../files/mockFs'
@@ -34,6 +40,8 @@
     file?: Omit<FileContent, 'data'>
     line?: number
     dirty: boolean
+    /** Saving would fail (permissions); the file opens read-only. */
+    access?: Access
     /** Bumped when the text is reloaded, so the editor starts over. */
     version: number
     saving?: boolean
@@ -85,7 +93,10 @@
     if (!tab) return
     tab.state = 'loading'
     try {
-      const text = hasRuntime ? await readText(tab) : mockRead(tab.path)
+      const [text, access] = hasRuntime
+        ? await Promise.all([readText(tab), filesAccess(win.serverID, tab.path)])
+        : [mockRead(tab.path), mockAccess(tab.path)]
+      tab.access = access
       const nl = text.indexOf('\n')
       tab.language = detectLanguage(tab.path, nl === -1 ? text : text.slice(0, nl))
       tab.doc = text
@@ -97,6 +108,26 @@
         e instanceof Error && e.message === 'binary' ? t.editor.binary : toUserError(e).message
       tab.state = 'error'
     }
+  }
+
+  // The preview pretends system files other than nginx's are root's.
+  function mockAccess(path: string): Access {
+    const writable = !path.startsWith('/etc/') || path.startsWith('/etc/nginx/')
+    return { writable, sudoEdit: `sudoedit -- ${path}` }
+  }
+
+  function readOnly(tab: Tab): boolean {
+    return tab.access ? !tab.access.writable : false
+  }
+
+  /** Opens a terminal in the file's folder with sudoedit typed, not run. */
+  function editWithSudo(tab: Tab) {
+    if (!tab.access) return
+    openTerminalAt(
+      win.serverID,
+      tab.path.slice(0, tab.path.lastIndexOf('/')) || '/',
+      tab.access.sudoEdit,
+    )
   }
 
   async function readText(tab: Tab): Promise<string> {
@@ -113,7 +144,7 @@
    */
   async function save(tab: Tab, overwrite = false): Promise<boolean> {
     const view = views[tab.id]
-    if (tab.state !== 'ready' || !view || tab.saving) return false
+    if (tab.state !== 'ready' || !view || tab.saving || readOnly(tab)) return false
     if (!hasRuntime) {
       tab.dirty = false
       tab.notice = { text: t.editor.saved }
@@ -141,6 +172,8 @@
       const ue = toUserError(e)
       tab.notice = { text: t.editor.saveFailed(ue.message), error: true }
       if (ue.code === 'FS_CHANGED') changedId = tab.id
+      // Permissions changed, or the owner could not be kept: stop editing.
+      if (ue.code === 'FS_PERMISSION_DENIED' && tab.access) tab.access.writable = false
       return false
     } finally {
       tab.saving = false
@@ -251,11 +284,21 @@
           <button class="btn" onclick={() => void load(tab.id)}>{t.editor.retry}</button>
         </div>
       {:else}
+        {#if readOnly(tab)}
+          <div class="readonly" role="note">
+            <Icon name="lock" size={14} strokeWidth={2.2} />
+            <span>{t.editor.readOnlyBody}</span>
+            <button class="btn" title={t.editor.sudoHint} onclick={() => editWithSudo(tab)}
+              >{t.editor.sudo}</button
+            >
+          </div>
+        {/if}
         {#key tab.version}
           <CodeEditor
             bind:this={views[tab.id]}
             doc={tab.doc}
             language={tab.language}
+            readOnly={readOnly(tab)}
             line={tab.line}
             onchange={(c) => {
               tab.cursor = { line: c.line, col: c.col }
@@ -279,6 +322,7 @@
           >{active.notice.text}</span
         >
       {/if}
+      {#if readOnly(active)}<span class="ro">{t.editor.readOnly}</span>{/if}
       {#if active.state === 'ready'}
         <span>{t.editor.position(active.cursor.line, active.cursor.col)}</span>
         <span>{LANGUAGE_LABELS[active.language]}</span>
@@ -338,6 +382,32 @@
 </Dialog>
 
 <style>
+  .readonly {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px 6px 12px;
+    border-bottom: 1px solid var(--divider-soft);
+    background: var(--fill-soft);
+    font-size: var(--text-sm);
+  }
+
+  .readonly :global(svg) {
+    color: var(--warn);
+    flex-shrink: 0;
+  }
+
+  .readonly span {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ro {
+    color: var(--warn);
+    font-weight: 600;
+  }
+
   .notice {
     color: var(--ok);
     overflow: hidden;

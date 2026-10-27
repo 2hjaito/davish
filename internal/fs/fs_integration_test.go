@@ -442,3 +442,35 @@ func TestSaveRefusesWhenChangedOnServer(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestWritable(t *testing.T) {
+	e := setup(t)
+	ctx := context.Background()
+	mine := e.path("mine.conf")
+	e.run(t, "touch "+shellx.Quote(mine))
+	locked := e.path("locked")
+	e.run(t, "mkdir "+shellx.Quote(locked)+" && touch "+shellx.Quote(locked+"/f")+" && chmod 555 "+shellx.Quote(locked))
+	t.Cleanup(func() { e.run(t, "chmod 755 "+shellx.Quote(locked)) })
+
+	tests := []struct {
+		p    string
+		want bool
+	}{
+		{mine, true},
+		{"/etc/nginx/nginx.conf", true}, // owned by tester in the test image
+		{"/etc/hostname", false},        // root's
+		{"/etc/passwd", false},
+		{locked + "/f", false}, // file writable, folder not: no room for the temporary file
+		{e.path("missing"), false},
+	}
+	for _, tt := range tests {
+		got, err := e.svc.Access(ctx, e.id, tt.p)
+		if err != nil || got.Writable != tt.want {
+			t.Errorf("Access(%s) = %+v, %v; want writable %v", tt.p, got, err, tt.want)
+		}
+	}
+	a, _ := e.svc.Access(ctx, e.id, "/etc/my site.conf")
+	if a.SudoEdit != "sudoedit -- '/etc/my site.conf'" {
+		t.Errorf("SudoEdit = %q", a.SudoEdit)
+	}
+}

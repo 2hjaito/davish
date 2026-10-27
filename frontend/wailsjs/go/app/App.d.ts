@@ -13,6 +13,8 @@ export function DeleteServer(arg1:string):Promise<void>;
 
 export function Disconnect(arg1:string):Promise<void>;
 
+export function FilesAccess(arg1:string,arg2:string):Promise<fs.Access>;
+
 export function FilesCompress(arg1:string,arg2:string,arg3:string,arg4:string):Promise<fs.CompressPlan>;
 
 export function FilesHome(arg1:string):Promise<string>;
