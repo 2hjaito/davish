@@ -135,3 +135,35 @@ export function openFilesAt(serverID: string, path: string) {
   servers.select(serverID)
   wm.openOrFocus('files', serverID, { title: t.apps.files, size: FILES_SIZE })
 }
+
+export interface SelectRequest {
+  appId: 'services' | 'docker'
+  serverID: string
+  /** A unit name or a container name. */
+  key: string
+}
+
+/** Items waiting to be selected in their app; Services and Docker take them. */
+class SelectRequests {
+  list = $state<SelectRequest[]>([])
+
+  /** Removes and returns the latest request for appId on serverID. */
+  take(appId: SelectRequest['appId'], serverID: string): SelectRequest | undefined {
+    const mine = this.list.filter((r) => r.appId === appId && r.serverID === serverID)
+    if (mine.length > 0) this.list = this.list.filter((r) => !mine.includes(r))
+    return mine[mine.length - 1]
+  }
+}
+
+export const selectRequests = new SelectRequests()
+
+/** Opens appId on serverID with key selected, as Spotlight does. */
+export function openSelected(
+  appId: SelectRequest['appId'],
+  serverID: string,
+  key: string,
+  opts: { title: string; size: { w: number; h: number } },
+) {
+  selectRequests.list.push({ appId, serverID, key })
+  wm.openOrFocus(appId, serverID, opts)
+}

@@ -5,6 +5,23 @@ export const t = {
   app: {
     name: 'Davish',
   },
+  spotlight: {
+    label: 'Spotlight',
+    placeholder: 'Mở app, dịch vụ, container, thư mục… hoặc /đường/dẫn, > lệnh',
+    results: 'Kết quả',
+    none: 'Không có kết quả.',
+    hint: '↑↓ chọn · Enter mở · /đường/dẫn mở file hay thư mục · > lệnh gõ sẵn vào Terminal · Esc đóng',
+    openPath: (path: string) => `Mở ${path}`,
+    typeCommand: (cmd: string) => `Gõ vào Terminal: ${cmd}`,
+    kinds: {
+      app: 'App',
+      path: 'Đường dẫn',
+      command: 'Lệnh',
+      service: 'Dịch vụ',
+      container: 'Container',
+      folder: 'Thư mục',
+    },
+  },
   common: {
     cancel: 'Hủy',
     refresh: 'Làm mới',
