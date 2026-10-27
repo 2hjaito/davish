@@ -2,6 +2,7 @@
   import '@xterm/xterm/css/xterm.css'
 
   import { FitAddon } from '@xterm/addon-fit'
+  import { WebglAddon } from '@xterm/addon-webgl'
   import { type ITheme, Terminal } from '@xterm/xterm'
 
   import { isMac } from '../../lib/shell/platform'
@@ -59,6 +60,7 @@
   /**
    * The block cursor fills the whole row, which lineHeight makes taller than the
    * text. Keep the row height but paint only the glyph's own height (see CSS).
+   * Only the DOM renderer has these rows; WebGL paints the full-height cursor.
    */
   function fitCursor(t: Terminal) {
     const row = t.element?.querySelector<HTMLElement>('.xterm-rows > div')
@@ -66,6 +68,21 @@
     const glyph = row.offsetHeight / LINE_HEIGHT
     host.style.setProperty('--cursor-h', `${glyph}px`)
     host.style.setProperty('--cursor-inset', `${(row.offsetHeight - glyph) / 2}px`)
+  }
+
+  // Draw with WebGL when the webview has it. Without it, or once the context
+  // is lost (too many open terminals, GPU reset), xterm falls back to the DOM.
+  function useWebgl(t: Terminal) {
+    try {
+      const webgl = new WebglAddon()
+      webgl.onContextLoss(() => {
+        webgl.dispose()
+        fitCursor(t)
+      })
+      t.loadAddon(webgl)
+    } catch {
+      // No WebGL2: the DOM renderer is already in place.
+    }
   }
 
   $effect(() => {
@@ -84,6 +101,7 @@
     t.loadAddon(f)
     t.attachCustomKeyEventHandler(clipboardKeys)
     t.open(host)
+    useWebgl(t)
     term = t
     fit = f
 
