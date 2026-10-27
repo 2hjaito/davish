@@ -117,6 +117,7 @@
 
   /* Terminal selection, tab hover */
   --term-selection: rgba(138, 180, 255, 0.35);
+  --term-bg-solid: #1d1f25;
   --term-scrollbar: rgba(255, 255, 255, 0.28);
   --term-scrollbar-hover: rgba(255, 255, 255, 0.45);
   --tab-hover-dark: rgba(255, 255, 255, 0.06);

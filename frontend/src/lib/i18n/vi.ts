@@ -134,6 +134,9 @@ export const t = {
     fontSizeHint: 'Áp dụng cho mọi cửa sổ Terminal.',
     fontSmaller: 'Giảm cỡ chữ',
     fontLarger: 'Tăng cỡ chữ',
+    gpu: 'Tăng tốc GPU',
+    gpuHint:
+      'Vẽ bằng WebGL, nhanh hơn khi in output lớn. Nền terminal chuyển sang màu đặc thay cho kính mờ.',
   },
   placeholder: {
     title: 'Đang phát triển',

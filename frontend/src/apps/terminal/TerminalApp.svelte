@@ -6,6 +6,7 @@
   import { decodeOutput, termClose, termResize, termStart, termWrite } from '../../lib/api/terminal'
   import { t } from '../../lib/i18n/vi'
   import { servers } from '../../lib/stores/servers.svelte'
+  import { settings } from '../../lib/stores/settings.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import { getWindowContext } from '../../lib/wm/context'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
@@ -184,7 +185,7 @@
   <span class="spacer"></span>
 </TitleBar>
 
-<div class="screen">
+<div class="screen" class:solid={settings.terminalGpu}>
   {#each tabs as tab (tab.id)}
     <XTerm
       bind:this={views[tab.id]}
@@ -286,6 +287,11 @@
     position: relative;
     flex: 1;
     min-height: 0;
+  }
+
+  /* GPU mode draws on a solid background; fill the margins around it too. */
+  .solid {
+    background: var(--term-bg-solid);
   }
 
   .lost {

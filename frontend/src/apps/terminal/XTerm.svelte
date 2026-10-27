@@ -22,14 +22,15 @@
   let host = $state<HTMLDivElement>()
   let term: Terminal | undefined
   let fit: FitAddon | undefined
+  let webgl: WebglAddon | undefined
 
   function token(name: string): string {
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
   }
 
-  function theme(): ITheme {
+  function theme(solid: boolean): ITheme {
     return {
-      background: '#00000000',
+      background: solid ? token('--term-bg-solid') : '#00000000',
       foreground: token('--fg-on-dark'),
       cursor: token('--fg-on-dark'),
       cursorAccent: token('--app-terminal'),
@@ -75,19 +76,33 @@
     host.style.setProperty('--cursor-inset', `${(row.offsetHeight - glyph) / 2}px`)
   }
 
-  // Draw with WebGL when the webview has it. Without it, or once the context
-  // is lost (too many open terminals, GPU reset), xterm falls back to the DOM.
-  function useWebgl(t: Terminal) {
-    try {
-      const webgl = new WebglAddon()
-      webgl.onContextLoss(() => {
-        webgl.dispose()
-        fitCursor(t)
-      })
-      t.loadAddon(webgl)
-    } catch {
-      // No WebGL2: the DOM renderer is already in place.
+  /**
+   * The DOM renderer draws on the transparent glass. WebGL (Settings → GPU)
+   * bakes each cell's background into its glyph atlas, which misplaces any
+   * coloured cell (selection, vim's status line, powerline prompts) on a
+   * transparent terminal, so it draws on a solid background instead. Without
+   * WebGL2, or once the context is lost, the terminal goes back to the DOM.
+   */
+  function setRenderer(t: Terminal, gpu: boolean) {
+    if (gpu === Boolean(webgl)) return
+    if (gpu) {
+      try {
+        const w = new WebglAddon()
+        w.onContextLoss(() => setRenderer(t, false))
+        t.options.allowTransparency = false
+        t.options.theme = theme(true)
+        t.loadAddon(w)
+        webgl = w
+        return
+      } catch {
+        // No WebGL2: stay on the DOM renderer below.
+      }
     }
+    webgl?.dispose()
+    webgl = undefined
+    t.options.allowTransparency = true
+    t.options.theme = theme(false)
+    fitCursor(t)
   }
 
   $effect(() => {
@@ -101,13 +116,16 @@
       lineHeight: LINE_HEIGHT,
       scrollback: 5000,
       macOptionIsMeta: true,
-      theme: theme(),
+      theme: theme(false),
     })
     const f = new FitAddon()
     t.loadAddon(f)
     t.attachCustomKeyEventHandler(clipboardKeys)
     t.open(host)
-    useWebgl(t)
+    setRenderer(
+      t,
+      untrack(() => settings.terminalGpu),
+    )
     term = t
     fit = f
 
@@ -129,7 +147,13 @@
       t.dispose()
       term = undefined
       fit = undefined
+      webgl = undefined
     }
+  })
+
+  $effect(() => {
+    const gpu = settings.terminalGpu
+    if (term) setRenderer(term, gpu)
   })
 
   $effect(() => {

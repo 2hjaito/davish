@@ -87,6 +87,19 @@
       </button>
     </div>
   </div>
+
+  <label class="row">
+    <span>
+      <strong>{t.settings.gpu}</strong>
+      <small>{t.settings.gpuHint}</small>
+    </span>
+    <input
+      type="checkbox"
+      role="switch"
+      checked={settings.terminalGpu}
+      onchange={(e) => settings.set('terminalGpu', e.currentTarget.checked)}
+    />
+  </label>
 </div>
 
 <style>
