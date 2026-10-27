@@ -1,5 +1,6 @@
 // Package transfer moves files and folders between this machine and a
-// server over SFTP, with progress events and cancellation.
+// server, or from one server to another, over SFTP, with progress events
+// and cancellation.
 package transfer
 
 import (
@@ -32,6 +33,9 @@ type Emitter interface {
 const (
 	KindUpload   = "upload"
 	KindDownload = "download"
+	// KindCopy goes from one server to another (or within one) through
+	// this machine: nothing is installed on either side.
+	KindCopy = "copy"
 )
 
 // Job is one file or folder being moved.
@@ -39,6 +43,8 @@ type Job struct {
 	ID       string `json:"id"`
 	Kind     string `json:"kind"`
 	ServerID string `json:"serverID"`
+	// FromServerID is the source of a copy; ServerID is its destination.
+	FromServerID string `json:"fromServerID,omitempty"`
 	// Name is the final name at the destination, which differs from the
 	// source when the user chose to keep both.
 	Name string `json:"name"`

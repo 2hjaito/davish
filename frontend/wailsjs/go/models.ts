@@ -1097,6 +1097,7 @@ export namespace transfer {
 	    id: string;
 	    kind: string;
 	    serverID: string;
+	    fromServerID?: string;
 	    name: string;
 	    src: string;
 	    dst: string;
@@ -1111,6 +1112,7 @@ export namespace transfer {
 	        this.id = source["id"];
 	        this.kind = source["kind"];
 	        this.serverID = source["serverID"];
+	        this.fromServerID = source["fromServerID"];
 	        this.name = source["name"];
 	        this.src = source["src"];
 	        this.dst = source["dst"];

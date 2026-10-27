@@ -125,6 +125,8 @@ export function TermWrite(arg1:string,arg2:string):Promise<void>;
 
 export function TransferCancel(arg1:string):Promise<void>;
 
+export function TransferCopy(arg1:string,arg2:Array<string>,arg3:string,arg4:string):Promise<Array<transfer.Job>>;
+
 export function TransferDownload(arg1:string,arg2:Array<string>):Promise<Array<transfer.Job>>;
 
 export function TransferPickFiles(arg1:string):Promise<Array<string>>;
