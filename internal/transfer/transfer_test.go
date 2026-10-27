@@ -2,10 +2,15 @@ package transfer
 
 import (
 	"context"
+	"errors"
+	"io"
+	"log/slog"
+	"path/filepath"
 	"sync"
 	"testing"
 	"time"
 
+	"davish/internal/apperr"
 	"davish/internal/events"
 )
 
@@ -94,5 +99,29 @@ func TestMeterStopsWhenCanceled(t *testing.T) {
 	cancel()
 	if m.add(1) == nil {
 		t.Error("add after cancel succeeded")
+	}
+}
+
+func TestRevealDownloadStaysInDownloads(t *testing.T) {
+	s, err := New(nil, &progressLog{}, slog.New(slog.NewTextHandler(io.Discard, nil)), Options{DownloadDir: t.TempDir()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range []string{
+		"relative",
+		s.opts.DownloadDir,
+		filepath.Join(s.opts.DownloadDir, ".."),
+		filepath.Join(s.opts.DownloadDir, "..", "elsewhere"),
+		"/etc/passwd",
+	} {
+		var ae *apperr.Error
+		if err := s.RevealDownload(context.Background(), p); !errors.As(err, &ae) || ae.Code != apperr.InvalidInput {
+			t.Errorf("RevealDownload(%q) = %v; want INVALID_INPUT", p, err)
+		}
+	}
+	var ae *apperr.Error
+	missing := filepath.Join(s.opts.DownloadDir, "missing.txt")
+	if err := s.RevealDownload(context.Background(), missing); !errors.As(err, &ae) || ae.Code != apperr.NotFound {
+		t.Errorf("RevealDownload(missing) = %v; want NOT_FOUND", err)
 	}
 }

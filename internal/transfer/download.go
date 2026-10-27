@@ -12,6 +12,7 @@ import (
 	"github.com/pkg/sftp"
 
 	"davish/internal/apperr"
+	"davish/internal/desktop"
 	"davish/internal/fs"
 )
 
@@ -243,6 +244,26 @@ func (s *Service) fillLocalDir(ctx context.Context, sc *sftp.Client, remote, par
 		if err := os.Symlink(filepath.FromSlash(target), filepath.Join(part, filepath.FromSlash(e.rel))); err != nil {
 			s.log.Warn("download skips link", "app", "transfer", "op", "download", "err", err)
 		}
+	}
+	return nil
+}
+
+// RevealDownload shows a finished download in the system file manager.
+// Only paths inside the download folder are accepted, so the frontend
+// cannot use this to open anything else.
+func (s *Service) RevealDownload(ctx context.Context, p string) error {
+	if !filepath.IsAbs(p) {
+		return apperr.New(apperr.InvalidInput, "path must be absolute")
+	}
+	rel, err := filepath.Rel(s.opts.DownloadDir, filepath.Clean(p))
+	if err != nil || rel == "." || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return apperr.New(apperr.InvalidInput, "not in the download folder")
+	}
+	if _, err := os.Lstat(p); err != nil {
+		return mapErr("reveal", err)
+	}
+	if err := desktop.Reveal(ctx, p); err != nil {
+		return apperr.Wrap(apperr.Internal, "cannot open the file manager", err)
 	}
 	return nil
 }

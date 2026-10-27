@@ -67,4 +67,6 @@ export function TransferPickFolder(arg1:string):Promise<string>;
 
 export function TransferPlanUpload(arg1:string,arg2:string,arg3:Array<string>):Promise<Array<transfer.UploadItem>>;
 
+export function TransferReveal(arg1:string):Promise<void>;
+
 export function TransferUpload(arg1:string,arg2:string,arg3:Array<transfer.UploadRequest>):Promise<Array<transfer.Job>>;

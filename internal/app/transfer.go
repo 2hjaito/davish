@@ -36,3 +36,9 @@ func (a *App) TransferDownload(serverID string, paths []string) ([]transfer.Job,
 func (a *App) TransferCancel(jobID string) error {
 	return a.transfers.Cancel(jobID)
 }
+
+// TransferReveal shows a finished download in Finder, Explorer or the
+// Linux file manager.
+func (a *App) TransferReveal(path string) error {
+	return a.transfers.RevealDownload(a.ctx, path)
+}

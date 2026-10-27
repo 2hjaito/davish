@@ -52,25 +52,55 @@ export function summarize(list: readonly Transfer[], serverID: string): Summary 
   return { count, fraction: total > 0 ? Math.min(1, done / total) : 0 }
 }
 
+/** What a transfer notification's button does; the shell supplies it. */
+export interface TransferActions {
+  /** Opens the Transfers window. */
+  showProgress: (j: Transfer) => void
+  /** Shows a finished download in the system file manager. */
+  reveal: (j: Transfer) => void
+}
+
 /**
- * The notification for a finished job, or null when the result is already
- * in sight: an upload shows up in its Files window, a cancel was the user's.
+ * The notification for a job, or null when there is nothing to say. All
+ * share one id per job, so "downloading" turns into "downloaded" in place.
+ * An upload says nothing while it runs or when it lands: it shows up in
+ * its Files window. A cancel was the user's own doing.
  */
-export function describeTransfer(j: Transfer, at = Date.now()): Notification | null {
-  const base = { id: `transfer-${j.id}`, serverID: j.serverID, at }
-  if (j.state === 'failed') {
-    const title = j.kind === 'upload' ? t.transfers.uploadFailed : t.transfers.downloadFailed
-    return { ...base, level: 'error', title: title(j.name), body: j.error ?? '' }
-  }
-  if (j.state === 'done' && j.kind === 'download') {
-    return {
-      ...base,
-      level: 'info',
-      title: t.transfers.downloaded(j.name),
-      body: t.transfers.savedIn,
+export function describeTransfer(
+  j: Transfer,
+  actions: TransferActions,
+  at = Date.now(),
+): Notification | null {
+  const base = { id: transferNoticeId(j), serverID: j.serverID, at }
+  switch (j.state) {
+    case 'failed': {
+      const title = j.kind === 'upload' ? t.transfers.uploadFailed : t.transfers.downloadFailed
+      return { ...base, level: 'error', title: title(j.name), body: j.error ?? '' }
     }
+    case 'done':
+      if (j.kind !== 'download') return null
+      return {
+        ...base,
+        level: 'info',
+        title: t.transfers.downloaded(j.name),
+        body: t.transfers.savedIn,
+        action: { label: t.transfers.reveal, run: () => actions.reveal(j) },
+      }
+    case 'running':
+      if (j.kind !== 'download') return null
+      return {
+        ...base,
+        level: 'info',
+        title: t.transfers.downloading(j.name),
+        body: t.transfers.savingTo,
+        action: { label: t.transfers.showProgress, run: () => actions.showProgress(j) },
+      }
   }
   return null
+}
+
+export function transferNoticeId(j: Pick<Transfer, 'id'>): string {
+  return `transfer-${j.id}`
 }
 
 // Sample jobs for the browser preview only; the real app starts empty.
@@ -110,9 +140,10 @@ class Transfers {
   // report progress or even finish before add() knows it.
   #early = new Map<string, { progress?: TransferProgress; done?: TransferDone }>()
   #onFinish: (t: Transfer) => void = () => {}
+  #onStart: (t: Transfer) => void = () => {}
 
-  /** onFinish runs once per job that ends, e.g. to notify. */
-  init(onFinish: (t: Transfer) => void): () => void {
+  /** onStart and onFinish run once per job as it begins and ends, e.g. to notify. */
+  init(onStart: (t: Transfer) => void, onFinish: (t: Transfer) => void): () => void {
     if (!hasRuntime) return () => {}
     const offProgress = onTransferProgress((p) => {
       const j = this.#find(p.jobID)
@@ -124,8 +155,10 @@ class Transfers {
       if (j) this.#finish(j, d)
       else this.#early.set(d.jobID, { ...this.#early.get(d.jobID), done: d })
     })
+    this.#onStart = onStart
     this.#onFinish = onFinish
     return () => {
+      this.#onStart = () => {}
       this.#onFinish = () => {}
       offProgress()
       offDone()
@@ -136,8 +169,10 @@ class Transfers {
     for (const job of jobs) {
       this.list.push({ ...job, done: 0, total: 0, bps: 0, state: 'running' })
       const j = this.list[this.list.length - 1]
+      if (!j) continue
+      this.#onStart(j)
       const early = this.#early.get(job.id)
-      if (!j || !early) continue
+      if (!early) continue
       this.#early.delete(job.id)
       if (early.progress) this.#progress(j, early.progress)
       if (early.done) this.#finish(j, early.done)

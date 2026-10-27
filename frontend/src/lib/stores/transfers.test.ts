@@ -22,6 +22,8 @@ vi.mock('../api/events', () => ({
 
 const { describeTransfer, landingKey, summarize, transfers } = await import('./transfers.svelte')
 
+const noActions = { showProgress: () => {}, reveal: () => {} }
+
 const job = (id: string, kind: Job['kind'] = 'upload'): Job => ({
   id,
   kind,
@@ -34,12 +36,17 @@ const job = (id: string, kind: Job['kind'] = 'upload'): Job => ({
 
 describe('transfers', () => {
   const finished: string[] = []
+  const started: string[] = []
 
   beforeEach(() => {
     transfers.list = []
     transfers.landed = {}
     finished.length = 0
-    transfers.init((j) => finished.push(`${j.id}:${j.state}`))
+    started.length = 0
+    transfers.init(
+      (j) => started.push(j.id),
+      (j) => finished.push(`${j.id}:${j.state}`),
+    )
   })
 
   it('applies progress and completion', () => {
@@ -50,6 +57,7 @@ describe('transfers', () => {
     expect(transfers.list[0]?.state).toBe('done')
     expect(transfers.landed[landingKey('s1', '/srv/www')]).toBe(1)
     expect(finished).toEqual(['a:done'])
+    expect(started).toEqual(['a'])
   })
 
   it('keeps events that arrive before the job is known', () => {
@@ -57,6 +65,8 @@ describe('transfers', () => {
     handlers.done?.({ jobID: 'b' })
     transfers.add([job('b')])
     expect(transfers.list[0]).toMatchObject({ done: 10, state: 'done' })
+    // Started is reported before finished, so "done" replaces "downloading".
+    expect(started).toEqual(['b'])
     expect(finished).toEqual(['b:done'])
   })
 
@@ -87,18 +97,31 @@ describe('summarize', () => {
 describe('describeTransfer', () => {
   const base = { ...job('x'), done: 0, total: 0, bps: 0 }
 
-  it('reports finished downloads and every failure', () => {
-    expect(describeTransfer({ ...base, kind: 'download', state: 'done' }, 1)).toMatchObject({
-      level: 'info',
-      title: 'Đã tải xong “x.txt”',
-    })
+  it('follows a download from start to finish under one id', () => {
+    const revealed: string[] = []
+    const actions = { showProgress: () => {}, reveal: (j: { id: string }) => revealed.push(j.id) }
+    const running = describeTransfer({ ...base, kind: 'download', state: 'running' }, actions, 1)
+    const done = describeTransfer({ ...base, kind: 'download', state: 'done' }, actions, 2)
+    expect(running).toMatchObject({ level: 'info', title: 'Đang tải xuống “x.txt”' })
+    expect(done).toMatchObject({ level: 'info', title: 'Đã tải xong “x.txt”' })
+    expect(done?.id).toBe(running?.id)
+    done?.action?.run()
+    expect(revealed).toEqual(['x'])
+  })
+
+  it('reports every failure', () => {
     expect(
-      describeTransfer({ ...base, state: 'failed', error: 'Không có quyền truy cập.' }, 1),
+      describeTransfer(
+        { ...base, state: 'failed', error: 'Không có quyền truy cập.' },
+        noActions,
+        1,
+      ),
     ).toMatchObject({ level: 'error', title: 'Tải lên “x.txt” thất bại' })
   })
 
   it('stays quiet when the result is already visible', () => {
-    expect(describeTransfer({ ...base, state: 'done' })).toBeNull()
-    expect(describeTransfer({ ...base, kind: 'download', state: 'canceled' })).toBeNull()
+    expect(describeTransfer({ ...base, state: 'running' }, noActions)).toBeNull()
+    expect(describeTransfer({ ...base, state: 'done' }, noActions)).toBeNull()
+    expect(describeTransfer({ ...base, kind: 'download', state: 'canceled' }, noActions)).toBeNull()
   })
 })

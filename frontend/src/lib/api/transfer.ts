@@ -80,3 +80,6 @@ export function registerDropTarget(el: Element, handler: DropHandler): () => voi
     if (targets.size === 0) OnFileDropOff()
   }
 }
+
+/** Shows a finished download in Finder, Explorer or the Linux file manager. */
+export const transferReveal = (path: string): Promise<void> => App.TransferReveal(path)

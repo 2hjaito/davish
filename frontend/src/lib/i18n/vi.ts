@@ -1,4 +1,6 @@
 // Every user-facing string lives here.
+import { isMac } from '../shell/platform'
+
 export const t = {
   app: {
     name: 'Davish',
@@ -158,6 +160,10 @@ export const t = {
     downloadFailed: (name: string) => `Tải xuống “${name}” thất bại`,
     downloaded: (name: string) => `Đã tải xong “${name}”`,
     savedIn: 'Đã lưu vào thư mục Downloads.',
+    downloading: (name: string) => `Đang tải xuống “${name}”`,
+    savingTo: 'Sẽ lưu vào thư mục Downloads.',
+    showProgress: 'Xem tiến độ',
+    reveal: isMac ? 'Hiện trong Finder' : 'Mở thư mục',
     upload: 'Tải lên',
     download: 'Tải xuống',
     waiting: 'Đang chờ…',

@@ -126,6 +126,10 @@ export function TransferPlanUpload(arg1, arg2, arg3) {
   return window['go']['app']['App']['TransferPlanUpload'](arg1, arg2, arg3);
 }
 
+export function TransferReveal(arg1) {
+  return window['go']['app']['App']['TransferReveal'](arg1);
+}
+
 export function TransferUpload(arg1, arg2, arg3) {
   return window['go']['app']['App']['TransferUpload'](arg1, arg2, arg3);
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { t } from '../i18n/vi'
-  import { notifications } from '../stores/notifications.svelte'
+  import { levelIcon, notifications } from '../stores/notifications.svelte'
   import Icon from '../ui/Icon.svelte'
   import Popover from './Popover.svelte'
 
@@ -28,10 +28,13 @@
     <div class="header">{t.notifications.title}</div>
     {#each notifications.list as n (n.id)}
       <div class="item">
-        <span class="icon {n.level}"><Icon name="warning" size={14} /></span>
+        <span class="icon {n.level}"><Icon name={levelIcon(n.level)} size={14} /></span>
         <span class="text">
           <strong>{n.title}</strong>
           <span>{n.body}</span>
+          {#if n.action}
+            <button class="action" onclick={() => n.action?.run()}>{n.action.label}</button>
+          {/if}
         </span>
         <button
           class="dismiss"
@@ -89,6 +92,9 @@
     color: var(--fg-muted);
     padding-top: 1px;
   }
+  .icon.info {
+    color: var(--accent);
+  }
   .icon.warn {
     color: var(--warn);
   }
@@ -106,6 +112,20 @@
 
   .text span {
     color: var(--fg-muted);
+  }
+
+  .action {
+    align-self: flex-start;
+    margin-top: 2px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .action:hover {
+    text-decoration: underline;
   }
 
   .dismiss {
