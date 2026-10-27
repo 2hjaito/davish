@@ -2,7 +2,8 @@
 :root {
   /* Font */
   --font-ui: 'Inter Variable', 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+  --font-mono:
+    'JetBrains Mono Variable', 'JetBrains Mono', 'Symbols Nerd Font Mono', ui-monospace, monospace;
   --text-xxs: 10.5px;
   --text-xs: 11px;
   --text-sm: 12.5px;

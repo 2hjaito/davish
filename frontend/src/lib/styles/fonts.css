@@ -1,0 +1,10 @@
+/*
+ * Symbols Nerd Font (v3.5.1, MIT, github.com/ryanoasis/nerd-fonts): the
+ * powerline and icon glyphs of the terminal prompt. Only characters JetBrains
+ * Mono lacks fall through to it, so it loads the first time one is drawn.
+ */
+@font-face {
+  font-family: 'Symbols Nerd Font Mono';
+  src: url('../../assets/fonts/SymbolsNerdFontMono-Regular.ttf') format('truetype');
+  font-display: block;
+}

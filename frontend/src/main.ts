@@ -1,5 +1,6 @@
 import '@fontsource-variable/inter'
 import '@fontsource-variable/jetbrains-mono'
+import './lib/styles/fonts.css'
 import './lib/styles/tokens.css'
 import './lib/styles/reset.css'
 import './lib/styles/glass.css'
