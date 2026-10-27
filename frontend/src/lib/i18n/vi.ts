@@ -99,7 +99,9 @@ export const t = {
   },
   terminal: {
     waiting: 'Đang chờ kết nối tới server…',
-    lost: 'Mất kết nối. Phiên sẽ tự mở lại khi server kết nối lại.',
+    lost: '[Mất kết nối]',
+    lostBar: 'Phiên terminal đã mất kết nối tới server.',
+    reopen: 'Mở lại',
     startFailed: 'Không mở được phiên terminal.',
     newTab: 'Tab mới',
     closeTab: 'Đóng tab',

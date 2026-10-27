@@ -28,6 +28,8 @@
     /** Remote PTY session, while one is open. */
     session?: string
     starting?: boolean
+    /** The session dropped or failed to open; waits for the user to reopen it. */
+    lost?: 'dropped' | 'failed'
     /** Set once its xterm exists; reactive, unlike the terms map below. */
     ready?: boolean
   }
@@ -39,6 +41,10 @@
   const views: Record<number, XTerm> = {}
   // eslint-disable-next-line svelte/prefer-svelte-reactivity -- holds xterm instances; Tab.ready carries the reactivity
   const terms = new Map<number, Terminal>()
+
+  // Undo modes a dead full-screen program left on (alternate screen, mouse
+  // reporting, hidden cursor) so the notice and the next shell show normally.
+  const RESTORE = '\x1b[?1049l\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l\x1b[!p'
 
   function title(tab: Tab) {
     return tab.title || `${server?.user ?? ''}@${server?.name ?? ''}: ${tab.cwd}`
@@ -75,20 +81,35 @@
     shell.start()
   }
 
-  // Open a remote shell for every tab that lacks one while the server is up;
-  // after a dropped connection this reopens them once it reconnects.
+  // Open a remote shell for every new or reopened tab while the server is up.
+  // A lost session stays closed until the user reopens it, like a terminal app
+  // whose process ended: its output stays readable.
   $effect(() => {
     if (!hasRuntime || !online) return
     for (const tab of tabs) {
       const term = terms.get(tab.id)
-      if (!tab.ready || !term || tab.session || tab.starting) continue
+      if (!tab.ready || !term || tab.session || tab.starting || tab.lost) continue
       tab.starting = true
       termStart(win.serverID, term.cols, term.rows)
         .then((id) => (tab.session = id))
-        .catch(() => term.write(`\r\n\x1b[31m${t.terminal.startFailed}\x1b[0m\r\n`))
+        .catch(() => {
+          term.write(`\r\n\x1b[31m${t.terminal.startFailed}\x1b[0m\r\n`)
+          tab.lost = 'failed'
+        })
         .finally(() => (tab.starting = false))
     }
   })
+
+  function reopen(tab: Tab) {
+    tab.lost = undefined
+    const term = terms.get(tab.id)
+    term?.write('\r\n')
+    if (!online) {
+      term?.write(`\x1b[2m${t.terminal.waiting}\x1b[0m\r\n`)
+      void servers.ensureConnected(win.serverID)
+    }
+    term?.focus()
+  }
 
   $effect(() => {
     if (!hasRuntime) return
@@ -101,8 +122,10 @@
       if (!tab) return
       tab.session = undefined
       // -1: the connection dropped, not the shell; keep the tab to reopen it.
-      if (code === -1) terms.get(tab.id)?.write(`\r\n\x1b[33m${t.terminal.lost}\x1b[0m\r\n`)
-      else closeTab(tab.id)
+      if (code === -1) {
+        terms.get(tab.id)?.write(`${RESTORE}\r\n\x1b[33m${t.terminal.lost}\x1b[0m\r\n`)
+        tab.lost = 'dropped'
+      } else closeTab(tab.id)
     })
     return () => {
       offData()
@@ -168,6 +191,13 @@
       active={tab.id === activeId}
       onready={(term) => connect(tab, term)}
     />
+    {#if tab.lost && tab.id === activeId}
+      <div class="lost glass-dark" role="status">
+        <Icon name="warning" size={13} />
+        <span>{tab.lost === 'failed' ? t.terminal.startFailed : t.terminal.lostBar}</span>
+        <button onclick={() => reopen(tab)}>{t.terminal.reopen}</button>
+      </div>
+    {/if}
   {/each}
 </div>
 
@@ -256,5 +286,36 @@
     position: relative;
     flex: 1;
     min-height: 0;
+  }
+
+  .lost {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    translate: -50% 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 6px 6px 12px;
+    border-radius: var(--control-radius);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .lost :global(svg) {
+    color: var(--term-warn);
+  }
+
+  .lost button {
+    border: 0;
+    padding: 4px 12px;
+    border-radius: var(--control-radius);
+    background: var(--accent);
+    color: var(--fg-on-accent);
+    font-weight: 500;
+  }
+
+  .lost button:hover {
+    filter: brightness(1.08);
   }
 </style>
