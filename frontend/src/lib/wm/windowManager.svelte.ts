@@ -29,6 +29,14 @@ export interface SavedWindow {
   snap: SnapZone | null
 }
 
+/** One window of a server's layout, as it was left. */
+export interface LayoutWindow {
+  appId: string
+  rect: Rect
+  snap: SnapZone | null
+  minimized: boolean
+}
+
 /** Older versions saved only the rect. */
 function toSaved(v: Rect | SavedWindow): SavedWindow {
   return 'rect' in v ? v : { rect: v, snap: null }
@@ -46,13 +54,61 @@ export class WindowManager {
   area = $state<Rect>({ x: 0, y: 30, w: 1280, h: 670 })
   snapPreview = $state<Rect | null>(null)
 
+  /**
+   * Geometry by app ("files") and by server and app ("s1/files"): a server
+   * opens an app where it last had it, else where the app was last used.
+   */
   #saved: Record<string, SavedWindow>
+  /** The windows each server had open, back to front. */
+  #layouts: Record<string, LayoutWindow[]>
+  /** Apps whose windows belong in a layout; the rest need context to reopen. */
+  #inLayout: (appId: string) => boolean = () => true
   // Plain records: guards and timer handles are bookkeeping, not UI state.
   #guards: Record<string, () => boolean> = {}
   #animTimers: Record<string, ReturnType<typeof setTimeout>> = {}
 
-  constructor(saved: Record<string, Rect | SavedWindow> = {}) {
+  constructor(
+    saved: Record<string, Rect | SavedWindow> = {},
+    layouts: Record<string, LayoutWindow[]> = {},
+  ) {
     this.#saved = Object.fromEntries(Object.entries(saved).map(([k, v]) => [k, toSaved(v)]))
+    this.#layouts = layouts
+  }
+
+  /** Tells which apps a server's layout keeps (see restoreLayout). */
+  keepInLayout(pred: (appId: string) => boolean) {
+    this.#inLayout = pred
+  }
+
+  /** Whether serverID ever had a layout saved, even an empty one. */
+  hasLayout(serverID: string): boolean {
+    return serverID in this.#layouts
+  }
+
+  /** The windows serverID had open when last seen, back to front. */
+  layoutOf(serverID: string): readonly LayoutWindow[] {
+    return this.#layouts[serverID] ?? []
+  }
+
+  /**
+   * Reopens serverID's windows as they were left, unless the workspace
+   * already has windows. options gives each app's title and size, or
+   * undefined for an app that no longer exists. Returns how many opened.
+   */
+  restoreLayout(serverID: string, options: (appId: string) => OpenOptions | undefined): number {
+    if (this.visible(serverID).length > 0) return 0
+    let n = 0
+    for (const l of this.layoutOf(serverID)) {
+      const o = options(l.appId)
+      if (!o || this.isOpen(l.appId, serverID)) continue
+      const w = this.open(l.appId, serverID, o)
+      w.rect = fitRect(l.rect, this.area)
+      w.snap = l.snap
+      w.minimized = l.minimized
+      n++
+    }
+    this.#saveLayout(serverID)
+    return n
   }
 
   /** Effective on-screen geometry, accounting for snap and maximize. */
@@ -95,7 +151,7 @@ export class WindowManager {
    * this workspace at the exact same spot.
    */
   open(appId: string, serverID: string, opts: OpenOptions): WindowState {
-    const saved = this.#saved[appId]
+    const saved = this.#saved[`${serverID}/${appId}`] ?? this.#saved[appId]
     let rect = fitRect(saved?.rect ?? this.#defaultRect(opts), this.area)
     const taken = (r: Rect) =>
       this.visible(serverID).some((w) => w.rect.x === r.x && w.rect.y === r.y)
@@ -114,6 +170,7 @@ export class WindowManager {
       animating: false,
     }
     this.windows.push(win)
+    this.#saveLayout(serverID)
     return win
   }
 
@@ -137,6 +194,7 @@ export class WindowManager {
     const w = this.#get(id)
     if (w) this.#remember(w)
     this.windows = this.windows.filter((w) => w.id !== id)
+    if (w) this.#saveLayout(w.serverID)
   }
 
   /** Lets an app veto closing its window: guard returns false to keep it. */
@@ -150,13 +208,17 @@ export class WindowManager {
   focus(id: string) {
     const w = this.#get(id)
     if (!w) return
+    const changed = w.minimized || w.z !== this.#topZ()
     w.minimized = false
     if (w.z !== this.#topZ()) w.z = this.#topZ() + 1
+    if (changed) this.#saveLayout(w.serverID)
   }
 
   minimize(id: string) {
     const w = this.#get(id)
-    if (w) w.minimized = true
+    if (!w) return
+    w.minimized = true
+    this.#saveLayout(w.serverID)
   }
 
   toggleMaximize(id: string) {
@@ -224,9 +286,26 @@ export class WindowManager {
   }
 
   #remember(w: WindowState) {
-    this.#saved[w.appId] = { rect: { ...w.rect }, snap: w.snap }
+    const saved = { rect: { ...w.rect }, snap: w.snap }
+    this.#saved[w.appId] = saved
+    this.#saved[`${w.serverID}/${w.appId}`] = saved
     save('windows', this.#saved)
+    this.#saveLayout(w.serverID)
+  }
+
+  #saveLayout(serverID: string) {
+    const layout = this.visible(serverID)
+      .filter((w) => this.#inLayout(w.appId))
+      .sort((a, b) => a.z - b.z)
+      .map((w) => ({ appId: w.appId, rect: { ...w.rect }, snap: w.snap, minimized: w.minimized }))
+    const before = JSON.stringify(this.#layouts[serverID] ?? [])
+    if (JSON.stringify(layout) === before) return
+    this.#layouts[serverID] = layout
+    save('layouts', this.#layouts)
   }
 }
 
-export const wm = new WindowManager(load<Record<string, Rect | SavedWindow>>('windows', {}))
+export const wm = new WindowManager(
+  load<Record<string, Rect | SavedWindow>>('windows', {}),
+  load<Record<string, LayoutWindow[]>>('layouts', {}),
+)

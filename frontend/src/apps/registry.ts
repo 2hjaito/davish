@@ -92,6 +92,7 @@ export const apps: AppDef[] = [
     theme: 'light',
     size: EDITOR_SIZE,
     component: EditorApp,
+    layout: false,
   },
   {
     id: 'settings',
@@ -100,6 +101,7 @@ export const apps: AppDef[] = [
     theme: 'light',
     size: { w: 520, h: 380 },
     component: SettingsApp,
+    layout: false,
   },
   {
     id: 'transfers',
@@ -109,6 +111,7 @@ export const apps: AppDef[] = [
     size: TRANSFERS_SIZE,
     component: TransfersApp,
     dock: false,
+    layout: false,
   },
   {
     id: 'audit',
@@ -118,6 +121,7 @@ export const apps: AppDef[] = [
     size: AUDIT_SIZE,
     component: AuditApp,
     dock: false,
+    layout: false,
   },
 ]
 
