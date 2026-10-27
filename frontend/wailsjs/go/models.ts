@@ -65,6 +65,113 @@ export namespace app {
 
 }
 
+export namespace fs {
+	
+	export class Entry {
+	    name: string;
+	    path: string;
+	    kind: string;
+	    dir: boolean;
+	    target?: string;
+	    size: number;
+	    mode: string;
+	    perm: number;
+	    modTime: number;
+	    uid: number;
+	    gid: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Entry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.path = source["path"];
+	        this.kind = source["kind"];
+	        this.dir = source["dir"];
+	        this.target = source["target"];
+	        this.size = source["size"];
+	        this.mode = source["mode"];
+	        this.perm = source["perm"];
+	        this.modTime = source["modTime"];
+	        this.uid = source["uid"];
+	        this.gid = source["gid"];
+	    }
+	}
+	export class File {
+	    name: string;
+	    path: string;
+	    kind: string;
+	    dir: boolean;
+	    target?: string;
+	    size: number;
+	    mode: string;
+	    perm: number;
+	    modTime: number;
+	    uid: number;
+	    gid: number;
+	    data: number[];
+	
+	    static createFrom(source: any = {}) {
+	        return new File(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.path = source["path"];
+	        this.kind = source["kind"];
+	        this.dir = source["dir"];
+	        this.target = source["target"];
+	        this.size = source["size"];
+	        this.mode = source["mode"];
+	        this.perm = source["perm"];
+	        this.modTime = source["modTime"];
+	        this.uid = source["uid"];
+	        this.gid = source["gid"];
+	        this.data = source["data"];
+	    }
+	}
+	export class RemovePlan {
+	    name: string;
+	    path: string;
+	    kind: string;
+	    dir: boolean;
+	    target?: string;
+	    size: number;
+	    mode: string;
+	    perm: number;
+	    modTime: number;
+	    uid: number;
+	    gid: number;
+	    nonEmpty: boolean;
+	    command: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RemovePlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.path = source["path"];
+	        this.kind = source["kind"];
+	        this.dir = source["dir"];
+	        this.target = source["target"];
+	        this.size = source["size"];
+	        this.mode = source["mode"];
+	        this.perm = source["perm"];
+	        this.modTime = source["modTime"];
+	        this.uid = source["uid"];
+	        this.gid = source["gid"];
+	        this.nonEmpty = source["nonEmpty"];
+	        this.command = source["command"];
+	    }
+	}
+
+}
+
 export namespace sysmon {
 	
 	export class Process {

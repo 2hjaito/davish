@@ -18,6 +18,42 @@ export function Disconnect(arg1) {
   return window['go']['app']['App']['Disconnect'](arg1);
 }
 
+export function FilesHome(arg1) {
+  return window['go']['app']['App']['FilesHome'](arg1);
+}
+
+export function FilesList(arg1, arg2) {
+  return window['go']['app']['App']['FilesList'](arg1, arg2);
+}
+
+export function FilesMkdir(arg1, arg2) {
+  return window['go']['app']['App']['FilesMkdir'](arg1, arg2);
+}
+
+export function FilesPlanRemove(arg1, arg2) {
+  return window['go']['app']['App']['FilesPlanRemove'](arg1, arg2);
+}
+
+export function FilesRead(arg1, arg2) {
+  return window['go']['app']['App']['FilesRead'](arg1, arg2);
+}
+
+export function FilesRemove(arg1, arg2, arg3) {
+  return window['go']['app']['App']['FilesRemove'](arg1, arg2, arg3);
+}
+
+export function FilesRename(arg1, arg2, arg3) {
+  return window['go']['app']['App']['FilesRename'](arg1, arg2, arg3);
+}
+
+export function FilesStat(arg1, arg2) {
+  return window['go']['app']['App']['FilesStat'](arg1, arg2);
+}
+
+export function FilesWrite(arg1, arg2, arg3) {
+  return window['go']['app']['App']['FilesWrite'](arg1, arg2, arg3);
+}
+
 export function ListServers() {
   return window['go']['app']['App']['ListServers']();
 }
