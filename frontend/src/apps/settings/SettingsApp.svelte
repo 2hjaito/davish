@@ -27,6 +27,7 @@
     </span>
     <input
       type="checkbox"
+      class="switch"
       role="switch"
       checked={settings.reduceGlass}
       onchange={(e) => settings.set('reduceGlass', e.currentTarget.checked)}
@@ -40,6 +41,7 @@
     </span>
     <input
       type="checkbox"
+      class="switch"
       role="switch"
       checked={settings.reduceMotion}
       onchange={(e) => settings.set('reduceMotion', e.currentTarget.checked)}
@@ -95,6 +97,7 @@
     </span>
     <input
       type="checkbox"
+      class="switch"
       role="switch"
       checked={settings.terminalPrompt}
       onchange={(e) => settings.set('terminalPrompt', e.currentTarget.checked)}
@@ -108,6 +111,7 @@
     </span>
     <input
       type="checkbox"
+      class="switch"
       role="switch"
       checked={settings.terminalGpu}
       onchange={(e) => settings.set('terminalGpu', e.currentTarget.checked)}
@@ -167,40 +171,6 @@
   small {
     color: var(--fg-muted);
     font-size: var(--text-xs);
-  }
-
-  /* A macOS-style switch drawn over the native checkbox, which keeps its semantics. */
-  input[type='checkbox'] {
-    appearance: none;
-    flex-shrink: 0;
-    position: relative;
-    width: 32px;
-    height: 18px;
-    margin: 0;
-    border-radius: 9px;
-    background: var(--fill-track);
-    transition: background var(--dur) var(--ease-out);
-  }
-
-  input[type='checkbox']::after {
-    content: '';
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: var(--switch-knob);
-    box-shadow: var(--switch-knob-shadow);
-    transition: translate var(--dur) var(--ease-out);
-  }
-
-  input[type='checkbox']:checked {
-    background: var(--accent);
-  }
-
-  input[type='checkbox']:checked::after {
-    translate: 14px 0;
   }
 
   /* Segmented − value + control, like the macOS font size stepper. */

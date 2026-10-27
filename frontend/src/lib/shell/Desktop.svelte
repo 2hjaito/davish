@@ -2,6 +2,7 @@
   import { dockApps, getApp } from '../../apps/registry'
   import type { AppDef } from '../../apps/types'
   import { hasRuntime } from '../api/runtime'
+  import { audit } from '../stores/audit.svelte'
   import { notifications } from '../stores/notifications.svelte'
   import { servers } from '../stores/servers.svelte'
   import { toUserError } from '../api/errors'
@@ -88,6 +89,8 @@
     }
     return transfers.init(notify, notify)
   })
+
+  $effect(() => audit.init())
 
   // First run: ask for a server. Otherwise open a terminal on the active one,
   // like the mockup's Terminal + Files in the browser preview.

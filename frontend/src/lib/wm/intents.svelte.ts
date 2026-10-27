@@ -9,10 +9,16 @@ export const TRANSFERS_SIZE = { w: 460, h: 360 }
 export const TERMINAL_SIZE = { w: 720, h: 470 }
 export const EDITOR_SIZE = { w: 720, h: 500 }
 export const LOGS_SIZE = { w: 820, h: 500 }
+export const AUDIT_SIZE = { w: 620, h: 440 }
 
 /** Shows the Transfers window in serverID's workspace. */
 export function openTransfers(serverID: string) {
   wm.openOrFocus('transfers', serverID, { title: t.apps.transfers, size: TRANSFERS_SIZE })
+}
+
+/** Shows the command log, in the active workspace. */
+export function openAudit(serverID: string) {
+  wm.openOrFocus('audit', serverID, { title: t.apps.audit, size: AUDIT_SIZE })
 }
 
 export interface TerminalRequest {

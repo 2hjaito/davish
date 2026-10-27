@@ -23,6 +23,7 @@ export const t = {
     editor: 'Editor',
     settings: 'Cài đặt',
     transfers: 'Chuyển file',
+    audit: 'Nhật ký lệnh',
   },
   menubar: {
     label: 'Menu chính',
@@ -37,6 +38,7 @@ export const t = {
   },
   system: {
     settings: 'Cài đặt…',
+    audit: 'Nhật ký lệnh…',
     sleep: 'Ngủ màn hình',
     quit: 'Thoát Davish',
     wakeHint: 'Bấm chuột hoặc nhấn phím bất kỳ để tiếp tục',
@@ -553,6 +555,27 @@ export const t = {
     logLoading: 'Đang đọc log…',
     refreshLog: 'Làm mới log',
     stderr: 'stderr',
+  },
+  audit: {
+    search: 'Tìm lệnh',
+    onlyThis: 'Chỉ server đang chọn',
+    empty: 'Chưa chạy lệnh nào trên server',
+    emptyHint:
+      'Mọi lệnh Davish chạy thay bạn (Dịch vụ, Docker, Logs, xóa và nén file) đều được ghi ở đây, để bạn biết app đã làm gì trên server.',
+    noMatch: 'Không có lệnh nào khớp.',
+    exitCode: (n: number) => `Mã thoát ${n}`,
+    noExit: 'Chưa kết thúc hoặc mất kết nối giữa chừng',
+    stream: 'theo dõi liên tục',
+    copy: 'Sao chép lệnh',
+    copied: 'Đã sao chép',
+    footer: (n: number) => `${n} lệnh gần nhất · tối đa 1000, mất khi thoát app`,
+    apps: {
+      services: 'Dịch vụ',
+      docker: 'Docker',
+      logs: 'Logs',
+      files: 'Files',
+      editor: 'Editor',
+    } as Record<string, string>,
   },
   logs: {
     view: 'Nội dung log',

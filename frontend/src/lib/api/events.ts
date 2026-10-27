@@ -147,6 +147,20 @@ export interface LogsEnd {
   sudo?: string
 }
 
+/** A command the app ran on a server (internal/audit). */
+export interface AuditEntry {
+  id: number
+  /** ms since epoch, when it started. */
+  time: number
+  serverID: string
+  /** The app it ran for: services, docker, logs, files, editor. */
+  app: string
+  command: string
+  /** -1 when it did not finish (connection lost) or is a stream that runs until stopped. */
+  exit: number
+  durMs: number
+}
+
 function on<T>(name: EventName, handler: (payload: T) => void): Unsubscribe {
   return EventsOn(name, (payload: T) => handler(payload))
 }
@@ -162,3 +176,4 @@ export const onTransferProgress = (h: (p: TransferProgress) => void) =>
 export const onTransferDone = (h: (p: TransferDone) => void) => on(Events.TransferDone, h)
 export const onLogsLine = (h: (p: LogsLine) => void) => on(Events.LogsLine, h)
 export const onLogsEnd = (h: (p: LogsEnd) => void) => on(Events.LogsEnd, h)
+export const onAuditEntry = (h: (p: AuditEntry) => void) => on(Events.AuditEntry, h)

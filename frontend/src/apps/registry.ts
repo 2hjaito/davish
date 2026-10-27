@@ -1,4 +1,5 @@
 import { t } from '../lib/i18n/vi'
+import AuditApp from './audit/AuditApp.svelte'
 import DockerApp from './docker/DockerApp.svelte'
 import EditorApp from './editor/EditorApp.svelte'
 import FilesApp from './files/FilesApp.svelte'
@@ -8,7 +9,13 @@ import ServicesApp from './services/ServicesApp.svelte'
 import SettingsApp from './settings/SettingsApp.svelte'
 import TerminalApp from './terminal/TerminalApp.svelte'
 import TransfersApp from './transfers/TransfersApp.svelte'
-import { EDITOR_SIZE, LOGS_SIZE, TERMINAL_SIZE, TRANSFERS_SIZE } from '../lib/wm/intents.svelte'
+import {
+  AUDIT_SIZE,
+  EDITOR_SIZE,
+  LOGS_SIZE,
+  TERMINAL_SIZE,
+  TRANSFERS_SIZE,
+} from '../lib/wm/intents.svelte'
 import type { AppDef, AppId } from './types'
 
 export const apps: AppDef[] = [
@@ -83,6 +90,15 @@ export const apps: AppDef[] = [
     theme: 'light',
     size: TRANSFERS_SIZE,
     component: TransfersApp,
+    dock: false,
+  },
+  {
+    id: 'audit',
+    label: t.apps.audit,
+    icon: 'list',
+    theme: 'light',
+    size: AUDIT_SIZE,
+    component: AuditApp,
     dock: false,
   },
 ]
