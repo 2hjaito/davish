@@ -77,6 +77,8 @@ export function LogsStop(arg1:string):Promise<void>;
 
 export function MonitorProcesses(arg1:string,arg2:string):Promise<sysmon.ProcessList>;
 
+export function MonitorSetThresholds(arg1:number,arg2:number,arg3:number):Promise<void>;
+
 export function MonitorSystemInfo(arg1:string):Promise<sysmon.SystemInfo>;
 
 export function MonitorUnwatch(arg1:string):Promise<void>;

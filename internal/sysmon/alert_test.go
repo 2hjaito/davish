@@ -93,3 +93,21 @@ func TestAlerterPerMount(t *testing.T) {
 		t.Errorf("alerts = %+v, want one for /data", got)
 	}
 }
+
+func TestSetThresholds(t *testing.T) {
+	s := New(nil, nil, nil, Options{})
+	s.resumeAlerts("s1")
+	tick := func(mem, at float64) []Alert {
+		return s.checkAlerts(Tick{ServerID: "s1", MemUsed: uint64(mem), MemTotal: 100, Uptime: at})
+	}
+	// 80% is fine by default…
+	if got := append(tick(80, 0), tick(80, 120)...); len(got) != 0 {
+		t.Fatalf("default thresholds alerted: %+v", got)
+	}
+	// …and over a lowered threshold for its duration.
+	s.SetThresholds(Thresholds{MemPct: 75, DiskPct: 85, For: 30 * time.Second})
+	tick(80, 200)
+	if got := tick(80, 231); len(got) != 1 || got[0].Threshold != 75 {
+		t.Errorf("after lowering: %+v", got)
+	}
+}

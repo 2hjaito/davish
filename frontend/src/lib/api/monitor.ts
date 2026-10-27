@@ -47,3 +47,10 @@ export interface SystemInfo {
 
 export const monitorSystemInfo = (serverID: string): Promise<SystemInfo> =>
   App.MonitorSystemInfo(serverID)
+
+/** RAM and disk percents (50–99) and how many seconds over before notifying. */
+export const monitorSetThresholds = (
+  memPct: number,
+  diskPct: number,
+  forSec: number,
+): Promise<void> => App.MonitorSetThresholds(memPct, diskPct, forSec)

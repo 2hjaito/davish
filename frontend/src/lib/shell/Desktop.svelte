@@ -1,11 +1,13 @@
 <script lang="ts">
   import { dockApps, getApp } from '../../apps/registry'
   import type { AppDef } from '../../apps/types'
+  import { monitorSetThresholds } from '../api/monitor'
   import { nginxCheckCerts } from '../api/nginx'
   import { hasRuntime } from '../api/runtime'
   import { audit } from '../stores/audit.svelte'
   import { notifications } from '../stores/notifications.svelte'
   import { servers } from '../stores/servers.svelte'
+  import { settings } from '../stores/settings.svelte'
   import { toUserError } from '../api/errors'
   import { transferReveal } from '../api/transfer'
   import { t } from '../i18n/vi'
@@ -97,6 +99,16 @@
   })
 
   $effect(() => audit.init())
+
+  // Settings that reach outside the frontend's own components: the mono
+  // font of every view, and the thresholds sysmon notifies at.
+  $effect(() => {
+    document.documentElement.style.setProperty('--font-mono', settings.monoFamily)
+  })
+  $effect(() => {
+    if (!hasRuntime) return
+    void monitorSetThresholds(settings.alertMem, settings.alertDisk, settings.alertHold)
+  })
 
   // TLS certificates nearing expiry notify once a server connects; checked
   // once per server for the app's lifetime (Go keeps what it notified).

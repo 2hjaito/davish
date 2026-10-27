@@ -56,8 +56,8 @@ type Service struct {
 	procsMu sync.Mutex
 	procs   map[string]procSample
 
-	// alertsMu guards alerts. Outlives watchers so that watching a server
-	// again does not repeat a notification it already gave.
+	// alertsMu guards alerts and opts.Thresholds. Alerts outlive watchers
+	// so that watching a server again does not repeat a notification.
 	alertsMu sync.Mutex
 	alerts   map[string]*alerter
 }
@@ -79,6 +79,17 @@ func New(clients ClientSource, emit Emitter, log *slog.Logger, opts Options) *Se
 		clients: clients, emit: emit, log: log, opts: opts,
 		watchers: map[string]*watcher{}, procs: map[string]procSample{},
 		alerts: map[string]*alerter{},
+	}
+}
+
+// SetThresholds changes when RAM and disk readings notify, for every
+// server, from the next tick on (Settings → Cảnh báo).
+func (s *Service) SetThresholds(th Thresholds) {
+	s.alertsMu.Lock()
+	defer s.alertsMu.Unlock()
+	s.opts.Thresholds = th
+	for _, a := range s.alerts {
+		a.th = th
 	}
 }
 

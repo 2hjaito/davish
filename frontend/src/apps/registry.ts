@@ -100,7 +100,7 @@ export const apps: AppDef[] = [
     label: t.apps.settings,
     icon: 'settings',
     theme: 'light',
-    size: { w: 520, h: 380 },
+    size: { w: 580, h: 600 },
     component: SettingsApp,
     layout: false,
   },
