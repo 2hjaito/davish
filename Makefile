@@ -23,8 +23,10 @@ test:
 
 check: lint test
 
+# One package at a time: the conn tests restart the shared sshd container,
+# which would drop the connections of packages running alongside.
 test-integration:
-	go test -race -tags=integration ./...
+	go test -race -p 1 -tags=integration ./...
 
 # Test keys are not committed; generate a throwaway pair on first use.
 sshd-keys:
