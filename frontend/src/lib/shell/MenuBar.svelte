@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { hasRuntime } from '../api/runtime'
   import { formatClock, formatGB, formatRate } from '../format'
   import { t } from '../i18n/vi'
   import { metrics } from '../stores/metrics.svelte'
   import { servers } from '../stores/servers.svelte'
+  import { level } from '../ui/charts/scale'
   import Icon from '../ui/Icon.svelte'
   import NotificationMenu from './NotificationMenu.svelte'
   import { hasNativeTrafficLights } from './platform'
@@ -11,24 +11,20 @@
   import SystemMenu from './SystemMenu.svelte'
 
   let now = $state(new Date())
-  // Metrics are still mock data (real ones arrive with sysmon in M4), so they
-  // only show in the browser preview, never next to a real server.
-  const online = $derived(!hasRuntime && servers.active?.state === 'connected')
-  const m = $derived(metrics.current)
-  const memPct = $derived((m.memUsed / m.memTotal) * 100)
+  // Only a connected server is watched, so a reconnect starts a fresh
+  // collector and the numbers disappear while the server is unreachable.
+  const watchedId = $derived(servers.active?.state === 'connected' ? servers.active.id : '')
+  const m = $derived(watchedId ? metrics.latest(watchedId) : undefined)
+  const memPct = $derived(m && m.memTotal > 0 ? (m.memUsed / m.memTotal) * 100 : 0)
 
   $effect(() => {
     const timer = setInterval(() => (now = new Date()), 1000)
     return () => clearInterval(timer)
   })
 
-  $effect(() => metrics.subscribe())
-
-  function level(value: number, warn: number, danger: number) {
-    if (value >= danger) return 'danger'
-    if (value >= warn) return 'warn'
-    return ''
-  }
+  $effect(() => {
+    if (watchedId) return metrics.watch(watchedId)
+  })
 </script>
 
 <header class="menubar glass" class:native-lights={hasNativeTrafficLights}>
@@ -41,11 +37,11 @@
   </nav>
 
   <div class="right">
-    {#if online}
+    {#if m}
       <span class="stat {level(m.cpu, 85, 95)}">
         <span class="label">{t.menubar.cpu}</span>
         <span class="bar"><span style:width="{m.cpu}%"></span></span>
-        <span>{m.cpu}%</span>
+        <span>{Math.round(m.cpu)}%</span>
       </span>
       <span class="stat {level(memPct, 90, 95)}">
         <span class="label">{t.menubar.ram}</span>

@@ -1,5 +1,6 @@
 import { t } from '../lib/i18n/vi'
 import FilesApp from './files/FilesApp.svelte'
+import MonitorApp from './monitor/MonitorApp.svelte'
 import PlaceholderApp from './PlaceholderApp.svelte'
 import SettingsApp from './settings/SettingsApp.svelte'
 import TerminalApp from './terminal/TerminalApp.svelte'
@@ -27,8 +28,8 @@ export const apps: AppDef[] = [
     label: t.apps.monitor,
     icon: 'monitor',
     theme: 'light',
-    size: { w: 640, h: 440 },
-    component: PlaceholderApp,
+    size: { w: 860, h: 580 },
+    component: MonitorApp,
   },
   {
     id: 'services',

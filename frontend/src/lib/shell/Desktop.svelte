@@ -2,6 +2,7 @@
   import { apps, getApp } from '../../apps/registry'
   import type { AppDef } from '../../apps/types'
   import { hasRuntime } from '../api/runtime'
+  import { notifications } from '../stores/notifications.svelte'
   import { servers } from '../stores/servers.svelte'
   import { ui } from '../stores/ui.svelte'
   import Window from '../wm/Window.svelte'
@@ -47,6 +48,9 @@
       stop()
     }
   })
+
+  // Threshold alerts and other notify:new events, for the app's lifetime.
+  $effect(() => notifications.init((id) => servers.list.find((s) => s.id === id)?.name ?? id))
 
   // First run: ask for a server. Otherwise open a terminal on the active one,
   // like the mockup's Terminal + Files in the browser preview.

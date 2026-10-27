@@ -13,6 +13,7 @@ import (
 
 	"davish/internal/conn"
 	"davish/internal/store"
+	"davish/internal/sysmon"
 	"davish/internal/term"
 )
 
@@ -27,6 +28,7 @@ type App struct {
 	secrets *store.Secrets
 	conns   *conn.Manager
 	terms   *term.Service
+	sysmon  *sysmon.Service
 }
 
 // New wires the services with their config under os.UserConfigDir()/davish.
@@ -44,6 +46,7 @@ func New() (*App, error) {
 	hostKeys := conn.NewHostKeys(filepath.Join(dir, "known_hosts"))
 	a.conns = conn.NewManager(a.store, a.secrets, hostKeys, emitter{a}, log, conn.Options{})
 	a.terms = term.New(a.conns, emitter{a}, log)
+	a.sysmon = sysmon.New(a.conns, emitter{a}, log, sysmon.Options{})
 	return a, nil
 }
 
@@ -55,6 +58,7 @@ func (a *App) Startup(ctx context.Context) {
 
 // Shutdown is called by Wails before the process exits.
 func (a *App) Shutdown(_ context.Context) {
+	a.sysmon.Close()
 	a.terms.CloseAll()
 	a.conns.Close()
 }
