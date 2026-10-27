@@ -43,17 +43,64 @@ export interface TermExit {
   code: number
 }
 
-/** Bytes for memory, bytes per second for network, percent for cpu and disk. */
+/** Percent for cpu, disk and GPU load; bytes for memory; bytes per second for rates. */
 export interface SysmonTick {
   serverID: string
   cpu: number
   memUsed: number
   memTotal: number
+  /** Filesystem of /. */
   diskPct: number
   rxBps: number
   txBps: number
   load1: number
+  /** Seconds since boot. */
   uptime: number
+  load5: number
+  load15: number
+  procs: number
+  cpuSplit: { user: number; system: number; iowait: number; steal: number }
+  cores: number[]
+  memCache: number
+  memFree: number
+  swapTotal: number
+  swapUsed: number
+  readBps: number
+  writeBps: number
+  disks: { name: string; readBps: number; writeBps: number }[]
+  mounts: Mount[]
+  ifaces: NetIface[]
+  gpus: Gpu[]
+}
+
+export interface Mount {
+  device: string
+  path: string
+  size: number
+  used: number
+  avail: number
+  pct: number
+}
+
+export interface NetIface {
+  name: string
+  rxBps: number
+  txBps: number
+  rxTotal: number
+  txTotal: number
+}
+
+/** Readings the driver does not report are -1. */
+export interface Gpu {
+  index: number
+  name: string
+  util: number
+  memUsed: number
+  memTotal: number
+  /** °C */
+  temp: number
+  /** Watts */
+  power: number
 }
 
 function on<T>(name: EventName, handler: (payload: T) => void): Unsubscribe {

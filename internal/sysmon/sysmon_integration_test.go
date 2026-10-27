@@ -150,6 +150,17 @@ func TestTicksMatchFreeAndDf(t *testing.T) {
 	if tick.CPU < 0 || tick.CPU > 100 || tick.Uptime <= 0 || tick.ServerID != id {
 		t.Errorf("tick = %+v", tick)
 	}
+	if n, _ := strconv.Atoi(run(t, m, id, "nproc --all")); len(tick.Cores) != n {
+		t.Errorf("%d cores; nproc says %d", len(tick.Cores), n)
+	}
+	// free -b: "Swap: total used free"
+	swap := strings.Fields(strings.Split(run(t, m, id, "free -b"), "\n")[2])
+	if swapTotal, _ := strconv.ParseUint(swap[1], 10, 64); tick.SwapTotal != swapTotal {
+		t.Errorf("swapTotal = %d; free says %d", tick.SwapTotal, swapTotal)
+	}
+	if len(tick.Mounts) == 0 || tick.Mounts[0].Path != "/" || tick.GPUs == nil || tick.Ifaces == nil {
+		t.Errorf("mounts %+v, gpus %+v, ifaces %+v", tick.Mounts, tick.GPUs, tick.Ifaces)
+	}
 }
 
 func TestStopsWithTheLastUnwatch(t *testing.T) {

@@ -19,17 +19,12 @@ vi.mock('../api/events', () => ({
 }))
 
 const { metrics } = await import('./metrics.svelte')
+const { firstMockTick } = await import('./mockMetrics')
 
 const tick = (serverID: string, cpu: number): SysmonTick => ({
+  ...firstMockTick(),
   serverID,
   cpu,
-  memUsed: 1,
-  memTotal: 2,
-  diskPct: 3,
-  rxBps: 4,
-  txBps: 5,
-  load1: 0.5,
-  uptime: 60,
 })
 
 describe('metrics', () => {

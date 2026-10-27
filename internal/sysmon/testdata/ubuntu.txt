@@ -1,46 +1,61 @@
 @@stat
-cpu  745 0 612 576705 102 0 60 0 0 0
+cpu  8599 0 7140 8422285 117 0 728 0 0 0
+cpu0 587 0 502 561058 12 0 571 0 0 0
+cpu1 576 0 487 561488 8 0 57 0 0 0
+cpu2 591 0 491 561495 5 0 14 0 0 0
+cpu3 563 0 474 561539 3 0 11 0 0 0
+cpu4 576 0 473 561516 3 0 8 0 0 0
+cpu5 569 0 483 561488 19 0 8 0 0 0
+cpu6 570 0 470 561529 4 0 7 0 0 0
+cpu7 572 0 458 561525 8 0 6 0 0 0
+cpu8 562 0 494 561504 2 0 6 0 0 0
+cpu9 561 0 470 561543 4 0 5 0 0 0
+cpu10 591 0 467 561511 3 0 6 0 0 0
+cpu11 566 0 460 561510 21 0 6 0 0 0
+cpu12 576 0 473 561514 2 0 6 0 0 0
+cpu13 559 0 462 561531 11 0 7 0 0 0
+cpu14 574 0 470 561528 5 0 5 0 0 0
 @@meminfo
 MemTotal:        8125796 kB
-MemFree:         7236208 kB
-MemAvailable:    7483280 kB
-Buffers:           38188 kB
-Cached:           348844 kB
+MemFree:         7250720 kB
+MemAvailable:    7500692 kB
+Buffers:           38468 kB
+Cached:           351208 kB
 SwapCached:            0 kB
-Active:           584700 kB
-Inactive:         116532 kB
-Active(anon):     314792 kB
+Active:           589576 kB
+Inactive:         116992 kB
+Active(anon):     317428 kB
 Inactive(anon):        0 kB
-Active(file):     269908 kB
-Inactive(file):   116532 kB
+Active(file):     272148 kB
+Inactive(file):   116992 kB
 Unevictable:           0 kB
 Mlocked:               0 kB
 SwapTotal:       1048572 kB
 SwapFree:        1048572 kB
 Zswap:                 0 kB
 Zswapped:              0 kB
-Dirty:                 0 kB
+Dirty:                 4 kB
 Writeback:             0 kB
-AnonPages:        301780 kB
-Mapped:           178352 kB
-Shmem:               560 kB
-KReclaimable:      15120 kB
-Slab:              66096 kB
-SReclaimable:      15120 kB
-SUnreclaim:        50976 kB
-KernelStack:        5536 kB
-PageTables:         2940 kB
+AnonPages:        304460 kB
+Mapped:           179980 kB
+Shmem:               556 kB
+KReclaimable:      15520 kB
+Slab:              68400 kB
+SReclaimable:      15520 kB
+SUnreclaim:        52880 kB
+KernelStack:        5648 kB
+PageTables:         3012 kB
 SecPageTables:         0 kB
 NFS_Unstable:          0 kB
 Bounce:                0 kB
 WritebackTmp:          0 kB
 CommitLimit:     5111468 kB
-Committed_AS:    1405344 kB
+Committed_AS:    1417644 kB
 VmallocTotal:   135288315904 kB
-VmallocUsed:        5532 kB
+VmallocUsed:        5524 kB
 VmallocChunk:          0 kB
 Percpu:             4140 kB
-AnonHugePages:    217088 kB
+AnonHugePages:    215040 kB
 ShmemHugePages:        0 kB
 ShmemPmdMapped:        0 kB
 FileHugePages:         0 kB
@@ -52,9 +67,9 @@ HugePages_Surp:        0
 Hugepagesize:       2048 kB
 Hugetlb:               0 kB
 @@loadavg
-0.06 0.04 0.01 2/332 1213
+0.02 0.04 0.00 1/339 17487
 @@uptime
-385.85 5767.07
+5630.33 84222.87
 @@netdev
 Inter-|   Receive                                                |  Transmit
  face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed
@@ -68,54 +83,161 @@ ip6_vti0:       0       0    0    0    0     0          0         0        0    
   sit0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
 ip6tnl0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
 ip6gre0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
-  eth0:   62826     749    0    0    0     0          0         0  1677222    1605    0    0    0     0       0          0
+  eth0:  307018    3205    0    0    0     0          0         0  5291697    5767    0    0    0     0       0          0
 @@df
 Filesystem     1024-blocks     Used Available Capacity Mounted on
-overlay          954925484 28681832 877662380       4% /
+overlay          954925484 28681852 877662360       4% /
+tmpfs                65536        0     65536       0% /dev
+shm                  65536        0     65536       0% /dev/shm
+/dev/vda1        954925484 28681852 877662360       4% /etc/hosts
+tmpfs                    4        0         4       0% /proc/scsi
+@@diskstats
+   1       0 ram0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1       1 ram1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1       2 ram2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1       3 ram3 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1       4 ram4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1       5 ram5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1       6 ram6 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1       7 ram7 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1       8 ram8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1       9 ram9 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1      10 ram10 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1      11 ram11 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1      12 ram12 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1      13 ram13 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1      14 ram14 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1      15 ram15 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   7       0 loop0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   7       1 loop1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   7       2 loop2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   7       3 loop3 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   7       4 loop4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   7       5 loop5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   7       6 loop6 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   7       7 loop7 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43       0 nbd0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43      32 nbd1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43      64 nbd2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43      96 nbd3 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     128 nbd4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     160 nbd5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     192 nbd6 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     224 nbd7 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     256 nbd8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     288 nbd9 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     320 nbd10 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     352 nbd11 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     384 nbd12 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     416 nbd13 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     448 nbd14 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     480 nbd15 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 254       0 vda 2390 1527 66378 511 1625 1108 22960 634 0 568 1250 125 0 18448 22 518 81
+ 254       1 vda1 2319 1527 64018 505 1625 1108 22960 634 0 579 1162 125 0 18448 22 0 0
+ 254      16 vdb 3574 0 533256 1001 0 0 0 0 0 601 1001 0 0 0 0 0 0
+@@block
+loop0
+loop1
+loop2
+loop3
+loop4
+loop5
+loop6
+loop7
+nbd0
+nbd1
+nbd10
+nbd11
+nbd12
+nbd13
+nbd14
+nbd15
+nbd2
+nbd3
+nbd4
+nbd5
+nbd6
+nbd7
+nbd8
+nbd9
+ram0
+ram1
+ram10
+ram11
+ram12
+ram13
+ram14
+ram15
+ram2
+ram3
+ram4
+ram5
+ram6
+ram7
+ram8
+ram9
+vda
+vdb
+@@gpu
 @@end
 @@stat
-cpu  746 0 614 579714 102 0 60 0 0 0
+cpu  8602 0 7143 8425288 117 0 728 0 0 0
+cpu0 587 0 503 561258 12 0 572 0 0 0
+cpu1 576 0 487 561689 8 0 57 0 0 0
+cpu2 591 0 491 561695 5 0 14 0 0 0
+cpu3 563 0 474 561739 3 0 11 0 0 0
+cpu4 576 0 473 561716 3 0 8 0 0 0
+cpu5 569 0 483 561688 19 0 8 0 0 0
+cpu6 571 0 470 561729 4 0 7 0 0 0
+cpu7 573 0 459 561725 8 0 6 0 0 0
+cpu8 563 0 494 561703 2 0 6 0 0 0
+cpu9 561 0 470 561743 4 0 5 0 0 0
+cpu10 591 0 467 561711 3 0 6 0 0 0
+cpu11 566 0 461 561710 21 0 6 0 0 0
+cpu12 576 0 473 561714 2 0 6 0 0 0
+cpu13 559 0 463 561731 11 0 7 0 0 0
+cpu14 575 0 470 561728 5 0 5 0 0 0
 @@meminfo
 MemTotal:        8125796 kB
-MemFree:         7249460 kB
-MemAvailable:    7496792 kB
-Buffers:           38188 kB
-Cached:           349044 kB
+MemFree:         7253828 kB
+MemAvailable:    7503800 kB
+Buffers:           38468 kB
+Cached:           351208 kB
 SwapCached:            0 kB
-Active:           585040 kB
-Inactive:         116564 kB
-Active(anon):     314912 kB
+Active:           589800 kB
+Inactive:         116992 kB
+Active(anon):     317652 kB
 Inactive(anon):        0 kB
-Active(file):     270128 kB
-Inactive(file):   116564 kB
+Active(file):     272148 kB
+Inactive(file):   116992 kB
 Unevictable:           0 kB
 Mlocked:               0 kB
 SwapTotal:       1048572 kB
 SwapFree:        1048572 kB
 Zswap:                 0 kB
 Zswapped:              0 kB
-Dirty:                 0 kB
+Dirty:                 4 kB
 Writeback:             0 kB
-AnonPages:        301828 kB
-Mapped:           178352 kB
-Shmem:               560 kB
-KReclaimable:      15136 kB
-Slab:              66128 kB
-SReclaimable:      15136 kB
-SUnreclaim:        50992 kB
-KernelStack:        5536 kB
-PageTables:         2916 kB
+AnonPages:        304556 kB
+Mapped:           179980 kB
+Shmem:               556 kB
+KReclaimable:      15520 kB
+Slab:              68384 kB
+SReclaimable:      15520 kB
+SUnreclaim:        52864 kB
+KernelStack:        5648 kB
+PageTables:         3012 kB
 SecPageTables:         0 kB
 NFS_Unstable:          0 kB
 Bounce:                0 kB
 WritebackTmp:          0 kB
 CommitLimit:     5111468 kB
-Committed_AS:    1405344 kB
+Committed_AS:    1417644 kB
 VmallocTotal:   135288315904 kB
-VmallocUsed:        5532 kB
+VmallocUsed:        5524 kB
 VmallocChunk:          0 kB
 Percpu:             4140 kB
-AnonHugePages:    217088 kB
+AnonHugePages:    215040 kB
 ShmemHugePages:        0 kB
 ShmemPmdMapped:        0 kB
 FileHugePages:         0 kB
@@ -127,9 +249,9 @@ HugePages_Surp:        0
 Hugepagesize:       2048 kB
 Hugetlb:               0 kB
 @@loadavg
-0.06 0.04 0.01 1/332 1226
+0.02 0.03 0.00 1/339 17502
 @@uptime
-387.86 5797.17
+5632.34 84252.92
 @@netdev
 Inter-|   Receive                                                |  Transmit
  face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed
@@ -143,8 +265,100 @@ ip6_vti0:       0       0    0    0    0     0          0         0        0    
   sit0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
 ip6tnl0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
 ip6gre0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
-  eth0:   62826     749    0    0    0     0          0         0  1677222    1605    0    0    0     0       0          0
+  eth0:  307942    3219    0    0    0     0          0         0  5300135    5784    0    0    0     0       0          0
 @@df
 Filesystem     1024-blocks     Used Available Capacity Mounted on
-overlay          954925484 28681832 877662380       4% /
+overlay          954925484 28681852 877662360       4% /
+tmpfs                65536        0     65536       0% /dev
+shm                  65536        0     65536       0% /dev/shm
+/dev/vda1        954925484 28681852 877662360       4% /etc/hosts
+tmpfs                    4        0         4       0% /proc/scsi
+@@diskstats
+   1       0 ram0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1       1 ram1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1       2 ram2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1       3 ram3 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1       4 ram4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1       5 ram5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1       6 ram6 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1       7 ram7 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1       8 ram8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1       9 ram9 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1      10 ram10 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1      11 ram11 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1      12 ram12 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1      13 ram13 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1      14 ram14 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   1      15 ram15 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   7       0 loop0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   7       1 loop1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   7       2 loop2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   7       3 loop3 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   7       4 loop4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   7       5 loop5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   7       6 loop6 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+   7       7 loop7 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43       0 nbd0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43      32 nbd1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43      64 nbd2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43      96 nbd3 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     128 nbd4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     160 nbd5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     192 nbd6 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     224 nbd7 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     256 nbd8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     288 nbd9 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     320 nbd10 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     352 nbd11 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     384 nbd12 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     416 nbd13 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     448 nbd14 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  43     480 nbd15 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 254       0 vda 2390 1527 66378 511 1625 1108 22960 634 0 568 1250 125 0 18448 22 518 81
+ 254       1 vda1 2319 1527 64018 505 1625 1108 22960 634 0 579 1162 125 0 18448 22 0 0
+ 254      16 vdb 3574 0 533256 1001 0 0 0 0 0 601 1001 0 0 0 0 0 0
+@@block
+loop0
+loop1
+loop2
+loop3
+loop4
+loop5
+loop6
+loop7
+nbd0
+nbd1
+nbd10
+nbd11
+nbd12
+nbd13
+nbd14
+nbd15
+nbd2
+nbd3
+nbd4
+nbd5
+nbd6
+nbd7
+nbd8
+nbd9
+ram0
+ram1
+ram10
+ram11
+ram12
+ram13
+ram14
+ram15
+ram2
+ram3
+ram4
+ram5
+ram6
+ram7
+ram8
+ram9
+vda
+vdb
+@@gpu
 @@end
