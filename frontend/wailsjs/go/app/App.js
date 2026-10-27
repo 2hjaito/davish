@@ -146,6 +146,34 @@ export function MonitorWatch(arg1) {
   return window['go']['app']['App']['MonitorWatch'](arg1);
 }
 
+export function NginxCheckCerts(arg1) {
+  return window['go']['app']['App']['NginxCheckCerts'](arg1);
+}
+
+export function NginxList(arg1) {
+  return window['go']['app']['App']['NginxList'](arg1);
+}
+
+export function NginxPlanToggle(arg1, arg2, arg3) {
+  return window['go']['app']['App']['NginxPlanToggle'](arg1, arg2, arg3);
+}
+
+export function NginxReload(arg1) {
+  return window['go']['app']['App']['NginxReload'](arg1);
+}
+
+export function NginxReloadCommand() {
+  return window['go']['app']['App']['NginxReloadCommand']();
+}
+
+export function NginxTest(arg1) {
+  return window['go']['app']['App']['NginxTest'](arg1);
+}
+
+export function NginxToggle(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['NginxToggle'](arg1, arg2, arg3, arg4);
+}
+
 export function ReorderServers(arg1) {
   return window['go']['app']['App']['ReorderServers'](arg1);
 }
