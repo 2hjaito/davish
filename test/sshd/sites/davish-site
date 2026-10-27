@@ -1,15 +1,16 @@
-# Test site for the Nginx app: enabled at build, serves one page on 8081.
+# Test site for the Nginx app: enabled at build. With it off, requests for
+# davish.test fall to the default site, where /davish.html is a 404.
 upstream davish_backend {
     server 127.0.0.1:9000;
 }
 
 server {
-    listen 8081;
-    listen [::]:8081;
+    listen 80;
+    listen [::]:80;
     server_name davish.test www.davish.test;
 
     root /srv/davish-site;
-    index index.html;
+    index davish.html;
 
     location /api/ {
         proxy_pass http://davish_backend;

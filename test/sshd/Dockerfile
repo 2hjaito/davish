@@ -39,7 +39,7 @@ RUN chmod 600 /etc/ssh/ssh_host_ed25519_key \
 # nginx.service. Test container only.
 RUN chown -R tester:tester /etc/nginx /var/log/nginx
 COPY sites/ /etc/nginx/sites-available/
-RUN mkdir -p /srv/davish-site && echo 'davish site' > /srv/davish-site/index.html \
+RUN mkdir -p /srv/davish-site && echo 'davish site' > /srv/davish-site/davish.html \
  && ln -s /etc/nginx/sites-available/davish-site /etc/nginx/sites-enabled/davish-site \
  && chown -R tester:tester /etc/nginx
 
