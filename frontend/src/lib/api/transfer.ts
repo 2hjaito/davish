@@ -5,8 +5,10 @@ import { hasRuntime } from './runtime'
 
 export interface Job {
   id: string
-  kind: 'upload' | 'download'
+  /** copy goes from fromServerID to serverID, through this machine. */
+  kind: 'upload' | 'download' | 'copy'
   serverID: string
+  fromServerID?: string
   /** The final name; differs from the source when both were kept. */
   name: string
   src: string
@@ -53,6 +55,14 @@ export const transferUpload = (
 /** Saves into the user's Downloads folder, never replacing a file there. */
 export const transferDownload = (serverID: string, paths: string[]): Promise<Job[]> =>
   App.TransferDownload(serverID, paths) as Promise<Job[]>
+
+/** Copies paths from one server into dir on another; taken names get "name (n)". */
+export const transferCopy = (
+  fromServerID: string,
+  paths: string[],
+  toServerID: string,
+  dir: string,
+): Promise<Job[]> => App.TransferCopy(fromServerID, paths, toServerID, dir) as Promise<Job[]>
 
 export const transferCancel = (jobID: string): Promise<void> => App.TransferCancel(jobID)
 

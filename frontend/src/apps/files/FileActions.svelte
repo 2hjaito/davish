@@ -18,6 +18,7 @@
   import DeleteDialog from './DeleteDialog.svelte'
   import type { DragPhase } from './FileList.svelte'
   import { baseName } from './listing'
+  import type { DropTarget } from './remotes.svelte'
   import RenameDialog from './RenameDialog.svelte'
 
   interface Props {
@@ -30,12 +31,25 @@
     onchanged: (select: string | null) => void
     /** A short confirmation for the path bar. */
     onflash: (text: string) => void
+    /** Another server's folder under the pointer, where a drag can copy to. */
+    dropAt?: (x: number, y: number) => DropTarget | null
+    /** The drop target the drag is over, to highlight; null when none. */
+    onhover?: (target: DropTarget | null) => void
+    /** The entry was dropped on another server's folder. */
+    ondropcopy?: (entry: Entry, target: DropTarget) => void
   }
 
-  let { serverID, cwd, bounds, onchanged, onflash }: Props = $props()
+  let { serverID, cwd, bounds, onchanged, onflash, dropAt, onhover, ondropcopy }: Props = $props()
 
   let dialog = $state<{ kind: 'rename' | 'delete' | 'compress'; entry: Entry } | null>(null)
-  let menu = $state<{ entry: Entry; x: number; y: number; hit: Hit } | null>(null)
+  let menu = $state<{
+    entry: Entry
+    x: number
+    y: number
+    hit: Hit
+    /** Over another server's folder: the menu steps aside for the drop. */
+    target: DropTarget | null
+  } | null>(null)
 
   const items = $derived<RadialItem[]>(
     menu
@@ -52,17 +66,36 @@
   /** Follows a drag from the file list (FileList's ondrag). */
   export function drag(entry: Entry, phase: DragPhase, x: number, y: number) {
     if (phase === 'start') {
-      menu = { entry, x, y, hit: NO_HIT }
+      menu = { entry, x, y, hit: NO_HIT, target: null }
       return
     }
     if (!menu) return
     if (phase === 'cancel') {
       menu = null
+      onhover?.(null)
+      return
+    }
+    const target = dropAt?.(x, y) ?? null
+    if (phase === 'move' && target) {
+      if (menu.target?.serverID !== target.serverID || menu.target.path !== target.path) {
+        menu.target = target
+        onhover?.(target)
+      }
+      return
+    }
+    if (menu.target && !target) {
+      menu.target = null
+      onhover?.(null)
+    }
+    if (phase === 'end' && target) {
+      menu = null
+      onhover?.(null)
+      ondropcopy?.(entry, target)
       return
     }
     if (phase === 'move') {
       const b = bounds()
-      // Leaving the window is for dragging files elsewhere (M9), not this menu.
+      // Leaving the window cancels; other servers are reached through the sidebar.
       if (b && (x < b.left || x > b.right || y < b.top || y > b.bottom)) {
         menu = null
         return
@@ -164,7 +197,7 @@
   }
 </script>
 
-{#if menu}
+{#if menu && !menu.target}
   <RadialMenu
     x={menu.x}
     y={menu.y}

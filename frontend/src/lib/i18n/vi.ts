@@ -206,6 +206,13 @@ export const t = {
     copied: 'Đã sao chép đường dẫn',
     copyFailed: 'Không sao chép được đường dẫn',
     loadingPlan: 'Đang chuẩn bị…',
+    otherOffline: 'Server chưa kết nối',
+    copyToTitle: (name: string) => `Copy “${name}” sang server khác`,
+    copyToHint:
+      'Copy đi qua máy này; trùng tên thì giữ cả hai. Kéo file thả vào mục của server khác trên sidebar cũng được.',
+    copyToNone: 'Chưa có server nào khác. Thêm server ở bộ chọn server trên menu bar.',
+    otherPlace: (path: string, server: string) =>
+      `${path} trên ${server}. Bấm để mở, hoặc kéo file thả vào đây để copy sang.`,
   },
   editor: {
     tabs: 'File đang mở',
@@ -283,10 +290,19 @@ export const t = {
     cancel: (name: string) => `Hủy chuyển “${name}”`,
     clearFinished: 'Xóa mục đã xong',
     empty: 'Chưa chuyển file nào',
-    emptyHint: 'Tải lên hoặc tải xuống trong Files, tiến độ sẽ hiện ở đây.',
+    emptyHint:
+      'Tải lên, tải xuống, hoặc kéo file sang server khác trong Files; tiến độ sẽ hiện ở đây.',
     left: (time: string) => `còn ${time}`,
     seconds: (n: number) => `${n} giây`,
     open: 'Mở cửa sổ Chuyển file',
+    copy: 'Copy giữa hai server',
+    copying: (name: string) => `Đang copy “${name}”`,
+    copyingTo: (server: string) => `Sang ${server}, qua máy này.`,
+    copied: (name: string) => `Đã copy “${name}”`,
+    copiedTo: (server: string, dir: string) => `Vào ${dir} trên ${server}.`,
+    copyFailed: (name: string) => `Copy “${name}” thất bại`,
+    openFolder: 'Mở thư mục',
+    route: (from: string, to: string) => `${from} → ${to}`,
   },
   settings: {
     appearance: 'Giao diện',

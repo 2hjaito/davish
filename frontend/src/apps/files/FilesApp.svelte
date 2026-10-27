@@ -6,6 +6,7 @@
   import { hasRuntime } from '../../lib/api/runtime'
   import {
     registerDropTarget,
+    transferCopy,
     transferDownload,
     transferPickFiles,
     transferPickFolder,
@@ -18,16 +19,23 @@
   import { t } from '../../lib/i18n/vi'
   import { hasPrimaryModifier, shortcut } from '../../lib/shell/platform'
   import { load, save } from '../../lib/stores/persist'
+  import { notifications } from '../../lib/stores/notifications.svelte'
   import { servers } from '../../lib/stores/servers.svelte'
   import { landingKey, summarize, transfers } from '../../lib/stores/transfers.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import type { IconName } from '../../lib/ui/icons'
   import { getWindowContext } from '../../lib/wm/context'
-  import { openFileInEditor, openTransfers } from '../../lib/wm/intents.svelte'
+  import {
+    filesRequests,
+    openFileInEditor,
+    openFilesAt,
+    openTransfers,
+  } from '../../lib/wm/intents.svelte'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import type { AppProps } from '../types'
   import { actionForKey } from './actions'
+  import CopyToDialog from './CopyToDialog.svelte'
   import FileActions from './FileActions.svelte'
   import FileList from './FileList.svelte'
   import {
@@ -44,6 +52,7 @@
   } from './listing'
   import { cameFrom, type FolderView, lastDir, rememberDir } from './memory'
   import { mockHome, mockList } from './mockFs'
+  import { type DropTarget, dropTargetAt, homes } from './remotes.svelte'
   import UploadConflictDialog, { type Answer } from './UploadConflictDialog.svelte'
 
   let { win }: AppProps = $props()
@@ -109,6 +118,73 @@
       icon: 'folder' as const,
     })),
   ])
+  interface RemotePlace {
+    label: string
+    path: string
+    icon: IconName
+    title: string
+  }
+
+  /** Every other server, with its home and last folder: drop targets for copies. */
+  const others = $derived(
+    servers.list
+      .filter((s) => s.id !== win.serverID)
+      .map((s) => {
+        const online = !hasRuntime || s.state === 'connected'
+        const home = homes.byServer[s.id]
+        const last = lastDir(s.id)
+        const places: RemotePlace[] = []
+        if (home) places.push({ label: t.files.home, path: home, icon: 'home', title: home })
+        if (last && last !== home)
+          places.push({ label: baseName(last) || '/', path: last, icon: 'folder', title: last })
+        if (places.length === 0)
+          places.push({ label: t.files.root, path: '/', icon: 'disk', title: '/' })
+        return { server: s, online, places }
+      }),
+  )
+
+  // Ask each connected server where its home is, once.
+  $effect(() => {
+    for (const o of others) if (o.online) homes.ensure(o.server.id)
+  })
+
+  /** The other server's folder a drag is over, highlighted. */
+  let dropHover = $state<DropTarget | null>(null)
+  /** The entry being sent to another server from the keyboard. */
+  let copying = $state<Entry | null>(null)
+
+  async function copyTo(entry: Entry, target: DropTarget) {
+    const name = servers.list.find((s) => s.id === target.serverID)?.name ?? target.serverID
+    try {
+      if (!hasRuntime) {
+        // The browser preview has no Go side: show what would start.
+        transfers.add([
+          {
+            id: `demo-${Date.now()}`,
+            kind: 'copy',
+            serverID: target.serverID,
+            fromServerID: win.serverID,
+            name: entry.name,
+            src: entry.path,
+            dst: `${target.path === '/' ? '' : target.path}/${entry.name}`,
+            dir: entry.dir,
+          },
+        ])
+        return
+      }
+      transfers.add(await transferCopy(win.serverID, [entry.path], target.serverID, target.path))
+    } catch (e) {
+      notifications.add({
+        id: `copy-${win.serverID}-${entry.path}`,
+        level: 'error',
+        title: t.transfers.copyFailed(entry.name),
+        body: `${toUserError(e).message} (${name})`,
+        serverID: win.serverID,
+        at: Date.now(),
+      })
+    }
+  }
+
   // The most specific place holding cwd, so /etc/nginx lights up /etc, not /.
   const activePlace = $derived(
     cwd === null
@@ -213,6 +289,16 @@
     actions?.act(id, entry)
     return true
   }
+
+  // Another window asked to show a folder here (a sidebar entry of another
+  // server's Files, a finished copy).
+  $effect(() => {
+    if (!filesRequests.list.some((r) => r.serverID === win.serverID)) return
+    untrack(() => {
+      const [req] = filesRequests.take(win.serverID).slice(-1)
+      if (req && connected) void go(req.path)
+    })
+  })
 
   // Load on open and again whenever the server comes back.
   $effect(() => {
@@ -331,6 +417,15 @@
 
   function onkeydown(e: KeyboardEvent) {
     if (actionKey(e)) return
+    // ⌘⌥S: copy the selection to another server, as dragging it there does.
+    if (hasPrimaryModifier(e) && e.altKey && !e.shiftKey && e.code === 'KeyS') {
+      const entry = listing.find((x) => x.path === selected)
+      if (entry && connected) {
+        e.preventDefault()
+        copying = entry
+      }
+      return
+    }
     // ⌘⌥L like Safari's downloads; code, since Option changes e.key on macOS.
     if (hasPrimaryModifier(e) && e.altKey && !e.shiftKey && e.code === 'KeyL') {
       e.preventDefault()
@@ -372,6 +467,27 @@
           <Icon name={p.icon} size={16} />
           <span class="label">{p.label}</span>
         </button>
+      {/each}
+
+      {#each others as o (o.server.id)}
+        <span class="group other" title={o.online ? '' : t.files.otherOffline}>
+          <span class="dot" class:online={o.online} aria-hidden="true"></span>
+          {o.server.name}
+        </span>
+        {#each o.places as p (p.path)}
+          <button
+            class="place"
+            class:drop={dropHover?.serverID === o.server.id && dropHover.path === p.path}
+            disabled={!o.online}
+            title={t.files.otherPlace(p.title, o.server.name)}
+            data-drop-server={o.server.id}
+            data-drop-path={p.path}
+            onclick={() => openFilesAt(o.server.id, p.path)}
+          >
+            <Icon name={p.icon} size={16} />
+            <span class="label">{p.label}</span>
+          </button>
+        {/each}
       {/each}
     </div>
   </nav>
@@ -510,6 +626,19 @@
   bounds={() => root?.getBoundingClientRect()}
   onchanged={(path) => void changed(path)}
   onflash={showFlash}
+  dropAt={dropTargetAt}
+  onhover={(target) => (dropHover = target)}
+  ondropcopy={(entry, target) => void copyTo(entry, target)}
+/>
+
+<CopyToDialog
+  entry={copying}
+  {others}
+  onclose={() => (copying = null)}
+  oncopy={(entry, target) => {
+    copying = null
+    void copyTo(entry, target)
+  }}
 />
 
 <UploadConflictDialog
@@ -580,6 +709,30 @@
 
   .place.active {
     background: var(--sidebar-active);
+  }
+
+  /* Another server's folder under a dragged file: dropping copies there. */
+  .place.drop {
+    background: var(--accent-soft);
+    box-shadow: inset 0 0 0 1.5px var(--accent);
+  }
+
+  .group.other {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-top: 14px;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--offline);
+  }
+
+  .dot.online {
+    background: var(--ok);
   }
 
   .place:disabled {

@@ -18,6 +18,13 @@
   const list = $derived([...transfers.list].reverse())
   const anyFinished = $derived(transfers.list.some((j) => j.state !== 'running'))
 
+  const kindIcon = { upload: 'arrowUp', download: 'arrowDown', copy: 'copy' } as const
+  const kindLabel = {
+    upload: t.transfers.upload,
+    download: t.transfers.download,
+    copy: t.transfers.copy,
+  }
+
   function serverName(id: string) {
     return servers.list.find((s) => s.id === id)?.name ?? id
   }
@@ -51,20 +58,17 @@
     <ul class="jobs">
       {#each list as j (j.id)}
         <li class="job" class:failed={j.state === 'failed'}>
-          <span
-            class="kind"
-            title={j.kind === 'upload' ? t.transfers.upload : t.transfers.download}
-          >
-            <Icon
-              name={j.kind === 'upload' ? 'arrowUp' : 'arrowDown'}
-              size={14}
-              strokeWidth={2.4}
-            />
+          <span class="kind" title={kindLabel[j.kind]}>
+            <Icon name={kindIcon[j.kind]} size={14} strokeWidth={2.4} />
           </span>
           <div class="info">
             <div class="line">
-              <span class="name" title={j.kind === 'upload' ? j.dst : j.src}>{j.name}</span>
-              <span class="server">{serverName(j.serverID)}</span>
+              <span class="name" title={j.kind === 'download' ? j.src : j.dst}>{j.name}</span>
+              <span class="server">
+                {j.kind === 'copy' && j.fromServerID
+                  ? t.transfers.route(serverName(j.fromServerID), serverName(j.serverID))
+                  : serverName(j.serverID)}
+              </span>
             </div>
             {#if j.state === 'running'}
               <Meter pct={percent(j)} label={j.name} warn={101} danger={101} />

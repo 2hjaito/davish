@@ -14,6 +14,7 @@ import TransfersApp from './transfers/TransfersApp.svelte'
 import {
   AUDIT_SIZE,
   EDITOR_SIZE,
+  FILES_SIZE,
   LOGS_SIZE,
   TERMINAL_SIZE,
   TRANSFERS_SIZE,
@@ -34,7 +35,7 @@ export const apps: AppDef[] = [
     label: t.apps.files,
     icon: 'files',
     theme: 'light',
-    size: { w: 640, h: 440 },
+    size: FILES_SIZE,
     component: FilesApp,
   },
   {
