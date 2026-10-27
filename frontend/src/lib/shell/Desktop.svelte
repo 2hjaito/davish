@@ -21,6 +21,7 @@
   import { ui } from '../stores/ui.svelte'
   import Window from '../wm/Window.svelte'
   import { wm } from '../wm/windowManager.svelte'
+  import Spotlight from '../spotlight/Spotlight.svelte'
   import Dock from './Dock.svelte'
   import MenuBar from './MenuBar.svelte'
   import HostKeyDialog from './HostKeyDialog.svelte'
@@ -157,10 +158,18 @@
     wm.restoreLayout(id, openOptions)
   })
 
+  let spotlight = $state(false)
+
   function onKeyDown(e: KeyboardEvent) {
     if (!hasPrimaryModifier(e) || e.altKey || e.shiftKey) return
-    // Off macOS the modifier is Ctrl, which the terminal needs (Ctrl+W, Ctrl+1…).
+    // Off macOS the modifier is Ctrl, which the terminal needs (Ctrl+W,
+    // Ctrl+K, Ctrl+1…): there Spotlight opens from outside the terminal.
     if (!isMac && e.target instanceof Element && e.target.closest('.xterm')) return
+    if (e.key.toLowerCase() === 'k') {
+      e.preventDefault()
+      spotlight = !spotlight
+      return
+    }
     const key = e.key.toLowerCase()
     if (key === 'w' && focused) {
       wm.close(focused.id)
@@ -182,6 +191,7 @@
 
 <div class="desktop">
   <MenuBar />
+  <Spotlight open={spotlight} onclose={() => (spotlight = false)} />
 
   {#if wm.snapPreview}
     {@const p = wm.snapPreview}

@@ -11,6 +11,7 @@
   import type { IconName } from '../../lib/ui/icons'
   import StatusList, { type StatusItem } from '../../lib/ui/StatusList.svelte'
   import { getWindowContext } from '../../lib/wm/context'
+  import { selectRequests } from '../../lib/wm/intents.svelte'
   import type { AppProps } from '../types'
   import { backend } from './backend'
   import ServiceInspector from './ServiceInspector.svelte'
@@ -73,6 +74,19 @@
       loading = false
     }
   }
+
+  // Spotlight asked for an item: show it, whatever the filter.
+  $effect(() => {
+    if (!selectRequests.list.some((r) => r.appId === 'services' && r.serverID === win.serverID))
+      return
+    untrack(() => {
+      const req = selectRequests.take('services', win.serverID)
+      if (!req) return
+      filter = 'all'
+      query = ''
+      selected = req.key
+    })
+  })
 
   // Load when the server comes up, and again whenever the window regains
   // focus, since services change behind our back. There is no polling: every

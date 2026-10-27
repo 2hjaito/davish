@@ -12,6 +12,7 @@
   import type { IconName } from '../../lib/ui/icons'
   import StatusList, { type StatusItem } from '../../lib/ui/StatusList.svelte'
   import { getWindowContext } from '../../lib/wm/context'
+  import { selectRequests } from '../../lib/wm/intents.svelte'
   import type { AppProps } from '../types'
   import { backend } from './backend'
   import ContainerInspector from './ContainerInspector.svelte'
@@ -91,6 +92,19 @@
       }
     }
   }
+
+  // Spotlight asked for an item: show it, whatever the filter.
+  $effect(() => {
+    if (!selectRequests.list.some((r) => r.appId === 'docker' && r.serverID === win.serverID))
+      return
+    untrack(() => {
+      const req = selectRequests.take('docker', win.serverID)
+      if (!req) return
+      filter = 'all'
+      query = ''
+      selected = req.key
+    })
+  })
 
   // Load when the server comes up and whenever the window regains focus.
   // No polling: every read is a command in the audit log.
