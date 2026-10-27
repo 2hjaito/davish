@@ -554,9 +554,48 @@ export const t = {
     refreshLog: 'Làm mới log',
     stderr: 'stderr',
   },
-  placeholder: {
-    title: 'Đang phát triển',
-    body: 'App này sẽ có ở các bản sau.',
+  logs: {
+    view: 'Nội dung log',
+    kinds: { journal: 'Dịch vụ', file: 'File', docker: 'Container' },
+    kindLabel: 'Loại nguồn log',
+    targetHint: {
+      journal: 'Tên dịch vụ, để trống là toàn bộ journal',
+      file: '/var/log/syslog',
+      docker: 'Tên container',
+    },
+    targetLabel: 'Nguồn log',
+    problems: {
+      path: 'Đường dẫn phải bắt đầu bằng / và không có “..”.',
+      unit: 'Tên dịch vụ không hợp lệ.',
+      name: 'Tên container không hợp lệ.',
+    },
+    follow: 'Theo dõi',
+    stop: 'Dừng theo dõi',
+    filter: 'Lọc dòng',
+    pause: 'Tạm dừng',
+    resume: 'Tiếp tục',
+    clear: 'Xóa màn hình',
+    wholeJournal: 'toàn bộ journal',
+    empty: 'Chọn nguồn log để theo dõi',
+    emptyHint:
+      'Journal của một dịch vụ, một file log hoặc output của container. Bấm vào đường dẫn file trong log để mở trong Editor.',
+    offline: 'Server chưa kết nối',
+    offlineHint: 'Log sẽ tiếp tục khi server kết nối lại.',
+    waiting: 'Đang chờ dòng log đầu tiên…',
+    noMatch: 'Không có dòng nào khớp bộ lọc.',
+    status: {
+      live: 'Đang theo dõi',
+      paused: (n: number) => (n > 0 ? `Tạm dừng · ${n} dòng mới` : 'Tạm dừng'),
+      stopped: 'Đã dừng',
+      lost: 'Mất kết nối · sẽ tiếp tục khi server kết nối lại',
+      failed: (why: string) => `Đã dừng: ${why}`,
+    },
+    lines: (shown: number, total: number) =>
+      shown === total ? `${total} dòng` : `${shown} / ${total} dòng`,
+    openPath: (path: string, line?: number) =>
+      line ? `Mở ${path} tại dòng ${line} trong Editor` : `Mở ${path} trong Editor`,
+    needsRoot: 'Tài khoản này không được đọc nguồn log này.',
+    openInLogs: 'Mở trong Logs',
   },
   errors: {
     INTERNAL: 'Đã có lỗi xảy ra.',

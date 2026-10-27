@@ -6,7 +6,7 @@
   import { formatBytes, formatDuration } from '../../lib/format'
   import { t } from '../../lib/i18n/vi'
   import Icon from '../../lib/ui/Icon.svelte'
-  import { openFileInEditor } from '../../lib/wm/intents.svelte'
+  import { openFileInEditor, openLogs } from '../../lib/wm/intents.svelte'
   import { backend } from './backend'
   import { lineLevel } from '../../lib/logLevel'
   import ConfirmCommand from '../../lib/ui/ConfirmCommand.svelte'
@@ -195,6 +195,15 @@
     >
       <Icon name="refresh" size={13} strokeWidth={2.2} />
     </button>
+    <button
+      type="button"
+      class="icon-btn"
+      aria-label={t.logs.openInLogs}
+      title={t.logs.openInLogs}
+      onclick={() => openLogs(serverID, { kind: 'journal', target: unit.name })}
+    >
+      <Icon name="logs" size={13} strokeWidth={2.2} />
+    </button>
   </div>
   {#if logError}
     <p class="flash" role="alert">{logError}</p>
@@ -373,11 +382,12 @@
   .log-head {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 2px;
     margin-top: 4px;
   }
 
   h4 {
+    flex: 1;
     margin: 0;
     font-size: var(--text-xs);
     font-weight: 600;

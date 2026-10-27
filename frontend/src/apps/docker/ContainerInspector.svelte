@@ -16,6 +16,7 @@
   import ConfirmCommand from '../../lib/ui/ConfirmCommand.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import NeedsRoot from '../../lib/ui/NeedsRoot.svelte'
+  import { openLogs } from '../../lib/wm/intents.svelte'
   import { backend } from './backend'
   import { canDo, clock, health, since } from './containers'
 
@@ -225,6 +226,15 @@
       >
         <Icon name="refresh" size={13} strokeWidth={2.2} />
       </button>
+      <button
+        type="button"
+        class="icon-btn"
+        aria-label={t.logs.openInLogs}
+        title={t.logs.openInLogs}
+        onclick={() => openLogs(serverID, { kind: 'docker', target: name })}
+      >
+        <Icon name="logs" size={13} strokeWidth={2.2} />
+      </button>
     {/if}
   </div>
 
@@ -398,12 +408,13 @@
   .tabs-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 2px;
     margin-top: 4px;
   }
 
   .segmented {
     display: flex;
+    margin-right: auto;
     padding: 2px;
     border-radius: 8px;
     background: var(--fill-soft);

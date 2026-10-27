@@ -133,6 +133,20 @@ export interface TransferDone {
   error?: { code: string; message: string }
 }
 
+/** A batch of lines of one log stream, at most every 100ms. */
+export interface LogsLine {
+  streamID: string
+  lines: string[]
+}
+
+/** A log stream is over; no error when the user stopped it. */
+export interface LogsEnd {
+  streamID: string
+  error?: { code: string; message: string }
+  /** The same command with sudo, with CMD_NEEDS_ROOT. */
+  sudo?: string
+}
+
 function on<T>(name: EventName, handler: (payload: T) => void): Unsubscribe {
   return EventsOn(name, (payload: T) => handler(payload))
 }
@@ -146,3 +160,5 @@ export const onNotifyNew = (h: (p: NotifyNew) => void) => on(Events.NotifyNew, h
 export const onTransferProgress = (h: (p: TransferProgress) => void) =>
   on(Events.TransferProgress, h)
 export const onTransferDone = (h: (p: TransferDone) => void) => on(Events.TransferDone, h)
+export const onLogsLine = (h: (p: LogsLine) => void) => on(Events.LogsLine, h)
+export const onLogsEnd = (h: (p: LogsEnd) => void) => on(Events.LogsEnd, h)
