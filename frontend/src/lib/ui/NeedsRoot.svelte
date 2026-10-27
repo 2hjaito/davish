@@ -9,9 +9,11 @@
     command: string
     /** Why root is needed; a general sentence when not given. */
     message?: string
+    /** After the terminal opens, e.g. to close the dialog this sits in. */
+    onopen?: () => void
   }
 
-  let { serverID, command, message = t.common.needsRoot }: Props = $props()
+  let { serverID, command, message = t.common.needsRoot, onopen }: Props = $props()
 </script>
 
 <!-- Davish never stores or types a sudo password (docs/SECURITY.md): the
@@ -25,7 +27,10 @@
     <button
       type="button"
       class="btn btn-primary"
-      onclick={() => openTerminalAt(serverID, undefined, command)}
+      onclick={() => {
+        openTerminalAt(serverID, undefined, command)
+        onopen?.()
+      }}
     >
       {t.common.runInTerminal}
     </button>

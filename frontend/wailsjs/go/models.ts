@@ -237,6 +237,7 @@ export namespace fs {
 	export class CompressPlan {
 	    output: string;
 	    command: string;
+	    sudo: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new CompressPlan(source);
@@ -246,6 +247,7 @@ export namespace fs {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.output = source["output"];
 	        this.command = source["command"];
+	        this.sudo = source["sudo"];
 	    }
 	}
 	export class Entry {
@@ -342,6 +344,7 @@ export namespace fs {
 	    gid: number;
 	    nonEmpty: boolean;
 	    command: string;
+	    sudo: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new RemovePlan(source);
@@ -362,6 +365,7 @@ export namespace fs {
 	        this.gid = source["gid"];
 	        this.nonEmpty = source["nonEmpty"];
 	        this.command = source["command"];
+	        this.sudo = source["sudo"];
 	    }
 	}
 	export class SaveOptions {

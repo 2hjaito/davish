@@ -26,6 +26,9 @@ type CompressPlan struct {
 	// Output is the archive's path, next to the source, never an existing name.
 	Output  string `json:"output"`
 	Command string `json:"command"`
+	// Sudo runs the same archiver with sudo, for a terminal when the
+	// folder is not writable.
+	Sudo string `json:"sudo"`
 }
 
 // PlanCompress describes how p would be archived as format.
@@ -52,7 +55,11 @@ func (s *Service) PlanCompress(_ context.Context, serverID, p, format string) (C
 	if err != nil {
 		return CompressPlan{}, err
 	}
-	return CompressPlan{Output: path.Join(dir, out), Command: shellx.InDir(dir, cmd)}, nil
+	return CompressPlan{
+		Output:  path.Join(dir, out),
+		Command: shellx.InDir(dir, cmd),
+		Sudo:    shellx.InDir(dir, shellx.Cmd("sudo", cmd.Args()...)),
+	}, nil
 }
 
 func compressCommand(format, out, name string) (shellx.Command, error) {

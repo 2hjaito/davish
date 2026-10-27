@@ -20,6 +20,9 @@ type RemovePlan struct {
 	NonEmpty bool `json:"nonEmpty"`
 	// Command is exactly what Remove runs on the server.
 	Command string `json:"command"`
+	// Sudo is the same command with sudo, for a terminal when the server
+	// refuses for lack of rights (docs/SECURITY.md).
+	Sudo string `json:"sudo"`
 }
 
 // PlanRemove describes how p would be deleted. Remove only runs the
@@ -48,7 +51,9 @@ func (s *Service) PlanRemove(_ context.Context, serverID, p string) (RemovePlan,
 		}
 		plan.NonEmpty = len(children) > 0
 	}
-	plan.Command = removeCommand(e.Kind, plan.NonEmpty, p).String()
+	cmd := removeCommand(e.Kind, plan.NonEmpty, p)
+	plan.Command = cmd.String()
+	plan.Sudo = shellx.Cmd("sudo", cmd.Args()...).String()
 	return plan, nil
 }
 

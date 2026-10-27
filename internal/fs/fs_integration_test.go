@@ -287,6 +287,9 @@ func TestRemoveRefusesStaleOrForeignCommand(t *testing.T) {
 		t.Fatal(err)
 	}
 	wantCode(t, e.svc.Remove(ctx, e.id, "/etc/hostname", plan.Command), apperr.FSPermissionDenied)
+	if plan.Sudo != "sudo rm -- /etc/hostname" {
+		t.Errorf("sudo = %q", plan.Sudo)
+	}
 }
 
 func TestCompress(t *testing.T) {
@@ -339,6 +342,9 @@ func TestCompress(t *testing.T) {
 	}
 	_, err = e.svc.Compress(ctx, e.id, locked, fs.FormatTar, plan.Command)
 	wantCode(t, err, apperr.FSPermissionDenied)
+	if want := shellx.InDir(e.dir, shellx.Cmd("sudo", "tar", "-cf", "locked.tar", "--", "locked")); plan.Sudo != want {
+		t.Errorf("sudo = %q, want %q", plan.Sudo, want)
+	}
 	if out := e.run(t, "ls -A "+shellx.Quote(e.dir)+" | grep -c locked.tar || true"); out != "0" {
 		t.Errorf("partial archive left: %s", out)
 	}
