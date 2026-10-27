@@ -34,6 +34,9 @@
       cursor: token('--fg-on-dark'),
       cursorAccent: token('--app-terminal'),
       selectionBackground: token('--term-selection'),
+      scrollbarSliderBackground: token('--term-scrollbar'),
+      scrollbarSliderHoverBackground: token('--term-scrollbar-hover'),
+      scrollbarSliderActiveBackground: token('--term-scrollbar-hover'),
       green: token('--term-user'),
       brightGreen: token('--term-user'),
       blue: token('--term-path'),
@@ -172,7 +175,24 @@
     background-clip: content-box;
   }
 
+  /*
+   * xterm 6 scrolls with its own scrollbar, yet the viewport keeps
+   * overflow-y: scroll. When macOS always shows scroll bars (a mouse is
+   * attached), WebKit paints an empty light track there; hide it.
+   */
   .host :global(.xterm-viewport) {
     background: transparent !important;
+    scrollbar-width: none;
+  }
+
+  .host :global(.xterm-viewport::-webkit-scrollbar) {
+    display: none;
+  }
+
+  /* A thin macOS-style overlay slider in place of xterm's 14px VS Code bar. */
+  .host :global(.xterm-scrollable-element > .scrollbar.vertical > .slider) {
+    left: 6px !important;
+    width: 6px !important;
+    border-radius: 3px;
   }
 </style>
