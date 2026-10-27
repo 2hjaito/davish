@@ -1,5 +1,6 @@
 import { t } from '../lib/i18n/vi'
 import AuditApp from './audit/AuditApp.svelte'
+import CronApp from './cron/CronApp.svelte'
 import DockerApp from './docker/DockerApp.svelte'
 import EditorApp from './editor/EditorApp.svelte'
 import FilesApp from './files/FilesApp.svelte'
@@ -66,6 +67,14 @@ export const apps: AppDef[] = [
     theme: 'dark',
     size: LOGS_SIZE,
     component: LogsApp,
+  },
+  {
+    id: 'cron',
+    label: t.apps.cron,
+    icon: 'clock',
+    theme: 'light',
+    size: { w: 900, h: 580 },
+    component: CronApp,
   },
   {
     id: 'editor',
