@@ -11,9 +11,11 @@ import (
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 
+	"davish/internal/audit"
 	"davish/internal/conn"
 	"davish/internal/fs"
 	"davish/internal/store"
+	"davish/internal/svc"
 	"davish/internal/sysmon"
 	"davish/internal/term"
 	"davish/internal/transfer"
@@ -34,6 +36,8 @@ type App struct {
 	sysmon    *sysmon.Service
 	files     *fs.Service
 	transfers *transfer.Service
+	audit     *audit.Log
+	services  *svc.Service
 }
 
 // New wires the services with their config under os.UserConfigDir()/davish.
@@ -54,6 +58,8 @@ func New() (*App, error) {
 	a.terms = term.New(a.conns, emitter{a}, log)
 	a.sysmon = sysmon.New(a.conns, emitter{a}, log, sysmon.Options{})
 	a.files = fs.New(a.conns, log)
+	a.audit = audit.New(emitter{a})
+	a.services = svc.New(audit.NewRunner(a.conns, a.audit))
 	if a.transfers, err = transfer.New(a.conns, emitter{a}, log, transfer.Options{}); err != nil {
 		return nil, err
 	}

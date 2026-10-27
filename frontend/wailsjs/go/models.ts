@@ -278,6 +278,101 @@ export namespace fs {
 
 }
 
+export namespace svc {
+	
+	export class Journal {
+	    lines: string[];
+	    restricted: boolean;
+	    sudo: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Journal(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.lines = source["lines"];
+	        this.restricted = source["restricted"];
+	        this.sudo = source["sudo"];
+	    }
+	}
+	export class Plan {
+	    unit: string;
+	    action: string;
+	    command: string;
+	    confirm: boolean;
+	    sudo: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Plan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.unit = source["unit"];
+	        this.action = source["action"];
+	        this.command = source["command"];
+	        this.confirm = source["confirm"];
+	        this.sudo = source["sudo"];
+	    }
+	}
+	export class Status {
+	    unit: string;
+	    description: string;
+	    load: string;
+	    active: string;
+	    sub: string;
+	    enabled: string;
+	    activeFor: number;
+	    mainPID: number;
+	    memory: number;
+	    restarts: number;
+	    result: string;
+	    file: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Status(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.unit = source["unit"];
+	        this.description = source["description"];
+	        this.load = source["load"];
+	        this.active = source["active"];
+	        this.sub = source["sub"];
+	        this.enabled = source["enabled"];
+	        this.activeFor = source["activeFor"];
+	        this.mainPID = source["mainPID"];
+	        this.memory = source["memory"];
+	        this.restarts = source["restarts"];
+	        this.result = source["result"];
+	        this.file = source["file"];
+	    }
+	}
+	export class Unit {
+	    name: string;
+	    load: string;
+	    active: string;
+	    sub: string;
+	    description: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Unit(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.load = source["load"];
+	        this.active = source["active"];
+	        this.sub = source["sub"];
+	        this.description = source["description"];
+	    }
+	}
+
+}
+
 export namespace sysmon {
 	
 	export class Process {

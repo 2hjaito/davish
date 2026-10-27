@@ -26,6 +26,7 @@ const (
 	FSChanged            Code = "FS_CHANGED"
 	CmdNeedsRoot         Code = "CMD_NEEDS_ROOT"
 	CmdMissing           Code = "CMD_MISSING"
+	CmdFailed            Code = "CMD_FAILED"
 	InvalidInput         Code = "INVALID_INPUT"
 	NotFound             Code = "NOT_FOUND"
 	StoreCorrupt         Code = "STORE_CORRUPT"

@@ -1,0 +1,81 @@
+apt-daily-upgrade.service                loaded    inactive dead    Daily apt upgrade and clean activities
+apt-daily.service                        loaded    inactive dead    Daily apt download activities
+auditd.service                           not-found inactive dead    auditd.service
+connman.service                          not-found inactive dead    connman.service
+console-getty.service                    masked    inactive dead    console-getty.service
+davish-crash.service                     loaded    failed   failed  Davish test service that always fails
+davish-ok.service                        loaded    active   running Davish test service that keeps running
+dbus.service                             loaded    active   running D-Bus System Message Bus
+display-manager.service                  not-found inactive dead    display-manager.service
+dpkg-db-backup.service                   loaded    inactive dead    Daily dpkg database backup service
+e2scrub_all.service                      loaded    inactive dead    Online ext4 Metadata Check for All Filesystems
+e2scrub_reap.service                     loaded    inactive dead    Remove Stale Online ext4 Metadata Check Snapshots
+emergency.service                        loaded    inactive dead    Emergency Shell
+fstrim.service                           loaded    inactive dead    Discard unused blocks on filesystems from /etc/fstab
+getty-static.service                     loaded    inactive dead    getty on tty2-tty6 if dbus and logind are not available
+getty@tty1.service                       loaded    inactive dead    Getty on tty1
+initrd-cleanup.service                   loaded    inactive dead    Cleaning Up and Shutting Down Daemons
+initrd-parse-etc.service                 loaded    inactive dead    Mountpoints Configured in the Real Root
+initrd-switch-root.service               loaded    inactive dead    Switch Root
+initrd-udevadm-cleanup-db.service        loaded    inactive dead    Cleanup udev Database
+kmod-static-nodes.service                loaded    inactive dead    Create List of Static Device Nodes
+ldconfig.service                         loaded    inactive dead    Rebuild Dynamic Linker Cache
+modprobe@configfs.service                loaded    inactive dead    Load Kernel Module configfs
+modprobe@dm_mod.service                  loaded    inactive dead    Load Kernel Module dm_mod
+modprobe@drm.service                     loaded    inactive dead    Load Kernel Module drm
+modprobe@efi_pstore.service              loaded    inactive dead    Load Kernel Module efi_pstore
+modprobe@fuse.service                    loaded    inactive dead    Load Kernel Module fuse
+modprobe@loop.service                    loaded    inactive dead    Load Kernel Module loop
+motd-news.service                        loaded    inactive dead    Message of the Day
+NetworkManager.service                   not-found inactive dead    NetworkManager.service
+nginx.service                            loaded    active   running A high performance web server and a reverse proxy server
+plymouth-quit-wait.service               not-found inactive dead    plymouth-quit-wait.service
+plymouth-start.service                   not-found inactive dead    plymouth-start.service
+rc-local.service                         loaded    inactive dead    /etc/rc.local Compatibility
+rescue.service                           loaded    inactive dead    Rescue Shell
+ssh.service                              loaded    active   running OpenBSD Secure Shell server
+syslog.service                           not-found inactive dead    syslog.service
+systemd-ask-password-console.service     loaded    inactive dead    Dispatch Password Requests to Console
+systemd-ask-password-wall.service        loaded    inactive dead    Forward Password Requests to Wall
+systemd-battery-check.service            loaded    inactive dead    Check battery level during early boot
+systemd-binfmt.service                   loaded    inactive dead    Set Up Additional Binary Formats
+systemd-bsod.service                     loaded    inactive dead    Displays emergency message in full screen.
+systemd-firstboot.service                loaded    inactive dead    First Boot Wizard
+systemd-hibernate-resume.service         loaded    inactive dead    Resume from hibernation
+systemd-initctl.service                  loaded    inactive dead    initctl Compatibility Daemon
+systemd-journal-catalog-update.service   loaded    inactive dead    Rebuild Journal Catalog
+systemd-journal-flush.service            loaded    active   exited  Flush Journal to Persistent Storage
+systemd-journald.service                 loaded    active   running Journal Service
+systemd-logind.service                   loaded    active   running User Login Management
+systemd-machine-id-commit.service        loaded    inactive dead    Commit a transient machine-id on disk
+systemd-modules-load.service             masked    inactive dead    systemd-modules-load.service
+systemd-networkd.service                 loaded    inactive dead    Network Configuration
+systemd-oomd.service                     not-found inactive dead    systemd-oomd.service
+systemd-pcrmachine.service               loaded    inactive dead    TPM2 PCR Machine ID Measurement
+systemd-pcrphase-initrd.service          loaded    inactive dead    TPM2 PCR Barrier (initrd)
+systemd-pcrphase-sysinit.service         loaded    inactive dead    TPM2 PCR Barrier (Initialization)
+systemd-pcrphase.service                 loaded    inactive dead    TPM2 PCR Barrier (User)
+systemd-pstore.service                   loaded    inactive dead    Platform Persistent Storage Archival
+systemd-random-seed.service              loaded    inactive dead    Load/Save OS Random Seed
+systemd-remount-fs.service               masked    inactive dead    systemd-remount-fs.service
+systemd-repart.service                   loaded    inactive dead    Repartition Root Disk
+systemd-soft-reboot.service              loaded    inactive dead    Reboot System Userspace
+systemd-sysctl.service                   loaded    inactive dead    Apply Kernel Variables
+systemd-sysext.service                   loaded    inactive dead    Merge System Extension Images into /usr/ and /opt/
+systemd-sysusers.service                 loaded    inactive dead    Create System Users
+systemd-tmpfiles-clean.service           loaded    inactive dead    Cleanup of Temporary Directories
+systemd-tmpfiles-setup-dev-early.service loaded    active   exited  Create Static Device Nodes in /dev gracefully
+systemd-tmpfiles-setup-dev.service       loaded    active   exited  Create Static Device Nodes in /dev
+systemd-tmpfiles-setup.service           loaded    active   exited  Create Volatile Files and Directories
+systemd-tpm2-setup-early.service         loaded    inactive dead    TPM2 SRK Setup (Early)
+systemd-tpm2-setup.service               loaded    inactive dead    TPM2 SRK Setup
+systemd-udev-settle.service              not-found inactive dead    systemd-udev-settle.service
+systemd-udev-trigger.service             masked    inactive dead    systemd-udev-trigger.service
+systemd-udevd.service                    masked    inactive dead    systemd-udevd.service
+systemd-update-done.service              loaded    inactive dead    Update is Completed
+systemd-update-utmp-runlevel.service     loaded    inactive dead    Record Runlevel Change in UTMP
+systemd-update-utmp.service              loaded    active   exited  Record System Boot/Shutdown in UTMP
+systemd-user-sessions.service            loaded    active   exited  Permit User Sessions
+systemd-vconsole-setup.service           not-found inactive dead    systemd-vconsole-setup.service
+user-runtime-dir@1001.service            loaded    active   exited  User Runtime Directory /run/user/1001
+user@1001.service                        loaded    active   running User Manager for UID 1001

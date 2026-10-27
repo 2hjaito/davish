@@ -98,6 +98,26 @@ export function SaveServer(arg1) {
   return window['go']['app']['App']['SaveServer'](arg1);
 }
 
+export function ServicesAct(arg1, arg2, arg3) {
+  return window['go']['app']['App']['ServicesAct'](arg1, arg2, arg3);
+}
+
+export function ServicesJournal(arg1, arg2) {
+  return window['go']['app']['App']['ServicesJournal'](arg1, arg2);
+}
+
+export function ServicesList(arg1) {
+  return window['go']['app']['App']['ServicesList'](arg1);
+}
+
+export function ServicesPlan(arg1, arg2) {
+  return window['go']['app']['App']['ServicesPlan'](arg1, arg2);
+}
+
+export function ServicesStatus(arg1, arg2) {
+  return window['go']['app']['App']['ServicesStatus'](arg1, arg2);
+}
+
 export function SettingsLoad() {
   return window['go']['app']['App']['SettingsLoad']();
 }

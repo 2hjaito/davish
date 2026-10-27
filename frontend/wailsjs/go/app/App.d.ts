@@ -3,6 +3,7 @@
 import {fs} from '../models';
 import {app} from '../models';
 import {sysmon} from '../models';
+import {svc} from '../models';
 import {transfer} from '../models';
 
 export function AcceptHostKey(arg1:string,arg2:string):Promise<void>;
@@ -52,6 +53,16 @@ export function MonitorWatch(arg1:string):Promise<void>;
 export function ReorderServers(arg1:Array<string>):Promise<void>;
 
 export function SaveServer(arg1:app.ServerInput):Promise<app.ServerView>;
+
+export function ServicesAct(arg1:string,arg2:string,arg3:string):Promise<void>;
+
+export function ServicesJournal(arg1:string,arg2:string):Promise<svc.Journal>;
+
+export function ServicesList(arg1:string):Promise<Array<svc.Unit>>;
+
+export function ServicesPlan(arg1:string,arg2:string):Promise<svc.Plan>;
+
+export function ServicesStatus(arg1:string,arg2:string):Promise<svc.Status>;
 
 export function SettingsLoad():Promise<Record<string, string>>;
 

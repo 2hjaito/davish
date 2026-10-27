@@ -405,6 +405,7 @@ export const t = {
     FS_CHANGED: 'File đã bị thay đổi trên server từ lúc bạn mở.',
     CMD_NEEDS_ROOT: 'Lệnh này cần quyền root.',
     CMD_MISSING: 'Server chưa cài chương trình cần cho thao tác này (ví dụ zip).',
+    CMD_FAILED: 'Lệnh chạy trên server bị lỗi.',
     INVALID_INPUT: 'Thông tin chưa hợp lệ.',
     NOT_FOUND: 'Không tìm thấy.',
     STORE_CORRUPT: 'File cấu hình bị hỏng. Hãy kiểm tra lại servers.json.',
