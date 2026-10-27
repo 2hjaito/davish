@@ -69,6 +69,15 @@ export function describe(
         body: t.notifications.serviceFailedBody,
         action: logs({ kind: 'journal', target }),
       }
+    case 'cert-expiring':
+      return {
+        ...base,
+        title:
+          p.value < 0
+            ? t.notifications.certExpired(serverName)
+            : t.notifications.certExpiring(serverName),
+        body: t.notifications.certBody(target, p.value),
+      }
     case 'container-restarting':
       return {
         ...base,

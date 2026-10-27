@@ -111,13 +111,16 @@ export interface NotifyNew {
   id: string
   level: 'info' | 'warn' | 'error'
   serverID: string
-  kind: 'mem-high' | 'disk-high' | 'service-failed' | 'container-restarting'
-  /** Percent for mem-high and disk-high; total restarts for container-restarting. */
+  kind: 'mem-high' | 'disk-high' | 'service-failed' | 'container-restarting' | 'cert-expiring'
+  /**
+   * Percent for mem-high and disk-high; total restarts for
+   * container-restarting; days left (negative once expired) for cert-expiring.
+   */
   value: number
   threshold: number
   /** Mount path, for disk-high. */
   mount?: string
-  /** The unit or container, for service-failed and container-restarting. */
+  /** The unit, container or certificate file of a health alert. */
   target?: string
 }
 

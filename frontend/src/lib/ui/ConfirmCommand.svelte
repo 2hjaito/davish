@@ -8,13 +8,15 @@
     title: string
     /** What happens, ending with an introduction to the command. */
     body: string
-    /** Label of the danger button. */
+    /** Label of the action button. */
     action: string
+    /** Danger for what interrupts or removes something, primary otherwise. */
+    tone?: 'danger' | 'primary'
     onclose: () => void
     onconfirm: () => void
   }
 
-  let { command, title, body, action, onclose, onconfirm }: Props = $props()
+  let { command, title, body, action, tone = 'danger', onclose, onconfirm }: Props = $props()
 </script>
 
 <!-- A destructive action shows the exact command first (docs/SECURITY.md). -->
@@ -27,7 +29,7 @@
     <!-- Cancelling is the safe choice, so it has the focus. -->
     <!-- svelte-ignore a11y_autofocus -->
     <button type="button" class="btn" autofocus onclick={onclose}>{t.common.cancel}</button>
-    <button type="button" class="btn btn-danger" onclick={onconfirm}>{action}</button>
+    <button type="button" class="btn btn-{tone}" onclick={onconfirm}>{action}</button>
   {/snippet}
 </Dialog>
 

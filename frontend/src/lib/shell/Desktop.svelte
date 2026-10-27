@@ -1,6 +1,7 @@
 <script lang="ts">
   import { dockApps, getApp } from '../../apps/registry'
   import type { AppDef } from '../../apps/types'
+  import { nginxCheckCerts } from '../api/nginx'
   import { hasRuntime } from '../api/runtime'
   import { audit } from '../stores/audit.svelte'
   import { notifications } from '../stores/notifications.svelte'
@@ -93,6 +94,19 @@
   })
 
   $effect(() => audit.init())
+
+  // TLS certificates nearing expiry notify once a server connects; checked
+  // once per server for the app's lifetime (Go keeps what it notified).
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity -- bookkeeping, never rendered
+  const certsChecked = new Set<string>()
+  $effect(() => {
+    if (!hasRuntime) return
+    for (const s of servers.list) {
+      if (s.state !== 'connected' || certsChecked.has(s.id)) continue
+      certsChecked.add(s.id)
+      void nginxCheckCerts(s.id).catch(() => {})
+    }
+  })
 
   // First run: ask for a server. Otherwise open a terminal on the active one,
   // like the mockup's Terminal + Files in the browser preview.
