@@ -45,6 +45,7 @@ const ICONS = {
   warning: 'FiAlertTriangle',
   check: 'FiCheck',
   plus: 'FiPlus',
+  minus: 'FiMinus',
   copy: 'FiCopy',
   // Official marks (Simple Icons) for third-party tools; see ADR 0003.
   brandDocker: 'SiDocker',

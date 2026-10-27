@@ -4,8 +4,10 @@
   import { FitAddon } from '@xterm/addon-fit'
   import { WebglAddon } from '@xterm/addon-webgl'
   import { type ITheme, Terminal } from '@xterm/xterm'
+  import { untrack } from 'svelte'
 
   import { isMac } from '../../lib/shell/platform'
+  import { settings } from '../../lib/stores/settings.svelte'
 
   interface Props {
     /** Whether this terminal is the visible tab; hidden ones keep their buffer. */
@@ -91,7 +93,8 @@
       allowTransparency: true,
       cursorBlink: true,
       fontFamily: token('--font-mono'),
-      fontSize: 12.5,
+      // Read once here; the effect below applies later changes in place.
+      fontSize: untrack(() => settings.terminalFontSize),
       lineHeight: LINE_HEIGHT,
       scrollback: 5000,
       macOptionIsMeta: true,
@@ -124,6 +127,14 @@
       term = undefined
       fit = undefined
     }
+  })
+
+  $effect(() => {
+    const size = settings.terminalFontSize
+    if (!term || term.options.fontSize === size) return
+    term.options.fontSize = size
+    fit?.fit()
+    fitCursor(term)
   })
 
   $effect(() => {

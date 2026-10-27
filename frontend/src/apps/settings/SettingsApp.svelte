@@ -1,10 +1,15 @@
 <script lang="ts">
   import { t } from '../../lib/i18n/vi'
-  import { settings, WALLPAPER_ACCENTS } from '../../lib/stores/settings.svelte'
+  import { settings, TERMINAL_FONT, WALLPAPER_ACCENTS } from '../../lib/stores/settings.svelte'
+  import Icon from '../../lib/ui/Icon.svelte'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import type { AppProps } from '../types'
 
   let { win }: AppProps = $props()
+
+  function stepFont(dir: 1 | -1) {
+    settings.set('terminalFontSize', settings.terminalFontSize + dir * TERMINAL_FONT.step)
+  }
 </script>
 
 <TitleBar>
@@ -56,6 +61,32 @@
       {/each}
     </div>
   </div>
+
+  <h2 class="section">{t.settings.terminal}</h2>
+
+  <div class="row">
+    <span>
+      <strong>{t.settings.fontSize}</strong>
+      <small>{t.settings.fontSizeHint}</small>
+    </span>
+    <div class="stepper">
+      <button
+        aria-label={t.settings.fontSmaller}
+        disabled={settings.terminalFontSize <= TERMINAL_FONT.min}
+        onclick={() => stepFont(-1)}
+      >
+        <Icon name="minus" size={12} strokeWidth={2.2} />
+      </button>
+      <output aria-live="polite">{settings.terminalFontSize.toLocaleString('vi-VN')}</output>
+      <button
+        aria-label={t.settings.fontLarger}
+        disabled={settings.terminalFontSize >= TERMINAL_FONT.max}
+        onclick={() => stepFont(1)}
+      >
+        <Icon name="plus" size={12} strokeWidth={2.2} />
+      </button>
+    </div>
+  </div>
 </div>
 
 <style>
@@ -85,6 +116,10 @@
     color: var(--fg-muted);
     letter-spacing: 0.04em;
     text-transform: uppercase;
+  }
+
+  .section {
+    margin-top: 14px;
   }
 
   .row {
@@ -140,6 +175,39 @@
 
   input[type='checkbox']:checked::after {
     translate: 14px 0;
+  }
+
+  /* Segmented − value + control, like the macOS font size stepper. */
+  .stepper {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    border-radius: var(--control-radius);
+    background: var(--fill-soft);
+  }
+
+  .stepper button {
+    display: flex;
+    border: 0;
+    padding: 6px 8px;
+    border-radius: var(--control-radius);
+    background: none;
+    color: inherit;
+    transition: background var(--dur-fast) var(--ease-out);
+  }
+
+  .stepper button:hover:not(:disabled) {
+    background: var(--fill-track);
+  }
+
+  .stepper button:disabled {
+    opacity: 0.35;
+  }
+
+  .stepper output {
+    min-width: 36px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
   }
 
   .swatches {

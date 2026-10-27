@@ -127,6 +127,11 @@ export const t = {
     reduceMotionHint: 'Tắt hiệu ứng mở, đóng, thu nhỏ cửa sổ và dock.',
     wallpaper: 'Màu hình nền',
     wallpaperColor: (c: string) => `Màu ${c}`,
+    terminal: 'Terminal',
+    fontSize: 'Cỡ chữ',
+    fontSizeHint: 'Áp dụng cho mọi cửa sổ Terminal.',
+    fontSmaller: 'Giảm cỡ chữ',
+    fontLarger: 'Tăng cỡ chữ',
   },
   placeholder: {
     title: 'Đang phát triển',
