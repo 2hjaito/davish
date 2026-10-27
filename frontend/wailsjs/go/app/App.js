@@ -6,6 +6,10 @@ export function AcceptHostKey(arg1, arg2) {
   return window['go']['app']['App']['AcceptHostKey'](arg1, arg2);
 }
 
+export function AuditEntries() {
+  return window['go']['app']['App']['AuditEntries']();
+}
+
 export function Connect(arg1) {
   return window['go']['app']['App']['Connect'](arg1);
 }

@@ -40,11 +40,17 @@ func NewRunner(conns ClientSource, log *Log) *Runner {
 // it is in Result.Exit for the caller to interpret. The error is set only
 // when the command could not run or finish.
 func (r *Runner) Run(ctx context.Context, serverID, app string, cmd shellx.Command) (Result, error) {
+	return r.RunLine(ctx, serverID, app, cmd.String())
+}
+
+// RunLine is Run for a command line already rendered by shellx, such as
+// shellx.InDir or a few commands joined with &&. It must never contain
+// text that did not go through shellx.
+func (r *Runner) RunLine(ctx context.Context, serverID, app, line string) (Result, error) {
 	client, err := r.conns.Client(serverID)
 	if err != nil {
 		return Result{}, err
 	}
-	line := cmd.String()
 	start := time.Now()
 	res, err := run(ctx, client, line)
 	exit := res.Exit

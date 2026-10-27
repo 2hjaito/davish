@@ -65,6 +65,35 @@ export namespace app {
 
 }
 
+export namespace audit {
+	
+	export class Entry {
+	    id: number;
+	    time: number;
+	    serverID: string;
+	    app: string;
+	    command: string;
+	    exit: number;
+	    durMs: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Entry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.time = source["time"];
+	        this.serverID = source["serverID"];
+	        this.app = source["app"];
+	        this.command = source["command"];
+	        this.exit = source["exit"];
+	        this.durMs = source["durMs"];
+	    }
+	}
+
+}
+
 export namespace docker {
 	
 	export class Container {

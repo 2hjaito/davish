@@ -19,6 +19,7 @@ import (
 	"golang.org/x/crypto/ssh/knownhosts"
 
 	"davish/internal/apperr"
+	"davish/internal/audit"
 	"davish/internal/conn"
 	"davish/internal/fs"
 	"davish/internal/shellx"
@@ -73,7 +74,7 @@ func setup(t *testing.T) env {
 		t.Fatal(err)
 	}
 
-	e := env{m: m, svc: fs.New(m, quiet()), id: srv.ID}
+	e := env{m: m, svc: fs.New(m, audit.NewRunner(m, audit.New(discard{})), quiet()), id: srv.ID}
 	home, err := e.svc.Home(context.Background(), e.id)
 	if err != nil {
 		t.Fatal(err)

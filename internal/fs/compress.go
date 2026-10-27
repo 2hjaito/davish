@@ -105,13 +105,8 @@ func (s *Service) Compress(ctx context.Context, serverID, p, format, command str
 	if plan.Command != command {
 		return CompressPlan{}, apperr.New(apperr.FSStale, "the archive plan changed")
 	}
-	client, err := s.conns.Client(serverID)
-	if err != nil {
-		return CompressPlan{}, err
-	}
-	// TODO(M7): record the command in audit.
 	s.log.Info("compress", "server", serverID, "app", "files", "op", "compress")
-	if err := run(ctx, client, command); err != nil {
+	if err := s.shell(ctx, serverID, command); err != nil {
 		// Do not leave a half-written archive behind.
 		if sc, serr := s.conns.SFTP(serverID); serr == nil {
 			sc.Remove(plan.Output) //nolint:errcheck,gosec // best effort cleanup

@@ -2,12 +2,8 @@ package fs
 
 import (
 	"context"
-	"errors"
 	"path"
 
-	"golang.org/x/crypto/ssh"
-
-	"davish/internal/apperr"
 	"davish/internal/shellx"
 )
 
@@ -44,27 +40,10 @@ func (s *Service) Access(ctx context.Context, serverID, p string) (Access, error
 }
 
 func (s *Service) writable(ctx context.Context, serverID, p string) (bool, error) {
-	client, err := s.conns.Client(serverID)
+	res, err := s.run.RunLine(ctx, serverID, "editor", writableCommand(p))
 	if err != nil {
 		return false, err
 	}
-	sess, err := client.NewSession()
-	if err != nil {
-		return false, apperr.Wrap(apperr.ConnNotConnected, "cannot open a session", err)
-	}
-	defer sess.Close()                                      //nolint:errcheck // closed either way
-	stop := context.AfterFunc(ctx, func() { sess.Close() }) //nolint:errcheck,gosec // unblocks Run
-	defer stop()
-
-	err = sess.Run(writableCommand(p))
-	var exit *ssh.ExitError
-	switch {
-	case ctx.Err() != nil:
-		return false, ctx.Err()
-	case err == nil:
-		return true, nil
-	case errors.As(err, &exit):
-		return false, nil
-	}
-	return false, apperr.Wrap(apperr.ConnNotConnected, "command did not finish", err)
+	// Any failure of test(1) means no; there is nothing else in the line.
+	return res.Exit == 0, nil
 }
