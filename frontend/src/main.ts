@@ -8,9 +8,14 @@ import './lib/styles/controls.css'
 
 import { mount } from 'svelte'
 
-import App from './App.svelte'
+import { initPersist } from './lib/stores/persist'
 
 const target = document.getElementById('app')
 if (!target) throw new Error('missing #app')
+
+// Stores read saved UI state when their modules load, so the app is only
+// imported once settings.json has arrived.
+await initPersist()
+const { default: App } = await import('./App.svelte')
 
 export default mount(App, { target })

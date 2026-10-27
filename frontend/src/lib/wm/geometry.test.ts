@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { clampRect, MIN_H, MIN_W, resizeRect, snapZone, zoneRect } from './geometry'
+import { clampRect, fitRect, MIN_H, MIN_W, resizeRect, snapZone, zoneRect } from './geometry'
 
 const area = { x: 0, y: 30, w: 1000, h: 600 }
 
@@ -53,5 +53,32 @@ describe('snap', () => {
     expect(zoneRect('left', area)).toEqual({ x: 0, y: 30, w: 500, h: 600 })
     expect(zoneRect('right', area)).toEqual({ x: 500, y: 30, w: 500, h: 600 })
     expect(zoneRect('top', area)).toEqual(area)
+  })
+})
+
+describe('fitRect', () => {
+  const area = { x: 0, y: 30, w: 1000, h: 600 }
+
+  it('keeps a window that already fits', () => {
+    expect(fitRect({ x: 100, y: 100, w: 400, h: 300 }, area)).toEqual({
+      x: 100,
+      y: 100,
+      w: 400,
+      h: 300,
+    })
+  })
+
+  it('moves a window back inside every edge', () => {
+    expect(fitRect({ x: 800, y: 500, w: 400, h: 300 }, area)).toEqual({
+      x: 600,
+      y: 330,
+      w: 400,
+      h: 300,
+    })
+    expect(fitRect({ x: -50, y: 0, w: 400, h: 300 }, area)).toEqual({ x: 0, y: 30, w: 400, h: 300 })
+  })
+
+  it('shrinks a window bigger than the area', () => {
+    expect(fitRect({ x: 10, y: 10, w: 1400, h: 900 }, area)).toEqual(area)
   })
 })

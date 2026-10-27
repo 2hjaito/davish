@@ -6,7 +6,7 @@
   import type { Sample } from '../../lib/stores/metrics.svelte'
   import { t } from '../../lib/i18n/vi'
   import Card from './Card.svelte'
-  import Empty from './Empty.svelte'
+  import Empty from '../../lib/ui/Empty.svelte'
   import { mockInfo } from './mock'
 
   interface Props {

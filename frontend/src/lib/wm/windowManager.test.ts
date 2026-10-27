@@ -56,6 +56,38 @@ describe('WindowManager', () => {
     expect(wm.open('terminal', 's1', opts).rect).toEqual({ x: 200, y: 150, w: 500, h: 350 })
   })
 
+  it('opens at the default size in the middle of the work area', () => {
+    // Default area: x 0, y 30, 1280 × 670.
+    expect(wm.open('terminal', 's1', opts).rect).toEqual({ x: 440, y: 215, w: 400, h: 300 })
+  })
+
+  it('cascades a window that would land exactly on another', () => {
+    const a = wm.open('terminal', 's1', opts)
+    const b = wm.open('files', 's1', opts)
+    expect(b.rect).toEqual({ ...a.rect, x: a.rect.x + 28, y: a.rect.y + 28 })
+    // Another workspace does not count.
+    expect(wm.open('monitor', 's2', opts).rect).toEqual(a.rect)
+  })
+
+  it('pulls a saved window back fully on screen', () => {
+    wm = new WindowManager({ files: { rect: { x: 1100, y: 600, w: 900, h: 2000 }, snap: null } })
+    expect(wm.open('files', 's1', opts).rect).toEqual({ x: 380, y: 30, w: 900, h: 670 })
+  })
+
+  it('reopens maximized or snapped as it was left', () => {
+    const a = wm.open('terminal', 's1', opts)
+    wm.toggleMaximize(a.id)
+    wm.close(a.id)
+    expect(wm.open('terminal', 's1', opts).snap).toBe('top')
+  })
+
+  it('reads geometry saved by older versions', () => {
+    wm = new WindowManager({ files: { x: 10, y: 40, w: 500, h: 400 } })
+    const w = wm.open('files', 's1', opts)
+    expect(w.rect).toEqual({ x: 10, y: 40, w: 500, h: 400 })
+    expect(w.snap).toBeNull()
+  })
+
   it('keeps the pointer position when dragging out of a snap', () => {
     const a = wm.open('terminal', 's1', opts)
     wm.snap(a.id, 'left')

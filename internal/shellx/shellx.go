@@ -46,3 +46,9 @@ func (c Command) String() string {
 	}
 	return strings.Join(quoted, " ")
 }
+
+// InDir renders c to run inside dir: "cd -- dir && c". If dir cannot be
+// entered, c does not run.
+func InDir(dir string, c Command) string {
+	return Cmd("cd", "--", dir).String() + " && " + c.String()
+}

@@ -18,6 +18,50 @@ export function Disconnect(arg1) {
   return window['go']['app']['App']['Disconnect'](arg1);
 }
 
+export function FilesCompress(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['FilesCompress'](arg1, arg2, arg3, arg4);
+}
+
+export function FilesHome(arg1) {
+  return window['go']['app']['App']['FilesHome'](arg1);
+}
+
+export function FilesList(arg1, arg2) {
+  return window['go']['app']['App']['FilesList'](arg1, arg2);
+}
+
+export function FilesMkdir(arg1, arg2) {
+  return window['go']['app']['App']['FilesMkdir'](arg1, arg2);
+}
+
+export function FilesPlanCompress(arg1, arg2, arg3) {
+  return window['go']['app']['App']['FilesPlanCompress'](arg1, arg2, arg3);
+}
+
+export function FilesPlanRemove(arg1, arg2) {
+  return window['go']['app']['App']['FilesPlanRemove'](arg1, arg2);
+}
+
+export function FilesRead(arg1, arg2) {
+  return window['go']['app']['App']['FilesRead'](arg1, arg2);
+}
+
+export function FilesRemove(arg1, arg2, arg3) {
+  return window['go']['app']['App']['FilesRemove'](arg1, arg2, arg3);
+}
+
+export function FilesRename(arg1, arg2, arg3) {
+  return window['go']['app']['App']['FilesRename'](arg1, arg2, arg3);
+}
+
+export function FilesStat(arg1, arg2) {
+  return window['go']['app']['App']['FilesStat'](arg1, arg2);
+}
+
+export function FilesWrite(arg1, arg2, arg3) {
+  return window['go']['app']['App']['FilesWrite'](arg1, arg2, arg3);
+}
+
 export function ListServers() {
   return window['go']['app']['App']['ListServers']();
 }
@@ -46,6 +90,14 @@ export function SaveServer(arg1) {
   return window['go']['app']['App']['SaveServer'](arg1);
 }
 
+export function SettingsLoad() {
+  return window['go']['app']['App']['SettingsLoad']();
+}
+
+export function SettingsSave(arg1, arg2) {
+  return window['go']['app']['App']['SettingsSave'](arg1, arg2);
+}
+
 export function TermClose(arg1) {
   return window['go']['app']['App']['TermClose'](arg1);
 }
@@ -54,10 +106,38 @@ export function TermResize(arg1, arg2, arg3) {
   return window['go']['app']['App']['TermResize'](arg1, arg2, arg3);
 }
 
-export function TermStart(arg1, arg2, arg3, arg4) {
-  return window['go']['app']['App']['TermStart'](arg1, arg2, arg3, arg4);
+export function TermStart(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['app']['App']['TermStart'](arg1, arg2, arg3, arg4, arg5);
 }
 
 export function TermWrite(arg1, arg2) {
   return window['go']['app']['App']['TermWrite'](arg1, arg2);
+}
+
+export function TransferCancel(arg1) {
+  return window['go']['app']['App']['TransferCancel'](arg1);
+}
+
+export function TransferDownload(arg1, arg2) {
+  return window['go']['app']['App']['TransferDownload'](arg1, arg2);
+}
+
+export function TransferPickFiles(arg1) {
+  return window['go']['app']['App']['TransferPickFiles'](arg1);
+}
+
+export function TransferPickFolder(arg1) {
+  return window['go']['app']['App']['TransferPickFolder'](arg1);
+}
+
+export function TransferPlanUpload(arg1, arg2, arg3) {
+  return window['go']['app']['App']['TransferPlanUpload'](arg1, arg2, arg3);
+}
+
+export function TransferReveal(arg1) {
+  return window['go']['app']['App']['TransferReveal'](arg1);
+}
+
+export function TransferUpload(arg1, arg2, arg3) {
+  return window['go']['app']['App']['TransferUpload'](arg1, arg2, arg3);
 }

@@ -5,7 +5,7 @@
   import Meter from '../../lib/ui/charts/Meter.svelte'
   import TimeChart from '../../lib/ui/charts/TimeChart.svelte'
   import Card from './Card.svelte'
-  import Empty from './Empty.svelte'
+  import Empty from '../../lib/ui/Empty.svelte'
   import Stat from './Stat.svelte'
   import { chartColors, memPct, type ViewProps } from './types'
 

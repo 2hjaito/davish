@@ -127,7 +127,7 @@ func TestShellRunsCommandsAndReportsExit(t *testing.T) {
 	svc := term.New(m, scr, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	t.Cleanup(svc.CloseAll)
 
-	sid, err := svc.Start(context.Background(), id, 80, 24, false)
+	sid, err := svc.Start(context.Background(), id, 80, 24, false, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -160,7 +160,7 @@ func TestShellRunsCommandsAndReportsExit(t *testing.T) {
 func TestStartNeedsConnection(t *testing.T) {
 	m, _ := connect(t)
 	svc := term.New(m, discard{}, slog.New(slog.NewTextHandler(io.Discard, nil)))
-	if _, err := svc.Start(context.Background(), "not-connected", 80, 24, false); err == nil {
+	if _, err := svc.Start(context.Background(), "not-connected", 80, 24, false, ""); err == nil {
 		t.Error("started a shell on a server that is not connected")
 	}
 }
@@ -171,7 +171,7 @@ func TestLargeOutputArrivesWhole(t *testing.T) {
 	svc := term.New(m, scr, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	t.Cleanup(svc.CloseAll)
 
-	sid, err := svc.Start(context.Background(), id, 80, 24, false)
+	sid, err := svc.Start(context.Background(), id, 80, 24, false, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -193,7 +193,7 @@ func TestCloseReportsExit(t *testing.T) {
 	svc := term.New(m, scr, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	t.Cleanup(svc.CloseAll)
 
-	sid, err := svc.Start(context.Background(), id, 80, 24, false)
+	sid, err := svc.Start(context.Background(), id, 80, 24, false, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -212,7 +212,7 @@ func TestDroppedConnectionEndsSessionWithoutCode(t *testing.T) {
 	svc := term.New(m, scr, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	t.Cleanup(svc.CloseAll)
 
-	sid, err := svc.Start(context.Background(), id, 80, 24, false)
+	sid, err := svc.Start(context.Background(), id, 80, 24, false, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -231,7 +231,7 @@ func TestPromptOnBashWritesNothing(t *testing.T) {
 	scr := &screen{}
 	svc := term.New(m, scr, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	t.Cleanup(svc.CloseAll)
-	sid, err := svc.Start(context.Background(), id, 120, 30, true)
+	sid, err := svc.Start(context.Background(), id, 120, 30, true, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -269,7 +269,7 @@ func TestNoPromptLeavesTheShellAlone(t *testing.T) {
 	scr := &screen{}
 	svc := term.New(m, scr, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	t.Cleanup(svc.CloseAll)
-	sid, err := svc.Start(context.Background(), id, 80, 24, false)
+	sid, err := svc.Start(context.Background(), id, 80, 24, false, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -281,5 +281,40 @@ func TestNoPromptLeavesTheShellAlone(t *testing.T) {
 	defer scr.mu.Unlock()
 	if strings.Contains(scr.out.String(), "") {
 		t.Error("Davish prompt shown although it was not asked for")
+	}
+}
+
+func TestStartsInDirectory(t *testing.T) {
+	m, id := connect(t)
+	for _, prompt := range []bool{false, true} {
+		scr := &screen{}
+		svc := term.New(m, scr, slog.New(slog.NewTextHandler(io.Discard, nil)))
+		t.Cleanup(svc.CloseAll)
+
+		sid, err := svc.Start(context.Background(), id, 80, 24, prompt, "/usr/share")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := svc.Write(sid, "echo at:$(pwd)\n"); err != nil {
+			t.Fatal(err)
+		}
+		scr.waitFor(t, func(out string, _ *term.Exit) bool { return strings.Contains(out, "at:/usr/share") })
+	}
+
+	// A folder that cannot be entered still opens a shell, at home.
+	scr := &screen{}
+	svc := term.New(m, scr, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	t.Cleanup(svc.CloseAll)
+	sid, err := svc.Start(context.Background(), id, 80, 24, false, "/root/nope")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := svc.Write(sid, "echo at:$(pwd)\n"); err != nil {
+		t.Fatal(err)
+	}
+	scr.waitFor(t, func(out string, _ *term.Exit) bool { return strings.Contains(out, "at:/home/tester") })
+
+	if _, err := svc.Start(context.Background(), id, 80, 24, false, "relative"); err == nil {
+		t.Error("relative start directory accepted")
 	}
 }

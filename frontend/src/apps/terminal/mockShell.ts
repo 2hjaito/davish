@@ -1,7 +1,8 @@
 // A tiny line-editing shell over mock data, so the Terminal can be typed into
 // before real PTY sessions exist (M3). It speaks the same byte stream as a PTY:
 // input() receives keystrokes from xterm, emit() writes ANSI output back.
-import { join, mockFs } from '../files/mockFs'
+import { joinPath as join } from '../files/listing'
+import { mockIsDir, mockList } from '../files/mockFs'
 
 const GREEN = '\x1b[32m'
 const BLUE = '\x1b[34m'
@@ -158,7 +159,7 @@ export class MockShell {
         break
       case 'cd': {
         const target = this.#resolve(args[0])
-        if (mockFs[target]) {
+        if (mockIsDir(target)) {
           this.cwd = target
           this.#opts.onCwd?.(this.displayCwd)
         } else {
@@ -168,7 +169,7 @@ export class MockShell {
       }
       case 'ls': {
         const dir = this.#resolve(args.find((a) => !a.startsWith('-')) ?? this.cwd)
-        const entries = mockFs[dir]
+        const entries = mockIsDir(dir) ? mockList(dir) : undefined
         if (!entries) {
           out(`ls: cannot access '${args[0]}': No such file or directory`)
         } else {
@@ -180,7 +181,7 @@ export class MockShell {
         const path = this.#resolve(args[0])
         const parent = path.slice(0, path.lastIndexOf('/')) || '/'
         const name = path.slice(path.lastIndexOf('/') + 1)
-        const entry = mockFs[parent]?.find((e) => e.name === name)
+        const entry = mockList(parent).find((e) => e.name === name)
         if (!args[0]) out('cat: thiếu tên file')
         else if (!entry) out(`cat: ${args[0]}: No such file or directory`)
         else if (entry.dir) out(`cat: ${args[0]}: Is a directory`)

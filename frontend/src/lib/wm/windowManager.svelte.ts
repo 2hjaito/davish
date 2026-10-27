@@ -1,5 +1,5 @@
 import { load, save } from '../stores/persist'
-import { clampRect, type Rect, type SnapZone, zoneRect } from './geometry'
+import { clampRect, fitRect, type Rect, type SnapZone, zoneRect } from './geometry'
 
 export interface WindowState {
   id: string
@@ -23,6 +23,20 @@ export interface OpenOptions {
   at?: { x: number; y: number }
 }
 
+/** How an app's window looked when last used, to open it the same way. */
+export interface SavedWindow {
+  rect: Rect
+  snap: SnapZone | null
+}
+
+/** Older versions saved only the rect. */
+function toSaved(v: Rect | SavedWindow): SavedWindow {
+  return 'rect' in v ? v : { rect: v, snap: null }
+}
+
+/** Offset between windows opened one after another, like macOS. */
+const CASCADE = 28
+
 let nextId = 1
 /** Slightly longer than --dur-slow so the CSS transition can finish. */
 const ANIMATION_MS = 320
@@ -32,12 +46,12 @@ export class WindowManager {
   area = $state<Rect>({ x: 0, y: 30, w: 1280, h: 670 })
   snapPreview = $state<Rect | null>(null)
 
-  #saved: Record<string, Rect>
+  #saved: Record<string, SavedWindow>
   // Plain record: timer handles are bookkeeping, not UI state.
   #animTimers: Record<string, ReturnType<typeof setTimeout>> = {}
 
-  constructor(saved: Record<string, Rect> = {}) {
-    this.#saved = saved
+  constructor(saved: Record<string, Rect | SavedWindow> = {}) {
+    this.#saved = Object.fromEntries(Object.entries(saved).map(([k, v]) => [k, toSaved(v)]))
   }
 
   /** Effective on-screen geometry, accounting for snap and maximize. */
@@ -73,26 +87,43 @@ export class WindowManager {
     return true
   }
 
+  /**
+   * Opens the app's window as it was last left (size, place, maximized or
+   * snapped), otherwise at its default size in the middle of the screen.
+   * Either way it starts fully on screen and does not cover a window of
+   * this workspace at the exact same spot.
+   */
   open(appId: string, serverID: string, opts: OpenOptions): WindowState {
-    const cascade = this.visible(serverID).length * 28
-    const start = this.#saved[appId] ?? {
-      x: opts.at?.x ?? this.area.x + 80 + cascade,
-      y: opts.at?.y ?? this.area.y + 40 + cascade,
-      ...opts.size,
+    const saved = this.#saved[appId]
+    let rect = fitRect(saved?.rect ?? this.#defaultRect(opts), this.area)
+    const taken = (r: Rect) =>
+      this.visible(serverID).some((w) => w.rect.x === r.x && w.rect.y === r.y)
+    for (let i = 0; i < 10 && taken(rect); i++) {
+      rect = fitRect({ ...rect, x: rect.x + CASCADE, y: rect.y + CASCADE }, this.area)
     }
     const win: WindowState = {
       id: `w${nextId++}`,
       appId,
       serverID,
       title: opts.title,
-      rect: clampRect(start, this.area),
+      rect,
       z: this.#topZ() + 1,
       minimized: false,
-      snap: null,
+      snap: saved?.snap ?? null,
       animating: false,
     }
     this.windows.push(win)
     return win
+  }
+
+  #defaultRect(opts: OpenOptions): Rect {
+    const { w, h } = opts.size
+    return {
+      x: opts.at?.x ?? Math.round(this.area.x + (this.area.w - w) / 2),
+      y: opts.at?.y ?? Math.round(this.area.y + (this.area.h - h) / 2),
+      w,
+      h,
+    }
   }
 
   close(id: string) {
@@ -124,6 +155,7 @@ export class WindowManager {
     if (!w || w.snap === zone) return
     w.snap = zone
     w.animating = true
+    this.#remember(w)
     clearTimeout(this.#animTimers[id])
     this.#animTimers[id] = setTimeout(() => {
       const cur = this.#get(id)
@@ -177,9 +209,9 @@ export class WindowManager {
   }
 
   #remember(w: WindowState) {
-    this.#saved[w.appId] = { ...w.rect }
+    this.#saved[w.appId] = { rect: { ...w.rect }, snap: w.snap }
     save('windows', this.#saved)
   }
 }
 
-export const wm = new WindowManager(load<Record<string, Rect>>('windows', {}))
+export const wm = new WindowManager(load<Record<string, Rect | SavedWindow>>('windows', {}))

@@ -11,7 +11,7 @@
   import type { AppProps } from '../types'
   import CpuView from './CpuView.svelte'
   import DiskView from './DiskView.svelte'
-  import Empty from './Empty.svelte'
+  import Empty from '../../lib/ui/Empty.svelte'
   import GpuView from './GpuView.svelte'
   import InfoView from './InfoView.svelte'
   import MemoryView from './MemoryView.svelte'

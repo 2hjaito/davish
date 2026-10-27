@@ -44,9 +44,15 @@ func main() {
 			Assets: assets,
 		},
 		BackgroundColour: &options.RGBA{R: 205, G: 215, B: 234, A: 255},
-		ErrorFormatter:   apperr.Format,
-		OnStartup:        a.Startup,
-		OnShutdown:       a.Shutdown,
+		// Files dropped from the OS upload into the Files window under the
+		// pointer. The webview must not open them as a page instead.
+		DragAndDrop: &options.DragAndDrop{
+			EnableFileDrop:     true,
+			DisableWebViewDrop: true,
+		},
+		ErrorFormatter: apperr.Format,
+		OnStartup:      a.Startup,
+		OnShutdown:     a.Shutdown,
 		Bind: []any{
 			a,
 		},

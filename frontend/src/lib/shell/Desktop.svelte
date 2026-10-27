@@ -1,9 +1,21 @@
 <script lang="ts">
-  import { apps, getApp } from '../../apps/registry'
+  import { dockApps, getApp } from '../../apps/registry'
   import type { AppDef } from '../../apps/types'
   import { hasRuntime } from '../api/runtime'
   import { notifications } from '../stores/notifications.svelte'
   import { servers } from '../stores/servers.svelte'
+  import { toUserError } from '../api/errors'
+  import { transferReveal } from '../api/transfer'
+  import { t } from '../i18n/vi'
+  import {
+    describeTransfer,
+    type Transfer,
+    type TransferActions,
+    transferNoticeId,
+    transfers,
+  } from '../stores/transfers.svelte'
+  import { openTransfers } from '../wm/intents.svelte'
+  import Banners from './Banners.svelte'
   import { ui } from '../stores/ui.svelte'
   import Window from '../wm/Window.svelte'
   import { wm } from '../wm/windowManager.svelte'
@@ -51,6 +63,31 @@
 
   // Threshold alerts and other notify:new events, for the app's lifetime.
   $effect(() => notifications.init((id) => servers.list.find((s) => s.id === id)?.name ?? id))
+
+  // Transfers outlive the Files window that started them: a download says
+  // when it starts and how it ends, in one notification per job.
+  $effect(() => {
+    const actions: TransferActions = {
+      showProgress: () => openTransfers(serverID),
+      reveal: (j) =>
+        void transferReveal(j.dst).catch((e: unknown) =>
+          notifications.add({
+            id: `reveal-${j.id}`,
+            level: 'error',
+            title: t.transfers.reveal,
+            body: toUserError(e).message,
+            serverID: j.serverID,
+            at: Date.now(),
+          }),
+        ),
+    }
+    const notify = (j: Transfer) => {
+      const n = describeTransfer(j, actions)
+      if (n) notifications.add(n)
+      else notifications.dismiss(transferNoticeId(j))
+    }
+    return transfers.init(notify, notify)
+  })
 
   // First run: ask for a server. Otherwise open a terminal on the active one,
   // like the mockup's Terminal + Files in the browser preview.
@@ -125,12 +162,13 @@
   {/each}
 
   <Dock
-    {apps}
+    apps={dockApps}
     isOpen={(id) => wm.isOpen(id, serverID)}
     onlaunch={launch}
     bind:height={dockHeight}
   />
 
+  <Banners />
   <ServerDialog />
   <HostKeyDialog />
   <SleepScreen />
@@ -140,7 +178,9 @@
   .desktop {
     position: fixed;
     inset: 0;
-    overflow: hidden;
+    /* clip, not hidden: focusing something in a window that hangs off
+       screen must not scroll the whole desktop sideways. */
+    overflow: clip;
     background-color: var(--wallpaper-base);
     background-image:
       radial-gradient(circle at 18% 22%, var(--wallpaper-accent) 0, transparent 38%),

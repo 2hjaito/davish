@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Terminal } from '@xterm/xterm'
+  import { untrack } from 'svelte'
 
   import { onTermData, onTermExit } from '../../lib/api/events'
   import { hasRuntime } from '../../lib/api/runtime'
@@ -9,6 +10,7 @@
   import { settings } from '../../lib/stores/settings.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import { getWindowContext } from '../../lib/wm/context'
+  import { terminalRequests } from '../../lib/wm/intents.svelte'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import { wm } from '../../lib/wm/windowManager.svelte'
   import type { AppProps } from '../types'
@@ -24,6 +26,8 @@
   interface Tab {
     id: number
     cwd: string
+    /** Where the shell starts, when another app asked for a folder. */
+    startDir?: string
     /** Title the remote shell sets (bash sets "user@host: cwd" for xterm). */
     title?: string
     /** Remote PTY session, while one is open. */
@@ -36,7 +40,10 @@
   }
 
   let nextId = 1
-  let tabs = $state<Tab[]>([{ id: nextId++, cwd: '~' }])
+  const tabAt = (dir?: string): Tab => ({ id: nextId++, cwd: dir ?? '~', startDir: dir })
+  // A window opened to show a folder starts there instead of at home.
+  const asked = untrack(() => terminalRequests.take(win.serverID))
+  let tabs = $state<Tab[]>(asked.length > 0 ? asked.map(tabAt) : [tabAt()])
   let activeId = $state(1)
   // Component and xterm instances stay out of $state, which would proxy them.
   const views: Record<number, XTerm> = {}
@@ -91,7 +98,7 @@
       const term = terms.get(tab.id)
       if (!tab.ready || !term || tab.session || tab.starting || tab.lost) continue
       tab.starting = true
-      termStart(win.serverID, term.cols, term.rows, settings.terminalPrompt)
+      termStart(win.serverID, term.cols, term.rows, settings.terminalPrompt, tab.startDir)
         .then((id) => (tab.session = id))
         .catch(() => {
           term.write(`\r\n\x1b[31m${t.terminal.startFailed}\x1b[0m\r\n`)
@@ -135,11 +142,19 @@
     }
   })
 
-  function newTab() {
-    const tab: Tab = { id: nextId++, cwd: '~' }
+  function newTab(dir?: string) {
+    const tab = tabAt(dir)
     tabs.push(tab)
     activeId = tab.id
   }
+
+  // "Open Terminal here" from Files, while this window is already open.
+  $effect(() => {
+    if (!terminalRequests.list.some((r) => r.serverID === win.serverID)) return
+    untrack(() => {
+      for (const dir of terminalRequests.take(win.serverID)) newTab(dir)
+    })
+  })
 
   function closeTab(id: number) {
     const i = tabs.findIndex((tb) => tb.id === id)
@@ -178,7 +193,7 @@
         {/if}
       </div>
     {/each}
-    <button class="add" aria-label={t.terminal.newTab} onclick={newTab}>
+    <button class="add" aria-label={t.terminal.newTab} onclick={() => newTab()}>
       <Icon name="plus" size={12} strokeWidth={2.2} />
     </button>
   </div>

@@ -12,9 +12,11 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 
 	"davish/internal/conn"
+	"davish/internal/fs"
 	"davish/internal/store"
 	"davish/internal/sysmon"
 	"davish/internal/term"
+	"davish/internal/transfer"
 )
 
 // App is bound to the frontend; every exported method becomes a binding.
@@ -24,11 +26,14 @@ type App struct {
 	// nil until Startup, and EventsEmit aborts the process on any other ctx.
 	wails atomic.Pointer[context.Context]
 
-	store   *store.Store
-	secrets *store.Secrets
-	conns   *conn.Manager
-	terms   *term.Service
-	sysmon  *sysmon.Service
+	store     *store.Store
+	settings  *store.Settings
+	secrets   *store.Secrets
+	conns     *conn.Manager
+	terms     *term.Service
+	sysmon    *sysmon.Service
+	files     *fs.Service
+	transfers *transfer.Service
 }
 
 // New wires the services with their config under os.UserConfigDir()/davish.
@@ -43,10 +48,15 @@ func New() (*App, error) {
 	a := &App{ctx: context.Background()}
 	a.secrets = store.NewSecrets(store.OSKeyring{})
 	a.store = store.New(dir, a.secrets)
+	a.settings = store.NewSettings(dir, log)
 	hostKeys := conn.NewHostKeys(filepath.Join(dir, "known_hosts"))
 	a.conns = conn.NewManager(a.store, a.secrets, hostKeys, emitter{a}, log, conn.Options{})
 	a.terms = term.New(a.conns, emitter{a}, log)
 	a.sysmon = sysmon.New(a.conns, emitter{a}, log, sysmon.Options{})
+	a.files = fs.New(a.conns, log)
+	if a.transfers, err = transfer.New(a.conns, emitter{a}, log, transfer.Options{}); err != nil {
+		return nil, err
+	}
 	return a, nil
 }
 
@@ -59,6 +69,7 @@ func (a *App) Startup(ctx context.Context) {
 // Shutdown is called by Wails before the process exits.
 func (a *App) Shutdown(_ context.Context) {
 	a.sysmon.Close()
+	a.transfers.Close()
 	a.terms.CloseAll()
 	a.conns.Close()
 }

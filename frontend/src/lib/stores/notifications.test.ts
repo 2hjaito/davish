@@ -15,7 +15,7 @@ vi.mock('../api/events', () => ({
   },
 }))
 
-const { describe, notifications } = await import('./notifications.svelte')
+const { BANNER_MS, describe, MAX_BANNERS, notifications } = await import('./notifications.svelte')
 
 const mem: NotifyNew = {
   id: 's1:mem',
@@ -61,5 +61,54 @@ suite('notifications', () => {
 
     stop()
     expect(api.off).toHaveBeenCalledOnce()
+  })
+})
+
+suite('banners', () => {
+  const note = (id: string, level: 'info' | 'warn' | 'error' = 'info') => ({
+    id,
+    level,
+    title: id,
+    body: '',
+    serverID: 's1',
+    at: 0,
+  })
+
+  it('shows a new notification for a while, then keeps it only in the list', () => {
+    vi.useFakeTimers()
+    notifications.list = []
+    notifications.bannerIds = []
+    notifications.add(note('a'))
+    expect(notifications.banners.map((n) => n.id)).toEqual(['a'])
+    vi.advanceTimersByTime(BANNER_MS.info)
+    expect(notifications.banners).toEqual([])
+    expect(notifications.list.map((n) => n.id)).toEqual(['a'])
+    vi.useRealTimers()
+  })
+
+  it('keeps a banner while hovered and drops it when dismissed', () => {
+    vi.useFakeTimers()
+    notifications.list = []
+    notifications.bannerIds = []
+    notifications.add(note('b', 'error'))
+    notifications.holdBanner('b')
+    vi.advanceTimersByTime(BANNER_MS.error * 2)
+    expect(notifications.bannerIds).toEqual(['b'])
+    notifications.releaseBanner('b')
+    vi.advanceTimersByTime(3000)
+    expect(notifications.bannerIds).toEqual([])
+    notifications.add(note('c'))
+    notifications.dismiss('c')
+    expect(notifications.bannerIds).toEqual([])
+    vi.useRealTimers()
+  })
+
+  it('shows at most a few, newest first, and re-shows a replaced one', () => {
+    notifications.list = []
+    notifications.bannerIds = []
+    for (const id of ['1', '2', '3', '4']) notifications.add(note(id))
+    expect(notifications.bannerIds).toEqual(['4', '3', '2'].slice(0, MAX_BANNERS))
+    notifications.add(note('2'))
+    expect(notifications.bannerIds[0]).toBe('2')
   })
 })

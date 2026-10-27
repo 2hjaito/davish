@@ -1,104 +1,439 @@
 <script lang="ts">
-  import { formatBytes } from '../../lib/format'
+  import { tick, untrack } from 'svelte'
+
+  import { toUserError } from '../../lib/api/errors'
+  import { type Entry, filesHome, filesList } from '../../lib/api/files'
+  import { hasRuntime } from '../../lib/api/runtime'
+  import {
+    registerDropTarget,
+    transferDownload,
+    transferPickFiles,
+    transferPickFolder,
+    transferPlanUpload,
+    transferUpload,
+    type UploadItem,
+    type UploadRequest,
+  } from '../../lib/api/transfer'
+  import { formatPct } from '../../lib/format'
   import { t } from '../../lib/i18n/vi'
+  import { hasPrimaryModifier, shortcut } from '../../lib/shell/platform'
+  import { load, save } from '../../lib/stores/persist'
   import { servers } from '../../lib/stores/servers.svelte'
+  import { landingKey, summarize, transfers } from '../../lib/stores/transfers.svelte'
+  import Empty from '../../lib/ui/Empty.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
+  import type { IconName } from '../../lib/ui/icons'
   import { getWindowContext } from '../../lib/wm/context'
+  import { openTransfers } from '../../lib/wm/intents.svelte'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import type { AppProps } from '../types'
-  import { join, mockFs, places, remotePlaces } from './mockFs'
+  import { actionForKey } from './actions'
+  import FileActions from './FileActions.svelte'
+  import FileList from './FileList.svelte'
+  import {
+    baseName,
+    crumbs,
+    filterEntries,
+    nextOrder,
+    parentPath,
+    SORT_KEYS,
+    type SortKey,
+    type SortOrder,
+    sortEntries,
+    within,
+  } from './listing'
+  import { cameFrom, type FolderView, lastDir, rememberDir } from './memory'
+  import { mockHome, mockList } from './mockFs'
+  import UploadConflictDialog, { type Answer } from './UploadConflictDialog.svelte'
 
   let { win }: AppProps = $props()
 
   const ctx = getWindowContext()
 
-  let cwd = $state('/etc/nginx')
+  const saved = load('files', { order: { key: 'name', desc: false } as SortOrder })
+  let order = $state<SortOrder>(
+    SORT_KEYS.includes(saved.order.key) ? saved.order : { key: 'name', desc: false },
+  )
+  $effect(() => save('files', { order }))
+
+  let home = $state<string | null>(null)
+  /** The folder on screen; it only changes once its listing has arrived. */
+  let cwd = $state<string | null>(null)
+  let listing = $state.raw<Entry[]>([])
+  let fetchedAt = $state(new Date())
+  let loading = $state(false)
+  let error = $state('')
   let query = $state('')
   let selected = $state<string | null>(null)
   let back = $state<string[]>([])
   let forward = $state<string[]>([])
+  let search = $state<HTMLInputElement>()
+  let main = $state<HTMLDivElement>()
+  let root = $state<HTMLDivElement>()
+  let list = $state<ReturnType<typeof FileList>>()
+  let actions = $state<ReturnType<typeof FileActions>>()
+  /** A short confirmation in the path bar, like "path copied". */
+  let flash = $state('')
+  let flashTimer: ReturnType<typeof setTimeout> | undefined
+  // Scroll and selection of folders already visited in this window, so
+  // coming back lands where the user left off. Not reactive: only read
+  // when arriving in a folder.
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity -- read on arrival only
+  const views = new Map<string, FolderView>()
+  /** The name clash being asked about, and how to answer it. */
+  let conflict = $state<{
+    item: UploadItem
+    remaining: number
+    answer: (a: Answer) => void
+  } | null>(null)
 
-  const serverName = $derived(servers.list.find((s) => s.id === win.serverID)?.name ?? '')
-  const otherServers = $derived(servers.list.filter((s) => s.id !== win.serverID))
-  const crumbs = $derived(
-    cwd
-      .split('/')
-      .filter(Boolean)
-      .map((name, i, all) => ({ name, path: '/' + all.slice(0, i + 1).join('/') })),
-  )
-  const folderName = $derived(crumbs.at(-1)?.name ?? serverName)
-  const entries = $derived(
-    (mockFs[cwd] ?? []).filter((e) => e.name.toLowerCase().includes(query.trim().toLowerCase())),
-  )
+  const server = $derived(servers.list.find((s) => s.id === win.serverID))
+  const connected = $derived(!hasRuntime || server?.state === 'connected')
+  const entries = $derived(filterEntries(sortEntries(listing, order), query))
+  const title = $derived(cwd === null ? (server?.name ?? '') : baseName(cwd))
+  const busy = $derived(summarize(transfers.list, win.serverID))
+  const canTransfer = $derived(hasRuntime && connected && cwd !== null)
 
-  function show(path: string) {
-    cwd = path
-    query = ''
-    selected = null
+  interface Place {
+    label: string
+    path: string
+    icon: IconName
   }
 
-  function go(path: string) {
+  const places = $derived<Place[]>([
+    ...(home ? [{ label: t.files.home, path: home, icon: 'home' as const }] : []),
+    { label: t.files.root, path: '/', icon: 'disk' },
+    ...['/etc', '/var/log', '/opt', '/tmp'].map((path) => ({
+      label: path,
+      path,
+      icon: 'folder' as const,
+    })),
+  ])
+  // The most specific place holding cwd, so /etc/nginx lights up /etc, not /.
+  const activePlace = $derived(
+    cwd === null
+      ? null
+      : places
+          .filter((p) => within(cwd ?? '', p.path))
+          .reduce<Place | null>((a, p) => (a && a.path.length >= p.path.length ? a : p), null),
+  )
+
+  // Requests can overlap (double clicks, slow links); only the latest counts.
+  let seq = 0
+
+  /**
+   * Lists path and shows it; false when it could not be listed. quiet keeps
+   * a failure off screen, for guesses like the last folder of a past run.
+   */
+  async function show(path: string, quiet = false): Promise<boolean> {
+    const id = win.serverID
+    const mine = ++seq
+    loading = true
+    try {
+      const entries = hasRuntime ? await filesList(id, path) : mockList(path)
+      if (mine !== seq) return false
+      const from = cwd
+      const arriving = path !== from
+      if (arriving && from !== null) {
+        views.set(from, { scrollTop: list?.getScroll() ?? 0, selected })
+      }
+      const view = arriving ? views.get(path) : undefined
+      if (arriving) {
+        query = ''
+        selected = (from && cameFrom(from, path)) ?? view?.selected ?? null
+      }
+      if (selected !== null && !entries.some((e) => e.path === selected)) selected = null
+      cwd = path
+      listing = entries
+      fetchedAt = new Date()
+      error = ''
+      rememberDir(id, path)
+      if (arriving) {
+        await tick()
+        list?.restore(view?.scrollTop ?? 0, selected)
+      }
+      return true
+    } catch (e) {
+      if (mine === seq && !quiet) error = toUserError(e).message
+      return false
+    } finally {
+      if (mine === seq) loading = false
+    }
+  }
+
+  async function start() {
+    try {
+      home = hasRuntime ? await filesHome(win.serverID) : mockHome
+    } catch (e) {
+      error = toUserError(e).message
+      return
+    }
+    // Back where the last run left this server, if that folder still opens.
+    const last = lastDir(win.serverID)
+    if (last && last !== home && (await show(last, true))) return
+    await show(home)
+  }
+
+  function reload() {
+    if (cwd === null) void start()
+    else void show(cwd)
+  }
+
+  /** After a change on the server: list again, then select path if given. */
+  async function changed(path: string | null) {
+    if (cwd === null || !(await show(cwd))) return
+    if (path === null || !listing.some((e) => e.path === path)) return
+    selected = path
+    await tick()
+    list?.restore(null, path)
+  }
+
+  function showFlash(text: string) {
+    flash = text
+    clearTimeout(flashTimer)
+    flashTimer = setTimeout(() => (flash = ''), 2500)
+  }
+
+  /** Shortcuts for the drag menu's actions; false when the key is not one. */
+  function actionKey(e: KeyboardEvent): boolean {
+    // Typing in the search box or a dialog never touches files.
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)
+      return false
+    const id = actionForKey({
+      key: e.key,
+      code: e.code,
+      primary: hasPrimaryModifier(e),
+      shift: e.shiftKey,
+      alt: e.altKey,
+    })
+    if (!id || !connected) return false
+    const entry = listing.find((x) => x.path === selected) ?? null
+    if (!entry && id !== 'terminal') return false
+    e.preventDefault()
+    actions?.act(id, entry)
+    return true
+  }
+
+  // Load on open and again whenever the server comes back.
+  $effect(() => {
+    if (connected) untrack(reload)
+  })
+
+  // Uploads that finish in the folder on screen show up without a refresh.
+  let seen: number | undefined
+  $effect(() => {
+    const n = cwd === null ? undefined : transfers.landed[landingKey(win.serverID, cwd)]
+    if (n !== undefined && seen !== undefined && n !== seen) untrack(reload)
+    seen = n
+  })
+
+  // Files dropped from the OS upload into the folder on screen.
+  $effect(() => {
+    if (main) return registerDropTarget(main, (paths) => void upload(paths))
+  })
+
+  function ask(item: UploadItem, remaining: number): Promise<Answer> {
+    return new Promise((resolve) => {
+      conflict = {
+        item,
+        remaining,
+        answer: (a) => {
+          conflict = null
+          resolve(a)
+        },
+      }
+    })
+  }
+
+  /** Uploads local paths into the folder on screen, asking about name clashes one by one. */
+  async function upload(locals: string[]) {
+    const dir = cwd
+    if (!canTransfer || dir === null || locals.length === 0) return
+    const id = win.serverID
+    try {
+      const items = await transferPlanUpload(id, dir, locals)
+      const reqs: UploadRequest[] = []
+      let clashes = items.filter((it) => it.exists).length
+      for (const it of items) {
+        if (!it.exists) {
+          reqs.push({ local: it.local, replace: false })
+          continue
+        }
+        const a = await ask(it, --clashes)
+        if (a !== 'skip') reqs.push({ local: it.local, replace: a === 'replace' })
+      }
+      if (reqs.length > 0) transfers.add(await transferUpload(id, dir, reqs))
+      error = ''
+    } catch (e) {
+      error = toUserError(e).message
+    }
+  }
+
+  async function pickAndUpload(folder: boolean) {
+    if (!canTransfer) return
+    try {
+      const picked = folder
+        ? [await transferPickFolder(t.files.pickFolder)].filter(Boolean)
+        : await transferPickFiles(t.files.pickFiles)
+      await upload(picked)
+    } catch (e) {
+      error = toUserError(e).message
+    }
+  }
+
+  async function download() {
+    if (!canTransfer || selected === null) return
+    try {
+      transfers.add(await transferDownload(win.serverID, [selected]))
+      error = ''
+    } catch (e) {
+      error = toUserError(e).message
+    }
+  }
+
+  async function go(path: string) {
     if (path === cwd) return
-    back.push(cwd)
-    forward = []
-    show(path)
+    const from = cwd
+    if ((await show(path)) && from !== null) {
+      back.push(from)
+      forward = []
+    }
   }
 
-  function goBack() {
-    const path = back.pop()
-    if (path === undefined) return
-    forward.push(cwd)
-    show(path)
+  async function goBack() {
+    const path = back.at(-1)
+    if (path === undefined || cwd === null) return
+    const from = cwd
+    if (await show(path)) {
+      back.pop()
+      forward.push(from)
+    }
   }
 
-  function goForward() {
-    const path = forward.pop()
-    if (path === undefined) return
-    back.push(cwd)
-    show(path)
+  async function goForward() {
+    const path = forward.at(-1)
+    if (path === undefined || cwd === null) return
+    const from = cwd
+    if (await show(path)) {
+      forward.pop()
+      back.push(from)
+    }
   }
 
-  function isActivePlace(path: string) {
-    return cwd === path || cwd.startsWith(path + '/')
+  function openEntry(e: Entry) {
+    // Files open in the Editor from M6 on.
+    if (e.dir) void go(e.path)
+  }
+
+  function sortBy(key: SortKey) {
+    order = nextOrder(order, key)
+  }
+
+  function onkeydown(e: KeyboardEvent) {
+    if (actionKey(e)) return
+    // ⌘⌥L like Safari's downloads; code, since Option changes e.key on macOS.
+    if (hasPrimaryModifier(e) && e.altKey && !e.shiftKey && e.code === 'KeyL') {
+      e.preventDefault()
+      openTransfers(win.serverID)
+      return
+    }
+    if (!hasPrimaryModifier(e) || e.altKey) return
+    const actions: Record<string, () => void> = e.shiftKey
+      ? { u: () => void pickAndUpload(true) }
+      : {
+          ArrowUp: () => cwd !== null && void go(parentPath(cwd)),
+          '[': () => void goBack(),
+          ']': () => void goForward(),
+          f: () => search?.focus(),
+          u: () => void pickAndUpload(false),
+          d: () => void download(),
+        }
+    const action = actions[e.key.toLowerCase()] ?? actions[e.key]
+    if (!action) return
+    e.preventDefault()
+    action()
   }
 </script>
 
-<div class="files" class:blurred={!ctx.focused}>
+<!-- Shortcuts for the whole window; every one also has a button. -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div class="files" {onkeydown} bind:this={root}>
   <nav class="sidebar" aria-label={t.files.places}>
     <TitleBar bare />
     <div class="places">
-      <span class="group">{serverName}</span>
+      <span class="group">{server?.name ?? ''}</span>
       {#each places as p (p.path)}
-        <button class="place" class:active={isActivePlace(p.path)} onclick={() => go(p.path)}>
+        <button
+          class="place"
+          class:active={activePlace?.path === p.path}
+          disabled={!connected}
+          onclick={() => void go(p.path)}
+        >
           <Icon name={p.icon} size={16} />
-          {p.label}
+          <span class="label">{p.label}</span>
         </button>
-      {/each}
-      {#each otherServers as s (s.id)}
-        <span class="group">{s.name}</span>
-        {#each remotePlaces as p (p.path)}
-          <button class="place" disabled>
-            <Icon name={p.icon} size={16} />
-            {p.label}
-          </button>
-        {/each}
       {/each}
     </div>
   </nav>
 
-  <div class="main">
+  <div class="main" bind:this={main}>
     <!-- Pointer handlers here only add window dragging, as on the title bar. -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="toolbar" onpointerdown={ctx.startDrag} ondblclick={ctx.toggleMaximize}>
       <div class="nav">
-        <button aria-label={t.files.back} disabled={back.length === 0} onclick={goBack}>
+        <button
+          aria-label={t.files.back}
+          title="{t.files.back} ({shortcut('[')})"
+          disabled={back.length === 0}
+          onclick={() => void goBack()}
+        >
           <Icon name="chevronLeft" size={18} strokeWidth={2.2} />
         </button>
-        <button aria-label={t.files.forward} disabled={forward.length === 0} onclick={goForward}>
+        <button
+          aria-label={t.files.forward}
+          title="{t.files.forward} ({shortcut(']')})"
+          disabled={forward.length === 0}
+          onclick={() => void goForward()}
+        >
           <Icon name="chevronRight" size={18} strokeWidth={2.2} />
         </button>
+        <button
+          aria-label={t.files.up}
+          title="{t.files.up} ({shortcut('↑')})"
+          disabled={cwd === null || cwd === '/'}
+          onclick={() => cwd !== null && void go(parentPath(cwd))}
+        >
+          <Icon name="arrowUp" size={16} strokeWidth={2.2} />
+        </button>
       </div>
-      <h2 class="title">{folderName}</h2>
+      <h2 class="title" title={cwd ?? ''}>{title}</h2>
+      <button
+        class="tool"
+        aria-label={t.files.upload}
+        title="{t.files.upload} ({shortcut('U')}) · {t.files.uploadFolder} ({shortcut('⇧U')})"
+        disabled={!canTransfer}
+        onclick={(e) => void pickAndUpload(e.altKey)}
+      >
+        <Icon name="upload" size={15} strokeWidth={2.2} />
+      </button>
+      <button
+        class="tool"
+        aria-label={t.files.download}
+        title="{t.files.download} ({shortcut('D')})"
+        disabled={!canTransfer || selected === null}
+        onclick={() => void download()}
+      >
+        <Icon name="download" size={15} strokeWidth={2.2} />
+      </button>
+      <button
+        class="tool"
+        aria-label={t.files.refresh}
+        title={t.files.refresh}
+        disabled={!connected || loading}
+        onclick={reload}
+      >
+        <Icon name="refresh" size={14} strokeWidth={2.2} />
+      </button>
       <label class="search">
         <Icon name="search" size={13} strokeWidth={2.2} />
         <input
@@ -106,52 +441,82 @@
           placeholder={t.files.search}
           aria-label={t.files.searchLabel}
           bind:value={query}
+          bind:this={search}
+          onkeydown={(e) => e.key === 'Escape' && (query = '')}
         />
       </label>
     </div>
 
-    <div class="list">
-      <div class="row head">
-        <span>{t.files.name}</span><span class="size">{t.files.size}</span><span
-          >{t.files.modified}</span
-        >
+    {#if error}
+      <div class="error" role="alert">
+        <Icon name="warning" size={14} strokeWidth={2.2} />
+        <span>{error}</span>
+        <button onclick={reload}>{t.files.retry}</button>
       </div>
-      {#each entries as e (e.name)}
-        <button
-          class="row"
-          class:selected={selected === e.name}
-          onclick={() => (selected = e.name)}
-          ondblclick={() => e.dir && go(join(cwd, e.name))}
-        >
-          <span class="name" class:dir={e.dir}>
-            <Icon name={e.dir ? 'folder' : 'file'} size={16} strokeWidth={e.dir ? 1.5 : 1.8} />
-            <span class="label">{e.name}</span>
-          </span>
-          <span class="meta size">
-            {#if e.size === undefined}<span class="none">--</span>{:else}{formatBytes(e.size)}{/if}
-          </span>
-          <span class="meta">{e.modified}</span>
-        </button>
-      {:else}
-        <p class="empty">{query ? t.files.noMatch : t.files.empty}</p>
-      {/each}
-    </div>
+    {/if}
+
+    {#if !connected}
+      <Empty icon="server" title={t.files.offline} hint={t.files.offlineHint} />
+    {:else if cwd === null}
+      {#if !error}<Empty icon="folder" title={t.files.loading} />{/if}
+    {:else if entries.length === 0}
+      <Empty icon="folder" title={query ? t.files.noMatch : t.files.empty} />
+    {:else}
+      <FileList
+        {entries}
+        {order}
+        {selected}
+        now={fetchedAt}
+        onsort={sortBy}
+        onselect={(path) => (selected = path)}
+        onopen={openEntry}
+        ondrag={(entry, phase, x, y) => actions?.drag(entry, phase, x, y)}
+        bind:this={list}
+      />
+    {/if}
 
     <nav class="pathbar" aria-label={t.files.path}>
-      <button class="crumb" onclick={() => go('/')}>
+      <button class="crumb" disabled={!connected} onclick={() => void go('/')}>
         <Icon name="server" size={12} />
-        {serverName}
+        {server?.name ?? '/'}
       </button>
-      {#each crumbs as c (c.path)}
+      {#each crumbs(cwd ?? '/') as c (c.path)}
         <Icon name="chevronRight" size={10} strokeWidth={2.4} />
-        <button class="crumb" onclick={() => go(c.path)}>
+        <button class="crumb" onclick={() => void go(c.path)}>
           <Icon name="folder" size={12} />
           {c.name}
         </button>
       {/each}
+      {#if flash}
+        <span class="count flash" role="status">{flash}</span>
+      {:else if busy.count > 0}
+        <button
+          class="count busy"
+          title="{t.transfers.open} ({shortcut('⌥L')})"
+          onclick={() => openTransfers(win.serverID)}
+          >{t.files.transferring(busy.count, formatPct(busy.fraction * 100))}</button
+        >
+      {:else if cwd !== null && connected}
+        <span class="count">{t.files.count(listing.length)}</span>
+      {/if}
     </nav>
   </div>
 </div>
+
+<FileActions
+  bind:this={actions}
+  serverID={win.serverID}
+  {cwd}
+  bounds={() => root?.getBoundingClientRect()}
+  onchanged={(path) => void changed(path)}
+  onflash={showFlash}
+/>
+
+<UploadConflictDialog
+  item={conflict?.item ?? null}
+  remaining={conflict?.remaining ?? 0}
+  onanswer={(a) => conflict?.answer(a)}
+/>
 
 <style>
   /* Finder layout: a translucent sidebar running the full height, beside an
@@ -186,10 +551,6 @@
     padding: 6px 8px 4px;
   }
 
-  .group:not(:first-child) {
-    padding-top: 14px;
-  }
-
   .place {
     display: flex;
     align-items: center;
@@ -200,6 +561,12 @@
     padding: 5px 8px;
     border-radius: var(--control-radius);
     transition: background var(--dur-fast) var(--ease-out);
+  }
+
+  .place .label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .place :global(svg) {
@@ -223,13 +590,22 @@
     color: var(--fg-subtle);
   }
 
+  /* Wails delivers OS file drops only over elements with this property. */
   .main {
+    --wails-drop-target: drop;
     flex: 1;
     min-width: 0;
     display: flex;
     flex-direction: column;
     background: var(--content-bg);
     border-left: 1px solid var(--divider-soft);
+  }
+
+  /* Wails adds this class while files are dragged over the window. */
+  .main:global(.wails-drop-target-active) {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+    background: var(--accent-soft);
   }
 
   .toolbar {
@@ -246,9 +622,14 @@
     display: flex;
   }
 
-  .nav button {
+  .nav button,
+  .tool {
     display: flex;
-    padding: 3px;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
     border: 0;
     border-radius: var(--control-radius);
     background: none;
@@ -256,11 +637,13 @@
     transition: background var(--dur-fast) var(--ease-out);
   }
 
-  .nav button:hover:not(:disabled) {
+  .nav button:hover:not(:disabled),
+  .tool:hover:not(:disabled) {
     background: var(--fill-soft);
   }
 
-  .nav button:disabled {
+  .nav button:disabled,
+  .tool:disabled {
     color: var(--fg-subtle);
     opacity: 0.5;
   }
@@ -295,120 +678,39 @@
     color: var(--fg);
   }
 
-  .list {
-    flex: 1;
-    min-height: 0;
-    padding: 0 8px 6px;
-    font-size: var(--text-md);
-    overflow-y: auto;
-  }
-
-  .row {
-    width: 100%;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 76px 100px;
-    gap: 14px;
-    padding: 6px 10px;
-    border: 0;
-    border-radius: var(--control-radius);
-    background: transparent;
-    align-items: center;
-    text-align: left;
-  }
-
-  /* Zebra stripes, like Finder's list view, guide the eye along a row. */
-  button.row:nth-of-type(even) {
-    background: var(--row-stripe);
-  }
-
-  button.row:hover {
-    background: var(--row-hover);
-  }
-
-  /* Like Finder: a solid accent row, clearly apart from the hover tint; it
-     turns gray while the window is in the background. */
-  button.row.selected {
-    background: var(--accent);
-  }
-
-  .row.head {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    margin: 0 -8px 4px;
-    width: calc(100% + 16px);
-    padding: 6px 18px;
-    border-radius: 0;
-    background: var(--content-bg);
-    border-bottom: 1px solid var(--divider-soft);
-    font-size: var(--text-xs);
-    font-weight: 600;
-    color: var(--fg-muted);
-  }
-
-  .name {
+  .error {
     display: flex;
     align-items: center;
     gap: 8px;
+    margin: 8px 8px 0;
+    padding: 6px 10px;
+    border-radius: var(--control-radius);
+    background: var(--fill-soft);
+    font-size: var(--text-sm);
+    color: var(--fg);
+  }
+
+  .error :global(svg) {
+    color: var(--warn);
+    flex-shrink: 0;
+  }
+
+  .error span {
+    flex: 1;
     min-width: 0;
-    color: var(--file-stroke);
   }
 
-  .name.dir {
-    color: var(--folder-stroke);
+  .error button {
+    border: 0;
+    background: none;
+    padding: 2px 6px;
+    border-radius: var(--control-radius);
+    color: var(--accent);
+    font-weight: 600;
   }
 
-  .name.dir :global(svg *) {
-    fill: var(--folder-fill);
-  }
-
-  .label {
-    color: var(--fg);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .meta {
-    color: var(--fg-muted);
-  }
-
-  /* Like Finder: sizes line up on the right so their magnitudes compare at a glance. */
-  .size {
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* Folders have no size. Plain figures keep the two dashes tight. */
-  .none {
-    font-variant-numeric: normal;
-    color: var(--fg-subtle);
-  }
-
-  .selected :is(.name, .label, .meta) {
-    color: var(--fg-on-accent);
-  }
-
-  .selected .name.dir :global(svg *) {
-    fill: var(--fg-on-accent);
-  }
-
-  .blurred button.row.selected {
-    background: var(--selection-inactive);
-  }
-
-  .blurred .selected :is(.name, .label, .meta) {
-    color: var(--fg);
-  }
-
-  .blurred .selected .name.dir :global(svg *) {
-    fill: var(--folder-fill);
-  }
-
-  .empty {
-    padding: 20px 10px;
-    color: var(--fg-subtle);
-    text-align: center;
+  .error button:hover {
+    background: var(--accent-soft);
   }
 
   .pathbar {
@@ -439,7 +741,30 @@
     color: var(--accent);
   }
 
-  .crumb:hover {
+  .crumb:hover:not(:disabled) {
     background: var(--fill-soft);
+  }
+
+  .count {
+    margin-left: auto;
+    padding-left: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .count.flash {
+    color: var(--ok);
+  }
+
+  .count.busy {
+    border: 0;
+    border-radius: 4px;
+    padding: 1px 6px;
+    background: none;
+    color: var(--accent);
+    font-size: inherit;
+  }
+
+  .count.busy:hover {
+    background: var(--accent-soft);
   }
 </style>
