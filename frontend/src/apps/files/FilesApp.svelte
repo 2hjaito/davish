@@ -24,7 +24,7 @@
   import Icon from '../../lib/ui/Icon.svelte'
   import type { IconName } from '../../lib/ui/icons'
   import { getWindowContext } from '../../lib/wm/context'
-  import { openTransfers } from '../../lib/wm/intents.svelte'
+  import { openFileInEditor, openTransfers } from '../../lib/wm/intents.svelte'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import type { AppProps } from '../types'
   import { actionForKey } from './actions'
@@ -321,8 +321,8 @@
   }
 
   function openEntry(e: Entry) {
-    // Files open in the Editor from M6 on.
     if (e.dir) void go(e.path)
+    else openFileInEditor(win.serverID, e.path)
   }
 
   function sortBy(key: SortKey) {

@@ -1,0 +1,298 @@
+<script lang="ts">
+  import { untrack } from 'svelte'
+
+  import { toUserError } from '../../lib/api/errors'
+  import { type FileContent, filesRead } from '../../lib/api/files'
+  import { hasRuntime } from '../../lib/api/runtime'
+  import { t } from '../../lib/i18n/vi'
+  import { servers } from '../../lib/stores/servers.svelte'
+  import Empty from '../../lib/ui/Empty.svelte'
+  import Icon from '../../lib/ui/Icon.svelte'
+  import { type EditorRequest, editorRequests } from '../../lib/wm/intents.svelte'
+  import TitleBar from '../../lib/wm/TitleBar.svelte'
+  import { mockRead } from '../files/mockFs'
+  import type { AppProps } from '../types'
+  import CodeEditor from './CodeEditor.svelte'
+  import { decodeText } from './decode'
+  import { detectLanguage, LANGUAGE_LABELS, type LanguageId } from './languages'
+
+  let { win }: AppProps = $props()
+
+  interface Tab {
+    id: number
+    path: string
+    name: string
+    state: 'loading' | 'ready' | 'error'
+    error?: string
+    /** Text as read; edits live in the editor until saved. */
+    doc: string
+    language: LanguageId
+    /** Stat at read time, to tell later whether the server copy changed. */
+    file?: Omit<FileContent, 'data'>
+    line?: number
+    dirty: boolean
+    cursor: { line: number; col: number }
+  }
+
+  let nextId = 1
+  let tabs = $state<Tab[]>([])
+  let activeId = $state<number | null>(null)
+  const views: Record<number, CodeEditor> = {}
+
+  const server = $derived(servers.list.find((s) => s.id === win.serverID))
+  const active = $derived(tabs.find((x) => x.id === activeId))
+
+  function open(req: EditorRequest) {
+    const existing = tabs.find((x) => x.path === req.path)
+    if (existing) {
+      activeId = existing.id
+      if (req.line) views[existing.id]?.goToLine(req.line)
+      return
+    }
+    const name = req.path.slice(req.path.lastIndexOf('/') + 1)
+    const tab: Tab = {
+      id: nextId++,
+      path: req.path,
+      name,
+      state: 'loading',
+      doc: '',
+      language: detectLanguage(req.path),
+      line: req.line,
+      dirty: false,
+      cursor: { line: 1, col: 1 },
+    }
+    tabs.push(tab)
+    activeId = tab.id
+    void load(tab.id)
+  }
+
+  async function load(id: number) {
+    const tab = tabs.find((x) => x.id === id)
+    if (!tab) return
+    tab.state = 'loading'
+    try {
+      const text = hasRuntime ? await readText(tab) : mockRead(tab.path)
+      const nl = text.indexOf('\n')
+      tab.language = detectLanguage(tab.path, nl === -1 ? text : text.slice(0, nl))
+      tab.doc = text
+      tab.state = 'ready'
+    } catch (e) {
+      tab.error =
+        e instanceof Error && e.message === 'binary' ? t.editor.binary : toUserError(e).message
+      tab.state = 'error'
+    }
+  }
+
+  async function readText(tab: Tab): Promise<string> {
+    const { data, ...file } = await filesRead(win.serverID, tab.path)
+    const text = decodeText(data)
+    if (text === null) throw new Error('binary')
+    tab.file = file
+    return text
+  }
+
+  function closeTab(id: number) {
+    const i = tabs.findIndex((x) => x.id === id)
+    if (i === -1) return
+    tabs.splice(i, 1)
+    delete views[id]
+    if (activeId === id) activeId = tabs[Math.min(i, tabs.length - 1)]?.id ?? null
+  }
+
+  // Files asked for before this window existed, then any asked for later.
+  for (const req of untrack(() => editorRequests.take(win.serverID))) open(req)
+  $effect(() => {
+    if (!editorRequests.list.some((r) => r.serverID === win.serverID)) return
+    untrack(() => {
+      for (const req of editorRequests.take(win.serverID)) open(req)
+    })
+  })
+</script>
+
+<TitleBar>
+  <div class="tabs" role="tablist" aria-label={t.editor.tabs}>
+    {#each tabs as tab (tab.id)}
+      <div class="tab" class:active={tab.id === activeId}>
+        <button
+          role="tab"
+          class="label"
+          aria-selected={tab.id === activeId}
+          title={tab.path}
+          onclick={() => (activeId = tab.id)}
+        >
+          {tab.name}{#if tab.dirty}<span class="dot" aria-label={t.editor.unsaved}>●</span>{/if}
+        </button>
+        <button
+          class="close"
+          aria-label={t.editor.closeTab(tab.name)}
+          onclick={() => closeTab(tab.id)}
+        >
+          <Icon name="close" size={10} strokeWidth={2.5} />
+        </button>
+      </div>
+    {/each}
+  </div>
+  <span class="spacer"></span>
+</TitleBar>
+
+<div class="body">
+  {#if tabs.length === 0}
+    <Empty icon="editor" title={t.editor.empty} hint={t.editor.emptyHint} />
+  {/if}
+  {#each tabs as tab (tab.id)}
+    <div class="pane" class:hidden={tab.id !== activeId}>
+      {#if tab.state === 'loading'}
+        <Empty icon="file" title={t.editor.loading} />
+      {:else if tab.state === 'error'}
+        <div class="failed">
+          <Empty icon="warning" title={tab.error ?? ''} />
+          <button class="btn" onclick={() => void load(tab.id)}>{t.editor.retry}</button>
+        </div>
+      {:else}
+        <CodeEditor
+          bind:this={views[tab.id]}
+          doc={tab.doc}
+          language={tab.language}
+          line={tab.line}
+          onchange={(c) => {
+            tab.cursor = { line: c.line, col: c.col }
+            if (c.edited) tab.dirty = true
+          }}
+        />
+      {/if}
+    </div>
+  {/each}
+
+  {#if active}
+    <footer class="status">
+      <span class="path" title={active.path}>{server?.name ?? ''}:{active.path}</span>
+      {#if active.state === 'ready'}
+        <span>{t.editor.position(active.cursor.line, active.cursor.col)}</span>
+        <span>{LANGUAGE_LABELS[active.language]}</span>
+      {/if}
+    </footer>
+  {/if}
+</div>
+
+<style>
+  .tabs {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    overflow: hidden;
+  }
+
+  .tab {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    border-radius: var(--control-radius);
+    color: var(--fg-muted);
+    transition: background var(--dur-fast) var(--ease-out);
+  }
+
+  .tab:hover {
+    background: var(--row-hover);
+  }
+
+  .tab.active {
+    background: var(--tab-active-light);
+    color: var(--fg);
+  }
+
+  /* Room for the close button on both sides keeps the name centered. */
+  .label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border: 0;
+    background: none;
+    padding: 4px 24px;
+    color: inherit;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dot {
+    font-size: 9px;
+    color: var(--fg-muted);
+  }
+
+  .close {
+    position: absolute;
+    left: 5px;
+    display: flex;
+    border: 0;
+    padding: 2px;
+    border-radius: 4px;
+    background: none;
+    color: inherit;
+    opacity: 0;
+    transition: opacity var(--dur-fast) var(--ease-out);
+  }
+
+  .tab:hover .close,
+  .close:focus-visible {
+    opacity: 1;
+  }
+
+  .close:hover {
+    background: var(--fill-soft);
+  }
+
+  .spacer {
+    width: 52px;
+  }
+
+  .body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--content-bg);
+  }
+
+  .pane {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pane.hidden {
+    display: none;
+  }
+
+  .failed {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 24px;
+  }
+
+  .status {
+    flex-shrink: 0;
+    display: flex;
+    gap: 16px;
+    padding: 4px 12px;
+    border-top: 1px solid var(--divider-soft);
+    font-size: var(--text-xs);
+    color: var(--fg-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .path {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>

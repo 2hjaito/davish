@@ -135,6 +135,20 @@
   --term-scrollbar-hover: rgba(255, 255, 255, 0.45);
   --tab-hover-dark: rgba(255, 255, 255, 0.06);
 
+  /* Editor syntax, on the near-white content pane; every color keeps at
+     least 4.5:1 contrast. Text the grammar does not color stays --fg. */
+  --code-comment: #6b7180;
+  --code-keyword: #a626a4;
+  --code-string: #1f7a3a;
+  --code-number: #b35900;
+  --code-property: #0b5cc4;
+  --code-variable: #c0392b;
+  --code-meta: #6a4bc4;
+  --editor-gutter-fg: #9aa0ab;
+  --editor-active-line: rgba(10, 100, 216, 0.05);
+  --editor-selection: rgba(10, 100, 216, 0.18);
+  --editor-match: rgba(224, 138, 18, 0.28);
+
   /* Motion */
   --dur-fast: 120ms;
   --dur: 180ms;

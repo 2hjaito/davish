@@ -61,3 +61,50 @@ export function mockList(dir: string): Entry[] {
 export function mockIsDir(path: string): boolean {
   return path in tree
 }
+
+const NGINX_CONF = `user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+
+events {
+    worker_connections 768;
+}
+
+http {
+    sendfile on;
+    tcp_nopush on;
+    types_hash_max_size 2048;
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    # Logging
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+
+    gzip on;
+
+    include /etc/nginx/conf.d/*.conf;
+    include /etc/nginx/sites-enabled/*;
+}
+`
+
+const BASHRC = `# ~/.bashrc: executed by bash for non-login shells.
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+HISTSIZE=1000
+export EDITOR=vim
+alias ll='ls -alF'
+if [ -f ~/.bash_aliases ]; then
+    . ~/.bash_aliases
+fi
+`
+
+/** File content for the browser preview; real files come over SFTP. */
+export function mockRead(path: string): string {
+  if (path.endsWith('nginx.conf')) return NGINX_CONF
+  if (path.endsWith('.bashrc')) return BASHRC
+  return `# ${path}\n# Nội dung mô phỏng cho bản xem thử trên trình duyệt.\n`
+}
