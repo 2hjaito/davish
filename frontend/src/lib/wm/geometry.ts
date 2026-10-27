@@ -32,6 +32,19 @@ export function resizeRect(r: Rect, edge: Edge, dx: number, dy: number): Rect {
   return { x, y, w, h }
 }
 
+/**
+ * Places a window entirely inside the work area, shrinking it if it is
+ * bigger: used when opening, where a window half off screen (saved on a
+ * larger display, or simply too far right) would look broken.
+ */
+export function fitRect(r: Rect, area: Rect): Rect {
+  const w = Math.min(r.w, area.w)
+  const h = Math.min(r.h, area.h)
+  const x = Math.min(Math.max(r.x, area.x), area.x + area.w - w)
+  const y = Math.min(Math.max(r.y, area.y), area.y + area.h - h)
+  return { x, y, w, h }
+}
+
 /** Keeps the title bar reachable inside the work area. */
 export function clampRect(r: Rect, area: Rect): Rect {
   const w = Math.min(r.w, area.w)
