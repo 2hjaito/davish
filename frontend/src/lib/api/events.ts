@@ -103,6 +103,22 @@ export interface Gpu {
   power: number
 }
 
+/**
+ * A reading that stayed over its threshold (internal/sysmon/alert.go). The
+ * text is written here from kind; id repeats for the same server and reading.
+ */
+export interface NotifyNew {
+  id: string
+  level: 'info' | 'warn' | 'error'
+  serverID: string
+  kind: 'mem-high' | 'disk-high'
+  /** Percent. */
+  value: number
+  threshold: number
+  /** Mount path, for disk-high. */
+  mount?: string
+}
+
 function on<T>(name: EventName, handler: (payload: T) => void): Unsubscribe {
   return EventsOn(name, (payload: T) => handler(payload))
 }
@@ -112,3 +128,4 @@ export const onHostKeyPrompt = (h: (p: HostKeyPrompt) => void) => on(Events.Conn
 export const onTermData = (h: (p: TermData) => void) => on(Events.TermData, h)
 export const onTermExit = (h: (p: TermExit) => void) => on(Events.TermExit, h)
 export const onSysmonTick = (h: (p: SysmonTick) => void) => on(Events.SysmonTick, h)
+export const onNotifyNew = (h: (p: NotifyNew) => void) => on(Events.NotifyNew, h)

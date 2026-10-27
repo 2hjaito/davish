@@ -87,6 +87,10 @@ export const t = {
   notifications: {
     title: 'Thông báo',
     empty: 'Không có thông báo',
+    memHigh: (server: string) => `RAM trên ${server} sắp đầy`,
+    diskHigh: (server: string, mount: string) => `Ổ ${mount} trên ${server} sắp đầy`,
+    overThreshold: (value: string, threshold: string) =>
+      `Đang dùng ${value}, trên ngưỡng ${threshold}.`,
   },
   window: {
     close: 'Đóng',

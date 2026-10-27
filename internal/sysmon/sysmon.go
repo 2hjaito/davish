@@ -36,6 +36,8 @@ type Options struct {
 	// RetryEvery is how long to wait before collecting again after the
 	// server was unreachable or the collector ended.
 	RetryEvery time.Duration
+	// Thresholds trigger notify:new.
+	Thresholds Thresholds
 }
 
 // Service runs one collector per watched server.
@@ -53,6 +55,11 @@ type Service struct {
 	// procsMu guards procs, the last process sample per server.
 	procsMu sync.Mutex
 	procs   map[string]procSample
+
+	// alertsMu guards alerts. Outlives watchers so that watching a server
+	// again does not repeat a notification it already gave.
+	alertsMu sync.Mutex
+	alerts   map[string]*alerter
 }
 
 type watcher struct {
@@ -65,9 +72,13 @@ func New(clients ClientSource, emit Emitter, log *slog.Logger, opts Options) *Se
 	if opts.RetryEvery <= 0 {
 		opts.RetryEvery = 3 * time.Second
 	}
+	if opts.Thresholds == (Thresholds{}) {
+		opts.Thresholds = DefaultThresholds
+	}
 	return &Service{
 		clients: clients, emit: emit, log: log, opts: opts,
 		watchers: map[string]*watcher{}, procs: map[string]procSample{},
+		alerts: map[string]*alerter{},
 	}
 }
 
@@ -153,6 +164,7 @@ func (s *Service) collect(ctx context.Context, serverID string, client *ssh.Clie
 	stop := context.AfterFunc(ctx, func() { sess.Close() }) //nolint:errcheck,gosec // unblocks the reader
 	defer stop()
 
+	s.resumeAlerts(serverID)
 	r := NewReader(stdout)
 	var prev *Snapshot
 	for {
@@ -169,8 +181,35 @@ func (s *Service) collect(ctx context.Context, serverID string, client *ssh.Clie
 			return err
 		}
 		if prev != nil {
-			s.emit.Emit(events.SysmonTick, Rate(serverID, *prev, snap))
+			tick := Rate(serverID, *prev, snap)
+			s.emit.Emit(events.SysmonTick, tick)
+			for _, a := range s.checkAlerts(tick) {
+				s.emit.Emit(events.NotifyNew, a)
+			}
 		}
 		prev = &snap
 	}
+}
+
+// resumeAlerts readies the server's alerter for a new collector. Two
+// collectors can briefly overlap after a quick Unwatch and Watch, hence the
+// lock around every use.
+func (s *Service) resumeAlerts(serverID string) {
+	s.alertsMu.Lock()
+	defer s.alertsMu.Unlock()
+	if a, ok := s.alerts[serverID]; ok {
+		a.resume()
+		return
+	}
+	s.alerts[serverID] = newAlerter(s.opts.Thresholds)
+}
+
+func (s *Service) checkAlerts(t Tick) []Alert {
+	s.alertsMu.Lock()
+	defer s.alertsMu.Unlock()
+	a, ok := s.alerts[t.ServerID]
+	if !ok {
+		return nil
+	}
+	return a.check(t)
 }
