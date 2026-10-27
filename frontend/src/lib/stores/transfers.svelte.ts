@@ -73,9 +73,36 @@ export function describeTransfer(j: Transfer, at = Date.now()): Notification | n
   return null
 }
 
+// Sample jobs for the browser preview only; the real app starts empty.
+const demo: Transfer[] = hasRuntime
+  ? []
+  : [
+      {
+        ...{ id: 'd1', kind: 'download', serverID: 'tsc-vps', name: 'syslog', dir: false },
+        ...{ src: '/var/log/syslog', dst: '~/Downloads/syslog' },
+        ...{ done: 1_887_436, total: 1_887_436, bps: 0, state: 'done' },
+      },
+      {
+        ...{ id: 'd2', kind: 'upload', serverID: 'tsc-vps', name: 'nginx.conf', dir: false },
+        ...{ src: '~/nginx.conf', dst: '/etc/nginx/nginx.conf' },
+        ...{ done: 0, total: 2458, bps: 0, state: 'failed', error: 'Không có quyền truy cập.' },
+      },
+      {
+        ...{
+          id: 'd3',
+          kind: 'upload',
+          serverID: 'tsc-vps',
+          name: 'backup-2026-10.tar.gz',
+          dir: false,
+        },
+        ...{ src: '~/backup-2026-10.tar.gz', dst: '/srv/backups/backup-2026-10.tar.gz' },
+        ...{ done: 412_000_000, total: 1_073_741_824, bps: 11_800_000, state: 'running' },
+      },
+    ]
+
 class Transfers {
   /** Oldest first. */
-  list = $state<Transfer[]>([])
+  list = $state<Transfer[]>(demo)
   /** Bumped per landingKey when an upload finishes there. */
   landed = $state<Record<string, number>>({})
 
@@ -115,6 +142,11 @@ class Transfers {
       if (early.progress) this.#progress(j, early.progress)
       if (early.done) this.#finish(j, early.done)
     }
+  }
+
+  /** Drops jobs that are over, keeping the running ones. */
+  clearFinished() {
+    this.list = this.list.filter((j) => j.state === 'running')
   }
 
   #find(id: string): Transfer | undefined {

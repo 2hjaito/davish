@@ -4,7 +4,15 @@ import type { IconName } from '../lib/ui/icons'
 import type { WindowState } from '../lib/wm/windowManager.svelte'
 
 export type AppId =
-  'terminal' | 'files' | 'monitor' | 'services' | 'docker' | 'logs' | 'editor' | 'settings'
+  | 'terminal'
+  | 'files'
+  | 'monitor'
+  | 'services'
+  | 'docker'
+  | 'logs'
+  | 'editor'
+  | 'settings'
+  | 'transfers'
 
 export interface AppProps {
   win: WindowState
@@ -17,4 +25,6 @@ export interface AppDef {
   theme: 'light' | 'dark'
   size: { w: number; h: number }
   component: Component<AppProps>
+  /** False for helper windows opened from another app, such as Transfers. */
+  dock?: boolean
 }

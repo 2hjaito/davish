@@ -24,6 +24,7 @@
   import Icon from '../../lib/ui/Icon.svelte'
   import type { IconName } from '../../lib/ui/icons'
   import { getWindowContext } from '../../lib/wm/context'
+  import { openTransfers } from '../../lib/wm/intents'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import type { AppProps } from '../types'
   import FileList from './FileList.svelte'
@@ -287,6 +288,12 @@
   }
 
   function onkeydown(e: KeyboardEvent) {
+    // ⌘⌥L like Safari's downloads; code, since Option changes e.key on macOS.
+    if (hasPrimaryModifier(e) && e.altKey && !e.shiftKey && e.code === 'KeyL') {
+      e.preventDefault()
+      openTransfers(win.serverID)
+      return
+    }
     if (!hasPrimaryModifier(e) || e.altKey) return
     const actions: Record<string, () => void> = e.shiftKey
       ? { u: () => void pickAndUpload(true) }
@@ -437,7 +444,11 @@
         </button>
       {/each}
       {#if busy.count > 0}
-        <span class="count">{t.files.transferring(busy.count, formatPct(busy.fraction * 100))}</span
+        <button
+          class="count busy"
+          title="{t.transfers.open} ({shortcut('⌥L')})"
+          onclick={() => openTransfers(win.serverID)}
+          >{t.files.transferring(busy.count, formatPct(busy.fraction * 100))}</button
         >
       {:else if cwd !== null && connected}
         <span class="count">{t.files.count(listing.length)}</span>
@@ -683,5 +694,18 @@
     margin-left: auto;
     padding-left: 12px;
     font-variant-numeric: tabular-nums;
+  }
+
+  .count.busy {
+    border: 0;
+    border-radius: 4px;
+    padding: 1px 6px;
+    background: none;
+    color: var(--accent);
+    font-size: inherit;
+  }
+
+  .count.busy:hover {
+    background: var(--accent-soft);
   }
 </style>

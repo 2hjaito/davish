@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { apps, getApp } from '../../apps/registry'
+  import { dockApps, getApp } from '../../apps/registry'
   import type { AppDef } from '../../apps/types'
   import { hasRuntime } from '../api/runtime'
   import { notifications } from '../stores/notifications.svelte'
@@ -134,7 +134,7 @@
   {/each}
 
   <Dock
-    {apps}
+    apps={dockApps}
     isOpen={(id) => wm.isOpen(id, serverID)}
     onlaunch={launch}
     bind:height={dockHeight}
