@@ -37,9 +37,9 @@ export function firstMockTick(): Metrics {
       {
         device: '/dev/vda15',
         path: '/boot/efi',
-        size: 0.1 * GB,
+        size: 105 * MB,
         used: 6 * MB,
-        avail: 0.1 * GB,
+        avail: 99 * MB,
         pct: 6,
       },
       {

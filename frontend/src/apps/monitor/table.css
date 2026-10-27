@@ -1,0 +1,50 @@
+/* Tables of the Monitor app (mounts, interfaces, processes), following the
+   list rules of docs/DESIGN.md: 11px bold headers, ~32px zebra rows, numbers
+   right-aligned in tabular figures. Prefixed because it is global CSS. */
+.mon-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--text-md);
+}
+
+.mon-table th {
+  padding: 5px 10px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--fg-muted);
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--divider-soft);
+}
+
+.mon-table td {
+  height: 30px;
+  padding: 0 10px;
+  white-space: nowrap;
+}
+
+.mon-table tbody tr:nth-child(even) td {
+  background: var(--row-stripe);
+}
+
+.mon-table tbody tr:hover td {
+  background: var(--row-hover);
+}
+
+.mon-table td:first-child {
+  border-radius: var(--control-radius) 0 0 var(--control-radius);
+}
+
+.mon-table td:last-child {
+  border-radius: 0 var(--control-radius) var(--control-radius) 0;
+}
+
+.mon-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.mon-table .muted {
+  color: var(--fg-muted);
+}

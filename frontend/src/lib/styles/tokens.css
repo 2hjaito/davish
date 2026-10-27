@@ -111,6 +111,18 @@
   --folder-stroke: #3a7fd8;
   --file-stroke: #6b7180;
 
+  /* Monitor charts: categorical slots, validated for color-vision deficiency
+     on the content pane. Series keep their slot whatever else is shown. */
+  --chart-1: #2a78d6;
+  --chart-2: #eb6834;
+  --chart-3: #1baf7a;
+  --chart-grid: rgba(0, 0, 0, 0.07);
+  --chart-crosshair: rgba(0, 0, 0, 0.25);
+  /* Ring around chart dots so they stay readable where lines cross. */
+  --chart-surface: #fff;
+  --card-bg: rgba(0, 0, 0, 0.025);
+  --card-radius: 12px;
+
   /* Terminal */
   --term-user: #7ee2a8;
   --term-path: #8ab4ff;

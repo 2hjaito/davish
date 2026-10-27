@@ -3,6 +3,7 @@
   import { t } from '../i18n/vi'
   import { metrics } from '../stores/metrics.svelte'
   import { servers } from '../stores/servers.svelte'
+  import { level } from '../ui/charts/scale'
   import Icon from '../ui/Icon.svelte'
   import NotificationMenu from './NotificationMenu.svelte'
   import { hasNativeTrafficLights } from './platform'
@@ -13,7 +14,7 @@
   // Only a connected server is watched, so a reconnect starts a fresh
   // collector and the numbers disappear while the server is unreachable.
   const watchedId = $derived(servers.active?.state === 'connected' ? servers.active.id : '')
-  const m = $derived(watchedId ? metrics.byServer[watchedId] : undefined)
+  const m = $derived(watchedId ? metrics.latest(watchedId) : undefined)
   const memPct = $derived(m && m.memTotal > 0 ? (m.memUsed / m.memTotal) * 100 : 0)
 
   $effect(() => {
@@ -24,12 +25,6 @@
   $effect(() => {
     if (watchedId) return metrics.watch(watchedId)
   })
-
-  function level(value: number, warn: number, danger: number) {
-    if (value >= danger) return 'danger'
-    if (value >= warn) return 'warn'
-    return ''
-  }
 </script>
 
 <header class="menubar glass" class:native-lights={hasNativeTrafficLights}>
