@@ -11,7 +11,7 @@ ENV container=docker
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends systemd systemd-sysv dbus polkitd \
-      openssh-server procps zip nginx docker.io \
+      openssh-server procps zip nginx docker.io cron curl \
  && rm -rf /var/lib/apt/lists/* \
  && useradd -m -s /bin/bash -G systemd-journal tester \
  && rm -f /etc/ssh/ssh_host_*
@@ -34,8 +34,14 @@ RUN chmod 600 /etc/ssh/ssh_host_ed25519_key \
  && chmod 600 /home/tester/.ssh/authorized_keys
 
 # tester owns nginx's config, so Editor and Nginx tests have a real /etc
-# file to change. Test container only.
-RUN chown -R tester:tester /etc/nginx
+# file to change, and plays an admin who may test and reload nginx: it can
+# write the pid file nginx -t opens and the logs, and polkit lets it reload
+# nginx.service. Test container only.
+RUN chown -R tester:tester /etc/nginx /var/log/nginx
+COPY sites/ /etc/nginx/sites-available/
+RUN mkdir -p /srv/davish-site && echo 'davish site' > /srv/davish-site/index.html \
+ && ln -s /etc/nginx/sites-available/davish-site /etc/nginx/sites-enabled/davish-site \
+ && chown -R tester:tester /etc/nginx
 
 # Docker runs inside this container, never the host's. tester is in the
 # docker group, as on most servers that use Docker.
@@ -48,7 +54,7 @@ RUN usermod -aG docker tester
 # and nothing else, so tests cover both success and "needs root".
 COPY units/ /etc/systemd/system/
 COPY polkit-tester.rules /etc/polkit-1/rules.d/50-davish-tester.rules
-RUN systemctl enable davish-ok.service davish-crash.service davish-containers.service docker.service
+RUN systemctl enable davish-ok.service davish-crash.service davish-containers.service docker.service cron.service
 
 EXPOSE 22
 STOPSIGNAL SIGRTMIN+3
