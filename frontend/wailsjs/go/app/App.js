@@ -134,6 +134,10 @@ export function MonitorProcesses(arg1, arg2) {
   return window['go']['app']['App']['MonitorProcesses'](arg1, arg2);
 }
 
+export function MonitorSetThresholds(arg1, arg2, arg3) {
+  return window['go']['app']['App']['MonitorSetThresholds'](arg1, arg2, arg3);
+}
+
 export function MonitorSystemInfo(arg1) {
   return window['go']['app']['App']['MonitorSystemInfo'](arg1);
 }
