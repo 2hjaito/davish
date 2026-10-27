@@ -145,3 +145,62 @@ func TestStartNeedsConnection(t *testing.T) {
 		t.Error("started a shell on a server that is not connected")
 	}
 }
+
+func TestLargeOutputArrivesWhole(t *testing.T) {
+	m, id := connect(t)
+	scr := &screen{}
+	svc := term.New(m, scr, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	t.Cleanup(svc.CloseAll)
+
+	sid, err := svc.Start(context.Background(), id, 80, 24)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// About 1.3MB in many reads; the marker only prints once seq is done.
+	if err := svc.Write(sid, "seq 1 200000; echo done-$((1+1))\n"); err != nil {
+		t.Fatal(err)
+	}
+	scr.waitFor(t, func(out string, _ *term.Exit) bool { return strings.Contains(out, "done-2") })
+	scr.mu.Lock()
+	defer scr.mu.Unlock()
+	if out := scr.out.String(); !strings.Contains(out, "\r\n199999\r\n200000\r\n") {
+		t.Error("output lost the last lines of seq")
+	}
+}
+
+func TestCloseReportsExit(t *testing.T) {
+	m, id := connect(t)
+	scr := &screen{}
+	svc := term.New(m, scr, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	t.Cleanup(svc.CloseAll)
+
+	sid, err := svc.Start(context.Background(), id, 80, 24)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := svc.Close(sid); err != nil {
+		t.Fatal(err)
+	}
+	scr.waitFor(t, func(_ string, exit *term.Exit) bool { return exit != nil })
+	if err := svc.Close(sid); err == nil {
+		t.Error("closing a closed session succeeded")
+	}
+}
+
+func TestDroppedConnectionEndsSessionWithoutCode(t *testing.T) {
+	m, id := connect(t)
+	scr := &screen{}
+	svc := term.New(m, scr, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	t.Cleanup(svc.CloseAll)
+
+	sid, err := svc.Start(context.Background(), id, 80, 24)
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.Disconnect(id)
+	scr.waitFor(t, func(_ string, exit *term.Exit) bool { return exit != nil })
+	// The frontend reads -1 as a lost connection and offers to reopen the tab.
+	if scr.exit.Code != -1 || scr.exit.ID != sid {
+		t.Errorf("exit = %+v; want code -1 for %s", scr.exit, sid)
+	}
+}
