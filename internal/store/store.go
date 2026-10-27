@@ -218,17 +218,22 @@ func (s *Store) load() (file, error) {
 	return f, nil
 }
 
-// write replaces servers.json atomically: a crash leaves either the old or
-// the new file, never a truncated one.
+// write replaces servers.json atomically.
 func (s *Store) write(f file) error {
-	if err := os.MkdirAll(s.dir, 0o700); err != nil {
-		return fmt.Errorf("create config dir: %w", err)
-	}
 	data, err := json.MarshalIndent(f, "", "  ")
 	if err != nil {
 		return fmt.Errorf("encode %s: %w", serversFile, err)
 	}
-	tmp, err := os.CreateTemp(s.dir, "."+serversFile+".*.davish-tmp")
+	return writeAtomic(s.dir, serversFile, data)
+}
+
+// writeAtomic replaces dir/name: a crash leaves either the old or the new
+// file, never a truncated one.
+func writeAtomic(dir, name string, data []byte) error {
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		return fmt.Errorf("create config dir: %w", err)
+	}
+	tmp, err := os.CreateTemp(dir, "."+name+".*.davish-tmp")
 	if err != nil {
 		return fmt.Errorf("create temp file: %w", err)
 	}
@@ -236,17 +241,17 @@ func (s *Store) write(f file) error {
 
 	if _, err := tmp.Write(append(data, '\n')); err != nil {
 		tmp.Close() //nolint:errcheck,gosec // already failing
-		return fmt.Errorf("write %s: %w", serversFile, err)
+		return fmt.Errorf("write %s: %w", name, err)
 	}
 	if err := tmp.Sync(); err != nil {
 		tmp.Close() //nolint:errcheck,gosec // already failing
-		return fmt.Errorf("sync %s: %w", serversFile, err)
+		return fmt.Errorf("sync %s: %w", name, err)
 	}
 	if err := tmp.Close(); err != nil {
-		return fmt.Errorf("close %s: %w", serversFile, err)
+		return fmt.Errorf("close %s: %w", name, err)
 	}
-	if err := os.Rename(tmp.Name(), s.path()); err != nil {
-		return fmt.Errorf("replace %s: %w", serversFile, err)
+	if err := os.Rename(tmp.Name(), filepath.Join(dir, name)); err != nil {
+		return fmt.Errorf("replace %s: %w", name, err)
 	}
 	return nil
 }

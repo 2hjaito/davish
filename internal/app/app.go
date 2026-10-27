@@ -27,6 +27,7 @@ type App struct {
 	wails atomic.Pointer[context.Context]
 
 	store     *store.Store
+	settings  *store.Settings
 	secrets   *store.Secrets
 	conns     *conn.Manager
 	terms     *term.Service
@@ -47,6 +48,7 @@ func New() (*App, error) {
 	a := &App{ctx: context.Background()}
 	a.secrets = store.NewSecrets(store.OSKeyring{})
 	a.store = store.New(dir, a.secrets)
+	a.settings = store.NewSettings(dir, log)
 	hostKeys := conn.NewHostKeys(filepath.Join(dir, "known_hosts"))
 	a.conns = conn.NewManager(a.store, a.secrets, hostKeys, emitter{a}, log, conn.Options{})
 	a.terms = term.New(a.conns, emitter{a}, log)

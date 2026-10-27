@@ -82,6 +82,14 @@ export function SaveServer(arg1) {
   return window['go']['app']['App']['SaveServer'](arg1);
 }
 
+export function SettingsLoad() {
+  return window['go']['app']['App']['SettingsLoad']();
+}
+
+export function SettingsSave(arg1, arg2) {
+  return window['go']['app']['App']['SettingsSave'](arg1, arg2);
+}
+
 export function TermClose(arg1) {
   return window['go']['app']['App']['TermClose'](arg1);
 }

@@ -45,6 +45,10 @@ export function ReorderServers(arg1:Array<string>):Promise<void>;
 
 export function SaveServer(arg1:app.ServerInput):Promise<app.ServerView>;
 
+export function SettingsLoad():Promise<Record<string, string>>;
+
+export function SettingsSave(arg1:string,arg2:string):Promise<void>;
+
 export function TermClose(arg1:string):Promise<void>;
 
 export function TermResize(arg1:string,arg2:number,arg3:number):Promise<void>;
