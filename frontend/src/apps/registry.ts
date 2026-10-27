@@ -3,6 +3,7 @@ import EditorApp from './editor/EditorApp.svelte'
 import FilesApp from './files/FilesApp.svelte'
 import MonitorApp from './monitor/MonitorApp.svelte'
 import PlaceholderApp from './PlaceholderApp.svelte'
+import ServicesApp from './services/ServicesApp.svelte'
 import SettingsApp from './settings/SettingsApp.svelte'
 import TerminalApp from './terminal/TerminalApp.svelte'
 import TransfersApp from './transfers/TransfersApp.svelte'
@@ -39,8 +40,8 @@ export const apps: AppDef[] = [
     label: t.apps.services,
     icon: 'services',
     theme: 'light',
-    size: { w: 620, h: 420 },
-    component: PlaceholderApp,
+    size: { w: 900, h: 560 },
+    component: ServicesApp,
   },
   {
     id: 'docker',

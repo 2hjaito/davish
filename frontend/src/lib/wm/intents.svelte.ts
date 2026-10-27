@@ -15,7 +15,8 @@ export function openTransfers(serverID: string) {
 
 export interface TerminalRequest {
   serverID: string
-  dir: string
+  /** Folder to start in; the home folder when not given. */
+  dir?: string
   /** Typed at the prompt without Enter, for the user to check and run. */
   input?: string
 }
@@ -39,7 +40,7 @@ export const terminalRequests = new TerminalRequests()
  * typed at the prompt but not run: commands needing root are prefilled
  * this way and the user presses Enter (docs/SECURITY.md).
  */
-export function openTerminalAt(serverID: string, dir: string, input?: string) {
+export function openTerminalAt(serverID: string, dir: string | undefined, input?: string) {
   terminalRequests.list.push({ serverID, dir, input })
   wm.openOrFocus('terminal', serverID, { title: t.apps.terminal, size: TERMINAL_SIZE })
 }
