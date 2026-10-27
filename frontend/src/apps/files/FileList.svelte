@@ -43,11 +43,22 @@
     modified: t.files.modified,
   }
 
-  // A new folder starts at the top.
-  $effect(() => {
-    void entries
-    if (scroller && selected === null) scroller.scrollTop = 0
-  })
+  /** Where the list is scrolled, for the caller to come back to later. */
+  export function getScroll(): number {
+    return scroller?.scrollTop ?? 0
+  }
+
+  /**
+   * Scrolls to top (or keeps the position when null), then brings path into
+   * view if it is listed. Call after the entries are rendered.
+   */
+  export function restore(top: number | null, path: string | null) {
+    if (!scroller) return
+    if (top !== null) scroller.scrollTop = top
+    scrollTop = scroller.scrollTop
+    const i = path === null ? -1 : entries.findIndex((e) => e.path === path)
+    if (i >= 0) reveal(i)
+  }
 
   function reveal(index: number) {
     if (!scroller) return

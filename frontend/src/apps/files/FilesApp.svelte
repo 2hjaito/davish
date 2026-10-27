@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { untrack } from 'svelte'
+  import { tick, untrack } from 'svelte'
 
   import { toUserError } from '../../lib/api/errors'
   import { type Entry, filesHome, filesList } from '../../lib/api/files'
@@ -39,6 +39,7 @@
     sortEntries,
     within,
   } from './listing'
+  import { cameFrom, type FolderView, lastDir, rememberDir } from './memory'
   import { mockHome, mockList } from './mockFs'
   import UploadConflictDialog, { type Answer } from './UploadConflictDialog.svelte'
 
@@ -65,6 +66,12 @@
   let forward = $state<string[]>([])
   let search = $state<HTMLInputElement>()
   let main = $state<HTMLDivElement>()
+  let list = $state<ReturnType<typeof FileList>>()
+  // Scroll and selection of folders already visited in this window, so
+  // coming back lands where the user left off. Not reactive: only read
+  // when arriving in a folder.
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity -- read on arrival only
+  const views = new Map<string, FolderView>()
   /** The name clash being asked about, and how to answer it. */
   let conflict = $state<{
     item: UploadItem
@@ -106,27 +113,40 @@
   // Requests can overlap (double clicks, slow links); only the latest counts.
   let seq = 0
 
-  /** Lists path and shows it; false when it could not be listed. */
-  async function show(path: string): Promise<boolean> {
+  /**
+   * Lists path and shows it; false when it could not be listed. quiet keeps
+   * a failure off screen, for guesses like the last folder of a past run.
+   */
+  async function show(path: string, quiet = false): Promise<boolean> {
     const id = win.serverID
     const mine = ++seq
     loading = true
     try {
-      const list = hasRuntime ? await filesList(id, path) : mockList(path)
+      const entries = hasRuntime ? await filesList(id, path) : mockList(path)
       if (mine !== seq) return false
-      if (path !== cwd) {
-        query = ''
-        selected = null
-      } else if (selected !== null && !list.some((e) => e.path === selected)) {
-        selected = null
+      const from = cwd
+      const arriving = path !== from
+      if (arriving && from !== null) {
+        views.set(from, { scrollTop: list?.getScroll() ?? 0, selected })
       }
+      const view = arriving ? views.get(path) : undefined
+      if (arriving) {
+        query = ''
+        selected = (from && cameFrom(from, path)) ?? view?.selected ?? null
+      }
+      if (selected !== null && !entries.some((e) => e.path === selected)) selected = null
       cwd = path
-      listing = list
+      listing = entries
       fetchedAt = new Date()
       error = ''
+      rememberDir(id, path)
+      if (arriving) {
+        await tick()
+        list?.restore(view?.scrollTop ?? 0, selected)
+      }
       return true
     } catch (e) {
-      if (mine === seq) error = toUserError(e).message
+      if (mine === seq && !quiet) error = toUserError(e).message
       return false
     } finally {
       if (mine === seq) loading = false
@@ -140,6 +160,9 @@
       error = toUserError(e).message
       return
     }
+    // Back where the last run left this server, if that folder still opens.
+    const last = lastDir(win.serverID)
+    if (last && last !== home && (await show(last, true))) return
     await show(home)
   }
 
@@ -397,6 +420,7 @@
         onsort={sortBy}
         onselect={(path) => (selected = path)}
         onopen={openEntry}
+        bind:this={list}
       />
     {/if}
 
