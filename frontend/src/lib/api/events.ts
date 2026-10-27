@@ -119,6 +119,20 @@ export interface NotifyNew {
   mount?: string
 }
 
+/** Total is 0 until a folder has been walked; bps is bytes per second. */
+export interface TransferProgress {
+  jobID: string
+  done: number
+  total: number
+  bps: number
+}
+
+export interface TransferDone {
+  jobID: string
+  canceled?: boolean
+  error?: { code: string; message: string }
+}
+
 function on<T>(name: EventName, handler: (payload: T) => void): Unsubscribe {
   return EventsOn(name, (payload: T) => handler(payload))
 }
@@ -129,3 +143,6 @@ export const onTermData = (h: (p: TermData) => void) => on(Events.TermData, h)
 export const onTermExit = (h: (p: TermExit) => void) => on(Events.TermExit, h)
 export const onSysmonTick = (h: (p: SysmonTick) => void) => on(Events.SysmonTick, h)
 export const onNotifyNew = (h: (p: NotifyNew) => void) => on(Events.NotifyNew, h)
+export const onTransferProgress = (h: (p: TransferProgress) => void) =>
+  on(Events.TransferProgress, h)
+export const onTransferDone = (h: (p: TransferDone) => void) => on(Events.TransferDone, h)

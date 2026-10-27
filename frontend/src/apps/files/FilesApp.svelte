@@ -4,10 +4,22 @@
   import { toUserError } from '../../lib/api/errors'
   import { type Entry, filesHome, filesList } from '../../lib/api/files'
   import { hasRuntime } from '../../lib/api/runtime'
+  import {
+    registerDropTarget,
+    transferDownload,
+    transferPickFiles,
+    transferPickFolder,
+    transferPlanUpload,
+    transferUpload,
+    type UploadItem,
+    type UploadRequest,
+  } from '../../lib/api/transfer'
+  import { formatPct } from '../../lib/format'
   import { t } from '../../lib/i18n/vi'
   import { hasPrimaryModifier, shortcut } from '../../lib/shell/platform'
   import { load, save } from '../../lib/stores/persist'
   import { servers } from '../../lib/stores/servers.svelte'
+  import { landingKey, summarize, transfers } from '../../lib/stores/transfers.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import type { IconName } from '../../lib/ui/icons'
@@ -28,6 +40,7 @@
     within,
   } from './listing'
   import { mockHome, mockList } from './mockFs'
+  import UploadConflictDialog, { type Answer } from './UploadConflictDialog.svelte'
 
   let { win }: AppProps = $props()
 
@@ -51,11 +64,20 @@
   let back = $state<string[]>([])
   let forward = $state<string[]>([])
   let search = $state<HTMLInputElement>()
+  let main = $state<HTMLDivElement>()
+  /** The name clash being asked about, and how to answer it. */
+  let conflict = $state<{
+    item: UploadItem
+    remaining: number
+    answer: (a: Answer) => void
+  } | null>(null)
 
   const server = $derived(servers.list.find((s) => s.id === win.serverID))
   const connected = $derived(!hasRuntime || server?.state === 'connected')
   const entries = $derived(filterEntries(sortEntries(listing, order), query))
   const title = $derived(cwd === null ? (server?.name ?? '') : baseName(cwd))
+  const busy = $derived(summarize(transfers.list, win.serverID))
+  const canTransfer = $derived(hasRuntime && connected && cwd !== null)
 
   interface Place {
     label: string
@@ -131,6 +153,78 @@
     if (connected) untrack(reload)
   })
 
+  // Uploads that finish in the folder on screen show up without a refresh.
+  let seen: number | undefined
+  $effect(() => {
+    const n = cwd === null ? undefined : transfers.landed[landingKey(win.serverID, cwd)]
+    if (n !== undefined && seen !== undefined && n !== seen) untrack(reload)
+    seen = n
+  })
+
+  // Files dropped from the OS upload into the folder on screen.
+  $effect(() => {
+    if (main) return registerDropTarget(main, (paths) => void upload(paths))
+  })
+
+  function ask(item: UploadItem, remaining: number): Promise<Answer> {
+    return new Promise((resolve) => {
+      conflict = {
+        item,
+        remaining,
+        answer: (a) => {
+          conflict = null
+          resolve(a)
+        },
+      }
+    })
+  }
+
+  /** Uploads local paths into the folder on screen, asking about name clashes one by one. */
+  async function upload(locals: string[]) {
+    const dir = cwd
+    if (!canTransfer || dir === null || locals.length === 0) return
+    const id = win.serverID
+    try {
+      const items = await transferPlanUpload(id, dir, locals)
+      const reqs: UploadRequest[] = []
+      let clashes = items.filter((it) => it.exists).length
+      for (const it of items) {
+        if (!it.exists) {
+          reqs.push({ local: it.local, replace: false })
+          continue
+        }
+        const a = await ask(it, --clashes)
+        if (a !== 'skip') reqs.push({ local: it.local, replace: a === 'replace' })
+      }
+      if (reqs.length > 0) transfers.add(await transferUpload(id, dir, reqs))
+      error = ''
+    } catch (e) {
+      error = toUserError(e).message
+    }
+  }
+
+  async function pickAndUpload(folder: boolean) {
+    if (!canTransfer) return
+    try {
+      const picked = folder
+        ? [await transferPickFolder(t.files.pickFolder)].filter(Boolean)
+        : await transferPickFiles(t.files.pickFiles)
+      await upload(picked)
+    } catch (e) {
+      error = toUserError(e).message
+    }
+  }
+
+  async function download() {
+    if (!canTransfer || selected === null) return
+    try {
+      transfers.add(await transferDownload(win.serverID, [selected]))
+      error = ''
+    } catch (e) {
+      error = toUserError(e).message
+    }
+  }
+
   async function go(path: string) {
     if (path === cwd) return
     const from = cwd
@@ -170,14 +264,18 @@
   }
 
   function onkeydown(e: KeyboardEvent) {
-    if (!hasPrimaryModifier(e) || e.shiftKey || e.altKey) return
-    const actions: Record<string, () => void> = {
-      ArrowUp: () => cwd !== null && void go(parentPath(cwd)),
-      '[': () => void goBack(),
-      ']': () => void goForward(),
-      f: () => search?.focus(),
-    }
-    const action = actions[e.key]
+    if (!hasPrimaryModifier(e) || e.altKey) return
+    const actions: Record<string, () => void> = e.shiftKey
+      ? { u: () => void pickAndUpload(true) }
+      : {
+          ArrowUp: () => cwd !== null && void go(parentPath(cwd)),
+          '[': () => void goBack(),
+          ']': () => void goForward(),
+          f: () => search?.focus(),
+          u: () => void pickAndUpload(false),
+          d: () => void download(),
+        }
+    const action = actions[e.key.toLowerCase()] ?? actions[e.key]
     if (!action) return
     e.preventDefault()
     action()
@@ -205,7 +303,7 @@
     </div>
   </nav>
 
-  <div class="main">
+  <div class="main" bind:this={main}>
     <!-- Pointer handlers here only add window dragging, as on the title bar. -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="toolbar" onpointerdown={ctx.startDrag} ondblclick={ctx.toggleMaximize}>
@@ -236,6 +334,24 @@
         </button>
       </div>
       <h2 class="title" title={cwd ?? ''}>{title}</h2>
+      <button
+        class="tool"
+        aria-label={t.files.upload}
+        title="{t.files.upload} ({shortcut('U')}) · {t.files.uploadFolder} ({shortcut('⇧U')})"
+        disabled={!canTransfer}
+        onclick={(e) => void pickAndUpload(e.altKey)}
+      >
+        <Icon name="upload" size={15} strokeWidth={2.2} />
+      </button>
+      <button
+        class="tool"
+        aria-label={t.files.download}
+        title="{t.files.download} ({shortcut('D')})"
+        disabled={!canTransfer || selected === null}
+        onclick={() => void download()}
+      >
+        <Icon name="download" size={15} strokeWidth={2.2} />
+      </button>
       <button
         class="tool"
         aria-label={t.files.refresh}
@@ -296,12 +412,21 @@
           {c.name}
         </button>
       {/each}
-      {#if cwd !== null && connected}
+      {#if busy.count > 0}
+        <span class="count">{t.files.transferring(busy.count, formatPct(busy.fraction * 100))}</span
+        >
+      {:else if cwd !== null && connected}
         <span class="count">{t.files.count(listing.length)}</span>
       {/if}
     </nav>
   </div>
 </div>
+
+<UploadConflictDialog
+  item={conflict?.item ?? null}
+  remaining={conflict?.remaining ?? 0}
+  onanswer={(a) => conflict?.answer(a)}
+/>
 
 <style>
   /* Finder layout: a translucent sidebar running the full height, beside an
@@ -375,13 +500,22 @@
     color: var(--fg-subtle);
   }
 
+  /* Wails delivers OS file drops only over elements with this property. */
   .main {
+    --wails-drop-target: drop;
     flex: 1;
     min-width: 0;
     display: flex;
     flex-direction: column;
     background: var(--content-bg);
     border-left: 1px solid var(--divider-soft);
+  }
+
+  /* Wails adds this class while files are dragged over the window. */
+  .main:global(.wails-drop-target-active) {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+    background: var(--accent-soft);
   }
 
   .toolbar {

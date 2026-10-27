@@ -136,6 +136,27 @@ export const t = {
     count: (n: number) => `${n.toLocaleString('vi')} mục`,
     today: 'Hôm nay',
     yesterday: 'Hôm qua',
+    upload: 'Tải lên',
+    uploadFolder: 'Tải thư mục lên',
+    download: 'Tải xuống',
+    pickFiles: 'Chọn file để tải lên',
+    pickFolder: 'Chọn thư mục để tải lên',
+    transferring: (n: number, pct: string) => `Đang chuyển ${n} mục · ${pct}`,
+    conflictTitle: (name: string) => `Đã có “${name}” trong thư mục này`,
+    conflictFile:
+      'Thay thế sẽ ghi đè file trên server bằng file của bạn. Giữ cả hai sẽ tải lên với tên mới.',
+    conflictDir:
+      'Thư mục không được gộp hay thay thế. Giữ cả hai sẽ tải lên thành một thư mục với tên mới.',
+    replace: 'Thay thế',
+    keepBoth: 'Giữ cả hai',
+    skip: 'Bỏ qua',
+    remaining: (n: number) => `Còn ${n} mục trùng tên sau mục này.`,
+  },
+  transfers: {
+    uploadFailed: (name: string) => `Tải lên “${name}” thất bại`,
+    downloadFailed: (name: string) => `Tải xuống “${name}” thất bại`,
+    downloaded: (name: string) => `Đã tải xong “${name}”`,
+    savedIn: 'Đã lưu vào thư mục Downloads.',
   },
   settings: {
     appearance: 'Giao diện',

@@ -1,0 +1,104 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+import type { TransferDone, TransferProgress } from '../api/events'
+import type { Job } from '../api/transfer'
+
+const handlers: {
+  progress?: (p: TransferProgress) => void
+  done?: (d: TransferDone) => void
+} = {}
+
+vi.mock('../api/runtime', () => ({ hasRuntime: true }))
+vi.mock('../api/events', () => ({
+  onTransferProgress: (h: (p: TransferProgress) => void) => {
+    handlers.progress = h
+    return () => {}
+  },
+  onTransferDone: (h: (d: TransferDone) => void) => {
+    handlers.done = h
+    return () => {}
+  },
+}))
+
+const { describeTransfer, landingKey, summarize, transfers } = await import('./transfers.svelte')
+
+const job = (id: string, kind: Job['kind'] = 'upload'): Job => ({
+  id,
+  kind,
+  serverID: 's1',
+  name: id + '.txt',
+  src: '/local/' + id,
+  dst: '/srv/www/' + id + '.txt',
+  dir: false,
+})
+
+describe('transfers', () => {
+  const finished: string[] = []
+
+  beforeEach(() => {
+    transfers.list = []
+    transfers.landed = {}
+    finished.length = 0
+    transfers.init((j) => finished.push(`${j.id}:${j.state}`))
+  })
+
+  it('applies progress and completion', () => {
+    transfers.add([job('a')])
+    handlers.progress?.({ jobID: 'a', done: 50, total: 100, bps: 10 })
+    expect(transfers.list[0]).toMatchObject({ done: 50, total: 100, state: 'running' })
+    handlers.done?.({ jobID: 'a' })
+    expect(transfers.list[0]?.state).toBe('done')
+    expect(transfers.landed[landingKey('s1', '/srv/www')]).toBe(1)
+    expect(finished).toEqual(['a:done'])
+  })
+
+  it('keeps events that arrive before the job is known', () => {
+    handlers.progress?.({ jobID: 'b', done: 10, total: 10, bps: 0 })
+    handlers.done?.({ jobID: 'b' })
+    transfers.add([job('b')])
+    expect(transfers.list[0]).toMatchObject({ done: 10, state: 'done' })
+    expect(finished).toEqual(['b:done'])
+  })
+
+  it('records failures with a user message and cancels without one', () => {
+    transfers.add([job('c'), job('d')])
+    handlers.done?.({ jobID: 'c', error: { code: 'FS_PERMISSION_DENIED', message: 'x' } })
+    handlers.done?.({ jobID: 'd', canceled: true })
+    expect(transfers.list.map((j) => j.state)).toEqual(['failed', 'canceled'])
+    expect(transfers.list[0]?.error).toBe('Không có quyền truy cập.')
+    expect(transfers.landed).toEqual({})
+  })
+})
+
+describe('summarize', () => {
+  it('adds up the running jobs of one server', () => {
+    const base = { ...job('x'), bps: 0 }
+    const list = [
+      { ...base, id: '1', done: 30, total: 100, state: 'running' as const },
+      { ...base, id: '2', done: 20, total: 100, state: 'running' as const },
+      { ...base, id: '3', done: 100, total: 100, state: 'done' as const },
+      { ...base, id: '4', serverID: 's2', done: 0, total: 100, state: 'running' as const },
+    ]
+    expect(summarize(list, 's1')).toEqual({ count: 2, fraction: 0.25 })
+    expect(summarize([], 's1')).toEqual({ count: 0, fraction: 0 })
+  })
+})
+
+describe('describeTransfer', () => {
+  const base = { ...job('x'), done: 0, total: 0, bps: 0 }
+
+  it('reports finished downloads and every failure', () => {
+    expect(describeTransfer({ ...base, kind: 'download', state: 'done' }, 1)).toMatchObject({
+      level: 'info',
+      title: 'Đã tải xong “x.txt”',
+    })
+    expect(
+      describeTransfer({ ...base, state: 'failed', error: 'Không có quyền truy cập.' }, 1),
+    ).toMatchObject({ level: 'error', title: 'Tải lên “x.txt” thất bại' })
+  })
+
+  it('stays quiet when the result is already visible', () => {
+    expect(describeTransfer({ ...base, state: 'done' })).toBeNull()
+    expect(describeTransfer({ ...base, kind: 'download', state: 'canceled' })).toBeNull()
+  })
+})

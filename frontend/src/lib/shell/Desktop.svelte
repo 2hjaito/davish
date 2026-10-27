@@ -4,6 +4,7 @@
   import { hasRuntime } from '../api/runtime'
   import { notifications } from '../stores/notifications.svelte'
   import { servers } from '../stores/servers.svelte'
+  import { describeTransfer, transfers } from '../stores/transfers.svelte'
   import { ui } from '../stores/ui.svelte'
   import Window from '../wm/Window.svelte'
   import { wm } from '../wm/windowManager.svelte'
@@ -51,6 +52,14 @@
 
   // Threshold alerts and other notify:new events, for the app's lifetime.
   $effect(() => notifications.init((id) => servers.list.find((s) => s.id === id)?.name ?? id))
+
+  // Transfers outlive the Files window that started them; report how they end.
+  $effect(() =>
+    transfers.init((j) => {
+      const n = describeTransfer(j)
+      if (n) notifications.add(n)
+    }),
+  )
 
   // First run: ask for a server. Otherwise open a terminal on the active one,
   // like the mockup's Terminal + Files in the browser preview.
