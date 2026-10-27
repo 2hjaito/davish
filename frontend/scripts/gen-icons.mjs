@@ -23,6 +23,7 @@ const ICONS = {
   chevronDown: 'FiChevronDown',
   folder: 'FiFolder',
   file: 'FiFile',
+  link: 'FiLink',
   arrowUp: 'FiArrowUp',
   arrowDown: 'FiArrowDown',
   bell: 'FiBell',

@@ -1,75 +1,63 @@
-import type { IconName } from '../../lib/ui/icons'
+// Demo directory tree for running the frontend outside Wails (vite dev,
+// previews), shaped like the real file bindings.
+import type { Entry } from '../../lib/api/files'
+import { joinPath } from './listing'
 
-// Mock directory listings until SFTP lands in M5.
-export interface Entry {
-  name: string
-  dir: boolean
-  size?: number
-  modified: string
+type Node = { dir: true; days: number } | { dir: false; size: number; days: number }
+
+const d = (days: number): Node => ({ dir: true, days })
+const f = (size: number, days: number): Node => ({ dir: false, size, days })
+
+const tree: Record<string, Record<string, Node>> = {
+  '/': { etc: d(7), home: d(87), opt: d(15), tmp: d(0), usr: d(87), var: d(87) },
+  '/usr': { bin: d(3) },
+  // Big enough to exercise the virtual list.
+  '/usr/bin': Object.fromEntries(
+    Array.from({ length: 3000 }, (_, i) => [
+      `tool-${i}`,
+      f(10_000 + ((i * 7919) % 900_000), i % 90),
+    ]),
+  ),
+  '/home': { dangth: d(2) },
+  '/home/dangth': { projects: d(2), '.bashrc': f(3800, 87), '.profile': f(807, 87) },
+  '/etc': { nginx: d(7), systemd: d(15), hosts: f(221, 87), fstab: f(657, 87) },
+  '/etc/nginx': {
+    'conf.d': d(15),
+    'sites-available': d(7),
+    'sites-enabled': d(7),
+    snippets: d(85),
+    'nginx.conf': f(2458, 7),
+    'mime.types': f(5222, 85),
+    proxy_params: f(210, 85),
+  },
+  '/var': { log: d(1), lib: d(15) },
+  '/var/log': {
+    journal: d(0),
+    nginx: d(0),
+    'auth.log': f(186_368, 0),
+    syslog: f(1_887_436, 0),
+  },
+  '/opt': { grafana: d(15), lightrag: d(3) },
 }
 
-const d = (name: string, modified: string): Entry => ({ name, dir: true, modified })
-const f = (name: string, size: number, modified: string): Entry => ({
-  name,
-  dir: false,
-  size,
-  modified,
-})
+export const mockHome = '/home/dangth'
 
-export const mockFs: Record<string, Entry[]> = {
-  '/': [
-    d('etc', '20/10/2026'),
-    d('home', '01/08/2026'),
-    d('opt', '12/10/2026'),
-    d('var', '01/08/2026'),
-  ],
-  '/home': [d('dangth', '25/10/2026')],
-  '/home/dangth': [
-    d('projects', '25/10/2026'),
-    f('.bashrc', 3800, '01/08/2026'),
-    f('.profile', 807, '01/08/2026'),
-  ],
-  '/etc': [
-    d('nginx', '20/10/2026'),
-    d('systemd', '12/10/2026'),
-    f('hosts', 221, '01/08/2026'),
-    f('fstab', 657, '01/08/2026'),
-  ],
-  '/etc/nginx': [
-    d('conf.d', '12/10/2026'),
-    d('sites-available', '20/10/2026'),
-    d('sites-enabled', '20/10/2026'),
-    d('snippets', '03/08/2026'),
-    f('nginx.conf', 2.4 * 1024, '20/10/2026'),
-    f('mime.types', 5.1 * 1024, '03/08/2026'),
-    f('proxy_params', 210, '03/08/2026'),
-  ],
-  '/var': [d('log', '26/10/2026'), d('lib', '12/10/2026')],
-  '/var/log': [
-    d('journal', '26/10/2026'),
-    d('nginx', '26/10/2026'),
-    f('auth.log', 182 * 1024, '26/10/2026'),
-    f('syslog', 1.8 * 1024 ** 2, '26/10/2026'),
-  ],
-  '/opt': [d('grafana', '12/10/2026'), d('lightrag', '24/10/2026')],
+export function mockList(dir: string): Entry[] {
+  const now = Date.now() / 1000
+  return Object.entries(tree[dir] ?? {}).map(([name, n]) => ({
+    name,
+    path: joinPath(dir, name),
+    kind: n.dir ? 'dir' : 'file',
+    dir: n.dir,
+    size: n.dir ? 4096 : n.size,
+    mode: n.dir ? 'drwxr-xr-x' : '-rw-r--r--',
+    perm: n.dir ? 0o755 : 0o644,
+    modTime: Math.round(now - n.days * 86_400 - 3600),
+    uid: 0,
+    gid: 0,
+  }))
 }
 
-export interface Place {
-  label: string
-  path: string
-  icon: IconName
+export function mockIsDir(path: string): boolean {
+  return path in tree
 }
-
-export const places: Place[] = [
-  { label: 'Home', path: '/home/dangth', icon: 'home' },
-  { label: '/etc', path: '/etc', icon: 'folder' },
-  { label: '/var/log', path: '/var/log', icon: 'folder' },
-  { label: '/opt', path: '/opt', icon: 'folder' },
-]
-
-export function join(dir: string, name: string): string {
-  return dir === '/' ? `/${name}` : `${dir}/${name}`
-}
-
-/** Shortcuts shown for other servers in the sidebar. */
-export const remotePlaces: Place[] = [{ label: 'Backups', path: '/srv/backups', icon: 'folder' }]
