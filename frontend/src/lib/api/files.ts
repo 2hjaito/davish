@@ -71,3 +71,27 @@ export const filesPlanRemove = (serverID: string, path: string): Promise<RemoveP
 /** Runs plan.command; fails with FS_STALE when the path changed since the plan. */
 export const filesRemove = (serverID: string, plan: RemovePlan): Promise<void> =>
   App.FilesRemove(serverID, plan.path, plan.command)
+
+/** zip, tar.gz (shown as GZ) or tar; folders and files alike. */
+export type ArchiveFormat = 'zip' | 'tar.gz' | 'tar'
+
+export interface CompressPlan {
+  /** Next to the source, never an existing name. */
+  output: string
+  /** Exactly what filesCompress runs. */
+  command: string
+}
+
+export const filesPlanCompress = (
+  serverID: string,
+  path: string,
+  format: ArchiveFormat,
+): Promise<CompressPlan> => App.FilesPlanCompress(serverID, path, format)
+
+/** Runs plan.command; fails with FS_STALE when the plan no longer holds. */
+export const filesCompress = (
+  serverID: string,
+  path: string,
+  format: ArchiveFormat,
+  plan: CompressPlan,
+): Promise<CompressPlan> => App.FilesCompress(serverID, path, format, plan.command)

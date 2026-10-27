@@ -1,3 +1,7 @@
+<script lang="ts" module>
+  export type DragPhase = 'start' | 'move' | 'end' | 'cancel'
+</script>
+
 <script lang="ts">
   import type { Entry } from '../../lib/api/files'
   import { formatBytes } from '../../lib/format'
@@ -21,9 +25,14 @@
     onsort: (key: SortKey) => void
     onselect: (path: string) => void
     onopen: (entry: Entry) => void
+    /**
+     * A row dragged out of place, for the drag menu. Positions are in
+     * viewport pixels; start gives where the press began.
+     */
+    ondrag?: (entry: Entry, phase: DragPhase, x: number, y: number) => void
   }
 
-  let { entries, order, selected, now, onsort, onselect, onopen }: Props = $props()
+  let { entries, order, selected, now, onsort, onselect, onopen, ondrag }: Props = $props()
 
   // Must match .row's height in CSS; the virtual window is computed from it.
   const ROW_H = 30
@@ -75,6 +84,60 @@
 
   // Keys go to the scroller, never to a row: rows scrolled out of the
   // window are removed, and focus would fall to the page with them.
+  // A press becomes a drag only after it moves this far, so clicks and
+  // double clicks keep working.
+  const DRAG_START = 12
+
+  let press: { entry: Entry; x: number; y: number; pointer: number } | null = null
+  let dragging = false
+  // The click that ends a drag must not also select a row.
+  let swallowClick = false
+
+  function onRowPointerDown(ev: PointerEvent, e: Entry) {
+    if (!ondrag || ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return
+    press = { entry: e, x: ev.clientX, y: ev.clientY, pointer: ev.pointerId }
+  }
+
+  function onpointermove(ev: PointerEvent) {
+    if (!press || !ondrag || ev.pointerId !== press.pointer) return
+    if (!dragging) {
+      if (Math.hypot(ev.clientX - press.x, ev.clientY - press.y) < DRAG_START) return
+      dragging = true
+      // Keep receiving moves wherever the pointer goes, rows included.
+      scroller?.setPointerCapture(ev.pointerId)
+      select(press.entry.path)
+      ondrag(press.entry, 'start', press.x, press.y)
+    }
+    ondrag(press.entry, 'move', ev.clientX, ev.clientY)
+  }
+
+  function endDrag(ev: PointerEvent, phase: 'end' | 'cancel') {
+    if (press && dragging && ondrag) {
+      ondrag(press.entry, phase, ev.clientX, ev.clientY)
+      // The click follows pointerup in the same task, if it comes at all.
+      swallowClick = phase === 'end'
+      setTimeout(() => (swallowClick = false))
+    }
+    press = null
+    dragging = false
+  }
+
+  function onWindowKeydown(ev: KeyboardEvent) {
+    if (ev.key !== 'Escape' || !dragging || !press || !ondrag) return
+    ev.preventDefault()
+    ondrag(press.entry, 'cancel', press.x, press.y)
+    press = null
+    dragging = false
+  }
+
+  function onRowClick(path: string) {
+    if (swallowClick) {
+      swallowClick = false
+      return
+    }
+    select(path)
+  }
+
   function select(path: string) {
     scroller?.focus({ preventScroll: true })
     onselect(path)
@@ -111,6 +174,8 @@
   }
 </script>
 
+<svelte:window onkeydown={onWindowKeydown} />
+
 <div class="table">
   <div class="row head" role="row">
     {#each SORT_KEYS as key (key)}
@@ -140,6 +205,9 @@
     bind:clientHeight={viewport}
     onscroll={() => scroller && (scrollTop = scroller.scrollTop)}
     {onkeydown}
+    {onpointermove}
+    onpointerup={(ev) => endDrag(ev, 'end')}
+    onpointercancel={(ev) => endDrag(ev, 'cancel')}
   >
     <div class="rows" style:height="{entries.length * ROW_H}px">
       {#each rows as e, i (e.path)}
@@ -153,7 +221,8 @@
           aria-selected={e.path === selected}
           tabindex="-1"
           style:translate="0 {index * ROW_H}px"
-          onclick={() => select(e.path)}
+          onpointerdown={(ev) => onRowPointerDown(ev, e)}
+          onclick={() => onRowClick(e.path)}
           ondblclick={() => onopen(e)}
           title={e.kind === 'link' && e.target ? `${e.name} → ${e.target}` : e.name}
         >

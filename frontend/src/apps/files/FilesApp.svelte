@@ -27,6 +27,8 @@
   import { openTransfers } from '../../lib/wm/intents.svelte'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import type { AppProps } from '../types'
+  import { actionForKey } from './actions'
+  import FileActions from './FileActions.svelte'
   import FileList from './FileList.svelte'
   import {
     baseName,
@@ -67,7 +69,12 @@
   let forward = $state<string[]>([])
   let search = $state<HTMLInputElement>()
   let main = $state<HTMLDivElement>()
+  let root = $state<HTMLDivElement>()
   let list = $state<ReturnType<typeof FileList>>()
+  let actions = $state<ReturnType<typeof FileActions>>()
+  /** A short confirmation in the path bar, like "path copied". */
+  let flash = $state('')
+  let flashTimer: ReturnType<typeof setTimeout> | undefined
   // Scroll and selection of folders already visited in this window, so
   // coming back lands where the user left off. Not reactive: only read
   // when arriving in a folder.
@@ -170,6 +177,41 @@
   function reload() {
     if (cwd === null) void start()
     else void show(cwd)
+  }
+
+  /** After a change on the server: list again, then select path if given. */
+  async function changed(path: string | null) {
+    if (cwd === null || !(await show(cwd))) return
+    if (path === null || !listing.some((e) => e.path === path)) return
+    selected = path
+    await tick()
+    list?.restore(null, path)
+  }
+
+  function showFlash(text: string) {
+    flash = text
+    clearTimeout(flashTimer)
+    flashTimer = setTimeout(() => (flash = ''), 2500)
+  }
+
+  /** Shortcuts for the drag menu's actions; false when the key is not one. */
+  function actionKey(e: KeyboardEvent): boolean {
+    // Typing in the search box or a dialog never touches files.
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)
+      return false
+    const id = actionForKey({
+      key: e.key,
+      code: e.code,
+      primary: hasPrimaryModifier(e),
+      shift: e.shiftKey,
+      alt: e.altKey,
+    })
+    if (!id || !connected) return false
+    const entry = listing.find((x) => x.path === selected) ?? null
+    if (!entry && id !== 'terminal') return false
+    e.preventDefault()
+    actions?.act(id, entry)
+    return true
   }
 
   // Load on open and again whenever the server comes back.
@@ -288,6 +330,7 @@
   }
 
   function onkeydown(e: KeyboardEvent) {
+    if (actionKey(e)) return
     // ⌘⌥L like Safari's downloads; code, since Option changes e.key on macOS.
     if (hasPrimaryModifier(e) && e.altKey && !e.shiftKey && e.code === 'KeyL') {
       e.preventDefault()
@@ -314,7 +357,7 @@
 
 <!-- Shortcuts for the whole window; every one also has a button. -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="files" {onkeydown}>
+<div class="files" {onkeydown} bind:this={root}>
   <nav class="sidebar" aria-label={t.files.places}>
     <TitleBar bare />
     <div class="places">
@@ -427,6 +470,7 @@
         onsort={sortBy}
         onselect={(path) => (selected = path)}
         onopen={openEntry}
+        ondrag={(entry, phase, x, y) => actions?.drag(entry, phase, x, y)}
         bind:this={list}
       />
     {/if}
@@ -443,7 +487,9 @@
           {c.name}
         </button>
       {/each}
-      {#if busy.count > 0}
+      {#if flash}
+        <span class="count flash" role="status">{flash}</span>
+      {:else if busy.count > 0}
         <button
           class="count busy"
           title="{t.transfers.open} ({shortcut('⌥L')})"
@@ -456,6 +502,15 @@
     </nav>
   </div>
 </div>
+
+<FileActions
+  bind:this={actions}
+  serverID={win.serverID}
+  {cwd}
+  bounds={() => root?.getBoundingClientRect()}
+  onchanged={(path) => void changed(path)}
+  onflash={showFlash}
+/>
 
 <UploadConflictDialog
   item={conflict?.item ?? null}
@@ -694,6 +749,10 @@
     margin-left: auto;
     padding-left: 12px;
     font-variant-numeric: tabular-nums;
+  }
+
+  .count.flash {
+    color: var(--ok);
   }
 
   .count.busy {

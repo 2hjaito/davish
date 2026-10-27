@@ -24,6 +24,8 @@ const ICONS = {
   folder: 'FiFolder',
   file: 'FiFile',
   link: 'FiLink',
+  rename: 'FiType',
+  archive: 'FiArchive',
   arrowUp: 'FiArrowUp',
   arrowDown: 'FiArrowDown',
   bell: 'FiBell',
