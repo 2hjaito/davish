@@ -1,9 +1,10 @@
 package app
 
 // TermStart opens a shell on the server and returns the session ID; output
-// arrives as term:data and the end as term:exit.
-func (a *App) TermStart(serverID string, cols, rows int) (string, error) {
-	return a.terms.Start(a.ctx, serverID, cols, rows)
+// arrives as term:data and the end as term:exit. prompt asks for Davish's
+// prompt on bash.
+func (a *App) TermStart(serverID string, cols, rows int, prompt bool) (string, error) {
+	return a.terms.Start(a.ctx, serverID, cols, rows, prompt)
 }
 
 // TermWrite sends input to the shell.

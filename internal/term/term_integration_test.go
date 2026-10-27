@@ -102,13 +102,32 @@ func connect(t *testing.T) (*conn.Manager, string) {
 	return m, srv.ID
 }
 
+// run executes cmd in its own session and returns its trimmed output.
+func run(t *testing.T, m *conn.Manager, id, cmd string) string {
+	t.Helper()
+	client, err := m.Client(id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sess, err := client.NewSession()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = sess.Close() }()
+	out, err := sess.Output(cmd)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return strings.TrimSpace(string(out))
+}
+
 func TestShellRunsCommandsAndReportsExit(t *testing.T) {
 	m, id := connect(t)
 	scr := &screen{}
 	svc := term.New(m, scr, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	t.Cleanup(svc.CloseAll)
 
-	sid, err := svc.Start(context.Background(), id, 80, 24)
+	sid, err := svc.Start(context.Background(), id, 80, 24, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,7 +160,7 @@ func TestShellRunsCommandsAndReportsExit(t *testing.T) {
 func TestStartNeedsConnection(t *testing.T) {
 	m, _ := connect(t)
 	svc := term.New(m, discard{}, slog.New(slog.NewTextHandler(io.Discard, nil)))
-	if _, err := svc.Start(context.Background(), "not-connected", 80, 24); err == nil {
+	if _, err := svc.Start(context.Background(), "not-connected", 80, 24, false); err == nil {
 		t.Error("started a shell on a server that is not connected")
 	}
 }
@@ -152,7 +171,7 @@ func TestLargeOutputArrivesWhole(t *testing.T) {
 	svc := term.New(m, scr, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	t.Cleanup(svc.CloseAll)
 
-	sid, err := svc.Start(context.Background(), id, 80, 24)
+	sid, err := svc.Start(context.Background(), id, 80, 24, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -174,7 +193,7 @@ func TestCloseReportsExit(t *testing.T) {
 	svc := term.New(m, scr, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	t.Cleanup(svc.CloseAll)
 
-	sid, err := svc.Start(context.Background(), id, 80, 24)
+	sid, err := svc.Start(context.Background(), id, 80, 24, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -193,7 +212,7 @@ func TestDroppedConnectionEndsSessionWithoutCode(t *testing.T) {
 	svc := term.New(m, scr, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	t.Cleanup(svc.CloseAll)
 
-	sid, err := svc.Start(context.Background(), id, 80, 24)
+	sid, err := svc.Start(context.Background(), id, 80, 24, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -202,5 +221,65 @@ func TestDroppedConnectionEndsSessionWithoutCode(t *testing.T) {
 	// The frontend reads -1 as a lost connection and offers to reopen the tab.
 	if scr.exit.Code != -1 || scr.exit.ID != sid {
 		t.Errorf("exit = %+v; want code -1 for %s", scr.exit, sid)
+	}
+}
+
+func TestPromptOnBashWritesNothing(t *testing.T) {
+	m, id := connect(t)
+	before := run(t, m, id, "ls -A ~ /tmp")
+
+	scr := &screen{}
+	svc := term.New(m, scr, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	t.Cleanup(svc.CloseAll)
+	sid, err := svc.Start(context.Background(), id, 120, 30, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// The powerline arrow and the ❯ line mean the prompt script ran.
+	scr.waitFor(t, func(out string, _ *term.Exit) bool {
+		return strings.Contains(out, "") && strings.Contains(out, "❯")
+	})
+
+	// Ubuntu's ~/.bashrc defines ll, so the user's environment was loaded.
+	if err := svc.Write(sid, "type ll\n"); err != nil {
+		t.Fatal(err)
+	}
+	scr.waitFor(t, func(out string, _ *term.Exit) bool { return strings.Contains(out, "ll is aliased") })
+
+	// A failing command shows its code in the next prompt.
+	if err := svc.Write(sid, "(exit 7)\n"); err != nil {
+		t.Fatal(err)
+	}
+	scr.waitFor(t, func(out string, _ *term.Exit) bool { return strings.Contains(out, " 7") })
+
+	if err := svc.Write(sid, "exit 3\n"); err != nil {
+		t.Fatal(err)
+	}
+	scr.waitFor(t, func(_ string, exit *term.Exit) bool { return exit != nil })
+	if scr.exit.Code != 3 {
+		t.Errorf("exit code = %d; want 3", scr.exit.Code)
+	}
+	if after := run(t, m, id, "ls -A ~ /tmp"); after != before {
+		t.Errorf("files changed on the server:\nbefore %q\nafter  %q", before, after)
+	}
+}
+
+func TestNoPromptLeavesTheShellAlone(t *testing.T) {
+	m, id := connect(t)
+	scr := &screen{}
+	svc := term.New(m, scr, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	t.Cleanup(svc.CloseAll)
+	sid, err := svc.Start(context.Background(), id, 80, 24, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := svc.Write(sid, "echo plain-$((1+1))\n"); err != nil {
+		t.Fatal(err)
+	}
+	scr.waitFor(t, func(out string, _ *term.Exit) bool { return strings.Contains(out, "plain-2") })
+	scr.mu.Lock()
+	defer scr.mu.Unlock()
+	if strings.Contains(scr.out.String(), "") {
+		t.Error("Davish prompt shown although it was not asked for")
 	}
 }

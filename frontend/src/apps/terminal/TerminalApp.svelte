@@ -91,7 +91,7 @@
       const term = terms.get(tab.id)
       if (!tab.ready || !term || tab.session || tab.starting || tab.lost) continue
       tab.starting = true
-      termStart(win.serverID, term.cols, term.rows)
+      termStart(win.serverID, term.cols, term.rows, settings.terminalPrompt)
         .then((id) => (tab.session = id))
         .catch(() => {
           term.write(`\r\n\x1b[31m${t.terminal.startFailed}\x1b[0m\r\n`)

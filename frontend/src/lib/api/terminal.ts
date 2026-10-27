@@ -1,8 +1,13 @@
 // Typed wrappers for the terminal bindings (internal/app/terminal.go).
 import * as App from '../../../wailsjs/go/app/App'
 
-export const termStart = (serverID: string, cols: number, rows: number): Promise<string> =>
-  App.TermStart(serverID, cols, rows)
+/** prompt asks for Davish's powerline prompt; it applies when the login shell is bash. */
+export const termStart = (
+  serverID: string,
+  cols: number,
+  rows: number,
+  prompt: boolean,
+): Promise<string> => App.TermStart(serverID, cols, rows, prompt)
 export const termWrite = (id: string, data: string): Promise<void> => App.TermWrite(id, data)
 export const termResize = (id: string, cols: number, rows: number): Promise<void> =>
   App.TermResize(id, cols, rows)

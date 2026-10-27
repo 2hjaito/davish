@@ -17,6 +17,7 @@ interface SettingsData {
   wallpaperAccent: string
   terminalFontSize: number
   terminalGpu: boolean
+  terminalPrompt: boolean
 }
 
 const defaults: SettingsData = {
@@ -25,6 +26,7 @@ const defaults: SettingsData = {
   wallpaperAccent: WALLPAPER_ACCENTS[0],
   terminalFontSize: TERMINAL_FONT.default,
   terminalGpu: false,
+  terminalPrompt: true,
 }
 
 class Settings {
@@ -38,6 +40,9 @@ class Settings {
   }
   get wallpaperAccent() {
     return this.#data.wallpaperAccent
+  }
+  get terminalPrompt() {
+    return this.#data.terminalPrompt !== false
   }
   get terminalGpu() {
     return this.#data.terminalGpu === true

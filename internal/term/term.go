@@ -5,12 +5,15 @@ package term
 import (
 	"context"
 	"crypto/rand"
+	_ "embed"
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
 	"log/slog"
+	"path"
+	"strings"
 	"sync"
 	"time"
 
@@ -18,7 +21,17 @@ import (
 
 	"davish/internal/apperr"
 	"davish/internal/events"
+	"davish/internal/shellx"
 )
+
+//go:embed prompt.bash
+var promptScript string
+
+// promptCommand starts bash with Davish's prompt. The script travels as one
+// quoted argument and bash reads it through process substitution, so nothing
+// is written on the server (docs/adr/0004). The login shell runs this line,
+// which is why it is only used when that shell is bash.
+var promptCommand = "exec bash --rcfile <(printf '%s\\n' " + shellx.Quote(promptScript) + ") -i"
 
 // ClientSource hands out the live SSH client of a server.
 type ClientSource interface {
@@ -70,7 +83,9 @@ func New(clients ClientSource, emit Emitter, log *slog.Logger) *Service {
 }
 
 // Start opens a login shell on serverID sized cols×rows and returns its ID.
-func (s *Service) Start(ctx context.Context, serverID string, cols, rows int) (string, error) {
+// With prompt, a bash login shell gets Davish's powerline prompt; other
+// shells open untouched.
+func (s *Service) Start(ctx context.Context, serverID string, cols, rows int, prompt bool) (string, error) {
 	if err := checkSize(cols, rows); err != nil {
 		return "", err
 	}
@@ -81,11 +96,15 @@ func (s *Service) Start(ctx context.Context, serverID string, cols, rows int) (s
 	if err != nil {
 		return "", err
 	}
+	command := ""
+	if prompt && loginShellIsBash(client) {
+		command = promptCommand
+	}
 	sess, err := client.NewSession()
 	if err != nil {
 		return "", apperr.Wrap(apperr.ConnNotConnected, "cannot open a session", err)
 	}
-	stdin, stdout, err := startShell(sess, cols, rows)
+	stdin, stdout, err := startShell(sess, cols, rows, command)
 	if err != nil {
 		sess.Close() //nolint:errcheck,gosec // failed to start
 		return "", err
@@ -115,7 +134,20 @@ func (s *Service) Start(ctx context.Context, serverID string, cols, rows int) (s
 	return id, nil
 }
 
-func startShell(sess *ssh.Session, cols, rows int) (io.WriteCloser, io.Reader, error) {
+// loginShellIsBash asks the server for the user's login shell. Any failure
+// counts as no, which falls back to the plain shell.
+func loginShellIsBash(client *ssh.Client) bool {
+	sess, err := client.NewSession()
+	if err != nil {
+		return false
+	}
+	defer sess.Close() //nolint:errcheck // probe only
+	out, err := sess.Output(`printf %s "$SHELL"`)
+	return err == nil && path.Base(strings.TrimSpace(string(out))) == "bash"
+}
+
+// startShell runs command on a PTY, or the login shell when it is empty.
+func startShell(sess *ssh.Session, cols, rows int, command string) (io.WriteCloser, io.Reader, error) {
 	modes := ssh.TerminalModes{
 		ssh.ECHO:          1,
 		ssh.TTY_OP_ISPEED: 14400,
@@ -133,7 +165,11 @@ func startShell(sess *ssh.Session, cols, rows int) (io.WriteCloser, io.Reader, e
 	if err != nil {
 		return nil, nil, fmt.Errorf("stdout pipe: %w", err)
 	}
-	if err := sess.Shell(); err != nil {
+	start := sess.Shell
+	if command != "" {
+		start = func() error { return sess.Start(command) }
+	}
+	if err := start(); err != nil {
 		return nil, nil, apperr.Wrap(apperr.ConnNotConnected, "cannot start the shell", err)
 	}
 	return stdin, stdout, nil

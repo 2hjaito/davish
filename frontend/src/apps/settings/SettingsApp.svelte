@@ -90,6 +90,19 @@
 
   <label class="row">
     <span>
+      <strong>{t.settings.prompt}</strong>
+      <small>{t.settings.promptHint}</small>
+    </span>
+    <input
+      type="checkbox"
+      role="switch"
+      checked={settings.terminalPrompt}
+      onchange={(e) => settings.set('terminalPrompt', e.currentTarget.checked)}
+    />
+  </label>
+
+  <label class="row">
+    <span>
       <strong>{t.settings.gpu}</strong>
       <small>{t.settings.gpuHint}</small>
     </span>
