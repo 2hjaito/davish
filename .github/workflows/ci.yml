@@ -92,6 +92,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev
 
+      # main.go embeds frontend/dist; these tests never serve it, so an
+      # empty placeholder saves installing Node and building the UI.
+      - name: Placeholder frontend build
+        run: mkdir -p frontend/dist && touch frontend/dist/.keep
+
       - name: Start test sshd
         run: make sshd-up
 
