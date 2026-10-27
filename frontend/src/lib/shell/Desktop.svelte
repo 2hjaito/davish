@@ -15,7 +15,7 @@
     transferNoticeId,
     transfers,
   } from '../stores/transfers.svelte'
-  import { openTransfers } from '../wm/intents.svelte'
+  import { openLogs, openTransfers } from '../wm/intents.svelte'
   import Banners from './Banners.svelte'
   import { ui } from '../stores/ui.svelte'
   import Window from '../wm/Window.svelte'
@@ -63,7 +63,9 @@
   })
 
   // Threshold alerts and other notify:new events, for the app's lifetime.
-  $effect(() => notifications.init((id) => servers.list.find((s) => s.id === id)?.name ?? id))
+  $effect(() =>
+    notifications.init((id) => servers.list.find((s) => s.id === id)?.name ?? id, openLogs),
+  )
 
   // Transfers outlive the Files window that started them: a download says
   // when it starts and how it ends, in one notification per job.

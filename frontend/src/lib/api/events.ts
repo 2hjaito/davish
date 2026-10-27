@@ -111,12 +111,14 @@ export interface NotifyNew {
   id: string
   level: 'info' | 'warn' | 'error'
   serverID: string
-  kind: 'mem-high' | 'disk-high'
-  /** Percent. */
+  kind: 'mem-high' | 'disk-high' | 'service-failed' | 'container-restarting'
+  /** Percent for mem-high and disk-high; total restarts for container-restarting. */
   value: number
   threshold: number
   /** Mount path, for disk-high. */
   mount?: string
+  /** The unit or container, for service-failed and container-restarting. */
+  target?: string
 }
 
 /** Total is 0 until a folder has been walked; bps is bytes per second. */

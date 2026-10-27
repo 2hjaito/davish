@@ -104,6 +104,12 @@ export const t = {
     diskHigh: (server: string, mount: string) => `Ổ ${mount} trên ${server} sắp đầy`,
     overThreshold: (value: string, threshold: string) =>
       `Đang dùng ${value}, trên ngưỡng ${threshold}.`,
+    serviceFailed: (unit: string, server: string) => `Dịch vụ ${unit} trên ${server} bị lỗi`,
+    serviceFailedBody: 'Dịch vụ đã dừng vì lỗi. Xem log để biết lý do.',
+    containerRestarting: (name: string, server: string) =>
+      `${name} trên ${server} đang khởi động lại liên tục`,
+    containerRestartingBody: (n: number) => `Container đã khởi động lại ${n} lần.`,
+    showLogs: 'Xem log',
   },
   window: {
     close: 'Đóng',
