@@ -194,6 +194,16 @@ export const t = {
     emptyHint: 'Mở file từ Files: nhấp đúp, Enter, hoặc kéo ra rồi chọn “Mở trong Editor”.',
     position: (line: number, col: number) => `Dòng ${line}, cột ${col}`,
     unsaved: 'Chưa lưu',
+    save: 'Lưu',
+    saving: 'Đang lưu…',
+    saved: 'Đã lưu',
+    savedWithBackup: (name: string) => `Đã lưu · bản cũ giữ ở ${name}`,
+    saveFailed: (reason: string) => `Chưa lưu được: ${reason}`,
+    dontSave: 'Không lưu',
+    cancel: 'Hủy',
+    unsavedTitle: (name: string) => `Lưu thay đổi của “${name}”?`,
+    unsavedMany: (n: number) => `${n} file có thay đổi chưa lưu`,
+    unsavedBody: 'Nếu không lưu, các thay đổi sẽ mất.',
     retry: 'Thử lại',
     /** CodeMirror's own UI text (search panel, folding). */
     phrases: {

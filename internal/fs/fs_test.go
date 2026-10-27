@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"testing"
+	"time"
 
 	"davish/internal/apperr"
 )
@@ -141,5 +142,12 @@ func TestCompressCommand(t *testing.T) {
 	}
 	if _, err := compressCommand("rar", "x.rar", "x"); err == nil {
 		t.Error("unknown format accepted")
+	}
+}
+
+func TestBackupName(t *testing.T) {
+	at := time.Date(2026, 10, 27, 15, 10, 5, 0, time.FixedZone("ICT", 7*3600))
+	if got := backupName("/etc/nginx/nginx.conf", at); got != "/etc/nginx/nginx.conf.bak-20261027T081005Z" {
+		t.Errorf("backupName = %q", got)
 	}
 }

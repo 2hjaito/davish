@@ -54,6 +54,10 @@ export function FilesRename(arg1, arg2, arg3) {
   return window['go']['app']['App']['FilesRename'](arg1, arg2, arg3);
 }
 
+export function FilesSave(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['FilesSave'](arg1, arg2, arg3, arg4);
+}
+
 export function FilesStat(arg1, arg2) {
   return window['go']['app']['App']['FilesStat'](arg1, arg2);
 }

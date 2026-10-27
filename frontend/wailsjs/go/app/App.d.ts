@@ -31,6 +31,8 @@ export function FilesRemove(arg1:string,arg2:string,arg3:string):Promise<void>;
 
 export function FilesRename(arg1:string,arg2:string,arg3:string):Promise<void>;
 
+export function FilesSave(arg1:string,arg2:string,arg3:Array<number>,arg4:fs.SaveOptions):Promise<fs.SaveResult>;
+
 export function FilesStat(arg1:string,arg2:string):Promise<fs.Entry>;
 
 export function FilesWrite(arg1:string,arg2:string,arg3:Array<number>):Promise<fs.Entry>;

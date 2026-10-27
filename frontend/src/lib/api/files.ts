@@ -95,3 +95,26 @@ export const filesCompress = (
   format: ArchiveFormat,
   plan: CompressPlan,
 ): Promise<CompressPlan> => App.FilesCompress(serverID, path, format, plan.command)
+
+export interface SaveResult {
+  entry: Entry
+  /** Path of the copy made of the previous version, when asked for. */
+  backup?: string
+}
+
+/**
+ * Saves editor text atomically. With backup, the current file is first
+ * copied to "<name>.bak-<UTC time>" next to it.
+ */
+export const filesSave = (
+  serverID: string,
+  path: string,
+  data: Uint8Array,
+  opts: { backup: boolean },
+): Promise<SaveResult> =>
+  App.FilesSave(
+    serverID,
+    path,
+    encodeBase64(data) as unknown as number[],
+    opts,
+  ) as Promise<SaveResult>

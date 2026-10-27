@@ -47,7 +47,8 @@ export class WindowManager {
   snapPreview = $state<Rect | null>(null)
 
   #saved: Record<string, SavedWindow>
-  // Plain record: timer handles are bookkeeping, not UI state.
+  // Plain records: guards and timer handles are bookkeeping, not UI state.
+  #guards: Record<string, () => boolean> = {}
   #animTimers: Record<string, ReturnType<typeof setTimeout>> = {}
 
   constructor(saved: Record<string, Rect | SavedWindow> = {}) {
@@ -126,10 +127,24 @@ export class WindowManager {
     }
   }
 
-  close(id: string) {
+  /**
+   * Closes the window. A guard registered by its app may keep it open (to
+   * ask about unsaved work); the app then closes it with force.
+   */
+  close(id: string, { force = false } = {}) {
+    if (!force && this.#guards[id]?.() === false) return
+    delete this.#guards[id]
     const w = this.#get(id)
     if (w) this.#remember(w)
     this.windows = this.windows.filter((w) => w.id !== id)
+  }
+
+  /** Lets an app veto closing its window: guard returns false to keep it. */
+  guardClose(id: string, guard: () => boolean): () => void {
+    this.#guards[id] = guard
+    return () => {
+      if (this.#guards[id] === guard) delete this.#guards[id]
+    }
   }
 
   focus(id: string) {

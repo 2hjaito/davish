@@ -56,6 +56,21 @@ describe('WindowManager', () => {
     expect(wm.open('terminal', 's1', opts).rect).toEqual({ x: 200, y: 150, w: 500, h: 350 })
   })
 
+  it('lets a guard keep a window open until closed with force', () => {
+    const a = wm.open('editor', 's1', opts)
+    let asked = 0
+    const off = wm.guardClose(a.id, () => {
+      asked++
+      return false
+    })
+    wm.close(a.id)
+    expect(asked).toBe(1)
+    expect(wm.windows).toHaveLength(1)
+    wm.close(a.id, { force: true })
+    expect(wm.windows).toHaveLength(0)
+    off()
+  })
+
   it('opens at the default size in the middle of the work area', () => {
     // Default area: x 0, y 30, 1280 × 670.
     expect(wm.open('terminal', 's1', opts).rect).toEqual({ x: 440, y: 215, w: 400, h: 300 })

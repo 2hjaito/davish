@@ -28,9 +28,11 @@
     line?: number
     /** Called on every edit and cursor move. */
     onchange?: (info: { text: () => string; line: number; col: number; edited: boolean }) => void
+    /** ⌘S / Ctrl+S. */
+    onsave?: () => void
   }
 
-  let { doc, language, readOnly = false, line, onchange }: Props = $props()
+  let { doc, language, readOnly = false, line, onchange, onsave }: Props = $props()
 
   let host: HTMLDivElement
   let view: EditorView | undefined
@@ -103,6 +105,8 @@
           closeBrackets(),
           highlightActiveLine(),
           highlightSelectionMatches(),
+          // Before the defaults, so the browser never sees ⌘S.
+          keymap.of([{ key: 'Mod-s', preventDefault: true, run: () => (onsave?.(), true) }]),
           keymap.of([
             ...closeBracketsKeymap,
             ...defaultKeymap,
@@ -146,6 +150,11 @@
     if (!view || n < 1 || n > view.state.doc.lines) return
     view.dispatch({ selection: { anchor: view.state.doc.line(n).from }, scrollIntoView: true })
     view.focus()
+  }
+
+  /** The current text, edits included. */
+  export function getText(): string {
+    return view?.state.doc.toString() ?? ''
   }
 
   export function focus() {

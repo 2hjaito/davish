@@ -2,7 +2,7 @@
 FROM ubuntu:24.04
 
 RUN apt-get update \
- && apt-get install -y --no-install-recommends openssh-server procps zip \
+ && apt-get install -y --no-install-recommends openssh-server procps zip nginx \
  && rm -rf /var/lib/apt/lists/* \
  && mkdir -p /run/sshd \
  && useradd -m -s /bin/bash tester \
@@ -17,6 +17,10 @@ RUN chmod 600 /etc/ssh/ssh_host_ed25519_key \
  && chown -R tester:tester /home/tester/.ssh \
  && chmod 700 /home/tester/.ssh \
  && chmod 600 /home/tester/.ssh/authorized_keys
+
+# tester owns nginx's config, so Editor and Nginx tests have a real /etc
+# file to change. Test container only.
+RUN chown -R tester:tester /etc/nginx
 
 EXPOSE 22
 CMD ["/usr/sbin/sshd", "-D", "-e"]

@@ -2,19 +2,22 @@
   import { untrack } from 'svelte'
 
   import { toUserError } from '../../lib/api/errors'
-  import { type FileContent, filesRead } from '../../lib/api/files'
+  import { type FileContent, filesRead, filesSave } from '../../lib/api/files'
   import { hasRuntime } from '../../lib/api/runtime'
   import { t } from '../../lib/i18n/vi'
   import { servers } from '../../lib/stores/servers.svelte'
+  import Dialog from '../../lib/ui/Dialog.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import { type EditorRequest, editorRequests } from '../../lib/wm/intents.svelte'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
+  import { wm } from '../../lib/wm/windowManager.svelte'
   import { mockRead } from '../files/mockFs'
   import type { AppProps } from '../types'
   import CodeEditor from './CodeEditor.svelte'
   import { decodeText } from './decode'
   import { detectLanguage, LANGUAGE_LABELS, type LanguageId } from './languages'
+  import { backupByDefault } from './save'
 
   let { win }: AppProps = $props()
 
@@ -31,6 +34,9 @@
     file?: Omit<FileContent, 'data'>
     line?: number
     dirty: boolean
+    saving?: boolean
+    /** The outcome of the last save, shown in the status bar until the next edit. */
+    notice?: { text: string; error?: boolean }
     cursor: { line: number; col: number }
   }
 
@@ -38,6 +44,8 @@
   let tabs = $state<Tab[]>([])
   let activeId = $state<number | null>(null)
   const views: Record<number, CodeEditor> = {}
+  /** Tabs with unsaved work waiting on "save or discard"; window means closing it all. */
+  let closing = $state<{ ids: number[]; window: boolean } | null>(null)
 
   const server = $derived(servers.list.find((s) => s.id === win.serverID))
   const active = $derived(tabs.find((x) => x.id === activeId))
@@ -91,6 +99,73 @@
     return text
   }
 
+  /** Writes the tab's text; true when it is saved. */
+  async function save(tab: Tab): Promise<boolean> {
+    const view = views[tab.id]
+    if (tab.state !== 'ready' || !view || tab.saving) return false
+    if (!hasRuntime) {
+      tab.dirty = false
+      tab.notice = { text: t.editor.saved }
+      return true
+    }
+    tab.saving = true
+    tab.notice = { text: t.editor.saving }
+    try {
+      const data = new TextEncoder().encode(view.getText())
+      const res = await filesSave(win.serverID, tab.path, data, {
+        backup: backupByDefault(tab.path),
+      })
+      tab.file = res.entry
+      tab.dirty = false
+      tab.notice = {
+        text: res.backup
+          ? t.editor.savedWithBackup(res.backup.slice(res.backup.lastIndexOf('/') + 1))
+          : t.editor.saved,
+      }
+      return true
+    } catch (e) {
+      tab.notice = { text: t.editor.saveFailed(toUserError(e).message), error: true }
+      return false
+    } finally {
+      tab.saving = false
+    }
+  }
+
+  function requestCloseTab(id: number) {
+    if (tabs.find((x) => x.id === id)?.dirty) closing = { ids: [id], window: false }
+    else closeTab(id)
+  }
+
+  // Closing the window with unsaved tabs asks first, like a desktop editor.
+  $effect(() =>
+    wm.guardClose(win.id, () => {
+      const dirty = tabs.filter((x) => x.dirty).map((x) => x.id)
+      if (dirty.length === 0) return true
+      closing = { ids: dirty, window: true }
+      return false
+    }),
+  )
+
+  async function resolveClosing(choice: 'save' | 'discard' | 'cancel') {
+    const c = closing
+    closing = null
+    if (!c || choice === 'cancel') return
+    if (choice === 'save') {
+      for (const id of c.ids) {
+        const tab = tabs.find((x) => x.id === id)
+        // A failed save keeps everything open, with the reason on screen.
+        if (tab && !(await save(tab))) {
+          activeId = tab.id
+          return
+        }
+      }
+    }
+    if (c.window) wm.close(win.id, { force: true })
+    else for (const id of c.ids) closeTab(id)
+  }
+
+  const closingTabs = $derived(closing ? tabs.filter((x) => closing?.ids.includes(x.id)) : [])
+
   function closeTab(id: number) {
     const i = tabs.findIndex((x) => x.id === id)
     if (i === -1) return
@@ -125,7 +200,7 @@
         <button
           class="close"
           aria-label={t.editor.closeTab(tab.name)}
-          onclick={() => closeTab(tab.id)}
+          onclick={() => requestCloseTab(tab.id)}
         >
           <Icon name="close" size={10} strokeWidth={2.5} />
         </button>
@@ -156,8 +231,12 @@
           line={tab.line}
           onchange={(c) => {
             tab.cursor = { line: c.line, col: c.col }
-            if (c.edited) tab.dirty = true
+            if (c.edited) {
+              tab.dirty = true
+              tab.notice = undefined
+            }
           }}
+          onsave={() => void save(tab)}
         />
       {/if}
     </div>
@@ -166,6 +245,11 @@
   {#if active}
     <footer class="status">
       <span class="path" title={active.path}>{server?.name ?? ''}:{active.path}</span>
+      {#if active.notice}
+        <span class="notice" class:error={active.notice.error} role="status"
+          >{active.notice.text}</span
+        >
+      {/if}
       {#if active.state === 'ready'}
         <span>{t.editor.position(active.cursor.line, active.cursor.col)}</span>
         <span>{LANGUAGE_LABELS[active.language]}</span>
@@ -174,7 +258,62 @@
   {/if}
 </div>
 
+<Dialog
+  open={closing !== null}
+  title={closingTabs.length === 1
+    ? t.editor.unsavedTitle(closingTabs[0]?.name ?? '')
+    : t.editor.unsavedMany(closingTabs.length)}
+  onclose={() => void resolveClosing('cancel')}
+>
+  <p class="dialog-text">{t.editor.unsavedBody}</p>
+  {#if closingTabs.length > 1}
+    <ul class="dialog-list">
+      {#each closingTabs as tab (tab.id)}<li>{tab.path}</li>{/each}
+    </ul>
+  {/if}
+  {#snippet footer()}
+    <button type="button" class="btn" onclick={() => void resolveClosing('discard')}
+      >{t.editor.dontSave}</button
+    >
+    <span class="grow"></span>
+    <!-- svelte-ignore a11y_autofocus -->
+    <button type="button" class="btn" autofocus onclick={() => void resolveClosing('cancel')}
+      >{t.editor.cancel}</button
+    >
+    <button type="button" class="btn btn-primary" onclick={() => void resolveClosing('save')}
+      >{t.editor.save}</button
+    >
+  {/snippet}
+</Dialog>
+
 <style>
+  .notice {
+    color: var(--ok);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .notice.error {
+    color: var(--danger);
+  }
+
+  .dialog-text {
+    margin: 0 0 8px;
+    line-height: 1.45;
+  }
+
+  .dialog-list {
+    margin: 0;
+    padding-left: 18px;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--fg-muted);
+  }
+
+  .grow {
+    flex: 1;
+  }
+
   .tabs {
     flex: 1;
     min-width: 0;
