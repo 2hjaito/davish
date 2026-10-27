@@ -80,6 +80,24 @@ type Snapshot struct {
 	Mounts []Mount        // real filesystems, / first
 	Disks  []DiskCounters // whole disks, not partitions
 	GPUs   []GPU
+
+	// Health is set on the snapshots that check services and containers,
+	// every 30 seconds; nil on the others.
+	Health *Health
+}
+
+// Health is what can break without a number going up: failed services and
+// containers that keep restarting.
+type Health struct {
+	Failed     []string // failed service units
+	Containers []ContainerState
+}
+
+// ContainerState is one container as docker inspect saw it.
+type ContainerState struct {
+	Name     string
+	Restarts int
+	Status   string // running, restarting, exited…
 }
 
 // ErrMalformed marks a snapshot that could not be parsed; the stream after
@@ -163,7 +181,33 @@ func parseSections(s map[string][]string) (Snapshot, error) {
 	// driver without a reading must not cost the whole snapshot.
 	snap.Disks = parseDiskstats(s["diskstats"], s["block"])
 	snap.GPUs = parseGPUs(s["gpu"])
+	if failed, ok := s["failed"]; ok {
+		snap.Health = parseHealth(failed, s["containers"])
+	}
 	return snap, nil
+}
+
+// parseHealth reads unit names, one per line, and "/name restarts status"
+// lines from docker inspect.
+func parseHealth(failed, containers []string) *Health {
+	h := &Health{}
+	for _, l := range failed {
+		if u := strings.TrimSpace(l); strings.HasSuffix(u, ".service") {
+			h.Failed = append(h.Failed, u)
+		}
+	}
+	for _, l := range containers {
+		f := strings.Fields(l)
+		if len(f) != 3 {
+			continue
+		}
+		n, err := strconv.Atoi(f[1])
+		if err != nil {
+			continue
+		}
+		h.Containers = append(h.Containers, ContainerState{Name: strings.TrimPrefix(f[0], "/"), Restarts: n, Status: f[2]})
+	}
+	return h
 }
 
 // parseStat reads the "cpu" and "cpuN" lines of /proc/stat.

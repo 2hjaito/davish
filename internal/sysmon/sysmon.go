@@ -180,6 +180,11 @@ func (s *Service) collect(ctx context.Context, serverID string, client *ssh.Clie
 		if err != nil {
 			return err
 		}
+		if snap.Health != nil {
+			for _, a := range s.checkHealth(serverID, snap.Uptime, snap.Health) {
+				s.emit.Emit(events.NotifyNew, a)
+			}
+		}
 		if prev != nil {
 			tick := Rate(serverID, *prev, snap)
 			s.emit.Emit(events.SysmonTick, tick)
@@ -212,4 +217,14 @@ func (s *Service) checkAlerts(t Tick) []Alert {
 		return nil
 	}
 	return a.check(t)
+}
+
+func (s *Service) checkHealth(serverID string, uptime float64, h *Health) []Alert {
+	s.alertsMu.Lock()
+	defer s.alertsMu.Unlock()
+	a, ok := s.alerts[serverID]
+	if !ok {
+		return nil
+	}
+	return a.health.check(serverID, uptime, h)
 }
