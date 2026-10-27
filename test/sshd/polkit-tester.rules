@@ -1,0 +1,8 @@
+// Test container only: tester controls the davish-* test units.
+polkit.addRule(function (action, subject) {
+  if (action.id == "org.freedesktop.systemd1.manage-units" &&
+      subject.user == "tester" &&
+      (action.lookup("unit") || "").indexOf("davish-") == 0) {
+    return polkit.Result.YES;
+  }
+});

@@ -1,0 +1,9 @@
+[Unit]
+Description=Davish test service that keeps running
+
+[Service]
+User=nobody
+ExecStart=/bin/sh -c 'echo "davish-ok ready"; exec sleep infinity'
+
+[Install]
+WantedBy=multi-user.target
