@@ -69,3 +69,11 @@ func TestArgsIsCopy(t *testing.T) {
 		t.Error("Args must return a copy")
 	}
 }
+
+func TestInDir(t *testing.T) {
+	got := InDir("/srv/my site", Cmd("tar", "-cf", "a b.tar", "--", "a b"))
+	want := "cd -- '/srv/my site' && tar -cf 'a b.tar' -- 'a b'"
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}

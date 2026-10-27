@@ -288,3 +288,59 @@ func TestRemoveRefusesStaleOrForeignCommand(t *testing.T) {
 	}
 	wantCode(t, e.svc.Remove(ctx, e.id, "/etc/hostname", plan.Command), apperr.FSPermissionDenied)
 }
+
+func TestCompress(t *testing.T) {
+	e := setup(t)
+	ctx := context.Background()
+	src := e.path("my site")
+	e.run(t, "mkdir -p "+shellx.Quote(src+"/css")+" && echo hi > "+shellx.Quote(src+"/index.html")+" && echo x > "+shellx.Quote(src+"/css/a.css"))
+
+	for _, f := range []string{fs.FormatZip, fs.FormatTarGz, fs.FormatTar} {
+		plan, err := e.svc.PlanCompress(ctx, e.id, src, f)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if plan.Output != src+"."+f {
+			t.Errorf("%s: output = %q", f, plan.Output)
+		}
+		if _, err := e.svc.Compress(ctx, e.id, src, f, plan.Command); err != nil {
+			t.Fatalf("%s: %v", f, err)
+		}
+	}
+	list := e.run(t, "cd "+shellx.Quote(e.dir)+" && zip -sf 'my site.zip' | grep -c 'my site/' && tar -tzf 'my site.tar.gz' | sort && tar -tf 'my site.tar' | wc -l")
+	if list != "4\nmy site/\nmy site/css/\nmy site/css/a.css\nmy site/index.html\n4" {
+		t.Errorf("archives: %q", list)
+	}
+
+	// The next archive of the same thing gets a new name, never overwriting.
+	plan, err := e.svc.PlanCompress(ctx, e.id, src, fs.FormatZip)
+	if err != nil || plan.Output != src+" (1).zip" {
+		t.Errorf("second plan = %+v, %v", plan, err)
+	}
+	// A plan gone stale is refused.
+	e.run(t, "touch "+shellx.Quote(plan.Output))
+	_, err = e.svc.Compress(ctx, e.id, src, fs.FormatZip, plan.Command)
+	wantCode(t, err, apperr.FSStale)
+
+	_, err = e.svc.PlanCompress(ctx, e.id, src, "rar")
+	wantCode(t, err, apperr.InvalidInput)
+	_, err = e.svc.PlanCompress(ctx, e.id, "/", fs.FormatTar)
+	wantCode(t, err, apperr.InvalidInput)
+
+	_, err = e.svc.PlanCompress(ctx, e.id, e.path("missing"), fs.FormatTar)
+	wantCode(t, err, apperr.NotFound)
+
+	// A failed run leaves no partial archive behind.
+	locked := e.path("locked")
+	e.run(t, "mkdir "+shellx.Quote(locked)+" && echo s > "+shellx.Quote(locked+"/secret")+" && chmod 000 "+shellx.Quote(locked+"/secret"))
+	plan, err = e.svc.PlanCompress(ctx, e.id, locked, fs.FormatTar)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = e.svc.Compress(ctx, e.id, locked, fs.FormatTar, plan.Command)
+	wantCode(t, err, apperr.FSPermissionDenied)
+	if out := e.run(t, "ls -A "+shellx.Quote(e.dir)+" | grep -c locked.tar || true"); out != "0" {
+		t.Errorf("partial archive left: %s", out)
+	}
+	e.run(t, "chmod 644 "+shellx.Quote(locked+"/secret"))
+}

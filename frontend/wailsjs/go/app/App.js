@@ -18,6 +18,10 @@ export function Disconnect(arg1) {
   return window['go']['app']['App']['Disconnect'](arg1);
 }
 
+export function FilesCompress(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['FilesCompress'](arg1, arg2, arg3, arg4);
+}
+
 export function FilesHome(arg1) {
   return window['go']['app']['App']['FilesHome'](arg1);
 }
@@ -28,6 +32,10 @@ export function FilesList(arg1, arg2) {
 
 export function FilesMkdir(arg1, arg2) {
   return window['go']['app']['App']['FilesMkdir'](arg1, arg2);
+}
+
+export function FilesPlanCompress(arg1, arg2, arg3) {
+  return window['go']['app']['App']['FilesPlanCompress'](arg1, arg2, arg3);
 }
 
 export function FilesPlanRemove(arg1, arg2) {
@@ -98,8 +106,8 @@ export function TermResize(arg1, arg2, arg3) {
   return window['go']['app']['App']['TermResize'](arg1, arg2, arg3);
 }
 
-export function TermStart(arg1, arg2, arg3, arg4) {
-  return window['go']['app']['App']['TermStart'](arg1, arg2, arg3, arg4);
+export function TermStart(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['app']['App']['TermStart'](arg1, arg2, arg3, arg4, arg5);
 }
 
 export function TermWrite(arg1, arg2) {

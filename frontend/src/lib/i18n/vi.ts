@@ -314,6 +314,7 @@ export const t = {
     FS_TOO_LARGE: 'File quá lớn để mở trực tiếp. Hãy tải về.',
     FS_STALE: 'File hoặc thư mục đã thay đổi từ lúc bạn xác nhận. Hãy thử lại.',
     CMD_NEEDS_ROOT: 'Lệnh này cần quyền root.',
+    CMD_MISSING: 'Server chưa cài chương trình cần cho thao tác này (ví dụ zip).',
     INVALID_INPUT: 'Thông tin chưa hợp lệ.',
     NOT_FOUND: 'Không tìm thấy.',
     STORE_CORRUPT: 'File cấu hình bị hỏng. Hãy kiểm tra lại servers.json.',

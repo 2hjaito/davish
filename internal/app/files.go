@@ -48,3 +48,14 @@ func (a *App) FilesPlanRemove(serverID, path string) (fs.RemovePlan, error) {
 func (a *App) FilesRemove(serverID, path, command string) error {
 	return a.files.Remove(a.ctx, serverID, path, command)
 }
+
+// FilesPlanCompress returns the archive name and the exact command that
+// compressing path as format would run.
+func (a *App) FilesPlanCompress(serverID, path, format string) (fs.CompressPlan, error) {
+	return a.files.PlanCompress(a.ctx, serverID, path, format)
+}
+
+// FilesCompress runs the command from FilesPlanCompress.
+func (a *App) FilesCompress(serverID, path, format, command string) (fs.CompressPlan, error) {
+	return a.files.Compress(a.ctx, serverID, path, format, command)
+}

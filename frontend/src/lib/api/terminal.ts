@@ -3,13 +3,17 @@ import * as App from '../../../wailsjs/go/app/App'
 
 import { decodeBase64 } from './base64'
 
-/** prompt asks for Davish's powerline prompt; it applies when the login shell is bash. */
+/**
+ * prompt asks for Davish's powerline prompt; it applies when the login shell
+ * is bash. dir, when set, is where the shell starts (home if it cannot).
+ */
 export const termStart = (
   serverID: string,
   cols: number,
   rows: number,
   prompt: boolean,
-): Promise<string> => App.TermStart(serverID, cols, rows, prompt)
+  dir = '',
+): Promise<string> => App.TermStart(serverID, cols, rows, prompt, dir)
 export const termWrite = (id: string, data: string): Promise<void> => App.TermWrite(id, data)
 export const termResize = (id: string, cols: number, rows: number): Promise<void> =>
   App.TermResize(id, cols, rows)

@@ -67,6 +67,20 @@ export namespace app {
 
 export namespace fs {
 	
+	export class CompressPlan {
+	    output: string;
+	    command: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CompressPlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.output = source["output"];
+	        this.command = source["command"];
+	    }
+	}
 	export class Entry {
 	    name: string;
 	    path: string;

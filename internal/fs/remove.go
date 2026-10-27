@@ -107,6 +107,9 @@ func run(ctx context.Context, client *ssh.Client, command string) error {
 	if !errors.As(err, &exit) {
 		return apperr.Wrap(apperr.ConnNotConnected, "command did not finish", err)
 	}
+	if exit.ExitStatus() == 127 { // the shell could not find the program
+		return apperr.Wrap(apperr.CmdMissing, "program not installed on the server", err)
+	}
 	msg := stderr.String()
 	switch {
 	case strings.Contains(msg, "Permission denied"), strings.Contains(msg, "Operation not permitted"):

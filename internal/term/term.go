@@ -84,10 +84,14 @@ func New(clients ClientSource, emit Emitter, log *slog.Logger) *Service {
 
 // Start opens a login shell on serverID sized cols×rows and returns its ID.
 // With prompt, a bash login shell gets Davish's powerline prompt; other
-// shells open untouched.
-func (s *Service) Start(ctx context.Context, serverID string, cols, rows int, prompt bool) (string, error) {
+// shells open untouched. A non-empty dir is where the shell starts; if it
+// cannot be entered the shell starts in the home directory instead.
+func (s *Service) Start(ctx context.Context, serverID string, cols, rows int, prompt bool, dir string) (string, error) {
 	if err := checkSize(cols, rows); err != nil {
 		return "", err
+	}
+	if dir != "" && !path.IsAbs(dir) {
+		return "", apperr.New(apperr.InvalidInput, "start directory must be absolute")
 	}
 	if err := ctx.Err(); err != nil {
 		return "", err
@@ -96,10 +100,7 @@ func (s *Service) Start(ctx context.Context, serverID string, cols, rows int, pr
 	if err != nil {
 		return "", err
 	}
-	command := ""
-	if prompt && loginShellIsBash(client) {
-		command = promptCommand
-	}
+	command := shellCommand(prompt && loginShellIsBash(client), dir)
 	sess, err := client.NewSession()
 	if err != nil {
 		return "", apperr.Wrap(apperr.ConnNotConnected, "cannot open a session", err)
@@ -144,6 +145,22 @@ func loginShellIsBash(client *ssh.Client) bool {
 	defer sess.Close() //nolint:errcheck // probe only
 	out, err := sess.Output(`printf %s "$SHELL"`)
 	return err == nil && path.Base(strings.TrimSpace(string(out))) == "bash"
+}
+
+// shellCommand is what the session runs: empty for the plain login shell.
+func shellCommand(prompt bool, dir string) string {
+	command := ""
+	if prompt {
+		command = promptCommand
+	} else if dir != "" {
+		// sshd runs a command through the login shell with -c, which is not
+		// a login shell; exec one so profiles load as usual.
+		command = `exec "$SHELL" -l`
+	}
+	if dir != "" {
+		command = shellx.Cmd("cd", "--", dir).String() + " 2>/dev/null; " + command
+	}
+	return command
 }
 
 // startShell runs command on a PTY, or the login shell when it is empty.

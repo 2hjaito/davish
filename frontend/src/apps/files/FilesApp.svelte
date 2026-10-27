@@ -24,7 +24,7 @@
   import Icon from '../../lib/ui/Icon.svelte'
   import type { IconName } from '../../lib/ui/icons'
   import { getWindowContext } from '../../lib/wm/context'
-  import { openTransfers } from '../../lib/wm/intents'
+  import { openTransfers } from '../../lib/wm/intents.svelte'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import type { AppProps } from '../types'
   import FileList from './FileList.svelte'

@@ -14,7 +14,7 @@
     transferNoticeId,
     transfers,
   } from '../stores/transfers.svelte'
-  import { openTransfers } from '../wm/intents'
+  import { openTransfers } from '../wm/intents.svelte'
   import Banners from './Banners.svelte'
   import { ui } from '../stores/ui.svelte'
   import Window from '../wm/Window.svelte'

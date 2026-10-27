@@ -5,7 +5,7 @@ import PlaceholderApp from './PlaceholderApp.svelte'
 import SettingsApp from './settings/SettingsApp.svelte'
 import TerminalApp from './terminal/TerminalApp.svelte'
 import TransfersApp from './transfers/TransfersApp.svelte'
-import { TRANSFERS_SIZE } from '../lib/wm/intents'
+import { TERMINAL_SIZE, TRANSFERS_SIZE } from '../lib/wm/intents.svelte'
 import type { AppDef, AppId } from './types'
 
 export const apps: AppDef[] = [
@@ -14,7 +14,7 @@ export const apps: AppDef[] = [
     label: t.apps.terminal,
     icon: 'terminal',
     theme: 'dark',
-    size: { w: 720, h: 470 },
+    size: TERMINAL_SIZE,
     component: TerminalApp,
   },
   {

@@ -13,11 +13,15 @@ export function DeleteServer(arg1:string):Promise<void>;
 
 export function Disconnect(arg1:string):Promise<void>;
 
+export function FilesCompress(arg1:string,arg2:string,arg3:string,arg4:string):Promise<fs.CompressPlan>;
+
 export function FilesHome(arg1:string):Promise<string>;
 
 export function FilesList(arg1:string,arg2:string):Promise<Array<fs.Entry>>;
 
 export function FilesMkdir(arg1:string,arg2:string):Promise<void>;
+
+export function FilesPlanCompress(arg1:string,arg2:string,arg3:string):Promise<fs.CompressPlan>;
 
 export function FilesPlanRemove(arg1:string,arg2:string):Promise<fs.RemovePlan>;
 
@@ -53,7 +57,7 @@ export function TermClose(arg1:string):Promise<void>;
 
 export function TermResize(arg1:string,arg2:number,arg3:number):Promise<void>;
 
-export function TermStart(arg1:string,arg2:number,arg3:number,arg4:boolean):Promise<string>;
+export function TermStart(arg1:string,arg2:number,arg3:number,arg4:boolean,arg5:string):Promise<string>;
 
 export function TermWrite(arg1:string,arg2:string):Promise<void>;
 

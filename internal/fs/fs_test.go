@@ -123,3 +123,23 @@ func TestMapErr(t *testing.T) {
 		}
 	}
 }
+
+func TestCompressCommand(t *testing.T) {
+	tests := []struct {
+		format string
+		want   string
+	}{
+		{FormatZip, "zip -r -q -y 'my site.zip' -- 'my site'"},
+		{FormatTarGz, "tar -czf 'my site.tar.gz' -- 'my site'"},
+		{FormatTar, "tar -cf 'my site.tar' -- 'my site'"},
+	}
+	for _, tt := range tests {
+		c, err := compressCommand(tt.format, "my site."+tt.format, "my site")
+		if err != nil || c.String() != tt.want {
+			t.Errorf("%s: %q, %v; want %q", tt.format, c.String(), err, tt.want)
+		}
+	}
+	if _, err := compressCommand("rar", "x.rar", "x"); err == nil {
+		t.Error("unknown format accepted")
+	}
+}
