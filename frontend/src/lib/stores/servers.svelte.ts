@@ -15,9 +15,9 @@ export interface Server extends ServerInfo {
 // Shown in a plain browser (vite dev, previews), where there is no Go side.
 const demoServers: Server[] = [
   {
-    id: 'tsc-vps',
-    name: 'tsc-vps',
-    host: 'vps.example.com',
+    id: 'dangth-vps',
+    name: 'dangth-vps',
+    host: 'vps.dangth.dev',
     port: 22,
     user: 'dangth',
     auth: 'agent',
@@ -45,7 +45,7 @@ class Servers {
       ? []
       : demoServers,
   )
-  activeId = $state(load('activeServer', { id: '' }).id || (hasRuntime ? '' : 'tsc-vps'))
+  activeId = $state(load('activeServer', { id: '' }).id || (hasRuntime ? '' : 'dangth-vps'))
   /** A host key waiting for the user to accept it. */
   hostKeyPrompt = $state<HostKeyPrompt | null>(null)
   /** True once the list has been loaded from Go (always true in a browser). */

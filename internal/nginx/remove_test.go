@@ -7,13 +7,13 @@ func site(p, name string, enabled, toggle bool, certs ...string) Site {
 }
 
 func TestPlanRemove(t *testing.T) {
-	inv := "/etc/nginx/sites-available/inventory.theptaydo.vn"
+	inv := "/etc/nginx/sites-available/inventory.davitek.com"
 	sites := []Site{
-		site(inv, "inventory.theptaydo.vn", true, true,
-			"/etc/letsencrypt/live/inventory.theptaydo.vn/fullchain.pem",
-			"/etc/letsencrypt/live/theptaydo.com/fullchain.pem"),
-		site("/etc/nginx/sites-available/theptaydo.com", "theptaydo.com", true, true,
-			"/etc/letsencrypt/live/theptaydo.com/fullchain.pem"),
+		site(inv, "inventory.davitek.com", true, true,
+			"/etc/letsencrypt/live/inventory.davitek.com/fullchain.pem",
+			"/etc/letsencrypt/live/davitek.com/fullchain.pem"),
+		site("/etc/nginx/sites-available/davitek.com", "davitek.com", true, true,
+			"/etc/letsencrypt/live/davitek.com/fullchain.pem"),
 		site("/etc/nginx/conf.d/fixssl.conf", "fixssl.conf", true, false, "/etc/ssl/own.pem"),
 		site("/etc/nginx/sites-available/old", "old", false, true),
 	}
@@ -22,20 +22,20 @@ func TestPlanRemove(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := "rm -- /etc/nginx/sites-enabled/inventory.theptaydo.vn && rm -- " + inv; p.Command != want {
+	if want := "rm -- /etc/nginx/sites-enabled/inventory.davitek.com && rm -- " + inv; p.Command != want {
 		t.Errorf("command = %s", p.Command)
 	}
-	if len(p.Certs) != 1 || p.Certs[0] != "inventory.theptaydo.vn" || len(p.SharedCerts) != 1 || p.SharedCerts[0] != "theptaydo.com" {
+	if len(p.Certs) != 1 || p.Certs[0] != "inventory.davitek.com" || len(p.SharedCerts) != 1 || p.SharedCerts[0] != "davitek.com" {
 		t.Errorf("certs = %v, shared = %v", p.Certs, p.SharedCerts)
 	}
 
 	p, _ = planRemove(sites, inv, true)
-	if want := "rm -- /etc/nginx/sites-enabled/inventory.theptaydo.vn && rm -- " + inv +
-		" && certbot delete --non-interactive --cert-name inventory.theptaydo.vn"; p.Command != want || !p.WithCerts {
+	if want := "rm -- /etc/nginx/sites-enabled/inventory.davitek.com && rm -- " + inv +
+		" && certbot delete --non-interactive --cert-name inventory.davitek.com"; p.Command != want || !p.WithCerts {
 		t.Errorf("with certs = %s", p.Command)
 	}
-	if want := "sudo rm -- /etc/nginx/sites-enabled/inventory.theptaydo.vn && sudo rm -- " + inv +
-		" && sudo certbot delete --non-interactive --cert-name inventory.theptaydo.vn"; p.Sudo != want {
+	if want := "sudo rm -- /etc/nginx/sites-enabled/inventory.davitek.com && sudo rm -- " + inv +
+		" && sudo certbot delete --non-interactive --cert-name inventory.davitek.com"; p.Sudo != want {
 		t.Errorf("sudo = %s", p.Sudo)
 	}
 

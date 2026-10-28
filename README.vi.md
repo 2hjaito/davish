@@ -5,7 +5,7 @@
 # Davish
 
 **Một desktop cho các server Linux của bạn.**<br>
-Terminal, file, dịch vụ, Docker, log, cron và nginx qua SSH thuần, gom trong một giao diện như một hệ điều hành.<br>
+Terminal, file, dịch vụ, Docker, log, cron, nginx và khóa SSH qua SSH thuần, gom trong một giao diện như một hệ điều hành.<br>
 Không cài gì lên server.
 
 [![CI](https://github.com/2hjaito/davish/actions/workflows/ci.yml/badge.svg)](https://github.com/2hjaito/davish/actions/workflows/ci.yml)
@@ -24,6 +24,7 @@ Không cài gì lên server.
 - **Không cần agent.** Davish chỉ cần `sshd` và SFTP. Mọi thứ chạy từ máy bạn qua SSH; không chép, không cài, không để lại gì trên server.
 - **Thấy trước mọi lệnh.** Thao tác phá hủy (dừng dịch vụ, xóa file, khởi động lại container, thay crontab) hiện đúng lệnh sẽ chạy trước khi chạy. Nhật ký lệnh ghi lại mọi thứ Davish đã chạy thay bạn.
 - **Bí mật nằm trong keychain.** Mật khẩu và passphrase chỉ lưu trong keychain của hệ điều hành. Davish không bao giờ lưu hay tự gõ mật khẩu `sudo`: khi cần root, nó mở Terminal với lệnh gõ sẵn để bạn tự nhấn Enter.
+- **Tự khóa khi bạn rời máy.** Mật khẩu khóa riêng, Touch ID trên macOS; khóa khi máy ngủ dậy, sau thời gian không dùng, hoặc `⌘L`. Phiên SSH vẫn chạy sau màn khóa, nhưng không thao tác nào tới được server cho tới khi mở khóa.
 - **Nhiều server, một desktop.** Mỗi server là một workspace (`⌘1`…`⌘9`) nhớ cửa sổ riêng của nó. Kéo file để copy giữa các server.
 
 ## Tính năng
@@ -32,9 +33,10 @@ Không cài gì lên server.
 |---|---|
 | **Terminal**<br>xterm.js nhiều tab, copy/paste, vẽ bằng GPU, và prompt powerline tùy chọn được nạp vào bash lúc đăng nhập, không ghi gì lên server. | **Files**<br>Trình duyệt kiểu Finder qua SFTP: tải lên, tải xuống, kéo thả từ hệ điều hành, đổi tên, xóa, nén, và copy giữa các server qua máy bạn. |
 | **Monitor**<br>CPU từng nhân, bộ nhớ và swap, ổ đĩa, mạng theo interface, GPU NVIDIA, tiến trình. Cảnh báo RAM và ổ đĩa chỉnh được ngưỡng. | **Editor**<br>CodeMirror 6, tô màu cho nginx, YAML, JSON, shell, env và file cấu hình. Lưu atomic giữ nguyên mode và chủ file, sao lưu file trong `/etc`, cảnh báo khi file đã đổi trên server. |
-| **Services**<br>Dịch vụ systemd theo trạng thái, chi tiết và journal; khởi động, dừng, khởi động lại. | **Docker**<br>Container với CPU và RAM, log có đánh dấu stderr, inspect, start/stop/restart, cảnh báo khởi động lại liên tục. |
+| **Services**<br>Dịch vụ systemd theo trạng thái, chi tiết và journal; khởi động, dừng, khởi động lại. Xóa dịch vụ không còn dùng: unit do admin tạo thì xóa file, unit của gói (như `certbot` cũ) thì chặn hẳn cùng timer chạy nó. | **Docker**<br>Container với CPU và RAM, log có đánh dấu stderr, inspect, start/stop/restart, cảnh báo khởi động lại liên tục. |
 | **Logs**<br>Theo dõi journal của dịch vụ, một file hoặc một container. Lọc, tạm dừng, tô dòng lỗi, bấm đường dẫn file để mở trong Editor đúng dòng. | **Cron**<br>Crontab của bạn và của hệ thống, lịch nói bằng lời, lần chạy kế tiếp theo giờ server, sửa an toàn có sao lưu. |
-| **Nginx**<br>Site, server block và upstream; bật/tắt site, `nginx -t` trước mỗi lần reload, lỗi mở đúng dòng; cảnh báo chứng chỉ TLS sắp hết hạn. | **Spotlight**<br>`⌘K` để mở app, dịch vụ, container, thư mục, một `/đường/dẫn`, hoặc `> một lệnh` gõ sẵn vào Terminal. |
+| **Nginx**<br>Site, server block và upstream; bật/tắt site, `nginx -t` trước mỗi lần reload, lỗi mở đúng dòng; cảnh báo chứng chỉ TLS sắp hết hạn. Xóa site, kèm chứng chỉ Let's Encrypt nếu không site nào khác dùng. | **Spotlight & Launchpad**<br>`⌘K` (hoặc kính lúp trên menu bar) để mở app, dịch vụ, container, thư mục, một `/đường/dẫn`, hoặc `> một lệnh` gõ sẵn vào Terminal. Launchpad (`⌘⇧A`) hiện mọi app và cho ghim vào Dock. |
+| **Khóa SSH**<br>`authorized_keys` của server, đánh dấu key Davish đang đăng nhập; thêm, gỡ key có sao lưu. Tạo deploy key trên server và thử với GitHub, GitLab (kiểm tra đúng host key họ công bố). Tạo key trên máy, đưa lên server rồi chuyển sang đăng nhập bằng nó. | **Khóa app**<br>Touch ID hoặc mật khẩu riêng che mọi thứ khi bạn rời máy. Quên mật khẩu thì đặt lại, nhưng Davish xóa mật khẩu server đã lưu trước, nên đặt lại không mở được đường vào server. Cửa sổ mở, đóng, thu nhỏ về Dock bằng hiệu ứng Genie. |
 
 <table>
   <tr>
@@ -49,6 +51,18 @@ Không cài gì lên server.
     <td><img src="assets/screenshots/cron.jpg" alt="Tác vụ cron với lịch nói bằng lời"></td>
     <td><img src="assets/screenshots/spotlight.jpg" alt="Spotlight"></td>
   </tr>
+  <tr>
+    <td><img src="assets/screenshots/keys.jpg" alt="Khóa SSH: authorized_keys của server"></td>
+    <td><img src="assets/screenshots/remove.jpg" alt="Xóa site nginx cùng chứng chỉ Let's Encrypt"></td>
+  </tr>
+  <tr>
+    <td><img src="assets/screenshots/launchpad.jpg" alt="Launchpad"></td>
+    <td><img src="assets/screenshots/genie.jpg" alt="Cửa sổ chảy vào Dock với hiệu ứng Genie"></td>
+  </tr>
+  <tr>
+    <td><img src="assets/screenshots/lock.jpg" alt="Màn khóa"></td>
+    <td><img src="assets/screenshots/welcome.jpg" alt="Trang chào"></td>
+  </tr>
 </table>
 
 > Ảnh chụp dùng dữ liệu mẫu của bản xem trước trên trình duyệt.
@@ -57,7 +71,7 @@ Không cài gì lên server.
 
 Bản build sẵn cho macOS (universal), Windows và Linux nằm trong từng [release](https://github.com/2hjaito/davish/releases).
 
-- **macOS 12 trở lên.** Mở `Davish-…-macos-universal.pkg` để cài vào Applications. App chưa được ký: lần đầu, chuột phải vào file `.pkg` (và sau đó `Davish.app`) rồi chọn **Mở**.
+- **macOS 12 trở lên.** Mở `Davish-…-macos-universal.pkg` để cài vào Applications. App chưa được ký nên macOS sẽ chặn lần đầu: bấm **Done**, mở **Cài đặt hệ thống → Quyền riêng tư & Bảo mật**, bấm **Vẫn mở** ở dòng nhắc tới Davish (làm lại cho `Davish.app` nếu bị chặn). Hoặc chạy `xattr -dr com.apple.quarantine` trên file đó.
 - **Windows 10 trở lên.** Chạy `Davish-…-windows-amd64-setup.exe`; bộ cài tự cài WebView2 runtime nếu máy chưa có. SmartScreen có thể cảnh báo nhà phát hành không xác định: chọn **More info** → **Run anyway**.
 - **Linux** có GTK 3 và WebKitGTK 4.1.
 

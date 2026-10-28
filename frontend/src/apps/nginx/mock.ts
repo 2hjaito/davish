@@ -26,22 +26,22 @@ let sites: NginxSite[] = [
     certs: [],
   },
   {
-    name: 'shop.example.com',
-    path: '/etc/nginx/sites-available/shop.example.com',
+    name: 'shop.davitek.com',
+    path: '/etc/nginx/sites-available/shop.davitek.com',
     kind: 'site',
     enabled: true,
     toggleable: true,
     servers: [
       {
-        names: ['shop.example.com', 'example.com'],
+        names: ['shop.davitek.com', 'davitek.com'],
         listen: ['443 ssl http2', '[::]:443 ssl'],
         ssl: true,
-        certs: ['/etc/letsencrypt/live/shop.example.com/fullchain.pem'],
+        certs: ['/etc/letsencrypt/live/shop.davitek.com/fullchain.pem'],
         proxyPass: ['http://shop_backend'],
         line: 6,
       },
       {
-        names: ['shop.example.com'],
+        names: ['shop.davitek.com'],
         listen: ['80'],
         ssl: false,
         certs: [],
@@ -52,9 +52,9 @@ let sites: NginxSite[] = [
     upstreams: ['shop_backend'],
     certs: [
       {
-        path: '/etc/letsencrypt/live/shop.example.com/fullchain.pem',
+        path: '/etc/letsencrypt/live/shop.davitek.com/fullchain.pem',
         notAfter: now() + 9 * day,
-        names: ['shop.example.com', 'example.com'],
+        names: ['shop.davitek.com', 'davitek.com'],
       },
     ],
   },
@@ -66,7 +66,7 @@ let sites: NginxSite[] = [
     toggleable: true,
     servers: [
       {
-        names: ['blog.example.com'],
+        names: ['blog.dangth.dev'],
         listen: ['80'],
         root: '/srv/blog',
         ssl: false,

@@ -33,12 +33,12 @@ let authorized: Authorized = {
 
 let serverKeys: ServerKey[] = [
   {
-    name: 'deploy_theptaydo',
-    path: '/home/dangth/.ssh/deploy_theptaydo',
+    name: 'deploy_davitek',
+    path: '/home/dangth/.ssh/deploy_davitek',
     type: 'ssh-ed25519',
     fingerprint: fp('deploy'),
-    comment: 'deploy@tsc-vps',
-    public: pub('deploy', 'deploy@tsc-vps'),
+    comment: 'deploy@dangth.dev',
+    public: pub('deploy', 'deploy@dangth.dev'),
   },
 ]
 
@@ -127,11 +127,11 @@ export function mockPlanGitTest(host: GitHost, name: string): Promise<GitTestPla
 /** The deploy key works; any other key is unknown to the host. */
 export const mockGitTest = (host: GitHost, name: string): Promise<GitTestResult> =>
   delay(
-    name === 'deploy_theptaydo'
+    name === 'deploy_davitek'
       ? {
           outcome: 'ok' as const,
-          account: 'theptaydo',
-          output: `Hi theptaydo! You've successfully authenticated, but ${host} does not provide shell access.`,
+          account: 'davitek',
+          output: `Hi davitek! You've successfully authenticated, but ${host} does not provide shell access.`,
         }
       : { outcome: 'denied' as const, output: `git@${host}: Permission denied (publickey).` },
     900,

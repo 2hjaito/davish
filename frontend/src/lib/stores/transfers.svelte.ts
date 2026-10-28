@@ -147,12 +147,12 @@ const demo: Transfer[] = hasRuntime
   ? []
   : [
       {
-        ...{ id: 'd1', kind: 'download', serverID: 'tsc-vps', name: 'syslog', dir: false },
+        ...{ id: 'd1', kind: 'download', serverID: 'dangth-vps', name: 'syslog', dir: false },
         ...{ src: '/var/log/syslog', dst: '~/Downloads/syslog' },
         ...{ done: 1_887_436, total: 1_887_436, bps: 0, state: 'done' },
       },
       {
-        ...{ id: 'd2', kind: 'upload', serverID: 'tsc-vps', name: 'nginx.conf', dir: false },
+        ...{ id: 'd2', kind: 'upload', serverID: 'dangth-vps', name: 'nginx.conf', dir: false },
         ...{ src: '~/nginx.conf', dst: '/etc/nginx/nginx.conf' },
         ...{ done: 0, total: 2458, bps: 0, state: 'failed', error: 'Không có quyền truy cập.' },
       },
@@ -160,7 +160,7 @@ const demo: Transfer[] = hasRuntime
         ...{
           id: 'd3',
           kind: 'upload',
-          serverID: 'tsc-vps',
+          serverID: 'dangth-vps',
           name: 'backup-2026-10.tar.gz',
           dir: false,
         },

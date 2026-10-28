@@ -92,11 +92,11 @@ func TestCreateServerKey(t *testing.T) {
 	name := "davish-test-deploy"
 	t.Cleanup(func() { testsshd.Run(t, m, id, "rm -f -- ~/.ssh/"+name+" ~/.ssh/"+name+".pub") })
 
-	plan, err := s.PlanCreate(ctx, id, name, "deploy@tsc")
+	plan, err := s.PlanCreate(ctx, id, name, "deploy@dangth.dev")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := s.Create(ctx, id, name, "deploy@tsc", plan.Command); err != nil {
+	if err := s.Create(ctx, id, name, "deploy@dangth.dev", plan.Command); err != nil {
 		t.Fatal(err)
 	}
 	keys, err := s.ServerKeys(ctx, id)
@@ -109,7 +109,7 @@ func TestCreateServerKey(t *testing.T) {
 			found = &keys[i]
 		}
 	}
-	if found == nil || found.Type != "ssh-ed25519" || found.Comment != "deploy@tsc" || !strings.HasPrefix(found.Public, "ssh-ed25519 ") {
+	if found == nil || found.Type != "ssh-ed25519" || found.Comment != "deploy@dangth.dev" || !strings.HasPrefix(found.Public, "ssh-ed25519 ") {
 		t.Fatalf("created key = %+v in %+v", found, keys)
 	}
 	if _, err := s.PlanCreate(ctx, id, name, ""); err == nil {

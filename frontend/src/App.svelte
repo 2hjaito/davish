@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { untrack } from 'svelte'
+
   import Desktop from './lib/shell/Desktop.svelte'
   import LockScreen from './lib/shell/LockScreen.svelte'
   import { appLock } from './lib/stores/lock.svelte'
@@ -14,7 +16,9 @@
   $effect(() => {
     let off = () => {}
     let disposed = false
-    void appLock.init().then((stop) => (disposed ? stop() : (off = stop)))
+    // Once for the app's lifetime: init writes the lock state it would
+    // otherwise track.
+    void untrack(() => appLock.init()).then((stop) => (disposed ? stop() : (off = stop)))
     return () => {
       disposed = true
       off()
