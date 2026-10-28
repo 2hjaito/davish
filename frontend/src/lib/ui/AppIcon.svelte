@@ -119,6 +119,48 @@
     <g transform="translate(12 12)" style:color="#2496ed">
       <Icon name="brandDocker" size={40} />
     </g>
+  {:else if id === 'nginx'}
+    <!-- Third-party tool: its official mark, unmodified, in its brand color (ADR 0003). -->
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff" />
+        <stop offset="1" stop-color="#e2f1e6" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    <g transform="translate(13 13)" style:color="#009639">
+      <Icon name="brandNginx" size={38} />
+    </g>
+  {:else if id === 'cron'}
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#4fe0d2" />
+        <stop offset="1" stop-color="#0a8791" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    <circle cx="32" cy="34" r="21" fill="#06555c" opacity="0.3" />
+    <circle cx="32" cy="32" r="21" fill="#fff" />
+    {#each [0, 90, 180, 270] as angle (angle)}
+      <rect
+        x="30.5"
+        y="14"
+        width="3"
+        height="5"
+        rx="1.5"
+        fill="#9ad9d6"
+        transform="rotate({angle} 32 32)"
+      />
+    {/each}
+    <path
+      d="M32 20.5V32l8 5"
+      fill="none"
+      stroke="#0b5f66"
+      stroke-width="4.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <circle cx="32" cy="32" r="3.2" fill="#ffc83d" />
   {:else if id === 'logs'}
     <defs>
       <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">

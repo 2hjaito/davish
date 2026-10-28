@@ -14,6 +14,26 @@ export function Connect(arg1) {
   return window['go']['app']['App']['Connect'](arg1);
 }
 
+export function CronApply(arg1, arg2, arg3) {
+  return window['go']['app']['App']['CronApply'](arg1, arg2, arg3);
+}
+
+export function CronList(arg1) {
+  return window['go']['app']['App']['CronList'](arg1);
+}
+
+export function CronPlan(arg1, arg2) {
+  return window['go']['app']['App']['CronPlan'](arg1, arg2);
+}
+
+export function CronPreview(arg1, arg2) {
+  return window['go']['app']['App']['CronPreview'](arg1, arg2);
+}
+
+export function CronRuns(arg1, arg2) {
+  return window['go']['app']['App']['CronRuns'](arg1, arg2);
+}
+
 export function DeleteServer(arg1) {
   return window['go']['app']['App']['DeleteServer'](arg1);
 }
@@ -124,6 +144,34 @@ export function MonitorUnwatch(arg1) {
 
 export function MonitorWatch(arg1) {
   return window['go']['app']['App']['MonitorWatch'](arg1);
+}
+
+export function NginxCheckCerts(arg1) {
+  return window['go']['app']['App']['NginxCheckCerts'](arg1);
+}
+
+export function NginxList(arg1) {
+  return window['go']['app']['App']['NginxList'](arg1);
+}
+
+export function NginxPlanToggle(arg1, arg2, arg3) {
+  return window['go']['app']['App']['NginxPlanToggle'](arg1, arg2, arg3);
+}
+
+export function NginxReload(arg1) {
+  return window['go']['app']['App']['NginxReload'](arg1);
+}
+
+export function NginxReloadCommand() {
+  return window['go']['app']['App']['NginxReloadCommand']();
+}
+
+export function NginxTest(arg1) {
+  return window['go']['app']['App']['NginxTest'](arg1);
+}
+
+export function NginxToggle(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['NginxToggle'](arg1, arg2, arg3, arg4);
 }
 
 export function ReorderServers(arg1) {

@@ -37,6 +37,9 @@
   --warn: #e08a12;
   --warn-on-dark: #ffb86b;
   --danger-on-dark: #ff6b6b;
+  /* Lines removed and added in a change preview (Cron). */
+  --diff-removed: rgba(212, 56, 13, 0.1);
+  --diff-added: rgba(26, 157, 75, 0.12);
   --danger: #d4380d;
   --offline: #9aa0ab;
 

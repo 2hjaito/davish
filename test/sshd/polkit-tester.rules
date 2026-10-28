@@ -5,4 +5,11 @@ polkit.addRule(function (action, subject) {
       (action.lookup("unit") || "").indexOf("davish-") == 0) {
     return polkit.Result.YES;
   }
+  // Reloading nginx (not stopping it) as the admin of the Nginx tests.
+  if (action.id == "org.freedesktop.systemd1.manage-units" &&
+      subject.user == "tester" &&
+      action.lookup("unit") == "nginx.service" &&
+      action.lookup("verb") == "reload") {
+    return polkit.Result.YES;
+  }
 });

@@ -94,6 +94,226 @@ export namespace audit {
 
 }
 
+export namespace cron {
+	
+	export class Change {
+	    op: string;
+	    id: string;
+	    schedule: string;
+	    command: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Change(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.op = source["op"];
+	        this.id = source["id"];
+	        this.schedule = source["schedule"];
+	        this.command = source["command"];
+	    }
+	}
+	export class Env {
+	    source: string;
+	    name: string;
+	    value: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Env(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.source = source["source"];
+	        this.name = source["name"];
+	        this.value = source["value"];
+	    }
+	}
+	export class Schedule {
+	    raw: string;
+	    reboot: boolean;
+	    minute: number[];
+	    hour: number[];
+	    dom: number[];
+	    month: number[];
+	    dow: number[];
+	    domAny: boolean;
+	    dowAny: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Schedule(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.raw = source["raw"];
+	        this.reboot = source["reboot"];
+	        this.minute = source["minute"];
+	        this.hour = source["hour"];
+	        this.dom = source["dom"];
+	        this.month = source["month"];
+	        this.dow = source["dow"];
+	        this.domAny = source["domAny"];
+	        this.dowAny = source["dowAny"];
+	    }
+	}
+	export class Job {
+	    id: string;
+	    source: string;
+	    line: number;
+	    schedule: Schedule;
+	    user?: string;
+	    command: string;
+	    enabled: boolean;
+	    next: number[];
+	    editable: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Job(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.source = source["source"];
+	        this.line = source["line"];
+	        this.schedule = this.convertValues(source["schedule"], Schedule);
+	        this.user = source["user"];
+	        this.command = source["command"];
+	        this.enabled = source["enabled"];
+	        this.next = source["next"];
+	        this.editable = source["editable"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Plan {
+	    command: string;
+	    before: string;
+	    after: string;
+	    backup: string;
+	    version: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Plan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.command = source["command"];
+	        this.before = source["before"];
+	        this.after = source["after"];
+	        this.backup = source["backup"];
+	        this.version = source["version"];
+	    }
+	}
+	export class Preview {
+	    schedule: Schedule;
+	    next: number[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Preview(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.schedule = this.convertValues(source["schedule"], Schedule);
+	        this.next = source["next"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Runs {
+	    lines: string[];
+	    restricted: boolean;
+	    sudo: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Runs(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.lines = source["lines"];
+	        this.restricted = source["restricted"];
+	        this.sudo = source["sudo"];
+	    }
+	}
+	
+	export class Table {
+	    jobs: Job[];
+	    env: Env[];
+	    zone: string;
+	    unreadable: string[];
+	    version: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Table(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.jobs = this.convertValues(source["jobs"], Job);
+	        this.env = this.convertValues(source["env"], Env);
+	        this.zone = source["zone"];
+	        this.unreadable = source["unreadable"];
+	        this.version = source["version"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
 export namespace docker {
 	
 	export class Container {
@@ -478,6 +698,208 @@ export namespace logs {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.kind = source["kind"];
 	        this.target = source["target"];
+	    }
+	}
+
+}
+
+export namespace nginx {
+	
+	export class Cert {
+	    path: string;
+	    notAfter: number;
+	    names: string[];
+	    error?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Cert(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.notAfter = source["notAfter"];
+	        this.names = source["names"];
+	        this.error = source["error"];
+	    }
+	}
+	export class Issue {
+	    level: string;
+	    message: string;
+	    file?: string;
+	    line?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Issue(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.level = source["level"];
+	        this.message = source["message"];
+	        this.file = source["file"];
+	        this.line = source["line"];
+	    }
+	}
+	export class TestResult {
+	    ok: boolean;
+	    needsRoot: boolean;
+	    issues: Issue[];
+	    output: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TestResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ok = source["ok"];
+	        this.needsRoot = source["needsRoot"];
+	        this.issues = this.convertValues(source["issues"], Issue);
+	        this.output = source["output"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class ReloadResult {
+	    test: TestResult;
+	    reloaded: boolean;
+	    needsRoot: boolean;
+	    sudo: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ReloadResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.test = this.convertValues(source["test"], TestResult);
+	        this.reloaded = source["reloaded"];
+	        this.needsRoot = source["needsRoot"];
+	        this.sudo = source["sudo"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Server {
+	    names: string[];
+	    listen: string[];
+	    root?: string;
+	    ssl: boolean;
+	    certs: string[];
+	    proxyPass: string[];
+	    line: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Server(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.names = source["names"];
+	        this.listen = source["listen"];
+	        this.root = source["root"];
+	        this.ssl = source["ssl"];
+	        this.certs = source["certs"];
+	        this.proxyPass = source["proxyPass"];
+	        this.line = source["line"];
+	    }
+	}
+	export class Site {
+	    name: string;
+	    path: string;
+	    kind: string;
+	    enabled: boolean;
+	    toggleable: boolean;
+	    servers: Server[];
+	    upstreams: string[];
+	    certs: Cert[];
+	    error?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Site(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.path = source["path"];
+	        this.kind = source["kind"];
+	        this.enabled = source["enabled"];
+	        this.toggleable = source["toggleable"];
+	        this.servers = this.convertValues(source["servers"], Server);
+	        this.upstreams = source["upstreams"];
+	        this.certs = this.convertValues(source["certs"], Cert);
+	        this.error = source["error"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	export class TogglePlan {
+	    name: string;
+	    enable: boolean;
+	    command: string;
+	    sudo: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TogglePlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.enable = source["enable"];
+	        this.command = source["command"];
+	        this.sudo = source["sudo"];
 	    }
 	}
 

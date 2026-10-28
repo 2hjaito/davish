@@ -10,6 +10,8 @@ export type AppId =
   | 'services'
   | 'docker'
   | 'logs'
+  | 'cron'
+  | 'nginx'
   | 'editor'
   | 'settings'
   | 'transfers'

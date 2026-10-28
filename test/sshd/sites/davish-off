@@ -1,0 +1,6 @@
+# Test site for the Nginx app: available but not enabled.
+server {
+    listen 8082;
+    server_name off.davish.test;
+    return 200 "off\n";
+}

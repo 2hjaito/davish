@@ -47,12 +47,18 @@ func (r *Runner) Run(ctx context.Context, serverID, app string, cmd shellx.Comma
 // shellx.InDir or a few commands joined with &&. It must never contain
 // text that did not go through shellx.
 func (r *Runner) RunLine(ctx context.Context, serverID, app, line string) (Result, error) {
+	return r.RunInput(ctx, serverID, app, line, nil)
+}
+
+// RunInput is RunLine with stdin, such as a new crontab for "crontab -".
+// Only the command line is recorded, never the input.
+func (r *Runner) RunInput(ctx context.Context, serverID, app, line string, stdin []byte) (Result, error) {
 	client, err := r.conns.Client(serverID)
 	if err != nil {
 		return Result{}, err
 	}
 	start := time.Now()
-	res, err := run(ctx, client, line)
+	res, err := run(ctx, client, line, stdin)
 	exit := res.Exit
 	if err != nil {
 		exit = -1
@@ -68,7 +74,7 @@ func (r *Runner) RunLine(ctx context.Context, serverID, app, line string) (Resul
 	return res, err
 }
 
-func run(ctx context.Context, client *ssh.Client, line string) (Result, error) {
+func run(ctx context.Context, client *ssh.Client, line string, stdin []byte) (Result, error) {
 	sess, err := client.NewSession()
 	if err != nil {
 		return Result{}, apperr.Wrap(apperr.ConnNotConnected, "cannot open a session", err)
@@ -79,6 +85,9 @@ func run(ctx context.Context, client *ssh.Client, line string) (Result, error) {
 	defer stop()
 
 	var stdout, stderr bytes.Buffer
+	if stdin != nil {
+		sess.Stdin = bytes.NewReader(stdin)
+	}
 	sess.Stdout = &stdout
 	sess.Stderr = &stderr
 	err = sess.Run(line)

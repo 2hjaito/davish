@@ -35,6 +35,8 @@
     placeholder: Snippet
     list: Snippet
     detail: Snippet
+    /** Buttons of the app before search, such as "add". */
+    actions?: Snippet
     /** Under the list: a count, or an error. */
     footer: string
     error?: string
@@ -53,6 +55,7 @@
     placeholder,
     list,
     detail,
+    actions,
     footer,
     error = '',
     onrefresh,
@@ -90,6 +93,8 @@
     <div class="toolbar" onpointerdown={ctx.startDrag} ondblclick={ctx.toggleMaximize}>
       <h2 class="title">{title}</h2>
       <span class="spacer"></span>
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <span class="actions" onpointerdown={(e) => e.stopPropagation()}>{@render actions?.()}</span>
       <label class="search" onpointerdown={(e) => e.stopPropagation()}>
         <Icon name="search" size={13} strokeWidth={2.2} />
         <input
@@ -235,6 +240,28 @@
 
   .spacer {
     flex: 1;
+  }
+
+  .actions {
+    display: flex;
+    gap: 4px;
+  }
+
+  .actions :global(.tool) {
+    display: flex;
+    padding: 6px;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--fg-muted);
+  }
+
+  .actions :global(.tool:hover:not(:disabled)) {
+    background: var(--fill-soft);
+  }
+
+  .actions :global(.tool:disabled) {
+    opacity: 0.5;
   }
 
   .search {

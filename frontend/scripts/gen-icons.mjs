@@ -59,6 +59,9 @@ const ICONS = {
   globe: 'LuNetwork',
   thermometer: 'LuThermometer',
   zap: 'LuZap',
+  clock: 'FiClock',
+  shield: 'FiShield',
+  globe2: 'FiGlobe',
   // Official marks (Simple Icons) for third-party tools; see ADR 0003.
   brandDocker: 'SiDocker',
   brandNginx: 'SiNginx',
