@@ -1,10 +1,11 @@
 <script lang="ts">
-  import type { Snippet } from 'svelte'
+  import { type Snippet, untrack } from 'svelte'
 
   import { t } from '../i18n/vi'
-  import { dockTile, windowZoom } from '../motion'
+  import { dockTile, GENIE_MS, ms, windowZoom } from '../motion'
   import { setWindowContext } from './context'
-  import { centerOffset, type Edge, type Rect, resizeRect, snapZone, zoneRect } from './geometry'
+  import { type Edge, type Rect, resizeRect, snapZone, zoneRect } from './geometry'
+  import { genieFrame } from './genie'
   import { type WindowState, wm } from './windowManager.svelte'
 
   interface Props {
@@ -21,16 +22,31 @@
   /** Pointer travel before a title-bar press counts as a drag. */
   const DRAG_SLOP = 3
 
-  // Where the window flies to when minimized: its app's tile in the dock.
-  const minOffset = $derived.by(() => {
-    if (!win.minimized) return { dx: 0, dy: 0 }
-    const tile = dockTile(win.appId)
-    if (!tile) return { dx: 0, dy: 0 }
-    return centerOffset(
-      { x: frame.x, y: frame.y, width: frame.w, height: frame.h },
-      tile.getBoundingClientRect(),
-    )
+  let el = $state<HTMLElement>()
+
+  // Minimize and restore pour the window into its dock tile and back out
+  // (the genie); the .minimized class hides it once the animation is over.
+  let wasMinimized = untrack(() => win.minimized)
+  $effect(() => {
+    const minimized = win.minimized
+    if (minimized === wasMinimized) return
+    wasMinimized = minimized
+    untrack(() => genie(minimized))
   })
+
+  function genie(minimizing: boolean) {
+    const tile = dockTile(win.appId)
+    const duration = ms(GENIE_MS)
+    if (!el || !tile || duration === 0) return
+    const box = { x: frame.x, y: frame.y, width: frame.w, height: frame.h }
+    const target = tile.getBoundingClientRect()
+    const steps = 24
+    const keyframes = Array.from({ length: steps + 1 }, (_, i) => {
+      const f = genieFrame(box, target, minimizing ? i / steps : 1 - i / steps)
+      return { transformOrigin: '0 0', ...f }
+    })
+    el.animate(keyframes, { duration, easing: 'linear' })
+  }
 
   // Shared pointer tracking: captures the pointer on el and batches moves into
   // one update per animation frame, so dragging never triggers layout per event.
@@ -145,8 +161,7 @@
   style:width="{frame.w}px"
   style:height="{frame.h}px"
   style:z-index={win.z}
-  style:--min-dx="{minOffset.dx}px"
-  style:--min-dy="{minOffset.dy}px"
+  bind:this={el}
   onpointerdowncapture={() => wm.focus(win.id)}
   in:windowZoom|global={{ appId: win.appId }}
   out:windowZoom|global={{ out: true, appId: win.appId }}
@@ -204,16 +219,13 @@
     box-shadow: var(--glass-dark-shadow-inactive);
   }
 
-  /* Minimize: shrink into the app's dock tile, then stop taking input. */
+  /* Minimized: hidden once the genie has poured it into the dock (300ms),
+     and no input meanwhile. */
   .window.minimized {
     opacity: 0;
-    transform: translate(var(--min-dx), var(--min-dy)) scale(0.12);
     pointer-events: none;
     visibility: hidden;
-    transition:
-      opacity var(--dur-slow) var(--ease-in),
-      transform var(--dur-slow) var(--ease-in),
-      visibility 0s linear var(--dur-slow);
+    transition: visibility 0s linear 300ms;
   }
 
   .handle {
