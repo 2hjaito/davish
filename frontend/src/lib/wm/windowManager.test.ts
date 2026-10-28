@@ -113,3 +113,71 @@ describe('WindowManager', () => {
     expect(wm.windows[0]!.snap).toBeNull()
   })
 })
+
+describe('layouts', () => {
+  const options = (appId: string) =>
+    appId === 'gone' ? undefined : { title: appId, size: { w: 400, h: 300 } }
+
+  it('remembers what each server had open, back to front', () => {
+    const wm = new WindowManager()
+    const term = wm.open('terminal', 's1', opts)
+    const files = wm.open('files', 's1', opts)
+    wm.open('monitor', 's2', opts)
+    wm.focus(term.id)
+    wm.minimize(files.id)
+    expect(wm.layoutOf('s1').map((l) => [l.appId, l.minimized])).toEqual([
+      ['files', true],
+      ['terminal', false],
+    ])
+    expect(wm.layoutOf('s2').map((l) => l.appId)).toEqual(['monitor'])
+    wm.close(term.id)
+    expect(wm.layoutOf('s1').map((l) => l.appId)).toEqual(['files'])
+  })
+
+  it('leaves out apps that need context to reopen', () => {
+    const wm = new WindowManager()
+    wm.keepInLayout((id) => id !== 'editor')
+    wm.open('editor', 's1', opts)
+    wm.open('files', 's1', opts)
+    expect(wm.layoutOf('s1').map((l) => l.appId)).toEqual(['files'])
+  })
+
+  it('restores a layout once, into an empty workspace', () => {
+    const rect = { x: 50, y: 60, w: 500, h: 400 }
+    const wm = new WindowManager(
+      {},
+      {
+        s1: [
+          { appId: 'files', rect, snap: null, minimized: true },
+          { appId: 'gone', rect, snap: null, minimized: false },
+          { appId: 'terminal', rect, snap: 'left', minimized: false },
+        ],
+      },
+    )
+    expect(wm.restoreLayout('s1', options)).toBe(2)
+    const [files, term] = wm.visible('s1')
+    expect(files?.appId).toBe('files')
+    expect(files?.minimized).toBe(true)
+    expect(files?.rect).toEqual(rect)
+    expect(term?.snap).toBe('left')
+    expect(wm.focused('s1')?.appId).toBe('terminal')
+    // Already populated: nothing more opens.
+    expect(wm.restoreLayout('s1', options)).toBe(0)
+  })
+
+  it('opens an app where this server last had it', () => {
+    const wm = new WindowManager()
+    const a = wm.open('files', 's1', opts)
+    wm.setRect(a.id, { x: 10, y: 40, w: 300, h: 200 })
+    wm.commit(a.id)
+    const b = wm.open('files', 's2', opts)
+    wm.setRect(b.id, { x: 600, y: 40, w: 300, h: 200 })
+    wm.commit(b.id)
+    wm.close(a.id)
+    wm.close(b.id)
+    expect(wm.open('files', 's1', opts).rect.x).toBe(10)
+    expect(wm.open('files', 's2', opts).rect.x).toBe(600)
+    // A server that never had it: where the app was last used.
+    expect(wm.open('files', 's3', opts).rect.x).toBe(600)
+  })
+})

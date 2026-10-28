@@ -39,7 +39,12 @@ const demoServers: Server[] = [
 ]
 
 class Servers {
-  list = $state<Server[]>(hasRuntime ? [] : demoServers)
+  // The browser preview shows the first-run welcome page with ?welcome.
+  list = $state<Server[]>(
+    hasRuntime || (typeof location !== 'undefined' && location.search.includes('welcome'))
+      ? []
+      : demoServers,
+  )
   activeId = $state(load('activeServer', { id: '' }).id || (hasRuntime ? '' : 'tsc-vps'))
   /** A host key waiting for the user to accept it. */
   hostKeyPrompt = $state<HostKeyPrompt | null>(null)

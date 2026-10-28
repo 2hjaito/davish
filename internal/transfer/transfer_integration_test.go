@@ -52,7 +52,12 @@ func (r *recorder) Emit(_ string, payload any) {
 
 func (r *recorder) wait(t *testing.T, id string) transfer.Done {
 	t.Helper()
-	deadline := time.Now().Add(30 * time.Second)
+	return r.waitFor(t, id, 30*time.Second)
+}
+
+func (r *recorder) waitFor(t *testing.T, id string, limit time.Duration) transfer.Done {
+	t.Helper()
+	deadline := time.Now().Add(limit)
 	for time.Now().Before(deadline) {
 		r.mu.Lock()
 		d, ok := r.done[id]

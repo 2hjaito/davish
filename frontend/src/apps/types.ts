@@ -30,4 +30,9 @@ export interface AppDef {
   component: Component<AppProps>
   /** False for helper windows opened from another app, such as Transfers. */
   dock?: boolean
+  /**
+   * False for windows a server's layout does not reopen: they need context
+   * (the Editor's files) or do not belong to one server (Settings).
+   */
+  layout?: boolean
 }

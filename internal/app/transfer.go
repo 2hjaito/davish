@@ -42,3 +42,9 @@ func (a *App) TransferCancel(jobID string) error {
 func (a *App) TransferReveal(path string) error {
 	return a.transfers.RevealDownload(a.ctx, path)
 }
+
+// TransferCopy copies paths from one server into dir on another, through
+// this machine. Taken names get "name (n)"; nothing is replaced.
+func (a *App) TransferCopy(fromServerID string, paths []string, toServerID, dir string) ([]transfer.Job, error) {
+	return a.transfers.Copy(a.ctx, fromServerID, paths, toServerID, dir)
+}

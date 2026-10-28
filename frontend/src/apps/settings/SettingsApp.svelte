@@ -1,6 +1,14 @@
 <script lang="ts">
   import { t } from '../../lib/i18n/vi'
-  import { settings, TERMINAL_FONT, WALLPAPER_ACCENTS } from '../../lib/stores/settings.svelte'
+  import {
+    ALERTS,
+    type BackupMode,
+    MONO_FAMILIES,
+    type MonoFont,
+    settings,
+    TERMINAL_FONT,
+    WALLPAPER_ACCENTS,
+  } from '../../lib/stores/settings.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import type { AppProps } from '../types'
@@ -10,6 +18,13 @@
   function stepFont(dir: 1 | -1) {
     settings.set('terminalFontSize', settings.terminalFontSize + dir * TERMINAL_FONT.step)
   }
+
+  const fonts = Object.keys(MONO_FAMILIES) as MonoFont[]
+  const backups: BackupMode[] = ['etc', 'always', 'never']
+  const pctRows = [
+    { key: 'alertMem', label: t.settings.alertMem, hint: t.settings.alertMemHint },
+    { key: 'alertDisk', label: t.settings.alertDisk, hint: t.settings.alertDiskHint },
+  ] as const
 </script>
 
 <TitleBar>
@@ -60,6 +75,23 @@
           style:background={c}
           onclick={() => settings.set('wallpaperAccent', c)}
         ></button>
+      {/each}
+    </div>
+  </div>
+
+  <div class="row">
+    <span>
+      <strong>{t.settings.monoFont}</strong>
+      <small>{t.settings.monoFontHint}</small>
+    </span>
+    <div class="segmented" role="radiogroup" aria-label={t.settings.monoFont}>
+      {#each fonts as f (f)}
+        <button
+          role="radio"
+          aria-checked={settings.monoFont === f}
+          style:font-family={MONO_FAMILIES[f]}
+          onclick={() => settings.set('monoFont', f)}>{t.settings.monoFonts[f]}</button
+        >
       {/each}
     </div>
   </div>
@@ -117,6 +149,70 @@
       onchange={(e) => settings.set('terminalGpu', e.currentTarget.checked)}
     />
   </label>
+
+  <h2 class="section">{t.settings.alerts}</h2>
+
+  {#each pctRows as r (r.key)}
+    <div class="row">
+      <span>
+        <strong>{r.label}</strong>
+        <small>{r.hint}</small>
+      </span>
+      <div class="stepper">
+        <button
+          aria-label="{t.settings.lower} {r.label}"
+          disabled={settings[r.key] <= ALERTS.pct.min}
+          onclick={() =>
+            settings.set(r.key, Math.max(ALERTS.pct.min, settings[r.key] - ALERTS.pct.step))}
+        >
+          <Icon name="minus" size={12} strokeWidth={2.2} />
+        </button>
+        <output aria-live="polite">{settings[r.key]}%</output>
+        <button
+          aria-label="{t.settings.higher} {r.label}"
+          disabled={settings[r.key] >= ALERTS.pct.max}
+          onclick={() =>
+            settings.set(r.key, Math.min(ALERTS.pct.max, settings[r.key] + ALERTS.pct.step))}
+        >
+          <Icon name="plus" size={12} strokeWidth={2.2} />
+        </button>
+      </div>
+    </div>
+  {/each}
+
+  <div class="row">
+    <span>
+      <strong>{t.settings.alertHold}</strong>
+      <small>{t.settings.alertHoldHint}</small>
+    </span>
+    <div class="segmented" role="radiogroup" aria-label={t.settings.alertHold}>
+      {#each ALERTS.holds as h (h)}
+        <button
+          role="radio"
+          aria-checked={settings.alertHold === h}
+          onclick={() => settings.set('alertHold', h)}>{t.settings.holds[h]}</button
+        >
+      {/each}
+    </div>
+  </div>
+
+  <h2 class="section">{t.settings.editor}</h2>
+
+  <div class="row">
+    <span>
+      <strong>{t.settings.backup}</strong>
+      <small>{t.settings.backupHint}</small>
+    </span>
+    <div class="segmented" role="radiogroup" aria-label={t.settings.backup}>
+      {#each backups as b (b)}
+        <button
+          role="radio"
+          aria-checked={settings.editorBackup === b}
+          onclick={() => settings.set('editorBackup', b)}>{t.settings.backups[b]}</button
+        >
+      {/each}
+    </div>
+  </div>
 </div>
 
 <style>
@@ -171,6 +267,33 @@
   small {
     color: var(--fg-muted);
     font-size: var(--text-xs);
+  }
+
+  /* A choice of a few, like macOS segmented controls. */
+  .segmented {
+    flex-shrink: 0;
+    display: flex;
+    padding: 2px;
+    border-radius: 8px;
+    background: var(--fill-soft);
+  }
+
+  .segmented button {
+    padding: 3px 10px;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    font-size: var(--text-xs);
+    color: var(--fg-muted);
+    white-space: nowrap;
+    transition: background var(--dur-fast) var(--ease-out);
+  }
+
+  .segmented button[aria-checked='true'] {
+    background: var(--chart-surface);
+    color: var(--fg);
+    font-weight: 600;
+    box-shadow: var(--switch-knob-shadow);
   }
 
   /* Segmented − value + control, like the macOS font size stepper. */

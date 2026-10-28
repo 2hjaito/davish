@@ -110,7 +110,7 @@
     const t = new Terminal({
       allowTransparency: true,
       cursorBlink: true,
-      fontFamily: token('--font-mono'),
+      fontFamily: untrack(() => settings.monoFamily),
       // Read once here; the effect below applies later changes in place.
       fontSize: untrack(() => settings.terminalFontSize),
       lineHeight: LINE_HEIGHT,
@@ -154,6 +154,14 @@
   $effect(() => {
     const gpu = settings.terminalGpu
     if (term) setRenderer(term, gpu)
+  })
+
+  $effect(() => {
+    const family = settings.monoFamily
+    if (!term || term.options.fontFamily === family) return
+    term.options.fontFamily = family
+    fit?.fit()
+    fitCursor(term)
   })
 
   $effect(() => {

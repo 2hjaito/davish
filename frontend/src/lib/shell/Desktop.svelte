@@ -1,11 +1,15 @@
 <script lang="ts">
+  import { untrack } from 'svelte'
+
   import { dockApps, getApp } from '../../apps/registry'
   import type { AppDef } from '../../apps/types'
+  import { monitorSetThresholds } from '../api/monitor'
   import { nginxCheckCerts } from '../api/nginx'
   import { hasRuntime } from '../api/runtime'
   import { audit } from '../stores/audit.svelte'
   import { notifications } from '../stores/notifications.svelte'
   import { servers } from '../stores/servers.svelte'
+  import { settings } from '../stores/settings.svelte'
   import { toUserError } from '../api/errors'
   import { transferReveal } from '../api/transfer'
   import { t } from '../i18n/vi'
@@ -16,12 +20,14 @@
     transferNoticeId,
     transfers,
   } from '../stores/transfers.svelte'
-  import { openLogs, openTransfers } from '../wm/intents.svelte'
+  import { openFilesAt, openLogs, openTransfers } from '../wm/intents.svelte'
   import Banners from './Banners.svelte'
   import { ui } from '../stores/ui.svelte'
   import Window from '../wm/Window.svelte'
   import { wm } from '../wm/windowManager.svelte'
+  import Spotlight from '../spotlight/Spotlight.svelte'
   import Dock from './Dock.svelte'
+  import Welcome from './Welcome.svelte'
   import MenuBar from './MenuBar.svelte'
   import HostKeyDialog from './HostKeyDialog.svelte'
   import ServerDialog from './ServerDialog.svelte'
@@ -73,6 +79,8 @@
   $effect(() => {
     const actions: TransferActions = {
       showProgress: () => openTransfers(serverID),
+      showCopy: (j) => openFilesAt(j.serverID, j.dst.slice(0, j.dst.lastIndexOf('/')) || '/'),
+      nameOf: (id) => servers.list.find((s) => s.id === id)?.name ?? id,
       reveal: (j) =>
         void transferReveal(j.dst).catch((e: unknown) =>
           notifications.add({
@@ -95,6 +103,16 @@
 
   $effect(() => audit.init())
 
+  // Settings that reach outside the frontend's own components: the mono
+  // font of every view, and the thresholds sysmon notifies at.
+  $effect(() => {
+    document.documentElement.style.setProperty('--font-mono', settings.monoFamily)
+  })
+  $effect(() => {
+    if (!hasRuntime) return
+    void monitorSetThresholds(settings.alertMem, settings.alertDisk, settings.alertHold)
+  })
+
   // TLS certificates nearing expiry notify once a server connects; checked
   // once per server for the app's lifetime (Go keeps what it notified).
   // eslint-disable-next-line svelte/prefer-svelte-reactivity -- bookkeeping, never rendered
@@ -108,17 +126,24 @@
     }
   })
 
-  // First run: ask for a server. Otherwise open a terminal on the active one,
-  // like the mockup's Terminal + Files in the browser preview.
-  let opened = false
-  $effect(() => {
-    if (!servers.ready || opened) return
-    opened = true
-    if (servers.list.length === 0) {
-      ui.addServer()
+  // Each server reopens the windows it had (docs/ARCHITECTURE.md §5.1).
+  wm.keepInLayout((appId) => getApp(appId)?.layout !== false)
+  function openOptions(appId: string) {
+    const app = getApp(appId)
+    return app && { title: app.label, size: app.size }
+  }
+
+  /**
+   * A workspace showing for the first time this session comes back as it
+   * was left; one never seen before opens a terminal (and, in the browser
+   * preview, Files, like the mockup).
+   */
+  function showWorkspace(id: string) {
+    if (wm.hasLayout(id)) {
+      wm.restoreLayout(id, openOptions)
       return
     }
-    const id = servers.activeId
+    if (wm.visible(id).length > 0) return
     const start = hasRuntime
       ? ([['terminal', { x: 120, y: 120 }]] as const)
       : ([
@@ -129,12 +154,31 @@
       const app = getApp(appId)
       if (app) wm.open(app.id, id, { title: app.label, size: app.size, at })
     }
+  }
+
+  // Once servers are known, and on every switch (including to a server just
+  // added): with no server yet, the welcome page asks for one.
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity -- bookkeeping, never rendered
+  const shown = new Set<string>()
+  $effect(() => {
+    const id = servers.activeId
+    if (!servers.ready || !id || !servers.list.some((s) => s.id === id) || shown.has(id)) return
+    shown.add(id)
+    untrack(() => showWorkspace(id))
   })
+
+  let spotlight = $state(false)
 
   function onKeyDown(e: KeyboardEvent) {
     if (!hasPrimaryModifier(e) || e.altKey || e.shiftKey) return
-    // Off macOS the modifier is Ctrl, which the terminal needs (Ctrl+W, Ctrl+1…).
+    // Off macOS the modifier is Ctrl, which the terminal needs (Ctrl+W,
+    // Ctrl+K, Ctrl+1…): there Spotlight opens from outside the terminal.
     if (!isMac && e.target instanceof Element && e.target.closest('.xterm')) return
+    if (e.key.toLowerCase() === 'k') {
+      e.preventDefault()
+      spotlight = !spotlight
+      return
+    }
     const key = e.key.toLowerCase()
     if (key === 'w' && focused) {
       wm.close(focused.id)
@@ -156,6 +200,7 @@
 
 <div class="desktop">
   <MenuBar />
+  <Spotlight open={spotlight} onclose={() => (spotlight = false)} />
 
   {#if wm.snapPreview}
     {@const p = wm.snapPreview}
@@ -180,12 +225,16 @@
     {/if}
   {/each}
 
-  <Dock
-    apps={dockApps}
-    isOpen={(id) => wm.isOpen(id, serverID)}
-    onlaunch={launch}
-    bind:height={dockHeight}
-  />
+  {#if servers.ready && servers.list.length === 0}
+    <Welcome onadd={() => ui.addServer()} />
+  {:else}
+    <Dock
+      apps={dockApps}
+      isOpen={(id) => wm.isOpen(id, serverID)}
+      onlaunch={launch}
+      bind:height={dockHeight}
+    />
+  {/if}
 
   <Banners />
   <ServerDialog />

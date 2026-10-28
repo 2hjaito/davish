@@ -125,3 +125,39 @@ describe('describeTransfer', () => {
     expect(describeTransfer({ ...base, kind: 'download', state: 'canceled' }, noActions)).toBeNull()
   })
 })
+
+describe('copies between servers', () => {
+  const copy = {
+    id: 'c1',
+    kind: 'copy' as const,
+    serverID: 'b',
+    fromServerID: 'a',
+    name: 'site',
+    src: '/srv/site',
+    dst: '/home/tester/site',
+    dir: true,
+    done: 0,
+    total: 0,
+    bps: 0,
+  }
+  const showCopy = vi.fn()
+  const actions = {
+    showProgress: vi.fn(),
+    reveal: vi.fn(),
+    showCopy,
+    nameOf: (id: string) => (id === 'b' ? 'web-2' : id),
+  }
+
+  it('says where it goes, and opens the folder once there', () => {
+    const running = describeTransfer({ ...copy, state: 'running' }, actions, 0)
+    expect(running?.title).toBe('Đang copy “site”')
+    expect(running?.body).toBe('Sang web-2, qua máy này.')
+    const done = describeTransfer({ ...copy, state: 'done' }, actions, 0)
+    expect(done?.body).toBe('Vào /home/tester trên web-2.')
+    done?.action?.run()
+    expect(showCopy).toHaveBeenCalled()
+    expect(describeTransfer({ ...copy, state: 'failed', error: 'x' }, actions, 0)?.title).toBe(
+      'Copy “site” thất bại',
+    )
+  })
+})

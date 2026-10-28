@@ -23,7 +23,8 @@
   import CodeEditor from './CodeEditor.svelte'
   import { decodeText } from './decode'
   import { detectLanguage, LANGUAGE_LABELS, type LanguageId } from './languages'
-  import { backupByDefault } from './save'
+  import { settings } from '../../lib/stores/settings.svelte'
+  import { backupFor } from './save'
 
   let { win }: AppProps = $props()
 
@@ -157,7 +158,7 @@
       const expect =
         overwrite || !tab.file ? undefined : { modTime: tab.file.modTime, size: tab.file.size }
       const res = await filesSave(win.serverID, tab.path, data, {
-        backup: backupByDefault(tab.path),
+        backup: backupFor(tab.path, settings.editorBackup),
         expect,
       })
       tab.file = res.entry

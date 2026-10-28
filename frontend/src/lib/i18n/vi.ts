@@ -5,6 +5,46 @@ export const t = {
   app: {
     name: 'Davish',
   },
+  welcome: {
+    title: 'Chào mừng đến Davish',
+    lead: 'Quản lý server Linux qua SSH trong một desktop: Terminal, Files, dịch vụ, Docker, log.',
+    points: [
+      {
+        icon: 'server' as const,
+        title: 'Không cài gì lên server',
+        body: 'Mọi thứ đi qua SSH và SFTP từ máy này. Chỉ cần sshd.',
+      },
+      {
+        icon: 'list' as const,
+        title: 'Thấy trước mọi lệnh',
+        body: 'Thao tác phá hủy hiện đúng lệnh sẽ chạy để bạn xác nhận; Nhật ký lệnh ghi lại tất cả.',
+      },
+      {
+        icon: 'lock' as const,
+        title: 'Bí mật nằm trong keychain',
+        body: 'Mật khẩu và passphrase chỉ lưu trong keychain của hệ điều hành. Không lưu mật khẩu sudo.',
+      },
+    ],
+    add: 'Thêm server qua SSH…',
+    foot: 'Có thể thêm nhiều server; mỗi server là một workspace (⌘1…⌘9).',
+  },
+  spotlight: {
+    label: 'Spotlight',
+    placeholder: 'Mở app, dịch vụ, container, thư mục… hoặc /đường/dẫn, > lệnh',
+    results: 'Kết quả',
+    none: 'Không có kết quả.',
+    hint: '↑↓ chọn · Enter mở · /đường/dẫn mở file hay thư mục · > lệnh gõ sẵn vào Terminal · Esc đóng',
+    openPath: (path: string) => `Mở ${path}`,
+    typeCommand: (cmd: string) => `Gõ vào Terminal: ${cmd}`,
+    kinds: {
+      app: 'App',
+      path: 'Đường dẫn',
+      command: 'Lệnh',
+      service: 'Dịch vụ',
+      container: 'Container',
+      folder: 'Thư mục',
+    },
+  },
   common: {
     cancel: 'Hủy',
     refresh: 'Làm mới',
@@ -206,6 +246,13 @@ export const t = {
     copied: 'Đã sao chép đường dẫn',
     copyFailed: 'Không sao chép được đường dẫn',
     loadingPlan: 'Đang chuẩn bị…',
+    otherOffline: 'Server chưa kết nối',
+    copyToTitle: (name: string) => `Copy “${name}” sang server khác`,
+    copyToHint:
+      'Copy đi qua máy này; trùng tên thì giữ cả hai. Kéo file thả vào mục của server khác trên sidebar cũng được.',
+    copyToNone: 'Chưa có server nào khác. Thêm server ở bộ chọn server trên menu bar.',
+    otherPlace: (path: string, server: string) =>
+      `${path} trên ${server}. Bấm để mở, hoặc kéo file thả vào đây để copy sang.`,
   },
   editor: {
     tabs: 'File đang mở',
@@ -283,10 +330,19 @@ export const t = {
     cancel: (name: string) => `Hủy chuyển “${name}”`,
     clearFinished: 'Xóa mục đã xong',
     empty: 'Chưa chuyển file nào',
-    emptyHint: 'Tải lên hoặc tải xuống trong Files, tiến độ sẽ hiện ở đây.',
+    emptyHint:
+      'Tải lên, tải xuống, hoặc kéo file sang server khác trong Files; tiến độ sẽ hiện ở đây.',
     left: (time: string) => `còn ${time}`,
     seconds: (n: number) => `${n} giây`,
     open: 'Mở cửa sổ Chuyển file',
+    copy: 'Copy giữa hai server',
+    copying: (name: string) => `Đang copy “${name}”`,
+    copyingTo: (server: string) => `Sang ${server}, qua máy này.`,
+    copied: (name: string) => `Đã copy “${name}”`,
+    copiedTo: (server: string, dir: string) => `Vào ${dir} trên ${server}.`,
+    copyFailed: (name: string) => `Copy “${name}” thất bại`,
+    openFolder: 'Mở thư mục',
+    route: (from: string, to: string) => `${from} → ${to}`,
   },
   settings: {
     appearance: 'Giao diện',
@@ -307,6 +363,24 @@ export const t = {
     gpu: 'Tăng tốc GPU',
     gpuHint:
       'Vẽ bằng WebGL, nhanh hơn khi in output lớn. Nền terminal chuyển sang màu đặc thay cho kính mờ.',
+    monoFont: 'Font chữ mono',
+    monoFontHint: 'Dùng cho Terminal, Editor và Logs.',
+    monoFonts: { jetbrains: 'JetBrains Mono', system: 'Font của hệ thống' },
+    alerts: 'Cảnh báo',
+    alertMem: 'RAM',
+    alertMemHint: 'Báo khi RAM dùng vượt mức này.',
+    alertDisk: 'Ổ đĩa',
+    alertDiskHint: 'Báo khi một phân vùng đầy quá mức này.',
+    alertHold: 'Kéo dài',
+    alertHoldHint:
+      'Số liệu phải vượt ngưỡng liên tục chừng này mới báo, để đỉnh ngắn không gây báo.',
+    holds: { 0: 'Ngay', 60: '1 phút', 300: '5 phút', 900: '15 phút' } as Record<number, string>,
+    lower: 'Giảm',
+    higher: 'Tăng',
+    editor: 'Editor',
+    backup: 'Sao lưu trước khi ghi',
+    backupHint: 'Lưu bản cũ thành tên.bak-<giờ UTC> cạnh file trước khi ghi đè.',
+    backups: { etc: 'File trong /etc', always: 'Mọi file', never: 'Không' },
   },
   units: {
     day: 'ngày',

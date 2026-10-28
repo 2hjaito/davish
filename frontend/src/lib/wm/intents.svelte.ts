@@ -2,6 +2,7 @@
 // importing the registry that imports them.
 import type { LogSource } from '../api/logs'
 import { t } from '../i18n/vi'
+import { servers } from '../stores/servers.svelte'
 import { wm } from './windowManager.svelte'
 
 /** Default window sizes the registry shares, for apps opened from here. */
@@ -10,6 +11,7 @@ export const TERMINAL_SIZE = { w: 720, h: 470 }
 export const EDITOR_SIZE = { w: 720, h: 500 }
 export const LOGS_SIZE = { w: 820, h: 500 }
 export const AUDIT_SIZE = { w: 620, h: 440 }
+export const FILES_SIZE = { w: 640, h: 440 }
 
 /** Shows the Transfers window in serverID's workspace. */
 export function openTransfers(serverID: string) {
@@ -103,4 +105,65 @@ export const logsRequests = new LogsRequests()
 export function openLogs(serverID: string, source: LogSource) {
   logsRequests.list.push({ serverID, source })
   wm.openOrFocus('logs', serverID, { title: t.apps.logs, size: LOGS_SIZE })
+}
+
+export interface FilesRequest {
+  serverID: string
+  path: string
+}
+
+/** Folders waiting to be shown; the Files app takes them. */
+class FilesRequests {
+  list = $state<FilesRequest[]>([])
+
+  /** Removes and returns the requests for serverID. */
+  take(serverID: string): FilesRequest[] {
+    const mine = this.list.filter((r) => r.serverID === serverID)
+    if (mine.length > 0) this.list = this.list.filter((r) => r.serverID !== serverID)
+    return mine
+  }
+}
+
+export const filesRequests = new FilesRequests()
+
+/**
+ * Shows path in serverID's Files window, switching to that server's
+ * workspace: from another server's Files sidebar, or a finished copy.
+ */
+export function openFilesAt(serverID: string, path: string) {
+  filesRequests.list.push({ serverID, path })
+  servers.select(serverID)
+  wm.openOrFocus('files', serverID, { title: t.apps.files, size: FILES_SIZE })
+}
+
+export interface SelectRequest {
+  appId: 'services' | 'docker'
+  serverID: string
+  /** A unit name or a container name. */
+  key: string
+}
+
+/** Items waiting to be selected in their app; Services and Docker take them. */
+class SelectRequests {
+  list = $state<SelectRequest[]>([])
+
+  /** Removes and returns the latest request for appId on serverID. */
+  take(appId: SelectRequest['appId'], serverID: string): SelectRequest | undefined {
+    const mine = this.list.filter((r) => r.appId === appId && r.serverID === serverID)
+    if (mine.length > 0) this.list = this.list.filter((r) => !mine.includes(r))
+    return mine[mine.length - 1]
+  }
+}
+
+export const selectRequests = new SelectRequests()
+
+/** Opens appId on serverID with key selected, as Spotlight does. */
+export function openSelected(
+  appId: SelectRequest['appId'],
+  serverID: string,
+  key: string,
+  opts: { title: string; size: { w: number; h: number } },
+) {
+  selectRequests.list.push({ appId, serverID, key })
+  wm.openOrFocus(appId, serverID, opts)
 }
