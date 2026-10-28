@@ -57,8 +57,8 @@ Nothing to install on the server.
 
 Prebuilt apps for macOS (universal), Windows and Linux are attached to each [release](https://github.com/2hjaito/davish/releases).
 
-- **macOS 12 or later.** The app is not signed yet: the first time, right-click `Davish.app` and choose **Open**.
-- **Windows 10 or later**, with the WebView2 runtime (included in Windows 11).
+- **macOS 12 or later.** Open `Davish-…-macos-universal.pkg` to install into Applications. The app is not signed yet: the first time, right-click the `.pkg` (and later `Davish.app`) and choose **Open**.
+- **Windows 10 or later.** Run `Davish-…-windows-amd64-setup.exe`; it installs the WebView2 runtime if it is missing. Windows SmartScreen may warn about an unknown publisher: choose **More info** → **Run anyway**.
 - **Linux** with GTK 3 and WebKitGTK 4.1.
 
 ### What the server needs

@@ -57,8 +57,8 @@ Không cài gì lên server.
 
 Bản build sẵn cho macOS (universal), Windows và Linux nằm trong từng [release](https://github.com/2hjaito/davish/releases).
 
-- **macOS 12 trở lên.** App chưa được ký: lần đầu, chuột phải vào `Davish.app` rồi chọn **Mở**.
-- **Windows 10 trở lên**, cần WebView2 runtime (Windows 11 có sẵn).
+- **macOS 12 trở lên.** Mở `Davish-…-macos-universal.pkg` để cài vào Applications. App chưa được ký: lần đầu, chuột phải vào file `.pkg` (và sau đó `Davish.app`) rồi chọn **Mở**.
+- **Windows 10 trở lên.** Chạy `Davish-…-windows-amd64-setup.exe`; bộ cài tự cài WebView2 runtime nếu máy chưa có. SmartScreen có thể cảnh báo nhà phát hành không xác định: chọn **More info** → **Run anyway**.
 - **Linux** có GTK 3 và WebKitGTK 4.1.
 
 ### Server cần gì
