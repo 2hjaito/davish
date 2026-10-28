@@ -178,6 +178,10 @@ export function NginxList(arg1) {
   return window['go']['app']['App']['NginxList'](arg1);
 }
 
+export function NginxPlanRemove(arg1, arg2, arg3) {
+  return window['go']['app']['App']['NginxPlanRemove'](arg1, arg2, arg3);
+}
+
 export function NginxPlanToggle(arg1, arg2, arg3) {
   return window['go']['app']['App']['NginxPlanToggle'](arg1, arg2, arg3);
 }
@@ -188,6 +192,10 @@ export function NginxReload(arg1) {
 
 export function NginxReloadCommand() {
   return window['go']['app']['App']['NginxReloadCommand']();
+}
+
+export function NginxRemove(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['NginxRemove'](arg1, arg2, arg3, arg4);
 }
 
 export function NginxTest(arg1) {
@@ -220,6 +228,14 @@ export function ServicesList(arg1) {
 
 export function ServicesPlan(arg1, arg2) {
   return window['go']['app']['App']['ServicesPlan'](arg1, arg2);
+}
+
+export function ServicesPlanRemove(arg1, arg2) {
+  return window['go']['app']['App']['ServicesPlanRemove'](arg1, arg2);
+}
+
+export function ServicesRemove(arg1, arg2, arg3) {
+  return window['go']['app']['App']['ServicesRemove'](arg1, arg2, arg3);
 }
 
 export function ServicesStatus(arg1, arg2) {

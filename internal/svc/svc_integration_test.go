@@ -145,3 +145,31 @@ func TestStatusAndJournal(t *testing.T) {
 		t.Errorf("sudo = %q", j.Sudo)
 	}
 }
+
+func TestPlanRemove(t *testing.T) {
+	s, _, id := setup(t)
+	ctx := context.Background()
+
+	// An admin's unit (test/sshd/units is copied to /etc/systemd/system).
+	p, err := s.PlanRemove(ctx, id, "davish-crash.service")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if p.Mode != svc.RemoveDelete || p.File != "/etc/systemd/system/davish-crash.service" {
+		t.Errorf("admin unit plan = %+v", p)
+	}
+
+	// A package's unit stays on disk and is masked instead.
+	p, err = s.PlanRemove(ctx, id, "ssh.service")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if p.Mode != svc.RemoveMask || !strings.HasPrefix(p.Command, "systemctl mask --now ssh.service") {
+		t.Errorf("package unit plan = %+v", p)
+	}
+
+	// The command must be the one confirmed.
+	if err := s.Remove(ctx, id, "davish-crash.service", "systemctl reset-failed davish-crash.service"); err == nil {
+		t.Error("a command other than the plan's was run")
+	}
+}

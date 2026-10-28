@@ -1,7 +1,15 @@
 // Demo data for the plain browser preview (vite dev), where there is no Go side.
-import type { ActionPlan, Journal, ServiceAction, Unit, UnitStatus } from '../../lib/api/services'
+import type {
+  ActionPlan,
+  Journal,
+  RemovePlan,
+  ServiceAction,
+  Unit,
+  UnitStatus,
+} from '../../lib/api/services'
 
 const units: Unit[] = [
+  ['certbot', 'failed', 'failed', 'Certbot'],
   ['cron', 'active', 'running', 'Regular background program processing daemon'],
   ['davish-crash', 'failed', 'failed', 'Davish test service that always fails'],
   ['dbus', 'active', 'running', 'D-Bus System Message Bus'],
@@ -70,4 +78,29 @@ export async function mockAct(unit: string, action: ServiceAction): Promise<void
   const u = units.find((x) => x.name === unit)
   if (!u) return
   ;[u.active, u.sub] = action === 'stop' ? ['inactive', 'dead'] : ['active', 'running']
+}
+
+/** davish-crash is an admin's unit and gets deleted; the rest are a package's. */
+export function mockPlanRemove(unit: string): Promise<RemovePlan> {
+  if (unit === 'davish-crash.service') {
+    const file = `/etc/systemd/system/${unit}`
+    const command = `systemctl disable --now ${unit} && systemctl reset-failed ${unit} && rm -- ${file} && systemctl daemon-reload`
+    return delay({
+      unit,
+      mode: 'delete' as const,
+      file,
+      triggers: [],
+      command,
+      sudo: `sudo ${command}`,
+    })
+  }
+  const triggers = unit === 'certbot.service' ? ['certbot.timer'] : []
+  const command = `systemctl mask --now ${[unit, ...triggers].join(' ')} && systemctl reset-failed ${unit}`
+  return delay({ unit, mode: 'mask' as const, triggers, command, sudo: `sudo ${command}` })
+}
+
+export async function mockRemove(unit: string): Promise<void> {
+  await delay(null)
+  const i = units.findIndex((x) => x.name === unit)
+  if (i >= 0) units.splice(i, 1)
 }

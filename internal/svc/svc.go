@@ -21,6 +21,7 @@ const app = "services"
 // Runner runs a command on a server and records it in the audit log.
 type Runner interface {
 	Run(ctx context.Context, serverID, app string, cmd shellx.Command) (audit.Result, error)
+	RunLine(ctx context.Context, serverID, app, line string) (audit.Result, error)
 }
 
 // Unit is one row of systemctl list-units.

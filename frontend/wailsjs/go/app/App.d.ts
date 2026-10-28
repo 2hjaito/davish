@@ -100,11 +100,15 @@ export function NginxCheckCerts(arg1:string):Promise<void>;
 
 export function NginxList(arg1:string):Promise<Array<nginx.Site>>;
 
+export function NginxPlanRemove(arg1:string,arg2:string,arg3:boolean):Promise<nginx.RemovePlan>;
+
 export function NginxPlanToggle(arg1:string,arg2:string,arg3:boolean):Promise<nginx.TogglePlan>;
 
 export function NginxReload(arg1:string):Promise<nginx.ReloadResult>;
 
 export function NginxReloadCommand():Promise<string>;
+
+export function NginxRemove(arg1:string,arg2:string,arg3:boolean,arg4:string):Promise<void>;
 
 export function NginxTest(arg1:string):Promise<nginx.TestResult>;
 
@@ -121,6 +125,10 @@ export function ServicesJournal(arg1:string,arg2:string):Promise<svc.Journal>;
 export function ServicesList(arg1:string):Promise<Array<svc.Unit>>;
 
 export function ServicesPlan(arg1:string,arg2:string):Promise<svc.Plan>;
+
+export function ServicesPlanRemove(arg1:string,arg2:string):Promise<svc.RemovePlan>;
+
+export function ServicesRemove(arg1:string,arg2:string,arg3:string):Promise<void>;
 
 export function ServicesStatus(arg1:string,arg2:string):Promise<svc.Status>;
 

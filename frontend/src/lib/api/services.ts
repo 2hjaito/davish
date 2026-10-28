@@ -54,6 +54,22 @@ export interface ActionPlan {
   sudo: string
 }
 
+/** How a unit is removed (internal/svc.RemovePlan). */
+export type RemoveMode = 'delete' | 'mask' | 'reset'
+
+export interface RemovePlan {
+  unit: string
+  /** delete: an admin's unit file is deleted; mask: a package's unit is
+   *  masked with its triggers; reset: only the failure is cleared. */
+  mode: RemoveMode
+  file?: string
+  /** Timers or sockets stopped along with it. */
+  triggers: string[] | null
+  /** Exactly what servicesRemove runs; always shown first. */
+  command: string
+  sudo: string
+}
+
 export const servicesList = (serverID: string): Promise<Unit[]> => App.ServicesList(serverID)
 
 export const servicesStatus = (serverID: string, unit: string): Promise<UnitStatus> =>
@@ -67,3 +83,10 @@ export const servicesPlan = (unit: string, action: ServiceAction): Promise<Actio
 
 export const servicesAct = (serverID: string, unit: string, action: ServiceAction): Promise<void> =>
   App.ServicesAct(serverID, unit, action)
+
+export const servicesPlanRemove = (serverID: string, unit: string): Promise<RemovePlan> =>
+  App.ServicesPlanRemove(serverID, unit) as Promise<RemovePlan>
+
+/** Runs the confirmed command; FS_STALE when the unit changed since. */
+export const servicesRemove = (serverID: string, unit: string, command: string): Promise<void> =>
+  App.ServicesRemove(serverID, unit, command)

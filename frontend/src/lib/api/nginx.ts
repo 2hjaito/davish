@@ -43,6 +43,22 @@ export interface TogglePlan {
   sudo: string
 }
 
+/** Deleting a site (internal/nginx.RemovePlan). */
+export interface RemovePlan {
+  path: string
+  name: string
+  /** nginx serves it until it reloads. */
+  enabled: boolean
+  /** Let's Encrypt certificates only this site uses. */
+  certs: string[]
+  withCerts: boolean
+  /** Used by other sites too; always kept. */
+  sharedCerts: string[]
+  /** Exactly what nginxRemove runs. */
+  command: string
+  sudo: string
+}
+
 export interface NginxIssue {
   level: 'emerg' | 'alert' | 'crit' | 'error' | 'warn'
   message: string
@@ -84,5 +100,15 @@ export const nginxReloadCommand = (): Promise<string> => App.NginxReloadCommand(
 
 export const nginxReload = (serverID: string): Promise<NginxReload> =>
   App.NginxReload(serverID) as Promise<NginxReload>
+
+export const nginxPlanRemove = (
+  serverID: string,
+  path: string,
+  withCerts: boolean,
+): Promise<RemovePlan> => App.NginxPlanRemove(serverID, path, withCerts)
+
+/** Runs the confirmed command; FS_STALE when the site changed since. */
+export const nginxRemove = (serverID: string, plan: RemovePlan): Promise<void> =>
+  App.NginxRemove(serverID, plan.path, plan.withCerts, plan.command)
 
 export const nginxCheckCerts = (serverID: string): Promise<void> => App.NginxCheckCerts(serverID)

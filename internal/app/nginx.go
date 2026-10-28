@@ -47,3 +47,17 @@ func (a *App) NginxReload(serverID string) (nginx.ReloadResult, error) {
 func (a *App) NginxCheckCerts(serverID string) error {
 	return a.nginx.CheckCerts(a.ctx, serverID)
 }
+
+// NginxPlanRemove describes deleting a site file and the link enabling it,
+// with withCerts also the Let's Encrypt certificates only it uses.
+func (a *App) NginxPlanRemove(serverID, sitePath string, withCerts bool) (nginx.RemovePlan, error) {
+	return a.nginx.PlanRemove(a.ctx, serverID, sitePath, withCerts)
+}
+
+// NginxRemove runs the confirmed command of NginxPlanRemove.
+func (a *App) NginxRemove(serverID, sitePath string, withCerts bool, command string) error {
+	if err := a.lock.Check(); err != nil {
+		return err
+	}
+	return a.nginx.Remove(a.ctx, serverID, sitePath, withCerts, command)
+}

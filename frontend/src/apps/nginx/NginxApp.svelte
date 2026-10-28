@@ -2,7 +2,13 @@
   import { untrack } from 'svelte'
 
   import { toUserError } from '../../lib/api/errors'
-  import type { NginxReload, NginxSite, NginxTest, TogglePlan } from '../../lib/api/nginx'
+  import type {
+    NginxReload,
+    NginxSite,
+    NginxTest,
+    RemovePlan,
+    TogglePlan,
+  } from '../../lib/api/nginx'
   import { t } from '../../lib/i18n/vi'
   import { load, save } from '../../lib/stores/persist'
   import { servers } from '../../lib/stores/servers.svelte'
@@ -16,6 +22,7 @@
   import type { AppProps } from '../types'
   import { backend } from './backend'
   import ResultDialog from './ResultDialog.svelte'
+  import RemoveDialog from './RemoveDialog.svelte'
   import SiteInspector from './SiteInspector.svelte'
   import { type Filter, FILTERS, mainName, matches, siteKey, visible, worstCert } from './sites'
 
@@ -32,6 +39,7 @@
   let selected = $state<string | null>(null)
   let busy = $state(false)
   let toggling = $state.raw<TogglePlan | null>(null)
+  let removing = $state.raw<RemovePlan | null>(null)
   /** The server refused the link change: its sudo form. */
   let toggleSudo = $state('')
   let flash = $state('')
@@ -107,6 +115,33 @@
     try {
       await backend.toggle(win.serverID, plan)
       flash = t.nginx.toggled[plan.enable ? 'enable' : 'disable'](plan.name)
+    } catch (e) {
+      const ue = toUserError(e)
+      if (ue.code === 'CMD_NEEDS_ROOT') toggleSudo = plan.sudo
+      else flash = ue.message
+    } finally {
+      busy = false
+    }
+    await refresh()
+  }
+
+  async function askRemove(site: NginxSite) {
+    toggleSudo = ''
+    flash = ''
+    try {
+      removing = await backend.planRemove(win.serverID, site.path, false)
+    } catch (e) {
+      flash = toUserError(e).message
+    }
+  }
+
+  async function remove(plan: RemovePlan) {
+    removing = null
+    busy = true
+    try {
+      await backend.remove(win.serverID, plan)
+      // A site nginx was serving keeps being served until a reload.
+      flash = plan.enabled ? t.nginx.removedEnabled(plan.name) : ''
     } catch (e) {
       const ue = toUserError(e)
       if (ue.code === 'CMD_NEEDS_ROOT') toggleSudo = plan.sudo
@@ -222,6 +257,7 @@
         {busy}
         {flash}
         ontoggle={(s) => void askToggle(s)}
+        onremove={(s) => void askRemove(s)}
         onreload={() => void askReload()}
       />
     {:else}
@@ -251,6 +287,12 @@
   onconfirm={() => void reload()}
 />
 <ResultDialog serverID={win.serverID} {result} onclose={() => (result = null)} />
+<RemoveDialog
+  plan={removing}
+  replan={(withCerts) => backend.planRemove(win.serverID, removing!.path, withCerts)}
+  onclose={() => (removing = null)}
+  onconfirm={(p) => void remove(p)}
+/>
 
 <style>
   .root {
