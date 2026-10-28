@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { useAppMenu } from '../../lib/shell/menus.svelte'
   import { untrack } from 'svelte'
 
   import { toUserError } from '../../lib/api/errors'
@@ -149,6 +150,14 @@
     onchanged()
     if (unit.name === name) await load(name)
   }
+
+  useAppMenu(() =>
+    actions.map((a) => ({
+      label: `${t.services.actions[a]} ${shortName(unit.name)}…`,
+      disabled: busy !== null || !canDo(active, a),
+      run: () => void ask(a),
+    })),
+  )
 </script>
 
 <section class="inspector" aria-label={shortName(unit.name)}>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { useAppMenu } from '../../lib/shell/menus.svelte'
   import { untrack } from 'svelte'
 
   import { toUserError } from '../../lib/api/errors'
@@ -228,6 +229,8 @@
     folders = { ...folders, [win.serverID]: next }
     void findRepos()
   }
+
+  useAppMenu(() => [{ label: `${t.git.addFolder}…`, run: () => (editingFolders = true) }], refresh)
 </script>
 
 <FilterShell

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { startDemo } from '../api/runtime'
   import { t } from '../i18n/vi'
   import DavishMark from '../ui/DavishMark.svelte'
   import Icon from '../ui/Icon.svelte'
@@ -37,6 +38,7 @@
     {t.welcome.add}
   </button>
   <button type="button" class="link" onclick={onimport}>{t.welcome.import}</button>
+  <button type="button" class="link" onclick={startDemo}>{t.demo.start}</button>
   <p class="foot">{t.welcome.foot(isMac ? '⌘' : 'Ctrl+')}</p>
 </section>
 

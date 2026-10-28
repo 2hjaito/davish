@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { useAppMenu } from '../../lib/shell/menus.svelte'
   import { tick, untrack } from 'svelte'
 
   import { toUserError } from '../../lib/api/errors'
@@ -448,6 +449,11 @@
     e.preventDefault()
     action()
   }
+
+  useAppMenu(
+    () => [],
+    () => void reload(),
+  )
 </script>
 
 <!-- Shortcuts for the whole window; every one also has a button. -->

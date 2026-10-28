@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { useAppMenu } from '../../lib/shell/menus.svelte'
   import { untrack } from 'svelte'
 
   import type {
@@ -128,6 +129,14 @@
     if (d.state === 'exited' || d.state === 'dead') return t.docker.exitCode(d.exitCode)
     return ''
   }
+
+  useAppMenu(() =>
+    actions.map((a) => ({
+      label: `${t.docker.actions[a]} ${container.name}…`,
+      disabled: busy !== null || !canDo(status, a),
+      run: () => void ask(a),
+    })),
+  )
 </script>
 
 <section class="inspector" aria-label={name}>
