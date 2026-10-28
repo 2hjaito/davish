@@ -131,6 +131,18 @@
     <g transform="translate(13 13)" style:color="#009639">
       <Icon name="brandNginx" size={38} />
     </g>
+  {:else if id === 'git'}
+    <!-- Third-party tool: its official mark, unmodified, in its brand color (ADR 0003). -->
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff" />
+        <stop offset="1" stop-color="#f8e3dd" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    <g transform="translate(13 13)" style:color="#f05032">
+      <Icon name="brandGit" size={38} />
+    </g>
   {:else if id === 'cron'}
     <defs>
       <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">

@@ -4,6 +4,7 @@ import {audit} from '../models';
 import {cron} from '../models';
 import {docker} from '../models';
 import {fs} from '../models';
+import {git} from '../models';
 import {sshkeys} from '../models';
 import {app} from '../models';
 import {lock} from '../models';
@@ -71,6 +72,20 @@ export function FilesSave(arg1:string,arg2:string,arg3:Array<number>,arg4:fs.Sav
 export function FilesStat(arg1:string,arg2:string):Promise<fs.Entry>;
 
 export function FilesWrite(arg1:string,arg2:string,arg3:Array<number>):Promise<fs.Entry>;
+
+export function GitBranches(arg1:string,arg2:string):Promise<Array<git.Branch>>;
+
+export function GitDiff(arg1:string,arg2:git.DiffRequest):Promise<git.Diff>;
+
+export function GitFind(arg1:string,arg2:Array<string>):Promise<Array<git.Repo>>;
+
+export function GitLog(arg1:string,arg2:string,arg3:number):Promise<Array<git.Commit>>;
+
+export function GitPlan(arg1:string,arg2:string,arg3:string,arg4:string):Promise<git.Plan>;
+
+export function GitRun(arg1:string,arg2:string,arg3:string,arg4:string,arg5:string):Promise<git.Result>;
+
+export function GitStatus(arg1:string,arg2:string):Promise<git.Status>;
 
 export function KeysAdd(arg1:string,arg2:string,arg3:string):Promise<void>;
 

@@ -36,6 +36,12 @@ const (
 	LockWrongPassword    Code = "LOCK_WRONG_PASSWORD"
 	LockTooManyAttempts  Code = "LOCK_TOO_MANY_ATTEMPTS"
 	LockBiometricFailed  Code = "LOCK_BIOMETRIC_FAILED"
+	GitUnsafeOwner       Code = "GIT_UNSAFE_OWNER"
+	GitDirty             Code = "GIT_DIRTY"
+	GitAuthFailed        Code = "GIT_AUTH_FAILED"
+	GitNotFastForward    Code = "GIT_NOT_FAST_FORWARD"
+	GitNoUpstream        Code = "GIT_NO_UPSTREAM"
+	GitRemoteFailed      Code = "GIT_REMOTE_FAILED"
 )
 
 // Error is the only error type allowed to cross into the frontend.

@@ -138,9 +138,9 @@ export function openFilesAt(serverID: string, path: string) {
 }
 
 export interface SelectRequest {
-  appId: 'services' | 'docker' | 'packages'
+  appId: 'services' | 'docker' | 'packages' | 'keys'
   serverID: string
-  /** A unit name, a container name or a program id. */
+  /** A unit name, a container name, a program id or a Keys filter. */
   key: string
 }
 

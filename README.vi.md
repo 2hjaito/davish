@@ -5,7 +5,7 @@
 # Davish
 
 **Một desktop cho các server Linux của bạn.**<br>
-Terminal, file, dịch vụ, Docker, log, cron, nginx, khóa SSH và gói phần mềm qua SSH thuần, gom trong một giao diện như một hệ điều hành.<br>
+Terminal, file, dịch vụ, Docker, log, cron, nginx, khóa SSH, gói phần mềm và git qua SSH thuần, gom trong một giao diện như một hệ điều hành.<br>
 Không cài gì lên server.
 
 [![CI](https://github.com/2hjaito/davish/actions/workflows/ci.yml/badge.svg)](https://github.com/2hjaito/davish/actions/workflows/ci.yml)
@@ -37,7 +37,7 @@ Không cài gì lên server.
 | **Logs**<br>Theo dõi journal của dịch vụ, một file hoặc một container. Lọc, tạm dừng, tô dòng lỗi, bấm đường dẫn file để mở trong Editor đúng dòng. | **Cron**<br>Crontab của bạn và của hệ thống, lịch nói bằng lời, lần chạy kế tiếp theo giờ server, sửa an toàn có sao lưu. |
 | **Nginx**<br>Site, server block và upstream; bật/tắt site, `nginx -t` trước mỗi lần reload, lỗi mở đúng dòng; cảnh báo chứng chỉ TLS sắp hết hạn. Xóa site, kèm chứng chỉ Let's Encrypt nếu không site nào khác dùng. | **Spotlight & Launchpad**<br>`⌘K` (hoặc kính lúp trên menu bar) để mở app, dịch vụ, container, thư mục, một `/đường/dẫn`, hoặc `> một lệnh` gõ sẵn vào Terminal. Launchpad (`⌘⇧A`) hiện mọi app và cho ghim vào Dock. |
 | **Khóa SSH**<br>`authorized_keys` của server, đánh dấu key Davish đang đăng nhập; thêm, gỡ key có sao lưu. Tạo deploy key trên server và thử với GitHub, GitLab (kiểm tra đúng host key họ công bố). Tạo key trên máy, đưa lên server rồi chuyển sang đăng nhập bằng nó. | **Khóa app**<br>Touch ID hoặc mật khẩu riêng che mọi thứ khi bạn rời máy. Quên mật khẩu thì đặt lại, nhưng Davish xóa mật khẩu server đã lưu trước, nên đặt lại không mở được đường vào server. Cửa sổ mở, đóng, thu nhỏ về Dock bằng hiệu ứng Genie. |
-| **Gói**<br>Gói apt, dnf, yum hoặc apk đã cài và có bản cập nhật, bản vá bảo mật lên đầu, có thông báo khi kết nối. Các runtime và chương trình trên server (nginx, MariaDB, Redis, Docker, Node.js qua nvm, PHP với php-fpm, Python…) kèm phiên bản, file cấu hình và dịch vụ; tìm được bằng Spotlight. Cài và nâng cấp thì gõ sẵn lệnh `sudo` vào Terminal cho bạn. | |
+| **Gói**<br>Gói apt, dnf, yum hoặc apk đã cài và có bản cập nhật, bản vá bảo mật lên đầu, có thông báo khi kết nối. Các runtime và chương trình trên server (nginx, MariaDB, Redis, Docker, Node.js qua nvm, PHP với php-fpm, Python…) kèm phiên bản, file cấu hình và dịch vụ; tìm được bằng Spotlight. Cài và nâng cấp thì gõ sẵn lệnh `sudo` vào Terminal cho bạn. | **Git**<br>Tìm repo trong home, `/var/www`, `/srv`, `/opt` hoặc thư mục bạn thêm. Nhánh, nhánh remote và số commit chưa đẩy/chưa kéo, file thay đổi kèm diff, biểu đồ commit của mọi nhánh với merge và tag. Fetch, `pull --ff-only` (bị chặn khi repo còn thay đổi chưa commit) và đổi nhánh sau khi xác nhận đúng lệnh; `npm ci` / yarn / pnpm theo lockfile trong Terminal. Remote từ chối key thì dẫn tới tạo deploy key. |
 
 <table>
   <tr>
@@ -59,6 +59,10 @@ Không cài gì lên server.
   <tr>
     <td><img src="assets/screenshots/packages.jpg" alt="Gói: bản cập nhật, bản vá bảo mật lên đầu"></td>
     <td><img src="assets/screenshots/packages-apps.jpg" alt="Chương trình trên server, Node.js với các phiên bản nvm"></td>
+  </tr>
+  <tr>
+    <td><img src="assets/screenshots/git.jpg" alt="Git: biểu đồ commit của mọi nhánh, kèm diff của một merge"></td>
+    <td><img src="assets/screenshots/git-changes.jpg" alt="Git: file thay đổi và diff của một file"></td>
   </tr>
   <tr>
     <td><img src="assets/screenshots/launchpad.jpg" alt="Launchpad"></td>

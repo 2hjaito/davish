@@ -5,7 +5,7 @@
 # Davish
 
 **A desktop for your Linux servers.**<br>
-Terminal, files, services, Docker, logs, cron, nginx, SSH keys and packages over plain SSH, in one place that feels like an operating system.<br>
+Terminal, files, services, Docker, logs, cron, nginx, SSH keys, packages and git over plain SSH, in one place that feels like an operating system.<br>
 Nothing to install on the server.
 
 [![CI](https://github.com/2hjaito/davish/actions/workflows/ci.yml/badge.svg)](https://github.com/2hjaito/davish/actions/workflows/ci.yml)
@@ -37,7 +37,7 @@ Nothing to install on the server.
 | **Logs**<br>Follow a unit's journal, a file or a container. Filter, pause, highlight errors, and click a file path to open it in the Editor at that line. | **Cron**<br>Your crontab and the system ones, schedules in plain words, next runs in the server's time zone, safe edits with a backup. |
 | **Nginx**<br>Sites, server blocks and upstreams; turn sites on or off, `nginx -t` before every reload, errors that open at the right line; TLS expiry alerts. Delete a site, and its Let's Encrypt certificate if no other site uses it. | **Spotlight & Launchpad**<br>`⌘K` (or the magnifier in the menu bar) to open an app, a service, a container, a folder, a `/path`, or `> a command` typed into a terminal. Launchpad (`⌘⇧A`) shows every app and lets you pin them to the Dock. |
 | **SSH keys**<br>The server's `authorized_keys` with the key Davish logs in with marked; add or remove keys with a backup. Create a deploy key on the server and test it against GitHub or GitLab, checked against their published host key. Generate a key on your machine, put it on the server and switch to it. | **App lock**<br>Touch ID or a password of its own covers everything when you step away. Forgot the password? Resetting it removes the saved server passwords first, so it never opens a way into a server. Windows open, close and minimize into the Dock with a genie effect. |
-| **Packages**<br>What apt, dnf, yum or apk installed and can upgrade, security fixes first, with an alert when you connect. The runtimes and server programs it finds (nginx, MariaDB, Redis, Docker, Node.js with nvm, PHP with php-fpm, Python…), each with its version, config files and service; also in Spotlight. Installing and upgrading type the `sudo` command into a terminal for you. | |
+| **Packages**<br>What apt, dnf, yum or apk installed and can upgrade, security fixes first, with an alert when you connect. The runtimes and server programs it finds (nginx, MariaDB, Redis, Docker, Node.js with nvm, PHP with php-fpm, Python…), each with its version, config files and service; also in Spotlight. Installing and upgrading type the `sudo` command into a terminal for you. | **Git**<br>Finds the repositories in your home, `/var/www`, `/srv` and `/opt`, or folders you add. Branch, upstream and how far ahead or behind, changed files with their diffs, and a commit graph of every branch with merges and tags. Fetch, `pull --ff-only` (refused while the tree is dirty) and switch branches after confirming the exact command; `npm ci` / yarn / pnpm from the lockfile in a terminal. A rejected key leads to creating a deploy key. |
 
 <table>
   <tr>
@@ -59,6 +59,10 @@ Nothing to install on the server.
   <tr>
     <td><img src="assets/screenshots/packages.jpg" alt="Packages: pending updates with security fixes first"></td>
     <td><img src="assets/screenshots/packages-apps.jpg" alt="Programs found on the server, with Node.js and its nvm versions"></td>
+  </tr>
+  <tr>
+    <td><img src="assets/screenshots/git.jpg" alt="Git: the commit graph of every branch, with a merge's diff"></td>
+    <td><img src="assets/screenshots/git-changes.jpg" alt="Git: changed files and the diff of one"></td>
   </tr>
   <tr>
     <td><img src="assets/screenshots/launchpad.jpg" alt="Launchpad"></td>

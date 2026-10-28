@@ -11,7 +11,7 @@ ENV container=docker
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends systemd systemd-sysv dbus polkitd \
-      openssh-server procps zip nginx docker.io cron curl \
+      openssh-server procps zip nginx docker.io cron curl git \
  && rm -rf /var/lib/apt/lists/* \
  && useradd -m -s /bin/bash -G systemd-journal tester \
  && rm -f /etc/ssh/ssh_host_*

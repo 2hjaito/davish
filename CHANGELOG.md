@@ -5,6 +5,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Thêm
+- App Git: tìm repo trên server (home, `/var/www`, `/srv`, `/opt` và thư mục thêm tay); nhánh, nhánh remote, số commit chưa đẩy/chưa kéo, file thay đổi và diff; biểu đồ commit của mọi nhánh với merge và tag. Fetch, `pull --ff-only` (chặn khi repo bẩn), đổi nhánh qua hộp xác nhận hiện đúng lệnh; cài dependency theo lockfile trong Terminal; lỗi xác thực remote dẫn tới tạo deploy key. Repo của user khác bị git từ chối thì báo rõ, không ghi đè `safe.directory`.
 - App Gói: gói apt/dnf/yum/apk đã cài và có bản cập nhật, bản vá bảo mật lên đầu (thông báo khi kết nối); runtime và chương trình trên server (nginx, MariaDB, Redis, Docker, Node.js qua nvm, PHP với php-fpm, Python…) với phiên bản, file cấu hình, dịch vụ; gói npm global. Cài, nâng cấp, gỡ thì gõ sẵn lệnh `sudo` vào Terminal. Spotlight tìm được chương trình trên server.
 - App Khóa SSH: quản lý `authorized_keys` của server (thêm, gỡ có sao lưu, đánh dấu key Davish đang đăng nhập), tạo deploy key trên server và thử với GitHub/GitLab (kiểm tra host key theo fingerprint họ công bố), tạo key trên máy này rồi đưa lên server và dùng để đăng nhập.
 - Khóa app (ADR 0007): mật khẩu khóa riêng, mở bằng Touch ID trên macOS; tự khóa khi máy ngủ dậy, sau N phút không dùng, hoặc `⌘L` / `Ctrl+L`. Phiên SSH, log, transfer vẫn chạy khi khóa; thao tác lên server bị chặn. Quên mật khẩu thì đặt lại, đổi lại Davish xóa mật khẩu server đã lưu.
