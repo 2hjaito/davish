@@ -5,7 +5,7 @@
 # Davish
 
 **A desktop for your Linux servers.**<br>
-Terminal, files, services, Docker, logs, cron and nginx over plain SSH, in one place that feels like an operating system.<br>
+Terminal, files, services, Docker, logs, cron, nginx and SSH keys over plain SSH, in one place that feels like an operating system.<br>
 Nothing to install on the server.
 
 [![CI](https://github.com/2hjaito/davish/actions/workflows/ci.yml/badge.svg)](https://github.com/2hjaito/davish/actions/workflows/ci.yml)
@@ -24,6 +24,7 @@ Nothing to install on the server.
 - **Agentless.** Davish only needs `sshd` and SFTP. Everything runs from your machine over SSH; nothing is copied to, installed on or left behind on the server.
 - **You see every command.** Anything destructive (stop a service, remove a file, restart a container, replace a crontab) shows the exact command before it runs. The command log records everything Davish ran on your behalf.
 - **Secrets stay in your keychain.** Passwords and passphrases live only in the OS keychain. Davish never stores or types a `sudo` password: when root is needed, it opens a terminal with the command typed in and lets you press Enter.
+- **Locks when you step away.** A lock password of its own, Touch ID on macOS; it locks when the machine wakes, after idle time or with `⌘L`. Sessions keep running behind the lock, but nothing reaches a server until you unlock.
 - **Many servers, one desktop.** Each server is a workspace (`⌘1`…`⌘9`) that remembers its own windows. Copy files between servers by dragging them.
 
 ## Features
@@ -32,9 +33,10 @@ Nothing to install on the server.
 |---|---|
 | **Terminal**<br>xterm.js with tabs, copy/paste, GPU rendering, and an optional powerline prompt injected into bash at login, with nothing written on the server. | **Files**<br>Finder-style browser over SFTP: upload, download, drag and drop from your OS, rename, delete, compress, and copy between servers through your machine. |
 | **Monitor**<br>CPU per core, memory and swap, disks, network per interface, NVIDIA GPUs, processes. RAM and disk alerts you can tune. | **Editor**<br>CodeMirror 6 with highlighting for nginx, YAML, JSON, shell, env and config files. Atomic saves that keep mode and owner, backups under `/etc`, and a warning if the file changed on the server. |
-| **Services**<br>systemd units by state, their status and journal; start, stop and restart. | **Docker**<br>Containers with live CPU and memory, logs with stderr marked, inspect, start/stop/restart, restart-loop alerts. |
+| **Services**<br>systemd units by state, their status and journal; start, stop and restart. Remove a unit you no longer use: an admin's unit is deleted, a package's (such as an old `certbot`) is masked with the timer that runs it. | **Docker**<br>Containers with live CPU and memory, logs with stderr marked, inspect, start/stop/restart, restart-loop alerts. |
 | **Logs**<br>Follow a unit's journal, a file or a container. Filter, pause, highlight errors, and click a file path to open it in the Editor at that line. | **Cron**<br>Your crontab and the system ones, schedules in plain words, next runs in the server's time zone, safe edits with a backup. |
-| **Nginx**<br>Sites, server blocks and upstreams; turn sites on or off, `nginx -t` before every reload, errors that open at the right line; TLS expiry alerts. | **Spotlight**<br>`⌘K` to open an app, a service, a container, a folder, a `/path`, or `> a command` typed into a terminal. |
+| **Nginx**<br>Sites, server blocks and upstreams; turn sites on or off, `nginx -t` before every reload, errors that open at the right line; TLS expiry alerts. Delete a site, and its Let's Encrypt certificate if no other site uses it. | **Spotlight & Launchpad**<br>`⌘K` (or the magnifier in the menu bar) to open an app, a service, a container, a folder, a `/path`, or `> a command` typed into a terminal. Launchpad (`⌘⇧A`) shows every app and lets you pin them to the Dock. |
+| **SSH keys**<br>The server's `authorized_keys` with the key Davish logs in with marked; add or remove keys with a backup. Create a deploy key on the server and test it against GitHub or GitLab, checked against their published host key. Generate a key on your machine, put it on the server and switch to it. | **App lock**<br>Touch ID or a password of its own covers everything when you step away. Forgot the password? Resetting it removes the saved server passwords first, so it never opens a way into a server. Windows open, close and minimize into the Dock with a genie effect. |
 
 <table>
   <tr>
@@ -49,6 +51,18 @@ Nothing to install on the server.
     <td><img src="assets/screenshots/cron.jpg" alt="Cron jobs with schedules in plain words"></td>
     <td><img src="assets/screenshots/spotlight.jpg" alt="Spotlight"></td>
   </tr>
+  <tr>
+    <td><img src="assets/screenshots/keys.jpg" alt="SSH keys: the server's authorized_keys"></td>
+    <td><img src="assets/screenshots/remove.jpg" alt="Deleting an nginx site with its Let's Encrypt certificate"></td>
+  </tr>
+  <tr>
+    <td><img src="assets/screenshots/launchpad.jpg" alt="Launchpad"></td>
+    <td><img src="assets/screenshots/genie.jpg" alt="A window pouring into the Dock with the genie effect"></td>
+  </tr>
+  <tr>
+    <td><img src="assets/screenshots/lock.jpg" alt="The lock screen"></td>
+    <td><img src="assets/screenshots/welcome.jpg" alt="Welcome page"></td>
+  </tr>
 </table>
 
 > The interface is in Vietnamese. Screenshots show demo data from the browser preview.
@@ -57,7 +71,7 @@ Nothing to install on the server.
 
 Prebuilt apps for macOS (universal), Windows and Linux are attached to each [release](https://github.com/2hjaito/davish/releases).
 
-- **macOS 12 or later.** Open `Davish-…-macos-universal.pkg` to install into Applications. The app is not signed yet: the first time, right-click the `.pkg` (and later `Davish.app`) and choose **Open**.
+- **macOS 12 or later.** Open `Davish-…-macos-universal.pkg` to install into Applications. The app is not signed yet, so macOS blocks it the first time: click **Done**, open **System Settings → Privacy & Security** and click **Open Anyway** next to the line about Davish (again for `Davish.app` if it is blocked). Or run `xattr -dr com.apple.quarantine` on the file.
 - **Windows 10 or later.** Run `Davish-…-windows-amd64-setup.exe`; it installs the WebView2 runtime if it is missing. Windows SmartScreen may warn about an unknown publisher: choose **More info** → **Run anyway**.
 - **Linux** with GTK 3 and WebKitGTK 4.1.
 
