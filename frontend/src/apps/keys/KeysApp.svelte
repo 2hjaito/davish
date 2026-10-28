@@ -20,6 +20,7 @@
   import Icon from '../../lib/ui/Icon.svelte'
   import StatusList, { type StatusItem } from '../../lib/ui/StatusList.svelte'
   import { getWindowContext } from '../../lib/wm/context'
+  import { selectRequests } from '../../lib/wm/intents.svelte'
   import type { AppProps } from '../types'
   import { backend } from './backend'
   import KeyForm, { type FormKind, type FormValue } from './KeyForm.svelte'
@@ -61,6 +62,19 @@
   let passphrase = $state('')
 
   $effect(() => save('keys', { filter }))
+
+  // Another app asked for a section, such as Git for a deploy key.
+  $effect(() => {
+    if (!selectRequests.list.some((r) => r.appId === 'keys' && r.serverID === win.serverID)) return
+    untrack(() => {
+      const req = selectRequests.take('keys', win.serverID)
+      const f = FILTERS.find((x) => x === req?.key)
+      if (!f) return
+      filter = f
+      query = ''
+      selected = null
+    })
+  })
 
   const server = $derived(servers.list.find((s) => s.id === win.serverID))
   const connected = $derived(server?.state === 'connected')

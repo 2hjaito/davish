@@ -12,6 +12,7 @@
   import Icon from '../../lib/ui/Icon.svelte'
   import { openFilesAt, openTerminalAt } from '../../lib/wm/intents.svelte'
   import DiffView from './DiffView.svelte'
+  import RepoActions from './RepoActions.svelte'
 
   interface Props {
     serverID: string
@@ -20,9 +21,11 @@
     sel: Selected | null
     diff: Diff | null
     diffError: string
+    /** The repository may have changed: read it again. */
+    onchanged: () => void
   }
 
-  let { serverID, dir, status, sel, diff, diffError }: Props = $props()
+  let { serverID, dir, status, sel, diff, diffError, onchanged }: Props = $props()
 
   const dateTime = (s: number) => new Date(s * 1000).toLocaleString('vi-VN')
 </script>
@@ -95,7 +98,7 @@
         {t.git.openTerminal}
       </button>
     </div>
-    <p class="muted">{t.git.readOnly}</p>
+    <RepoActions {serverID} {dir} {status} {onchanged} />
   </section>
 {:else}
   <Empty icon="gitBranch" title={t.git.loading} />
@@ -196,12 +199,6 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-  }
-
-  .muted {
-    margin: 0;
-    color: var(--fg-muted);
-    font-size: var(--text-xs);
   }
 
   .bad {

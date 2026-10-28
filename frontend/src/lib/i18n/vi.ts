@@ -174,7 +174,6 @@ export const t = {
     diffTruncated: 'Diff quá dài, chỉ hiện 1 MiB đầu.',
     diffLines: (n: number) => `Chỉ hiện ${n} dòng đầu của diff.`,
     diffEmpty: 'Không có thay đổi nội dung (có thể chỉ đổi quyền file hoặc là file nhị phân).',
-    readOnly: 'Chỉ xem: Davish không sửa repo ở đây.',
     addFolder: 'Thêm thư mục',
     addFolderTitle: 'Thêm thư mục chứa repo',
     addFolderLabel: 'Đường dẫn trên server',
@@ -184,6 +183,42 @@ export const t = {
     addFolderAction: 'Thêm',
     folders: 'Thư mục đã thêm',
     removeFolder: (p: string) => `Bỏ thư mục ${p}`,
+    fetch: 'Fetch',
+    pull: 'Pull',
+    switchBranch: 'Đổi nhánh…',
+    confirm: {
+      fetch: {
+        title: 'Fetch từ remote?',
+        body: 'Tải commit và nhánh mới từ remote về, không đổi file nào trong thư mục làm việc. Davish sẽ chạy:',
+        action: 'Fetch',
+      },
+      pull: {
+        title: 'Pull nhánh hiện tại?',
+        body: 'Kéo commit mới về và cập nhật file, chỉ khi đi thẳng được (fast-forward), không tạo merge. Davish sẽ chạy:',
+        action: 'Pull',
+      },
+      switch: {
+        title: 'Đổi nhánh?',
+        body: 'File trong thư mục làm việc sẽ đổi theo nhánh mới. Davish sẽ chạy:',
+        action: 'Đổi nhánh',
+      },
+    },
+    dirtyPull: (n: number) =>
+      `Có ${n} file đã sửa chưa commit. Pull bị chặn để không lẫn với thay đổi trên server: hãy commit, stash hoặc bỏ các thay đổi đó trong Terminal trước.`,
+    dirtySwitch: (n: number) =>
+      `Có ${n} file đã sửa chưa commit. Git sẽ mang các thay đổi này sang nhánh mới, hoặc từ chối nếu chúng bị ghi đè.`,
+    running: 'Đang chạy…',
+    done: { fetch: 'Đã fetch xong.', pull: 'Đã pull xong.', switch: 'Đã đổi nhánh.' },
+    output: 'Output của git',
+    branchesTitle: 'Đổi nhánh',
+    branchesLoading: 'Đang đọc nhánh…',
+    branchCurrent: 'đang dùng',
+    branchRemote: 'trên remote',
+    install: (cmd: string) => `Cài dependency (${cmd})`,
+    installHint: 'Mở Terminal tại repo với lệnh điền sẵn, bạn tự nhấn Enter để chạy và xem output.',
+    deployKey: 'Tạo deploy key',
+    deployKeyHint:
+      'Server chưa có key được remote chấp nhận. Tạo deploy key trên server trong Khóa SSH, rồi thêm public key vào repo trên GitHub/GitLab.',
   },
   keys: {
     sections: 'Loại key',
@@ -1187,6 +1222,12 @@ export const t = {
     LOCK_WRONG_PASSWORD: 'Sai mật khẩu.',
     LOCK_TOO_MANY_ATTEMPTS: 'Nhập sai quá nhiều lần. Hãy chờ rồi thử lại.',
     LOCK_BIOMETRIC_FAILED: 'Touch ID không thành công.',
+    GIT_DIRTY: 'Repo có thay đổi chưa commit nên thao tác này bị chặn.',
+    GIT_AUTH_FAILED: 'Remote từ chối xác thực (hoặc host key của remote chưa được tin).',
+    GIT_NOT_FAST_FORWARD:
+      'Không pull thẳng được: nhánh trên server và remote đã rẽ nhánh. Cần merge hoặc rebase trong Terminal.',
+    GIT_NO_UPSTREAM: 'Nhánh này chưa theo dõi nhánh remote nào.',
+    GIT_REMOTE_FAILED: 'Không kết nối được tới remote.',
     GIT_UNSAFE_OWNER:
       'Repo này thuộc user khác nên git từ chối đọc (dubious ownership). Hãy đăng nhập bằng user sở hữu repo.',
   },

@@ -305,7 +305,18 @@
     {/if}
   {/snippet}
   {#snippet detail()}
-    <RepoInspector serverID={win.serverID} dir={repo} {status} sel={current} {diff} {diffError} />
+    <RepoInspector
+      serverID={win.serverID}
+      dir={repo}
+      {status}
+      sel={current}
+      {diff}
+      {diffError}
+      onchanged={() => {
+        void loadStatus(repo)
+        commits = null
+      }}
+    />
   {/snippet}
 </FilterShell>
 

@@ -39,6 +39,8 @@ export interface Status {
   last: Commit | null
   changes: Change[]
   truncated: boolean
+  /** Installs Node.js dependencies as the lockfile pins them; empty when none. */
+  install: string
 }
 
 /** A commit when commit is set, else file in the working tree against HEAD. */
@@ -54,6 +56,28 @@ export interface Diff {
   truncated: boolean
 }
 
+export type GitOp = 'fetch' | 'pull' | 'switch'
+
+/** The exact command of an operation, to confirm. */
+export interface Plan {
+  command: string
+  /** Tracked files with uncommitted changes; a pull is refused unless 0. */
+  dirty: number
+}
+
+/** What git printed; error is an apperr code, empty on success. */
+export interface OpResult {
+  output: string
+  error: string
+}
+
+export interface Branch {
+  name: string
+  /** Only on a remote: switching creates the local branch. */
+  remote: boolean
+  current: boolean
+}
+
 /** How many commits gitLog returns at most (git.LogPage). */
 export const LOG_PAGE = 100
 
@@ -65,3 +89,15 @@ export const gitLog = (serverID: string, dir: string, skip: number): Promise<Com
   App.GitLog(serverID, dir, skip)
 export const gitDiff = (serverID: string, req: DiffRequest): Promise<Diff> =>
   App.GitDiff(serverID, req)
+export const gitBranches = (serverID: string, dir: string): Promise<Branch[]> =>
+  App.GitBranches(serverID, dir)
+export const gitPlan = (serverID: string, dir: string, op: GitOp, branch: string): Promise<Plan> =>
+  App.GitPlan(serverID, dir, op, branch)
+/** Runs a confirmed operation; command must be the confirmed plan's. */
+export const gitRun = (
+  serverID: string,
+  dir: string,
+  op: GitOp,
+  branch: string,
+  command: string,
+): Promise<OpResult> => App.GitRun(serverID, dir, op, branch, command)

@@ -1,5 +1,15 @@
 // Demo data for the plain browser preview (vite dev), where there is no Go side.
-import type { Commit, Diff, DiffRequest, Repo, Status } from '../../lib/api/git'
+import type {
+  Branch,
+  Commit,
+  Diff,
+  DiffRequest,
+  GitOp,
+  OpResult,
+  Plan,
+  Repo,
+  Status,
+} from '../../lib/api/git'
 
 const delay = <T>(v: T, ms = 200) => new Promise<T>((r) => setTimeout(() => r(v), ms))
 
@@ -53,6 +63,7 @@ export const mockStatus = (dir: string): Promise<Status> => {
       last: commits(dir)[0] ?? null,
       changes: [],
       truncated: false,
+      install: '',
     })
   return delay({
     branch: dir === '/home/deploy/api' ? 'develop' : 'main',
@@ -74,6 +85,7 @@ export const mockStatus = (dir: string): Promise<Status> => {
       { path: '.env.example', origPath: '', index: '?', worktree: '?', conflict: false },
     ],
     truncated: false,
+    install: dir === '/var/www/shop' ? 'npm ci' : '',
   })
 }
 
@@ -107,3 +119,48 @@ export const mockDiff = (_serverID: string, req: DiffRequest): Promise<Diff> =>
       : sample,
     truncated: false,
   })
+
+export const mockBranches = (): Promise<Branch[]> =>
+  delay([
+    { name: 'develop', remote: false, current: true },
+    { name: 'main', remote: false, current: false },
+    { name: 'feature/bank-transfer', remote: true, current: false },
+  ])
+
+const commands: Record<GitOp, (branch: string) => string> = {
+  fetch: () => 'env GIT_TERMINAL_PROMPT=0 timeout 120 git fetch --prune',
+  pull: () => 'env GIT_TERMINAL_PROMPT=0 timeout 120 git pull --ff-only',
+  switch: (b) => `git switch ${b}`,
+}
+
+export const mockPlan = (
+  _serverID: string,
+  dir: string,
+  op: GitOp,
+  branch: string,
+): Promise<Plan> =>
+  delay({ command: `cd -- ${dir} && ${commands[op](branch)}`, dirty: dir === '/srv/docs' ? 0 : 4 })
+
+export const mockRun = (
+  _serverID: string,
+  dir: string,
+  op: GitOp,
+  _branch: string,
+  _command: string,
+): Promise<OpResult> =>
+  delay(
+    dir === '/var/www/shop' && op !== 'switch'
+      ? {
+          output:
+            'git@github.com: Permission denied (publickey).\nfatal: Could not read from remote repository.',
+          error: 'GIT_AUTH_FAILED',
+        }
+      : {
+          output:
+            op === 'fetch'
+              ? 'From github.com:acme/docs\n   1a2b3c4..5d6e7f8  main -> origin/main'
+              : '',
+          error: '',
+        },
+    600,
+  )
