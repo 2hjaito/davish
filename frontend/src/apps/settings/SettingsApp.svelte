@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { toUserError } from '../../lib/api/errors'
   import { t } from '../../lib/i18n/vi'
+  import { appLock, LOCK_AFTER, MIN_LOCK_PASSWORD } from '../../lib/stores/lock.svelte'
   import {
     ALERTS,
     type BackupMode,
@@ -21,6 +23,46 @@
 
   const fonts = Object.keys(MONO_FAMILIES) as MonoFont[]
   const backups: BackupMode[] = ['etc', 'always', 'never']
+  // Lock password forms: one at a time (set, change or turn off).
+  let lockForm = $state<'change' | 'disable' | null>(null)
+  let current = $state('')
+  let next = $state('')
+  let again = $state('')
+  let lockMsg = $state('')
+  let lockBusy = $state(false)
+
+  const lockProblem = $derived(
+    lockForm === 'disable'
+      ? null
+      : next.length < MIN_LOCK_PASSWORD
+        ? t.settings.lockShort(MIN_LOCK_PASSWORD)
+        : next !== again
+          ? t.settings.lockMismatch
+          : null,
+  )
+
+  function closeLockForm() {
+    lockForm = null
+    current = next = again = ''
+  }
+
+  async function saveLock(e: SubmitEvent) {
+    e.preventDefault()
+    if (lockBusy || (lockForm !== 'disable' && lockProblem)) return
+    lockBusy = true
+    lockMsg = ''
+    try {
+      if (lockForm === 'disable') await appLock.disable(current)
+      else await appLock.setPassword(current, next)
+      closeLockForm()
+      lockMsg = t.settings.lockSaved
+    } catch (err) {
+      lockMsg = toUserError(err).message
+    } finally {
+      lockBusy = false
+    }
+  }
+
   const pctRows = [
     { key: 'alertMem', label: t.settings.alertMem, hint: t.settings.alertMemHint },
     { key: 'alertDisk', label: t.settings.alertDisk, hint: t.settings.alertDiskHint },
@@ -196,6 +238,96 @@
     </div>
   </div>
 
+  <h2 class="section">{t.settings.lock}</h2>
+
+  {#if !appLock.state.enabled}
+    <form class="row lockform" onsubmit={saveLock}>
+      <small>{t.settings.lockIntro}</small>
+      <label class="field">
+        <span>{t.settings.lockNew}</span>
+        <input class="input" type="password" autocomplete="new-password" bind:value={next} />
+      </label>
+      <label class="field">
+        <span>{t.settings.lockConfirm}</span>
+        <input class="input" type="password" autocomplete="new-password" bind:value={again} />
+      </label>
+      <div class="formfoot">
+        <small class="msg">{next ? (lockProblem ?? '') : lockMsg}</small>
+        <button class="btn btn-primary" disabled={lockBusy || lockProblem !== null}
+          >{t.settings.lockEnable}</button
+        >
+      </div>
+    </form>
+  {:else}
+    <div class="row">
+      <span>
+        <strong>{t.settings.lockOn}</strong>
+        <small
+          >{appLock.state.biometric ? t.settings.lockOnTouchID : t.settings.lockOnPassword}</small
+        >
+      </span>
+      <button class="btn" onclick={() => appLock.lock()}>{t.settings.lockNow}</button>
+    </div>
+    <div class="row">
+      <span>
+        <strong>{t.settings.lockAfter}</strong>
+        <small>{t.settings.lockAfterHint}</small>
+      </span>
+      <div class="segmented" role="radiogroup" aria-label={t.settings.lockAfter}>
+        {#each LOCK_AFTER as m (m)}
+          <button
+            role="radio"
+            aria-checked={settings.lockAfter === m}
+            onclick={() => settings.set('lockAfter', m)}>{t.settings.lockAfters[m]}</button
+          >
+        {/each}
+      </div>
+    </div>
+    {#if lockForm}
+      <form class="row lockform" onsubmit={saveLock}>
+        <label class="field">
+          <span>{t.settings.lockCurrent}</span>
+          <input
+            class="input"
+            type="password"
+            autocomplete="current-password"
+            bind:value={current}
+          />
+          {#if lockForm === 'disable'}<small>{t.settings.lockDisableHint}</small>{/if}
+        </label>
+        {#if lockForm === 'change'}
+          <label class="field">
+            <span>{t.settings.lockNew}</span>
+            <input class="input" type="password" autocomplete="new-password" bind:value={next} />
+          </label>
+          <label class="field">
+            <span>{t.settings.lockConfirm}</span>
+            <input class="input" type="password" autocomplete="new-password" bind:value={again} />
+          </label>
+        {/if}
+        <div class="formfoot">
+          <small class="msg">{lockForm === 'change' && next ? (lockProblem ?? '') : lockMsg}</small>
+          <button type="button" class="btn" onclick={closeLockForm}>{t.lock.cancel}</button>
+          <button
+            class="btn {lockForm === 'disable' ? 'btn-danger' : 'btn-primary'}"
+            disabled={lockBusy || !current || (lockForm === 'change' && lockProblem !== null)}
+            >{lockForm === 'disable' ? t.settings.lockDisable : t.settings.lockSave}</button
+          >
+        </div>
+      </form>
+    {:else}
+      <div class="lockactions">
+        {#if lockMsg}<small class="msg">{lockMsg}</small>{/if}
+        <button class="btn" onclick={() => ((lockForm = 'change'), (lockMsg = ''))}
+          >{t.settings.lockChange}</button
+        >
+        <button class="btn" onclick={() => ((lockForm = 'disable'), (lockMsg = ''))}
+          >{t.settings.lockDisable}</button
+        >
+      </div>
+    {/if}
+  {/if}
+
   <h2 class="section">{t.settings.editor}</h2>
 
   <div class="row">
@@ -246,6 +378,24 @@
 
   .section {
     margin-top: 14px;
+  }
+
+  .lockform {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .formfoot,
+  .lockactions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .msg {
+    flex: 1;
   }
 
   .row {

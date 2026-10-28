@@ -1,5 +1,7 @@
 <script lang="ts">
   import Desktop from './lib/shell/Desktop.svelte'
+  import LockScreen from './lib/shell/LockScreen.svelte'
+  import { appLock } from './lib/stores/lock.svelte'
   import { settings } from './lib/stores/settings.svelte'
 
   $effect(() => {
@@ -8,6 +10,21 @@
     root.dataset.reduceMotion = String(settings.reduceMotion)
     root.style.setProperty('--wallpaper-accent', settings.wallpaperAccent)
   })
+
+  $effect(() => {
+    let off = () => {}
+    let disposed = false
+    void appLock.init().then((stop) => (disposed ? stop() : (off = stop)))
+    return () => {
+      disposed = true
+      off()
+    }
+  })
 </script>
 
-<Desktop />
+<!-- Started locked: nothing connects or loads until the first unlock.
+     Locked later: the lock only covers the desktop, which keeps running. -->
+{#if appLock.ready}
+  {#if appLock.everUnlocked}<Desktop />{/if}
+  {#if appLock.state.locked}<LockScreen />{/if}
+{/if}

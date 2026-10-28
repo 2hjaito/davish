@@ -1,4 +1,5 @@
 import { EventsOn } from '../../../wailsjs/runtime/runtime'
+import type { LockState } from './lock'
 import type { ConnState } from './servers'
 
 // Event names emitted by Go. Keep in sync with internal/events/events.go.
@@ -14,6 +15,7 @@ export const Events = {
   TransferDone: 'transfer:done',
   NotifyNew: 'notify:new',
   AuditEntry: 'audit:entry',
+  LockState: 'lock:state',
 } as const
 
 export type EventName = (typeof Events)[keyof typeof Events]
@@ -182,3 +184,4 @@ export const onTransferDone = (h: (p: TransferDone) => void) => on(Events.Transf
 export const onLogsLine = (h: (p: LogsLine) => void) => on(Events.LogsLine, h)
 export const onLogsEnd = (h: (p: LogsEnd) => void) => on(Events.LogsEnd, h)
 export const onAuditEntry = (h: (p: AuditEntry) => void) => on(Events.AuditEntry, h)
+export const onLockState = (h: (p: LockState) => void) => on(Events.LockState, h)

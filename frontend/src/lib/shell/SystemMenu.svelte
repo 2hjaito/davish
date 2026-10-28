@@ -3,6 +3,7 @@
   import { hasRuntime, quit } from '../api/runtime'
   import { t } from '../i18n/vi'
   import { servers } from '../stores/servers.svelte'
+  import { appLock } from '../stores/lock.svelte'
   import { sleep } from '../stores/sleep.svelte'
   import { ui } from '../stores/ui.svelte'
   import Icon from '../ui/Icon.svelte'
@@ -51,6 +52,13 @@
       <span class="text">{t.system.audit}</span>
     </button>
     <div class="divider"></div>
+    {#if appLock.state.enabled}
+      <button role="menuitem" class="item" onclick={() => run(() => appLock.lock())}>
+        <Icon name="lock" size={15} />
+        <span class="text">{t.system.lock}</span>
+        <span class="key">{shortcut('L')}</span>
+      </button>
+    {/if}
     <button role="menuitem" class="item" onclick={() => run(() => sleep.start())}>
       <Icon name="moon" size={15} />
       <span class="text">{t.system.sleep}</span>

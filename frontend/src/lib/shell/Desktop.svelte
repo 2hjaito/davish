@@ -8,6 +8,7 @@
   import { hasRuntime } from '../api/runtime'
   import { audit } from '../stores/audit.svelte'
   import { dockPins } from '../stores/dock.svelte'
+  import { appLock } from '../stores/lock.svelte'
   import { notifications } from '../stores/notifications.svelte'
   import { servers } from '../stores/servers.svelte'
   import { settings } from '../stores/settings.svelte'
@@ -184,11 +185,32 @@
     untrack(() => showWorkspace(id))
   })
 
+  // Locks after settings.lockAfter idle minutes. Activity is any key or
+  // pointer use; checked every 15s, which is precise enough for minutes.
+  let lastActive = Date.now()
+  const markActive = () => (lastActive = Date.now())
+  $effect(() => {
+    const timer = setInterval(() => {
+      const after = settings.lockAfter
+      if (!appLock.state.enabled || appLock.state.locked || after === 0) {
+        lastActive = Date.now()
+        return
+      }
+      if (Date.now() - lastActive > after * 60_000) appLock.lock()
+    }, 15_000)
+    return () => clearInterval(timer)
+  })
+
   function onKeyDown(e: KeyboardEvent) {
     if (!hasPrimaryModifier(e) || e.altKey) return
     // Off macOS the modifier is Ctrl, which the terminal needs (Ctrl+W,
     // Ctrl+K, Ctrl+1…): there Spotlight opens from outside the terminal.
     if (!isMac && e.target instanceof Element && e.target.closest('.xterm')) return
+    if (e.key.toLowerCase() === 'l' && !e.shiftKey) {
+      e.preventDefault()
+      appLock.lock()
+      return
+    }
     if (e.shiftKey) {
       if (e.key.toLowerCase() !== 'a') return
       e.preventDefault()
@@ -217,7 +239,14 @@
   }
 </script>
 
-<svelte:window bind:innerWidth bind:innerHeight onkeydown={onKeyDown} />
+<svelte:window
+  bind:innerWidth
+  bind:innerHeight
+  onkeydown={onKeyDown}
+  onkeydowncapture={markActive}
+  onpointerdowncapture={markActive}
+  onpointermove={markActive}
+/>
 
 <div class="desktop">
   <MenuBar />

@@ -51,6 +51,7 @@ interface SettingsData {
   alertDisk: number
   alertHold: number
   editorBackup: BackupMode
+  lockAfter: number
 }
 
 const defaults: SettingsData = {
@@ -65,6 +66,7 @@ const defaults: SettingsData = {
   alertDisk: ALERTS.defaults.disk,
   alertHold: ALERTS.defaults.hold,
   editorBackup: 'etc',
+  lockAfter: 15,
 }
 
 class Settings {
@@ -110,6 +112,11 @@ class Settings {
     return ['etc', 'always', 'never'].includes(this.#data.editorBackup)
       ? this.#data.editorBackup
       : 'etc'
+  }
+
+  /** Idle minutes before the app locks; 0 is never. */
+  get lockAfter(): number {
+    return [0, 5, 15, 30, 60].includes(this.#data.lockAfter) ? this.#data.lockAfter : 15
   }
 
   set<K extends keyof SettingsData>(key: K, value: SettingsData[K]) {
