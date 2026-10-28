@@ -14,15 +14,20 @@ import (
 	"sync"
 
 	"github.com/pkg/sftp"
-	"golang.org/x/crypto/ssh"
 
 	"davish/internal/apperr"
+	"davish/internal/audit"
 )
 
-// Conns hands out a server's live SSH client and its shared SFTP client.
+// Conns hands out a server's shared SFTP client.
 type Conns interface {
-	Client(serverID string) (*ssh.Client, error)
 	SFTP(serverID string) (*sftp.Client, error)
+}
+
+// Runner runs a shellx-built command line on a server and records it in
+// the audit log.
+type Runner interface {
+	RunLine(ctx context.Context, serverID, app, line string) (audit.Result, error)
 }
 
 // MaxRead is the largest file Read returns; bigger files go through a
@@ -62,15 +67,17 @@ type File struct {
 	Data []byte `json:"data"`
 }
 
-// Service runs file operations over each server's SFTP client.
+// Service runs file operations over each server's SFTP client, and the
+// few that need a shell (delete, archive, access check) through run.
 type Service struct {
 	conns Conns
+	run   Runner
 	log   *slog.Logger
 }
 
 // New creates the service.
-func New(conns Conns, log *slog.Logger) *Service {
-	return &Service{conns: conns, log: log}
+func New(conns Conns, run Runner, log *slog.Logger) *Service {
+	return &Service{conns: conns, run: run, log: log}
 }
 
 // Home returns the directory the SFTP session starts in, normally the

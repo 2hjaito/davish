@@ -1,4 +1,5 @@
 import { onNotifyNew, type NotifyNew } from '../api/events'
+import type { LogSource } from '../api/logs'
 import { hasRuntime } from '../api/runtime'
 import { formatPct } from '../format'
 import { t } from '../i18n/vi'
@@ -35,26 +36,55 @@ const demo: Notification[] = hasRuntime
       {
         id: 'n1',
         level: 'warn',
-        title: 'lightrag đang khởi động lại liên tục',
-        body: 'Container restart 6 lần trong 2 phút.',
+        title: 'lightrag trên tsc-vps đang khởi động lại liên tục',
+        body: 'Container đã khởi động lại 6 lần.',
         serverID: 'tsc-vps',
         at: Date.now(),
       },
     ]
 
-/** Writes the text of a notify:new payload; serverName labels the server. */
-export function describe(p: NotifyNew, serverName: string, at = Date.now()): Notification {
+/** Opens the logs of what a health alert is about. */
+export type ShowLogs = (serverID: string, source: LogSource) => void
+
+/**
+ * Writes the text of a notify:new payload; serverName labels the server.
+ * With showLogs, health alerts get a button to the failing unit's or
+ * container's logs.
+ */
+export function describe(
+  p: NotifyNew,
+  serverName: string,
+  at = Date.now(),
+  showLogs?: ShowLogs,
+): Notification {
+  const base = { id: p.id, level: p.level, serverID: p.serverID, at }
+  const target = p.target ?? ''
+  const logs = (source: LogSource) =>
+    showLogs && { label: t.notifications.showLogs, run: () => showLogs(p.serverID, source) }
+  switch (p.kind) {
+    case 'service-failed':
+      return {
+        ...base,
+        title: t.notifications.serviceFailed(target.replace(/\.service$/, ''), serverName),
+        body: t.notifications.serviceFailedBody,
+        action: logs({ kind: 'journal', target }),
+      }
+    case 'container-restarting':
+      return {
+        ...base,
+        title: t.notifications.containerRestarting(target, serverName),
+        body: t.notifications.containerRestartingBody(p.value),
+        action: logs({ kind: 'docker', target }),
+      }
+  }
   const title =
     p.kind === 'disk-high'
       ? t.notifications.diskHigh(serverName, p.mount ?? '/')
       : t.notifications.memHigh(serverName)
   return {
-    id: p.id,
-    level: p.level,
+    ...base,
     title,
     body: t.notifications.overThreshold(formatPct(p.value), formatPct(p.threshold)),
-    serverID: p.serverID,
-    at,
   }
 }
 
@@ -74,9 +104,9 @@ class Notifications {
    * Listens to notify:new; nameOf turns a server id into the name to show.
    * Returns the function that stops listening.
    */
-  init(nameOf: (serverID: string) => string): () => void {
+  init(nameOf: (serverID: string) => string, showLogs?: ShowLogs): () => void {
     if (!hasRuntime) return () => {}
-    return onNotifyNew((p) => this.add(describe(p, nameOf(p.serverID))))
+    return onNotifyNew((p) => this.add(describe(p, nameOf(p.serverID), Date.now(), showLogs)))
   }
 
   /**

@@ -13,6 +13,7 @@ export type AppId =
   | 'editor'
   | 'settings'
   | 'transfers'
+  | 'audit'
 
 export interface AppProps {
   win: WindowState

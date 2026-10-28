@@ -41,6 +41,40 @@ suite('describe', () => {
     expect(n.title).toBe('Ổ /data trên web-1 sắp đầy')
     expect(n.body).toBe('Đang dùng 88%, trên ngưỡng 85%.')
   })
+
+  it('links health alerts to the logs of what failed', () => {
+    const showLogs = vi.fn()
+    const failed = describe(
+      {
+        ...mem,
+        id: 's1:svc:nginx.service',
+        level: 'error',
+        kind: 'service-failed',
+        target: 'nginx.service',
+      },
+      'web-1',
+      0,
+      showLogs,
+    )
+    expect(failed.title).toBe('Dịch vụ nginx trên web-1 bị lỗi')
+    failed.action?.run()
+    expect(showLogs).toHaveBeenLastCalledWith('s1', { kind: 'journal', target: 'nginx.service' })
+
+    const loop = describe(
+      { ...mem, id: 's1:ctr:api', kind: 'container-restarting', target: 'api', value: 12 },
+      'web-1',
+      0,
+      showLogs,
+    )
+    expect(loop.title).toBe('api trên web-1 đang khởi động lại liên tục')
+    expect(loop.body).toBe('Container đã khởi động lại 12 lần.')
+    loop.action?.run()
+    expect(showLogs).toHaveBeenLastCalledWith('s1', { kind: 'docker', target: 'api' })
+
+    expect(
+      describe({ ...mem, kind: 'service-failed', target: 'x.service' }, 'w').action,
+    ).toBeFalsy()
+  })
 })
 
 suite('notifications', () => {

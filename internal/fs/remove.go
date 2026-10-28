@@ -1,12 +1,8 @@
 package fs
 
 import (
-	"bytes"
 	"context"
-	"errors"
 	"strings"
-
-	"golang.org/x/crypto/ssh"
 
 	"davish/internal/apperr"
 	"davish/internal/shellx"
@@ -20,6 +16,9 @@ type RemovePlan struct {
 	NonEmpty bool `json:"nonEmpty"`
 	// Command is exactly what Remove runs on the server.
 	Command string `json:"command"`
+	// Sudo is the same command with sudo, for a terminal when the server
+	// refuses for lack of rights (docs/SECURITY.md).
+	Sudo string `json:"sudo"`
 }
 
 // PlanRemove describes how p would be deleted. Remove only runs the
@@ -48,7 +47,9 @@ func (s *Service) PlanRemove(_ context.Context, serverID, p string) (RemovePlan,
 		}
 		plan.NonEmpty = len(children) > 0
 	}
-	plan.Command = removeCommand(e.Kind, plan.NonEmpty, p).String()
+	cmd := removeCommand(e.Kind, plan.NonEmpty, p)
+	plan.Command = cmd.String()
+	plan.Sudo = shellx.Cmd("sudo", cmd.Args()...).String()
 	return plan, nil
 }
 
@@ -74,48 +75,29 @@ func (s *Service) Remove(ctx context.Context, serverID, p, command string) error
 	if plan.Command != command {
 		return apperr.New(apperr.FSStale, "path changed since the delete was confirmed")
 	}
-	client, err := s.conns.Client(serverID)
+	s.log.Info("remove", "server", serverID, "app", "files", "op", "remove")
+	return s.shell(ctx, serverID, command)
+}
+
+// shell runs command through the audit runner and maps a failure to an
+// error code from its stderr.
+func (s *Service) shell(ctx context.Context, serverID, command string) error {
+	res, err := s.run.RunLine(ctx, serverID, "files", command)
 	if err != nil {
 		return err
 	}
-	// TODO(M7): record the command in audit.
-	s.log.Info("remove", "server", serverID, "app", "files", "op", "remove")
-	return run(ctx, client, command)
-}
-
-// run executes command and maps a failure to an error code from its stderr.
-func run(ctx context.Context, client *ssh.Client, command string) error {
-	sess, err := client.NewSession()
-	if err != nil {
-		return apperr.Wrap(apperr.ConnNotConnected, "cannot open a session", err)
-	}
-	defer sess.Close() //nolint:errcheck // closed either way
-
-	stop := context.AfterFunc(ctx, func() { sess.Close() }) //nolint:errcheck,gosec // unblocks Run
-	defer stop()
-
-	var stderr bytes.Buffer
-	sess.Stderr = &stderr
-	err = sess.Run(command)
-	if ctx.Err() != nil {
-		return ctx.Err()
-	}
-	if err == nil {
+	if res.Exit == 0 {
 		return nil
 	}
-	var exit *ssh.ExitError
-	if !errors.As(err, &exit) {
-		return apperr.Wrap(apperr.ConnNotConnected, "command did not finish", err)
+	if res.Exit == 127 { // the shell could not find the program
+		return apperr.New(apperr.CmdMissing, "program not installed on the server")
 	}
-	if exit.ExitStatus() == 127 { // the shell could not find the program
-		return apperr.Wrap(apperr.CmdMissing, "program not installed on the server", err)
-	}
-	msg := stderr.String()
+	msg := string(res.Stderr)
 	switch {
 	case strings.Contains(msg, "Permission denied"), strings.Contains(msg, "Operation not permitted"):
-		return apperr.Wrap(apperr.FSPermissionDenied, "permission denied", err)
+		return apperr.New(apperr.FSPermissionDenied, "permission denied")
 	case strings.Contains(msg, "No such file"):
-		return apperr.Wrap(apperr.NotFound, "no such file or directory", err)
+		return apperr.New(apperr.NotFound, "no such file or directory")
 	}
-	return apperr.Wrap(apperr.Internal, "command failed", err)
+	return apperr.New(apperr.Internal, "command failed")
 }

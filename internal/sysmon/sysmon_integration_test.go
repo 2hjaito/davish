@@ -266,3 +266,51 @@ func TestSystemInfo(t *testing.T) {
 		t.Errorf("info = %+v", info)
 	}
 }
+
+// alerts records notify:new events.
+type alerts struct {
+	mu  sync.Mutex
+	all []sysmon.Alert
+}
+
+func (r *alerts) Emit(_ string, payload any) {
+	if a, ok := payload.(sysmon.Alert); ok {
+		r.mu.Lock()
+		r.all = append(r.all, a)
+		r.mu.Unlock()
+	}
+}
+
+func (r *alerts) has(kind, target string) bool {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	for _, a := range r.all {
+		if a.Kind == kind && a.Target == target {
+			return true
+		}
+	}
+	return false
+}
+
+// The test sshd has a failed unit and a container in a restart loop from
+// boot (test/sshd, ADR 0005 and 0006); both notify on the first check.
+func TestNotifiesFailedServiceAndRestartLoop(t *testing.T) {
+	m, id := testsshd.Connect(t)
+	rec := &alerts{}
+	s := sysmon.New(m, rec, testsshd.Quiet(), sysmon.Options{})
+	t.Cleanup(s.Close)
+	s.Watch(id)
+
+	deadline := time.Now().Add(15 * time.Second)
+	for !(rec.has(sysmon.AlertServiceFailed, "davish-crash.service") &&
+		rec.has(sysmon.AlertContainerRestarting, "davish-crashloop")) {
+		if time.Now().After(deadline) {
+			rec.mu.Lock()
+			t.Fatalf("alerts = %+v", rec.all)
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	if rec.has(sysmon.AlertContainerRestarting, "davish-web") {
+		t.Error("the healthy container was reported")
+	}
+}

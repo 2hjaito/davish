@@ -31,6 +31,8 @@ type Alert struct {
 	Value     float64 `json:"value"`
 	Threshold float64 `json:"threshold"`
 	Mount     string  `json:"mount,omitempty"`
+	// Target is the unit or container of a health alert.
+	Target string `json:"target,omitempty"`
 }
 
 // rearmMargin is how far under its threshold a reading must fall before it
@@ -42,8 +44,9 @@ const rearmMargin = 5
 // Time is the server's uptime, which keeps it independent of SSH latency
 // and lets tests drive it directly.
 type alerter struct {
-	th   Thresholds
-	over map[string]*overState // "mem" or "disk:<path>"
+	th     Thresholds
+	over   map[string]*overState // "mem" or "disk:<path>"
+	health *healthWatch
 }
 
 type overState struct {
@@ -52,7 +55,7 @@ type overState struct {
 }
 
 func newAlerter(th Thresholds) *alerter {
-	return &alerter{th: th, over: map[string]*overState{}}
+	return &alerter{th: th, over: map[string]*overState{}, health: newHealthWatch()}
 }
 
 // resume forgets readings that were over but had not notified yet. It runs
@@ -65,6 +68,7 @@ func (a *alerter) resume() {
 			delete(a.over, k)
 		}
 	}
+	a.health.resume()
 }
 
 // check returns the alerts that become due with t.

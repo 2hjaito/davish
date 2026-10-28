@@ -6,6 +6,10 @@ export function AcceptHostKey(arg1, arg2) {
   return window['go']['app']['App']['AcceptHostKey'](arg1, arg2);
 }
 
+export function AuditEntries() {
+  return window['go']['app']['App']['AuditEntries']();
+}
+
 export function Connect(arg1) {
   return window['go']['app']['App']['Connect'](arg1);
 }
@@ -16,6 +20,30 @@ export function DeleteServer(arg1) {
 
 export function Disconnect(arg1) {
   return window['go']['app']['App']['Disconnect'](arg1);
+}
+
+export function DockerAct(arg1, arg2, arg3) {
+  return window['go']['app']['App']['DockerAct'](arg1, arg2, arg3);
+}
+
+export function DockerInspect(arg1, arg2) {
+  return window['go']['app']['App']['DockerInspect'](arg1, arg2);
+}
+
+export function DockerList(arg1) {
+  return window['go']['app']['App']['DockerList'](arg1);
+}
+
+export function DockerLogs(arg1, arg2) {
+  return window['go']['app']['App']['DockerLogs'](arg1, arg2);
+}
+
+export function DockerPlan(arg1, arg2) {
+  return window['go']['app']['App']['DockerPlan'](arg1, arg2);
+}
+
+export function DockerStats(arg1) {
+  return window['go']['app']['App']['DockerStats'](arg1);
 }
 
 export function FilesAccess(arg1, arg2) {
@@ -74,6 +102,14 @@ export function ListServers() {
   return window['go']['app']['App']['ListServers']();
 }
 
+export function LogsStart(arg1, arg2) {
+  return window['go']['app']['App']['LogsStart'](arg1, arg2);
+}
+
+export function LogsStop(arg1) {
+  return window['go']['app']['App']['LogsStop'](arg1);
+}
+
 export function MonitorProcesses(arg1, arg2) {
   return window['go']['app']['App']['MonitorProcesses'](arg1, arg2);
 }
@@ -96,6 +132,26 @@ export function ReorderServers(arg1) {
 
 export function SaveServer(arg1) {
   return window['go']['app']['App']['SaveServer'](arg1);
+}
+
+export function ServicesAct(arg1, arg2, arg3) {
+  return window['go']['app']['App']['ServicesAct'](arg1, arg2, arg3);
+}
+
+export function ServicesJournal(arg1, arg2) {
+  return window['go']['app']['App']['ServicesJournal'](arg1, arg2);
+}
+
+export function ServicesList(arg1) {
+  return window['go']['app']['App']['ServicesList'](arg1);
+}
+
+export function ServicesPlan(arg1, arg2) {
+  return window['go']['app']['App']['ServicesPlan'](arg1, arg2);
+}
+
+export function ServicesStatus(arg1, arg2) {
+  return window['go']['app']['App']['ServicesStatus'](arg1, arg2);
 }
 
 export function SettingsLoad() {

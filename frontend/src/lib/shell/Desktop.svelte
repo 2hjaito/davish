@@ -2,6 +2,7 @@
   import { dockApps, getApp } from '../../apps/registry'
   import type { AppDef } from '../../apps/types'
   import { hasRuntime } from '../api/runtime'
+  import { audit } from '../stores/audit.svelte'
   import { notifications } from '../stores/notifications.svelte'
   import { servers } from '../stores/servers.svelte'
   import { toUserError } from '../api/errors'
@@ -14,7 +15,7 @@
     transferNoticeId,
     transfers,
   } from '../stores/transfers.svelte'
-  import { openTransfers } from '../wm/intents.svelte'
+  import { openLogs, openTransfers } from '../wm/intents.svelte'
   import Banners from './Banners.svelte'
   import { ui } from '../stores/ui.svelte'
   import Window from '../wm/Window.svelte'
@@ -62,7 +63,9 @@
   })
 
   // Threshold alerts and other notify:new events, for the app's lifetime.
-  $effect(() => notifications.init((id) => servers.list.find((s) => s.id === id)?.name ?? id))
+  $effect(() =>
+    notifications.init((id) => servers.list.find((s) => s.id === id)?.name ?? id, openLogs),
+  )
 
   // Transfers outlive the Files window that started them: a download says
   // when it starts and how it ends, in one notification per job.
@@ -88,6 +91,8 @@
     }
     return transfers.init(notify, notify)
   })
+
+  $effect(() => audit.init())
 
   // First run: ask for a server. Otherwise open a terminal on the active one,
   // like the mockup's Terminal + Files in the browser preview.

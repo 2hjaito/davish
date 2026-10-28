@@ -3,6 +3,7 @@
   import { type Entry, filesPlanRemove, filesRemove, type RemovePlan } from '../../lib/api/files'
   import { t } from '../../lib/i18n/vi'
   import Dialog from '../../lib/ui/Dialog.svelte'
+  import NeedsRoot from '../../lib/ui/NeedsRoot.svelte'
 
   interface Props {
     serverID: string
@@ -16,6 +17,8 @@
 
   let plan = $state<RemovePlan | null>(null)
   let error = $state('')
+  /** The server refused for lack of rights: the sudo form to offer. */
+  let sudo = $state('')
   let typed = $state('')
   let busy = $state(false)
 
@@ -24,6 +27,7 @@
     const e = entry
     plan = null
     error = ''
+    sudo = ''
     typed = ''
     if (e) void loadPlan(e)
   })
@@ -60,7 +64,9 @@
       ondone(entry)
     } catch (err) {
       const ue = toUserError(err)
-      error = ue.message
+      // Without the rights, the way out is the same command with sudo.
+      if (ue.code === 'FS_PERMISSION_DENIED') sudo = plan.sudo
+      else error = ue.message
       // It changed since the user looked: show what would run now.
       if (ue.code === 'FS_STALE') void loadPlan(entry)
     } finally {
@@ -96,13 +102,19 @@
     {/if}
   {/if}
   {#if error}<p class="error" role="alert">{error}</p>{/if}
+  {#if sudo}<NeedsRoot {serverID} command={sudo} onopen={onclose} />{/if}
 
   {#snippet footer()}
     <span class="spacer"></span>
     <!-- Cancelling is the safe choice, so it has the focus. -->
     <!-- svelte-ignore a11y_autofocus -->
     <button type="button" class="btn" autofocus onclick={onclose}>{t.files.cancel}</button>
-    <button type="button" class="btn btn-danger" disabled={!ready} onclick={() => void confirm()}>
+    <button
+      type="button"
+      class="btn btn-danger"
+      disabled={!ready || sudo !== ''}
+      onclick={() => void confirm()}
+    >
       {busy ? t.files.deleting : t.files.actions.delete}
     </button>
   {/snippet}

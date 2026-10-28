@@ -4,6 +4,11 @@ export LC_ALL=C
 # Asking for GPUs only makes sense where the NVIDIA driver tools exist.
 gpu=
 command -v nvidia-smi >/dev/null 2>&1 && gpu=1
+docker=
+command -v docker >/dev/null 2>&1 && docker=1
+# Failed services and container restarts change slowly: every 15th
+# snapshot (30 seconds), starting with the first.
+n=0
 while :; do
 	echo '@@stat'
 	grep '^cpu' /proc/stat
@@ -24,6 +29,17 @@ while :; do
 	echo '@@gpu'
 	[ -n "$gpu" ] && nvidia-smi --query-gpu=index,name,utilization.gpu,memory.used,memory.total,temperature.gpu,power.draw \
 		--format=csv,noheader,nounits 2>/dev/null
+	if [ $((n % 15)) -eq 0 ]; then
+		echo '@@failed'
+		systemctl list-units --type=service --state=failed --no-legend --plain 2>/dev/null | cut -d' ' -f1
+		echo '@@containers'
+		if [ -n "$docker" ]; then
+			ids=$(docker ps -aq 2>/dev/null)
+			# Word splitting of $ids is wanted: one argument per container.
+			[ -n "$ids" ] && docker inspect --format '{{.Name}} {{.RestartCount}} {{.State.Status}}' $ids 2>/dev/null
+		fi
+	fi
+	n=$((n + 1))
 	echo '@@end'
 	sleep 2
 done

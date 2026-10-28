@@ -142,18 +142,24 @@
       })
       onchanged(done.output)
     } catch (e) {
-      failed(entry, e)
+      failed(entry, e, plan)
     }
   }
 
-  function failed(entry: Entry, e: unknown) {
+  function failed(entry: Entry, e: unknown, plan?: CompressPlan) {
+    const ue = toUserError(e)
+    // A folder we may not write to: offer the same archiver with sudo.
+    const sudo = ue.code === 'FS_PERMISSION_DENIED' ? plan?.sudo : undefined
     notifications.add({
       id: `compress-${serverID}-${entry.path}`,
       level: 'error',
       title: t.files.compressFailed(entry.name),
-      body: toUserError(e).message,
+      body: ue.message,
       serverID,
       at: Date.now(),
+      action: sudo
+        ? { label: t.common.runInTerminal, run: () => openTerminalAt(serverID, undefined, sudo) }
+        : undefined,
     })
   }
 </script>

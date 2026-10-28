@@ -1,0 +1,9 @@
+[Unit]
+Description=Davish test service that always fails
+
+[Service]
+User=nobody
+ExecStart=/bin/sh -c 'echo "error: cannot open /etc/nginx/nginx.conf" >&2; exit 1'
+
+[Install]
+WantedBy=multi-user.target

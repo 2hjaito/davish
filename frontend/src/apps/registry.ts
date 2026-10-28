@@ -1,12 +1,21 @@
 import { t } from '../lib/i18n/vi'
+import AuditApp from './audit/AuditApp.svelte'
+import DockerApp from './docker/DockerApp.svelte'
 import EditorApp from './editor/EditorApp.svelte'
 import FilesApp from './files/FilesApp.svelte'
+import LogsApp from './logs/LogsApp.svelte'
 import MonitorApp from './monitor/MonitorApp.svelte'
-import PlaceholderApp from './PlaceholderApp.svelte'
+import ServicesApp from './services/ServicesApp.svelte'
 import SettingsApp from './settings/SettingsApp.svelte'
 import TerminalApp from './terminal/TerminalApp.svelte'
 import TransfersApp from './transfers/TransfersApp.svelte'
-import { EDITOR_SIZE, TERMINAL_SIZE, TRANSFERS_SIZE } from '../lib/wm/intents.svelte'
+import {
+  AUDIT_SIZE,
+  EDITOR_SIZE,
+  LOGS_SIZE,
+  TERMINAL_SIZE,
+  TRANSFERS_SIZE,
+} from '../lib/wm/intents.svelte'
 import type { AppDef, AppId } from './types'
 
 export const apps: AppDef[] = [
@@ -39,24 +48,24 @@ export const apps: AppDef[] = [
     label: t.apps.services,
     icon: 'services',
     theme: 'light',
-    size: { w: 620, h: 420 },
-    component: PlaceholderApp,
+    size: { w: 900, h: 580 },
+    component: ServicesApp,
   },
   {
     id: 'docker',
     label: t.apps.docker,
     icon: 'docker',
     theme: 'light',
-    size: { w: 640, h: 420 },
-    component: PlaceholderApp,
+    size: { w: 900, h: 580 },
+    component: DockerApp,
   },
   {
     id: 'logs',
     label: t.apps.logs,
     icon: 'logs',
     theme: 'dark',
-    size: { w: 720, h: 440 },
-    component: PlaceholderApp,
+    size: LOGS_SIZE,
+    component: LogsApp,
   },
   {
     id: 'editor',
@@ -81,6 +90,15 @@ export const apps: AppDef[] = [
     theme: 'light',
     size: TRANSFERS_SIZE,
     component: TransfersApp,
+    dock: false,
+  },
+  {
+    id: 'audit',
+    label: t.apps.audit,
+    icon: 'list',
+    theme: 'light',
+    size: AUDIT_SIZE,
+    component: AuditApp,
     dock: false,
   },
 ]

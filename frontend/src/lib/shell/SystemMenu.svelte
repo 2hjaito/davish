@@ -5,6 +5,7 @@
   import { servers } from '../stores/servers.svelte'
   import { sleep } from '../stores/sleep.svelte'
   import Icon from '../ui/Icon.svelte'
+  import { openAudit } from '../wm/intents.svelte'
   import { wm } from '../wm/windowManager.svelte'
   import { isMac, shortcut } from './platform'
   import Popover from './Popover.svelte'
@@ -38,6 +39,10 @@
       <Icon name="settings" size={15} />
       <span class="text">{t.system.settings}</span>
       <span class="key">{shortcut(',')}</span>
+    </button>
+    <button role="menuitem" class="item" onclick={() => run(() => openAudit(servers.activeId))}>
+      <Icon name="list" size={15} />
+      <span class="text">{t.system.audit}</span>
     </button>
     <div class="divider"></div>
     <button role="menuitem" class="item" onclick={() => run(() => sleep.start())}>

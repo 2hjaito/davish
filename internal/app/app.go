@@ -11,9 +11,13 @@ import (
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 
+	"davish/internal/audit"
 	"davish/internal/conn"
+	"davish/internal/docker"
 	"davish/internal/fs"
+	"davish/internal/logs"
 	"davish/internal/store"
+	"davish/internal/svc"
 	"davish/internal/sysmon"
 	"davish/internal/term"
 	"davish/internal/transfer"
@@ -34,6 +38,10 @@ type App struct {
 	sysmon    *sysmon.Service
 	files     *fs.Service
 	transfers *transfer.Service
+	audit     *audit.Log
+	services  *svc.Service
+	docker    *docker.Service
+	logs      *logs.Service
 }
 
 // New wires the services with their config under os.UserConfigDir()/davish.
@@ -53,7 +61,12 @@ func New() (*App, error) {
 	a.conns = conn.NewManager(a.store, a.secrets, hostKeys, emitter{a}, log, conn.Options{})
 	a.terms = term.New(a.conns, emitter{a}, log)
 	a.sysmon = sysmon.New(a.conns, emitter{a}, log, sysmon.Options{})
-	a.files = fs.New(a.conns, log)
+	a.audit = audit.New(emitter{a})
+	runner := audit.NewRunner(a.conns, a.audit)
+	a.files = fs.New(a.conns, runner, log)
+	a.services = svc.New(runner)
+	a.docker = docker.New(runner)
+	a.logs = logs.New(a.conns, a.audit, emitter{a}, log)
 	if a.transfers, err = transfer.New(a.conns, emitter{a}, log, transfer.Options{}); err != nil {
 		return nil, err
 	}
@@ -69,6 +82,7 @@ func (a *App) Startup(ctx context.Context) {
 // Shutdown is called by Wails before the process exits.
 func (a *App) Shutdown(_ context.Context) {
 	a.sysmon.Close()
+	a.logs.Close()
 	a.transfers.Close()
 	a.terms.CloseAll()
 	a.conns.Close()

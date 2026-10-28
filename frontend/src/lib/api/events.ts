@@ -111,12 +111,14 @@ export interface NotifyNew {
   id: string
   level: 'info' | 'warn' | 'error'
   serverID: string
-  kind: 'mem-high' | 'disk-high'
-  /** Percent. */
+  kind: 'mem-high' | 'disk-high' | 'service-failed' | 'container-restarting'
+  /** Percent for mem-high and disk-high; total restarts for container-restarting. */
   value: number
   threshold: number
   /** Mount path, for disk-high. */
   mount?: string
+  /** The unit or container, for service-failed and container-restarting. */
+  target?: string
 }
 
 /** Total is 0 until a folder has been walked; bps is bytes per second. */
@@ -133,6 +135,34 @@ export interface TransferDone {
   error?: { code: string; message: string }
 }
 
+/** A batch of lines of one log stream, at most every 100ms. */
+export interface LogsLine {
+  streamID: string
+  lines: string[]
+}
+
+/** A log stream is over; no error when the user stopped it. */
+export interface LogsEnd {
+  streamID: string
+  error?: { code: string; message: string }
+  /** The same command with sudo, with CMD_NEEDS_ROOT. */
+  sudo?: string
+}
+
+/** A command the app ran on a server (internal/audit). */
+export interface AuditEntry {
+  id: number
+  /** ms since epoch, when it started. */
+  time: number
+  serverID: string
+  /** The app it ran for: services, docker, logs, files, editor. */
+  app: string
+  command: string
+  /** -1 when it did not finish (connection lost) or is a stream that runs until stopped. */
+  exit: number
+  durMs: number
+}
+
 function on<T>(name: EventName, handler: (payload: T) => void): Unsubscribe {
   return EventsOn(name, (payload: T) => handler(payload))
 }
@@ -146,3 +176,6 @@ export const onNotifyNew = (h: (p: NotifyNew) => void) => on(Events.NotifyNew, h
 export const onTransferProgress = (h: (p: TransferProgress) => void) =>
   on(Events.TransferProgress, h)
 export const onTransferDone = (h: (p: TransferDone) => void) => on(Events.TransferDone, h)
+export const onLogsLine = (h: (p: LogsLine) => void) => on(Events.LogsLine, h)
+export const onLogsEnd = (h: (p: LogsEnd) => void) => on(Events.LogsEnd, h)
+export const onAuditEntry = (h: (p: AuditEntry) => void) => on(Events.AuditEntry, h)

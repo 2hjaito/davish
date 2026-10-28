@@ -29,6 +29,8 @@ export interface RemovePlan extends Entry {
   nonEmpty: boolean
   /** Exactly what filesRemove runs; show it in the confirmation dialog. */
   command: string
+  /** The same command with sudo, for a terminal when the server refuses. */
+  sudo: string
 }
 
 /** Content plus the stat it was read with; larger than 10 MiB fails with FS_TOO_LARGE. */
@@ -80,6 +82,8 @@ export interface CompressPlan {
   output: string
   /** Exactly what filesCompress runs. */
   command: string
+  /** The same archiver with sudo, for a terminal when the folder is not writable. */
+  sudo: string
 }
 
 export const filesPlanCompress = (
