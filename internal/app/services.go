@@ -26,5 +26,8 @@ func (a *App) ServicesPlan(unit, action string) (svc.Plan, error) {
 // ServicesAct starts, stops or restarts a service. Stop and restart must
 // have been confirmed with the command from ServicesPlan.
 func (a *App) ServicesAct(serverID, unit, action string) error {
+	if err := a.lock.Check(); err != nil {
+		return err
+	}
 	return a.services.Act(a.ctx, serverID, unit, action)
 }

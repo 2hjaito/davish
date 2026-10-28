@@ -219,6 +219,26 @@ func TestDeleteRemovesSecrets(t *testing.T) {
 	}
 }
 
+func TestForgetSecretsKeepsServers(t *testing.T) {
+	ctx := context.Background()
+	s, kr, _ := newTestStore(t)
+	a, _ := s.Save(ctx, vps())
+	b, _ := s.Save(ctx, vps())
+	_ = s.secrets.Set(a.ID, SecretPassword, "pw-a")
+	_ = s.secrets.Set(b.ID, SecretPassphrase, "pp-b")
+	_ = kr.Set("davish", "app-lock:hash", "kept")
+
+	if err := s.ForgetSecrets(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := s.Servers(ctx); len(got) != 2 {
+		t.Errorf("servers = %d; want both kept", len(got))
+	}
+	if len(kr.m) != 1 {
+		t.Errorf("keychain = %v; want only the entry that is not a server secret", kr.m)
+	}
+}
+
 func TestReorder(t *testing.T) {
 	ctx := context.Background()
 	s, _, _ := newTestStore(t)

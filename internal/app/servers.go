@@ -41,6 +41,9 @@ func (a *App) ListServers() ([]ServerView, error) {
 
 // SaveServer adds or updates a server and stores any secret given with it.
 func (a *App) SaveServer(in ServerInput) (ServerView, error) {
+	if err := a.lock.Check(); err != nil {
+		return ServerView{}, err
+	}
 	srv, err := a.store.Save(a.ctx, in.Server)
 	if err != nil {
 		return ServerView{}, err
@@ -60,17 +63,26 @@ func (a *App) SaveServer(in ServerInput) (ServerView, error) {
 
 // DeleteServer disconnects and removes a server with its secrets.
 func (a *App) DeleteServer(id string) error {
+	if err := a.lock.Check(); err != nil {
+		return err
+	}
 	a.conns.Disconnect(id)
 	return a.store.Delete(a.ctx, id)
 }
 
 // ReorderServers sets the display order.
 func (a *App) ReorderServers(ids []string) error {
+	if err := a.lock.Check(); err != nil {
+		return err
+	}
 	return a.store.Reorder(a.ctx, ids)
 }
 
 // Connect opens the server's connection; state changes arrive as conn:status.
 func (a *App) Connect(id string) error {
+	if err := a.lock.Check(); err != nil {
+		return err
+	}
 	return a.conns.Connect(a.ctx, id)
 }
 
@@ -81,6 +93,9 @@ func (a *App) Disconnect(id string) {
 
 // AcceptHostKey trusts the host key the user approved, then connects.
 func (a *App) AcceptHostKey(id, fingerprint string) error {
+	if err := a.lock.Check(); err != nil {
+		return err
+	}
 	return a.conns.AcceptHostKey(a.ctx, id, fingerprint)
 }
 

@@ -118,9 +118,10 @@ func New(kr Keyring, bio Biometric, emit Emitter, log *slog.Logger, wipe func() 
 	return s
 }
 
-// Watch locks the app whenever the machine wakes from sleep, until Close.
-func (s *Service) Watch() {
-	ctx, cancel := context.WithCancel(context.Background())
+// Watch locks the app whenever the machine wakes from sleep, until ctx
+// ends or Close.
+func (s *Service) Watch(ctx context.Context) {
+	ctx, cancel := context.WithCancel(ctx)
 	s.cancel = cancel
 	s.wg.Add(1)
 	go func() {

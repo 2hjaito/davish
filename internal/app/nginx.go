@@ -15,11 +15,17 @@ func (a *App) NginxPlanToggle(serverID, name string, enable bool) (nginx.ToggleP
 
 // NginxToggle runs the confirmed command from NginxPlanToggle.
 func (a *App) NginxToggle(serverID, name string, enable bool, command string) error {
+	if err := a.lock.Check(); err != nil {
+		return err
+	}
 	return a.nginx.Toggle(a.ctx, serverID, name, enable, command)
 }
 
 // NginxTest runs nginx -t.
 func (a *App) NginxTest(serverID string) (nginx.TestResult, error) {
+	if err := a.lock.Check(); err != nil {
+		return nginx.TestResult{}, err
+	}
 	return a.nginx.Test(a.ctx, serverID)
 }
 
@@ -30,6 +36,9 @@ func (a *App) NginxReloadCommand() string {
 
 // NginxReload tests the configuration and reloads nginx if it passes.
 func (a *App) NginxReload(serverID string) (nginx.ReloadResult, error) {
+	if err := a.lock.Check(); err != nil {
+		return nginx.ReloadResult{}, err
+	}
 	return a.nginx.Reload(a.ctx, serverID)
 }
 

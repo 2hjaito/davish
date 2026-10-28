@@ -165,6 +165,25 @@ func (s *Store) Delete(ctx context.Context, id string) error {
 	return s.secrets.DeleteAll(id)
 }
 
+// ForgetSecrets removes the passwords and passphrases of every saved
+// server but keeps the servers: the app lock's reset (ADR 0007).
+func (s *Store) ForgetSecrets(ctx context.Context) error {
+	servers, err := s.Servers(ctx)
+	if err != nil {
+		return err
+	}
+	var errs []error
+	for _, srv := range servers {
+		if err := s.secrets.DeleteAll(srv.ID); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if len(errs) > 0 {
+		return errors.Join(errs...)
+	}
+	return nil
+}
+
 // Reorder sets the display order. ids must list every saved server once.
 func (s *Store) Reorder(ctx context.Context, ids []string) error {
 	if err := ctx.Err(); err != nil {

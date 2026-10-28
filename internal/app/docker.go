@@ -32,5 +32,8 @@ func (a *App) DockerPlan(name, action string) (docker.Plan, error) {
 // DockerAct starts, stops or restarts a container. Stop and restart must
 // have been confirmed with the command from DockerPlan.
 func (a *App) DockerAct(serverID, name, action string) error {
+	if err := a.lock.Check(); err != nil {
+		return err
+	}
 	return a.docker.Act(a.ctx, serverID, name, action)
 }

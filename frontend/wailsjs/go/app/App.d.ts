@@ -5,6 +5,7 @@ import {cron} from '../models';
 import {docker} from '../models';
 import {fs} from '../models';
 import {app} from '../models';
+import {lock} from '../models';
 import {logs} from '../models';
 import {sysmon} from '../models';
 import {nginx} from '../models';
@@ -70,6 +71,16 @@ export function FilesStat(arg1:string,arg2:string):Promise<fs.Entry>;
 export function FilesWrite(arg1:string,arg2:string,arg3:Array<number>):Promise<fs.Entry>;
 
 export function ListServers():Promise<Array<app.ServerView>>;
+
+export function LockDisable(arg1:string):Promise<void>;
+
+export function LockNow():Promise<void>;
+
+export function LockReset():Promise<void>;
+
+export function LockSetPassword(arg1:string,arg2:string):Promise<void>;
+
+export function LockState():Promise<lock.State>;
 
 export function LogsStart(arg1:string,arg2:logs.Source):Promise<logs.Started>;
 
@@ -140,3 +151,7 @@ export function TransferPlanUpload(arg1:string,arg2:string,arg3:Array<string>):P
 export function TransferReveal(arg1:string):Promise<void>;
 
 export function TransferUpload(arg1:string,arg2:string,arg3:Array<transfer.UploadRequest>):Promise<Array<transfer.Job>>;
+
+export function Unlock(arg1:string):Promise<void>;
+
+export function UnlockTouchID(arg1:string):Promise<void>;
