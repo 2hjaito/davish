@@ -1,22 +1,6 @@
+import type { Component } from 'svelte'
+
 import { t } from '../lib/i18n/vi'
-import AuditApp from './audit/AuditApp.svelte'
-import CronApp from './cron/CronApp.svelte'
-import KeysApp from './keys/KeysApp.svelte'
-import PackagesApp from './packages/PackagesApp.svelte'
-import PortsApp from './ports/PortsApp.svelte'
-import DiskApp from './disk/DiskApp.svelte'
-import SecurityApp from './security/SecurityApp.svelte'
-import DockerApp from './docker/DockerApp.svelte'
-import EditorApp from './editor/EditorApp.svelte'
-import FilesApp from './files/FilesApp.svelte'
-import GitApp from './git/GitApp.svelte'
-import LogsApp from './logs/LogsApp.svelte'
-import NginxApp from './nginx/NginxApp.svelte'
-import MonitorApp from './monitor/MonitorApp.svelte'
-import ServicesApp from './services/ServicesApp.svelte'
-import SettingsApp from './settings/SettingsApp.svelte'
-import TerminalApp from './terminal/TerminalApp.svelte'
-import TransfersApp from './transfers/TransfersApp.svelte'
 import {
   AUDIT_SIZE,
   DISK_SIZE,
@@ -27,7 +11,7 @@ import {
   TERMINAL_SIZE,
   TRANSFERS_SIZE,
 } from '../lib/wm/intents.svelte'
-import type { AppDef, AppId } from './types'
+import type { AppDef, AppId, AppProps } from './types'
 
 export const apps: AppDef[] = [
   {
@@ -36,7 +20,7 @@ export const apps: AppDef[] = [
     icon: 'terminal',
     theme: 'dark',
     size: TERMINAL_SIZE,
-    component: TerminalApp,
+    load: () => import('./terminal/TerminalApp.svelte'),
   },
   {
     id: 'files',
@@ -44,7 +28,7 @@ export const apps: AppDef[] = [
     icon: 'files',
     theme: 'light',
     size: FILES_SIZE,
-    component: FilesApp,
+    load: () => import('./files/FilesApp.svelte'),
   },
   {
     id: 'monitor',
@@ -52,7 +36,7 @@ export const apps: AppDef[] = [
     icon: 'monitor',
     theme: 'light',
     size: { w: 860, h: 580 },
-    component: MonitorApp,
+    load: () => import('./monitor/MonitorApp.svelte'),
   },
   {
     id: 'services',
@@ -60,7 +44,7 @@ export const apps: AppDef[] = [
     icon: 'services',
     theme: 'light',
     size: SERVICES_SIZE,
-    component: ServicesApp,
+    load: () => import('./services/ServicesApp.svelte'),
   },
   {
     id: 'docker',
@@ -68,7 +52,7 @@ export const apps: AppDef[] = [
     icon: 'docker',
     theme: 'light',
     size: { w: 900, h: 580 },
-    component: DockerApp,
+    load: () => import('./docker/DockerApp.svelte'),
   },
   {
     id: 'logs',
@@ -76,7 +60,7 @@ export const apps: AppDef[] = [
     icon: 'logs',
     theme: 'dark',
     size: LOGS_SIZE,
-    component: LogsApp,
+    load: () => import('./logs/LogsApp.svelte'),
   },
   {
     id: 'cron',
@@ -84,7 +68,7 @@ export const apps: AppDef[] = [
     icon: 'clock',
     theme: 'light',
     size: { w: 900, h: 580 },
-    component: CronApp,
+    load: () => import('./cron/CronApp.svelte'),
   },
   {
     id: 'nginx',
@@ -92,7 +76,7 @@ export const apps: AppDef[] = [
     icon: 'brandNginx',
     theme: 'light',
     size: { w: 920, h: 600 },
-    component: NginxApp,
+    load: () => import('./nginx/NginxApp.svelte'),
   },
   {
     id: 'keys',
@@ -100,7 +84,7 @@ export const apps: AppDef[] = [
     icon: 'key',
     theme: 'light',
     size: { w: 900, h: 580 },
-    component: KeysApp,
+    load: () => import('./keys/KeysApp.svelte'),
   },
   {
     id: 'packages',
@@ -108,7 +92,7 @@ export const apps: AppDef[] = [
     icon: 'package',
     theme: 'light',
     size: { w: 960, h: 600 },
-    component: PackagesApp,
+    load: () => import('./packages/PackagesApp.svelte'),
   },
   {
     id: 'git',
@@ -116,7 +100,7 @@ export const apps: AppDef[] = [
     icon: 'gitBranch',
     theme: 'light',
     size: { w: 1100, h: 640 },
-    component: GitApp,
+    load: () => import('./git/GitApp.svelte'),
   },
   {
     id: 'ports',
@@ -124,7 +108,7 @@ export const apps: AppDef[] = [
     icon: 'network',
     theme: 'light',
     size: { w: 900, h: 580 },
-    component: PortsApp,
+    load: () => import('./ports/PortsApp.svelte'),
   },
   {
     id: 'disk',
@@ -132,7 +116,7 @@ export const apps: AppDef[] = [
     icon: 'disk',
     theme: 'light',
     size: DISK_SIZE,
-    component: DiskApp,
+    load: () => import('./disk/DiskApp.svelte'),
   },
   {
     id: 'security',
@@ -140,7 +124,7 @@ export const apps: AppDef[] = [
     icon: 'shield',
     theme: 'light',
     size: { w: 820, h: 620 },
-    component: SecurityApp,
+    load: () => import('./security/SecurityApp.svelte'),
   },
   {
     id: 'editor',
@@ -148,7 +132,7 @@ export const apps: AppDef[] = [
     icon: 'editor',
     theme: 'light',
     size: EDITOR_SIZE,
-    component: EditorApp,
+    load: () => import('./editor/EditorApp.svelte'),
     layout: false,
   },
   {
@@ -157,7 +141,7 @@ export const apps: AppDef[] = [
     icon: 'settings',
     theme: 'light',
     size: { w: 580, h: 600 },
-    component: SettingsApp,
+    load: () => import('./settings/SettingsApp.svelte'),
     layout: false,
   },
   {
@@ -166,7 +150,7 @@ export const apps: AppDef[] = [
     icon: 'download',
     theme: 'light',
     size: TRANSFERS_SIZE,
-    component: TransfersApp,
+    load: () => import('./transfers/TransfersApp.svelte'),
     dock: false,
     layout: false,
   },
@@ -176,7 +160,7 @@ export const apps: AppDef[] = [
     icon: 'list',
     theme: 'light',
     size: AUDIT_SIZE,
-    component: AuditApp,
+    load: () => import('./audit/AuditApp.svelte'),
     dock: false,
     layout: false,
   },
@@ -187,6 +171,22 @@ export const dockApps = apps.filter((a) => a.dock !== false)
 
 export function getApp(id: string): AppDef | undefined {
   return apps.find((a) => a.id === id)
+}
+
+// Each app's code loads the first time one of its windows opens, so the
+// first screen carries only the shell (docs/PLAN.md M21).
+const loaded = new Map<AppId, Promise<Component<AppProps>>>()
+
+/** The app's component, loading its chunk once. */
+export function loadApp(app: AppDef): Promise<Component<AppProps>> {
+  let p = loaded.get(app.id)
+  if (!p) {
+    p = app.load().then((m) => m.default)
+    // A failed load (an update replaced the chunk) may be retried.
+    p.catch(() => loaded.delete(app.id))
+    loaded.set(app.id, p)
+  }
+  return p
 }
 
 export type { AppId }

@@ -1,4 +1,4 @@
-.PHONY: dev build check lint test test-integration frontend-install sshd-up sshd-down sshd-keys
+.PHONY: dev build check lint test test-integration frontend-install sshd-up sshd-down sshd-keys bench
 
 FRONTEND := frontend
 COMPOSE  := docker compose -f test/sshd/compose.yml
@@ -8,6 +8,10 @@ dev:
 
 build:
 	wails build
+
+# Start time and idle memory of the built app; run `make build` first.
+bench:
+	./scripts/bench.sh
 
 frontend-install:
 	cd $(FRONTEND) && npm ci

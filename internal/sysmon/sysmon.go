@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"golang.org/x/crypto/ssh"
@@ -60,7 +61,26 @@ type Service struct {
 	// so that watching a server again does not repeat a notification.
 	alertsMu sync.Mutex
 	alerts   map[string]*alerter
+
+	// idle slows every collector down while nobody looks at Davish; the
+	// alerts still need readings. paceMu guards paced, closed and
+	// replaced when idle changes so running collectors restart.
+	idle   atomic.Bool
+	paceMu sync.Mutex
+	paced  chan struct{}
 }
+
+// Collection pace: every 2s while Davish is on screen, every 30s while it
+// is hidden or locked, with failed units and restarts read every 30s either
+// way.
+const (
+	activeEvery = 2
+	idleEvery   = 30
+	healthSecs  = 30
+)
+
+// errRepace ends a collector so it restarts at the new pace.
+var errRepace = errors.New("pace changed")
 
 type watcher struct {
 	refs   int
@@ -78,8 +98,32 @@ func New(clients ClientSource, emit Emitter, log *slog.Logger, opts Options) *Se
 	return &Service{
 		clients: clients, emit: emit, log: log, opts: opts,
 		watchers: map[string]*watcher{}, procs: map[string]procSample{},
-		alerts: map[string]*alerter{},
+		alerts: map[string]*alerter{}, paced: make(chan struct{}),
 	}
+}
+
+// SetIdle slows collection down while Davish is hidden or locked, and
+// brings it back to full speed when it is seen again.
+func (s *Service) SetIdle(idle bool) {
+	if s.idle.Swap(idle) == idle {
+		return
+	}
+	s.paceMu.Lock()
+	close(s.paced)
+	s.paced = make(chan struct{})
+	s.paceMu.Unlock()
+}
+
+// script is collect.sh at the current pace.
+func (s *Service) script() (string, <-chan struct{}) {
+	every := activeEvery
+	if s.idle.Load() {
+		every = idleEvery
+	}
+	s.paceMu.Lock()
+	ch := s.paced
+	s.paceMu.Unlock()
+	return fmt.Sprintf("every=%d\nhealthEvery=%d\n", every, max(1, healthSecs/every)) + collectScript, ch
 }
 
 // SetThresholds changes when RAM and disk readings notify, for every
@@ -141,7 +185,11 @@ func (s *Service) Close() {
 func (s *Service) run(ctx context.Context, serverID string) {
 	for {
 		if client, err := s.clients.Client(serverID); err == nil {
-			if err := s.collect(ctx, serverID, client); err != nil && ctx.Err() == nil {
+			err := s.collect(ctx, serverID, client)
+			if errors.Is(err, errRepace) {
+				continue
+			}
+			if err != nil && ctx.Err() == nil {
 				s.log.Warn("sysmon collector ended", "server", serverID, "err", err)
 			}
 		}
@@ -164,7 +212,8 @@ func (s *Service) collect(ctx context.Context, serverID string, client *ssh.Clie
 
 	// The script goes in on stdin, so no command line is built and the
 	// user's login shell (fish, csh…) does not matter.
-	sess.Stdin = strings.NewReader(collectScript)
+	script, repace := s.script()
+	sess.Stdin = strings.NewReader(script)
 	stdout, err := sess.StdoutPipe()
 	if err != nil {
 		return fmt.Errorf("stdout pipe: %w", err)
@@ -172,14 +221,40 @@ func (s *Service) collect(ctx context.Context, serverID string, client *ssh.Clie
 	if err := sess.Start("sh -s"); err != nil {
 		return fmt.Errorf("start collector: %w", err)
 	}
-	stop := context.AfterFunc(ctx, func() { sess.Close() }) //nolint:errcheck,gosec // unblocks the reader
+	// Reading goes through a pipe this side can close: closing the session
+	// alone waits for the server, which may be in a 30s sleep.
+	pr, pw := io.Pipe()
+	go func() {
+		_, err := io.Copy(pw, stdout)
+		pw.CloseWithError(err) //nolint:errcheck,gosec // always nil
+	}()
+	abort := func() {
+		pw.Close()               //nolint:errcheck,gosec // unblocks the reader now
+		sess.Signal(ssh.SIGTERM) //nolint:errcheck,gosec // older sshd ignore it; SIGPIPE ends it later
+		sess.Close()             //nolint:errcheck,gosec // closed either way
+	}
+	stop := context.AfterFunc(ctx, abort)
 	defer stop()
+	var repaced atomic.Bool
+	done := make(chan struct{})
+	defer close(done)
+	go func() {
+		select {
+		case <-repace:
+			repaced.Store(true)
+			abort() // restarts at the new pace
+		case <-done:
+		}
+	}()
 
 	s.resumeAlerts(serverID)
-	r := NewReader(stdout)
+	r := NewReader(pr)
 	var prev *Snapshot
 	for {
 		snap, err := r.Next()
+		if err != nil && repaced.Load() {
+			return errRepace
+		}
 		if errors.Is(err, io.EOF) {
 			return errors.New("collector output ended")
 		}

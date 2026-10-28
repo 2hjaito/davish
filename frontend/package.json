@@ -11,7 +11,8 @@
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
     "test": "vitest run",
-    "icons": "node scripts/gen-icons.mjs"
+    "icons": "node scripts/gen-icons.mjs",
+    "budget": "node scripts/bundle-budget.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

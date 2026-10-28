@@ -5,6 +5,9 @@ import * as App from '../../../wailsjs/go/app/App'
 export const monitorWatch = (serverID: string): Promise<void> => App.MonitorWatch(serverID)
 export const monitorUnwatch = (serverID: string): Promise<void> => App.MonitorUnwatch(serverID)
 
+/** Slows collection while nobody looks at Davish; alerts keep coming, less often. */
+export const monitorSetIdle = (idle: boolean): Promise<void> => App.MonitorSetIdle(idle)
+
 export type ProcessSort = 'cpu' | 'mem'
 
 export interface Process {

@@ -24,6 +24,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 - Kính lúp trên menu bar và mục `Tìm kiếm…` trong menu hệ thống mở Spotlight.
 
 ### Thay đổi
+- Nhẹ hơn: mỗi app chỉ tải code khi mở lần đầu (JS ban đầu khoảng 96 kB gzip); CI chặn bundle vượt ngân sách. Khi Davish bị ẩn, khóa hoặc ngủ màn hình, chỉ số đọc 30 giây một lần thay vì 2 giây, cảnh báo vẫn chạy.
 - Mở, đóng, thu nhỏ và khôi phục cửa sổ bằng hiệu ứng Genie như macOS: cửa sổ chảy ra từ icon của app trên Dock và chảy về đó.
 
 ### Sửa

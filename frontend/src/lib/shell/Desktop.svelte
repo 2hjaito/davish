@@ -1,9 +1,9 @@
 <script lang="ts">
   import { untrack } from 'svelte'
 
-  import { apps, getApp } from '../../apps/registry'
+  import { apps, getApp, loadApp } from '../../apps/registry'
   import type { AppDef } from '../../apps/types'
-  import { monitorSetThresholds } from '../api/monitor'
+  import { monitorSetIdle, monitorSetThresholds } from '../api/monitor'
   import { nginxCheckCerts } from '../api/nginx'
   import { packagesCheckSecurity } from '../api/packages'
   import { exitDemo, hasRuntime, isDemo } from '../api/runtime'
@@ -13,6 +13,7 @@
   import { notifications } from '../stores/notifications.svelte'
   import { servers } from '../stores/servers.svelte'
   import { settings } from '../stores/settings.svelte'
+  import { sleep } from '../stores/sleep.svelte'
   import { toUserError } from '../api/errors'
   import { transferReveal } from '../api/transfer'
   import { t } from '../i18n/vi'
@@ -141,6 +142,14 @@
     void monitorSetThresholds(settings.alertMem, settings.alertDisk, settings.alertHold)
   })
 
+  // Nobody looks at Davish while it is hidden, minimized, locked or asleep:
+  // metrics are then read every 30s instead of every 2s, enough for alerts.
+  let hidden = $state(document.hidden)
+  $effect(() => {
+    if (!hasRuntime) return
+    void monitorSetIdle(hidden || appLock.state.locked || sleep.active)
+  })
+
   // TLS certificates nearing expiry notify once a server connects; checked
   // once per server for the app's lifetime (Go keeps what it notified).
   // eslint-disable-next-line svelte/prefer-svelte-reactivity -- bookkeeping, never rendered
@@ -247,6 +256,7 @@
   onpointermove={markActive}
   onpointerover={tooltip}
 />
+<svelte:document onvisibilitychange={() => (hidden = document.hidden)} />
 
 <div class="desktop">
   <MenuBar />
@@ -270,7 +280,9 @@
       <!-- Other workspaces stay mounted so their state survives switching. -->
       <div class="workspace" class:hidden={win.serverID !== serverID}>
         <Window {win} theme={app.theme} focused={focused?.id === win.id}>
-          <app.component {win} />
+          {#await loadApp(app) then AppView}
+            <AppView {win} />
+          {/await}
         </Window>
       </div>
     {/if}

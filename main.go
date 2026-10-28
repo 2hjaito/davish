@@ -2,9 +2,13 @@
 package main
 
 import (
+	"context"
 	"embed"
+	"fmt"
 	"log"
+	"os"
 	"runtime"
+	"time"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/menu"
@@ -20,6 +24,7 @@ import (
 var assets embed.FS
 
 func main() {
+	start := time.Now()
 	a, err := app.New()
 	if err != nil {
 		log.Fatal(err)
@@ -52,7 +57,13 @@ func main() {
 		},
 		ErrorFormatter: apperr.Format,
 		OnStartup:      a.Startup,
-		OnShutdown:     a.Shutdown,
+		// make bench reads this line to time the start; nothing else does.
+		OnDomReady: func(context.Context) {
+			if os.Getenv("DAVISH_BENCH") != "" {
+				fmt.Fprintf(os.Stderr, "davish-bench ready_ms=%d\n", time.Since(start).Milliseconds())
+			}
+		},
+		OnShutdown: a.Shutdown,
 		Bind: []any{
 			a,
 		},
