@@ -4,6 +4,7 @@
   import { t } from '../i18n/vi'
   import { servers } from '../stores/servers.svelte'
   import { sleep } from '../stores/sleep.svelte'
+  import { ui } from '../stores/ui.svelte'
   import Icon from '../ui/Icon.svelte'
   import { openAudit } from '../wm/intents.svelte'
   import { wm } from '../wm/windowManager.svelte'
@@ -35,6 +36,11 @@
   </button>
 
   <Popover {open} onclose={() => (open = false)} label={t.menubar.system} width={240}>
+    <button role="menuitem" class="item" onclick={() => run(() => (ui.spotlight = true))}>
+      <Icon name="search" size={15} />
+      <span class="text">{t.system.search}</span>
+      <span class="key">{shortcut('K')}</span>
+    </button>
     <button role="menuitem" class="item" onclick={() => run(openSettings)}>
       <Icon name="settings" size={15} />
       <span class="text">{t.system.settings}</span>

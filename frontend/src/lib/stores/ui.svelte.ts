@@ -1,8 +1,14 @@
-/** Which shell-level dialog is open. */
+/** Which shell-level dialog or overlay is open. */
 type ServerDialog = { mode: 'add' } | { mode: 'edit'; id: string } | null
 
 class Ui {
   serverDialog = $state<ServerDialog>(null)
+  spotlight = $state(false)
+  launchpad = $state(false)
+
+  toggleSpotlight() {
+    this.spotlight = !this.spotlight
+  }
 
   addServer() {
     this.serverDialog = { mode: 'add' }

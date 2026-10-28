@@ -73,3 +73,19 @@ export function zoneRect(zone: SnapZone, area: Rect): Rect {
       return { x: area.x + half, y: area.y, w: area.w - half, h: area.h }
   }
 }
+
+/** A box as DOMRect gives it. */
+export interface Box {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+/** How far b's centre lies from a's, e.g. a window's from its dock tile. */
+export function centerOffset(a: Box, b: Box): { dx: number; dy: number } {
+  return {
+    dx: b.x + b.width / 2 - (a.x + a.width / 2),
+    dy: b.y + b.height / 2 - (a.y + a.height / 2),
+  }
+}

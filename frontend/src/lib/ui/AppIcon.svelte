@@ -3,7 +3,7 @@
   import Icon from './Icon.svelte'
 
   interface Props {
-    id: AppId
+    id: AppId | 'launchpad'
     size?: number
   }
 
@@ -206,5 +206,52 @@
       <circle cx="32" cy="32" r="16" />
     </g>
     <circle cx="32" cy="32" r="6.5" fill="#dfe1e7" />
+  {:else if id === 'transfers'}
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#5ec8ff" />
+        <stop offset="1" stop-color="#1268e0" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    <g fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M23 13v34M13 37l10 10 10-10" />
+      <path d="M41 51V17M31 27l10-10 10 10" opacity="0.75" />
+    </g>
+  {:else if id === 'audit'}
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffcf5c" />
+        <stop offset="1" stop-color="#e8860c" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    <rect x="14" y="12" width="36" height="44" rx="6" fill="#8a4a00" opacity="0.25" />
+    <rect x="14" y="10" width="36" height="44" rx="6" fill="#fff" />
+    <rect x="24" y="6" width="16" height="9" rx="3" fill="#5a3300" />
+    {#each [22, 31, 40] as y (y)}
+      <path
+        d="M20 {y + 2}l2.5 2.5 4.5-5"
+        fill="none"
+        stroke="#e8860c"
+        stroke-width="2.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <rect x="30" {y} width="14" height="4.5" rx="2.25" fill="#f2d9b3" />
+    {/each}
+  {:else if id === 'launchpad'}
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#8a93a8" />
+        <stop offset="1" stop-color="#3d4456" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    {#each [['#ff6b6b', '#ffc83d', '#4cd97b'], ['#3dc2ff', '#b18bff', '#ff5c8f'], ['#ffffff', '#5ec8ff', '#ffa23d']] as row, r (r)}
+      {#each row as color, c (c)}
+        <rect x={12 + c * 15} y={12 + r * 15} width="11" height="11" rx="3.5" fill={color} />
+      {/each}
+    {/each}
   {/if}
 </svg>

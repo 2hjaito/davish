@@ -1,12 +1,13 @@
 <script lang="ts">
   import { untrack } from 'svelte'
 
-  import { dockApps, getApp } from '../../apps/registry'
+  import { apps, getApp } from '../../apps/registry'
   import type { AppDef } from '../../apps/types'
   import { monitorSetThresholds } from '../api/monitor'
   import { nginxCheckCerts } from '../api/nginx'
   import { hasRuntime } from '../api/runtime'
   import { audit } from '../stores/audit.svelte'
+  import { dockPins } from '../stores/dock.svelte'
   import { notifications } from '../stores/notifications.svelte'
   import { servers } from '../stores/servers.svelte'
   import { settings } from '../stores/settings.svelte'
@@ -27,6 +28,8 @@
   import { wm } from '../wm/windowManager.svelte'
   import Spotlight from '../spotlight/Spotlight.svelte'
   import Dock from './Dock.svelte'
+  import { dockItems } from './dockItems'
+  import Launchpad from './Launchpad.svelte'
   import Welcome from './Welcome.svelte'
   import MenuBar from './MenuBar.svelte'
   import HostKeyDialog from './HostKeyDialog.svelte'
@@ -56,6 +59,20 @@
 
   function launch(app: AppDef): boolean {
     return wm.openOrFocus(app.id, serverID, { title: app.label, size: app.size })
+  }
+
+  const dockTiles = $derived([
+    { id: 'launchpad' as const, label: t.launchpad.label },
+    ...dockItems(apps, dockPins.ids, (id) => wm.isOpen(id, serverID)),
+  ])
+
+  function launchTile(id: AppDef['id'] | 'launchpad'): boolean {
+    if (id === 'launchpad') {
+      ui.launchpad = !ui.launchpad
+      return false
+    }
+    const app = getApp(id)
+    return app ? launch(app) : false
   }
 
   // Load saved servers and follow connection events for the app's lifetime.
@@ -167,16 +184,20 @@
     untrack(() => showWorkspace(id))
   })
 
-  let spotlight = $state(false)
-
   function onKeyDown(e: KeyboardEvent) {
-    if (!hasPrimaryModifier(e) || e.altKey || e.shiftKey) return
+    if (!hasPrimaryModifier(e) || e.altKey) return
     // Off macOS the modifier is Ctrl, which the terminal needs (Ctrl+W,
     // Ctrl+K, Ctrl+1…): there Spotlight opens from outside the terminal.
     if (!isMac && e.target instanceof Element && e.target.closest('.xterm')) return
+    if (e.shiftKey) {
+      if (e.key.toLowerCase() !== 'a') return
+      e.preventDefault()
+      ui.launchpad = !ui.launchpad
+      return
+    }
     if (e.key.toLowerCase() === 'k') {
       e.preventDefault()
-      spotlight = !spotlight
+      ui.toggleSpotlight()
       return
     }
     const key = e.key.toLowerCase()
@@ -200,7 +221,8 @@
 
 <div class="desktop">
   <MenuBar />
-  <Spotlight open={spotlight} onclose={() => (spotlight = false)} />
+  <Spotlight open={ui.spotlight} onclose={() => (ui.spotlight = false)} />
+  <Launchpad open={ui.launchpad} onclose={() => (ui.launchpad = false)} onlaunch={launch} />
 
   {#if wm.snapPreview}
     {@const p = wm.snapPreview}
@@ -229,9 +251,9 @@
     <Welcome onadd={() => ui.addServer()} />
   {:else}
     <Dock
-      apps={dockApps}
+      apps={dockTiles}
       isOpen={(id) => wm.isOpen(id, serverID)}
-      onlaunch={launch}
+      onlaunch={launchTile}
       bind:height={dockHeight}
     />
   {/if}
