@@ -211,6 +211,12 @@ export const t = {
     done: { fetch: 'Đã fetch xong.', pull: 'Đã pull xong.', switch: 'Đã đổi nhánh.' },
     output: 'Output của git',
     branchesTitle: 'Đổi nhánh',
+    refKinds: {
+      head: 'Nhánh đang dùng',
+      local: 'Nhánh trên server',
+      remote: 'Nhánh remote',
+      tag: 'Tag',
+    } as Record<string, string>,
     branchesLoading: 'Đang đọc nhánh…',
     branchCurrent: 'đang dùng',
     branchRemote: 'trên remote',

@@ -111,7 +111,7 @@ export const apps: AppDef[] = [
     label: t.apps.git,
     icon: 'gitBranch',
     theme: 'light',
-    size: { w: 980, h: 620 },
+    size: { w: 1100, h: 640 },
     component: GitApp,
   },
   {

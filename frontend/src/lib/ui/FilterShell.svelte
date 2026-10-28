@@ -40,6 +40,8 @@
     /** Under the list: a count, or an error. */
     footer: string
     error?: string
+    /** Share of the width the list takes, such as Git's wider history. */
+    listWidth?: string
     onrefresh: () => void
   }
 
@@ -58,6 +60,7 @@
     actions,
     footer,
     error = '',
+    listWidth = '42%',
     onrefresh,
   }: Props = $props()
 
@@ -121,7 +124,7 @@
       {@render placeholder()}
     {:else}
       <div class="split">
-        <div class="list">
+        <div class="list" style:width={listWidth}>
           {#if error}<p class="error"><Icon name="warning" size={13} /> {error}</p>{/if}
           {@render list()}
           <p class="footer">{footer}</p>
@@ -308,7 +311,6 @@
   }
 
   .list {
-    width: 42%;
     min-width: 220px;
     display: flex;
     flex-direction: column;

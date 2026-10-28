@@ -6,6 +6,14 @@ export interface Repo {
   name: string
 }
 
+export type RefKind = 'head' | 'local' | 'remote' | 'tag'
+
+/** A branch or tag pointing at a commit; 'head' is the one checked out. */
+export interface Ref {
+  name: string
+  kind: RefKind
+}
+
 export interface Commit {
   hash: string
   short: string
@@ -13,6 +21,9 @@ export interface Commit {
   /** Unix seconds. */
   time: number
   subject: string
+  /** Filled by gitLog only, to draw the graph. */
+  parents: string[]
+  refs: Ref[]
 }
 
 /**
@@ -86,7 +97,7 @@ export const gitFind = (serverID: string, extra: string[]): Promise<Repo[]> =>
 export const gitStatus = (serverID: string, dir: string): Promise<Status> =>
   App.GitStatus(serverID, dir) as Promise<Status>
 export const gitLog = (serverID: string, dir: string, skip: number): Promise<Commit[]> =>
-  App.GitLog(serverID, dir, skip)
+  App.GitLog(serverID, dir, skip) as Promise<Commit[]>
 export const gitDiff = (serverID: string, req: DiffRequest): Promise<Diff> =>
   App.GitDiff(serverID, req)
 export const gitBranches = (serverID: string, dir: string): Promise<Branch[]> =>

@@ -32,16 +32,59 @@ const subjects = [
 const authors = ['Trần Minh', 'Lê Hoa', 'deploy-bot']
 const now = 1793170000
 
+// A history with a long-lived develop branch above main, and on main a
+// feature branch merged every few commits.
 function commits(dir: string): Commit[] {
   const seed = dir.length
-  return Array.from({ length: 140 }, (_, i) => {
-    const hash = ((seed * 7919 + i * 104729) >>> 0).toString(16).padStart(8, '0').repeat(5)
+  const ids: [id: string, parents: string[], refs: Commit['refs']][] = [
+    [
+      'd2',
+      ['d1'],
+      [
+        { name: 'develop', kind: 'local' },
+        { name: 'origin/develop', kind: 'remote' },
+      ],
+    ],
+    ['d1', ['m0'], []],
+  ]
+  for (let b = 0; b < 28; b++) {
+    const next = b < 27 ? [`m${b + 1}`] : []
+    ids.push(
+      [
+        `m${b}`,
+        [`a${b}`, `f2${b}`],
+        b === 0
+          ? [
+              { name: 'main', kind: 'head' },
+              { name: 'origin/main', kind: 'remote' },
+            ]
+          : [],
+      ],
+      [`f2${b}`, [`f1${b}`], []],
+      [`a${b}`, [`b${b}`], []],
+      [`f1${b}`, [`b${b}`], []],
+      [`b${b}`, next, b % 3 === 1 ? [{ name: `v1.${9 - Math.floor(b / 3)}.0`, kind: 'tag' }] : []],
+    )
+  }
+  const hashOf = new Map(
+    ids.map(([id], i) => [
+      id,
+      ((seed * 7919 + i * 104729) >>> 0).toString(16).padStart(8, '0').repeat(5),
+    ]),
+  )
+  return ids.map(([id, parents, refs], i) => {
+    const hash = hashOf.get(id) ?? ''
+    const merge = parents.length > 1
     return {
       hash,
       short: hash.slice(0, 7),
       author: authors[(i + seed) % authors.length] ?? '',
       time: now - i * 9_000 - seed * 300,
-      subject: subjects[(i + seed) % subjects.length] ?? '',
+      subject: merge
+        ? `Merge branch 'feature/${subjects[i % subjects.length]?.split(':')[0] ?? 'x'}'`
+        : (subjects[(i + seed) % subjects.length] ?? ''),
+      parents: parents.map((p) => hashOf.get(p) ?? ''),
+      refs,
     }
   })
 }

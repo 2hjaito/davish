@@ -124,6 +124,15 @@
   --chart-crosshair: rgba(0, 0, 0, 0.25);
   /* Ring around chart dots so they stay readable where lines cross. */
   --chart-surface: #fff;
+
+  /* Lanes of the Git commit graph, cycled by lane. */
+  --graph-1: #2a78d6;
+  --graph-2: #eb6834;
+  --graph-3: #1baf7a;
+  --graph-4: #9b59d6;
+  --graph-5: #d6455a;
+  --graph-6: #c99a06;
+  --graph-7: #14a3a8;
   --card-bg: rgba(0, 0, 0, 0.025);
   --card-radius: 12px;
 

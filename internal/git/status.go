@@ -35,6 +35,23 @@ type Commit struct {
 	Author  string `json:"author"`
 	Time    int64  `json:"time"` // unix seconds
 	Subject string `json:"subject"`
+	// Parents and Refs are filled by Log only, to draw the graph.
+	Parents []string `json:"parents"`
+	Refs    []Ref    `json:"refs"`
+}
+
+// Kinds of refs pointing at a commit.
+const (
+	RefHead   = "head" // the branch checked out, or HEAD itself when detached
+	RefLocal  = "local"
+	RefRemote = "remote"
+	RefTag    = "tag"
+)
+
+// Ref is a branch or tag pointing at a commit.
+type Ref struct {
+	Name string `json:"name"`
+	Kind string `json:"kind"`
 }
 
 // Change is a file that differs from the last commit. Index and Worktree
@@ -168,7 +185,55 @@ func parseCommit(line, sep string) *Commit {
 		return nil
 	}
 	t, _ := strconv.ParseInt(f[3], 10, 64)
-	return &Commit{Hash: f[0], Short: f[1], Author: f[2], Time: t, Subject: f[4]}
+	return &Commit{Hash: f[0], Short: f[1], Author: f[2], Time: t, Subject: f[4], Parents: []string{}, Refs: []Ref{}}
+}
+
+// parseLogRecord reads one record of logLine: hash, short hash, parents,
+// author, time, decorations, subject.
+func parseLogRecord(r string) *Commit {
+	f := strings.SplitN(strings.Trim(r, "\r\n"), "\x1f", 7)
+	if len(f) < 7 || f[0] == "" {
+		return nil
+	}
+	c := parseCommit(strings.Join([]string{f[0], f[1], f[3], f[4], f[6]}, "\x1f"), "\x1f")
+	if c == nil {
+		return nil
+	}
+	c.Parents = append(c.Parents, strings.Fields(f[2])...)
+	c.Refs = parseRefs(f[5])
+	return c
+}
+
+// parseRefs reads %D with --decorate=full: "HEAD -> refs/heads/main,
+// refs/remotes/origin/main, tag: refs/tags/v1". origin/HEAD only aliases
+// a remote branch and is left out.
+func parseRefs(d string) []Ref {
+	refs := []Ref{}
+	for _, part := range strings.Split(d, ", ") {
+		part = strings.TrimSpace(part)
+		head := false
+		if rest, ok := strings.CutPrefix(part, "HEAD -> "); ok {
+			part, head = rest, true
+		}
+		switch {
+		case part == "":
+		case part == "HEAD":
+			refs = append(refs, Ref{Name: "HEAD", Kind: RefHead})
+		case strings.HasPrefix(part, "tag: "):
+			refs = append(refs, Ref{Name: strings.TrimPrefix(strings.TrimPrefix(part, "tag: "), "refs/tags/"), Kind: RefTag})
+		case strings.HasPrefix(part, "refs/heads/"):
+			kind := RefLocal
+			if head {
+				kind = RefHead
+			}
+			refs = append(refs, Ref{Name: strings.TrimPrefix(part, "refs/heads/"), Kind: kind})
+		case strings.HasPrefix(part, "refs/remotes/"):
+			if name := strings.TrimPrefix(part, "refs/remotes/"); !strings.HasSuffix(name, "/HEAD") {
+				refs = append(refs, Ref{Name: name, Kind: RefRemote})
+			}
+		}
+	}
+	return refs
 }
 
 // parseStatus reads git status --porcelain=v2 --branch -z.
@@ -216,13 +281,17 @@ func parseStatus(out []byte) Status {
 	return st
 }
 
-// logLine lists commits from HEAD, fields split by US and records by RS.
+// logLine lists the commits of every branch and tag, newest first with
+// children before parents, fields split by US and records by RS. The
+// stash is not history, so it is left out.
 func logLine(dir string, skip int) string {
-	return readOnly + gitIn(dir, "log", "--format=%H%x1f%h%x1f%an%x1f%at%x1f%s%x1e",
+	return readOnly + gitIn(dir, "log", "--exclude=refs/stash", "--all", "--date-order", "--decorate=full",
+		"--format=%H%x1f%h%x1f%P%x1f%an%x1f%at%x1f%D%x1f%s%x1e",
 		"--max-count="+strconv.Itoa(LogPage), "--skip="+strconv.Itoa(skip))
 }
 
-// Log lists up to LogPage commits from HEAD, after skipping skip of them.
+// Log lists up to LogPage commits of all branches, after skipping skip
+// of them, with their parents and refs to draw the graph.
 func (s *Service) Log(ctx context.Context, serverID, dir string, skip int) ([]Commit, error) {
 	dir, err := checkDir(dir)
 	if err != nil {
@@ -244,7 +313,7 @@ func (s *Service) Log(ctx context.Context, serverID, dir string, skip int) ([]Co
 	}
 	commits := []Commit{}
 	for _, r := range strings.Split(string(res.Stdout), "\x1e") {
-		if c := parseCommit(strings.TrimLeft(r, "\n"), "\x1f"); c != nil {
+		if c := parseLogRecord(r); c != nil {
 			commits = append(commits, *c)
 		}
 	}
@@ -278,7 +347,8 @@ func diffArgs(r DiffRequest) ([]string, error) {
 		if !hash.MatchString(r.Commit) {
 			return nil, apperr.New(apperr.InvalidInput, "not a commit hash")
 		}
-		return append(append([]string{"show", "--format="}, base...), r.Commit, "--"), nil
+		// A merge shows what it brought into the first parent's line.
+		return append(append([]string{"show", "--format=", "-m", "--first-parent"}, base...), r.Commit, "--"), nil
 	case r.File == "" || strings.ContainsAny(r.File, "\n\r\x00") || path.IsAbs(r.File):
 		return nil, apperr.New(apperr.InvalidInput, "file must be a path inside the repository")
 	case r.Untracked:

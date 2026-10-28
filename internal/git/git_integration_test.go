@@ -79,6 +79,11 @@ echo three >> 'a file.txt'; echo new > untracked.txt`)
 	if err != nil || len(commits) != 2 || commits[1].Subject != "first commit" {
 		t.Fatalf("log %+v, %v", commits, err)
 	}
+	if len(commits[0].Parents) != 1 || commits[0].Parents[0] != commits[1].Hash ||
+		len(commits[0].Refs) != 1 || commits[0].Refs[0] != (git.Ref{Name: "main", Kind: git.RefHead}) ||
+		len(commits[1].Refs) != 1 || commits[1].Refs[0] != (git.Ref{Name: "origin/main", Kind: git.RefRemote}) {
+		t.Fatalf("graph %+v", commits)
+	}
 
 	d, err := s.Diff(ctx, id, git.DiffRequest{Dir: dir, File: "a file.txt"})
 	if err != nil || !strings.Contains(d.Text, "+three") || strings.Contains(d.Text, "+two") {

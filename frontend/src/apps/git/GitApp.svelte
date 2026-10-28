@@ -21,6 +21,7 @@
   import type { AppProps } from '../types'
   import { backend } from './backend'
   import FoldersDialog from './FoldersDialog.svelte'
+  import GitGraph from './GitGraph.svelte'
   import RepoInspector, { type Selected } from './RepoInspector.svelte'
 
   type Tab = 'changes' | 'history'
@@ -101,7 +102,7 @@
       note: date(c.time),
       title: `${c.short} · ${c.author} · ${dateTime(c.time)}`,
       sel: { kind: 'commit', commit: c },
-      text: `${c.subject} ${c.hash} ${c.author}`,
+      text: `${c.subject} ${c.hash} ${c.author} ${c.refs.map((r) => r.name).join(' ')}`,
     }))
   })
 
@@ -240,6 +241,7 @@
   ready={connected && (repos?.length ?? 0) > 0}
   {footer}
   {error}
+  listWidth={tab === 'history' ? '58%' : '42%'}
   onrefresh={refresh}
 >
   {#snippet actions()}
@@ -283,21 +285,30 @@
       {/each}
     </div>
     {#if tab === 'changes' && status?.truncated}<p class="warn">{t.git.truncated}</p>{/if}
-    <StatusList
-      items={shown}
-      {selected}
-      label={t.git.tabs[tab]}
-      empty={query
-        ? t.git.noMatch
-        : status === null && !error
-          ? t.git.loading
-          : tab === 'changes'
-            ? t.git.noChanges
-            : commits === null
-              ? t.git.loading
-              : t.git.noCommits}
-      onselect={(k) => (selected = k)}
-    />
+    {#if tab === 'history' && commits}
+      <GitGraph
+        commits={shown.flatMap((r) => (r.sel.kind === 'commit' ? [r.sel.commit] : []))}
+        graph={!query.trim()}
+        selected={selected?.startsWith('c:') ? selected.slice(2) : null}
+        label={t.git.tabs.history}
+        empty={query ? t.git.noMatch : t.git.noCommits}
+        onselect={(h) => (selected = `c:${h}`)}
+      />
+    {:else}
+      <StatusList
+        items={shown}
+        {selected}
+        label={t.git.tabs[tab]}
+        empty={query
+          ? t.git.noMatch
+          : status === null && !error
+            ? t.git.loading
+            : tab === 'changes'
+              ? t.git.noChanges
+              : t.git.loading}
+        onselect={(k) => (selected = k)}
+      />
+    {/if}
     {#if tab === 'history' && more && !query}
       <button type="button" class="more" onclick={() => void loadLog(repo, commits?.length ?? 0)}
         >{t.git.loadMore}</button

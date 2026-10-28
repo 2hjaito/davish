@@ -145,7 +145,7 @@ func TestDiffArgs(t *testing.T) {
 		r    DiffRequest
 		want string
 	}{
-		{"commit", DiffRequest{Commit: "abc1234"}, "show --format= --no-color --no-ext-diff --no-textconv abc1234 --"},
+		{"commit", DiffRequest{Commit: "abc1234"}, "show --format= -m --first-parent --no-color --no-ext-diff --no-textconv abc1234 --"},
 		{"file", DiffRequest{File: "-rf name"}, "diff --no-color --no-ext-diff --no-textconv HEAD -- -rf name"},
 		{"untracked", DiffRequest{File: "new.txt", Untracked: true}, "diff --no-index --no-color --no-ext-diff --no-textconv -- /dev/null new.txt"},
 		{"bad hash", DiffRequest{Commit: "HEAD; reboot"}, ""},
@@ -187,5 +187,26 @@ func TestGitError(t *testing.T) {
 		if !errors.As(err, &ae) || ae.Code != tt.want {
 			t.Errorf("%q: got %v, want %s", tt.stderr, err, tt.want)
 		}
+	}
+}
+
+func TestParseLogRecord(t *testing.T) {
+	rec := "\nabc123\x1fabc\x1fp1 p2\x1fAn\x1f1700000000\x1fHEAD -> refs/heads/main, refs/remotes/origin/main, refs/remotes/origin/HEAD, tag: refs/tags/v1.2, refs/heads/feature/x\x1fMerge branch 'x'"
+	c := parseLogRecord(rec)
+	if c == nil || c.Subject != "Merge branch 'x'" || strings.Join(c.Parents, ",") != "p1,p2" || c.Time != 1700000000 {
+		t.Fatalf("got %+v", c)
+	}
+	want := []Ref{{"main", RefHead}, {"origin/main", RefRemote}, {"v1.2", RefTag}, {"feature/x", RefLocal}}
+	if len(c.Refs) != len(want) {
+		t.Fatalf("refs %+v", c.Refs)
+	}
+	for i := range want {
+		if c.Refs[i] != want[i] {
+			t.Errorf("ref %d = %+v, want %+v", i, c.Refs[i], want[i])
+		}
+	}
+	root := parseLogRecord("r00t\x1fr00\x1f\x1fAn\x1f1\x1fHEAD\x1finit")
+	if root == nil || len(root.Parents) != 0 || len(root.Refs) != 1 || root.Refs[0].Kind != RefHead {
+		t.Fatalf("root %+v", root)
 	}
 }
