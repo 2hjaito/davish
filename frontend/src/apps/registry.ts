@@ -3,6 +3,7 @@ import type { Component } from 'svelte'
 import { t } from '../lib/i18n/vi'
 import {
   AUDIT_SIZE,
+  BROWSER_SIZE,
   DISK_SIZE,
   EDITOR_SIZE,
   FILES_SIZE,
@@ -109,6 +110,15 @@ export const apps: AppDef[] = [
     theme: 'light',
     size: { w: 900, h: 580 },
     load: () => import('./ports/PortsApp.svelte'),
+  },
+  {
+    id: 'browser',
+    label: t.apps.browser,
+    icon: 'globe2',
+    theme: 'light',
+    size: BROWSER_SIZE,
+    load: () => import('./browser/BrowserApp.svelte'),
+    layout: false,
   },
   {
     id: 'disk',

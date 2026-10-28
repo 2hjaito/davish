@@ -1454,6 +1454,24 @@ export namespace ports {
 		}
 	}
 	
+	export class Site {
+	    serverID: string;
+	    remotePort: number;
+	    localPort: number;
+	    token: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Site(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.serverID = source["serverID"];
+	        this.remotePort = source["remotePort"];
+	        this.localPort = source["localPort"];
+	        this.token = source["token"];
+	    }
+	}
 	export class Tunnel {
 	    id: string;
 	    serverID: string;

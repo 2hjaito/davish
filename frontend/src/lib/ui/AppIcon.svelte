@@ -176,6 +176,17 @@
     <g transform="translate(14 14)" style:color="#ffffff">
       <Icon name="shield" size={36} strokeWidth={2.4} />
     </g>
+  {:else if id === 'browser'}
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#8fd3ff" />
+        <stop offset="1" stop-color="#1a73c9" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    <g transform="translate(14 14)" style:color="#ffffff">
+      <Icon name="globe2" size={36} strokeWidth={2.2} />
+    </g>
   {:else if id === 'cron'}
     <defs>
       <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
