@@ -873,6 +873,8 @@ export const t = {
     openPath: (path: string, line?: number) =>
       line ? `Mở ${path} tại dòng ${line} trong Editor` : `Mở ${path} trong Editor`,
     needsRoot: 'Tài khoản này không được đọc nguồn log này.',
+    quiet:
+      'Journal không trả về dòng nào cho dịch vụ này. Có thể dịch vụ không ghi log vào journal, hoặc tài khoản SSH không được đọc journal hệ thống (cần thuộc nhóm systemd-journal hoặc adm).',
     openInLogs: 'Mở trong Logs',
   },
   errors: {

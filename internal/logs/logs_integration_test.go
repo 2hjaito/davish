@@ -74,10 +74,11 @@ func contains(lines []string, s string) bool {
 
 func TestFollowsContainerUntilStopped(t *testing.T) {
 	s, rec, log, id := setup(t)
-	sid, err := s.Start(context.Background(), id, logs.Source{Kind: logs.KindDocker, Target: "davish-web"})
+	st, err := s.Start(context.Background(), id, logs.Source{Kind: logs.KindDocker, Target: "davish-web"})
 	if err != nil {
 		t.Fatal(err)
 	}
+	sid := st.StreamID
 	// The backlog, then new lines as the container writes them.
 	rec.waitFor(t, "two batches of output", func() bool { return len(rec.lines[sid]) > 0 })
 	first := len(rec.lines[sid])
@@ -97,10 +98,11 @@ func TestFollowsContainerUntilStopped(t *testing.T) {
 
 func TestFollowsCrashLoopStderr(t *testing.T) {
 	s, rec, _, id := setup(t)
-	sid, err := s.Start(context.Background(), id, logs.Source{Kind: logs.KindDocker, Target: "davish-crashloop"})
+	st, err := s.Start(context.Background(), id, logs.Source{Kind: logs.KindDocker, Target: "davish-crashloop"})
 	if err != nil {
 		t.Fatal(err)
 	}
+	sid := st.StreamID
 	t.Cleanup(func() { s.Stop(sid) })
 	rec.waitFor(t, "the error line", func() bool {
 		return contains(rec.lines[sid], "Error: cannot open /etc/nginx/nginx.conf")
@@ -110,27 +112,33 @@ func TestFollowsCrashLoopStderr(t *testing.T) {
 func TestFollowsJournalAndFile(t *testing.T) {
 	s, rec, _, id := setup(t)
 	ctx := context.Background()
-	j, err := s.Start(ctx, id, logs.Source{Kind: logs.KindJournal, Target: "davish-crash.service"})
+	js, err := s.Start(ctx, id, logs.Source{Kind: logs.KindJournal, Target: "davish-crash.service"})
 	if err != nil {
 		t.Fatal(err)
+	}
+	j := js.StreamID
+	if want := "sudo journalctl -u davish-crash.service -f -n 200 -o short-iso --no-pager"; js.Sudo != want {
+		t.Errorf("sudo = %q, want %q", js.Sudo, want)
 	}
 	t.Cleanup(func() { s.Stop(j) })
 	rec.waitFor(t, "journal lines", func() bool { return contains(rec.lines[j], "cannot open /etc/nginx/nginx.conf") })
 
-	f, err := s.Start(ctx, id, logs.Source{Kind: logs.KindFile, Target: "/etc/nginx/mime.types"})
+	fs, err := s.Start(ctx, id, logs.Source{Kind: logs.KindFile, Target: "/etc/nginx/mime.types"})
 	if err != nil {
 		t.Fatal(err)
 	}
+	f := fs.StreamID
 	t.Cleanup(func() { s.Stop(f) })
 	rec.waitFor(t, "file lines", func() bool { return contains(rec.lines[f], "}") })
 }
 
 func TestUnreadableFileNeedsRoot(t *testing.T) {
 	s, rec, _, id := setup(t)
-	sid, err := s.Start(context.Background(), id, logs.Source{Kind: logs.KindFile, Target: "/etc/shadow"})
+	st, err := s.Start(context.Background(), id, logs.Source{Kind: logs.KindFile, Target: "/etc/shadow"})
 	if err != nil {
 		t.Fatal(err)
 	}
+	sid := st.StreamID
 	rec.waitFor(t, "end", func() bool { _, ok := rec.ends[sid]; return ok })
 	end := rec.ends[sid]
 	if end.Error == nil || end.Error.Code != apperr.CmdNeedsRoot || end.Sudo != "sudo tail -F -n 200 -- /etc/shadow" {

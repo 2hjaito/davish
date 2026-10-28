@@ -34,6 +34,14 @@ type Lines struct {
 	Lines    []string `json:"lines"`
 }
 
+// Started tells the frontend which stream is its own, and how to read the
+// same source as root: an empty journal may only mean the account cannot
+// read the system journal, which journalctl does not report.
+type Started struct {
+	StreamID string `json:"streamID"`
+	Sudo     string `json:"sudo"`
+}
+
 // End is the logs:end payload. Error is nil when the user stopped the
 // stream; Sudo is set with CMD_NEEDS_ROOT.
 type End struct {
@@ -74,35 +82,35 @@ func New(clients ClientSource, auditLog *audit.Log, emit Emitter, log *slog.Logg
 	return &Service{clients: clients, audit: auditLog, emit: emit, log: log, streams: map[string]*stream{}}
 }
 
-// Start follows src on serverID and returns the stream's ID. Lines arrive
-// as logs:line, and logs:end tells when it is over.
-func (s *Service) Start(_ context.Context, serverID string, src Source) (string, error) {
+// Start follows src on serverID and returns the stream's ID with its sudo
+// form. Lines arrive as logs:line, and logs:end tells when it is over.
+func (s *Service) Start(_ context.Context, serverID string, src Source) (Started, error) {
 	cmd, err := Command(src)
 	if err != nil {
-		return "", err
+		return Started{}, err
 	}
 	client, err := s.clients.Client(serverID)
 	if err != nil {
-		return "", err
+		return Started{}, err
 	}
 	sess, err := client.NewSession()
 	if err != nil {
-		return "", apperr.Wrap(apperr.ConnNotConnected, "cannot open a session", err)
+		return Started{}, apperr.Wrap(apperr.ConnNotConnected, "cannot open a session", err)
 	}
 	stdout, err := sess.StdoutPipe()
 	if err != nil {
 		sess.Close() //nolint:errcheck,gosec // failed to start
-		return "", apperr.Wrap(apperr.Internal, "stdout pipe", err)
+		return Started{}, apperr.Wrap(apperr.Internal, "stdout pipe", err)
 	}
 	stderr, err := sess.StderrPipe()
 	if err != nil {
 		sess.Close() //nolint:errcheck,gosec // failed to start
-		return "", apperr.Wrap(apperr.Internal, "stderr pipe", err)
+		return Started{}, apperr.Wrap(apperr.Internal, "stderr pipe", err)
 	}
 	line := cmd.String()
 	if err := sess.Start(line); err != nil {
 		sess.Close() //nolint:errcheck,gosec // failed to start
-		return "", apperr.Wrap(apperr.ConnNotConnected, "cannot start the command", err)
+		return Started{}, apperr.Wrap(apperr.ConnNotConnected, "cannot start the command", err)
 	}
 	// A stream has no exit status until the user stops it, so it is
 	// recorded when it starts, with -1.
@@ -135,7 +143,7 @@ func (s *Service) Start(_ context.Context, serverID string, src Source) (string,
 		s.emit.Emit(events.LogsEnd, end)
 		s.log.Info("log stream ended", "server", serverID, "app", "logs")
 	}()
-	return id, nil
+	return Started{StreamID: id, Sudo: sudo}, nil
 }
 
 func endError(err error) *apperr.Error {
