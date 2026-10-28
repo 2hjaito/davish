@@ -201,7 +201,7 @@ export const mockRun = (
       : {
           output:
             op === 'fetch'
-              ? 'From github.com:acme/docs\n   1a2b3c4..5d6e7f8  main -> origin/main'
+              ? 'From github.com:davitek/docs\n   1a2b3c4..5d6e7f8  main -> origin/main'
               : '',
           error: '',
         },
