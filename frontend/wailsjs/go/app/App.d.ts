@@ -17,7 +17,7 @@ export function AuditEntries():Promise<Array<audit.Entry>>;
 
 export function Connect(arg1:string):Promise<void>;
 
-export function CronApply(arg1:string,arg2:cron.Change,arg3:string):Promise<void>;
+export function CronApply(arg1:string,arg2:cron.Change,arg3:cron.Plan):Promise<void>;
 
 export function CronList(arg1:string):Promise<cron.Table>;
 
