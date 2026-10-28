@@ -5,9 +5,19 @@ import {
   servicesJournal,
   servicesList,
   servicesPlan,
+  servicesPlanRemove,
+  servicesRemove,
   servicesStatus,
 } from '../../lib/api/services'
-import { mockAct, mockJournal, mockList, mockPlan, mockStatus } from './mock'
+import {
+  mockAct,
+  mockJournal,
+  mockList,
+  mockPlan,
+  mockPlanRemove,
+  mockRemove,
+  mockStatus,
+} from './mock'
 
 export const backend = hasRuntime
   ? {
@@ -16,6 +26,8 @@ export const backend = hasRuntime
       journal: servicesJournal,
       plan: servicesPlan,
       act: servicesAct,
+      planRemove: servicesPlanRemove,
+      remove: servicesRemove,
     }
   : {
       list: (_serverID: string) => mockList(),
@@ -24,4 +36,6 @@ export const backend = hasRuntime
       plan: mockPlan,
       act: (_serverID: string, unit: string, action: Parameters<typeof mockAct>[1]) =>
         mockAct(unit, action),
+      planRemove: (_serverID: string, unit: string) => mockPlanRemove(unit),
+      remove: (_serverID: string, unit: string, _command: string) => mockRemove(unit),
     }

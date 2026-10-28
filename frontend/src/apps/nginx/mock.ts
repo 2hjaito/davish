@@ -1,5 +1,5 @@
 // Demo data for the plain browser preview (vite dev), where there is no Go side.
-import type { NginxReload, NginxSite, NginxTest, TogglePlan } from '../../lib/api/nginx'
+import type { NginxReload, NginxSite, NginxTest, RemovePlan, TogglePlan } from '../../lib/api/nginx'
 
 const day = 86_400
 const now = () => Math.floor(Date.now() / 1000)
@@ -99,6 +99,38 @@ export function mockPlanToggle(name: string, enable: boolean): Promise<TogglePla
     ? `ln -s -- /etc/nginx/sites-available/${name} /etc/nginx/sites-enabled/${name}`
     : `rm -- /etc/nginx/sites-enabled/${name}`
   return delay({ name, enable, command, sudo: `sudo ${command}` })
+}
+
+export function mockPlanRemove(path: string, withCerts: boolean): Promise<RemovePlan> {
+  const site = sites.find((s) => s.path === path)!
+  const certs = [
+    ...new Set(
+      site.servers
+        .flatMap((s) => s.certs)
+        .map((c) => /^\/etc\/letsencrypt\/live\/([^/]+)\//.exec(c)?.[1])
+        .filter((n): n is string => !!n),
+    ),
+  ]
+  const steps = [
+    ...(site.toggleable && site.enabled ? [`rm -- /etc/nginx/sites-enabled/${site.name}`] : []),
+    `rm -- ${site.path}`,
+    ...(withCerts ? certs.map((n) => `certbot delete --non-interactive --cert-name ${n}`) : []),
+  ]
+  return delay({
+    path,
+    name: site.name,
+    enabled: site.enabled,
+    certs,
+    withCerts: withCerts && certs.length > 0,
+    sharedCerts: [],
+    command: steps.join(' && '),
+    sudo: steps.map((s) => `sudo ${s}`).join(' && '),
+  })
+}
+
+export async function mockRemove(plan: RemovePlan): Promise<void> {
+  await delay(null)
+  sites = sites.filter((s) => s.path !== plan.path)
 }
 
 export async function mockToggle(plan: TogglePlan): Promise<void> {

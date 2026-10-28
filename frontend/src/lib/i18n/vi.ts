@@ -599,6 +599,26 @@ export const t = {
       stop: (n: string) => `Dừng “${n}”?`,
       restart: (n: string) => `Khởi động lại “${n}”?`,
     },
+    remove: 'Xóa…',
+    removeTitle: {
+      delete: (n: string) => `Xóa dịch vụ “${n}”?`,
+      mask: (n: string) => `Vô hiệu hóa hẳn “${n}”?`,
+      reset: (n: string) => `Bỏ trạng thái lỗi của “${n}”?`,
+    },
+    removeBody: {
+      delete: (file: string, triggers: string[]) =>
+        `Dịch vụ${triggers.length ? ` và ${triggers.join(', ')}` : ''} sẽ dừng, không tự chạy nữa, và file ${file} bị xóa. Không hoàn tác được. Lệnh sẽ chạy:`,
+      mask: (_file: string, triggers: string[]) =>
+        `File unit thuộc về gói cài trên server nên được giữ lại. Dịch vụ${triggers.length ? ` và ${triggers.join(', ')} (thứ kích hoạt nó)` : ''} bị dừng và chặn hẳn (mask), không bao giờ chạy lại. Gỡ chặn bằng systemctl unmask. Lệnh sẽ chạy:`,
+      reset: () =>
+        'File unit không còn trên server; chỉ còn trạng thái lỗi. Xóa nó để dịch vụ biến khỏi danh sách. Lệnh sẽ chạy:',
+    },
+    removeAction: { delete: 'Xóa dịch vụ', mask: 'Vô hiệu hóa hẳn', reset: 'Bỏ lỗi' },
+    removed: {
+      delete: (n: string) => `Đã xóa ${n}`,
+      mask: (n: string) => `Đã vô hiệu hóa hẳn ${n}`,
+      reset: (n: string) => `Đã bỏ trạng thái lỗi của ${n}`,
+    },
     confirmBody: {
       stop: 'Dịch vụ sẽ ngừng chạy cho tới khi được khởi động lại. Ai đang dùng nó sẽ bị ngắt. Lệnh sẽ chạy:',
       restart:
@@ -853,6 +873,18 @@ export const t = {
       enable: (n: string) => `Đã bật ${n}. Reload nginx để áp dụng.`,
       disable: (n: string) => `Đã tắt ${n}. Reload nginx để áp dụng.`,
     },
+    remove: 'Xóa site…',
+    removeTitle: (n: string) => `Xóa site “${n}”?`,
+    removeBody: 'File cấu hình của site bị xóa khỏi server. Không hoàn tác được.',
+    removeBodyEnabled:
+      'File cấu hình và link trong sites-enabled bị xóa. Không hoàn tác được. nginx vẫn phục vụ site cho tới khi reload.',
+    removeCerts: (names: string) => `Xóa luôn chứng chỉ Let's Encrypt: ${names}`,
+    removeCertsHint:
+      'Chạy certbot delete: certbot thôi gia hạn tên miền này, hết báo lỗi gia hạn. Chỉ site này dùng chứng chỉ.',
+    sharedCerts: (names: string) => `Giữ lại chứng chỉ ${names} vì site khác cũng dùng.`,
+    commandIntro: 'Lệnh sẽ chạy:',
+    removeAction: 'Xóa site',
+    removedEnabled: (n: string) => `Đã xóa ${n}. Reload nginx để thôi phục vụ site này.`,
     reloadNow: 'Kiểm tra & reload',
     reloadTitle: 'Reload nginx?',
     reloadBody:

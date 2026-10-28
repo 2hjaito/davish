@@ -157,3 +157,21 @@ func TestRefusesBadNames(t *testing.T) {
 		}
 	}
 }
+
+func TestPlanRemove(t *testing.T) {
+	s, _, id := setup(t)
+	ctx := context.Background()
+	p, err := s.PlanRemove(ctx, id, "/etc/nginx/sites-available/davish-site", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := "rm -- /etc/nginx/sites-enabled/davish-site && rm -- /etc/nginx/sites-available/davish-site"; !p.Enabled || p.Command != want {
+		t.Errorf("plan = %+v", p)
+	}
+	if _, err := s.PlanRemove(ctx, id, "/etc/nginx/nginx.conf", false); err == nil {
+		t.Error("nginx.conf planned for removal")
+	}
+	if err := s.Remove(ctx, id, "/etc/nginx/sites-available/davish-site", false, "rm -- /etc/nginx/sites-available/davish-site"); err == nil {
+		t.Error("a command other than the plan's was run")
+	}
+}

@@ -12,10 +12,11 @@
     /** A note after a toggle, with a way to reload. */
     flash: string
     ontoggle: (site: NginxSite) => void
+    onremove: (site: NginxSite) => void
     onreload: () => void
   }
 
-  let { serverID, site, busy, flash, ontoggle, onreload }: Props = $props()
+  let { serverID, site, busy, flash, ontoggle, onremove, onreload }: Props = $props()
 
   const fmtDate = new Intl.DateTimeFormat('vi-VN', {
     day: '2-digit',
@@ -45,6 +46,9 @@
     {/if}
     <button type="button" class="btn" onclick={() => openFileInEditor(serverID, site.path)}>
       {t.nginx.openFile}
+    </button>
+    <button type="button" class="btn remove" disabled={busy} onclick={() => onremove(site)}>
+      {t.nginx.remove}
     </button>
   </div>
   {#if !site.toggleable && site.kind === 'site'}<p class="hint">{t.nginx.fileInEnabled}</p>{/if}
@@ -125,6 +129,11 @@
 </section>
 
 <style>
+  .remove {
+    margin-left: auto;
+    color: var(--danger);
+  }
+
   .inspector {
     flex: 1;
     min-height: 0;

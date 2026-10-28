@@ -2,7 +2,14 @@
   import { untrack } from 'svelte'
 
   import { toUserError } from '../../lib/api/errors'
-  import type { ActionPlan, Journal, ServiceAction, Unit, UnitStatus } from '../../lib/api/services'
+  import type {
+    ActionPlan,
+    Journal,
+    RemovePlan,
+    ServiceAction,
+    Unit,
+    UnitStatus,
+  } from '../../lib/api/services'
   import { formatBytes, formatDuration } from '../../lib/format'
   import { t } from '../../lib/i18n/vi'
   import Icon from '../../lib/ui/Icon.svelte'
@@ -28,6 +35,8 @@
   let logError = $state('')
   let busy = $state<ServiceAction | null>(null)
   let confirming = $state.raw<ActionPlan | null>(null)
+  let removing = $state.raw<RemovePlan | null>(null)
+  let removeBusy = $state(false)
   // Only stop and restart are confirmed; start runs right away.
   const confirmKind = $derived(confirming?.action === 'stop' ? 'stop' : 'restart')
   /** The server refused for lack of root: what to run with sudo instead. */
@@ -93,6 +102,32 @@
     }
   }
 
+  async function askRemove() {
+    try {
+      removing = await backend.planRemove(serverID, unit.name)
+    } catch (e) {
+      flash = { text: toUserError(e).message, ok: false }
+    }
+  }
+
+  async function remove(plan: RemovePlan) {
+    removing = null
+    removeBusy = true
+    needsRoot = ''
+    flash = null
+    try {
+      await backend.remove(serverID, plan.unit, plan.command)
+      flash = { text: t.services.removed[plan.mode](shortName(plan.unit)), ok: true }
+    } catch (e) {
+      const ue = toUserError(e)
+      if (ue.code === 'CMD_NEEDS_ROOT') needsRoot = plan.sudo
+      else flash = { text: ue.message, ok: false }
+    } finally {
+      removeBusy = false
+    }
+    onchanged()
+  }
+
   async function run(plan: ActionPlan) {
     confirming = null
     busy = plan.action
@@ -144,6 +179,12 @@
         {busy === a ? t.services.working[a] : t.services.actions[a]}
       </button>
     {/each}
+    <button
+      type="button"
+      class="btn remove"
+      disabled={busy !== null || removeBusy}
+      onclick={() => void askRemove()}>{t.services.remove}</button
+    >
   </div>
 
   {#if needsRoot}
@@ -230,7 +271,23 @@
   onconfirm={() => confirming && void run(confirming)}
 />
 
+<ConfirmCommand
+  command={removing?.command ?? null}
+  title={removing ? t.services.removeTitle[removing.mode](shortName(removing.unit)) : ''}
+  body={removing
+    ? t.services.removeBody[removing.mode](removing.file ?? '', removing.triggers ?? [])
+    : ''}
+  action={removing ? t.services.removeAction[removing.mode] : ''}
+  onclose={() => (removing = null)}
+  onconfirm={() => removing && void remove(removing)}
+/>
+
 <style>
+  .remove {
+    margin-left: auto;
+    color: var(--danger);
+  }
+
   .inspector {
     flex: 1;
     min-height: 0;
