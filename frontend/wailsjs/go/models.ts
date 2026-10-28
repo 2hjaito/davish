@@ -684,6 +684,29 @@ export namespace fs {
 
 }
 
+export namespace lock {
+	
+	export class State {
+	    enabled: boolean;
+	    locked: boolean;
+	    biometric: boolean;
+	    retryAt: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new State(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.enabled = source["enabled"];
+	        this.locked = source["locked"];
+	        this.biometric = source["biometric"];
+	        this.retryAt = source["retryAt"];
+	    }
+	}
+
+}
+
 export namespace logs {
 	
 	export class Source {

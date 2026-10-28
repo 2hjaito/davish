@@ -122,6 +122,26 @@ export function ListServers() {
   return window['go']['app']['App']['ListServers']();
 }
 
+export function LockDisable(arg1) {
+  return window['go']['app']['App']['LockDisable'](arg1);
+}
+
+export function LockNow() {
+  return window['go']['app']['App']['LockNow']();
+}
+
+export function LockReset() {
+  return window['go']['app']['App']['LockReset']();
+}
+
+export function LockSetPassword(arg1, arg2) {
+  return window['go']['app']['App']['LockSetPassword'](arg1, arg2);
+}
+
+export function LockState() {
+  return window['go']['app']['App']['LockState']();
+}
+
 export function LogsStart(arg1, arg2) {
   return window['go']['app']['App']['LogsStart'](arg1, arg2);
 }
@@ -260,4 +280,12 @@ export function TransferReveal(arg1) {
 
 export function TransferUpload(arg1, arg2, arg3) {
   return window['go']['app']['App']['TransferUpload'](arg1, arg2, arg3);
+}
+
+export function Unlock(arg1) {
+  return window['go']['app']['App']['Unlock'](arg1);
+}
+
+export function UnlockTouchID(arg1) {
+  return window['go']['app']['App']['UnlockTouchID'](arg1);
 }

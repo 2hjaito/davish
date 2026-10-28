@@ -16,6 +16,7 @@ import (
 	"davish/internal/cron"
 	"davish/internal/docker"
 	"davish/internal/fs"
+	"davish/internal/lock"
 	"davish/internal/logs"
 	"davish/internal/nginx"
 	"davish/internal/store"
@@ -46,6 +47,7 @@ type App struct {
 	logs      *logs.Service
 	cron      *cron.Service
 	nginx     *nginx.Service
+	lock      *lock.Service
 }
 
 // New wires the services with their config under os.UserConfigDir()/davish.
@@ -60,6 +62,8 @@ func New() (*App, error) {
 	a := &App{ctx: context.Background()}
 	a.secrets = store.NewSecrets(store.OSKeyring{})
 	a.store = store.New(dir, a.secrets)
+	a.lock = lock.New(store.OSKeyring{}, lock.NewBiometric(), emitter{a}, log,
+		func() error { return a.store.ForgetSecrets(context.Background()) }, lock.Options{})
 	a.settings = store.NewSettings(dir, log)
 	hostKeys := conn.NewHostKeys(filepath.Join(dir, "known_hosts"))
 	a.conns = conn.NewManager(a.store, a.secrets, hostKeys, emitter{a}, log, conn.Options{})
@@ -83,10 +87,12 @@ func New() (*App, error) {
 func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
 	a.wails.Store(&ctx)
+	a.lock.Watch(ctx)
 }
 
 // Shutdown is called by Wails before the process exits.
 func (a *App) Shutdown(_ context.Context) {
+	a.lock.Close()
 	a.sysmon.Close()
 	a.logs.Close()
 	a.transfers.Close()

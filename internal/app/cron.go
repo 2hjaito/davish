@@ -22,6 +22,9 @@ func (a *App) CronPlan(serverID string, change cron.Change) (cron.Plan, error) {
 // CronApply makes a change exactly as its plan from CronPlan was
 // confirmed; it refuses if the crontab changed since.
 func (a *App) CronApply(serverID string, change cron.Change, plan cron.Plan) error {
+	if err := a.lock.Check(); err != nil {
+		return err
+	}
 	return a.cron.Apply(a.ctx, serverID, change, plan)
 }
 

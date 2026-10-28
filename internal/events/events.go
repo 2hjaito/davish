@@ -15,4 +15,5 @@ const (
 	TransferDone      = "transfer:done"
 	NotifyNew         = "notify:new"
 	AuditEntry        = "audit:entry"
+	LockState         = "lock:state"
 )

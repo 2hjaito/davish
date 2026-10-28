@@ -32,6 +32,10 @@ const (
 	NotFound             Code = "NOT_FOUND"
 	StoreCorrupt         Code = "STORE_CORRUPT"
 	KeychainUnavailable  Code = "KEYCHAIN_UNAVAILABLE"
+	AppLocked            Code = "APP_LOCKED"
+	LockWrongPassword    Code = "LOCK_WRONG_PASSWORD"
+	LockTooManyAttempts  Code = "LOCK_TOO_MANY_ATTEMPTS"
+	LockBiometricFailed  Code = "LOCK_BIOMETRIC_FAILED"
 )
 
 // Error is the only error type allowed to cross into the frontend.

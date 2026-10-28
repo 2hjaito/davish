@@ -8,11 +8,17 @@ import (
 
 // TransferPickFiles asks the user for files to upload; empty when canceled.
 func (a *App) TransferPickFiles(title string) ([]string, error) {
+	if err := a.lock.Check(); err != nil {
+		return nil, err
+	}
 	return runtime.OpenMultipleFilesDialog(a.ctx, runtime.OpenDialogOptions{Title: title})
 }
 
 // TransferPickFolder asks the user for a folder to upload; empty when canceled.
 func (a *App) TransferPickFolder(title string) (string, error) {
+	if err := a.lock.Check(); err != nil {
+		return "", err
+	}
 	return runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{Title: title})
 }
 
@@ -24,11 +30,17 @@ func (a *App) TransferPlanUpload(serverID, dir string, locals []string) ([]trans
 
 // TransferUpload starts uploads into dir; progress arrives as events.
 func (a *App) TransferUpload(serverID, dir string, reqs []transfer.UploadRequest) ([]transfer.Job, error) {
+	if err := a.lock.Check(); err != nil {
+		return nil, err
+	}
 	return a.transfers.Upload(a.ctx, serverID, dir, reqs)
 }
 
 // TransferDownload starts downloads into the user's Downloads folder.
 func (a *App) TransferDownload(serverID string, paths []string) ([]transfer.Job, error) {
+	if err := a.lock.Check(); err != nil {
+		return nil, err
+	}
 	return a.transfers.Download(a.ctx, serverID, paths)
 }
 
@@ -40,11 +52,17 @@ func (a *App) TransferCancel(jobID string) error {
 // TransferReveal shows a finished download in Finder, Explorer or the
 // Linux file manager.
 func (a *App) TransferReveal(path string) error {
+	if err := a.lock.Check(); err != nil {
+		return err
+	}
 	return a.transfers.RevealDownload(a.ctx, path)
 }
 
 // TransferCopy copies paths from one server into dir on another, through
 // this machine. Taken names get "name (n)"; nothing is replaced.
 func (a *App) TransferCopy(fromServerID string, paths []string, toServerID, dir string) ([]transfer.Job, error) {
+	if err := a.lock.Check(); err != nil {
+		return nil, err
+	}
 	return a.transfers.Copy(a.ctx, fromServerID, paths, toServerID, dir)
 }
