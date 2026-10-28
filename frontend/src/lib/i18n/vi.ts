@@ -75,6 +75,55 @@ export const t = {
     git: 'Git',
     ports: 'Cổng',
     disk: 'Ổ đĩa',
+    security: 'An ninh',
+  },
+  security: {
+    offline: 'Server chưa kết nối',
+    offlineHint: 'Thông tin đăng nhập sẽ hiện khi server kết nối lại.',
+    loading: 'Đang đọc log đăng nhập…',
+    password: {
+      title: 'Đăng nhập bằng mật khẩu',
+      off: 'Đã tắt: server chỉ nhận đăng nhập bằng key.',
+      on: 'Đang bật: ai cũng có thể dò mật khẩu qua SSH.',
+      unknown: 'Không đọc được cấu hình sshd; mặc định của OpenSSH là bật.',
+      useKeyFirst:
+        'Davish đang đăng nhập server này bằng mật khẩu. Chuyển sang key trong app Khóa SSH trước, rồi mới tắt đăng nhập mật khẩu.',
+      how: 'Lệnh dưới thêm một file trong /etc/ssh/sshd_config.d, kiểm tra bằng sshd -t rồi mới reload; nếu kiểm tra lỗi thì tự gỡ file. Cần sshd_config có dòng Include sshd_config.d (Ubuntu 20.04+, Debian 11+).',
+      keepOpen:
+        'Giữ phiên hiện tại mở cho tới khi thử kết nối lại bằng key thành công (Tệp → Ngắt kết nối rồi Kết nối).',
+    },
+    failed: {
+      title: (n: number) => `Thử đăng nhập sai (7 ngày): ${n}`,
+      none: 'Không có lần thử sai nào.',
+    },
+    accepted: 'Đăng nhập thành công gần đây',
+    noAccepted: 'Không có đăng nhập nào trong 7 ngày.',
+    noLogs:
+      'Không đọc được log của sshd (journalctl hoặc /var/log/auth.log). User cần thuộc nhóm systemd-journal hoặc adm.',
+    source: (src: string) =>
+      `Nguồn: ${src === 'journal' ? 'journalctl -u ssh' : '/var/log/auth.log'}`,
+    ip: 'IP',
+    count: 'Lần',
+    users: 'User đã thử',
+    last: 'Lần cuối',
+    time: 'Thời gian',
+    user: 'User',
+    method: 'Cách',
+    banned: 'đã chặn',
+    block: 'Chặn bằng ufw…',
+    ban: 'Chặn bằng fail2ban…',
+    lastTitle: 'Phiên đăng nhập (last)',
+    lastbTitle: 'Đăng nhập sai (lastb)',
+    lastbRoot: 'lastb cần root để đọc /var/log/btmp.',
+    lastbRun: 'Xem lastb trong Terminal',
+    firewall: 'Tường lửa',
+    notInstalled: 'Chưa cài.',
+    needsRoot: 'Cần root để xem trạng thái.',
+    active: 'Đang bật',
+    inactive: 'Đang tắt',
+    jailActive: (n: number) => `Jail sshd đang chạy, ${n} IP bị chặn`,
+    firewallHint:
+      'Davish chỉ đọc. Mọi thay đổi (bật ufw, chặn IP) được gõ sẵn vào Terminal với sudo để bạn xem rồi tự nhấn Enter.',
   },
   disk: {
     sections: 'Ổ đĩa',
@@ -582,6 +631,19 @@ export const t = {
         runs: [
           'dpkg-query, apt list, dnf/yum/apk (chỉ đọc)',
           'lệnh --version của từng chương trình',
+        ],
+      },
+      security: {
+        does: 'Ai đăng nhập server qua SSH và ai đang dò: lần thử sai gom theo IP, đăng nhập gần đây, ufw, fail2ban.',
+        actions: [
+          'Tắt đăng nhập mật khẩu (lệnh sudo gõ sẵn, có sshd -t)',
+          'Chặn một IP bằng ufw hoặc fail2ban qua Terminal',
+        ],
+        keys: [],
+        runs: [
+          'journalctl -u ssh (hoặc đọc /var/log/auth.log)',
+          'last, lastb',
+          'ufw status, fail2ban-client status sshd',
         ],
       },
       disk: {
