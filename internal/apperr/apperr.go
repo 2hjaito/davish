@@ -36,6 +36,7 @@ const (
 	LockWrongPassword    Code = "LOCK_WRONG_PASSWORD"
 	LockTooManyAttempts  Code = "LOCK_TOO_MANY_ATTEMPTS"
 	LockBiometricFailed  Code = "LOCK_BIOMETRIC_FAILED"
+	GitUnsafeOwner       Code = "GIT_UNSAFE_OWNER"
 )
 
 // Error is the only error type allowed to cross into the frontend.

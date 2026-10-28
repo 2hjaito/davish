@@ -1124,5 +1124,7 @@ export const t = {
     LOCK_WRONG_PASSWORD: 'Sai mật khẩu.',
     LOCK_TOO_MANY_ATTEMPTS: 'Nhập sai quá nhiều lần. Hãy chờ rồi thử lại.',
     LOCK_BIOMETRIC_FAILED: 'Touch ID không thành công.',
+    GIT_UNSAFE_OWNER:
+      'Repo này thuộc user khác nên git từ chối đọc (dubious ownership). Hãy đăng nhập bằng user sở hữu repo.',
   },
 } as const
