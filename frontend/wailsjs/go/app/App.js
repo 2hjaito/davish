@@ -42,6 +42,26 @@ export function Disconnect(arg1) {
   return window['go']['app']['App']['Disconnect'](arg1);
 }
 
+export function DiskCancel(arg1) {
+  return window['go']['app']['App']['DiskCancel'](arg1);
+}
+
+export function DiskClean(arg1, arg2, arg3) {
+  return window['go']['app']['App']['DiskClean'](arg1, arg2, arg3);
+}
+
+export function DiskCleanups(arg1) {
+  return window['go']['app']['App']['DiskCleanups'](arg1);
+}
+
+export function DiskMounts(arg1) {
+  return window['go']['app']['App']['DiskMounts'](arg1);
+}
+
+export function DiskUsage(arg1, arg2, arg3) {
+  return window['go']['app']['App']['DiskUsage'](arg1, arg2, arg3);
+}
+
 export function DockerAct(arg1, arg2, arg3) {
   return window['go']['app']['App']['DockerAct'](arg1, arg2, arg3);
 }

@@ -318,6 +318,97 @@ export namespace cron {
 
 }
 
+export namespace disk {
+	
+	export class Cleanup {
+	    id: string;
+	    bytes: number;
+	    count?: number;
+	    command: string;
+	    root: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Cleanup(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.bytes = source["bytes"];
+	        this.count = source["count"];
+	        this.command = source["command"];
+	        this.root = source["root"];
+	    }
+	}
+	export class Entry {
+	    path: string;
+	    size: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Entry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.size = source["size"];
+	    }
+	}
+	export class Mount {
+	    path: string;
+	    total: number;
+	    used: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Mount(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.total = source["total"];
+	        this.used = source["used"];
+	    }
+	}
+	export class Usage {
+	    dir: string;
+	    size: number;
+	    entries: Entry[];
+	    partial: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Usage(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.dir = source["dir"];
+	        this.size = source["size"];
+	        this.entries = this.convertValues(source["entries"], Entry);
+	        this.partial = source["partial"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
 export namespace docker {
 	
 	export class Container {

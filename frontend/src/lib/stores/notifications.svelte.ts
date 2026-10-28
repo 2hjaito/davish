@@ -46,16 +46,20 @@ const demo: Notification[] = hasRuntime
 /** Opens the logs of what a health alert is about. */
 export type ShowLogs = (serverID: string, source: LogSource) => void
 
+/** Opens the Disk app at a mount. */
+export type ShowDisk = (serverID: string, mount: string) => void
+
 /**
  * Writes the text of a notify:new payload; serverName labels the server.
  * With showLogs, health alerts get a button to the failing unit's or
- * container's logs.
+ * container's logs; with showDisk, a full disk opens the Disk app there.
  */
 export function describe(
   p: NotifyNew,
   serverName: string,
   at = Date.now(),
   showLogs?: ShowLogs,
+  showDisk?: ShowDisk,
 ): Notification {
   const base = { id: p.id, level: p.level, serverID: p.serverID, at }
   const target = p.target ?? ''
@@ -96,10 +100,15 @@ export function describe(
     p.kind === 'disk-high'
       ? t.notifications.diskHigh(serverName, p.mount ?? '/')
       : t.notifications.memHigh(serverName)
+  const mount = p.mount ?? '/'
   return {
     ...base,
     title,
     body: t.notifications.overThreshold(formatPct(p.value), formatPct(p.threshold)),
+    action:
+      p.kind === 'disk-high' && showDisk
+        ? { label: t.notifications.showDisk, run: () => showDisk(p.serverID, mount) }
+        : undefined,
   }
 }
 
@@ -119,9 +128,11 @@ class Notifications {
    * Listens to notify:new; nameOf turns a server id into the name to show.
    * Returns the function that stops listening.
    */
-  init(nameOf: (serverID: string) => string, showLogs?: ShowLogs): () => void {
+  init(nameOf: (serverID: string) => string, showLogs?: ShowLogs, showDisk?: ShowDisk): () => void {
     if (!hasRuntime) return () => {}
-    return onNotifyNew((p) => this.add(describe(p, nameOf(p.serverID), Date.now(), showLogs)))
+    return onNotifyNew((p) =>
+      this.add(describe(p, nameOf(p.serverID), Date.now(), showLogs, showDisk)),
+    )
   }
 
   /**
