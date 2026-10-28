@@ -6,6 +6,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ### Sửa
 - Logs: nhãn trên toolbar không còn xuống dòng; cửa sổ hẹp thì ô nguồn và ô lọc co lại, hẹp hơn nữa thì toolbar xuống hàng thay vì che mất nút.
+- Thông báo: đường dẫn dài (ví dụ đường dẫn chứng chỉ TLS) xuống dòng trong banner và bảng Thông báo thay vì tràn ra ngoài và đẩy nút đóng đi.
 
 ## [1.0.0] - 2026-10-28
 
