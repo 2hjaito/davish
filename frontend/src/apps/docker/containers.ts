@@ -1,9 +1,24 @@
 // Pure helpers of the Docker app: filters, states and times.
-import type { Container, ContainerAction } from '../../lib/api/docker'
+import type { Container, ContainerAction, Image } from '../../lib/api/docker'
 
 export type Filter = 'all' | 'running' | 'restarting' | 'stopped'
 
 export const FILTERS: readonly Filter[] = ['all', 'running', 'restarting', 'stopped']
+
+/** The image side of the sidebar. */
+export type ImageFilter = 'images' | 'unused'
+
+export const IMAGE_FILTERS: readonly ImageFilter[] = ['images', 'unused']
+
+/** Images in filter whose name or ID contains query; unused ones have no container. */
+export function visibleImages(list: readonly Image[], filter: ImageFilter, query: string): Image[] {
+  const q = query.trim().toLowerCase()
+  return list.filter(
+    (i) =>
+      (filter === 'images' || i.containers === 0) &&
+      (!q || `${i.repository}:${i.tag} ${i.id}`.toLowerCase().includes(q)),
+  )
+}
 
 /** The dot color of a state. A restart loop is as bad as a failure. */
 export type Health = 'ok' | 'busy' | 'failed' | 'off'

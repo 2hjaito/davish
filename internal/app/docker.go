@@ -37,3 +37,26 @@ func (a *App) DockerAct(serverID, name, action string) error {
 	}
 	return a.docker.Act(a.ctx, serverID, name, action)
 }
+
+// DockerImages lists the server's images and how many containers use each.
+func (a *App) DockerImages(serverID string) ([]docker.Image, error) {
+	return a.docker.Images(a.ctx, serverID)
+}
+
+// DockerImage reads an image's layers and config.
+func (a *App) DockerImage(serverID, ref string) (docker.ImageDetail, error) {
+	return a.docker.Image(a.ctx, serverID, ref)
+}
+
+// DockerPlanImage gives the remove and run commands for an image.
+func (a *App) DockerPlanImage(ref string) (docker.ImagePlan, error) {
+	return docker.PlanImage(ref)
+}
+
+// DockerRemoveImage runs docker rmi after the user confirmed command.
+func (a *App) DockerRemoveImage(serverID, ref, command string) error {
+	if err := a.lock.Check(); err != nil {
+		return err
+	}
+	return a.docker.RemoveImage(a.ctx, serverID, ref, command)
+}

@@ -5,7 +5,7 @@
 # Davish
 
 **Một desktop cho các server Linux của bạn.**<br>
-Terminal, file, dịch vụ, Docker, log, cron, nginx, khóa SSH, gói phần mềm và git qua SSH thuần, gom trong một giao diện như một hệ điều hành.<br>
+Terminal, file, dịch vụ, Docker, log, cron, nginx, cổng, trình duyệt, ổ đĩa, an ninh đăng nhập, khóa SSH, gói phần mềm và git qua SSH thuần, gom trong một giao diện như một hệ điều hành.<br>
 Không cài gì lên server.
 
 [![CI](https://github.com/2hjaito/davish/actions/workflows/ci.yml/badge.svg)](https://github.com/2hjaito/davish/actions/workflows/ci.yml)
@@ -26,53 +26,58 @@ Không cài gì lên server.
 - **Bí mật nằm trong keychain.** Mật khẩu và passphrase chỉ lưu trong keychain của hệ điều hành. Davish không bao giờ lưu hay tự gõ mật khẩu `sudo`: khi cần root, nó mở Terminal với lệnh gõ sẵn để bạn tự nhấn Enter.
 - **Tự khóa khi bạn rời máy.** Mật khẩu khóa riêng, Touch ID trên macOS; khóa khi máy ngủ dậy, sau thời gian không dùng, hoặc `⌘L`. Phiên SSH vẫn chạy sau màn khóa, nhưng không thao tác nào tới được server cho tới khi mở khóa.
 - **Nhiều server, một desktop.** Mỗi server là một workspace (`⌘1`…`⌘9`) nhớ cửa sổ riêng của nó. Kéo file để copy giữa các server.
+- **Dùng luôn `~/.ssh/config`.** Nhập host một lần, kèm key và `ProxyJump`; Davish chỉ đọc file. Server sau bastion kết nối qua nó, mỗi bậc kiểm tra host key riêng, cả chuỗi tự kết nối lại.
 
 ## Tính năng
 
-| | |
-|---|---|
-| **Terminal**<br>xterm.js nhiều tab, copy/paste, vẽ bằng GPU, và prompt powerline tùy chọn được nạp vào bash lúc đăng nhập, không ghi gì lên server. | **Files**<br>Trình duyệt kiểu Finder qua SFTP: tải lên, tải xuống, kéo thả từ hệ điều hành, đổi tên, xóa, nén, và copy giữa các server qua máy bạn. |
-| **Monitor**<br>CPU từng nhân, bộ nhớ và swap, ổ đĩa, mạng theo interface, GPU NVIDIA, tiến trình. Cảnh báo RAM và ổ đĩa chỉnh được ngưỡng. | **Editor**<br>CodeMirror 6, tô màu cho nginx, YAML, JSON, shell, env và file cấu hình. Lưu atomic giữ nguyên mode và chủ file, sao lưu file trong `/etc`, cảnh báo khi file đã đổi trên server. |
-| **Services**<br>Dịch vụ systemd theo trạng thái, chi tiết và journal; khởi động, dừng, khởi động lại. Xóa dịch vụ không còn dùng: unit do admin tạo thì xóa file, unit của gói (như `certbot` cũ) thì chặn hẳn cùng timer chạy nó. | **Docker**<br>Container với CPU và RAM, log có đánh dấu stderr, inspect, start/stop/restart, cảnh báo khởi động lại liên tục. |
-| **Logs**<br>Theo dõi journal của dịch vụ, một file hoặc một container. Lọc, tạm dừng, tô dòng lỗi, bấm đường dẫn file để mở trong Editor đúng dòng. | **Cron**<br>Crontab của bạn và của hệ thống, lịch nói bằng lời, lần chạy kế tiếp theo giờ server, sửa an toàn có sao lưu. |
-| **Nginx**<br>Site, server block và upstream; bật/tắt site, `nginx -t` trước mỗi lần reload, lỗi mở đúng dòng; cảnh báo chứng chỉ TLS sắp hết hạn. Xóa site, kèm chứng chỉ Let's Encrypt nếu không site nào khác dùng. | **Spotlight & Launchpad**<br>`⌘K` (hoặc kính lúp trên menu bar) để mở app, dịch vụ, container, thư mục, một `/đường/dẫn`, hoặc `> một lệnh` gõ sẵn vào Terminal. Launchpad (`⌘⇧A`) hiện mọi app và cho ghim vào Dock. |
-| **Khóa SSH**<br>`authorized_keys` của server, đánh dấu key Davish đang đăng nhập; thêm, gỡ key có sao lưu. Tạo deploy key trên server và thử với GitHub, GitLab (kiểm tra đúng host key họ công bố). Tạo key trên máy, đưa lên server rồi chuyển sang đăng nhập bằng nó. | **Khóa app**<br>Touch ID hoặc mật khẩu riêng che mọi thứ khi bạn rời máy. Quên mật khẩu thì đặt lại, nhưng Davish xóa mật khẩu server đã lưu trước, nên đặt lại không mở được đường vào server. Cửa sổ mở, đóng, thu nhỏ về Dock bằng hiệu ứng Genie. |
-| **Gói**<br>Gói apt, dnf, yum hoặc apk đã cài và có bản cập nhật, bản vá bảo mật lên đầu, có thông báo khi kết nối. Các runtime và chương trình trên server (nginx, MariaDB, Redis, Docker, Node.js qua nvm, PHP với php-fpm, Python…) kèm phiên bản, file cấu hình và dịch vụ; tìm được bằng Spotlight. Cài và nâng cấp thì gõ sẵn lệnh `sudo` vào Terminal cho bạn. | **Git**<br>Tìm repo trong home, `/var/www`, `/srv`, `/opt` hoặc thư mục bạn thêm. Nhánh, nhánh remote và số commit chưa đẩy/chưa kéo, file thay đổi kèm diff, biểu đồ commit của mọi nhánh với merge và tag. Fetch, `pull --ff-only` (bị chặn khi repo còn thay đổi chưa commit) và đổi nhánh sau khi xác nhận đúng lệnh; `npm ci` / yarn / pnpm theo lockfile trong Terminal. Remote từ chối key thì dẫn tới tạo deploy key. |
+**Trên server**
+
+- [Terminal](FEATURES.vi.md#terminal): nhiều tab, vẽ bằng GPU, prompt powerline tùy chọn
+- [Files](FEATURES.vi.md#files): SFTP kiểu Finder, kéo thả, copy giữa server
+- [Editor](FEATURES.vi.md#editor): CodeMirror, lưu atomic, có sao lưu
+- [Logs](FEATURES.vi.md#logs): journal, file, container, theo dõi trực tiếp
+- [Monitor](FEATURES.vi.md#monitor): CPU, RAM, ổ đĩa, mạng, GPU, tiến trình
+
+**Dịch vụ và ứng dụng**
+
+- [Services](FEATURES.vi.md#services): dịch vụ systemd, trạng thái, journal
+- [Docker](FEATURES.vi.md#docker): container, image và các layer
+- [Cron](FEATURES.vi.md#cron): lịch nói bằng lời
+- [Nginx](FEATURES.vi.md#nginx): site, `nginx -t` trước khi reload, hạn TLS
+- [Gói](FEATURES.vi.md#gói): bản cập nhật, bản vá bảo mật lên đầu, runtime
+- [Git](FEATURES.vi.md#git): trạng thái, diff, biểu đồ commit, fetch và pull
+
+**Mạng và an ninh**
+
+- [Cổng và tunnel](FEATURES.vi.md#cổng-và-tunnel): cổng đang nghe, tunnel về `127.0.0.1`
+- [Trình duyệt](FEATURES.vi.md#trình-duyệt): mở `localhost:3000` của server ngay trong Davish
+- [Ổ đĩa](FEATURES.vi.md#ổ-đĩa): thứ gì chiếm ổ đĩa, gợi ý dọn dẹp
+- [An ninh](FEATURES.vi.md#an-ninh): đăng nhập sai theo IP, ufw, fail2ban
+- [Khóa SSH](FEATURES.vi.md#khóa-ssh): authorized_keys, deploy key, key trên máy
+- [~/.ssh/config và ProxyJump](FEATURES.vi.md#sshconfig-và-proxyjump): nhập host, kết nối qua bastion
+
+**Desktop**
+
+- [Spotlight & Launchpad](FEATURES.vi.md#spotlight--launchpad): mở mọi thứ bằng `⌘K`
+- [Menu bar và trợ giúp](FEATURES.vi.md#menu-bar-và-trợ-giúp): mọi lệnh và phím tắt, nút `?` trên mỗi app
+- [Khóa app](FEATURES.vi.md#khóa-app): Touch ID hoặc mật khẩu, tự khóa khi máy dậy
 
 <table>
   <tr>
-    <td><img src="assets/screenshots/services.jpg" alt="Services"></td>
-    <td><img src="assets/screenshots/docker.jpg" alt="Docker với một container khởi động lại liên tục"></td>
+    <td><img src="assets/screenshots/browser.jpg" alt="Web app trên server, ngay trong Davish"></td>
+    <td><img src="assets/screenshots/docker-images.jpg" alt="Các layer của image Docker"></td>
   </tr>
   <tr>
-    <td><img src="assets/screenshots/logs.jpg" alt="Logs với đường dẫn file bấm được"></td>
-    <td><img src="assets/screenshots/nginx.jpg" alt="Site nginx với chứng chỉ TLS"></td>
+    <td><img src="assets/screenshots/ports.jpg" alt="Cổng và tunnel"></td>
+    <td><img src="assets/screenshots/git.jpg" alt="Biểu đồ commit Git"></td>
   </tr>
   <tr>
-    <td><img src="assets/screenshots/cron.jpg" alt="Tác vụ cron với lịch nói bằng lời"></td>
-    <td><img src="assets/screenshots/spotlight.jpg" alt="Spotlight"></td>
-  </tr>
-  <tr>
-    <td><img src="assets/screenshots/keys.jpg" alt="Khóa SSH: authorized_keys của server"></td>
-    <td><img src="assets/screenshots/remove.jpg" alt="Xóa site nginx cùng chứng chỉ Let's Encrypt"></td>
-  </tr>
-  <tr>
-    <td><img src="assets/screenshots/packages.jpg" alt="Gói: bản cập nhật, bản vá bảo mật lên đầu"></td>
-    <td><img src="assets/screenshots/packages-apps.jpg" alt="Chương trình trên server, Node.js với các phiên bản nvm"></td>
-  </tr>
-  <tr>
-    <td><img src="assets/screenshots/git.jpg" alt="Git: biểu đồ commit của mọi nhánh, kèm diff của một merge"></td>
-    <td><img src="assets/screenshots/git-changes.jpg" alt="Git: file thay đổi và diff của một file"></td>
-  </tr>
-  <tr>
-    <td><img src="assets/screenshots/launchpad.jpg" alt="Launchpad"></td>
-    <td><img src="assets/screenshots/genie.jpg" alt="Cửa sổ chảy vào Dock với hiệu ứng Genie"></td>
-  </tr>
-  <tr>
-    <td><img src="assets/screenshots/lock.jpg" alt="Màn khóa"></td>
-    <td><img src="assets/screenshots/welcome.jpg" alt="Trang chào"></td>
+    <td><img src="assets/screenshots/security.jpg" alt="Đăng nhập sai theo IP"></td>
+    <td><img src="assets/screenshots/disk.jpg" alt="Thứ gì chiếm ổ đĩa"></td>
   </tr>
 </table>
+
+**[Chi tiết từng app, kèm ảnh chụp →](FEATURES.vi.md)**
 
 > Ảnh chụp dùng dữ liệu mẫu của bản xem trước trên trình duyệt.
 

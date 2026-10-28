@@ -1,18 +1,19 @@
 <script lang="ts">
   import { untrack } from 'svelte'
 
-  import { apps, getApp } from '../../apps/registry'
+  import { apps, getApp, loadApp } from '../../apps/registry'
   import type { AppDef } from '../../apps/types'
-  import { monitorSetThresholds } from '../api/monitor'
+  import { monitorSetIdle, monitorSetThresholds } from '../api/monitor'
   import { nginxCheckCerts } from '../api/nginx'
   import { packagesCheckSecurity } from '../api/packages'
-  import { hasRuntime } from '../api/runtime'
+  import { exitDemo, hasRuntime, isDemo } from '../api/runtime'
   import { audit } from '../stores/audit.svelte'
   import { dockPins } from '../stores/dock.svelte'
   import { appLock } from '../stores/lock.svelte'
   import { notifications } from '../stores/notifications.svelte'
   import { servers } from '../stores/servers.svelte'
   import { settings } from '../stores/settings.svelte'
+  import { sleep } from '../stores/sleep.svelte'
   import { toUserError } from '../api/errors'
   import { transferReveal } from '../api/transfer'
   import { t } from '../i18n/vi'
@@ -23,7 +24,7 @@
     transferNoticeId,
     transfers,
   } from '../stores/transfers.svelte'
-  import { openFilesAt, openLogs, openTransfers } from '../wm/intents.svelte'
+  import { openDisk, openFilesAt, openLogs, openTransfers } from '../wm/intents.svelte'
   import Banners from './Banners.svelte'
   import { ui } from '../stores/ui.svelte'
   import Window from '../wm/Window.svelte'
@@ -37,9 +38,13 @@
   import HostKeyDialog from './HostKeyDialog.svelte'
   import ServerDialog from './ServerDialog.svelte'
   import ImportDialog from './ImportDialog.svelte'
+  import HelpDialog from './HelpDialog.svelte'
+  import Tour from './Tour.svelte'
   import SleepScreen from './SleepScreen.svelte'
   import { fadeOut } from '../motion'
   import { hasPrimaryModifier, isMac } from './platform'
+  import { buildMenus } from './menuModel.svelte'
+  import { findShortcut } from './menus.svelte'
 
   const MENUBAR_H = 30
   const DOCK_BOTTOM = 14
@@ -91,7 +96,11 @@
 
   // Threshold alerts and other notify:new events, for the app's lifetime.
   $effect(() =>
-    notifications.init((id) => servers.list.find((s) => s.id === id)?.name ?? id, openLogs),
+    notifications.init(
+      (id) => servers.list.find((s) => s.id === id)?.name ?? id,
+      openLogs,
+      openDisk,
+    ),
   )
 
   // Transfers outlive the Files window that started them: a download says
@@ -131,6 +140,14 @@
   $effect(() => {
     if (!hasRuntime) return
     void monitorSetThresholds(settings.alertMem, settings.alertDisk, settings.alertHold)
+  })
+
+  // Nobody looks at Davish while it is hidden, minimized, locked or asleep:
+  // metrics are then read every 30s instead of every 2s, enough for alerts.
+  let hidden = $state(document.hidden)
+  $effect(() => {
+    if (!hasRuntime) return
+    void monitorSetIdle(hidden || appLock.state.locked || sleep.active)
   })
 
   // TLS certificates nearing expiry notify once a server connects; checked
@@ -204,39 +221,27 @@
     return () => clearInterval(timer)
   })
 
+  // Every icon-only button gets its accessible name as a tooltip, so none
+  // is left unexplained; buttons with their own title keep it.
+  function tooltip(e: PointerEvent) {
+    const b =
+      e.target instanceof Element ? e.target.closest('button[aria-label]:not([title])') : null
+    const label = b?.getAttribute('aria-label')
+    if (b && label && !b.textContent?.trim()) b.setAttribute('title', label)
+  }
+
   function onKeyDown(e: KeyboardEvent) {
     if (!hasPrimaryModifier(e) || e.altKey) return
     // Off macOS the modifier is Ctrl, which the terminal needs (Ctrl+W,
     // Ctrl+K, Ctrl+1…): there Spotlight opens from outside the terminal.
     if (!isMac && e.target instanceof Element && e.target.closest('.xterm')) return
-    if (e.key.toLowerCase() === 'l' && !e.shiftKey) {
-      e.preventDefault()
-      appLock.lock()
-      return
-    }
-    if (e.shiftKey) {
-      if (e.key.toLowerCase() !== 'a') return
-      e.preventDefault()
-      ui.launchpad = !ui.launchpad
-      return
-    }
-    if (e.key.toLowerCase() === 'k') {
-      e.preventDefault()
-      ui.toggleSpotlight()
-      return
-    }
-    const key = e.key.toLowerCase()
-    if (key === 'w' && focused) {
-      wm.close(focused.id)
-    } else if (key === 'm' && focused) {
-      wm.minimize(focused.id)
-    } else if (key === ',') {
-      const settings = getApp('settings')
-      if (settings) launch(settings)
-    } else if (/^[1-9]$/.test(key)) {
-      servers.selectIndex(Number(key) - 1)
+    if (/^[1-9]$/.test(e.key) && !e.shiftKey) {
+      servers.selectIndex(Number(e.key) - 1)
     } else {
-      return
+      // Every other shortcut is a menu item's (menuModel.svelte.ts).
+      const item = findShortcut(buildMenus(), e)
+      if (!item) return
+      item.run()
     }
     e.preventDefault()
   }
@@ -249,7 +254,9 @@
   onkeydowncapture={markActive}
   onpointerdowncapture={markActive}
   onpointermove={markActive}
+  onpointerover={tooltip}
 />
+<svelte:document onvisibilitychange={() => (hidden = document.hidden)} />
 
 <div class="desktop">
   <MenuBar />
@@ -273,7 +280,9 @@
       <!-- Other workspaces stay mounted so their state survives switching. -->
       <div class="workspace" class:hidden={win.serverID !== serverID}>
         <Window {win} theme={app.theme} focused={focused?.id === win.id}>
-          <app.component {win} />
+          {#await loadApp(app) then AppView}
+            <AppView {win} />
+          {/await}
         </Window>
       </div>
     {/if}
@@ -293,6 +302,14 @@
   <Banners />
   <ServerDialog />
   <ImportDialog />
+  <HelpDialog />
+  <Tour />
+  {#if isDemo}
+    <div class="demo glass glass-strong" role="status">
+      <span>{t.demo.banner}</span>
+      <button type="button" class="btn" onclick={exitDemo}>{t.demo.exit}</button>
+    </div>
+  {/if}
   <HostKeyDialog />
   <SleepScreen />
 </div>
@@ -337,5 +354,19 @@
       opacity: 0;
       scale: 0.97;
     }
+  }
+
+  .demo {
+    position: fixed;
+    top: calc(var(--menubar-h) + 8px);
+    left: 50%;
+    translate: -50% 0;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 8px 6px 14px;
+    border-radius: 12px;
+    font-size: var(--text-sm);
   }
 </style>

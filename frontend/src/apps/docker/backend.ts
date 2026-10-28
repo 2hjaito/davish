@@ -2,6 +2,10 @@
 import {
   type ContainerAction,
   dockerAct,
+  dockerImage,
+  dockerImages,
+  dockerPlanImage,
+  dockerRemoveImage,
   dockerInspect,
   dockerList,
   dockerLogs,
@@ -9,7 +13,18 @@ import {
   dockerStats,
 } from '../../lib/api/docker'
 import { hasRuntime } from '../../lib/api/runtime'
-import { mockAct, mockInspect, mockList, mockLogs, mockPlan, mockStats } from './mock'
+import {
+  mockAct,
+  mockImage,
+  mockImages,
+  mockInspect,
+  mockList,
+  mockLogs,
+  mockPlan,
+  mockPlanImage,
+  mockRemoveImage,
+  mockStats,
+} from './mock'
 
 export const backend = hasRuntime
   ? {
@@ -19,6 +34,10 @@ export const backend = hasRuntime
       logs: dockerLogs,
       plan: dockerPlan,
       act: dockerAct,
+      images: dockerImages,
+      image: dockerImage,
+      planImage: dockerPlanImage,
+      removeImage: dockerRemoveImage,
     }
   : {
       list: (_serverID: string) => mockList(),
@@ -27,4 +46,8 @@ export const backend = hasRuntime
       logs: (_serverID: string, name: string) => mockLogs(name),
       plan: mockPlan,
       act: (_serverID: string, name: string, action: ContainerAction) => mockAct(name, action),
+      images: (_serverID: string) => mockImages(),
+      image: (_serverID: string, ref: string) => mockImage(ref),
+      planImage: mockPlanImage,
+      removeImage: (_serverID: string, ref: string, _command: string) => mockRemoveImage(ref),
     }

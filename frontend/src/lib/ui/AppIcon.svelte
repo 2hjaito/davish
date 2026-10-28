@@ -143,6 +143,50 @@
     <g transform="translate(13 13)" style:color="#f05032">
       <Icon name="brandGit" size={38} />
     </g>
+  {:else if id === 'ports'}
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#7ab8ff" />
+        <stop offset="1" stop-color="#2156c9" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    <g transform="translate(14 14)" style:color="#ffffff">
+      <Icon name="network" size={36} strokeWidth={2.4} />
+    </g>
+  {:else if id === 'disk'}
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffb35c" />
+        <stop offset="1" stop-color="#d9480f" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    <g transform="translate(14 14)" style:color="#ffffff">
+      <Icon name="disk" size={36} strokeWidth={2.4} />
+    </g>
+  {:else if id === 'security'}
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#6ee7a8" />
+        <stop offset="1" stop-color="#0f8a55" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    <g transform="translate(14 14)" style:color="#ffffff">
+      <Icon name="shield" size={36} strokeWidth={2.4} />
+    </g>
+  {:else if id === 'browser'}
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#8fd3ff" />
+        <stop offset="1" stop-color="#1a73c9" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    <g transform="translate(14 14)" style:color="#ffffff">
+      <Icon name="globe2" size={36} strokeWidth={2.2} />
+    </g>
   {:else if id === 'cron'}
     <defs>
       <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">

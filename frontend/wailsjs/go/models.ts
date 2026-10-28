@@ -318,6 +318,97 @@ export namespace cron {
 
 }
 
+export namespace disk {
+	
+	export class Cleanup {
+	    id: string;
+	    bytes: number;
+	    count?: number;
+	    command: string;
+	    root: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Cleanup(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.bytes = source["bytes"];
+	        this.count = source["count"];
+	        this.command = source["command"];
+	        this.root = source["root"];
+	    }
+	}
+	export class Entry {
+	    path: string;
+	    size: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Entry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.size = source["size"];
+	    }
+	}
+	export class Mount {
+	    path: string;
+	    total: number;
+	    used: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Mount(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.total = source["total"];
+	        this.used = source["used"];
+	    }
+	}
+	export class Usage {
+	    dir: string;
+	    size: number;
+	    entries: Entry[];
+	    partial: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Usage(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.dir = source["dir"];
+	        this.size = source["size"];
+	        this.entries = this.convertValues(source["entries"], Entry);
+	        this.partial = source["partial"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
 export namespace docker {
 	
 	export class Container {
@@ -382,6 +473,111 @@ export namespace docker {
 	        this.json = source["json"];
 	    }
 	}
+	export class Image {
+	    id: string;
+	    repository: string;
+	    tag: string;
+	    created: string;
+	    createdSince: string;
+	    size: number;
+	    containers: number;
+	    dangling: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Image(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.repository = source["repository"];
+	        this.tag = source["tag"];
+	        this.created = source["created"];
+	        this.createdSince = source["createdSince"];
+	        this.size = source["size"];
+	        this.containers = source["containers"];
+	        this.dangling = source["dangling"];
+	    }
+	}
+	export class Layer {
+	    createdBy: string;
+	    size: number;
+	    comment?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Layer(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.createdBy = source["createdBy"];
+	        this.size = source["size"];
+	        this.comment = source["comment"];
+	    }
+	}
+	export class ImageDetail {
+	    layers: Layer[];
+	    architecture: string;
+	    os: string;
+	    entrypoint: string[];
+	    cmd: string[];
+	    workingDir: string;
+	    user: string;
+	    env: string[];
+	    exposedPorts: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new ImageDetail(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.layers = this.convertValues(source["layers"], Layer);
+	        this.architecture = source["architecture"];
+	        this.os = source["os"];
+	        this.entrypoint = source["entrypoint"];
+	        this.cmd = source["cmd"];
+	        this.workingDir = source["workingDir"];
+	        this.user = source["user"];
+	        this.env = source["env"];
+	        this.exposedPorts = source["exposedPorts"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class ImagePlan {
+	    ref: string;
+	    command: string;
+	    run: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ImagePlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ref = source["ref"];
+	        this.command = source["command"];
+	        this.run = source["run"];
+	    }
+	}
+	
 	export class LogLine {
 	    time: string;
 	    text: string;
@@ -1303,6 +1499,223 @@ export namespace packages {
 	    }
 	}
 	
+
+}
+
+export namespace ports {
+	
+	export class Port {
+	    addr: string;
+	    port: number;
+	    process?: string;
+	    pid?: number;
+	    container?: string;
+	    loopback: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Port(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.addr = source["addr"];
+	        this.port = source["port"];
+	        this.process = source["process"];
+	        this.pid = source["pid"];
+	        this.container = source["container"];
+	        this.loopback = source["loopback"];
+	    }
+	}
+	export class List {
+	    ports: Port[];
+	    root: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new List(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ports = this.convertValues(source["ports"], Port);
+	        this.root = source["root"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	export class Site {
+	    serverID: string;
+	    remotePort: number;
+	    localPort: number;
+	    token: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Site(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.serverID = source["serverID"];
+	        this.remotePort = source["remotePort"];
+	        this.localPort = source["localPort"];
+	        this.token = source["token"];
+	    }
+	}
+	export class Tunnel {
+	    id: string;
+	    serverID: string;
+	    remoteHost: string;
+	    remotePort: number;
+	    localPort: number;
+	    moved: boolean;
+	    hostHeader?: string;
+	    conns: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Tunnel(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.serverID = source["serverID"];
+	        this.remoteHost = source["remoteHost"];
+	        this.remotePort = source["remotePort"];
+	        this.localPort = source["localPort"];
+	        this.moved = source["moved"];
+	        this.hostHeader = source["hostHeader"];
+	        this.conns = source["conns"];
+	    }
+	}
+
+}
+
+export namespace security {
+	
+	export class Attempts {
+	    ip: string;
+	    count: number;
+	    users: string[];
+	    last: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Attempts(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ip = source["ip"];
+	        this.count = source["count"];
+	        this.users = source["users"];
+	        this.last = source["last"];
+	    }
+	}
+	export class Firewall {
+	    installed: boolean;
+	    needsRoot: boolean;
+	    active: boolean;
+	    lines: string[];
+	    banned?: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Firewall(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.installed = source["installed"];
+	        this.needsRoot = source["needsRoot"];
+	        this.active = source["active"];
+	        this.lines = source["lines"];
+	        this.banned = source["banned"];
+	    }
+	}
+	export class Login {
+	    time: string;
+	    user: string;
+	    ip: string;
+	    method: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Login(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.time = source["time"];
+	        this.user = source["user"];
+	        this.ip = source["ip"];
+	        this.method = source["method"];
+	    }
+	}
+	export class Report {
+	    root: boolean;
+	    source: string;
+	    accepted: Login[];
+	    failed: Attempts[];
+	    failedTotal: number;
+	    last: string[];
+	    lastb: string[];
+	    lastbDenied: boolean;
+	    ufw: Firewall;
+	    fail2ban: Firewall;
+	    passwordAuth: string;
+	    disablePassword: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Report(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.root = source["root"];
+	        this.source = source["source"];
+	        this.accepted = this.convertValues(source["accepted"], Login);
+	        this.failed = this.convertValues(source["failed"], Attempts);
+	        this.failedTotal = source["failedTotal"];
+	        this.last = source["last"];
+	        this.lastb = source["lastb"];
+	        this.lastbDenied = source["lastbDenied"];
+	        this.ufw = this.convertValues(source["ufw"], Firewall);
+	        this.fail2ban = this.convertValues(source["fail2ban"], Firewall);
+	        this.passwordAuth = source["passwordAuth"];
+	        this.disablePassword = source["disablePassword"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 
 }
 

@@ -5,6 +5,9 @@ import type {
   ContainerAction,
   ContainerDetail,
   ContainerStats,
+  Image,
+  ImageDetail,
+  ImagePlan,
   LogLine,
 } from '../../lib/api/docker'
 
@@ -93,4 +96,66 @@ export async function mockAct(name: string, action: ContainerAction): Promise<vo
   if (name === 'db') throw { code: 'CMD_NEEDS_ROOT', message: 'needs root' }
   const c = list.find((x) => x.name === name)
   if (c) c.state = action === 'stop' ? 'exited' : 'running'
+}
+
+let images: Image[] = [
+  ['sha256:cf41f4080901', 'myapp/api', '2.4.1', '2 days ago', 431 * MB, 2],
+  ['sha256:9a68dc314d7a', 'myapp/worker', '2.4.1', '2 days ago', 2140 * MB, 1],
+  ['sha256:c53852c00c23', 'postgres', '16', '12 days ago', 1120 * MB, 1],
+  ['sha256:acc6678fb1fa', 'redis', '7-alpine', '17 days ago', 41 * MB, 1],
+  ['sha256:4731c9d4264a', 'myapp/api', '2.3.0', '3 weeks ago', 419 * MB, 0],
+  ['sha256:2703a43d0d47', '<none>', '<none>', '1 month ago', 434 * MB, 0],
+].map(([id, repository, tag, createdSince, size, containers]) => ({
+  id: id as string,
+  repository: repository as string,
+  tag: tag as string,
+  created: '2026-10-26 09:12:40 +0700 +07',
+  createdSince: createdSince as string,
+  size: size as number,
+  containers: containers as number,
+  dangling: repository === '<none>',
+}))
+
+export const mockImages = () => delay(images.map((i) => ({ ...i })))
+
+export const mockImage = (_ref: string): Promise<ImageDetail> =>
+  delay({
+    layers: [
+      { createdBy: 'ADD alpine-minirootfs-3.20.3-aarch64.tar.gz / # buildkit', size: 9.31 * MB },
+      { createdBy: 'CMD ["/bin/sh"]', size: 0 },
+      { createdBy: 'ENV NODE_VERSION=22.23.4', size: 0 },
+      {
+        createdBy: 'RUN addgroup -g 1000 node && adduser -u 1000 -G node -s /bin/sh -D node',
+        size: 158.33 * MB,
+      },
+      {
+        createdBy: 'RUN apk add --no-cache --virtual .build-deps-yarn curl gnupg tar',
+        size: 5.49 * MB,
+      },
+      { createdBy: 'COPY docker-entrypoint.sh /usr/local/bin/ # buildkit', size: 20480 },
+      { createdBy: 'ENTRYPOINT ["docker-entrypoint.sh"]', size: 0 },
+      { createdBy: 'WORKDIR /app', size: 0 },
+      { createdBy: 'COPY . . # buildkit', size: 258 * MB },
+      { createdBy: 'EXPOSE map[3000/tcp:{}]', size: 0 },
+      { createdBy: 'CMD ["node" "server.js"]', size: 0 },
+    ],
+    architecture: 'arm64',
+    os: 'linux',
+    entrypoint: ['docker-entrypoint.sh'],
+    cmd: ['node', 'server.js'],
+    workingDir: '/app',
+    user: 'node',
+    env: [
+      'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+      'NODE_VERSION=22.23.4',
+    ],
+    exposedPorts: ['3000/tcp'],
+  })
+
+export const mockPlanImage = (ref: string): Promise<ImagePlan> =>
+  delay({ ref, command: `docker rmi ${ref}`, run: `docker run --rm -it ${ref}` })
+
+export function mockRemoveImage(ref: string): Promise<void> {
+  images = images.filter((i) => (i.dangling ? i.id : `${i.repository}:${i.tag}`) !== ref)
+  return delay(undefined, 400)
 }

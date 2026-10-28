@@ -10,6 +10,7 @@
   import { hasRuntime } from '../api/runtime'
   import { t } from '../i18n/vi'
   import { servers } from '../stores/servers.svelte'
+  import { ui } from '../stores/ui.svelte'
   import AppIcon from '../ui/AppIcon.svelte'
   import Icon from '../ui/Icon.svelte'
   import type { IconName } from '../ui/icons'
@@ -46,7 +47,8 @@
   $effect(() => {
     if (!open) return
     untrack(() => {
-      query = ''
+      query = ui.spotlightSeed
+      ui.spotlightSeed = ''
       index = 0
       requestAnimationFrame(() => input?.focus())
       if (!connected) return
@@ -153,6 +155,23 @@
         icon: 'folder',
         run: () => openFilesAt(serverID, f),
       })
+    // Help answers a question, so it shows only once something is typed.
+    if (query.trim())
+      for (const [appId, h] of Object.entries(t.help.apps)) {
+        const app = getApp(appId)
+        if (!app) continue
+        all.push({
+          kind: 'help',
+          id: appId,
+          label: t.help.spotlight(app.label),
+          detail: [h.does, ...h.actions, ...h.runs].join(' · '),
+          icon: 'help',
+          run: () => {
+            wm.openOrFocus(app.id, serverID, { title: app.label, size: app.size })
+            ui.help = { kind: 'app', appId }
+          },
+        })
+      }
     // A path or command typed in full is the point of the query: keep it
     // even when it matches nothing else.
     const q = want ? '' : query

@@ -57,6 +57,7 @@ const ICONS = {
   grid: 'FiGrid',
   list: 'FiList',
   info: 'FiInfo',
+  help: 'FiHelpCircle',
   pause: 'FiPause',
   memory: 'LuMemoryStick',
   gpu: 'LuGpu',

@@ -10,6 +10,14 @@ export function AuditEntries() {
   return window['go']['app']['App']['AuditEntries']();
 }
 
+export function BrowserOpen(arg1, arg2) {
+  return window['go']['app']['App']['BrowserOpen'](arg1, arg2);
+}
+
+export function BrowserSites() {
+  return window['go']['app']['App']['BrowserSites']();
+}
+
 export function Connect(arg1) {
   return window['go']['app']['App']['Connect'](arg1);
 }
@@ -42,8 +50,36 @@ export function Disconnect(arg1) {
   return window['go']['app']['App']['Disconnect'](arg1);
 }
 
+export function DiskCancel(arg1) {
+  return window['go']['app']['App']['DiskCancel'](arg1);
+}
+
+export function DiskClean(arg1, arg2, arg3) {
+  return window['go']['app']['App']['DiskClean'](arg1, arg2, arg3);
+}
+
+export function DiskCleanups(arg1) {
+  return window['go']['app']['App']['DiskCleanups'](arg1);
+}
+
+export function DiskMounts(arg1) {
+  return window['go']['app']['App']['DiskMounts'](arg1);
+}
+
+export function DiskUsage(arg1, arg2, arg3) {
+  return window['go']['app']['App']['DiskUsage'](arg1, arg2, arg3);
+}
+
 export function DockerAct(arg1, arg2, arg3) {
   return window['go']['app']['App']['DockerAct'](arg1, arg2, arg3);
+}
+
+export function DockerImage(arg1, arg2) {
+  return window['go']['app']['App']['DockerImage'](arg1, arg2);
+}
+
+export function DockerImages(arg1) {
+  return window['go']['app']['App']['DockerImages'](arg1);
 }
 
 export function DockerInspect(arg1, arg2) {
@@ -60,6 +96,14 @@ export function DockerLogs(arg1, arg2) {
 
 export function DockerPlan(arg1, arg2) {
   return window['go']['app']['App']['DockerPlan'](arg1, arg2);
+}
+
+export function DockerPlanImage(arg1) {
+  return window['go']['app']['App']['DockerPlanImage'](arg1);
+}
+
+export function DockerRemoveImage(arg1, arg2, arg3) {
+  return window['go']['app']['App']['DockerRemoveImage'](arg1, arg2, arg3);
 }
 
 export function DockerStats(arg1) {
@@ -234,6 +278,10 @@ export function MonitorProcesses(arg1, arg2) {
   return window['go']['app']['App']['MonitorProcesses'](arg1, arg2);
 }
 
+export function MonitorSetIdle(arg1) {
+  return window['go']['app']['App']['MonitorSetIdle'](arg1);
+}
+
 export function MonitorSetThresholds(arg1, arg2, arg3) {
   return window['go']['app']['App']['MonitorSetThresholds'](arg1, arg2, arg3);
 }
@@ -306,6 +354,14 @@ export function PackagesPlan(arg1, arg2, arg3) {
   return window['go']['app']['App']['PackagesPlan'](arg1, arg2, arg3);
 }
 
+export function PortsList(arg1) {
+  return window['go']['app']['App']['PortsList'](arg1);
+}
+
+export function PortsProbe(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['PortsProbe'](arg1, arg2, arg3, arg4);
+}
+
 export function ReorderServers(arg1) {
   return window['go']['app']['App']['ReorderServers'](arg1);
 }
@@ -316,6 +372,10 @@ export function SSHConfigHosts() {
 
 export function SaveServer(arg1) {
   return window['go']['app']['App']['SaveServer'](arg1);
+}
+
+export function SecurityReport(arg1) {
+  return window['go']['app']['App']['SecurityReport'](arg1);
 }
 
 export function ServicesAct(arg1, arg2, arg3) {
@@ -400,6 +460,18 @@ export function TransferReveal(arg1) {
 
 export function TransferUpload(arg1, arg2, arg3) {
   return window['go']['app']['App']['TransferUpload'](arg1, arg2, arg3);
+}
+
+export function TunnelList() {
+  return window['go']['app']['App']['TunnelList']();
+}
+
+export function TunnelStart(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['TunnelStart'](arg1, arg2, arg3, arg4);
+}
+
+export function TunnelStop(arg1) {
+  return window['go']['app']['App']['TunnelStop'](arg1);
 }
 
 export function Unlock(arg1) {
