@@ -3,8 +3,8 @@ package app
 import "davish/internal/logs"
 
 // LogsStart follows a journal unit, a file or a container and returns the
-// stream ID; lines arrive as logs:line, the end as logs:end.
-func (a *App) LogsStart(serverID string, src logs.Source) (string, error) {
+// stream ID with its sudo form; lines arrive as logs:line, the end as logs:end.
+func (a *App) LogsStart(serverID string, src logs.Source) (logs.Started, error) {
 	return a.logs.Start(a.ctx, serverID, src)
 }
 

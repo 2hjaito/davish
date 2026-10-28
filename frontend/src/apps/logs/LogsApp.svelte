@@ -23,6 +23,8 @@
 
   const ctx = getWindowContext()
   const KINDS: LogKind[] = ['journal', 'file', 'docker']
+  /** How long a journal may stay empty before the reasons are shown. */
+  const QUIET_MS = 5000
 
   // The source being typed, remembered per server.
   const saved = load(`logs:${untrack(() => win.serverID)}`, {
@@ -42,7 +44,10 @@
   let failure = $state('')
   let sudo = $state('')
   let suggestions = $state.raw<string[]>([])
+  /** The sudo command to offer once a journal stays silent. */
+  let quiet = $state('')
   let stop: (() => void) | null = null
+  let quietTimer: ReturnType<typeof setTimeout> | undefined
 
   const server = $derived(servers.list.find((s) => s.id === win.serverID))
   const connected = $derived(server?.state === 'connected')
@@ -65,12 +70,15 @@
     paused = false
     failure = ''
     sudo = ''
+    quiet = ''
+    clearTimeout(quietTimer)
     status = 'live'
     const mine = src
     try {
       const s = await follow(win.serverID, src, {
         lines: (batch) => {
           if (source !== mine) return
+          quiet = ''
           if (paused) held = append(held, batch)
           else lines = append(lines, batch)
         },
@@ -86,8 +94,16 @@
           }
         },
       })
-      if (source === mine && status === 'live') stop = s
-      else s()
+      if (source === mine && status === 'live') {
+        stop = s.stop
+        // journalctl prints nothing, not an error, for an account that
+        // cannot read the system journal; say so instead of waiting on.
+        if (src.kind === 'journal')
+          quietTimer = setTimeout(() => {
+            if (source === mine && status === 'live' && lines.length === 0 && held.length === 0)
+              quiet = s.sudo
+          }, QUIET_MS)
+      } else s.stop()
     } catch (e) {
       if (source !== mine) return
       const ue = toUserError(e)
@@ -139,7 +155,10 @@
     })
   })
 
-  $effect(() => () => stop?.())
+  $effect(() => () => {
+    stop?.()
+    clearTimeout(quietTimer)
+  })
 
   async function suggest() {
     try {
@@ -244,6 +263,10 @@
   {:else if status === 'failed' && sudo}
     <div class="root">
       <NeedsRoot serverID={win.serverID} command={sudo} message={t.logs.needsRoot} />
+    </div>
+  {:else if quiet && status === 'live' && connected && lines.length === 0}
+    <div class="root">
+      <NeedsRoot serverID={win.serverID} command={quiet} message={t.logs.quiet} />
     </div>
   {:else if lines.length === 0}
     <Empty
@@ -425,9 +448,18 @@
     color: var(--fg-on-dark);
   }
 
+  /* Fills the body like the log view; the notice keeps its light-theme
+     text, so it sits on a light card in this dark window. */
   .root {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
     padding: 16px;
     color: var(--fg);
+  }
+
+  .root :global([role='alert']) {
+    background: var(--content-bg);
   }
 
   .status {

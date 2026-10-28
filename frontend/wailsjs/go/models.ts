@@ -700,6 +700,20 @@ export namespace logs {
 	        this.target = source["target"];
 	    }
 	}
+	export class Started {
+	    streamID: string;
+	    sudo: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Started(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.streamID = source["streamID"];
+	        this.sudo = source["sudo"];
+	    }
+	}
 
 }
 

@@ -71,7 +71,7 @@ export function FilesWrite(arg1:string,arg2:string,arg3:Array<number>):Promise<f
 
 export function ListServers():Promise<Array<app.ServerView>>;
 
-export function LogsStart(arg1:string,arg2:logs.Source):Promise<string>;
+export function LogsStart(arg1:string,arg2:logs.Source):Promise<logs.Started>;
 
 export function LogsStop(arg1:string):Promise<void>;
 
