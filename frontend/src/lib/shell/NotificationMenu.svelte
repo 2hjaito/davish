@@ -104,10 +104,12 @@
 
   .text {
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 2px;
     font-size: var(--text-sm);
+    overflow-wrap: anywhere;
   }
 
   .text span {

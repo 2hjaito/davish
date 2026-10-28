@@ -86,9 +86,6 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
-  }
-
-  strong {
     overflow-wrap: anywhere;
   }
 
