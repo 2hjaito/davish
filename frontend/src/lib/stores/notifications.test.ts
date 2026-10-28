@@ -146,3 +146,26 @@ suite('banners', () => {
     expect(notifications.bannerIds[0]).toBe('2')
   })
 })
+
+suite('disk alert', () => {
+  it('opens the Disk app at the full mount', () => {
+    const opened: string[] = []
+    const n = describe(
+      {
+        id: 'd',
+        level: 'warn',
+        kind: 'disk-high',
+        serverID: 's',
+        value: 91,
+        threshold: 85,
+        mount: '/var',
+      },
+      'web-1',
+      0,
+      undefined,
+      (id, mount) => opened.push(`${id}:${mount}`),
+    )
+    n.action?.run()
+    expect(opened).toEqual(['s:/var'])
+  })
+})

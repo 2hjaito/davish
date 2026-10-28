@@ -4,6 +4,7 @@ import CronApp from './cron/CronApp.svelte'
 import KeysApp from './keys/KeysApp.svelte'
 import PackagesApp from './packages/PackagesApp.svelte'
 import PortsApp from './ports/PortsApp.svelte'
+import DiskApp from './disk/DiskApp.svelte'
 import DockerApp from './docker/DockerApp.svelte'
 import EditorApp from './editor/EditorApp.svelte'
 import FilesApp from './files/FilesApp.svelte'
@@ -17,6 +18,7 @@ import TerminalApp from './terminal/TerminalApp.svelte'
 import TransfersApp from './transfers/TransfersApp.svelte'
 import {
   AUDIT_SIZE,
+  DISK_SIZE,
   EDITOR_SIZE,
   FILES_SIZE,
   LOGS_SIZE,
@@ -122,6 +124,14 @@ export const apps: AppDef[] = [
     theme: 'light',
     size: { w: 900, h: 580 },
     component: PortsApp,
+  },
+  {
+    id: 'disk',
+    label: t.apps.disk,
+    icon: 'disk',
+    theme: 'light',
+    size: DISK_SIZE,
+    component: DiskApp,
   },
   {
     id: 'editor',

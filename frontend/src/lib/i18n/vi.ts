@@ -74,6 +74,53 @@ export const t = {
     packages: 'Gói',
     git: 'Git',
     ports: 'Cổng',
+    disk: 'Ổ đĩa',
+  },
+  disk: {
+    sections: 'Ổ đĩa',
+    clean: 'Dọn dẹp',
+    search: 'Lọc theo tên',
+    offline: 'Server chưa kết nối',
+    offlineHint: 'Dung lượng sẽ hiện khi server kết nối lại.',
+    loading: 'Đang đọc ổ đĩa…',
+    used: (used: string, total: string, pct: number) => `${used} / ${total} (${pct}%)`,
+    measure: 'Đo thư mục này',
+    measureHint:
+      'Mỗi lần bấm chỉ đo các thư mục con trực tiếp (du -x -d 1), tối đa 30 giây, không quét cả cây.',
+    measuring: 'Đang đo…',
+    cancel: 'Hủy',
+    up: 'Lên thư mục cha',
+    partial: 'Hết 30 giây: số liệu chưa đủ, các thư mục lớn có thể thiếu.',
+    empty: 'Chưa đo. Bấm "Đo thư mục này".',
+    noChildren: 'Không có thư mục con nào đọc được.',
+    openFiles: 'Mở trong Files',
+    drill: 'Đo bên trong',
+    noSelection: 'Chọn một mục để xem.',
+    count: (n: number) => `${n} mục`,
+    cleanEmpty: 'Không có gì đáng dọn.',
+    cleanLoading: 'Đang ước lượng…',
+    frees: (size: string) => `Lấy lại khoảng ${size}`,
+    files: (n: number) => `${n} file`,
+    needsRoot: 'Lệnh cần root: Davish gõ sẵn vào Terminal với sudo, bạn xem rồi tự nhấn Enter.',
+    toTerminal: 'Mở Terminal với lệnh',
+    run: 'Dọn…',
+    done: 'Đã dọn xong.',
+    cleanups: {
+      docker: {
+        title: 'Docker: container dừng, image và cache build không dùng',
+        body: 'Xóa container đã dừng, network không dùng, image treo và cache build. Volume được giữ lại. Lệnh sẽ chạy:',
+      },
+      journal: {
+        title: 'Journal của systemd',
+        body: 'Xóa journal cũ, chỉ giữ 100 MB gần nhất. Lệnh sẽ chạy:',
+      },
+      logs: {
+        title: 'Log xoay vòng cũ trong /var/log',
+        body: 'Xóa các file log đã xoay vòng (*.gz, *.1, *.old); log đang ghi không bị đụng. Lệnh sẽ chạy:',
+      },
+      apt: { title: 'Cache gói apt', body: 'Xóa các gói .deb đã tải về. Lệnh sẽ chạy:' },
+      dnf: { title: 'Cache gói dnf', body: 'Xóa cache metadata và gói của dnf. Lệnh sẽ chạy:' },
+    } as Record<string, { title: string; body: string }>,
   },
   ports: {
     sections: 'Cổng',
@@ -537,6 +584,16 @@ export const t = {
           'lệnh --version của từng chương trình',
         ],
       },
+      disk: {
+        does: 'Thứ gì chiếm ổ đĩa: đo từng thư mục một, đi sâu từng tầng; gợi ý dọn dẹp kèm dung lượng lấy lại.',
+        actions: ['Đo thư mục, bấm đúp để đi sâu', 'Dọn Docker, journal, log cũ, cache gói'],
+        keys: ['Enter: đi sâu', 'Backspace: lên thư mục cha'],
+        runs: [
+          'df, du -x -d 1 (khi bấm Đo)',
+          'docker system df, journalctl --disk-usage, find /var/log',
+          'lệnh dọn dẹp (có xác nhận, cần root thì qua Terminal)',
+        ],
+      },
       ports: {
         does: 'Cổng TCP server đang nghe, process và container mở nó; tunnel cổng về máy này qua SSH.',
         actions: [
@@ -695,6 +752,7 @@ export const t = {
     reject: 'Hủy',
   },
   notifications: {
+    showDisk: 'Xem ổ đĩa',
     title: 'Thông báo',
     empty: 'Không có thông báo',
     memHigh: (server: string) => `RAM trên ${server} sắp đầy`,

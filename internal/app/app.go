@@ -14,6 +14,7 @@ import (
 	"davish/internal/audit"
 	"davish/internal/conn"
 	"davish/internal/cron"
+	"davish/internal/disk"
 	"davish/internal/docker"
 	"davish/internal/fs"
 	"davish/internal/git"
@@ -57,6 +58,7 @@ type App struct {
 	git       *git.Service
 	ports     *ports.Lister
 	tunnels   *ports.Tunnels
+	disk      *disk.Service
 }
 
 // New wires the services with their config under os.UserConfigDir()/davish.
@@ -89,6 +91,7 @@ func New() (*App, error) {
 	a.packages = packages.New(runner, emitter{a})
 	a.git = git.New(runner)
 	a.ports = ports.NewLister(runner)
+	a.disk = disk.New(runner)
 	a.tunnels = ports.NewTunnels(a.conns, emitter{a}, log)
 	a.logs = logs.New(a.conns, a.audit, emitter{a}, log)
 	if a.transfers, err = transfer.New(a.conns, emitter{a}, log, transfer.Options{}); err != nil {
