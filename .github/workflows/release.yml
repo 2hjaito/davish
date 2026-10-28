@@ -51,23 +51,39 @@ jobs:
       - name: Install frontend deps
         run: make frontend-install
 
+      # wails build -nsis needs makensis for the Windows installer.
+      - name: Install NSIS
+        if: runner.os == 'Windows'
+        run: |
+          command -v makensis || choco install nsis -y --no-progress
+          echo "C:/Program Files (x86)/NSIS" >> "$GITHUB_PATH"
+
       - name: Build
         run: |
           case "$RUNNER_OS" in
             macOS) wails build -platform darwin/universal -trimpath ;;
             Linux) wails build -tags webkit2_41 -trimpath ;;
-            *) wails build -trimpath ;;
+            *) wails build -trimpath -nsis ;;
           esac
 
-      # One archive per platform, named after the version and target.
+      # An installer (.pkg on macOS, .exe on Windows) plus a portable
+      # archive per platform, named after the version and target.
       - name: Package
         run: |
           name="Davish-${GITHUB_REF_NAME}-${{ matrix.target }}"
           mkdir -p dist
           case "$RUNNER_OS" in
-            macOS) ditto -c -k --keepParent build/bin/Davish.app "dist/$name.zip" ;;
+            macOS)
+              pkgbuild --component build/bin/Davish.app \
+                --install-location /Applications \
+                --identifier io.github.2hjaito.davish \
+                --version "${GITHUB_REF_NAME#v}" \
+                "dist/$name.pkg"
+              ditto -c -k --keepParent build/bin/Davish.app "dist/$name.zip" ;;
             Linux) tar -C build/bin -czf "dist/$name.tar.gz" Davish ;;
-            *) (cd build/bin && 7z a "../../dist/$name.zip" Davish.exe) ;;
+            *)
+              cp build/bin/Davish-amd64-installer.exe "dist/$name-setup.exe"
+              (cd build/bin && 7z a "../../dist/$name.zip" Davish.exe) ;;
           esac
           ls -la dist
 
