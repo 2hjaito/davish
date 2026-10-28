@@ -66,9 +66,12 @@ const ICONS = {
   clock: 'FiClock',
   shield: 'FiShield',
   globe2: 'FiGlobe',
+  gitBranch: 'FiGitBranch',
+  gitCommit: 'FiGitCommit',
   // Official marks (Simple Icons) for third-party tools; see ADR 0003.
   brandDocker: 'SiDocker',
   brandNginx: 'SiNginx',
+  brandGit: 'SiGit',
 }
 
 const PACKS = {

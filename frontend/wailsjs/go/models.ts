@@ -684,6 +684,139 @@ export namespace fs {
 
 }
 
+export namespace git {
+	
+	export class Change {
+	    path: string;
+	    origPath: string;
+	    index: string;
+	    worktree: string;
+	    conflict: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Change(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.origPath = source["origPath"];
+	        this.index = source["index"];
+	        this.worktree = source["worktree"];
+	        this.conflict = source["conflict"];
+	    }
+	}
+	export class Commit {
+	    hash: string;
+	    short: string;
+	    author: string;
+	    time: number;
+	    subject: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Commit(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.hash = source["hash"];
+	        this.short = source["short"];
+	        this.author = source["author"];
+	        this.time = source["time"];
+	        this.subject = source["subject"];
+	    }
+	}
+	export class Diff {
+	    text: string;
+	    truncated: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Diff(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.text = source["text"];
+	        this.truncated = source["truncated"];
+	    }
+	}
+	export class DiffRequest {
+	    dir: string;
+	    commit: string;
+	    file: string;
+	    untracked: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new DiffRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.dir = source["dir"];
+	        this.commit = source["commit"];
+	        this.file = source["file"];
+	        this.untracked = source["untracked"];
+	    }
+	}
+	export class Repo {
+	    path: string;
+	    name: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Repo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.name = source["name"];
+	    }
+	}
+	export class Status {
+	    branch: string;
+	    upstream: string;
+	    ahead: number;
+	    behind: number;
+	    last?: Commit;
+	    changes: Change[];
+	    truncated: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Status(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.branch = source["branch"];
+	        this.upstream = source["upstream"];
+	        this.ahead = source["ahead"];
+	        this.behind = source["behind"];
+	        this.last = this.convertValues(source["last"], Commit);
+	        this.changes = this.convertValues(source["changes"], Change);
+	        this.truncated = source["truncated"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
 export namespace lock {
 	
 	export class State {

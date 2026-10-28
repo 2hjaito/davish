@@ -16,6 +16,7 @@ import (
 	"davish/internal/cron"
 	"davish/internal/docker"
 	"davish/internal/fs"
+	"davish/internal/git"
 	"davish/internal/lock"
 	"davish/internal/logs"
 	"davish/internal/nginx"
@@ -52,6 +53,7 @@ type App struct {
 	lock      *lock.Service
 	keys      *sshkeys.Service
 	packages  *packages.Service
+	git       *git.Service
 }
 
 // New wires the services with their config under os.UserConfigDir()/davish.
@@ -82,6 +84,7 @@ func New() (*App, error) {
 	a.nginx = nginx.New(runner, a.conns, emitter{a})
 	a.keys = sshkeys.New(a.conns, runner)
 	a.packages = packages.New(runner, emitter{a})
+	a.git = git.New(runner)
 	a.logs = logs.New(a.conns, a.audit, emitter{a}, log)
 	if a.transfers, err = transfer.New(a.conns, emitter{a}, log, transfer.Options{}); err != nil {
 		return nil, err

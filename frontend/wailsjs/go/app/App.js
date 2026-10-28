@@ -118,6 +118,22 @@ export function FilesWrite(arg1, arg2, arg3) {
   return window['go']['app']['App']['FilesWrite'](arg1, arg2, arg3);
 }
 
+export function GitDiff(arg1, arg2) {
+  return window['go']['app']['App']['GitDiff'](arg1, arg2);
+}
+
+export function GitFind(arg1, arg2) {
+  return window['go']['app']['App']['GitFind'](arg1, arg2);
+}
+
+export function GitLog(arg1, arg2, arg3) {
+  return window['go']['app']['App']['GitLog'](arg1, arg2, arg3);
+}
+
+export function GitStatus(arg1, arg2) {
+  return window['go']['app']['App']['GitStatus'](arg1, arg2);
+}
+
 export function KeysAdd(arg1, arg2, arg3) {
   return window['go']['app']['App']['KeysAdd'](arg1, arg2, arg3);
 }

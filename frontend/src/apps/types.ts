@@ -14,6 +14,7 @@ export type AppId =
   | 'nginx'
   | 'keys'
   | 'packages'
+  | 'git'
   | 'editor'
   | 'settings'
   | 'transfers'

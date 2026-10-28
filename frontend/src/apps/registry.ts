@@ -6,6 +6,7 @@ import PackagesApp from './packages/PackagesApp.svelte'
 import DockerApp from './docker/DockerApp.svelte'
 import EditorApp from './editor/EditorApp.svelte'
 import FilesApp from './files/FilesApp.svelte'
+import GitApp from './git/GitApp.svelte'
 import LogsApp from './logs/LogsApp.svelte'
 import NginxApp from './nginx/NginxApp.svelte'
 import MonitorApp from './monitor/MonitorApp.svelte'
@@ -104,6 +105,14 @@ export const apps: AppDef[] = [
     theme: 'light',
     size: { w: 960, h: 600 },
     component: PackagesApp,
+  },
+  {
+    id: 'git',
+    label: t.apps.git,
+    icon: 'gitBranch',
+    theme: 'light',
+    size: { w: 980, h: 620 },
+    component: GitApp,
   },
   {
     id: 'editor',
