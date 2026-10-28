@@ -21,7 +21,7 @@ class AppLock {
 
   async init(): Promise<() => void> {
     if (!hasRuntime) {
-      this.#set({ ...this.state })
+      this.everUnlocked = true
       this.ready = true
       return () => {}
     }
