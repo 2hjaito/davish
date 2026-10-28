@@ -2,9 +2,9 @@
   import type { Snippet } from 'svelte'
 
   import { t } from '../i18n/vi'
-  import { windowZoom } from '../motion'
+  import { dockTile, windowZoom } from '../motion'
   import { setWindowContext } from './context'
-  import { type Edge, type Rect, resizeRect, snapZone, zoneRect } from './geometry'
+  import { centerOffset, type Edge, type Rect, resizeRect, snapZone, zoneRect } from './geometry'
   import { type WindowState, wm } from './windowManager.svelte'
 
   interface Props {
@@ -24,13 +24,12 @@
   // Where the window flies to when minimized: its app's tile in the dock.
   const minOffset = $derived.by(() => {
     if (!win.minimized) return { dx: 0, dy: 0 }
-    const tile = document.querySelector(`[data-dock-app="${win.appId}"]`)
+    const tile = dockTile(win.appId)
     if (!tile) return { dx: 0, dy: 0 }
-    const r = tile.getBoundingClientRect()
-    return {
-      dx: r.x + r.width / 2 - (frame.x + frame.w / 2),
-      dy: r.y + r.height / 2 - (frame.y + frame.h / 2),
-    }
+    return centerOffset(
+      { x: frame.x, y: frame.y, width: frame.w, height: frame.h },
+      tile.getBoundingClientRect(),
+    )
   })
 
   // Shared pointer tracking: captures the pointer on el and batches moves into
@@ -149,8 +148,8 @@
   style:--min-dx="{minOffset.dx}px"
   style:--min-dy="{minOffset.dy}px"
   onpointerdowncapture={() => wm.focus(win.id)}
-  in:windowZoom|global
-  out:windowZoom|global={{ out: true }}
+  in:windowZoom|global={{ appId: win.appId }}
+  out:windowZoom|global={{ out: true, appId: win.appId }}
 >
   {@render children()}
   {#if win.snap === null}

@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest'
 
-import { clampRect, fitRect, MIN_H, MIN_W, resizeRect, snapZone, zoneRect } from './geometry'
+import {
+  centerOffset,
+  clampRect,
+  fitRect,
+  MIN_H,
+  MIN_W,
+  resizeRect,
+  snapZone,
+  zoneRect,
+} from './geometry'
 
 const area = { x: 0, y: 30, w: 1000, h: 600 }
 
@@ -80,5 +89,19 @@ describe('fitRect', () => {
 
   it('shrinks a window bigger than the area', () => {
     expect(fitRect({ x: 10, y: 10, w: 1400, h: 900 }, area)).toEqual(area)
+  })
+})
+
+describe('centerOffset', () => {
+  it('points from the window centre to the tile centre', () => {
+    const win = { x: 100, y: 100, width: 400, height: 300 }
+    const tile = { x: 580, y: 700, width: 40, height: 40 }
+    expect(centerOffset(win, tile)).toEqual({ dx: 300, dy: 470 })
+  })
+
+  it('is zero for boxes sharing a centre', () => {
+    expect(
+      centerOffset({ x: 0, y: 0, width: 10, height: 10 }, { x: 4, y: 4, width: 2, height: 2 }),
+    ).toEqual({ dx: 0, dy: 0 })
   })
 })
