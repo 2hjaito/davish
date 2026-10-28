@@ -9,6 +9,9 @@ const wails = JSON.parse(readFileSync(new URL('../wails.json', import.meta.url),
 
 export default defineConfig({
   plugins: [svelte()],
+  // The manifest lets scripts/bundle-budget.mjs tell the first screen's
+  // chunks from those loaded later.
+  build: { manifest: true },
   define: { __APP_VERSION__: JSON.stringify(wails.info.productVersion) },
   test: {
     include: ['src/**/*.test.ts'],

@@ -50,6 +50,9 @@ jobs:
       - name: Build frontend
         run: cd frontend && npm run build
 
+      - name: Bundle budget
+        run: cd frontend && npm run budget
+
       - uses: golangci/golangci-lint-action@v8
         with:
           version: v2.15.0

@@ -37,3 +37,9 @@ func (a *App) MonitorSetThresholds(memPct, diskPct float64, forSec int) error {
 	a.sysmon.SetThresholds(sysmon.Thresholds{MemPct: memPct, DiskPct: diskPct, For: time.Duration(forSec) * time.Second})
 	return nil
 }
+
+// MonitorSetIdle slows metric collection while Davish is hidden or locked;
+// alerts keep coming, less often.
+func (a *App) MonitorSetIdle(idle bool) {
+	a.sysmon.SetIdle(idle)
+}

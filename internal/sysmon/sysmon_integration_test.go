@@ -314,3 +314,29 @@ func TestNotifiesFailedServiceAndRestartLoop(t *testing.T) {
 		t.Error("the healthy container was reported")
 	}
 }
+
+func TestIdleSlowsDownAndComesBack(t *testing.T) {
+	m, id := connect(t)
+	rec := &ticks{}
+	svc := sysmon.New(m, rec, quiet(), sysmon.Options{})
+	t.Cleanup(svc.Close)
+	svc.Watch(id)
+	rec.waitCount(t, 0)
+
+	// Idle: one snapshot every 30s, so after the restart's first (which
+	// only primes the rates) nothing for a while.
+	svc.SetIdle(true)
+	time.Sleep(time.Second)
+	n := rec.count()
+	time.Sleep(6 * time.Second)
+	if got := rec.count(); got != n {
+		t.Errorf("%d ticks in 6s while idle", got-n)
+	}
+	if out := run(t, m, id, "ps -eo args= | grep -cx 'sh -s' || true"); out != "1" {
+		t.Errorf("collectors on the server while idle: %s", out)
+	}
+
+	// Seen again: back to a tick every 2s.
+	svc.SetIdle(false)
+	rec.waitCount(t, rec.count())
+}

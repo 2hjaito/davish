@@ -33,7 +33,8 @@ export interface AppDef {
   icon: IconName
   theme: 'light' | 'dark'
   size: { w: number; h: number }
-  component: Component<AppProps>
+  /** The app's code, in its own chunk; see loadApp. */
+  load: () => Promise<{ default: Component<AppProps> }>
   /** False for helper windows opened from another app, such as Transfers. */
   dock?: boolean
   /**
