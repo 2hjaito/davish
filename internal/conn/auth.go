@@ -1,6 +1,7 @@
 package conn
 
 import (
+	"context"
 	"errors"
 	"net"
 	"os"
@@ -128,4 +129,31 @@ func expandHome(path string) string {
 		return path
 	}
 	return filepath.Join(home, strings.TrimPrefix(path, "~"))
+}
+
+// LoginKeys are the SHA256 fingerprints of every public key Davish may log
+// in to the server with: the agent's, the default files and the chosen
+// key. Removing one of them from the server's authorized_keys may lock
+// Davish out, so the UI warns about those. Password logins have none.
+func (m *Manager) LoginKeys(ctx context.Context, id string) ([]string, error) {
+	srv, err := m.servers.Server(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	var signers []ssh.Signer
+	switch srv.Auth {
+	case store.AuthAgent:
+		agentSigners, release := m.agentSigners()
+		defer release()
+		signers = append(agentSigners, m.defaultKeySigners(srv)...)
+	case store.AuthKey:
+		if s, err := m.loadKey(srv); err == nil {
+			signers = append(signers, s)
+		}
+	}
+	fps := make([]string, 0, len(signers))
+	for _, s := range signers {
+		fps = append(fps, ssh.FingerprintSHA256(s.PublicKey()))
+	}
+	return fps, nil
 }

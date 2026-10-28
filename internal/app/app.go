@@ -19,6 +19,7 @@ import (
 	"davish/internal/lock"
 	"davish/internal/logs"
 	"davish/internal/nginx"
+	"davish/internal/sshkeys"
 	"davish/internal/store"
 	"davish/internal/svc"
 	"davish/internal/sysmon"
@@ -48,6 +49,7 @@ type App struct {
 	cron      *cron.Service
 	nginx     *nginx.Service
 	lock      *lock.Service
+	keys      *sshkeys.Service
 }
 
 // New wires the services with their config under os.UserConfigDir()/davish.
@@ -76,6 +78,7 @@ func New() (*App, error) {
 	a.docker = docker.New(runner)
 	a.cron = cron.New(runner, a.conns)
 	a.nginx = nginx.New(runner, a.conns, emitter{a})
+	a.keys = sshkeys.New(a.conns, runner)
 	a.logs = logs.New(a.conns, a.audit, emitter{a}, log)
 	if a.transfers, err = transfer.New(a.conns, emitter{a}, log, transfer.Options{}); err != nil {
 		return nil, err

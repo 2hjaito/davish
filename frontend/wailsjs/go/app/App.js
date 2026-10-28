@@ -118,6 +118,54 @@ export function FilesWrite(arg1, arg2, arg3) {
   return window['go']['app']['App']['FilesWrite'](arg1, arg2, arg3);
 }
 
+export function KeysAdd(arg1, arg2, arg3) {
+  return window['go']['app']['App']['KeysAdd'](arg1, arg2, arg3);
+}
+
+export function KeysAuthorized(arg1) {
+  return window['go']['app']['App']['KeysAuthorized'](arg1);
+}
+
+export function KeysCreate(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['KeysCreate'](arg1, arg2, arg3, arg4);
+}
+
+export function KeysGenerateLocal(arg1, arg2, arg3) {
+  return window['go']['app']['App']['KeysGenerateLocal'](arg1, arg2, arg3);
+}
+
+export function KeysGitTest(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['KeysGitTest'](arg1, arg2, arg3, arg4);
+}
+
+export function KeysLocal() {
+  return window['go']['app']['App']['KeysLocal']();
+}
+
+export function KeysPlanAdd(arg1, arg2) {
+  return window['go']['app']['App']['KeysPlanAdd'](arg1, arg2);
+}
+
+export function KeysPlanCreate(arg1, arg2, arg3) {
+  return window['go']['app']['App']['KeysPlanCreate'](arg1, arg2, arg3);
+}
+
+export function KeysPlanGitTest(arg1, arg2, arg3) {
+  return window['go']['app']['App']['KeysPlanGitTest'](arg1, arg2, arg3);
+}
+
+export function KeysPlanRemove(arg1, arg2) {
+  return window['go']['app']['App']['KeysPlanRemove'](arg1, arg2);
+}
+
+export function KeysRemove(arg1, arg2) {
+  return window['go']['app']['App']['KeysRemove'](arg1, arg2);
+}
+
+export function KeysServer(arg1) {
+  return window['go']['app']['App']['KeysServer'](arg1);
+}
+
 export function ListServers() {
   return window['go']['app']['App']['ListServers']();
 }

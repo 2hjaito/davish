@@ -5,6 +5,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Thêm
+- App Khóa SSH: quản lý `authorized_keys` của server (thêm, gỡ có sao lưu, đánh dấu key Davish đang đăng nhập), tạo deploy key trên server và thử với GitHub/GitLab (kiểm tra host key theo fingerprint họ công bố), tạo key trên máy này rồi đưa lên server và dùng để đăng nhập.
 - Khóa app (ADR 0007): mật khẩu khóa riêng, mở bằng Touch ID trên macOS; tự khóa khi máy ngủ dậy, sau N phút không dùng, hoặc `⌘L` / `Ctrl+L`. Phiên SSH, log, transfer vẫn chạy khi khóa; thao tác lên server bị chặn. Quên mật khẩu thì đặt lại, đổi lại Davish xóa mật khẩu server đã lưu.
 - Launchpad (ô đầu Dock hoặc `⌘⇧A`): mọi app, tìm theo tên, ghim/bỏ ghim khỏi Dock. Dock hiện thêm app đang mở chưa ghim.
 - Xóa dịch vụ (Services → `Xóa…`): unit do admin tạo thì xóa file; unit của gói (như `certbot`) thì mask cùng timer kích hoạt nó; unit đã mất file thì chỉ bỏ trạng thái lỗi. Luôn hiện đúng lệnh trước khi chạy.

@@ -240,6 +240,25 @@
       />
       <rect x="30" {y} width="14" height="4.5" rx="2.25" fill="#f2d9b3" />
     {/each}
+  {:else if id === 'keys'}
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#2f6f73" />
+        <stop offset="1" stop-color="#123c40" />
+      </linearGradient>
+      <linearGradient id={ref('gold')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffe08a" />
+        <stop offset="1" stop-color="#e8a317" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    <g transform="rotate(-45 32 32)" fill={url('gold')}>
+      <circle cx="20" cy="32" r="11" />
+      <rect x="27" y="28.5" width="27" height="7" rx="2" />
+      <rect x="44" y="35" width="5" height="7" rx="1.5" />
+      <rect x="37" y="35" width="4.5" height="5" rx="1.5" />
+    </g>
+    <circle cx="23.5" cy="40.5" r="4.2" fill="#123c40" />
   {:else if id === 'launchpad'}
     <defs>
       <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">

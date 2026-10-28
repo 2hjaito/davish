@@ -12,6 +12,7 @@ export type AppId =
   | 'logs'
   | 'cron'
   | 'nginx'
+  | 'keys'
   | 'editor'
   | 'settings'
   | 'transfers'
