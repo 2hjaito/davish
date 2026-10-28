@@ -314,3 +314,75 @@ func TestAutomaticUsesDefaultKeyLikeSSH(t *testing.T) {
 		t.Fatalf("no keys anywhere: err = %v; want CONN_AGENT_UNAVAILABLE", err)
 	}
 }
+
+func TestProxyJump(t *testing.T) {
+	e := setup(t, testServer(), conn.Options{
+		KeepaliveInterval: 300 * time.Millisecond,
+		KeepaliveMisses:   2,
+		BackoffMin:        200 * time.Millisecond,
+		BackoffMax:        time.Second,
+	})
+	ctx := context.Background()
+	pin(t, e.hostKeys, testsshd.HostKey(t))
+	inner, err := e.store.Save(ctx, store.Server{
+		Name: "inner", Host: testsshd.InnerHost, Port: 22, User: testsshd.User,
+		Auth: store.AuthKey, KeyPath: testsshd.KeyPath(), JumpID: e.id,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// The inner host's key is unknown: the prompt names the hop and is
+	// answered for the server being opened.
+	if err := e.m.Connect(ctx, inner.ID); code(err) != apperr.ConnHostKeyUnknown {
+		t.Fatalf("first connect: err = %v; want CONN_HOSTKEY_UNKNOWN", err)
+	}
+	prompts := e.rec.prompts()
+	if len(prompts) != 1 || prompts[0].ServerID != inner.ID || prompts[0].Host != testsshd.InnerHost+":22" {
+		t.Fatalf("prompts = %+v", prompts)
+	}
+	if err := e.m.AcceptHostKey(ctx, inner.ID, prompts[0].Fingerprint); err != nil {
+		t.Fatalf("accept: %v", err)
+	}
+	innerName := run(t, e.m, inner.ID, "hostname")
+	if err := e.m.Connect(ctx, e.id); err != nil {
+		t.Fatal(err)
+	}
+	if jump := run(t, e.m, e.id, "hostname"); jump == innerName {
+		t.Fatalf("inner and jump report the same hostname %q", jump)
+	}
+
+	// Losing the hop drops the chain; it is rebuilt once the hop is back.
+	testsshd.Restart(t, "sshd")
+	deadline := time.Now().Add(60 * time.Second)
+	for time.Now().Before(deadline) {
+		if e.rec.sawState(conn.StateReconnecting) && e.m.State(inner.ID) == conn.StateConnected {
+			if got := run(t, e.m, inner.ID, "hostname"); got != innerName {
+				t.Fatalf("after reconnect: %q", got)
+			}
+			return
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	t.Fatalf("did not reconnect; state = %s", e.m.State(inner.ID))
+}
+
+func TestProxyJumpLoopIsRefused(t *testing.T) {
+	e := setup(t, testServer(), conn.Options{})
+	ctx := context.Background()
+	b, err := e.store.Save(ctx, store.Server{
+		Name: "b", Host: "b.invalid", Port: 22, User: testsshd.User,
+		Auth: store.AuthKey, KeyPath: testsshd.KeyPath(), JumpID: e.id,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	a, _ := e.store.Server(ctx, e.id)
+	a.JumpID = b.ID
+	if _, err := e.store.Save(ctx, a); err != nil {
+		t.Fatal(err)
+	}
+	if err := e.m.Connect(ctx, e.id); code(err) != apperr.InvalidInput {
+		t.Fatalf("err = %v; want INVALID_INPUT", err)
+	}
+}

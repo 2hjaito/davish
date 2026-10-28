@@ -1,5 +1,6 @@
-# Two identical servers, A and B, for tests that move files between
-# servers. Bound to localhost; test only.
+# Identical servers: A and B for tests that move files between servers,
+# and inner, reachable only from inside the compose network (through A),
+# for ProxyJump. Bound to localhost; test only.
 x-sshd: &sshd
   build: .
   # systemd as PID 1 needs the host's cgroup tree and a writable /run;
@@ -28,3 +29,6 @@ services:
     <<: *sshd
     ports:
       - "127.0.0.1:2223:22"
+  # No published port: the only way in is a jump through sshd.
+  sshd-inner:
+    <<: *sshd

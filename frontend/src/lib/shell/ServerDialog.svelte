@@ -29,6 +29,7 @@
       auth: 'agent',
       keyPath: '~/.ssh/id_ed25519',
       color: '',
+      jumpID: '',
       password: '',
       passphrase: '',
     }
@@ -44,6 +45,7 @@
           ...s,
           keyPath: s.keyPath ?? '~/.ssh/id_ed25519',
           color: s.color ?? '',
+          jumpID: s.jumpID ?? '',
           password: '',
           passphrase: '',
         }
@@ -51,6 +53,18 @@
     error = ''
     confirmingDelete = false
   })
+
+  // Only servers that do not already jump through this one, so no loop.
+  const jumpTargets = $derived(
+    servers.list.filter((s) => {
+      if (!editing) return true
+      for (let cur: string | undefined = s.id, n = 0; cur && n < 10; n++) {
+        if (cur === editing.id) return false
+        cur = servers.list.find((x) => x.id === cur)?.jumpID
+      }
+      return true
+    }),
+  )
 
   const auths: { value: AuthMethod; label: string }[] = [
     { value: 'agent', label: t.serverDialog.authAgent },
@@ -178,6 +192,19 @@
         <small
           >{editing?.hasPassword ? t.serverDialog.secretSaved : t.serverDialog.secretHint}</small
         >
+      </label>
+    {/if}
+
+    {#if jumpTargets.length > 0}
+      <label class="field">
+        <span>{t.serverDialog.jump}</span>
+        <select class="input" bind:value={draft.jumpID}>
+          <option value="">{t.serverDialog.jumpNone}</option>
+          {#each jumpTargets as s (s.id)}
+            <option value={s.id}>{s.name} ({s.user}@{s.host})</option>
+          {/each}
+        </select>
+        <small>{t.serverDialog.jumpHint}</small>
       </label>
     {/if}
 

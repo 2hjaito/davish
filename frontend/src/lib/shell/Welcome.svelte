@@ -7,9 +7,10 @@
 
   interface Props {
     onadd: () => void
+    onimport: () => void
   }
 
-  let { onadd }: Props = $props()
+  let { onadd, onimport }: Props = $props()
 
   const points: readonly { icon: IconName; title: string; body: string }[] = t.welcome.points
 </script>
@@ -35,6 +36,7 @@
     <Icon name="plus" size={14} strokeWidth={2.4} />
     {t.welcome.add}
   </button>
+  <button type="button" class="link" onclick={onimport}>{t.welcome.import}</button>
   <p class="foot">{t.welcome.foot(isMac ? '⌘' : 'Ctrl+')}</p>
 </section>
 
@@ -119,6 +121,14 @@
     gap: 6px;
     padding: 8px 18px;
     font-size: var(--text-md);
+  }
+
+  .link {
+    border: 0;
+    background: none;
+    padding: 4px 8px;
+    font-size: var(--text-sm);
+    color: var(--accent);
   }
 
   .foot {

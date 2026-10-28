@@ -108,6 +108,15 @@ class Servers {
     return saved
   }
 
+  /** Imports ~/.ssh/config hosts and returns the servers added; throws a UserError. */
+  async importHosts(aliases: string[]): Promise<Server[]> {
+    try {
+      return await api.importConfigHosts(aliases)
+    } finally {
+      await this.reload()
+    }
+  }
+
   async remove(id: string) {
     await api.deleteServer(id)
     await this.reload()
