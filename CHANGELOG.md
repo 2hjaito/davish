@@ -4,6 +4,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-28
+
 ### Thêm
 - App Trình duyệt (ADR 0008): mở `localhost:<cổng>` của VPS ngay trong Davish, qua proxy nghe `127.0.0.1` ở cổng ngẫu nhiên nên không đụng cổng nào trên máy; redirect về cổng khác vẫn ở lại VPS, websocket chạy, cookie đăng nhập do Davish giữ. Trang ở origin riêng, không gọi được Davish. App Cổng có nút "Mở trong Davish".
 - App An ninh: lần thử đăng nhập SSH sai trong 7 ngày gom theo IP (nhiều nhất lên đầu, user đã thử), đăng nhập thành công gần đây, `last`/`lastb`, trạng thái ufw và fail2ban; chặn một IP hoặc tắt đăng nhập mật khẩu bằng lệnh sudo gõ sẵn vào Terminal (có `sshd -t` trước khi reload, tự gỡ nếu lỗi).
@@ -116,7 +118,8 @@ M0–M3 · Khung dự án, desktop, kết nối, Terminal.
 - Kết nối SSH qua agent, key hoặc mật khẩu; bí mật trong keychain; xác nhận host key lần đầu, từ chối khi host key đổi; tự kết nối lại.
 - Terminal xterm.js nhiều tab, prompt Davish không cài gì lên server.
 
-[Unreleased]: https://github.com/2hjaito/davish/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/2hjaito/davish/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/2hjaito/davish/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/2hjaito/davish/compare/v0.9.0...v1.0.0
 [0.9.0]: https://github.com/2hjaito/davish/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/2hjaito/davish/compare/v0.7.0...v0.8.0
