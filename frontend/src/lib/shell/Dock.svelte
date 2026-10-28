@@ -101,6 +101,7 @@
         class="tile"
         class:bounce={bouncing === app.id}
         data-dock-app={app.id}
+        data-own-tooltip
         aria-label={app.label}
         onclick={() => launch(app)}
         onanimationend={() => (bouncing = null)}

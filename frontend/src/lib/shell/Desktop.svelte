@@ -222,10 +222,13 @@
   })
 
   // Every icon-only button gets its accessible name as a tooltip, so none
-  // is left unexplained; buttons with their own title keep it.
+  // is left unexplained; buttons with their own title, or their own
+  // tooltip like the Dock's label, keep it.
   function tooltip(e: PointerEvent) {
     const b =
-      e.target instanceof Element ? e.target.closest('button[aria-label]:not([title])') : null
+      e.target instanceof Element
+        ? e.target.closest('button[aria-label]:not([title]):not([data-own-tooltip])')
+        : null
     const label = b?.getAttribute('aria-label')
     if (b && label && !b.textContent?.trim()) b.setAttribute('title', label)
   }
