@@ -1,14 +1,21 @@
 <script lang="ts">
-  import type { AppDef } from '../../apps/types'
+  import type { AppId } from '../../apps/types'
   import { t } from '../i18n/vi'
   import { ms } from '../motion'
   import AppIcon from '../ui/AppIcon.svelte'
   import { approach, magnify, MAX_LIFT, MAX_SCALE } from './magnify'
 
+  /** An app's tile, or Launchpad's. */
+  interface Tile {
+    id: AppId | 'launchpad'
+    label: string
+  }
+
   interface Props {
-    apps: AppDef[]
+    apps: Tile[]
     isOpen: (appId: string) => boolean
-    onlaunch: (app: AppDef) => boolean
+    /** Opens the tile's app; false when nothing opened, so it does not bounce. */
+    onlaunch: (id: Tile['id']) => boolean
     height?: number
   }
 
@@ -64,8 +71,8 @@
 
   $effect(() => () => cancelAnimationFrame(frame))
 
-  function launch(app: AppDef) {
-    if (!onlaunch(app)) return
+  function launch(app: Tile) {
+    if (!onlaunch(app.id)) return
     bouncing = null
     // Restart the animation on the next frame if the same tile is clicked again.
     requestAnimationFrame(() => (bouncing = app.id))

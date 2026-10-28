@@ -1,4 +1,4 @@
-import { cubicIn, cubicOut } from 'svelte/easing'
+import { cubicIn, cubicInOut, cubicOut } from 'svelte/easing'
 import type { TransitionConfig } from 'svelte/transition'
 
 import { settings } from './stores/settings.svelte'
@@ -35,7 +35,9 @@ export function windowZoom(node: Element, { out = false, appId = '' } = {}): Tra
   const { dx, dy } = centerOffset(box, tile.getBoundingClientRect())
   return {
     duration: ms(out ? 200 : 260),
-    easing: out ? cubicIn : cubicOut,
+    // Opening eases in too, so the window is seen leaving the tile instead
+    // of covering most of the way in the first frames.
+    easing: out ? cubicIn : cubicInOut,
     css: (t, u) =>
       `opacity: ${t}; transform: translate(${dx * u}px, ${dy * u}px) scale(${0.12 + 0.88 * t})`,
   }

@@ -169,6 +169,14 @@ export const t = {
   dock: {
     label: 'Dock',
   },
+  launchpad: {
+    label: 'Launchpad',
+    search: 'Tìm app',
+    none: 'Không có app nào khớp.',
+    pin: (app: string) => `Ghim ${app} vào Dock`,
+    unpin: (app: string) => `Bỏ ${app} khỏi Dock`,
+    hint: '←→↑↓ chọn · Enter mở · Esc đóng',
+  },
   terminal: {
     waiting: 'Đang chờ kết nối tới server…',
     lost: '[Mất kết nối]',
