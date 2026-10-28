@@ -4,6 +4,7 @@ import {audit} from '../models';
 import {cron} from '../models';
 import {docker} from '../models';
 import {fs} from '../models';
+import {sshkeys} from '../models';
 import {app} from '../models';
 import {lock} from '../models';
 import {logs} from '../models';
@@ -69,6 +70,30 @@ export function FilesSave(arg1:string,arg2:string,arg3:Array<number>,arg4:fs.Sav
 export function FilesStat(arg1:string,arg2:string):Promise<fs.Entry>;
 
 export function FilesWrite(arg1:string,arg2:string,arg3:Array<number>):Promise<fs.Entry>;
+
+export function KeysAdd(arg1:string,arg2:string,arg3:string):Promise<void>;
+
+export function KeysAuthorized(arg1:string):Promise<sshkeys.Authorized>;
+
+export function KeysCreate(arg1:string,arg2:string,arg3:string,arg4:string):Promise<void>;
+
+export function KeysGenerateLocal(arg1:string,arg2:string,arg3:string):Promise<sshkeys.LocalKey>;
+
+export function KeysGitTest(arg1:string,arg2:string,arg3:string,arg4:string):Promise<sshkeys.GitTestResult>;
+
+export function KeysLocal():Promise<Array<sshkeys.LocalKey>>;
+
+export function KeysPlanAdd(arg1:string,arg2:string):Promise<sshkeys.KeyPlan>;
+
+export function KeysPlanCreate(arg1:string,arg2:string,arg3:string):Promise<sshkeys.CreatePlan>;
+
+export function KeysPlanGitTest(arg1:string,arg2:string,arg3:string):Promise<sshkeys.GitTestPlan>;
+
+export function KeysPlanRemove(arg1:string,arg2:string):Promise<sshkeys.KeyPlan>;
+
+export function KeysRemove(arg1:string,arg2:sshkeys.KeyPlan):Promise<void>;
+
+export function KeysServer(arg1:string):Promise<Array<sshkeys.ServerKey>>;
 
 export function ListServers():Promise<Array<app.ServerView>>;
 

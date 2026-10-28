@@ -942,6 +942,182 @@ export namespace nginx {
 
 }
 
+export namespace sshkeys {
+	
+	export class AuthorizedKey {
+	    type: string;
+	    fingerprint: string;
+	    comment: string;
+	    options: string[];
+	    login: boolean;
+	    text: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new AuthorizedKey(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.type = source["type"];
+	        this.fingerprint = source["fingerprint"];
+	        this.comment = source["comment"];
+	        this.options = source["options"];
+	        this.login = source["login"];
+	        this.text = source["text"];
+	    }
+	}
+	export class Authorized {
+	    path: string;
+	    keys: AuthorizedKey[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Authorized(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.keys = this.convertValues(source["keys"], AuthorizedKey);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	export class CreatePlan {
+	    name: string;
+	    path: string;
+	    comment: string;
+	    command: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CreatePlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.path = source["path"];
+	        this.comment = source["comment"];
+	        this.command = source["command"];
+	    }
+	}
+	export class GitTestPlan {
+	    host: string;
+	    key: string;
+	    command: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new GitTestPlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.host = source["host"];
+	        this.key = source["key"];
+	        this.command = source["command"];
+	    }
+	}
+	export class GitTestResult {
+	    outcome: string;
+	    account?: string;
+	    output: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new GitTestResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.outcome = source["outcome"];
+	        this.account = source["account"];
+	        this.output = source["output"];
+	    }
+	}
+	export class KeyPlan {
+	    fingerprint: string;
+	    comment: string;
+	    login: boolean;
+	    backup?: string;
+	    command: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new KeyPlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.fingerprint = source["fingerprint"];
+	        this.comment = source["comment"];
+	        this.login = source["login"];
+	        this.backup = source["backup"];
+	        this.command = source["command"];
+	    }
+	}
+	export class LocalKey {
+	    name: string;
+	    path: string;
+	    type: string;
+	    fingerprint: string;
+	    comment: string;
+	    public: string;
+	    encrypted: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new LocalKey(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.path = source["path"];
+	        this.type = source["type"];
+	        this.fingerprint = source["fingerprint"];
+	        this.comment = source["comment"];
+	        this.public = source["public"];
+	        this.encrypted = source["encrypted"];
+	    }
+	}
+	export class ServerKey {
+	    name: string;
+	    path: string;
+	    type: string;
+	    fingerprint: string;
+	    comment: string;
+	    public: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ServerKey(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.path = source["path"];
+	        this.type = source["type"];
+	        this.fingerprint = source["fingerprint"];
+	        this.comment = source["comment"];
+	        this.public = source["public"];
+	    }
+	}
+
+}
+
 export namespace svc {
 	
 	export class Journal {
