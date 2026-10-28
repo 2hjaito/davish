@@ -12,6 +12,7 @@ export const EDITOR_SIZE = { w: 720, h: 500 }
 export const LOGS_SIZE = { w: 820, h: 500 }
 export const AUDIT_SIZE = { w: 620, h: 440 }
 export const FILES_SIZE = { w: 640, h: 440 }
+export const SERVICES_SIZE = { w: 900, h: 580 }
 
 /** Shows the Transfers window in serverID's workspace. */
 export function openTransfers(serverID: string) {
@@ -137,9 +138,9 @@ export function openFilesAt(serverID: string, path: string) {
 }
 
 export interface SelectRequest {
-  appId: 'services' | 'docker'
+  appId: 'services' | 'docker' | 'packages'
   serverID: string
-  /** A unit name or a container name. */
+  /** A unit name, a container name or a program id. */
   key: string
 }
 

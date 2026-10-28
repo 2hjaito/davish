@@ -2,6 +2,7 @@ import { t } from '../lib/i18n/vi'
 import AuditApp from './audit/AuditApp.svelte'
 import CronApp from './cron/CronApp.svelte'
 import KeysApp from './keys/KeysApp.svelte'
+import PackagesApp from './packages/PackagesApp.svelte'
 import DockerApp from './docker/DockerApp.svelte'
 import EditorApp from './editor/EditorApp.svelte'
 import FilesApp from './files/FilesApp.svelte'
@@ -17,6 +18,7 @@ import {
   EDITOR_SIZE,
   FILES_SIZE,
   LOGS_SIZE,
+  SERVICES_SIZE,
   TERMINAL_SIZE,
   TRANSFERS_SIZE,
 } from '../lib/wm/intents.svelte'
@@ -52,7 +54,7 @@ export const apps: AppDef[] = [
     label: t.apps.services,
     icon: 'services',
     theme: 'light',
-    size: { w: 900, h: 580 },
+    size: SERVICES_SIZE,
     component: ServicesApp,
   },
   {
@@ -94,6 +96,14 @@ export const apps: AppDef[] = [
     theme: 'light',
     size: { w: 900, h: 580 },
     component: KeysApp,
+  },
+  {
+    id: 'packages',
+    label: t.apps.packages,
+    icon: 'package',
+    theme: 'light',
+    size: { w: 960, h: 600 },
+    component: PackagesApp,
   },
   {
     id: 'editor',

@@ -5,6 +5,7 @@
   import type { AppDef } from '../../apps/types'
   import { monitorSetThresholds } from '../api/monitor'
   import { nginxCheckCerts } from '../api/nginx'
+  import { packagesCheckSecurity } from '../api/packages'
   import { hasRuntime } from '../api/runtime'
   import { audit } from '../stores/audit.svelte'
   import { dockPins } from '../stores/dock.svelte'
@@ -141,6 +142,7 @@
       if (s.state !== 'connected' || certsChecked.has(s.id)) continue
       certsChecked.add(s.id)
       void nginxCheckCerts(s.id).catch(() => {})
+      void packagesCheckSecurity(s.id).catch(() => {})
     }
   })
 

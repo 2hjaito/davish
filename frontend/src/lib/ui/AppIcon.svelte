@@ -259,6 +259,18 @@
       <rect x="37" y="35" width="4.5" height="5" rx="1.5" />
     </g>
     <circle cx="23.5" cy="40.5" r="4.2" fill="#123c40" />
+  {:else if id === 'packages'}
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffb35c" />
+        <stop offset="1" stop-color="#d9671a" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    <path d="M32 12 51 22v21L32 53 13 43V22Z" fill="#fff4e3" />
+    <path d="M32 33 51 22v21L32 53Z" fill="#f2c79a" />
+    <path d="M32 33 13 22v21l19 10Z" fill="#fde3c4" />
+    <path d="M22.5 17 41.5 27.5v7l-4-2v-5.3L18.5 19Z" fill="#b8540f" opacity="0.85" />
   {:else if id === 'launchpad'}
     <defs>
       <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">

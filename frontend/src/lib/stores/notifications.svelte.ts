@@ -78,6 +78,12 @@ export function describe(
             : t.notifications.certExpiring(serverName),
         body: t.notifications.certBody(target, p.value),
       }
+    case 'security-updates':
+      return {
+        ...base,
+        title: t.notifications.securityUpdates(p.value, serverName),
+        body: t.notifications.securityUpdatesBody,
+      }
     case 'container-restarting':
       return {
         ...base,

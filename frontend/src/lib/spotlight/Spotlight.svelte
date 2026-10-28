@@ -4,6 +4,7 @@
   import { lastDir } from '../../apps/files/memory'
   import { dockApps, getApp } from '../../apps/registry'
   import { backend as dockerBackend } from '../../apps/docker/backend'
+  import { backend as packagesBackend } from '../../apps/packages/backend'
   import { backend as servicesBackend } from '../../apps/services/backend'
   import { filesStat } from '../api/files'
   import { hasRuntime } from '../api/runtime'
@@ -34,6 +35,7 @@
   let input = $state<HTMLInputElement>()
   let units = $state.raw<{ name: string; description: string }[]>([])
   let containers = $state.raw<{ name: string; image: string }[]>([])
+  let programs = $state.raw<{ id: string; label: string; version: string }[]>([])
   const listId = $props.id()
 
   const serverID = $derived(servers.activeId)
@@ -57,6 +59,10 @@
         (c) => id === serverID && (containers = c),
         () => (containers = []),
       )
+      packagesBackend.apps(id).then(
+        (a) => id === serverID && (programs = a),
+        () => (programs = []),
+      )
     })
   })
 
@@ -71,7 +77,7 @@
     }))
   }
 
-  function select(appId: 'services' | 'docker', key: string) {
+  function select(appId: 'services' | 'docker' | 'packages', key: string) {
     const app = getApp(appId)
     if (app) openSelected(appId, serverID, key, { title: app.label, size: app.size })
   }
@@ -128,6 +134,15 @@
         detail: c.image,
         icon: 'docker',
         run: () => select('docker', c.name),
+      })
+    for (const p of programs)
+      all.push({
+        kind: 'program',
+        id: p.id,
+        label: p.label,
+        detail: p.version,
+        icon: 'package',
+        run: () => select('packages', p.id),
       })
     const folders = [lastDir(serverID), '/etc', '/var/log', '/etc/nginx', '/srv', '/opt']
     for (const f of new Set(folders.filter((f): f is string => !!f)))
