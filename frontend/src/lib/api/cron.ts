@@ -38,7 +38,7 @@ export interface CronTable {
   /** The server's IANA zone, in which next runs are computed. */
   zone: string
   unreadable: string[]
-  /** The user's crontab as read, for cronApply. */
+  /** The user's crontab as read. */
   version: string
 }
 
@@ -78,8 +78,9 @@ export const cronList = (serverID: string): Promise<CronTable> =>
 export const cronPlan = (serverID: string, change: CronChange): Promise<CronPlan> =>
   App.CronPlan(serverID, change)
 
-export const cronApply = (serverID: string, change: CronChange, version: string): Promise<void> =>
-  App.CronApply(serverID, change, version)
+/** Makes change exactly as plan was confirmed; refused if the crontab changed since. */
+export const cronApply = (serverID: string, change: CronChange, plan: CronPlan): Promise<void> =>
+  App.CronApply(serverID, change, plan)
 
 export const cronPreview = (schedule: string, zone: string): Promise<CronPreview> =>
   App.CronPreview(schedule, zone) as Promise<CronPreview>

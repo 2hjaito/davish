@@ -19,9 +19,10 @@ func (a *App) CronPlan(serverID string, change cron.Change) (cron.Plan, error) {
 	return a.cron.Plan(a.ctx, serverID, change)
 }
 
-// CronApply makes a confirmed change, if the crontab is still at version.
-func (a *App) CronApply(serverID string, change cron.Change, version string) error {
-	return a.cron.Apply(a.ctx, serverID, change, version)
+// CronApply makes a change exactly as its plan from CronPlan was
+// confirmed; it refuses if the crontab changed since.
+func (a *App) CronApply(serverID string, change cron.Change, plan cron.Plan) error {
+	return a.cron.Apply(a.ctx, serverID, change, plan)
 }
 
 // CronRuns returns the system log lines of a job's latest runs.

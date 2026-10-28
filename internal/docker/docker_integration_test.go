@@ -45,7 +45,12 @@ func TestListAndStats(t *testing.T) {
 	if c := find(t, s, id, "davish-web"); c.State != "running" {
 		t.Errorf("web = %+v", c)
 	}
-	if c := find(t, s, id, "davish-crashloop"); c.State != "restarting" && c.State != "exited" {
+	// A restart loop is caught in any of its phases: restarting, exited, or
+	// running for the instant before it dies again. That it keeps
+	// restarting is checked through its restart count in TestInspectAndLogs.
+	switch c := find(t, s, id, "davish-crashloop"); c.State {
+	case "restarting", "exited", "running":
+	default:
 		t.Errorf("crashloop = %+v", c)
 	}
 	web := find(t, s, id, "davish-web")

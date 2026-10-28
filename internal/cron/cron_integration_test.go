@@ -59,7 +59,10 @@ func apply(t *testing.T, s *cron.Service, id string, c cron.Change) cron.Plan {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := s.Apply(ctx, id, c, p.Version); err != nil {
+	// A second ticking over between showing and confirming must not
+	// rename the backup.
+	time.Sleep(1100 * time.Millisecond)
+	if err := s.Apply(ctx, id, c, p); err != nil {
 		t.Fatal(err)
 	}
 	return p
@@ -130,7 +133,7 @@ func TestAddEditToggleDelete(t *testing.T) {
 		t.Fatal(err)
 	}
 	testsshd.Run(t, m, id, "(crontab -l; echo '0 1 * * * echo other') | crontab -")
-	if err := s.Apply(ctx, id, cron.Change{Op: cron.OpDelete, ID: mine[0].ID}, stale.Version); code(err) != apperr.FSStale {
+	if err := s.Apply(ctx, id, cron.Change{Op: cron.OpDelete, ID: mine[0].ID}, stale); code(err) != apperr.FSStale {
 		t.Errorf("stale apply = %v", err)
 	}
 
