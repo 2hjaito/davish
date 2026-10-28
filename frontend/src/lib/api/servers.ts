@@ -15,6 +15,7 @@ export interface ServerInfo {
   auth: AuthMethod
   keyPath?: string
   color?: string
+  jumpID?: string
   hasPassword: boolean
   hasPassphrase: boolean
   state: ConnState
@@ -30,6 +31,7 @@ export interface ServerDraft {
   auth: AuthMethod
   keyPath: string
   color: string
+  jumpID: string
   password: string
   passphrase: string
 }
@@ -44,6 +46,23 @@ export async function listServers(): Promise<ServerInfo[]> {
 
 export async function saveServer(draft: ServerDraft): Promise<ServerInfo> {
   return info(await App.SaveServer(app.ServerInput.createFrom(draft)))
+}
+
+/** A concrete Host from ~/.ssh/config, as the import dialog lists it. */
+export interface ConfigHost {
+  alias: string
+  hostName: string
+  user: string
+  port: number
+  identityFile?: string
+  proxyJump?: string
+  exists: boolean
+}
+
+export const listConfigHosts = (): Promise<ConfigHost[]> => App.SSHConfigHosts()
+
+export async function importConfigHosts(aliases: string[]): Promise<ServerInfo[]> {
+  return (await App.ImportSSHHosts(aliases)).map(info)
 }
 
 export const deleteServer = (id: string): Promise<void> => App.DeleteServer(id)

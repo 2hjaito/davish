@@ -146,6 +146,10 @@ export function GitStatus(arg1, arg2) {
   return window['go']['app']['App']['GitStatus'](arg1, arg2);
 }
 
+export function ImportSSHHosts(arg1) {
+  return window['go']['app']['App']['ImportSSHHosts'](arg1);
+}
+
 export function KeysAdd(arg1, arg2, arg3) {
   return window['go']['app']['App']['KeysAdd'](arg1, arg2, arg3);
 }
@@ -304,6 +308,10 @@ export function PackagesPlan(arg1, arg2, arg3) {
 
 export function ReorderServers(arg1) {
   return window['go']['app']['App']['ReorderServers'](arg1);
+}
+
+export function SSHConfigHosts() {
+  return window['go']['app']['App']['SSHConfigHosts']();
 }
 
 export function SaveServer(arg1) {

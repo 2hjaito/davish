@@ -36,6 +36,7 @@
   import MenuBar from './MenuBar.svelte'
   import HostKeyDialog from './HostKeyDialog.svelte'
   import ServerDialog from './ServerDialog.svelte'
+  import ImportDialog from './ImportDialog.svelte'
   import SleepScreen from './SleepScreen.svelte'
   import { fadeOut } from '../motion'
   import { hasPrimaryModifier, isMac } from './platform'
@@ -279,7 +280,7 @@
   {/each}
 
   {#if servers.ready && servers.list.length === 0}
-    <Welcome onadd={() => ui.addServer()} />
+    <Welcome onadd={() => ui.addServer()} onimport={() => (ui.importDialog = true)} />
   {:else}
     <Dock
       apps={dockTiles}
@@ -291,6 +292,7 @@
 
   <Banners />
   <ServerDialog />
+  <ImportDialog />
   <HostKeyDialog />
   <SleepScreen />
 </div>

@@ -9,6 +9,7 @@ export namespace app {
 	    auth: string;
 	    keyPath?: string;
 	    color?: string;
+	    jumpID?: string;
 	    password: string;
 	    passphrase: string;
 	
@@ -26,6 +27,7 @@ export namespace app {
 	        this.auth = source["auth"];
 	        this.keyPath = source["keyPath"];
 	        this.color = source["color"];
+	        this.jumpID = source["jumpID"];
 	        this.password = source["password"];
 	        this.passphrase = source["passphrase"];
 	    }
@@ -39,6 +41,7 @@ export namespace app {
 	    auth: string;
 	    keyPath?: string;
 	    color?: string;
+	    jumpID?: string;
 	    hasPassword: boolean;
 	    hasPassphrase: boolean;
 	    state: string;
@@ -57,6 +60,7 @@ export namespace app {
 	        this.auth = source["auth"];
 	        this.keyPath = source["keyPath"];
 	        this.color = source["color"];
+	        this.jumpID = source["jumpID"];
 	        this.hasPassword = source["hasPassword"];
 	        this.hasPassphrase = source["hasPassphrase"];
 	        this.state = source["state"];
@@ -1299,6 +1303,35 @@ export namespace packages {
 	    }
 	}
 	
+
+}
+
+export namespace sshconfig {
+	
+	export class Candidate {
+	    alias: string;
+	    hostName: string;
+	    user: string;
+	    port: number;
+	    identityFile?: string;
+	    proxyJump?: string;
+	    exists: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Candidate(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.alias = source["alias"];
+	        this.hostName = source["hostName"];
+	        this.user = source["user"];
+	        this.port = source["port"];
+	        this.identityFile = source["identityFile"];
+	        this.proxyJump = source["proxyJump"];
+	        this.exists = source["exists"];
+	    }
+	}
 
 }
 

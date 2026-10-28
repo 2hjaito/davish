@@ -42,6 +42,9 @@ type Server struct {
 	// KeyPath points at the user's private key; the key itself is never copied.
 	KeyPath string `json:"keyPath,omitempty"`
 	Color   string `json:"color,omitempty"`
+	// JumpID is the saved server to connect through (ProxyJump); that
+	// server may jump through another, forming a chain.
+	JumpID string `json:"jumpID,omitempty"`
 }
 
 // file is the on-disk layout of servers.json. Slice order is display order.
@@ -157,6 +160,12 @@ func (s *Store) Delete(ctx context.Context, id string) error {
 		return apperr.New(apperr.NotFound, "server not found")
 	}
 	f.Servers = slices.Delete(f.Servers, i, i+1)
+	// Servers that jumped through it now connect directly.
+	for j := range f.Servers {
+		if f.Servers[j].JumpID == id {
+			f.Servers[j].JumpID = ""
+		}
+	}
 	if err := s.write(f); err != nil {
 		return err
 	}
@@ -280,6 +289,7 @@ func normalize(srv Server) Server {
 	srv.Host = strings.TrimSpace(srv.Host)
 	srv.User = strings.TrimSpace(srv.User)
 	srv.KeyPath = strings.TrimSpace(srv.KeyPath)
+	srv.JumpID = strings.TrimSpace(srv.JumpID)
 	if srv.Port == 0 {
 		srv.Port = defaultPort
 	}
@@ -314,6 +324,8 @@ func validate(srv Server) error {
 		return invalid("key auth needs a key path")
 	case srv.Color != "" && !hexColor.MatchString(srv.Color):
 		return invalid("color must be #rrggbb")
+	case srv.JumpID != "" && srv.JumpID == srv.ID:
+		return invalid("a server cannot jump through itself")
 	}
 	return nil
 }

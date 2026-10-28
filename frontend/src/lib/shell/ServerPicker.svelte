@@ -120,6 +120,17 @@
       <Icon name="plus" size={14} strokeWidth={2.2} />
       {t.servers.add}
     </button>
+    <button
+      role="menuitem"
+      class="item"
+      onclick={() => {
+        open = false
+        ui.importDialog = true
+      }}
+    >
+      <Icon name="download" size={14} />
+      {t.servers.import}
+    </button>
   </Popover>
 </div>
 

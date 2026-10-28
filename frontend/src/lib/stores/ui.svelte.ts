@@ -5,6 +5,7 @@ class Ui {
   serverDialog = $state<ServerDialog>(null)
   spotlight = $state(false)
   launchpad = $state(false)
+  importDialog = $state(false)
 
   toggleSpotlight() {
     this.spotlight = !this.spotlight

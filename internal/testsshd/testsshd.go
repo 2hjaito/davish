@@ -21,6 +21,8 @@ const (
 	Port  = 2222
 	PortB = 2223
 	User  = "tester"
+	// InnerHost is the server only reachable through the one at Port.
+	InnerHost = "sshd-inner"
 )
 
 // Root is the repository root.
@@ -48,11 +50,12 @@ func HostKey(t *testing.T) ssh.PublicKey {
 	return key
 }
 
-// Restart restarts the container, dropping every connection to it.
-func Restart(t *testing.T) {
+// Restart restarts the containers (all when services is empty), dropping
+// every connection to them.
+func Restart(t *testing.T, services ...string) {
 	t.Helper()
 	compose := filepath.Join(Root(), "test", "sshd", "compose.yml")
-	out, err := exec.Command("docker", "compose", "-f", compose, "restart").CombinedOutput() //nolint:gosec // fixed test command
+	out, err := exec.Command("docker", append([]string{"compose", "-f", compose, "restart"}, services...)...).CombinedOutput() //nolint:gosec // fixed test command
 	if err != nil {
 		t.Fatalf("restart test sshd: %v\n%s", err, out)
 	}

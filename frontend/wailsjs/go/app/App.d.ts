@@ -5,13 +5,14 @@ import {cron} from '../models';
 import {docker} from '../models';
 import {fs} from '../models';
 import {git} from '../models';
-import {sshkeys} from '../models';
 import {app} from '../models';
+import {sshkeys} from '../models';
 import {lock} from '../models';
 import {logs} from '../models';
 import {sysmon} from '../models';
 import {nginx} from '../models';
 import {packages} from '../models';
+import {sshconfig} from '../models';
 import {svc} from '../models';
 import {transfer} from '../models';
 
@@ -86,6 +87,8 @@ export function GitPlan(arg1:string,arg2:string,arg3:string,arg4:string):Promise
 export function GitRun(arg1:string,arg2:string,arg3:string,arg4:string,arg5:string):Promise<git.Result>;
 
 export function GitStatus(arg1:string,arg2:string):Promise<git.Status>;
+
+export function ImportSSHHosts(arg1:Array<string>):Promise<Array<app.ServerView>>;
 
 export function KeysAdd(arg1:string,arg2:string,arg3:string):Promise<void>;
 
@@ -166,6 +169,8 @@ export function PackagesNpmGlobals(arg1:string):Promise<Array<packages.NpmGlobal
 export function PackagesPlan(arg1:string,arg2:string,arg3:Array<string>):Promise<string>;
 
 export function ReorderServers(arg1:Array<string>):Promise<void>;
+
+export function SSHConfigHosts():Promise<Array<sshconfig.Candidate>>;
 
 export function SaveServer(arg1:app.ServerInput):Promise<app.ServerView>;
 

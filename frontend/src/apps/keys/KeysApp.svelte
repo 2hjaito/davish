@@ -291,6 +291,7 @@
         auth: 'key',
         keyPath: k.path,
         color: server.color ?? '',
+        jumpID: server.jumpID ?? '',
         password: '',
         passphrase: pass,
       })

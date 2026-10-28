@@ -406,8 +406,20 @@ func (m *Manager) redial(ctx context.Context, id string) (*ssh.Client, error) {
 	}
 }
 
-// dial opens one SSH connection to the server.
+// maxJumps bounds a ProxyJump chain and stops servers that jump through
+// each other.
+const maxJumps = 8
+
+// dial opens one SSH connection to the server, through its jump chain if it
+// has one.
 func (m *Manager) dial(ctx context.Context, id string) (*ssh.Client, error) {
+	return m.dialVia(ctx, id, id, 0)
+}
+
+// dialVia connects to server id on behalf of target: a hop's unknown host
+// key is shown as target's prompt, and approving it reconnects target.
+// Every hop is a fresh connection with its own host key check and auth.
+func (m *Manager) dialVia(ctx context.Context, target, id string, depth int) (*ssh.Client, error) {
 	srv, err := m.servers.Server(ctx, id)
 	if err != nil {
 		return nil, err
@@ -436,20 +448,50 @@ func (m *Manager) dial(ctx context.Context, id string) (*ssh.Client, error) {
 		Timeout:           m.opts.DialTimeout,
 	}
 
-	d := net.Dialer{Timeout: m.opts.DialTimeout}
-	nc, err := d.DialContext(ctx, "tcp", addr)
-	if err != nil {
-		return nil, apperr.Wrap(apperr.ConnUnreachable, "cannot reach the server", err)
+	var jump *ssh.Client
+	var nc net.Conn
+	if srv.JumpID != "" {
+		if depth >= maxJumps {
+			return nil, apperr.New(apperr.InvalidInput, "jump chain is too long or loops")
+		}
+		if jump, err = m.dialVia(ctx, target, srv.JumpID, depth+1); err != nil {
+			return nil, err
+		}
+		if nc, err = jump.DialContext(ctx, "tcp", addr); err != nil {
+			jump.Close() //nolint:errcheck,gosec // unusable hop
+			return nil, apperr.Wrap(apperr.ConnUnreachable, "cannot reach the server through its jump host", err)
+		}
+	} else {
+		d := net.Dialer{Timeout: m.opts.DialTimeout}
+		if nc, err = d.DialContext(ctx, "tcp", addr); err != nil {
+			return nil, apperr.Wrap(apperr.ConnUnreachable, "cannot reach the server", err)
+		}
 	}
-	// Bound the handshake too; a silent server must not hang the UI.
-	_ = nc.SetDeadline(time.Now().Add(m.opts.DialTimeout))
+	// Bound the handshake too; a silent server must not hang the UI. A
+	// tunneled conn has no deadlines, so close it instead.
+	timer := time.AfterFunc(m.opts.DialTimeout, func() { nc.Close() }) //nolint:errcheck,gosec // aborting
 	c, chans, reqs, err := ssh.NewClientConn(nc, addr, cfg)
+	if !timer.Stop() && err == nil { // timed out just as the handshake finished
+		c.Close() //nolint:errcheck,gosec // already closed underneath
+		err = errors.New("ssh handshake timed out")
+	}
 	if err != nil {
 		nc.Close() //nolint:errcheck,gosec // handshake failed
-		return nil, m.handshakeError(id, addr, &res, err)
+		if jump != nil {
+			jump.Close() //nolint:errcheck,gosec // unusable hop
+		}
+		return nil, m.handshakeError(target, addr, &res, err)
 	}
-	_ = nc.SetDeadline(time.Time{})
-	return ssh.NewClient(c, chans, reqs), nil
+	client := ssh.NewClient(c, chans, reqs)
+	if jump != nil {
+		// The hop lives as long as the client; a dead hop ends the client,
+		// and the reconnect rebuilds the whole chain.
+		go func() {
+			client.Wait() //nolint:errcheck,gosec // only the end matters
+			jump.Close()  //nolint:errcheck,gosec // no longer needed
+		}()
+	}
+	return client, nil
 }
 
 func (m *Manager) handshakeError(id, addr string, res *hostKeyResult, err error) error {
