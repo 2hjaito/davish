@@ -53,7 +53,7 @@ function nextRuns(s: Schedule): number[] {
 
 let lines: [string, string, boolean][] = [
   ['0 3 * * *', '/usr/local/bin/backup-db.sh >> /var/log/backup.log 2>&1', true],
-  ['*/5 * * * *', 'curl -fsS https://example.com/health > /dev/null', true],
+  ['*/5 * * * *', 'curl -fsS https://api.davitek.com/health > /dev/null', true],
   ['@reboot', '/home/deploy/start-worker.sh', true],
   ['30 2 * * *', '/usr/local/bin/rotate-old.sh', false],
 ]
@@ -99,7 +99,7 @@ export function mockList(): Promise<CronTable> {
   })
   return delay({
     jobs: [...mine, ...system],
-    env: [{ source: 'user', name: 'MAILTO', value: 'ops@example.com' }],
+    env: [{ source: 'user', name: 'MAILTO', value: 'ops@davitek.com' }],
     zone: 'Asia/Ho_Chi_Minh',
     unreadable: [],
     version: 'demo',

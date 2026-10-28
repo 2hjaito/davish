@@ -58,7 +58,7 @@ func newTestStore(t *testing.T) (*Store, *fakeKeyring, string) {
 }
 
 func vps() Server {
-	return Server{Name: "tsc-vps", Host: "vps.example.com", User: "dangth", Auth: AuthAgent}
+	return Server{Name: "dangth-vps", Host: "vps.example.com", User: "dangth", Auth: AuthAgent}
 }
 
 func codeOf(err error) apperr.Code {

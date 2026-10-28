@@ -18,7 +18,7 @@ describe('MockShell', () => {
     onCwd.mockReset()
     shell = new MockShell({
       user: 'dangth',
-      host: 'tsc-vps',
+      host: 'dangth-vps',
       banner: 'hi',
       emit: (d) => (output += d),
       onExit,
@@ -32,7 +32,7 @@ describe('MockShell', () => {
 
   it('echoes typed characters and runs commands', () => {
     type('echo xin chào')
-    expect(plain(output)).toBe('echo xin chào\r\nxin chào\r\ndangth@tsc-vps:~$ ')
+    expect(plain(output)).toBe('echo xin chào\r\nxin chào\r\ndangth@dangth-vps:~$ ')
   })
 
   it('changes directory and reports the new cwd', () => {
@@ -68,7 +68,7 @@ describe('MockShell', () => {
   it('cancels the line on Ctrl+C', () => {
     shell.input('ls')
     shell.input('\x03')
-    expect(plain(output)).toBe('ls^C\r\ndangth@tsc-vps:~$ ')
+    expect(plain(output)).toBe('ls^C\r\ndangth@dangth-vps:~$ ')
   })
 
   it('exits on exit', () => {

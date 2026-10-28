@@ -9,7 +9,7 @@ func TestParseGitTest(t *testing.T) {
 	tests := []struct {
 		out, outcome, account string
 	}{
-		{"Hi theptaydo-deploy! You've successfully authenticated, but GitHub does not provide shell access.", GitOK, "theptaydo-deploy"},
+		{"Hi davitek-deploy! You've successfully authenticated, but GitHub does not provide shell access.", GitOK, "davitek-deploy"},
 		{"Welcome to GitLab, @dang!", GitOK, "dang"},
 		{"git@github.com: Permission denied (publickey).", GitDenied, ""},
 		{"davish:hostkey", GitHostKey, ""},
@@ -43,7 +43,7 @@ func TestGitTestCommand(t *testing.T) {
 
 func TestKeyName(t *testing.T) {
 	for name, ok := range map[string]bool{
-		"deploy_theptaydo": true, "id_ed25519.github": true,
+		"deploy_davitek": true, "id_ed25519.github": true,
 		"-rf": false, ".hidden": false, "a/b": false, "": false, "x y": false,
 	} {
 		if keyName.MatchString(name) != ok {

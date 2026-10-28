@@ -218,7 +218,7 @@ export const t = {
     addTitle: 'Thêm server qua SSH',
     editTitle: 'Sửa server',
     name: 'Tên hiển thị',
-    namePlaceholder: 'ví dụ: tsc-vps',
+    namePlaceholder: 'ví dụ: dangth-vps',
     host: 'Host',
     hostPlaceholder: 'tên miền hoặc IP',
     port: 'Port',

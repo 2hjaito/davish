@@ -28,7 +28,7 @@ const demo: AuditEntry[] = hasRuntime
     ].map(([app, command, exit, durMs], i) => ({
       id: i + 1,
       time: Date.now() - (7 - i) * 60_000,
-      serverID: 'tsc-vps',
+      serverID: 'dangth-vps',
       app: app as string,
       command: command as string,
       exit: exit as number,

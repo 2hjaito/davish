@@ -36,9 +36,9 @@ const demo: Notification[] = hasRuntime
       {
         id: 'n1',
         level: 'warn',
-        title: 'lightrag trên tsc-vps đang khởi động lại liên tục',
+        title: 'lightrag trên dangth-vps đang khởi động lại liên tục',
         body: 'Container đã khởi động lại 6 lần.',
-        serverID: 'tsc-vps',
+        serverID: 'dangth-vps',
         at: Date.now(),
       },
     ]

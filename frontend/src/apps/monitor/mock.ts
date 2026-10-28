@@ -141,7 +141,7 @@ export function mockProcesses(sortBy: ProcessSort): ProcessList {
 }
 
 export const mockInfo: SystemInfo = {
-  hostname: 'tsc-vps',
+  hostname: 'dangth-vps',
   os: 'Ubuntu 24.04.1 LTS',
   kernel: '6.8.0-45-generic',
   arch: 'x86_64',
