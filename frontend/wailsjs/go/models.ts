@@ -1483,6 +1483,119 @@ export namespace ports {
 
 }
 
+export namespace security {
+	
+	export class Attempts {
+	    ip: string;
+	    count: number;
+	    users: string[];
+	    last: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Attempts(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ip = source["ip"];
+	        this.count = source["count"];
+	        this.users = source["users"];
+	        this.last = source["last"];
+	    }
+	}
+	export class Firewall {
+	    installed: boolean;
+	    needsRoot: boolean;
+	    active: boolean;
+	    lines: string[];
+	    banned?: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Firewall(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.installed = source["installed"];
+	        this.needsRoot = source["needsRoot"];
+	        this.active = source["active"];
+	        this.lines = source["lines"];
+	        this.banned = source["banned"];
+	    }
+	}
+	export class Login {
+	    time: string;
+	    user: string;
+	    ip: string;
+	    method: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Login(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.time = source["time"];
+	        this.user = source["user"];
+	        this.ip = source["ip"];
+	        this.method = source["method"];
+	    }
+	}
+	export class Report {
+	    root: boolean;
+	    source: string;
+	    accepted: Login[];
+	    failed: Attempts[];
+	    failedTotal: number;
+	    last: string[];
+	    lastb: string[];
+	    lastbDenied: boolean;
+	    ufw: Firewall;
+	    fail2ban: Firewall;
+	    passwordAuth: string;
+	    disablePassword: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Report(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.root = source["root"];
+	        this.source = source["source"];
+	        this.accepted = this.convertValues(source["accepted"], Login);
+	        this.failed = this.convertValues(source["failed"], Attempts);
+	        this.failedTotal = source["failedTotal"];
+	        this.last = source["last"];
+	        this.lastb = source["lastb"];
+	        this.lastbDenied = source["lastbDenied"];
+	        this.ufw = this.convertValues(source["ufw"], Firewall);
+	        this.fail2ban = this.convertValues(source["fail2ban"], Firewall);
+	        this.passwordAuth = source["passwordAuth"];
+	        this.disablePassword = source["disablePassword"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
 export namespace sshconfig {
 	
 	export class Candidate {

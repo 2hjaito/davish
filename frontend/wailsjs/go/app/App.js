@@ -346,6 +346,10 @@ export function SaveServer(arg1) {
   return window['go']['app']['App']['SaveServer'](arg1);
 }
 
+export function SecurityReport(arg1) {
+  return window['go']['app']['App']['SecurityReport'](arg1);
+}
+
 export function ServicesAct(arg1, arg2, arg3) {
   return window['go']['app']['App']['ServicesAct'](arg1, arg2, arg3);
 }

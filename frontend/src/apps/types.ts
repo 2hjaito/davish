@@ -17,6 +17,7 @@ export type AppId =
   | 'git'
   | 'ports'
   | 'disk'
+  | 'security'
   | 'editor'
   | 'settings'
   | 'transfers'

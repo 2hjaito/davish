@@ -5,6 +5,7 @@ import KeysApp from './keys/KeysApp.svelte'
 import PackagesApp from './packages/PackagesApp.svelte'
 import PortsApp from './ports/PortsApp.svelte'
 import DiskApp from './disk/DiskApp.svelte'
+import SecurityApp from './security/SecurityApp.svelte'
 import DockerApp from './docker/DockerApp.svelte'
 import EditorApp from './editor/EditorApp.svelte'
 import FilesApp from './files/FilesApp.svelte'
@@ -132,6 +133,14 @@ export const apps: AppDef[] = [
     theme: 'light',
     size: DISK_SIZE,
     component: DiskApp,
+  },
+  {
+    id: 'security',
+    label: t.apps.security,
+    icon: 'shield',
+    theme: 'light',
+    size: { w: 820, h: 620 },
+    component: SecurityApp,
   },
   {
     id: 'editor',

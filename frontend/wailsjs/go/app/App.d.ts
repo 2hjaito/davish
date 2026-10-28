@@ -15,6 +15,7 @@ import {nginx} from '../models';
 import {packages} from '../models';
 import {ports} from '../models';
 import {sshconfig} from '../models';
+import {security} from '../models';
 import {svc} from '../models';
 import {transfer} from '../models';
 
@@ -189,6 +190,8 @@ export function ReorderServers(arg1:Array<string>):Promise<void>;
 export function SSHConfigHosts():Promise<Array<sshconfig.Candidate>>;
 
 export function SaveServer(arg1:app.ServerInput):Promise<app.ServerView>;
+
+export function SecurityReport(arg1:string):Promise<security.Report>;
 
 export function ServicesAct(arg1:string,arg2:string,arg3:string):Promise<void>;
 

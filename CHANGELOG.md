@@ -5,6 +5,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Thêm
+- App An ninh: lần thử đăng nhập SSH sai trong 7 ngày gom theo IP (nhiều nhất lên đầu, user đã thử), đăng nhập thành công gần đây, `last`/`lastb`, trạng thái ufw và fail2ban; chặn một IP hoặc tắt đăng nhập mật khẩu bằng lệnh sudo gõ sẵn vào Terminal (có `sshd -t` trước khi reload, tự gỡ nếu lỗi).
 - App Ổ đĩa: dung lượng từng mount; đo một thư mục mỗi lần bấm (`du -x -d 1`, tối đa 30 giây, hủy được), đi sâu từng tầng, mở trong Files. Gợi ý dọn dẹp kèm dung lượng lấy lại: Docker, journal, log xoay vòng cũ, cache apt/dnf; lệnh luôn hiện trước khi chạy, cần root thì gõ sẵn vào Terminal. Thông báo ổ sắp đầy mở thẳng app ở đúng mount.
 - App Cổng: cổng TCP server đang nghe (`ss -tlnp`) với process và container; tunnel một cổng về `127.0.0.1` của máy này qua kết nối SSH đang có (giữ số cổng nếu trống), mở trong trình duyệt hoặc copy địa chỉ; mở như một tên miền (ghi đè Host) cho site nginx; "Thử từ server" bằng curl. Tunnel sống qua reconnect và tắt khi đóng app.
 - Menu bar thật: Tệp, Xem, Đi tới, Cửa sổ, Trợ giúp và menu của app đang mở (Git: Fetch, Pull, Thêm thư mục; Services, Docker: khởi động lại…), điều khiển bằng bàn phím, phím tắt hiện bên phải. `⌘R` làm mới cửa sổ đang mở, `⌘⇧T/F/M/S/D/L/E/G` mở từng app.
