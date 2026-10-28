@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { useAppMenu } from '../../lib/shell/menus.svelte'
   import { toUserError } from '../../lib/api/errors'
   import type { Branch, GitOp, OpResult, Status } from '../../lib/api/git'
   import { t } from '../../lib/i18n/vi'
@@ -93,6 +94,11 @@
     if (!r.error) return t.git.done[r.op]
     return r.error in t.errors ? t.errors[r.error as keyof typeof t.errors] : t.errors.CMD_FAILED
   }
+
+  useAppMenu(() => [
+    { label: `${t.git.fetch}…`, disabled: busy, run: () => void plan('fetch') },
+    { label: `${t.git.pull}…`, disabled: busy || !status.upstream, run: () => void plan('pull') },
+  ])
 </script>
 
 <div class="actions">

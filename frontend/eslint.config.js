@@ -14,7 +14,7 @@ export default ts.config(
   prettier,
   ...svelte.configs.prettier,
   {
-    languageOptions: { globals: { ...globals.browser } },
+    languageOptions: { globals: { ...globals.browser, __APP_VERSION__: 'readonly' } },
     rules: {
       // Leading underscore marks parameters required by a signature but unused.
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],

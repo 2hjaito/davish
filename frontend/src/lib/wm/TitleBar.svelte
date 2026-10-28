@@ -2,6 +2,7 @@
   import type { Snippet } from 'svelte'
 
   import { t } from '../i18n/vi'
+  import { ui } from '../stores/ui.svelte'
   import Icon from '../ui/Icon.svelte'
   import { getWindowContext } from './context'
   import { wm } from './windowManager.svelte'
@@ -46,6 +47,16 @@
     </button>
   </div>
   {@render children?.()}
+  {#if t.help.apps[ctx.win.appId]}
+    <button
+      class="help"
+      aria-label={t.help.button}
+      title={t.help.button}
+      onclick={() => (ui.help = { kind: 'app', appId: ctx.win.appId })}
+    >
+      <Icon name="help" size={14} />
+    </button>
+  {/if}
 </div>
 
 <style>
@@ -99,6 +110,22 @@
 
   .lights:hover .light :global(svg) {
     opacity: 1;
+  }
+
+  .help {
+    margin-left: auto;
+    flex-shrink: 0;
+    display: flex;
+    padding: 3px;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    color: var(--fg-subtle);
+  }
+
+  .help:hover {
+    color: var(--fg);
+    background: var(--glass-hover);
   }
 
   .close {

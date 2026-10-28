@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { useAppMenu } from '../../lib/shell/menus.svelte'
   import { untrack } from 'svelte'
 
   import { toUserError } from '../../lib/api/errors'
@@ -191,6 +192,11 @@
     if (f && !wasFocused && connected) untrack(() => void refresh())
     wasFocused = f
   })
+
+  useAppMenu(
+    () => [],
+    () => void refresh(),
+  )
 </script>
 
 <FilterShell

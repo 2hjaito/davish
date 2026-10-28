@@ -6,12 +6,21 @@
   import { ui } from '../stores/ui.svelte'
   import { level } from '../ui/charts/scale'
   import Icon from '../ui/Icon.svelte'
+  import MenuDropdown from './MenuDropdown.svelte'
+  import { buildMenus } from './menuModel.svelte'
   import NotificationMenu from './NotificationMenu.svelte'
   import { hasNativeTrafficLights, shortcut } from './platform'
   import ServerPicker from './ServerPicker.svelte'
   import SystemMenu from './SystemMenu.svelte'
 
   let now = $state(new Date())
+  const menus = $derived(buildMenus())
+  let openId = $state('')
+
+  function step(dir: -1 | 1) {
+    const i = menus.findIndex((m) => m.id === openId)
+    openId = menus[(i + dir + menus.length) % menus.length]?.id ?? ''
+  }
   // Only a connected server is watched, so a reconnect starts a fresh
   // collector and the numbers disappear while the server is unreachable.
   const watchedId = $derived(servers.active?.state === 'connected' ? servers.active.id : '')
@@ -32,8 +41,15 @@
   <nav class="left" aria-label={t.menubar.label}>
     <SystemMenu />
     <ServerPicker />
-    {#each t.menubar.menus as label (label)}
-      <button class="mbtn">{label}</button>
+    {#each menus as menu (menu.id)}
+      <MenuDropdown
+        {menu}
+        open={openId === menu.id}
+        onopen={() => (openId = menu.id)}
+        onhover={() => openId && (openId = menu.id)}
+        onclose={() => openId === menu.id && (openId = '')}
+        onstep={step}
+      />
     {/each}
   </nav>
 
