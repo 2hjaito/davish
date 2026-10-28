@@ -51,3 +51,22 @@ func TestInventoryMatchesDpkg(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestAppsFindsNginx(t *testing.T) {
+	m, id := testsshd.Connect(t)
+	s := packages.New(audit.NewRunner(m, audit.New(discard{})), discard{})
+	apps, err := s.Apps(context.Background(), id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var nginx *packages.App
+	for i := range apps {
+		if apps[i].ID == "nginx" {
+			nginx = &apps[i]
+		}
+	}
+	want := strings.TrimPrefix(strings.Fields(testsshd.Run(t, m, id, "/usr/sbin/nginx -v 2>&1"))[2], "nginx/")
+	if nginx == nil || nginx.Version != want || len(nginx.Configs) == 0 || nginx.Path != "/usr/sbin/nginx" {
+		t.Errorf("nginx = %+v (nginx -v says %s); all: %+v", nginx, want, apps)
+	}
+}
