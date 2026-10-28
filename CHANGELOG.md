@@ -7,10 +7,12 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ### Thêm
 - Khóa app (ADR 0007): mật khẩu khóa riêng, mở bằng Touch ID trên macOS; tự khóa khi máy ngủ dậy, sau N phút không dùng, hoặc `⌘L` / `Ctrl+L`. Phiên SSH, log, transfer vẫn chạy khi khóa; thao tác lên server bị chặn. Quên mật khẩu thì đặt lại, đổi lại Davish xóa mật khẩu server đã lưu.
 - Launchpad (ô đầu Dock hoặc `⌘⇧A`): mọi app, tìm theo tên, ghim/bỏ ghim khỏi Dock. Dock hiện thêm app đang mở chưa ghim.
+- Xóa dịch vụ (Services → `Xóa…`): unit do admin tạo thì xóa file; unit của gói (như `certbot`) thì mask cùng timer kích hoạt nó; unit đã mất file thì chỉ bỏ trạng thái lỗi. Luôn hiện đúng lệnh trước khi chạy.
+- Xóa site nginx (`Xóa site…`), có thể xóa luôn chứng chỉ Let's Encrypt chỉ site đó dùng (`certbot delete`).
 - Kính lúp trên menu bar và mục `Tìm kiếm…` trong menu hệ thống mở Spotlight.
 
 ### Thay đổi
-- Cửa sổ bay ra từ icon của app trên Dock khi mở và thu về đó khi đóng.
+- Mở, đóng, thu nhỏ và khôi phục cửa sổ bằng hiệu ứng Genie như macOS: cửa sổ chảy ra từ icon của app trên Dock và chảy về đó.
 
 ### Sửa
 - Logs: nhãn trên toolbar không còn xuống dòng; cửa sổ hẹp thì ô nguồn và ô lọc co lại, hẹp hơn nữa thì toolbar xuống hàng thay vì che mất nút.
