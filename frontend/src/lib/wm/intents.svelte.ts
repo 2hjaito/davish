@@ -12,6 +12,7 @@ export const EDITOR_SIZE = { w: 720, h: 500 }
 export const LOGS_SIZE = { w: 820, h: 500 }
 export const AUDIT_SIZE = { w: 620, h: 440 }
 export const FILES_SIZE = { w: 640, h: 440 }
+export const BROWSER_SIZE = { w: 1100, h: 720 }
 export const DISK_SIZE = { w: 900, h: 580 }
 export const SERVICES_SIZE = { w: 900, h: 580 }
 
@@ -139,7 +140,7 @@ export function openFilesAt(serverID: string, path: string) {
 }
 
 export interface SelectRequest {
-  appId: 'services' | 'docker' | 'packages' | 'keys' | 'disk'
+  appId: 'services' | 'docker' | 'packages' | 'keys' | 'disk' | 'browser'
   serverID: string
   /** A unit name, a container name, a program id, a Keys filter or a mount. */
   key: string
@@ -163,6 +164,14 @@ export const selectRequests = new SelectRequests()
 export function openDisk(serverID: string, mount: string) {
   servers.select(serverID)
   openSelected('disk', serverID, mount, { title: t.apps.disk, size: DISK_SIZE })
+}
+
+/** Opens a port of serverID in the Browser app. */
+export function openInBrowser(serverID: string, port: number) {
+  openSelected('browser', serverID, `localhost:${port}`, {
+    title: t.apps.browser,
+    size: BROWSER_SIZE,
+  })
 }
 
 /** Opens appId on serverID with key selected, as Spotlight does. */

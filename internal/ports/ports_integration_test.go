@@ -87,3 +87,47 @@ func TestTunnelRewritesHost(t *testing.T) {
 		t.Fatalf("body = %q", body)
 	}
 }
+
+func TestBrowserProxy(t *testing.T) {
+	m, id := testsshd.Connect(t)
+	b := ports.NewBrowser(m, testsshd.Quiet())
+	t.Cleanup(b.Close)
+	site, err := b.Open(id, 80)
+	if err != nil {
+		t.Fatal(err)
+	}
+	base := "http://127.0.0.1:" + strconv.Itoa(site.LocalPort)
+	get := func(path string, hdr map[string]string) (int, string) {
+		req, _ := http.NewRequest("GET", base+path, nil)
+		for k, v := range hdr {
+			req.Header.Set(k, v)
+		}
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer resp.Body.Close()
+		body, _ := io.ReadAll(resp.Body)
+		return resp.StatusCode, string(body)
+	}
+
+	// The first load carries the token; nginx's page comes with nav.js.
+	code, body := get("/?__davish="+site.Token, nil)
+	if code != 200 || !strings.Contains(body, "/__davish/nav.js") || !strings.Contains(strings.ToLower(body), "nginx") {
+		t.Fatalf("token load: %d %q", code, body)
+	}
+	// Anything else from the page has the page as Referer.
+	if code, _ := get("/__davish/nav.js", map[string]string{"Referer": base + "/"}); code != 200 {
+		t.Errorf("nav.js with referer: %d", code)
+	}
+	// No token, no same-origin Referer: refused.
+	if code, _ := get("/", nil); code != 403 {
+		t.Errorf("no token: %d", code)
+	}
+	if code, _ := get("/", map[string]string{"Referer": "https://evil.example/"}); code != 403 {
+		t.Errorf("foreign referer: %d", code)
+	}
+	if len(b.Sites()) != 1 {
+		t.Errorf("sites = %+v", b.Sites())
+	}
+}

@@ -14,6 +14,7 @@
   import type { IconName } from '../../lib/ui/icons'
   import StatusList, { type StatusItem } from '../../lib/ui/StatusList.svelte'
   import { getWindowContext } from '../../lib/wm/context'
+  import { openInBrowser } from '../../lib/wm/intents.svelte'
   import type { AppProps } from '../types'
   import { backend } from './backend'
   import { tunnels } from './tunnels.svelte'
@@ -202,6 +203,14 @@
             <p class="hint">{t.ports.needsRoot}</p>
           {/if}
           <p class="hint">{current.loopback ? t.ports.loopbackHint : t.ports.publicHint}</p>
+          <div class="row">
+            <button
+              type="button"
+              class="btn"
+              onclick={() => openInBrowser(win.serverID, current.port)}
+              >{t.ports.openInDavish}</button
+            >
+          </div>
         </header>
 
         <section>

@@ -18,6 +18,7 @@ export type AppId =
   | 'ports'
   | 'disk'
   | 'security'
+  | 'browser'
   | 'editor'
   | 'settings'
   | 'transfers'

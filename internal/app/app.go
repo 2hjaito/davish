@@ -59,6 +59,7 @@ type App struct {
 	git       *git.Service
 	ports     *ports.Lister
 	tunnels   *ports.Tunnels
+	browser   *ports.Browser
 	disk      *disk.Service
 	security  *security.Service
 }
@@ -96,6 +97,7 @@ func New() (*App, error) {
 	a.disk = disk.New(runner)
 	a.security = security.New(runner)
 	a.tunnels = ports.NewTunnels(a.conns, emitter{a}, log)
+	a.browser = ports.NewBrowser(a.conns, log)
 	a.logs = logs.New(a.conns, a.audit, emitter{a}, log)
 	if a.transfers, err = transfer.New(a.conns, emitter{a}, log, transfer.Options{}); err != nil {
 		return nil, err
@@ -118,6 +120,7 @@ func (a *App) Shutdown(_ context.Context) {
 	a.transfers.Close()
 	a.terms.CloseAll()
 	a.tunnels.Close()
+	a.browser.Close()
 	a.conns.Close()
 }
 

@@ -49,3 +49,16 @@ export const tunnelStart = (
 
 export const tunnelStop = (id: string): Promise<void> => App.TunnelStop(id)
 export const tunnelList = (): Promise<Tunnel[]> => App.TunnelList()
+
+/** A server port opened in the Browser app (docs/adr/0008-in-app-browser.md). */
+export interface Site {
+  serverID: string
+  remotePort: number
+  localPort: number
+  /** Must be in the first URL the frame loads. */
+  token: string
+}
+
+export const browserOpen = (serverID: string, port: number): Promise<Site> =>
+  App.BrowserOpen(serverID, port)
+export const browserSites = (): Promise<Site[]> => App.BrowserSites()
