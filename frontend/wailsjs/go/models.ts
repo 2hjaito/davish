@@ -850,6 +850,32 @@ export namespace nginx {
 		    return a;
 		}
 	}
+	export class RemovePlan {
+	    path: string;
+	    name: string;
+	    enabled: boolean;
+	    certs: string[];
+	    withCerts: boolean;
+	    sharedCerts: string[];
+	    command: string;
+	    sudo: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RemovePlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.name = source["name"];
+	        this.enabled = source["enabled"];
+	        this.certs = source["certs"];
+	        this.withCerts = source["withCerts"];
+	        this.sharedCerts = source["sharedCerts"];
+	        this.command = source["command"];
+	        this.sudo = source["sudo"];
+	    }
+	}
 	export class Server {
 	    names: string[];
 	    listen: string[];
@@ -980,6 +1006,28 @@ export namespace svc {
 	        this.sudo = source["sudo"];
 	    }
 	}
+	export class RemovePlan {
+	    unit: string;
+	    mode: string;
+	    file?: string;
+	    triggers: string[];
+	    command: string;
+	    sudo: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RemovePlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.unit = source["unit"];
+	        this.mode = source["mode"];
+	        this.file = source["file"];
+	        this.triggers = source["triggers"];
+	        this.command = source["command"];
+	        this.sudo = source["sudo"];
+	    }
+	}
 	export class Status {
 	    unit: string;
 	    description: string;
@@ -993,6 +1041,7 @@ export namespace svc {
 	    restarts: number;
 	    result: string;
 	    file: string;
+	    triggeredBy: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Status(source);
@@ -1012,6 +1061,7 @@ export namespace svc {
 	        this.restarts = source["restarts"];
 	        this.result = source["result"];
 	        this.file = source["file"];
+	        this.triggeredBy = source["triggeredBy"];
 	    }
 	}
 	export class Unit {

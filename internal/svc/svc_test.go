@@ -220,3 +220,66 @@ func TestParseJournal(t *testing.T) {
 		t.Errorf("no journal: got %+v", got)
 	}
 }
+
+func TestPlanRemove(t *testing.T) {
+	tests := []struct {
+		name string
+		st   Status
+		mode string
+		cmd  string
+		sudo string
+	}{
+		{
+			name: "package unit run by a timer",
+			st: Status{Unit: "certbot.service", Load: "loaded", Enabled: "static",
+				File: "/lib/systemd/system/certbot.service", TriggeredBy: "certbot.timer"},
+			mode: RemoveMask,
+			cmd:  "systemctl mask --now certbot.service certbot.timer && systemctl reset-failed certbot.service",
+			sudo: "sudo systemctl mask --now certbot.service certbot.timer && sudo systemctl reset-failed certbot.service",
+		},
+		{
+			name: "admin unit",
+			st: Status{Unit: "btpanel.service", Load: "loaded", Enabled: "enabled",
+				File: "/etc/systemd/system/btpanel.service"},
+			mode: RemoveDelete,
+			cmd: "systemctl disable --now btpanel.service && systemctl reset-failed btpanel.service && " +
+				"rm -- /etc/systemd/system/btpanel.service && systemctl daemon-reload",
+		},
+		{
+			name: "file already gone",
+			st:   Status{Unit: "old.service", Load: "not-found"},
+			mode: RemoveReset,
+			cmd:  "systemctl reset-failed old.service",
+		},
+		{
+			name: "already masked",
+			st:   Status{Unit: "x.service", Load: "masked", File: "/dev/null", Enabled: "masked"},
+			mode: RemoveReset,
+			cmd:  "systemctl reset-failed x.service",
+		},
+		{
+			name: "unit in a subfolder of /etc is a package's drop-in, not deleted",
+			st:   Status{Unit: "y.service", Load: "loaded", File: "/etc/systemd/system/multi-user.target.wants/y.service"},
+			mode: RemoveMask,
+			cmd:  "systemctl mask --now y.service && systemctl reset-failed y.service",
+		},
+		{
+			name: "odd trigger names are dropped",
+			st:   Status{Unit: "z.service", Load: "loaded", File: "/usr/lib/systemd/system/z.service", TriggeredBy: "z.timer -bad;rm"},
+			mode: RemoveMask,
+			cmd:  "systemctl mask --now z.service z.timer && systemctl reset-failed z.service",
+		},
+	}
+	for _, tt := range tests {
+		got, err := planRemove(tt.st)
+		if err != nil {
+			t.Fatalf("%s: %v", tt.name, err)
+		}
+		if got.Mode != tt.mode || got.Command != tt.cmd {
+			t.Errorf("%s:\n got %s: %s\nwant %s: %s", tt.name, got.Mode, got.Command, tt.mode, tt.cmd)
+		}
+		if tt.sudo != "" && got.Sudo != tt.sudo {
+			t.Errorf("%s: sudo = %s", tt.name, got.Sudo)
+		}
+	}
+}

@@ -28,12 +28,15 @@ type Status struct {
 	Result    string `json:"result"` // success, exit-code, signal, timeout…
 	// File is the unit file, to open in the Editor.
 	File string `json:"file"`
+	// TriggeredBy lists the units that start this one (a timer, a
+	// socket), space-separated as systemctl prints them.
+	TriggeredBy string `json:"triggeredBy"`
 }
 
 var statusProps = []string{
 	"Description", "LoadState", "ActiveState", "SubState", "UnitFileState",
 	"ActiveEnterTimestampMonotonic", "MainPID", "MemoryCurrent", "NRestarts",
-	"Result", "FragmentPath",
+	"Result", "FragmentPath", "TriggeredBy",
 }
 
 // Status returns the detail of unit. How long it has run comes from the
@@ -77,6 +80,7 @@ func parseStatus(unit string, show, uptime []byte) Status {
 		Enabled:     p["UnitFileState"],
 		Result:      p["Result"],
 		File:        p["FragmentPath"],
+		TriggeredBy: p["TriggeredBy"],
 		Memory:      -1,
 	}
 	st.MainPID, _ = strconv.Atoi(p["MainPID"])

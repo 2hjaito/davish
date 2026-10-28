@@ -31,3 +31,17 @@ func (a *App) ServicesAct(serverID, unit, action string) error {
 	}
 	return a.services.Act(a.ctx, serverID, unit, action)
 }
+
+// ServicesPlanRemove describes removing unit: deleting an admin's unit,
+// masking a package's, or clearing the failure of one already gone.
+func (a *App) ServicesPlanRemove(serverID, unit string) (svc.RemovePlan, error) {
+	return a.services.PlanRemove(a.ctx, serverID, unit)
+}
+
+// ServicesRemove runs the confirmed command of ServicesPlanRemove.
+func (a *App) ServicesRemove(serverID, unit, command string) error {
+	if err := a.lock.Check(); err != nil {
+		return err
+	}
+	return a.services.Remove(a.ctx, serverID, unit, command)
+}
