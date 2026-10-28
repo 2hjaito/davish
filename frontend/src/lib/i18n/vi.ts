@@ -26,7 +26,8 @@ export const t = {
       },
     ],
     add: 'Thêm server qua SSH…',
-    foot: 'Có thể thêm nhiều server; mỗi server là một workspace (⌘1…⌘9).',
+    foot: (mod: string) =>
+      `Có thể thêm nhiều server; mỗi server là một workspace (${mod}1…${mod}9). ${mod}K mở Spotlight để tìm app, dịch vụ, container, thư mục.`,
   },
   spotlight: {
     label: 'Spotlight',
@@ -75,10 +76,12 @@ export const t = {
     ram: 'RAM',
     disk: 'Disk',
     network: 'Mạng',
+    search: (key: string) => `Tìm kiếm (${key})`,
     notifications: (n: number) => (n > 0 ? `Thông báo: ${n} cảnh báo` : 'Thông báo'),
     weekdays: ['CN', 'Th 2', 'Th 3', 'Th 4', 'Th 5', 'Th 6', 'Th 7'],
   },
   system: {
+    search: 'Tìm kiếm…',
     settings: 'Cài đặt…',
     audit: 'Nhật ký lệnh…',
     sleep: 'Ngủ màn hình',

@@ -3,10 +3,11 @@
   import { t } from '../i18n/vi'
   import { metrics } from '../stores/metrics.svelte'
   import { servers } from '../stores/servers.svelte'
+  import { ui } from '../stores/ui.svelte'
   import { level } from '../ui/charts/scale'
   import Icon from '../ui/Icon.svelte'
   import NotificationMenu from './NotificationMenu.svelte'
-  import { hasNativeTrafficLights } from './platform'
+  import { hasNativeTrafficLights, shortcut } from './platform'
   import ServerPicker from './ServerPicker.svelte'
   import SystemMenu from './SystemMenu.svelte'
 
@@ -56,6 +57,15 @@
         <span>{formatRate(m.rxBps)}</span>
       </span>
     {/if}
+    <button
+      class="mbtn search"
+      aria-label={t.menubar.search(shortcut('K'))}
+      title={t.menubar.search(shortcut('K'))}
+      aria-expanded={ui.spotlight}
+      onclick={() => ui.toggleSpotlight()}
+    >
+      <Icon name="search" size={15} />
+    </button>
     <NotificationMenu />
     <span class="clock">{formatClock(now, t.menubar.weekdays)}</span>
   </div>

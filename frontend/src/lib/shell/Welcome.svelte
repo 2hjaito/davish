@@ -3,6 +3,7 @@
   import DavishMark from '../ui/DavishMark.svelte'
   import Icon from '../ui/Icon.svelte'
   import type { IconName } from '../ui/icons'
+  import { isMac } from './platform'
 
   interface Props {
     onadd: () => void
@@ -34,7 +35,7 @@
     <Icon name="plus" size={14} strokeWidth={2.4} />
     {t.welcome.add}
   </button>
-  <p class="foot">{t.welcome.foot}</p>
+  <p class="foot">{t.welcome.foot(isMac ? '⌘' : 'Ctrl+')}</p>
 </section>
 
 <style>

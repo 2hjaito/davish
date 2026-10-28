@@ -167,8 +167,6 @@
     untrack(() => showWorkspace(id))
   })
 
-  let spotlight = $state(false)
-
   function onKeyDown(e: KeyboardEvent) {
     if (!hasPrimaryModifier(e) || e.altKey || e.shiftKey) return
     // Off macOS the modifier is Ctrl, which the terminal needs (Ctrl+W,
@@ -176,7 +174,7 @@
     if (!isMac && e.target instanceof Element && e.target.closest('.xterm')) return
     if (e.key.toLowerCase() === 'k') {
       e.preventDefault()
-      spotlight = !spotlight
+      ui.toggleSpotlight()
       return
     }
     const key = e.key.toLowerCase()
@@ -200,7 +198,7 @@
 
 <div class="desktop">
   <MenuBar />
-  <Spotlight open={spotlight} onclose={() => (spotlight = false)} />
+  <Spotlight open={ui.spotlight} onclose={() => (ui.spotlight = false)} />
 
   {#if wm.snapPreview}
     {@const p = wm.snapPreview}
