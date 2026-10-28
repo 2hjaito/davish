@@ -4,6 +4,14 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Khóa app (ADR 0007): mật khẩu khóa riêng, mở bằng Touch ID trên macOS; tự khóa khi máy ngủ dậy, sau N phút không dùng, hoặc `⌘L` / `Ctrl+L`. Phiên SSH, log, transfer vẫn chạy khi khóa; thao tác lên server bị chặn. Quên mật khẩu thì đặt lại, đổi lại Davish xóa mật khẩu server đã lưu.
+- Launchpad (ô đầu Dock hoặc `⌘⇧A`): mọi app, tìm theo tên, ghim/bỏ ghim khỏi Dock. Dock hiện thêm app đang mở chưa ghim.
+- Kính lúp trên menu bar và mục `Tìm kiếm…` trong menu hệ thống mở Spotlight.
+
+### Thay đổi
+- Cửa sổ bay ra từ icon của app trên Dock khi mở và thu về đó khi đóng.
+
 ### Sửa
 - Logs: nhãn trên toolbar không còn xuống dòng; cửa sổ hẹp thì ô nguồn và ô lọc co lại, hẹp hơn nữa thì toolbar xuống hàng thay vì che mất nút.
 - Logs: journal của một dịch vụ im lặng 5 giây thì giải thích lý do thường gặp (dịch vụ không ghi journal, hoặc tài khoản SSH không được đọc journal hệ thống) và đưa lệnh `sudo journalctl …` để chạy trong Terminal, thay vì chờ mãi.
