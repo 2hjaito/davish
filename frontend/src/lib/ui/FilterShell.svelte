@@ -8,6 +8,8 @@
     count?: number
     /** Draws the count in red: something needs attention. */
     alert?: boolean
+    /** Starts a new group in the sidebar, under this heading. */
+    section?: string
   }
 </script>
 
@@ -74,6 +76,7 @@
     <div class="items">
       <span class="group">{group}</span>
       {#each filters as f (f.id)}
+        {#if f.section}<span class="group">{f.section}</span>{/if}
         <button
           class="item"
           class:active={filter === f.id}

@@ -74,6 +74,14 @@ export function DockerAct(arg1, arg2, arg3) {
   return window['go']['app']['App']['DockerAct'](arg1, arg2, arg3);
 }
 
+export function DockerImage(arg1, arg2) {
+  return window['go']['app']['App']['DockerImage'](arg1, arg2);
+}
+
+export function DockerImages(arg1) {
+  return window['go']['app']['App']['DockerImages'](arg1);
+}
+
 export function DockerInspect(arg1, arg2) {
   return window['go']['app']['App']['DockerInspect'](arg1, arg2);
 }
@@ -88,6 +96,14 @@ export function DockerLogs(arg1, arg2) {
 
 export function DockerPlan(arg1, arg2) {
   return window['go']['app']['App']['DockerPlan'](arg1, arg2);
+}
+
+export function DockerPlanImage(arg1) {
+  return window['go']['app']['App']['DockerPlanImage'](arg1);
+}
+
+export function DockerRemoveImage(arg1, arg2, arg3) {
+  return window['go']['app']['App']['DockerRemoveImage'](arg1, arg2, arg3);
 }
 
 export function DockerStats(arg1) {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { Container } from '../../lib/api/docker'
-import { canDo, clock, counts, health, since, visible } from './containers'
+import { canDo, clock, counts, health, since, visible, visibleImages } from './containers'
 
 const c = (name: string, state: string, image = 'nginx:1.27'): Container => ({
   id: name,
@@ -65,4 +65,24 @@ it('shows log times as a local clock', () => {
   const d = new Date(2026, 9, 27, 8, 5, 9)
   expect(clock(d.toISOString())).toBe('08:05:09')
   expect(clock('garbage')).toBe('garbage')
+})
+
+describe('visibleImages', () => {
+  const img = (repository: string, containers: number) => ({
+    id: `sha256:${repository}`,
+    repository,
+    tag: 'latest',
+    created: '',
+    createdSince: '',
+    size: 1,
+    containers,
+    dangling: false,
+  })
+  const list = [img('nginx', 2), img('old-api', 0)]
+
+  it('keeps unused images for that filter and matches name or ID', () => {
+    expect(visibleImages(list, 'unused', '').map((i) => i.repository)).toEqual(['old-api'])
+    expect(visibleImages(list, 'images', 'NGINX:lat').map((i) => i.repository)).toEqual(['nginx'])
+    expect(visibleImages(list, 'images', 'sha256:old')).toHaveLength(1)
+  })
 })

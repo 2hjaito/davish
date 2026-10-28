@@ -473,6 +473,111 @@ export namespace docker {
 	        this.json = source["json"];
 	    }
 	}
+	export class Image {
+	    id: string;
+	    repository: string;
+	    tag: string;
+	    created: string;
+	    createdSince: string;
+	    size: number;
+	    containers: number;
+	    dangling: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Image(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.repository = source["repository"];
+	        this.tag = source["tag"];
+	        this.created = source["created"];
+	        this.createdSince = source["createdSince"];
+	        this.size = source["size"];
+	        this.containers = source["containers"];
+	        this.dangling = source["dangling"];
+	    }
+	}
+	export class Layer {
+	    createdBy: string;
+	    size: number;
+	    comment?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Layer(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.createdBy = source["createdBy"];
+	        this.size = source["size"];
+	        this.comment = source["comment"];
+	    }
+	}
+	export class ImageDetail {
+	    layers: Layer[];
+	    architecture: string;
+	    os: string;
+	    entrypoint: string[];
+	    cmd: string[];
+	    workingDir: string;
+	    user: string;
+	    env: string[];
+	    exposedPorts: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new ImageDetail(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.layers = this.convertValues(source["layers"], Layer);
+	        this.architecture = source["architecture"];
+	        this.os = source["os"];
+	        this.entrypoint = source["entrypoint"];
+	        this.cmd = source["cmd"];
+	        this.workingDir = source["workingDir"];
+	        this.user = source["user"];
+	        this.env = source["env"];
+	        this.exposedPorts = source["exposedPorts"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class ImagePlan {
+	    ref: string;
+	    command: string;
+	    run: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ImagePlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ref = source["ref"];
+	        this.command = source["command"];
+	        this.run = source["run"];
+	    }
+	}
+	
 	export class LogLine {
 	    time: string;
 	    text: string;

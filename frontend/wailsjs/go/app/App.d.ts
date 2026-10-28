@@ -55,6 +55,10 @@ export function DiskUsage(arg1:string,arg2:string,arg3:string):Promise<disk.Usag
 
 export function DockerAct(arg1:string,arg2:string,arg3:string):Promise<void>;
 
+export function DockerImage(arg1:string,arg2:string):Promise<docker.ImageDetail>;
+
+export function DockerImages(arg1:string):Promise<Array<docker.Image>>;
+
 export function DockerInspect(arg1:string,arg2:string):Promise<docker.Detail>;
 
 export function DockerList(arg1:string):Promise<Array<docker.Container>>;
@@ -62,6 +66,10 @@ export function DockerList(arg1:string):Promise<Array<docker.Container>>;
 export function DockerLogs(arg1:string,arg2:string):Promise<docker.Logs>;
 
 export function DockerPlan(arg1:string,arg2:string):Promise<docker.Plan>;
+
+export function DockerPlanImage(arg1:string):Promise<docker.ImagePlan>;
+
+export function DockerRemoveImage(arg1:string,arg2:string,arg3:string):Promise<void>;
 
 export function DockerStats(arg1:string):Promise<Array<docker.Stats>>;
 

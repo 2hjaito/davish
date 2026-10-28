@@ -139,3 +139,32 @@ func code(err error) apperr.Code {
 	}
 	return ""
 }
+
+func TestImagesAndLayers(t *testing.T) {
+	s, id := setup(t)
+	imgs, err := s.Images(context.Background(), id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var bb *docker.Image
+	for i := range imgs {
+		if imgs[i].Repository == "davish/busybox" {
+			bb = &imgs[i]
+		}
+	}
+	if bb == nil || bb.Containers < 2 || bb.Size == 0 {
+		t.Fatalf("busybox = %+v in %+v", bb, imgs)
+	}
+	d, err := s.Image(context.Background(), id, bb.Ref())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(d.Layers) == 0 || len(d.Cmd) == 0 || d.Cmd[0] != "/bin/sh" {
+		t.Fatalf("detail = %+v", d)
+	}
+	// In use by davish-web: docker refuses, and says so.
+	p, _ := docker.PlanImage(bb.Ref())
+	if err := s.RemoveImage(context.Background(), id, bb.Ref(), p.Command); err == nil {
+		t.Fatal("removed an image in use")
+	}
+}

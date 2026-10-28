@@ -80,3 +80,56 @@ export const dockerPlan = (name: string, action: ContainerAction): Promise<Actio
 
 export const dockerAct = (serverID: string, name: string, action: ContainerAction): Promise<void> =>
   App.DockerAct(serverID, name, action)
+
+/** One row of docker images. */
+export interface Image {
+  /** sha256:…, full */
+  id: string
+  repository: string
+  tag: string
+  created: string
+  /** "2 days ago", in English from docker */
+  createdSince: string
+  size: number
+  /** Containers, running or not, created from it. */
+  containers: number
+  /** Untagged: no tag points at it any more. */
+  dangling: boolean
+}
+
+export interface Layer {
+  createdBy: string
+  size: number
+  comment?: string
+}
+
+export interface ImageDetail {
+  /** Oldest first, as the Dockerfile reads. */
+  layers: Layer[]
+  architecture: string
+  os: string
+  entrypoint?: string[]
+  cmd?: string[]
+  workingDir: string
+  user: string
+  env?: string[]
+  exposedPorts?: string[]
+}
+
+export interface ImagePlan {
+  ref: string
+  /** Exactly what dockerRemoveImage runs. */
+  command: string
+  /** The docker run line typed into a terminal. */
+  run: string
+}
+
+/** How commands name an image: repo:tag, or its ID when untagged. */
+export const imageRef = (i: Image): string => (i.dangling ? i.id : `${i.repository}:${i.tag}`)
+
+export const dockerImages = (serverID: string): Promise<Image[]> => App.DockerImages(serverID)
+export const dockerImage = (serverID: string, ref: string): Promise<ImageDetail> =>
+  App.DockerImage(serverID, ref)
+export const dockerPlanImage = (ref: string): Promise<ImagePlan> => App.DockerPlanImage(ref)
+export const dockerRemoveImage = (serverID: string, ref: string, command: string): Promise<void> =>
+  App.DockerRemoveImage(serverID, ref, command)
