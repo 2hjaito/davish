@@ -16,4 +16,5 @@ const (
 	NotifyNew         = "notify:new"
 	AuditEntry        = "audit:entry"
 	LockState         = "lock:state"
+	TunnelChanged     = "tunnel:changed"
 )

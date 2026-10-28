@@ -15,6 +15,7 @@ export type AppId =
   | 'keys'
   | 'packages'
   | 'git'
+  | 'ports'
   | 'editor'
   | 'settings'
   | 'transfers'

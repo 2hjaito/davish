@@ -21,6 +21,7 @@ import (
 	"davish/internal/logs"
 	"davish/internal/nginx"
 	"davish/internal/packages"
+	"davish/internal/ports"
 	"davish/internal/sshkeys"
 	"davish/internal/store"
 	"davish/internal/svc"
@@ -54,6 +55,8 @@ type App struct {
 	keys      *sshkeys.Service
 	packages  *packages.Service
 	git       *git.Service
+	ports     *ports.Lister
+	tunnels   *ports.Tunnels
 }
 
 // New wires the services with their config under os.UserConfigDir()/davish.
@@ -85,6 +88,8 @@ func New() (*App, error) {
 	a.keys = sshkeys.New(a.conns, runner)
 	a.packages = packages.New(runner, emitter{a})
 	a.git = git.New(runner)
+	a.ports = ports.NewLister(runner)
+	a.tunnels = ports.NewTunnels(a.conns, emitter{a}, log)
 	a.logs = logs.New(a.conns, a.audit, emitter{a}, log)
 	if a.transfers, err = transfer.New(a.conns, emitter{a}, log, transfer.Options{}); err != nil {
 		return nil, err
@@ -106,6 +111,7 @@ func (a *App) Shutdown(_ context.Context) {
 	a.logs.Close()
 	a.transfers.Close()
 	a.terms.CloseAll()
+	a.tunnels.Close()
 	a.conns.Close()
 }
 

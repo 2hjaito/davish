@@ -306,6 +306,14 @@ export function PackagesPlan(arg1, arg2, arg3) {
   return window['go']['app']['App']['PackagesPlan'](arg1, arg2, arg3);
 }
 
+export function PortsList(arg1) {
+  return window['go']['app']['App']['PortsList'](arg1);
+}
+
+export function PortsProbe(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['PortsProbe'](arg1, arg2, arg3, arg4);
+}
+
 export function ReorderServers(arg1) {
   return window['go']['app']['App']['ReorderServers'](arg1);
 }
@@ -400,6 +408,18 @@ export function TransferReveal(arg1) {
 
 export function TransferUpload(arg1, arg2, arg3) {
   return window['go']['app']['App']['TransferUpload'](arg1, arg2, arg3);
+}
+
+export function TunnelList() {
+  return window['go']['app']['App']['TunnelList']();
+}
+
+export function TunnelStart(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['TunnelStart'](arg1, arg2, arg3, arg4);
+}
+
+export function TunnelStop(arg1) {
+  return window['go']['app']['App']['TunnelStop'](arg1);
 }
 
 export function Unlock(arg1) {
