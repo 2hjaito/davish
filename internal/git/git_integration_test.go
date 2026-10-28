@@ -102,3 +102,83 @@ func isCode(err error, code apperr.Code) bool {
 	var ae *apperr.Error
 	return errors.As(err, &ae) && ae.Code == code
 }
+
+func TestFetchPullSwitch(t *testing.T) {
+	m, id := testsshd.Connect(t)
+	s := git.New(audit.NewRunner(m, audit.New(discard{})))
+	ctx := context.Background()
+	testsshd.Run(t, m, id, `set -e; rm -rf ~/gitops; mkdir -p ~/gitops; cd ~/gitops
+g() { git -c user.name=Tester -c user.email=t@example.com "$@"; }
+git init -q --bare -b main remote.git
+g clone -q remote.git work 2>/dev/null; cd work
+echo '{}' > package.json; echo '{}' > package-lock.json
+g add .; g commit -qm one; g push -q -u origin main 2>/dev/null
+cd ..; g clone -q remote.git other 2>/dev/null; cd other
+echo two > two.txt; g add .; g commit -qm two; g push -q origin main 2>/dev/null
+g switch -qc feature; g push -q origin feature 2>/dev/null`)
+	t.Cleanup(func() { testsshd.Run(t, m, id, `rm -rf ~/gitops`) })
+	dir := "/home/tester/gitops/work"
+
+	run := func(op, branch string) git.Result {
+		t.Helper()
+		plan, err := s.Plan(ctx, id, dir, op, branch)
+		if err != nil {
+			t.Fatalf("plan %s: %v", op, err)
+		}
+		res, err := s.Run(ctx, id, dir, op, branch, plan.Command)
+		if err != nil {
+			t.Fatalf("run %s: %v", op, err)
+		}
+		return res
+	}
+
+	if r := run(git.OpFetch, ""); r.Error != "" {
+		t.Fatalf("fetch: %+v", r)
+	}
+	st, err := s.Status(ctx, id, dir)
+	if err != nil || st.Behind != 1 || st.Install != "npm ci" {
+		t.Fatalf("after fetch %+v, %v", st, err)
+	}
+
+	// A dirty tree blocks the pull, even with a plan confirmed while clean.
+	plan, err := s.Plan(ctx, id, dir, git.OpPull, "")
+	if err != nil || plan.Dirty != 0 {
+		t.Fatalf("plan %+v, %v", plan, err)
+	}
+	testsshd.Run(t, m, id, `echo '{"x":1}' > ~/gitops/work/package.json`)
+	if _, err := s.Run(ctx, id, dir, git.OpPull, "", plan.Command); !isCode(err, apperr.GitDirty) {
+		t.Fatalf("dirty pull: %v", err)
+	}
+	if p, _ := s.Plan(ctx, id, dir, git.OpPull, ""); p.Dirty != 1 {
+		t.Fatalf("dirty count %d", p.Dirty)
+	}
+	testsshd.Run(t, m, id, `cd ~/gitops/work && git checkout -q -- package.json`)
+
+	if r := run(git.OpPull, ""); r.Error != "" {
+		t.Fatalf("pull: %+v", r)
+	}
+	if st, _ := s.Status(ctx, id, dir); st.Behind != 0 || st.Last == nil || st.Last.Subject != "two" {
+		t.Fatalf("after pull %+v", st)
+	}
+
+	branches, err := s.Branches(ctx, id, dir)
+	if err != nil || len(branches) != 2 || !branches[0].Current || branches[1].Name != "feature" || !branches[1].Remote {
+		t.Fatalf("branches %+v, %v", branches, err)
+	}
+	if r := run(git.OpSwitch, "feature"); r.Error != "" {
+		t.Fatalf("switch: %+v", r)
+	}
+	if st, _ := s.Status(ctx, id, dir); st.Branch != "feature" || st.Upstream != "origin/feature" {
+		t.Fatalf("after switch %+v", st)
+	}
+
+	if _, err := s.Run(ctx, id, dir, git.OpSwitch, "main", "git switch main; reboot"); !isCode(err, apperr.FSStale) {
+		t.Fatalf("unconfirmed command: %v", err)
+	}
+
+	// A remote that refuses the key reports GIT_AUTH_FAILED.
+	testsshd.Run(t, m, id, `cd ~/gitops/work && git remote set-url origin nobody@127.0.0.1:/nowhere.git`)
+	if r := run(git.OpFetch, ""); r.Error != apperr.GitAuthFailed {
+		t.Fatalf("auth failure: %+v", r)
+	}
+}

@@ -5,6 +5,7 @@ import (
 	"context"
 	"path"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -59,6 +60,9 @@ type Status struct {
 	Last      *Commit  `json:"last"`
 	Changes   []Change `json:"changes"`
 	Truncated bool     `json:"truncated"`
+	// Install installs the Node.js dependencies as the lockfile at the
+	// root pins them, such as "npm ci"; empty without package.json.
+	Install string `json:"install"`
 }
 
 // checkDir accepts an absolute folder, without line breaks.
@@ -74,12 +78,27 @@ func gitIn(dir string, args ...string) string {
 	return shellx.InDir(dir, shellx.Cmd("git", args...))
 }
 
+// lockfiles are what the root may hold, in the order the first match
+// picks the install command.
+var lockfiles = []struct{ file, install string }{
+	{"pnpm-lock.yaml", "pnpm install --frozen-lockfile"},
+	{"yarn.lock", "yarn install --frozen-lockfile"},
+	{"package-lock.json", "npm ci"},
+	{"npm-shrinkwrap.json", "npm ci"},
+}
+
 // statusLine prints the last commit on one line, which is empty without
-// commits, then the porcelain status with NUL separated entries, so file
-// names need no unquoting.
+// commits, then the Node.js files at the root on one line, then the
+// porcelain status with NUL separated entries, so file names need no
+// unquoting.
 func statusLine(dir string) string {
+	files := []string{"package.json"}
+	for _, l := range lockfiles {
+		files = append(files, l.file)
+	}
 	return readOnly + shellx.Cmd("cd", "--", dir).String() + ` && { ` +
-		shellx.Cmd("git", "log", "-1", "--format=%H%x09%h%x09%an%x09%at%x09%s").String() + ` 2>/dev/null; echo; ` +
+		`printf '%s\n' "$(` + shellx.Cmd("git", "log", "-1", "--format=%H%x09%h%x09%an%x09%at%x09%s").String() + ` 2>/dev/null)"; ` +
+		`for f in ` + strings.Join(files, " ") + `; do [ -f "$f" ] && printf '%s ' "$f"; done; echo; ` +
 		shellx.Cmd("git", "status", "--porcelain=v2", "--branch", "-z").String() + `; }`
 }
 
@@ -98,9 +117,26 @@ func (s *Service) Status(ctx context.Context, serverID, dir string) (Status, err
 		return Status{}, err
 	}
 	head, rest, _ := bytes.Cut(res.Stdout, []byte("\n"))
+	node, rest, _ := bytes.Cut(rest, []byte("\n"))
 	st := parseStatus(rest)
 	st.Last = parseCommit(string(head), "\t")
+	st.Install = installFor(strings.Fields(string(node)))
 	return st, nil
+}
+
+// installFor picks the install command from the files at the root. A
+// package.json without a lockfile gets none: npm ci needs one, and a
+// plain install would rewrite what the repository pins.
+func installFor(files []string) string {
+	if !slices.Contains(files, "package.json") {
+		return ""
+	}
+	for _, l := range lockfiles {
+		if slices.Contains(files, l.file) {
+			return l.install
+		}
+	}
+	return ""
 }
 
 // gitError maps a failed git run to an error the UI can explain.

@@ -686,6 +686,22 @@ export namespace fs {
 
 export namespace git {
 	
+	export class Branch {
+	    name: string;
+	    remote: boolean;
+	    current: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Branch(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.remote = source["remote"];
+	        this.current = source["current"];
+	    }
+	}
 	export class Change {
 	    path: string;
 	    origPath: string;
@@ -758,6 +774,20 @@ export namespace git {
 	        this.untracked = source["untracked"];
 	    }
 	}
+	export class Plan {
+	    command: string;
+	    dirty: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Plan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.command = source["command"];
+	        this.dirty = source["dirty"];
+	    }
+	}
 	export class Repo {
 	    path: string;
 	    name: string;
@@ -772,6 +802,20 @@ export namespace git {
 	        this.name = source["name"];
 	    }
 	}
+	export class Result {
+	    output: string;
+	    error: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Result(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.output = source["output"];
+	        this.error = source["error"];
+	    }
+	}
 	export class Status {
 	    branch: string;
 	    upstream: string;
@@ -780,6 +824,7 @@ export namespace git {
 	    last?: Commit;
 	    changes: Change[];
 	    truncated: boolean;
+	    install: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Status(source);
@@ -794,6 +839,7 @@ export namespace git {
 	        this.last = this.convertValues(source["last"], Commit);
 	        this.changes = this.convertValues(source["changes"], Change);
 	        this.truncated = source["truncated"];
+	        this.install = source["install"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
