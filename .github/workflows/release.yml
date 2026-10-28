@@ -1,0 +1,113 @@
+name: release
+
+# Pushing a tag like v1.0.0 builds Davish for macOS, Windows and Linux and
+# publishes a GitHub release with the notes of that version from
+# CHANGELOG.md. Uses the gh CLI that GitHub runners ship with.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: macos-latest
+            target: macos-universal
+          - os: windows-latest
+            target: windows-amd64
+          - os: ubuntu-latest
+            target: linux-amd64
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Linux build deps
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.17.0
+
+      - name: Install frontend deps
+        run: make frontend-install
+
+      - name: Build
+        run: |
+          case "$RUNNER_OS" in
+            macOS) wails build -platform darwin/universal -trimpath ;;
+            Linux) wails build -tags webkit2_41 -trimpath ;;
+            *) wails build -trimpath ;;
+          esac
+
+      # One archive per platform, named after the version and target.
+      - name: Package
+        run: |
+          name="Davish-${GITHUB_REF_NAME}-${{ matrix.target }}"
+          mkdir -p dist
+          case "$RUNNER_OS" in
+            macOS) ditto -c -k --keepParent build/bin/Davish.app "dist/$name.zip" ;;
+            Linux) tar -C build/bin -czf "dist/$name.tar.gz" Davish ;;
+            *) (cd build/bin && 7z a "../../dist/$name.zip" Davish.exe) ;;
+          esac
+          ls -la dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}
+          path: dist/*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      # The section of CHANGELOG.md for this version, without its heading.
+      - name: Release notes
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v v="$version" '
+            $0 ~ "^## \\[" v "\\]" { on = 1; next }
+            on && /^## \[/ { exit }
+            on && /^\[[^]]+\]: / { exit }
+            on { print }
+          ' CHANGELOG.md > notes.md
+          test -s notes.md || echo "Davish ${GITHUB_REF_NAME}" > notes.md
+          cat notes.md
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          (cd dist && sha256sum * > SHA256SUMS.txt)
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --title "Davish ${GITHUB_REF_NAME}" \
+            --notes-file notes.md \
+            --verify-tag

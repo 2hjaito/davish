@@ -15,6 +15,9 @@ M10 · Hoàn thiện v1.0.
 - Đóng gói thành `Davish.app` / Davish 1.0.0 với icon chính thức, bundle ID `io.github.2hjaito.davish`; macOS tối thiểu 12.
 - Server chưa từng mở (kể cả server đầu tiên vừa thêm) mở sẵn Terminal.
 
+### Sửa
+- Cron: lệnh thay crontab chạy đúng lệnh người dùng đã xác nhận; trước đây nếu đồng hồ sang giây mới giữa lúc xác nhận và lúc chạy, file sao lưu mang tên khác với tên đã hiển thị.
+
 ## [0.9.0] - 2026-10-28
 
 M9 · Đa server.
