@@ -296,9 +296,12 @@
     color: var(--fg-on-dark);
   }
 
+  /* Inputs shrink first; a window too narrow for that wraps a row
+     rather than clipping the tools. */
   .toolbar {
     flex-shrink: 0;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 6px;
     padding: 6px 10px;
@@ -314,6 +317,7 @@
 
   .segmented button {
     padding: 2px 9px;
+    white-space: nowrap;
     border: 0;
     border-radius: 6px;
     background: none;
@@ -340,7 +344,8 @@
   }
 
   .target {
-    width: 220px;
+    flex: 0 1 220px;
+    min-width: 90px;
     padding: 4px 8px;
     border-radius: var(--control-radius);
     background: var(--tab-hover-dark);
@@ -360,6 +365,7 @@
     color: var(--fg-on-accent);
     font-size: var(--text-xs);
     font-weight: 600;
+    white-space: nowrap;
   }
 
   .go:disabled {
@@ -371,6 +377,8 @@
   }
 
   .filter {
+    flex: 0 1 auto;
+    min-width: 0;
     display: flex;
     align-items: center;
     gap: 5px;
@@ -382,6 +390,8 @@
 
   .filter input {
     width: 120px;
+    min-width: 50px;
+    flex: 1;
   }
 
   .tool {

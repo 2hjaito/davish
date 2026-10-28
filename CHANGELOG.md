@@ -2,6 +2,11 @@
 
 Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), phiên bản theo [SemVer](https://semver.org/lang/vi/): `v0.<milestone>.<patch>` trong giai đoạn phát triển, `v1.0.0` khi xong M10 (`docs/GIT.md`).
 
+## [Unreleased]
+
+### Sửa
+- Logs: nhãn trên toolbar không còn xuống dòng; cửa sổ hẹp thì ô nguồn và ô lọc co lại, hẹp hơn nữa thì toolbar xuống hàng thay vì che mất nút.
+
 ## [1.0.0] - 2026-10-28
 
 M10 · Hoàn thiện v1.0.
@@ -85,6 +90,7 @@ M0–M3 · Khung dự án, desktop, kết nối, Terminal.
 - Kết nối SSH qua agent, key hoặc mật khẩu; bí mật trong keychain; xác nhận host key lần đầu, từ chối khi host key đổi; tự kết nối lại.
 - Terminal xterm.js nhiều tab, prompt Davish không cài gì lên server.
 
+[Unreleased]: https://github.com/2hjaito/davish/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/2hjaito/davish/compare/v0.9.0...v1.0.0
 [0.9.0]: https://github.com/2hjaito/davish/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/2hjaito/davish/compare/v0.7.0...v0.8.0
