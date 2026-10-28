@@ -12,6 +12,7 @@ import {logs} from '../models';
 import {sysmon} from '../models';
 import {nginx} from '../models';
 import {packages} from '../models';
+import {ports} from '../models';
 import {sshconfig} from '../models';
 import {svc} from '../models';
 import {transfer} from '../models';
@@ -168,6 +169,10 @@ export function PackagesNpmGlobals(arg1:string):Promise<Array<packages.NpmGlobal
 
 export function PackagesPlan(arg1:string,arg2:string,arg3:Array<string>):Promise<string>;
 
+export function PortsList(arg1:string):Promise<ports.List>;
+
+export function PortsProbe(arg1:string,arg2:string,arg3:number,arg4:string):Promise<string>;
+
 export function ReorderServers(arg1:Array<string>):Promise<void>;
 
 export function SSHConfigHosts():Promise<Array<sshconfig.Candidate>>;
@@ -215,6 +220,12 @@ export function TransferPlanUpload(arg1:string,arg2:string,arg3:Array<string>):P
 export function TransferReveal(arg1:string):Promise<void>;
 
 export function TransferUpload(arg1:string,arg2:string,arg3:Array<transfer.UploadRequest>):Promise<Array<transfer.Job>>;
+
+export function TunnelList():Promise<Array<ports.Tunnel>>;
+
+export function TunnelStart(arg1:string,arg2:string,arg3:number,arg4:string):Promise<ports.Tunnel>;
+
+export function TunnelStop(arg1:string):Promise<void>;
 
 export function Unlock(arg1:string):Promise<void>;
 

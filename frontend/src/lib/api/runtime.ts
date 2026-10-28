@@ -1,6 +1,6 @@
 // Typed access to the Wails runtime. The frontend also runs in a plain browser
 // (vite dev, previews), where window.runtime does not exist.
-import { Quit } from '../../../wailsjs/runtime/runtime'
+import { BrowserOpenURL, Quit } from '../../../wailsjs/runtime/runtime'
 
 /**
  * The welcome page's "try it" mode: the app reloads with ?demo and runs on
@@ -22,4 +22,10 @@ export function exitDemo() {
 /** Quits the app; a no-op outside Wails. */
 export function quit() {
   if (hasRuntime) Quit()
+}
+
+/** Opens url in the user's default browser. */
+export function openURL(url: string) {
+  if (hasRuntime) BrowserOpenURL(url)
+  else window.open(url, '_blank', 'noopener')
 }

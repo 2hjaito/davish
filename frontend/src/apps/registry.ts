@@ -3,6 +3,7 @@ import AuditApp from './audit/AuditApp.svelte'
 import CronApp from './cron/CronApp.svelte'
 import KeysApp from './keys/KeysApp.svelte'
 import PackagesApp from './packages/PackagesApp.svelte'
+import PortsApp from './ports/PortsApp.svelte'
 import DockerApp from './docker/DockerApp.svelte'
 import EditorApp from './editor/EditorApp.svelte'
 import FilesApp from './files/FilesApp.svelte'
@@ -113,6 +114,14 @@ export const apps: AppDef[] = [
     theme: 'light',
     size: { w: 1100, h: 640 },
     component: GitApp,
+  },
+  {
+    id: 'ports',
+    label: t.apps.ports,
+    icon: 'network',
+    theme: 'light',
+    size: { w: 900, h: 580 },
+    component: PortsApp,
   },
   {
     id: 'editor',

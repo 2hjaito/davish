@@ -5,6 +5,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Thêm
+- App Cổng: cổng TCP server đang nghe (`ss -tlnp`) với process và container; tunnel một cổng về `127.0.0.1` của máy này qua kết nối SSH đang có (giữ số cổng nếu trống), mở trong trình duyệt hoặc copy địa chỉ; mở như một tên miền (ghi đè Host) cho site nginx; "Thử từ server" bằng curl. Tunnel sống qua reconnect và tắt khi đóng app.
 - Menu bar thật: Tệp, Xem, Đi tới, Cửa sổ, Trợ giúp và menu của app đang mở (Git: Fetch, Pull, Thêm thư mục; Services, Docker: khởi động lại…), điều khiển bằng bàn phím, phím tắt hiện bên phải. `⌘R` làm mới cửa sổ đang mở, `⌘⇧T/F/M/S/D/L/E/G` mở từng app.
 - Trợ giúp: nút `?` trên mỗi app (app làm gì, thao tác chính, phím tắt, lệnh chạy trên server), bảng phím tắt (`⌘/`), Về Davish; Spotlight tìm được trợ giúp. Hướng dẫn nhanh lần đầu, xem lại từ Trợ giúp.
 - Chế độ thử trên màn hình chào: xem Davish với dữ liệu mẫu, không kết nối server nào.
