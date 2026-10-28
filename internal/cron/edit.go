@@ -3,6 +3,7 @@ package cron
 import (
 	"context"
 	"strings"
+	"time"
 
 	"davish/internal/apperr"
 	"davish/internal/shellx"
@@ -41,21 +42,35 @@ type Plan struct {
 	Version string `json:"version"`
 }
 
+// backupStamp is the UTC time in a backup's name.
+const backupStamp = "20060102T150405Z"
+
 // Plan works out change against the current crontab without changing it.
 func (s *Service) Plan(ctx context.Context, serverID string, c Change) (Plan, error) {
-	p, _, err := s.plan(ctx, serverID, c)
+	p, _, err := s.plan(ctx, serverID, c, s.now())
 	return p, err
 }
 
-// Apply makes change, provided the crontab is still the one version
-// names. The previous crontab is saved first; if that fails nothing is
-// written.
-func (s *Service) Apply(ctx context.Context, serverID string, c Change, version string) error {
-	p, text, err := s.plan(ctx, serverID, c)
+// Apply makes change exactly as confirmed: the plan is worked out again
+// with the confirmed backup name, and must still give the same command
+// from the same crontab. The previous crontab is saved first; if that
+// fails nothing is written.
+func (s *Service) Apply(ctx context.Context, serverID string, c Change, confirmed Plan) error {
+	// The backup is named when the plan is shown, not when it runs: a
+	// second ticking over in between must not change the command.
+	stamp := s.now()
+	if i := strings.LastIndex(confirmed.Backup, ".crontab.bak-"); i >= 0 {
+		t, err := time.Parse(backupStamp, confirmed.Backup[i+len(".crontab.bak-"):])
+		if err != nil {
+			return apperr.New(apperr.InvalidInput, "not a backup name")
+		}
+		stamp = t
+	}
+	p, text, err := s.plan(ctx, serverID, c, stamp)
 	if err != nil {
 		return err
 	}
-	if p.Version != version {
+	if p.Version != confirmed.Version || p.Command != confirmed.Command {
 		return apperr.New(apperr.FSStale, "the crontab changed since the change was confirmed")
 	}
 	res, err := s.run.RunInput(ctx, serverID, app, p.Command, []byte(text))
@@ -72,7 +87,7 @@ func (s *Service) Apply(ctx context.Context, serverID string, c Change, version 
 }
 
 // plan returns the plan and the new crontab text.
-func (s *Service) plan(ctx context.Context, serverID string, c Change) (Plan, string, error) {
+func (s *Service) plan(ctx context.Context, serverID string, c Change, stamp time.Time) (Plan, string, error) {
 	cur, exists, err := s.userCrontab(ctx, serverID)
 	if err != nil {
 		return Plan{}, "", err
@@ -126,7 +141,7 @@ func (s *Service) plan(ctx context.Context, serverID string, c Change) (Plan, st
 		if err != nil {
 			return Plan{}, "", err
 		}
-		p.Backup = home + "/.crontab.bak-" + s.now().UTC().Format("20060102T150405Z")
+		p.Backup = home + "/.crontab.bak-" + stamp.UTC().Format(backupStamp)
 		p.Command = shellx.Cmd("crontab", "-l").String() + " > " + shellx.Quote(p.Backup) + " && " + install
 	}
 	return p, text, nil

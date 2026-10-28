@@ -126,7 +126,7 @@
     busy = true
     changeError = ''
     try {
-      await backend.apply(win.serverID, pending.change, pending.plan.version)
+      await backend.apply(win.serverID, pending.change, pending.plan)
       if (pending.change.op === 'delete') selected = null
       pending = null
       await refresh()
