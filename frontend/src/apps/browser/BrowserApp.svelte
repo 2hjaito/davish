@@ -13,6 +13,7 @@
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import type { AppProps } from '../types'
   import { displayAddress, frameURL, parseAddress } from './address'
+  import { demoPage } from './demo'
 
   let { win }: AppProps = $props()
 
@@ -20,6 +21,9 @@
 
   let address = $state('')
   let src = $state('')
+  // The preview and demo mode have no server: a sample page instead.
+  let srcdoc = $state('')
+  const demo = !hasRuntime
   let title = $state('')
   let error = $state('')
   let frame = $state<HTMLIFrameElement>()
@@ -27,13 +31,21 @@
   let sites = $state.raw<Site[]>([])
 
   const server = $derived(servers.list.find((s) => s.id === win.serverID))
-  const connected = $derived(server?.state === 'connected')
+  const connected = $derived(demo || server?.state === 'connected')
 
   async function go(text: string) {
     error = ''
     const a = parseAddress(text)
     if (!a) {
       error = b.badAddress
+      return
+    }
+    if (demo) {
+      const page = demoPage(a)
+      srcdoc = page.html
+      title = page.title
+      src = `demo:${a.port}`
+      address = `localhost${a.port === 80 ? '' : `:${a.port}`}${a.path}`
       return
     }
     try {
@@ -117,29 +129,31 @@
         placeholder={b.placeholder}
         spellcheck="false"
         autocapitalize="off"
-        disabled={!hasRuntime || !connected}
+        disabled={!connected}
       />
     </form>
   </div>
 </TitleBar>
 
 <div class="body">
-  {#if !hasRuntime}
-    <Empty icon="globe2" title={b.appOnly} />
-  {:else if !connected}
+  {#if !connected}
     <Empty icon="server" title={b.offline} hint={b.offlineHint} />
   {:else if !src}
     <Empty icon="globe2" title={error || b.start} hint={b.hint} />
   {:else}
     {#if error}<p class="error">{error}</p>{/if}
-    <!-- Its own origin (127.0.0.1:<port>), so the page cannot reach
+    {#if demo}
+      <iframe {srcdoc} {title} sandbox=""></iframe>
+    {:else}
+      <!-- Its own origin (127.0.0.1:<port>), so the page cannot reach
          Davish; no allow-top-navigation, so it cannot replace it. -->
-    <iframe
-      bind:this={frame}
-      {src}
-      title={title || address}
-      sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads"
-    ></iframe>
+      <iframe
+        bind:this={frame}
+        {src}
+        title={title || address}
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads"
+      ></iframe>
+    {/if}
   {/if}
 </div>
 

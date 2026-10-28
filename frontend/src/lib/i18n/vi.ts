@@ -89,7 +89,6 @@ export const t = {
     badAddress: 'Chỉ mở được localhost:<cổng> của server, qua http.',
     offline: 'Server chưa kết nối',
     offlineHint: 'Trình duyệt dùng kết nối SSH của server.',
-    appOnly: 'Trình duyệt chỉ chạy trong app Davish.',
   },
   security: {
     offline: 'Server chưa kết nối',
@@ -1317,6 +1316,7 @@ export const t = {
       section: 'IMAGE',
       filters: { images: 'Tất cả image', unused: 'Không dùng' },
       count: (n: number) => `${n} image`,
+      search: 'Tìm image',
       none: 'Server chưa có image nào.',
       noMatch: 'Không có image nào khớp.',
       noSelection: 'Chọn một image để xem các layer',

@@ -440,7 +440,7 @@
   h3 {
     margin: 0;
     font-size: var(--text-md);
-    word-break: break-all;
+    overflow-wrap: anywhere;
   }
 
   p {

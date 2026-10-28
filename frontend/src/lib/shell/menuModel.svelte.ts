@@ -108,13 +108,16 @@ export function buildMenus(): Menu[] {
       id: 'go',
       label: t.menubar.menus.go,
       items: [
-        ...dockApps.map((a) => ({
-          label: a.label,
-          combo: GO_KEYS[a.id],
-          disabled: !server,
-          checked: focused?.appId === a.id,
-          run: () => openApp(a.id),
-        })),
+        // Settings closes the menu on its own line, with ⌘,.
+        ...dockApps
+          .filter((a) => a.id !== 'settings')
+          .map((a) => ({
+            label: a.label,
+            combo: GO_KEYS[a.id],
+            disabled: !server,
+            checked: focused?.appId === a.id,
+            run: () => openApp(a.id),
+          })),
         null,
         { label: t.apps.settings, combo: ',', run: () => openApp('settings') },
       ],

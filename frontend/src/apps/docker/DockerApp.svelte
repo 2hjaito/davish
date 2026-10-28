@@ -171,7 +171,7 @@
   {filters}
   bind:filter={() => filter, (f) => ((filter = f as Any), (selected = null))}
   sidebarLabel={t.docker.sections}
-  searchLabel={t.docker.search}
+  searchLabel={imageMode ? t.docker.img.search : t.docker.search}
   bind:query
   refreshing={!connected || loading}
   ready={connected && containers !== null}
