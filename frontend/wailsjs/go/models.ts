@@ -968,6 +968,124 @@ export namespace nginx {
 
 }
 
+export namespace packages {
+	
+	export class App {
+	    id: string;
+	    label: string;
+	    kind: string;
+	    version: string;
+	    path: string;
+	    configs: string[];
+	    units: string[];
+	    versions: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new App(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.label = source["label"];
+	        this.kind = source["kind"];
+	        this.version = source["version"];
+	        this.path = source["path"];
+	        this.configs = source["configs"];
+	        this.units = source["units"];
+	        this.versions = source["versions"];
+	    }
+	}
+	export class Update {
+	    name: string;
+	    current: string;
+	    available: string;
+	    security: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Update(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.current = source["current"];
+	        this.available = source["available"];
+	        this.security = source["security"];
+	    }
+	}
+	export class Package {
+	    name: string;
+	    version: string;
+	    summary: string;
+	    size: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Package(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.version = source["version"];
+	        this.summary = source["summary"];
+	        this.size = source["size"];
+	    }
+	}
+	export class Inventory {
+	    manager: string;
+	    installed: Package[];
+	    updates: Update[];
+	    listsAge: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Inventory(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.manager = source["manager"];
+	        this.installed = this.convertValues(source["installed"], Package);
+	        this.updates = this.convertValues(source["updates"], Update);
+	        this.listsAge = source["listsAge"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class NpmGlobal {
+	    name: string;
+	    version: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new NpmGlobal(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.version = source["version"];
+	    }
+	}
+	
+
+}
+
 export namespace sshkeys {
 	
 	export class AuthorizedKey {

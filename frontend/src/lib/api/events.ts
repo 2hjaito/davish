@@ -113,10 +113,17 @@ export interface NotifyNew {
   id: string
   level: 'info' | 'warn' | 'error'
   serverID: string
-  kind: 'mem-high' | 'disk-high' | 'service-failed' | 'container-restarting' | 'cert-expiring'
+  kind:
+    | 'mem-high'
+    | 'disk-high'
+    | 'service-failed'
+    | 'container-restarting'
+    | 'cert-expiring'
+    | 'security-updates'
   /**
    * Percent for mem-high and disk-high; total restarts for
-   * container-restarting; days left (negative once expired) for cert-expiring.
+   * container-restarting; days left (negative once expired) for cert-expiring;
+   * pending fixes for security-updates.
    */
   value: number
   threshold: number

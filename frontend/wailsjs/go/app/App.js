@@ -254,6 +254,26 @@ export function NginxToggle(arg1, arg2, arg3, arg4) {
   return window['go']['app']['App']['NginxToggle'](arg1, arg2, arg3, arg4);
 }
 
+export function PackagesApps(arg1) {
+  return window['go']['app']['App']['PackagesApps'](arg1);
+}
+
+export function PackagesCheckSecurity(arg1) {
+  return window['go']['app']['App']['PackagesCheckSecurity'](arg1);
+}
+
+export function PackagesInventory(arg1) {
+  return window['go']['app']['App']['PackagesInventory'](arg1);
+}
+
+export function PackagesNpmGlobals(arg1) {
+  return window['go']['app']['App']['PackagesNpmGlobals'](arg1);
+}
+
+export function PackagesPlan(arg1, arg2, arg3) {
+  return window['go']['app']['App']['PackagesPlan'](arg1, arg2, arg3);
+}
+
 export function ReorderServers(arg1) {
   return window['go']['app']['App']['ReorderServers'](arg1);
 }

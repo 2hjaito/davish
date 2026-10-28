@@ -10,6 +10,7 @@ import {lock} from '../models';
 import {logs} from '../models';
 import {sysmon} from '../models';
 import {nginx} from '../models';
+import {packages} from '../models';
 import {svc} from '../models';
 import {transfer} from '../models';
 
@@ -138,6 +139,16 @@ export function NginxRemove(arg1:string,arg2:string,arg3:boolean,arg4:string):Pr
 export function NginxTest(arg1:string):Promise<nginx.TestResult>;
 
 export function NginxToggle(arg1:string,arg2:string,arg3:boolean,arg4:string):Promise<void>;
+
+export function PackagesApps(arg1:string):Promise<Array<packages.App>>;
+
+export function PackagesCheckSecurity(arg1:string):Promise<void>;
+
+export function PackagesInventory(arg1:string):Promise<packages.Inventory>;
+
+export function PackagesNpmGlobals(arg1:string):Promise<Array<packages.NpmGlobal>>;
+
+export function PackagesPlan(arg1:string,arg2:string,arg3:Array<string>):Promise<string>;
 
 export function ReorderServers(arg1:Array<string>):Promise<void>;
 
