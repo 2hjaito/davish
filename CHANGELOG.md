@@ -4,6 +4,11 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-10-29
+
+### Sửa
+- Khóa app: bấm Cancel ở hộp thoại Touch ID giờ đóng hẳn; trước đó hộp thoại hiện lại liên tục và chặn cả các app khác.
+
 ## [1.3.0] - 2026-10-29
 
 Đợt "Dựng mới": ngoài vận hành server có sẵn, Davish giờ dựng được site, container, app và database mới. Mọi file và lệnh đều hiện trước khi chạy; việc cần root được gõ sẵn vào Terminal.
@@ -166,7 +171,8 @@ M0–M3 · Khung dự án, desktop, kết nối, Terminal.
 - Kết nối SSH qua agent, key hoặc mật khẩu; bí mật trong keychain; xác nhận host key lần đầu, từ chối khi host key đổi; tự kết nối lại.
 - Terminal xterm.js nhiều tab, prompt Davish không cài gì lên server.
 
-[Unreleased]: https://github.com/2hjaito/davish/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/2hjaito/davish/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/2hjaito/davish/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/2hjaito/davish/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/2hjaito/davish/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/2hjaito/davish/compare/v1.1.0...v1.1.1
