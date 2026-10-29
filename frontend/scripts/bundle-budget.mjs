@@ -8,7 +8,7 @@ import { gzipSync } from 'node:zlib'
 
 const BUDGET = {
   initialKB: 110, // gzip; 96 when set
-  totalKB: 580, // gzip; 506 when set
+  totalKB: 620, // gzip; 506 when set, 580 by v1.2; v1.3 added windows loaded on first use
 }
 
 const dist = new URL('../dist/', import.meta.url)
