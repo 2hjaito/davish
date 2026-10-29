@@ -1,0 +1,22 @@
+[Unit]
+Description={{.Description}}
+After=network.target
+
+[Service]
+Type=simple
+{{- if .User}}
+User={{.User}}
+{{- end}}
+WorkingDirectory={{.WorkingDir}}
+ExecStart={{.ExecStart}}
+{{- range .Env}}
+Environment={{.}}
+{{- end}}
+{{- if .EnvFile}}
+EnvironmentFile={{.EnvFile}}
+{{- end}}
+Restart={{.Restart}}
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

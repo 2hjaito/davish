@@ -23,6 +23,7 @@ export type AppId =
   | 'settings'
   | 'transfers'
   | 'audit'
+  | 'deploy'
 
 export interface AppProps {
   win: WindowState

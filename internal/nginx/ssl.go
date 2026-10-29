@@ -2,6 +2,7 @@ package nginx
 
 import (
 	"context"
+	"errors"
 	"net"
 	"slices"
 	"strings"
@@ -71,17 +72,35 @@ func PlanSSL(ctx context.Context, r Resolver, host string, names []string, redir
 		}
 		p.DNS = append(p.DNS, c)
 	}
-	if len(p.Names) > 0 {
-		args := []string{"certbot", "--nginx"}
-		for _, n := range p.Names {
-			args = append(args, "-d", n)
-		}
-		if redirect {
-			args = append(args, "--redirect")
-		} else {
-			args = append(args, "--no-redirect")
-		}
-		p.Sudo = shellx.Cmd("sudo", args...).String()
-	}
+	p.Sudo = CertbotCommand(p.Names, redirect)
 	return p
 }
+
+// CertbotCommand is the certbot line for names, which PlanSSL has
+// checked; empty without names.
+func CertbotCommand(names []string, redirect bool) string {
+	if len(names) == 0 {
+		return ""
+	}
+	args := []string{"certbot", "--nginx"}
+	for _, n := range names {
+		args = append(args, "-d", n)
+	}
+	if redirect {
+		args = append(args, "--redirect")
+	} else {
+		args = append(args, "--no-redirect")
+	}
+	return shellx.Cmd("sudo", args...).String()
+}
+
+// CertNames are the names of names a certificate can be issued for.
+func CertNames(names []string) []string {
+	return PlanSSL(context.Background(), noDNS{}, "127.0.0.1", names, false).Names
+}
+
+type noDNS struct{}
+
+func (noDNS) LookupHost(context.Context, string) ([]string, error) { return nil, errNoDNS }
+
+var errNoDNS = errors.New("no lookup")
