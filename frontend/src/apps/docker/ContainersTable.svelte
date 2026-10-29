@@ -8,6 +8,7 @@
     ContainerAction,
     ContainerStats,
   } from '../../lib/api/docker'
+  import { copyText } from '../../lib/api/clipboard'
   import { toUserError } from '../../lib/api/errors'
   import { formatBytes, formatPct } from '../../lib/format'
   import { t } from '../../lib/i18n'
@@ -44,6 +45,7 @@
   let confirming = $state.raw<ActionPlan | null>(null)
   let busy = $state<string | null>(null)
   let error = $state('')
+  let runLine = $state.raw<{ name: string; command: string; public: string[] } | null>(null)
   /** The command to run with sudo, after the server refused for lack of root. */
   let sudo = $state('')
 
@@ -95,6 +97,7 @@
   function menu(c: Container) {
     return [
       { label: tb.details, run: () => onopen(c.name) },
+      { label: `${d.copyRun.label}…`, run: () => void showRun(c) },
       { label: tb.logs, run: () => openLogs(serverID, { kind: 'docker', target: c.name }) },
       {
         label: tb.shell,
@@ -114,6 +117,14 @@
         run: () => void act(c, 'rm'),
       },
     ]
+  }
+
+  async function showRun(c: Container) {
+    try {
+      runLine = { name: c.name, ...(await backend.runCommand(serverID, c.name)) }
+    } catch (e) {
+      error = toUserError(e).message
+    }
   }
 
   async function compose(g: Group, action: ComposeAction) {
@@ -307,6 +318,18 @@
   {/if}
 </div>
 
+<ConfirmCommand
+  command={runLine?.command ?? null}
+  title={runLine ? d.copyRun.title(runLine.name) : ''}
+  body={runLine?.public.length ? d.copyRun.bodyPublic(runLine.public.join(', ')) : d.copyRun.body}
+  action={d.copyRun.copy}
+  tone="primary"
+  onclose={() => (runLine = null)}
+  onconfirm={() => {
+    if (runLine) void copyText(runLine.command)
+    runLine = null
+  }}
+/>
 <ConfirmCommand
   command={confirming?.command ?? null}
   title={confirming ? d.confirmTitle[kind === 'start' ? 'stop' : kind](confirming.name) : ''}

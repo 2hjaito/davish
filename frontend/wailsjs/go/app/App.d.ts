@@ -65,6 +65,8 @@ export function DockerAct(arg1:string,arg2:string,arg3:string):Promise<void>;
 
 export function DockerComposeCommand(arg1:string,arg2:string,arg3:string,arg4:string):Promise<string>;
 
+export function DockerCreate(arg1:string,arg2:string,arg3:string):Promise<void>;
+
 export function DockerCreateStack(arg1:string,arg2:string,arg3:string,arg4:string):Promise<void>;
 
 export function DockerImage(arg1:string,arg2:string):Promise<docker.ImageDetail>;
@@ -92,6 +94,8 @@ export function DockerPullCommand(arg1:string):Promise<string>;
 export function DockerRemoveImage(arg1:string,arg2:string,arg3:string):Promise<void>;
 
 export function DockerRemoveVolume(arg1:string,arg2:string,arg3:string):Promise<void>;
+
+export function DockerRunCommand(arg1:string,arg2:string):Promise<docker.RunPlan>;
 
 export function DockerStats(arg1:string):Promise<Array<docker.Stats>>;
 

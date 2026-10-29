@@ -90,6 +90,10 @@ export function DockerComposeCommand(arg1, arg2, arg3, arg4) {
   return window['go']['app']['App']['DockerComposeCommand'](arg1, arg2, arg3, arg4);
 }
 
+export function DockerCreate(arg1, arg2, arg3) {
+  return window['go']['app']['App']['DockerCreate'](arg1, arg2, arg3);
+}
+
 export function DockerCreateStack(arg1, arg2, arg3, arg4) {
   return window['go']['app']['App']['DockerCreateStack'](arg1, arg2, arg3, arg4);
 }
@@ -144,6 +148,10 @@ export function DockerRemoveImage(arg1, arg2, arg3) {
 
 export function DockerRemoveVolume(arg1, arg2, arg3) {
   return window['go']['app']['App']['DockerRemoveVolume'](arg1, arg2, arg3);
+}
+
+export function DockerRunCommand(arg1, arg2) {
+  return window['go']['app']['App']['DockerRunCommand'](arg1, arg2);
 }
 
 export function DockerStats(arg1) {

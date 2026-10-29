@@ -41,6 +41,8 @@
   import ImagesTable from './ImagesTable.svelte'
   import RunDialog from './RunDialog.svelte'
   import NewStackDialog from './NewStackDialog.svelte'
+  import CreateDialog from './CreateDialog.svelte'
+  import ActionMenu from '../../lib/ui/ActionMenu.svelte'
   import VolumesTable from './VolumesTable.svelte'
 
   let { win }: AppProps = $props()
@@ -62,6 +64,7 @@
   let stats = $state.raw<Record<string, ContainerStats>>({})
   let runMode = $state<'pull' | 'run' | null>(null)
   let newStack = $state(false)
+  let creating = $state<'network' | 'volume' | null>(null)
   let error = $state('')
   let loading = $state(false)
   /** The detail page over the table, Docker Desktop style. */
@@ -272,6 +275,13 @@
     >
       <Icon name="grid" size={15} strokeWidth={2.2} />
     </button>
+    <ActionMenu
+      label={d.create.more}
+      actions={[
+        { label: d.create.title.network, disabled: !connected, run: () => (creating = 'network') },
+        { label: d.create.title.volume, disabled: !connected, run: () => (creating = 'volume') },
+      ]}
+    />
   {/snippet}
   {#snippet placeholder()}
     {#if !connected}
@@ -380,6 +390,12 @@
 
 <RunDialog serverID={win.serverID} mode={runMode} onclose={() => (runMode = null)} />
 <NewStackDialog serverID={win.serverID} open={newStack} onclose={() => (newStack = false)} />
+<CreateDialog
+  serverID={win.serverID}
+  kind={creating}
+  onclose={() => (creating = null)}
+  oncreated={() => void refresh()}
+/>
 
 <style>
   .of {
