@@ -31,10 +31,14 @@
     return () => clearInterval(timer)
   })
 
-  // Touch ID asks once when the lock shows; the button asks again.
+  // Touch ID asks once when the lock shows; the button asks again. touchID()
+  // reads busy before its first await, so it must stay untracked or a
+  // cancel (busy -> false) re-runs the effect and reopens the sheet forever.
   $effect(() => {
     requestAnimationFrame(() => input?.focus())
-    if (untrack(() => appLock.state.biometric)) void touchID()
+    untrack(() => {
+      if (appLock.state.biometric) void touchID()
+    })
   })
 
   async function touchID() {
