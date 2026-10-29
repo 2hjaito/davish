@@ -21,6 +21,7 @@ Không cài gì lên server.
 
 ## Vì sao là Davish
 
+- **Mở là vào.** Không màn hình đăng nhập, không web panel: Davish tự kết nối server bạn dùng gần nhất bằng SSH key và đưa bạn vào thẳng desktop của nó. Không có gì mới lắng nghe trên server, nên không phải mở thêm cổng nào.
 - **Không cần agent.** Davish chỉ cần `sshd` và SFTP. Mọi thứ chạy từ máy bạn qua SSH; không chép, không cài, không để lại gì trên server.
 - **Thấy trước mọi lệnh.** Thao tác phá hủy (dừng dịch vụ, xóa file, khởi động lại container, thay crontab) hiện đúng lệnh sẽ chạy trước khi chạy. Nhật ký lệnh ghi lại mọi thứ Davish đã chạy thay bạn.
 - **Bí mật nằm trong keychain.** Mật khẩu và passphrase chỉ lưu trong keychain của hệ điều hành. Davish không bao giờ lưu hay tự gõ mật khẩu `sudo`: khi cần root, nó mở Terminal với lệnh gõ sẵn để bạn tự nhấn Enter.

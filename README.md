@@ -21,6 +21,7 @@ Nothing to install on the server.
 
 ## Why Davish
 
+- **Open it and you're in.** No login screen, no web panel: Davish connects to the server you used last with your SSH key and puts you on its desktop. Nothing extra listens on the server, so there is no new port to open or protect.
 - **Agentless.** Davish only needs `sshd` and SFTP. Everything runs from your machine over SSH; nothing is copied to, installed on or left behind on the server.
 - **You see every command.** Anything destructive (stop a service, remove a file, restart a container, replace a crontab) shows the exact command before it runs. The command log records everything Davish ran on your behalf.
 - **Secrets stay in your keychain.** Passwords and passphrases live only in the OS keychain. Davish never stores or types a `sudo` password: when root is needed, it opens a terminal with the command typed in and lets you press Enter.
@@ -83,7 +84,7 @@ Nothing to install on the server.
 
 **[Every app in detail, with screenshots →](FEATURES.md)**
 
-> The interface is in Vietnamese. Screenshots show demo data from the browser preview.
+> Screenshots show demo data from the browser preview.
 
 ## Install
 
