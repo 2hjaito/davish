@@ -48,3 +48,25 @@ export const databaseDrop = (
   db: string,
   sql: string,
 ): Promise<void> => App.DatabaseDrop(serverID, kind, db, sql)
+
+/** Writes a database to ~/db-backups; resolves to the file's path. */
+export const databaseDump = (serverID: string, kind: DBKind, db: string): Promise<string> =>
+  App.DatabaseDump(serverID, kind, db)
+
+export const databaseDumps = (serverID: string, db: string): Promise<string[]> =>
+  App.DatabaseDumps(serverID, db)
+
+export const databaseRestoreCommand = (
+  serverID: string,
+  kind: DBKind,
+  db: string,
+  file: string,
+): Promise<string> => App.DatabaseRestoreCommand(serverID, kind, db, file)
+
+export const databaseRestore = (
+  serverID: string,
+  kind: DBKind,
+  db: string,
+  file: string,
+  command: string,
+): Promise<void> => App.DatabaseRestore(serverID, kind, db, file, command)

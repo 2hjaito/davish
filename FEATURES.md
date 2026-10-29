@@ -79,7 +79,7 @@ What apt, dnf, yum or apk installed and can upgrade, security fixes first, with 
 
 ## Database
 
-MariaDB/MySQL and PostgreSQL databases with their size, from Launchpad or Spotlight. Create a database and a user that owns it with a random password, shown once and kept nowhere; the statement goes on stdin, so the password is neither in the command log nor in a shell history. Delete a database after typing its name. Open the database server through a tunnel to use your own tools. Davish connects as you, through `sudo -n` or as `postgres`; when only root may connect it opens the client in a terminal.
+MariaDB/MySQL and PostgreSQL databases with their size, from Launchpad or Spotlight. Create a database and a user that owns it with a random password, shown once and kept nowhere; the statement goes on stdin, so the password is neither in the command log nor in a shell history. Delete a database after typing its name. Dump one to `~/db-backups` (`mysqldump` / `pg_dump`, compressed) and download it from Files, or restore a dump after seeing the exact command and typing the name. Open the database server through a tunnel to use your own tools. Davish connects as you, through `sudo -n` or as `postgres`; when only root may connect it opens the client in a terminal.
 
 ## Deploy an app
 

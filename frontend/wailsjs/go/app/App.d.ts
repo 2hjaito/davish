@@ -51,7 +51,15 @@ export function DatabaseDrop(arg1:string,arg2:string,arg3:string,arg4:string):Pr
 
 export function DatabaseDropSQL(arg1:string,arg2:string):Promise<string>;
 
+export function DatabaseDump(arg1:string,arg2:string,arg3:string):Promise<string>;
+
+export function DatabaseDumps(arg1:string,arg2:string):Promise<Array<string>>;
+
 export function DatabaseList(arg1:string):Promise<Array<database.Engine>>;
+
+export function DatabaseRestore(arg1:string,arg2:string,arg3:string,arg4:string,arg5:string):Promise<void>;
+
+export function DatabaseRestoreCommand(arg1:string,arg2:string,arg3:string,arg4:string):Promise<string>;
 
 export function DeleteServer(arg1:string):Promise<void>;
 

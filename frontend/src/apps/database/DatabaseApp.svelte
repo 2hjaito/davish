@@ -10,7 +10,7 @@
   import Dialog from '../../lib/ui/Dialog.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
-  import { openTerminalAt } from '../../lib/wm/intents.svelte'
+  import { openFilesAt, openTerminalAt } from '../../lib/wm/intents.svelte'
   import type { AppProps } from '../types'
   import { backend } from './backend'
 
@@ -104,6 +104,73 @@
     void refresh()
   }
 
+  let busy = $state('')
+  let lastDump = $state('')
+
+  async function dump(kind: DBKind, name: string) {
+    busy = name
+    flash = ''
+    try {
+      lastDump = await backend.dump(win.serverID, kind, name)
+      flash = d.dumped(lastDump)
+    } catch (e) {
+      flash = toUserError(e).message
+    } finally {
+      busy = ''
+    }
+  }
+
+  // Restore: pick a dump, see the exact command, type the name.
+  let restoring = $state.raw<{ kind: DBKind; name: string; dumps: string[] } | null>(null)
+  let restoreFile = $state('')
+  let restoreCmd = $state('')
+  let restoreTyped = $state('')
+
+  async function askRestore(kind: DBKind, name: string) {
+    restoreCmd = ''
+    restoreTyped = ''
+    try {
+      const dumps = await backend.dumps(win.serverID, name)
+      restoring = { kind, name, dumps }
+      restoreFile = dumps[0] ?? ''
+      if (restoreFile) await planRestore()
+    } catch (e) {
+      flash = toUserError(e).message
+    }
+  }
+
+  async function planRestore() {
+    if (!restoring) return
+    try {
+      restoreCmd = await backend.restoreCommand(
+        win.serverID,
+        restoring.kind,
+        restoring.name,
+        restoreFile.trim(),
+      )
+      error = ''
+    } catch (e) {
+      restoreCmd = ''
+      error = toUserError(e).message
+    }
+  }
+
+  async function restore() {
+    const r = restoring
+    if (!r || restoreTyped !== r.name || !restoreCmd) return
+    restoring = null
+    busy = r.name
+    try {
+      await backend.restore(win.serverID, r.kind, r.name, restoreFile.trim(), restoreCmd)
+      flash = d.restored(r.name)
+    } catch (e) {
+      flash = toUserError(e).message
+    } finally {
+      busy = ''
+    }
+    void refresh()
+  }
+
   async function tunnel(kind: DBKind) {
     try {
       const tn = await backend.tunnel(win.serverID, ports[kind])
@@ -127,7 +194,18 @@
         <Icon name="refresh" size={15} />
       </button>
     </header>
-    {#if flash}<p class="flash" role="status">{flash}</p>{/if}
+    {#if flash}
+      <p class="flash" role="status">
+        {flash}
+        {#if lastDump && flash === d.dumped(lastDump)}
+          <button
+            class="link"
+            onclick={() => openFilesAt(win.serverID, lastDump.replace(/\/[^/]*$/, ''))}
+            >{d.showInFiles}</button
+          >
+        {/if}
+      </p>
+    {/if}
     {#if error}<p class="error" role="alert">{error}</p>{/if}
 
     {#each engines as e (e.kind)}
@@ -179,6 +257,17 @@
                   <td class="mono">{db.name}</td>
                   <td class="num muted">{formatBytes(db.size)}</td>
                   <td class="act">
+                    <button
+                      class="link"
+                      disabled={busy === db.name}
+                      onclick={() => void dump(e.kind, db.name)}
+                      >{busy === db.name ? d.working : d.dump}</button
+                    >
+                    <button
+                      class="link"
+                      disabled={busy === db.name}
+                      onclick={() => void askRestore(e.kind, db.name)}>{d.restore}</button
+                    >
                     <button class="link danger" onclick={() => void askDrop(e.kind, db.name)}
                       >{d.drop}</button
                     >
@@ -273,6 +362,52 @@
     >
     <button type="button" class="btn btn-primary" onclick={() => ((login = null), (copied = false))}
       >{d.done}</button
+    >
+  {/snippet}
+</Dialog>
+
+<Dialog
+  open={restoring !== null}
+  title={restoring ? d.restoreTitle(restoring.name) : ''}
+  width={540}
+  onclose={() => (restoring = null)}
+>
+  {#if restoring}
+    <label class="field">
+      <span>{d.restoreFile}</span>
+      {#if restoring.dumps.length > 0}
+        <select class="input" bind:value={restoreFile} onchange={() => void planRestore()}>
+          {#each restoring.dumps as f (f)}<option value={f}>{f}</option>{/each}
+        </select>
+      {:else}
+        <input
+          class="input"
+          bind:value={restoreFile}
+          onchange={() => void planRestore()}
+          placeholder="/root/db-backups/{restoring.name}.sql.gz"
+          spellcheck="false"
+        />
+        <small>{d.noDumps}</small>
+      {/if}
+    </label>
+    {#if restoreCmd}
+      <p class="warn"><Icon name="warning" size={14} /> {d.restoreBody}</p>
+      <pre class="code">{restoreCmd}</pre>
+      <label class="field">
+        <span>{d.typeName(restoring.name)}</span>
+        <input class="input" bind:value={restoreTyped} spellcheck="false" />
+      </label>
+    {/if}
+    {#if error}<p class="error">{error}</p>{/if}
+  {/if}
+  {#snippet footer()}
+    <span class="spacer"></span>
+    <button type="button" class="btn" onclick={() => (restoring = null)}>{t.common.cancel}</button>
+    <button
+      type="button"
+      class="btn btn-danger"
+      disabled={!restoreCmd || restoreTyped !== restoring?.name}
+      onclick={() => void restore()}>{d.restore}</button
     >
   {/snippet}
 </Dialog>

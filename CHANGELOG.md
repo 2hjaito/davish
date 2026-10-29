@@ -5,6 +5,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Thêm
+- Database: **Dump** ra `~/db-backups` và **Khôi phục…** từ bản dump (gõ tên để xác nhận).
 - App **Database** (MariaDB/MySQL, PostgreSQL): danh sách kèm dung lượng, tạo database + user với mật khẩu ngẫu nhiên chỉ hiện một lần, xóa phải gõ tên, mở qua tunnel.
 
 ### Sửa

@@ -661,6 +661,7 @@ const vi = {
         actions: [
           'Tạo database và user với mật khẩu ngẫu nhiên, chỉ hiện một lần',
           'Xóa database sau khi gõ đúng tên',
+          'Dump ra ~/db-backups, khôi phục từ bản dump sau khi gõ đúng tên',
           'Mở database server qua tunnel cho công cụ trên máy này',
         ],
         keys: [],
@@ -1768,6 +1769,17 @@ const vi = {
     dropBody: 'Mọi bảng và dữ liệu trong đó bị xóa, không hoàn tác được. Sẽ chạy:',
     typeName: (n: string) => `Gõ ${n} để xác nhận`,
     dropped: (n: string) => `Đã xóa ${n}.`,
+    dump: 'Dump',
+    working: 'Đang chạy…',
+    dumped: (f: string) => `Đã dump ra ${f}.`,
+    showInFiles: 'Mở trong Files',
+    restore: 'Khôi phục…',
+    restoreTitle: (n: string) => `Khôi phục “${n}” từ bản dump?`,
+    restoreFile: 'Bản dump trên server',
+    noDumps: 'Chưa có bản dump trong ~/db-backups: gõ đường dẫn file .sql hoặc .sql.gz.',
+    restoreBody:
+      'Bản dump chạy trên database hiện tại: các bảng có trong dump thường bị thay thế. Nếu không chắc, hãy dump trước. Sẽ chạy:',
+    restored: (n: string) => `Đã khôi phục ${n}.`,
     tunnel: 'Mở tunnel',
     tunnelOpen: (remote: number, local: number) =>
       `Đã mở tunnel: kết nối công cụ của bạn tới 127.0.0.1:${local} (cổng ${remote} của server).`,
