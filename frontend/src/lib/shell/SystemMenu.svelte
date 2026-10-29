@@ -35,6 +35,7 @@
     onclick={() => (open = !open)}
   >
     <Icon name="server" size={16} />
+    <span class="name">{t.app.name}</span>
   </button>
 
   <Popover {open} onclose={() => (open = false)} label={t.menubar.system} width={240}>
@@ -90,7 +91,13 @@
   .icon {
     display: flex;
     align-items: center;
+    gap: 7px;
     padding: 2px 8px;
+  }
+
+  /* The app's own name, bold like the frontmost app on the macOS menu bar. */
+  .name {
+    font-weight: 700;
   }
 
   .item {
