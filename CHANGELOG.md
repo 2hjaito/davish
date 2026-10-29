@@ -4,32 +4,29 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
-### Thêm
-- Cổng: cột **Lộ ra Internet** (ufw + Docker), mở/đóng cổng bằng ufw (không đóng cổng SSH đang dùng), gợi ý đóng các cổng quản trị đang lộ ra.
-- Database: **Dump** ra `~/db-backups` và **Khôi phục…** từ bản dump (gõ tên để xác nhận).
-- App **Database** (MariaDB/MySQL, PostgreSQL): danh sách kèm dung lượng, tạo database + user với mật khẩu ngẫu nhiên chỉ hiện một lần, xóa phải gõ tên, mở qua tunnel.
+## [1.3.0] - 2026-10-29
 
-### Sửa
-- Thứ tự dock, "Bỏ qua bản này" và lựa chọn trong Logs giờ được nhớ sau khi khởi động lại (tên cài đặt có dấu `:` bị từ chối âm thầm).
-- An ninh: "Chặn bằng ufw…" chèn luật lên đầu (`ufw insert 1`), trước đó luật nằm sau `ALLOW 22` nên không chặn được SSH; IP đã chặn hiện nhãn "đã chặn bằng ufw".
-- Terminal: lệnh gõ sẵn hiện sau prompt thay vì trước.
+Đợt "Dựng mới": ngoài vận hành server có sẵn, Davish giờ dựng được site, container, app và database mới. Mọi file và lệnh đều hiện trước khi chạy; việc cần root được gõ sẵn vào Terminal.
 
 ### Thêm
 - **Triển khai app** (Launchpad/Spotlight): trình hướng dẫn từ repo git / image / thư mục → systemd, compose, container hoặc tĩnh → site nginx → HTTPS; xem trước mọi lệnh, chạy từng bước trong Terminal, tổng kết và lệnh gỡ toàn bộ.
-- Git → **Deploy…**: công thức triển khai cho mỗi repo, lưu trên máy, chạy từng bước trong Terminal và dừng ở bước lỗi.
-- Git: **Clone repo…** (ghim host key GitHub/GitLab), **git init**, **Đặt remote…**.
-- Docker: tạo network, volume; **Sao chép thành docker run** từ container.
-- Docker → Compose: up, pull, restart, down theo project; **Stack compose mới…** từ mẫu.
-- Docker → **Pull image…** và **Chạy container mới…** từ form; cổng mặc định bind `127.0.0.1`, cảnh báo `0.0.0.0`; lệnh gõ sẵn vào Terminal.
-
-### Thêm
-- Nginx → **Sửa nhanh…**: thêm tên miền, đổi upstream, gzip, `client_max_body_size`; sao lưu trước, `nginx -t` lỗi thì trả lại file cũ.
-- Ô reverse proxy gợi ý cổng và container đang nghe trên server.
-- `SECURITY.md`: mô hình bảo mật và cách báo lỗ hổng riêng tư.
-- README nêu "Mở là vào": không đăng nhập, không mở thêm cổng trên server.
-- Nginx → **Site mới…**: reverse proxy, tĩnh hoặc PHP-FPM; xem trước và sửa cấu hình; chỉ bật khi `nginx -t` qua, lỗi thì tắt lại.
+- Nginx → **Site mới…**: reverse proxy, tĩnh hoặc PHP-FPM; xem trước và sửa cấu hình; chỉ bật khi `nginx -t` qua, lỗi thì tắt lại. Ô reverse proxy gợi ý cổng và container đang nghe.
 - Nginx → **Bật HTTPS…**: kiểm tra DNS rồi gõ sẵn `certbot --nginx` vào Terminal.
-- `scripts/repo-meta.sh` đặt mô tả/topic repo; `scripts/social-preview.sh` sinh ảnh social preview.
+- Nginx → **Sửa nhanh…**: thêm tên miền, đổi upstream, gzip, `client_max_body_size`; sao lưu trước, `nginx -t` lỗi thì trả lại file cũ.
+- Docker → **Pull image…** và **Chạy container mới…** từ form; cổng mặc định bind `127.0.0.1`, cảnh báo `0.0.0.0`.
+- Docker → Compose: up, pull, restart, down theo project; **Stack compose mới…** từ mẫu.
+- Docker: tạo network, volume; **Sao chép thành docker run** từ container.
+- Git: **Clone repo…** (ghim host key GitHub/GitLab), **git init**, **Đặt remote…**.
+- Git → **Deploy…**: công thức triển khai cho mỗi repo, lưu trên máy, chạy từng bước trong Terminal và dừng ở bước lỗi.
+- Gói → **Cài thêm**: công thức cài nginx, Docker, Node (nvm), PHP-FPM, MariaDB, PostgreSQL, Redis, certbot, fail2ban, ufw; hiện toàn bộ script trước khi chạy.
+- App **Database** (MariaDB/MySQL, PostgreSQL): danh sách kèm dung lượng, tạo database + user với mật khẩu ngẫu nhiên chỉ hiện một lần, xóa phải gõ tên, mở qua tunnel; **Dump** ra `~/db-backups` và **Khôi phục…** từ bản dump.
+- Cổng: cột **Lộ ra Internet** (ufw + Docker), mở/đóng cổng bằng ufw (không đóng cổng SSH đang dùng), gợi ý đóng các cổng quản trị đang lộ ra.
+- `SECURITY.md`: mô hình bảo mật và cách báo lỗ hổng riêng tư; README nêu "Mở là vào" và có banner.
+
+### Sửa
+- Thứ tự dock, "Bỏ qua bản này" và lựa chọn trong Logs giờ được nhớ sau khi khởi động lại (tên cài đặt có dấu `:` bị từ chối âm thầm).
+- An ninh: "Chặn bằng ufw…" chèn luật lên đầu (`ufw insert 1`); trước đó luật nằm sau `ALLOW 22` nên không chặn được SSH. IP đã chặn hiện nhãn "đã chặn bằng ufw".
+- Terminal: lệnh gõ sẵn hiện sau prompt thay vì trước.
 
 ## [1.2.0] - 2026-10-29
 
@@ -169,7 +166,8 @@ M0–M3 · Khung dự án, desktop, kết nối, Terminal.
 - Kết nối SSH qua agent, key hoặc mật khẩu; bí mật trong keychain; xác nhận host key lần đầu, từ chối khi host key đổi; tự kết nối lại.
 - Terminal xterm.js nhiều tab, prompt Davish không cài gì lên server.
 
-[Unreleased]: https://github.com/2hjaito/davish/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/2hjaito/davish/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/2hjaito/davish/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/2hjaito/davish/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/2hjaito/davish/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/2hjaito/davish/compare/v1.0.0...v1.1.0
