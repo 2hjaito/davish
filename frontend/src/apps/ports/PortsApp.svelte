@@ -16,7 +16,8 @@
   import type { IconName } from '../../lib/ui/icons'
   import StatusList, { type StatusItem } from '../../lib/ui/StatusList.svelte'
   import { getWindowContext } from '../../lib/wm/context'
-  import { openInBrowser } from '../../lib/wm/intents.svelte'
+  import { openInBrowser, openTerminalAt } from '../../lib/wm/intents.svelte'
+  import { ADMIN_PORTS, closeAllCommand, closeCommand, exposedAdmin, openCommand } from './firewall'
   import type { AppProps } from '../types'
   import { backend } from './backend'
   import { tunnels } from './tunnels.svelte'
@@ -89,10 +90,15 @@
       key: keyOf(p),
       name: `${p.port}`,
       health: tunnelOf(p) ? 'ok' : p.loopback ? 'off' : 'busy',
-      note: p.container ?? p.process ?? t.ports.unknownProcess,
+      note: `${p.container ?? p.process ?? t.ports.unknownProcess}${p.exposed === 'yes' && !p.loopback ? ` · ${t.ports.fw.internet}` : ''}`,
       title: keyOf(p),
     })),
   )
+
+  const admin = $derived(exposedAdmin(data?.ports ?? []))
+  const fw = $derived(data?.firewall)
+  // The port this session's SSH comes in on is never closed from here.
+  const sshPort = $derived(server?.port ?? 22)
 
   const attempt = supersedes()
 
@@ -214,6 +220,43 @@
             <p class="hint">{t.ports.needsRoot}</p>
           {/if}
           <p class="hint">{current.loopback ? t.ports.loopbackHint : t.ports.publicHint}</p>
+          {#if !current.loopback}
+            <div class="exposure {current.exposed}">
+              <strong>{t.ports.fw.state[current.exposed]}</strong>
+              <span class="muted">{t.ports.fw.why(current, fw?.state ?? 'none')}</span>
+            </div>
+            {#if ADMIN_PORTS[current.port] && current.exposed === 'yes'}
+              <p class="warn-text">{t.ports.fw.adminWarn(ADMIN_PORTS[current.port] ?? '')}</p>
+            {/if}
+            {#if fw?.state === 'active' && !current.container && current.process !== 'docker-proxy'}
+              <div class="row">
+                {#if current.exposed === 'yes'}
+                  {#if current.port === sshPort}
+                    <p class="hint">{t.ports.fw.sshKept(sshPort)}</p>
+                  {:else}
+                    <button
+                      type="button"
+                      class="btn"
+                      onclick={() =>
+                        openTerminalAt(win.serverID, undefined, closeCommand(current.port))}
+                      >{t.ports.fw.close}</button
+                    >
+                  {/if}
+                {:else if current.exposed === 'no'}
+                  <button
+                    type="button"
+                    class="btn"
+                    onclick={() =>
+                      openTerminalAt(win.serverID, undefined, openCommand(current.port))}
+                    >{t.ports.fw.open}</button
+                  >
+                {/if}
+              </div>
+              {#if current.exposed === 'yes' && (current.port === 80 || current.port === 443)}
+                <p class="hint">{t.ports.fw.webWarn}</p>
+              {/if}
+            {/if}
+          {/if}
           <div class="row">
             <button
               type="button"
@@ -290,6 +333,40 @@
         </section>
 
         {#if actionError}<p class="error" role="alert">{actionError}</p>{/if}
+      </div>
+    {:else if admin.ufw.length > 0 || admin.docker.length > 0}
+      <div class="detail">
+        <section>
+          <h4>{t.ports.fw.adminTitle}</h4>
+          <p class="hint">{t.ports.fw.adminBody}</p>
+          <ul class="admin">
+            {#each [...admin.ufw, ...admin.docker] as p (`${p.addr}:${p.port}`)}
+              <li>
+                <code>:{p.port}</code>
+                {ADMIN_PORTS[p.port]}{p.container ? ` · ${p.container}` : ''}
+              </li>
+            {/each}
+          </ul>
+          {#if admin.ufw.length > 0}
+            {#if fw?.state === 'active'}
+              <pre class="probe">{closeAllCommand(admin.ufw)}</pre>
+              <div class="row">
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  onclick={() =>
+                    openTerminalAt(win.serverID, undefined, closeAllCommand(admin.ufw))}
+                  >{t.ports.fw.closeAll(admin.ufw.length)}</button
+                >
+              </div>
+            {:else}
+              <p class="hint">{t.ports.fw.noUfw}</p>
+            {/if}
+          {/if}
+          {#if admin.docker.length > 0}
+            <p class="hint">{t.ports.fw.dockerHint}</p>
+          {/if}
+        </section>
       </div>
     {:else}
       <Empty icon="network" title={t.ports.noSelection} />
@@ -372,5 +449,32 @@
 
   .error {
     color: var(--danger);
+  }
+
+  .exposure {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 8px;
+    padding: 8px 10px;
+    border-radius: var(--control-radius);
+    background: var(--fill-soft);
+  }
+
+  .exposure.yes strong {
+    color: var(--warn);
+  }
+
+  .exposure.no strong {
+    color: var(--ok);
+  }
+
+  .warn-text {
+    color: var(--warn);
+  }
+
+  .admin {
+    margin: 0 0 10px;
+    padding-left: 18px;
   }
 </style>

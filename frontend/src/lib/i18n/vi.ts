@@ -220,6 +220,32 @@ const vi = {
     unknownProcess: 'không rõ',
     needsRoot:
       'Davish không đăng nhập bằng root nên không thấy process của user khác (ss chỉ cho root xem). Cổng vẫn chuyển tiếp được.',
+    fw: {
+      internet: 'Internet',
+      state: { yes: 'Lộ ra Internet', no: 'Internet không vào được', unknown: 'Chưa rõ' },
+      why: (p: { container?: string; process?: string }, state: string) =>
+        p.container || p.process === 'docker-proxy'
+          ? 'Docker publish cổng bằng luật firewall riêng, đứng trước ufw: ufw không đóng được. Hãy publish trên 127.0.0.1.'
+          : state === 'none'
+            ? 'Server không có ufw nên không gì chặn (trừ firewall khác hoặc của nhà cung cấp).'
+            : state === 'inactive'
+              ? 'ufw đã cài nhưng đang tắt.'
+              : state === 'unknown'
+                ? 'Đọc luật ufw cần quyền root.'
+                : 'Theo luật của ufw.',
+      open: 'Mở bằng ufw…',
+      close: 'Đóng bằng ufw…',
+      sshKept: (port: number) => `Cổng ${port} đang chở phiên SSH này; Davish không đóng nó.`,
+      webWarn: 'Site nginx dùng cổng này: đóng là các site ngừng truy cập được.',
+      adminWarn: (name: string) =>
+        `${name} không nên lộ ra Internet. Hãy đóng và truy cập qua tunnel.`,
+      adminTitle: 'Cổng quản trị đang lộ ra Internet',
+      adminBody: 'Database và công cụ quản trị an toàn hơn khi đi qua tunnel. Đang mở:',
+      closeAll: (n: number) => `Đóng ${n} cổng bằng ufw…`,
+      noUfw: 'ufw chưa bật trên server này: cài hoặc bật trước (Gói → Cài thêm).',
+      dockerHint:
+        'Cổng của container không đóng được bằng ufw: publish dạng 127.0.0.1:cổng trong docker run hoặc compose.',
+    },
     listen: (addr: string) => `Nghe trên ${addr}`,
     loopbackHint: 'Chỉ server tự gọi được cổng này; tunnel là cách an toàn để dùng nó từ máy bạn.',
     publicHint: 'Cổng này mở cho mọi địa chỉ, kể cả Internet nếu firewall cho phép.',
@@ -761,6 +787,7 @@ const vi = {
       ports: {
         does: 'Cổng TCP server đang nghe, process và container mở nó; tunnel cổng về máy này qua SSH.',
         actions: [
+          'Xem cổng nào lộ ra Internet (ufw, Docker); mở hoặc đóng bằng ufw',
           'Mở tunnel rồi mở trong trình duyệt hoặc copy địa chỉ cho công cụ database',
           'Mở như tên miền (Host) cho site nginx',
           'Thử từ server bằng curl',

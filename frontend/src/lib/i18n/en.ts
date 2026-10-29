@@ -214,6 +214,36 @@ const en = {
     unknownProcess: 'unknown',
     needsRoot:
       'Davish is not logged in as root, so processes of other users are hidden (ss only shows them to root). Ports can still be forwarded.',
+    fw: {
+      internet: 'Internet',
+      state: {
+        yes: 'Open to the Internet',
+        no: 'Not reachable from the Internet',
+        unknown: 'Unknown',
+      },
+      why: (p: { container?: string; process?: string }, state: string) =>
+        p.container || p.process === 'docker-proxy'
+          ? 'Docker publishes it with its own firewall rules, which come before ufw: ufw cannot close it. Publish it on 127.0.0.1 instead.'
+          : state === 'none'
+            ? 'No ufw on the server, so nothing stops it (another firewall or the provider’s may).'
+            : state === 'inactive'
+              ? 'ufw is installed but off.'
+              : state === 'unknown'
+                ? 'Reading ufw’s rules needs root.'
+                : 'Decided by ufw’s rules.',
+      open: 'Open with ufw…',
+      close: 'Close with ufw…',
+      sshKept: (port: number) => `Port ${port} carries this SSH session; Davish will not close it.`,
+      webWarn: 'nginx sites use this port: closing it takes them offline.',
+      adminWarn: (name: string) =>
+        `${name} should not face the Internet. Close it and reach it through a tunnel.`,
+      adminTitle: 'Admin ports open to the Internet',
+      adminBody: 'Databases and admin tools are safer behind a tunnel. These are open now:',
+      closeAll: (n: number) => `Close ${n} with ufw…`,
+      noUfw: 'ufw is not active here: install or turn it on first (Packages → Install).',
+      dockerHint:
+        'Containers’ ports cannot be closed with ufw: publish them as 127.0.0.1:port in docker run or compose.',
+    },
     listen: (addr: string) => `Listening on ${addr}`,
     loopbackHint:
       'Only the server itself can reach this port; a tunnel is the safe way to use it from your computer.',
@@ -770,6 +800,7 @@ const en = {
       ports: {
         does: 'TCP ports the server listens on, with the process and container behind them; tunnel a port to this computer over SSH.',
         actions: [
+          'See which ports are open to the Internet (ufw, Docker); open or close one with ufw',
           'Open a tunnel, then open it in the browser or copy the address for a database tool',
           'Open as a domain (Host) for nginx sites',
           'Probe from the server with curl',

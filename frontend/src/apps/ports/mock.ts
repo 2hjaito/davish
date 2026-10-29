@@ -7,13 +7,20 @@ export function mockList(): Promise<PortList> {
   return delay({
     root: false,
     ports: [
-      { addr: '0.0.0.0', port: 22, process: 'sshd', pid: 812, loopback: false },
-      { addr: '127.0.0.53', port: 53, loopback: true },
-      { addr: '0.0.0.0', port: 80, process: 'nginx', pid: 1201, loopback: false },
-      { addr: '0.0.0.0', port: 443, process: 'nginx', pid: 1201, loopback: false },
-      { addr: '127.0.0.1', port: 3000, process: 'node', pid: 2210, loopback: true },
-      { addr: '127.0.0.1', port: 3306, loopback: true },
-      { addr: '127.0.0.1', port: 6379, process: 'redis-server', pid: 990, loopback: true },
+      { addr: '0.0.0.0', port: 22, process: 'sshd', pid: 812, loopback: false, exposed: 'yes' },
+      { addr: '127.0.0.53', port: 53, loopback: true, exposed: 'no' },
+      { addr: '0.0.0.0', port: 80, process: 'nginx', pid: 1201, loopback: false, exposed: 'yes' },
+      { addr: '0.0.0.0', port: 443, process: 'nginx', pid: 1201, loopback: false, exposed: 'yes' },
+      { addr: '127.0.0.1', port: 3000, process: 'node', pid: 2210, loopback: true, exposed: 'no' },
+      { addr: '127.0.0.1', port: 3306, loopback: true, exposed: 'no' },
+      {
+        addr: '127.0.0.1',
+        port: 6379,
+        process: 'redis-server',
+        pid: 990,
+        loopback: true,
+        exposed: 'no',
+      },
       {
         addr: '0.0.0.0',
         port: 8080,
@@ -21,8 +28,18 @@ export function mockList(): Promise<PortList> {
         pid: 3100,
         container: 'web',
         loopback: false,
+        exposed: 'yes',
+      },
+      {
+        addr: '0.0.0.0',
+        port: 6380,
+        process: 'redis-server',
+        pid: 991,
+        loopback: false,
+        exposed: 'yes',
       },
     ],
+    firewall: { state: 'active', defaultAllow: false },
   })
 }
 

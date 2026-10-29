@@ -102,6 +102,8 @@ Mọi cổng TCP server đang nghe, kèm process hoặc container. Tunnel một 
 
 <img src="assets/screenshots/ports.jpg" alt="Cổng đang nghe và tunnel" width="100%">
 
+**Lộ ra Internet** cho biết từng cổng Internet có vào được không, dựa trên nơi cổng đang nghe, luật ufw (đọc bằng `sudo -n` khi cần) và Docker (cổng publish của Docker vượt qua ufw). Mở hoặc đóng cổng bằng `ufw`, gõ sẵn vào Terminal; không bao giờ đóng cổng của phiên SSH đang dùng, đóng 80/443 thì cảnh báo về site nginx. Database và công cụ quản trị đang lộ ra (Redis, PostgreSQL, Grafana…) được liệt kê kèm một lệnh đóng tất cả.
+
 ## Trình duyệt
 
 Gõ `localhost:3000` để xem web app đang chạy trên server, ngay trong một cửa sổ Davish: lùi, tới, tải lại, redirect và websocket (hot reload) đều ở lại server, đăng nhập vẫn chạy. Đi qua SSH bằng một proxy nghe `127.0.0.1` ở cổng ngẫu nhiên nên không đụng app nào trên máy, và trang ở origin riêng, không bao giờ chạm được Davish.
