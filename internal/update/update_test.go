@@ -19,6 +19,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"davish/internal/apperr"
@@ -146,7 +147,8 @@ func TestLinuxUpdate(t *testing.T) {
 	if b, _ := os.ReadFile(exe + ".old"); string(b) != "old binary" { //nolint:gosec // test temp dir
 		t.Errorf("old = %q", b)
 	}
-	if fi, _ := os.Stat(exe); fi.Mode()&0o100 == 0 {
+	// Windows has no execute bit; the Linux install is tested there anyway.
+	if fi, _ := os.Stat(exe); runtime.GOOS != "windows" && fi.Mode()&0o100 == 0 {
 		t.Error("new binary is not executable")
 	}
 	if p.last.Done == 0 || p.last.Done != p.last.Total || !s.Ready() {
