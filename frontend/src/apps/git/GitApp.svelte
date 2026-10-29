@@ -22,6 +22,8 @@
   import type { AppProps } from '../types'
   import { backend } from './backend'
   import FoldersDialog from './FoldersDialog.svelte'
+  import CloneDialog from './CloneDialog.svelte'
+  import ActionMenu from '../../lib/ui/ActionMenu.svelte'
   import GitGraph from './GitGraph.svelte'
   import RepoInspector, { type Selected } from './RepoInspector.svelte'
 
@@ -43,6 +45,7 @@
   let findError = $state('')
   let finding = $state(false)
   let repo = $state('')
+  let cloneMode = $state<'clone' | 'init' | 'remote' | null>(null)
   let status = $state.raw<Status | null>(null)
   let commits = $state.raw<Commit[] | null>(null)
   let more = $state(false)
@@ -257,6 +260,26 @@
     >
       <Icon name="plus" size={15} strokeWidth={2.2} />
     </button>
+    <button
+      class="tool"
+      aria-label={t.git.clone.title.clone}
+      title={t.git.clone.title.clone}
+      disabled={!connected}
+      onclick={() => (cloneMode = 'clone')}
+    >
+      <Icon name="download" size={15} strokeWidth={2.2} />
+    </button>
+    <ActionMenu
+      label={t.git.clone.more}
+      actions={[
+        { label: t.git.clone.title.init, disabled: !connected, run: () => (cloneMode = 'init') },
+        {
+          label: t.git.clone.title.remote,
+          disabled: !connected || !repo,
+          run: () => (cloneMode = 'remote'),
+        },
+      ]}
+    />
   {/snippet}
   {#snippet placeholder()}
     {#if !connected}
@@ -334,6 +357,7 @@
   {/snippet}
 </FilterShell>
 
+<CloneDialog serverID={win.serverID} mode={cloneMode} {repo} onclose={() => (cloneMode = null)} />
 <FoldersDialog
   open={editingFolders}
   folders={extra}

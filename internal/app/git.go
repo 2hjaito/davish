@@ -39,3 +39,20 @@ func (a *App) GitRun(serverID, dir, op, branch, command string) (git.Result, err
 	}
 	return a.git.Run(a.ctx, serverID, dir, op, branch, command)
 }
+
+// GitPlanClone builds the clone line for a terminal; an empty folder only
+// reads the URL.
+func (a *App) GitPlanClone(spec git.CloneSpec) (git.ClonePlan, error) {
+	return git.PlanClone(spec)
+}
+
+// GitInitCommand is the line that makes a folder a repository, with a
+// remote when url is given.
+func (a *App) GitInitCommand(dir, remote, url string) (string, error) {
+	return git.InitCommand(dir, remote, url)
+}
+
+// GitRemoteCommand sets or adds a remote in a repository.
+func (a *App) GitRemoteCommand(dir, remote, url string) (string, error) {
+	return git.RemoteCommand(dir, remote, url)
+}

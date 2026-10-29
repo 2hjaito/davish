@@ -5,6 +5,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Thêm
+- Git: **Clone repo…** (ghim host key GitHub/GitLab), **git init**, **Đặt remote…**.
 - Docker: tạo network, volume; **Sao chép thành docker run** từ container.
 - Docker → Compose: up, pull, restart, down theo project; **Stack compose mới…** từ mẫu.
 - Docker → **Pull image…** và **Chạy container mới…** từ form; cổng mặc định bind `127.0.0.1`, cảnh báo `0.0.0.0`; lệnh gõ sẵn vào Terminal.

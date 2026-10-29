@@ -1,5 +1,7 @@
 // Demo data for the plain browser preview (vite dev), where there is no Go side.
 import type {
+  ClonePlan,
+  CloneSpec,
   Branch,
   Commit,
   Diff,
@@ -207,3 +209,25 @@ export const mockRun = (
         },
     600,
   )
+
+export function mockPlanClone(spec: CloneSpec): Promise<ClonePlan> {
+  const ssh = !spec.url.startsWith('https://')
+  const host = /(?:@|\/\/)([^:/]+)/.exec(spec.url)?.[1] ?? ''
+  const name = (spec.url.split(/[/:]/).pop() ?? '').replace(/\.git$/, '')
+  const branch = spec.branch ? `--branch ${spec.branch} ` : ''
+  return Promise.resolve({
+    command: spec.dir ? `git clone ${branch}-- ${spec.url} ${spec.dir}` : '',
+    ssh,
+    host,
+    pinned: ssh && (host === 'github.com' || host === 'gitlab.com'),
+    name,
+  })
+}
+
+export const mockInitCommand = (dir: string, remote: string, url: string): Promise<string> =>
+  Promise.resolve(
+    `mkdir -p -- ${dir} && cd -- ${dir} && git init${url ? ` && git remote add ${remote || 'origin'} ${url}` : ''}`,
+  )
+
+export const mockRemoteCommand = (dir: string, remote: string, url: string): Promise<string> =>
+  Promise.resolve(`cd -- ${dir} && git remote set-url ${remote || 'origin'} ${url}`)

@@ -390,6 +390,29 @@ const en = {
     install: (cmd: string) => `Install dependencies (${cmd})`,
     installHint:
       'Opens Terminal in the repo with the command typed in; press Enter yourself to run it and watch the output.',
+    clone: {
+      more: 'More',
+      title: {
+        clone: 'Clone a repository…',
+        init: 'New repository (git init)…',
+        remote: 'Set a remote…',
+      },
+      url: 'Repository URL (SSH or HTTPS)',
+      urlOptional: 'Remote URL (optional)',
+      dir: 'Folder on the server',
+      branch: 'Branch',
+      branchDefault: 'the default branch',
+      remote: 'Remote name',
+      remoteHint: (dir: string) => `In ${dir}. An existing remote is changed, a new one added.`,
+      sshPinned: (host: string) =>
+        `SSH needs a key ${host} accepts, such as a deploy key. ${host}'s published host key is added to known_hosts first, so ssh does not ask to trust it.`,
+      sshUnpinned: (host: string) =>
+        `SSH needs a key ${host} accepts, such as a deploy key. The first time, ssh shows ${host}'s fingerprint: compare it with the one the host publishes before typing yes.`,
+      next: 'Preview',
+      commandIntro:
+        'Opens a terminal with this command typed in; press Enter to run it. HTTPS may ask for a user name and token there. Command:',
+      open: 'Open in Terminal',
+    },
     deployKey: 'Create a deploy key',
     deployKeyHint:
       'The server has no key the remote accepts. Create a deploy key on the server in SSH keys, then add its public key to the repo on GitHub/GitLab.',
@@ -730,6 +753,7 @@ const en = {
         actions: [
           'Fetch, Pull (blocked when the repo is dirty), switch branch through a confirmation dialog',
           'Install dependencies from the lockfile in Terminal',
+          'Clone a repository (SSH host key of GitHub/GitLab pinned), git init, set a remote: typed into a terminal',
           'Add folders to search for repos',
         ],
         keys: ['↑↓ in the commit history'],

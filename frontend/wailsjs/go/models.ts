@@ -1175,6 +1175,42 @@ export namespace git {
 	        this.conflict = source["conflict"];
 	    }
 	}
+	export class ClonePlan {
+	    command: string;
+	    ssh: boolean;
+	    host: string;
+	    pinned: boolean;
+	    name: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ClonePlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.command = source["command"];
+	        this.ssh = source["ssh"];
+	        this.host = source["host"];
+	        this.pinned = source["pinned"];
+	        this.name = source["name"];
+	    }
+	}
+	export class CloneSpec {
+	    url: string;
+	    dir: string;
+	    branch: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CloneSpec(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.url = source["url"];
+	        this.dir = source["dir"];
+	        this.branch = source["branch"];
+	    }
+	}
 	export class Ref {
 	    name: string;
 	    kind: string;

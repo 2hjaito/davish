@@ -3,13 +3,27 @@ import {
   gitBranches,
   gitDiff,
   gitFind,
+  gitInitCommand,
   gitLog,
   gitPlan,
+  gitPlanClone,
+  gitRemoteCommand,
   gitRun,
   gitStatus,
 } from '../../lib/api/git'
 import { hasRuntime } from '../../lib/api/runtime'
-import { mockBranches, mockDiff, mockFind, mockLog, mockPlan, mockRun, mockStatus } from './mock'
+import {
+  mockBranches,
+  mockDiff,
+  mockFind,
+  mockInitCommand,
+  mockLog,
+  mockPlan,
+  mockPlanClone,
+  mockRemoteCommand,
+  mockRun,
+  mockStatus,
+} from './mock'
 
 export const backend = hasRuntime
   ? {
@@ -20,6 +34,9 @@ export const backend = hasRuntime
       branches: gitBranches,
       plan: gitPlan,
       run: gitRun,
+      planClone: gitPlanClone,
+      initCommand: gitInitCommand,
+      remoteCommand: gitRemoteCommand,
     }
   : {
       find: (_serverID: string, extra: string[]) => mockFind(extra),
@@ -29,4 +46,7 @@ export const backend = hasRuntime
       branches: (_serverID: string, _dir: string) => mockBranches(),
       plan: mockPlan,
       run: mockRun,
+      planClone: mockPlanClone,
+      initCommand: mockInitCommand,
+      remoteCommand: mockRemoteCommand,
     }
