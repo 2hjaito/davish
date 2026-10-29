@@ -4,6 +4,16 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-10-29
+
+### Sửa
+- App không còn chờ mãi khi server không trả lời (shell đăng nhập bị treo, Docker treo…). Mọi lệnh có hạn chót (mặc định 3 phút, đọc cổng 25 giây, Docker 30 giây) và trả lỗi ngay khi hết hạn, không đợi server đóng phiên; mở SFTP cũng vậy. Trước đây hạn chót chỉ yêu cầu đóng phiên nên vẫn đứng ở "Đang đọc…".
+- Nút làm mới bấm được cả khi đang tải: lần tải mới thay lần đang kẹt, kết quả muộn của lần cũ bị bỏ qua.
+
+### Thêm
+- Chẩn đoán: khi một app tải lâu hơn 8 giây hoặc báo lỗi, có Thử lại, **Chẩn đoán** và **Sao chép chi tiết**. Chẩn đoán thử `echo`, `ss`, `docker ps` trên server và nói rõ nguyên nhân: mất kết nối, shell đăng nhập bị treo (kèm cách sửa ~/.bashrc), shell chậm (kèm các dòng nghi vấn), ss hoặc Docker không trả lời.
+- Log của app ghi ra file JSON xoay vòng trong thư mục cache (`davish/logs`, 5 file × 5 MB): mọi lệnh chạy trên server, mã thoát, thời gian, lỗi; không bao giờ có mật khẩu, khóa hay nội dung file. Trợ giúp → "Sao chép thông tin hỗ trợ" gom phiên bản, hệ điều hành và log gần đây để gửi cho người hỗ trợ.
+
 ## [1.1.0] - 2026-10-28
 
 ### Thêm
@@ -123,7 +133,8 @@ M0–M3 · Khung dự án, desktop, kết nối, Terminal.
 - Kết nối SSH qua agent, key hoặc mật khẩu; bí mật trong keychain; xác nhận host key lần đầu, từ chối khi host key đổi; tự kết nối lại.
 - Terminal xterm.js nhiều tab, prompt Davish không cài gì lên server.
 
-[Unreleased]: https://github.com/2hjaito/davish/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/2hjaito/davish/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/2hjaito/davish/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/2hjaito/davish/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/2hjaito/davish/compare/v0.9.0...v1.0.0
 [0.9.0]: https://github.com/2hjaito/davish/compare/v0.8.0...v0.9.0

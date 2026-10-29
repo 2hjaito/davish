@@ -17,6 +17,8 @@
   import ConfirmCommand from '../../lib/ui/ConfirmCommand.svelte'
   import Dialog from '../../lib/ui/Dialog.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
+  import LoadState from '../../lib/ui/LoadState.svelte'
+  import { supersedes } from '../../lib/stores/latest'
   import FilterShell, { type FilterItem } from '../../lib/ui/FilterShell.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import StatusList, { type StatusItem } from '../../lib/ui/StatusList.svelte'
@@ -136,8 +138,11 @@
       : connected && (filter === 'authorized' ? !!authorized : !!serverKeys),
   )
 
+  const attempt = supersedes()
+
   async function refresh() {
-    if (loading) return
+    // A retry replaces a load still waiting on the server.
+    const current = attempt()
     loading = true
     try {
       const [l, a, s] = await Promise.all([
@@ -150,9 +155,9 @@
       if (s) serverKeys = s
       error = ''
     } catch (e) {
-      error = toUserError(e).message
+      if (current()) error = toUserError(e).message
     } finally {
-      loading = false
+      if (current()) loading = false
     }
   }
 
@@ -355,7 +360,13 @@
     {#if needsServer && !connected}
       <Empty icon="server" title={t.keys.offline} hint={t.keys.offlineHint} />
     {:else}
-      <Empty icon={error ? 'warning' : 'key'} title={error || t.keys.loading} />
+      <LoadState
+        serverID={win.serverID}
+        {error}
+        icon="key"
+        loading={t.keys.loading}
+        onretry={() => void refresh()}
+      />
     {/if}
   {/snippet}
   {#snippet list()}

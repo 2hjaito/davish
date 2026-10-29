@@ -9,6 +9,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"davish/internal/apperr"
 )
@@ -147,6 +148,9 @@ func (s *Service) Clean(ctx context.Context, serverID, id, command string) error
 	if !ok || command != want {
 		return apperr.New(apperr.InvalidInput, "cleanup does not match what was confirmed")
 	}
+	// A prune of years of images can outlast the default deadline.
+	ctx, cancel := context.WithTimeout(ctx, 15*time.Minute)
+	defer cancel()
 	res, err := s.run.RunLine(ctx, serverID, app, want)
 	if err != nil {
 		return err

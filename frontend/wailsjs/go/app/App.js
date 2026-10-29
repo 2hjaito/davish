@@ -46,6 +46,14 @@ export function DeleteServer(arg1) {
   return window['go']['app']['App']['DeleteServer'](arg1);
 }
 
+export function DiagRun(arg1) {
+  return window['go']['app']['App']['DiagRun'](arg1);
+}
+
+export function DiagSupportInfo() {
+  return window['go']['app']['App']['DiagSupportInfo']();
+}
+
 export function Disconnect(arg1) {
   return window['go']['app']['App']['Disconnect'](arg1);
 }

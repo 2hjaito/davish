@@ -7,6 +7,8 @@
   import { useAppMenu } from '../../lib/shell/menus.svelte'
   import { servers } from '../../lib/stores/servers.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
+  import LoadState from '../../lib/ui/LoadState.svelte'
+  import { supersedes } from '../../lib/stores/latest'
   import Icon from '../../lib/ui/Icon.svelte'
   import { getWindowContext } from '../../lib/wm/context'
   import { openTerminalAt } from '../../lib/wm/intents.svelte'
@@ -27,16 +29,19 @@
   const connected = $derived(server?.state === 'connected')
   const banned = $derived(new Set(report?.fail2ban.banned ?? []))
 
+  const attempt = supersedes()
+
   async function refresh() {
-    if (loading) return
+    // A retry replaces a load still waiting on the server.
+    const current = attempt()
     loading = true
     try {
       report = await backend.report(win.serverID)
       error = ''
     } catch (e) {
-      error = toUserError(e).message
+      if (current()) error = toUserError(e).message
     } finally {
-      loading = false
+      if (current()) loading = false
     }
   }
 
@@ -64,7 +69,8 @@
   <button
     class="tool"
     aria-label={t.common.refresh}
-    disabled={loading || !connected}
+    class:spin={loading}
+    disabled={!connected}
     onclick={() => void refresh()}
   >
     <Icon name="refresh" size={14} strokeWidth={2.2} />
@@ -75,7 +81,13 @@
   {#if !connected}
     <Empty icon="server" title={s.offline} hint={s.offlineHint} />
   {:else if !report}
-    <Empty icon={error ? 'warning' : 'shield'} title={error || s.loading} />
+    <LoadState
+      serverID={win.serverID}
+      {error}
+      icon="shield"
+      loading={s.loading}
+      onretry={() => void refresh()}
+    />
   {:else}
     {@const r = report}
     {#if error}<p class="error">{error}</p>{/if}
@@ -365,5 +377,15 @@
     font-size: var(--text-sm);
     cursor: default;
     margin: 6px 0;
+  }
+
+  .tool.spin :global(svg) {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      rotate: 360deg;
+    }
   }
 </style>

@@ -66,6 +66,24 @@ export namespace app {
 	        this.state = source["state"];
 	    }
 	}
+	export class SupportInfo {
+	    version: string;
+	    os: string;
+	    logPath: string;
+	    logTail: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SupportInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.version = source["version"];
+	        this.os = source["os"];
+	        this.logPath = source["logPath"];
+	        this.logTail = source["logTail"];
+	    }
+	}
 
 }
 
@@ -295,6 +313,81 @@ export namespace cron {
 	        this.zone = source["zone"];
 	        this.unreadable = source["unreadable"];
 	        this.version = source["version"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
+export namespace diag {
+	
+	export class Finding {
+	    file: string;
+	    line: number;
+	    text: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Finding(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.file = source["file"];
+	        this.line = source["line"];
+	        this.text = source["text"];
+	    }
+	}
+	export class Step {
+	    id: string;
+	    ok: boolean;
+	    detail?: string;
+	    ms: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Step(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.ok = source["ok"];
+	        this.detail = source["detail"];
+	        this.ms = source["ms"];
+	    }
+	}
+	export class Report {
+	    verdict: string;
+	    steps: Step[];
+	    findings?: Finding[];
+	    text: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Report(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.verdict = source["verdict"];
+	        this.steps = this.convertValues(source["steps"], Step);
+	        this.findings = this.convertValues(source["findings"], Finding);
+	        this.text = source["text"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

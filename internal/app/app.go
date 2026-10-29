@@ -12,9 +12,11 @@ import (
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 
+	"davish/internal/applog"
 	"davish/internal/audit"
 	"davish/internal/conn"
 	"davish/internal/cron"
+	"davish/internal/diag"
 	"davish/internal/disk"
 	"davish/internal/docker"
 	"davish/internal/fs"
@@ -65,6 +67,10 @@ type App struct {
 	disk      *disk.Service
 	security  *security.Service
 	updates   *update.Service
+	diag      *diag.Service
+	// logFile is the app log, nil when it could not be opened.
+	logFile *applog.Writer
+	version string
 }
 
 // New wires the services with their config under os.UserConfigDir()/davish.
@@ -73,10 +79,14 @@ func New(version string) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	// TODO(M10): JSON log file with rotation under os.UserCacheDir(), per CONVENTIONS.md.
+	a := &App{ctx: context.Background(), version: version}
 	log := slog.New(slog.NewTextHandler(os.Stderr, nil))
-
-	a := &App{ctx: context.Background()}
+	if logDir, err := applog.DefaultDir(); err == nil {
+		if w, err := applog.Open(logDir); err == nil {
+			a.logFile, log = w, applog.New(w)
+		}
+	}
+	log.Info("davish started", "version", version, "os", goruntime.GOOS, "arch", goruntime.GOARCH)
 	a.secrets = store.NewSecrets(store.OSKeyring{})
 	a.store = store.New(dir, a.secrets)
 	a.lock = lock.New(store.OSKeyring{}, lock.NewBiometric(), emitter{a}, log,
@@ -88,6 +98,7 @@ func New(version string) (*App, error) {
 	a.sysmon = sysmon.New(a.conns, emitter{a}, log, sysmon.Options{})
 	a.audit = audit.New(emitter{a})
 	runner := audit.NewRunner(a.conns, a.audit)
+	runner.LogTo(log)
 	a.files = fs.New(a.conns, runner, log)
 	a.services = svc.New(runner)
 	a.docker = docker.New(runner)
@@ -102,6 +113,7 @@ func New(version string) (*App, error) {
 	a.ports = ports.NewLister(runner)
 	a.disk = disk.New(runner)
 	a.security = security.New(runner)
+	a.diag = diag.New(runner, a.conns)
 	a.tunnels = ports.NewTunnels(a.conns, emitter{a}, log)
 	a.browser = ports.NewBrowser(a.conns, log)
 	a.logs = logs.New(a.conns, a.audit, emitter{a}, log)

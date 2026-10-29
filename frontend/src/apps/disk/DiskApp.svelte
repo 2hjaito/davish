@@ -9,6 +9,8 @@
   import { servers } from '../../lib/stores/servers.svelte'
   import ConfirmCommand from '../../lib/ui/ConfirmCommand.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
+  import LoadState from '../../lib/ui/LoadState.svelte'
+  import { supersedes } from '../../lib/stores/latest'
   import FilterShell, { type FilterItem } from '../../lib/ui/FilterShell.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import { getWindowContext } from '../../lib/wm/context'
@@ -72,8 +74,11 @@
       : entries.find((e) => e.path === selected),
   )
 
+  const attempt = supersedes()
+
   async function refresh() {
-    if (loading) return
+    // A retry replaces a load still waiting on the server.
+    const current = attempt()
     loading = true
     try {
       mounts = await backend.mounts(win.serverID)
@@ -81,9 +86,9 @@
       if (!isClean && !mounts.some((m) => m.path === filter)) filter = mounts[0]?.path ?? '/'
       void loadCleanups()
     } catch (e) {
-      error = toUserError(e).message
+      if (current()) error = toUserError(e).message
     } finally {
-      loading = false
+      if (current()) loading = false
     }
   }
 
@@ -210,7 +215,13 @@
     {#if !connected}
       <Empty icon="server" title={t.disk.offline} hint={t.disk.offlineHint} />
     {:else}
-      <Empty icon={error ? 'warning' : 'disk'} title={error || t.disk.loading} />
+      <LoadState
+        serverID={win.serverID}
+        {error}
+        icon="disk"
+        loading={t.disk.loading}
+        onretry={() => void refresh()}
+      />
     {/if}
   {/snippet}
   {#snippet list()}

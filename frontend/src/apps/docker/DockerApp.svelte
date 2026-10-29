@@ -17,6 +17,8 @@
   import { load, save } from '../../lib/stores/persist'
   import { servers } from '../../lib/stores/servers.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
+  import LoadState from '../../lib/ui/LoadState.svelte'
+  import { supersedes } from '../../lib/stores/latest'
   import FilterShell, { type FilterItem } from '../../lib/ui/FilterShell.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import type { IconName } from '../../lib/ui/icons'
@@ -150,8 +152,11 @@
     ]
   })
 
+  const attempt = supersedes()
+
   async function refresh() {
-    if (loading) return
+    // A retry replaces a load still waiting on the server.
+    const current = attempt()
     loading = true
     try {
       containers = await backend.list(win.serverID)
@@ -161,9 +166,9 @@
       if (kind === 'volumes') volumes = await backend.volumes(win.serverID)
       error = ''
     } catch (e) {
-      error = toUserError(e).message
+      if (current()) error = toUserError(e).message
     } finally {
-      loading = false
+      if (current()) loading = false
     }
     // Sampling takes about two seconds, so the table shows first.
     if (containers?.some((c) => c.state === 'running')) {
@@ -239,7 +244,13 @@
     {#if !connected}
       <Empty icon="server" title={d.offline} hint={d.offlineHint} />
     {:else}
-      <Empty icon={error ? 'warning' : 'docker'} title={error || d.loading} />
+      <LoadState
+        serverID={win.serverID}
+        {error}
+        icon="docker"
+        loading={d.loading}
+        onretry={() => void refresh()}
+      />
     {/if}
   {/snippet}
   {#snippet list()}

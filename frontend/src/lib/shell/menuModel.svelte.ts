@@ -1,6 +1,10 @@
 // What the menu bar holds, built from the current state each time it is read.
 import { dockApps, getApp } from '../../apps/registry'
+import { copyText } from '../api/clipboard'
+import { diagSupportInfo } from '../api/diag'
+import { hasRuntime } from '../api/runtime'
 import { t } from '../i18n/vi'
+import { notifications } from '../stores/notifications.svelte'
 import { appLock } from '../stores/lock.svelte'
 import { servers } from '../stores/servers.svelte'
 import { ui } from '../stores/ui.svelte'
@@ -19,6 +23,22 @@ export const GO_KEYS: Record<string, string> = {
   logs: 'shift+L',
   editor: 'shift+E',
   git: 'shift+G',
+}
+
+/** Copies the version, platform and recent log, for a support message. */
+async function copySupport() {
+  const info = await diagSupportInfo()
+  const ok = await copyText(
+    `Davish ${info.version} (${info.os})\n${t.diag.copyLog} (${info.logPath}):\n${info.logTail}`,
+  )
+  notifications.add({
+    id: 'support-copied',
+    level: 'info',
+    title: ok ? t.diag.supportCopied : t.diag.supportFailed,
+    body: ok ? t.diag.supportCopiedBody : '',
+    serverID: '',
+    at: Date.now(),
+  })
 }
 
 export function openApp(appId: string) {
@@ -173,6 +193,7 @@ export function buildMenus(): Menu[] {
         { label: m.shortcuts, combo: '/', run: () => (ui.help = { kind: 'shortcuts' }) },
         null,
         { label: t.update.check, run: () => void updates.check(true) },
+        { label: t.diag.help, disabled: !hasRuntime, run: () => void copySupport() },
         { label: m.about, run: () => (ui.help = { kind: 'about' }) },
         { label: m.changelog, run: () => (ui.help = { kind: 'about' }) },
       ],
