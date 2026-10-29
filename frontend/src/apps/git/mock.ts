@@ -231,3 +231,12 @@ export const mockInitCommand = (dir: string, remote: string, url: string): Promi
 
 export const mockRemoteCommand = (dir: string, remote: string, url: string): Promise<string> =>
   Promise.resolve(`cd -- ${dir} && git remote set-url ${remote || 'origin'} ${url}`)
+
+export function mockDeployLine(dir: string, steps: string[]): Promise<string> {
+  const kept = steps.map((s) => s.trim()).filter((s) => s && !s.startsWith('#'))
+  const body = kept.flatMap((s, i) => [`echo '▶ ${i + 1}/${kept.length}  ${s}'`, `{ ${s}; }`])
+  return Promise.resolve(
+    [`cd -- ${dir}`, ...body, "echo '✓ Deploy finished'"].join(' && ') +
+      " || echo '✗ Deploy stopped: the step above failed'",
+  )
+}

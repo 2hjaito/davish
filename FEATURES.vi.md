@@ -81,7 +81,7 @@ Gói apt, dnf, yum hoặc apk đã cài và có bản cập nhật, bản vá b�
 
 Tìm repo trong home, `/var/www`, `/srv`, `/opt` hoặc thư mục bạn thêm. Nhánh, nhánh remote và số commit chưa đẩy/chưa kéo, file thay đổi kèm diff, biểu đồ commit của mọi nhánh với merge và tag. Fetch, `pull --ff-only` (bị chặn khi repo còn thay đổi chưa commit) và đổi nhánh sau khi xác nhận đúng lệnh; `npm ci` / yarn / pnpm theo lockfile trong Terminal. Remote từ chối key thì dẫn tới tạo deploy key.
 
-**Clone repo…** (SSH hoặc HTTPS, thư mục, nhánh), **git init** và **Đặt remote…** gõ sẵn lệnh vào Terminal. Với GitHub và GitLab qua SSH, host key họ công bố được thêm vào `known_hosts` trước; có nút dẫn tới tạo deploy key.
+**Clone repo…** (SSH hoặc HTTPS, thư mục, nhánh), **git init** và **Đặt remote…** gõ sẵn lệnh vào Terminal. Với GitHub và GitLab qua SSH, host key họ công bố được thêm vào `known_hosts` trước; có nút dẫn tới tạo deploy key. **Deploy…** giữ công thức cho mỗi repo trên máy bạn (pull, cài, build, khởi động lại…) và chạy từng bước trong Terminal, dừng ở bước đầu tiên bị lỗi.
 
 <table><tr>
   <td><img src="assets/screenshots/git.jpg" alt="Biểu đồ commit của mọi nhánh"></td>

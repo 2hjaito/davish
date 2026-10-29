@@ -138,3 +138,7 @@ export const gitInitCommand = (dir: string, remote: string, url: string): Promis
 
 export const gitRemoteCommand = (dir: string, remote: string, url: string): Promise<string> =>
   App.GitRemoteCommand(dir, remote, url)
+
+/** A deploy recipe's steps as one terminal line that stops at a failure. */
+export const gitDeployLine = (dir: string, steps: string[]): Promise<string> =>
+  App.GitDeployLine(dir, steps)

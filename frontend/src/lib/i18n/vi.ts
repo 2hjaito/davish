@@ -390,6 +390,15 @@ const vi = {
     branchRemote: 'trên remote',
     install: (cmd: string) => `Cài dependency (${cmd})`,
     installHint: 'Mở Terminal tại repo với lệnh điền sẵn, bạn tự nhấn Enter để chạy và xem output.',
+    deploy: {
+      open: 'Deploy…',
+      title: 'Triển khai',
+      body: (dir: string) =>
+        `Mỗi dòng một lệnh, chạy lần lượt trong ${dir}; lệnh nào lỗi thì dừng các lệnh sau. Dòng bắt đầu bằng # được bỏ qua. Công thức lưu trên máy này, không ghi lên server.`,
+      next: 'Xem trước',
+      commandIntro: 'Mở Terminal với lệnh gõ sẵn; nhấn Enter để triển khai. Lệnh:',
+      run: 'Deploy trong Terminal',
+    },
     clone: {
       more: 'Thêm',
       title: { clone: 'Clone repo…', init: 'Repo mới (git init)…', remote: 'Đặt remote…' },
@@ -741,6 +750,7 @@ const vi = {
         does: 'Repo trên server: nhánh, ahead/behind, file thay đổi, diff, biểu đồ commit.',
         actions: [
           'Clone repo (ghim host key GitHub/GitLab), git init, đặt remote: gõ sẵn vào Terminal',
+          'Công thức triển khai cho mỗi repo (lưu trên máy này), chạy từng bước trong Terminal',
           'Fetch, Pull (chặn khi repo bẩn), đổi nhánh qua hộp xác nhận',
           'Cài dependency theo lockfile trong Terminal',
           'Thêm thư mục để tìm repo',
