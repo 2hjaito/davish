@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"golang.org/x/crypto/ssh"
@@ -25,9 +26,10 @@ func TestGenerateLocal(t *testing.T) {
 		t.Errorf("plain = %+v\nlocked = %+v", plain, locked)
 	}
 
+	// Windows reports 0666/0777 whatever was asked: it has no Unix modes.
 	for p, want := range map[string]os.FileMode{dir: 0o700, plain.Path: 0o600, plain.Path + ".pub": 0o644} {
 		fi, err := os.Stat(p)
-		if err != nil || fi.Mode().Perm() != want {
+		if err != nil || (runtime.GOOS != "windows" && fi.Mode().Perm() != want) {
 			t.Errorf("%s mode = %v, want %v", p, fi.Mode().Perm(), want)
 		}
 	}
