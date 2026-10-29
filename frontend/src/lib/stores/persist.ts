@@ -56,10 +56,15 @@ function read(key: string): unknown {
   }
 }
 
-/** The stored value merged over fallback, so new fields get their defaults. */
+/** The stored value merged over fallback, so new fields get their defaults.
+ * Arrays are taken whole: spreading one into an object turns it into
+ * {0: …, 1: …}, which has no .map. */
 export function load<T>(key: string, fallback: T): T {
   const stored = read(key)
   if (stored === undefined || stored === null) return fallback
+  if (Array.isArray(fallback) || Array.isArray(stored)) {
+    return Array.isArray(fallback) && Array.isArray(stored) ? (stored as T) : fallback
+  }
   if (typeof fallback === 'object' && fallback !== null && typeof stored === 'object') {
     return { ...fallback, ...(stored as T) }
   }
