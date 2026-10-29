@@ -25,7 +25,8 @@ const (
 	maxSettingValue = 64 << 10
 )
 
-var settingKey = regexp.MustCompile(`^[A-Za-z0-9_.-]{1,64}$`)
+// settingKey allows ":" for keys scoped to a server, such as "logs:<id>".
+var settingKey = regexp.MustCompile(`^[A-Za-z0-9_.:-]{1,64}$`)
 
 // settingsLayout is the on-disk layout of settings.json.
 type settingsLayout struct {

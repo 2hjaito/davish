@@ -138,6 +138,7 @@ const vi = {
     user: 'User',
     method: 'Cách',
     banned: 'đã chặn',
+    blocked: 'đã chặn bằng ufw',
     block: 'Chặn bằng ufw…',
     ban: 'Chặn bằng fail2ban…',
     lastTitle: 'Phiên đăng nhập (last)',

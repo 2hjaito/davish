@@ -125,6 +125,7 @@ const en = {
     user: 'User',
     method: 'Method',
     banned: 'banned',
+    blocked: 'blocked by ufw',
     block: 'Block with ufw…',
     ban: 'Ban with fail2ban…',
     lastTitle: 'Login sessions (last)',

@@ -4,6 +4,11 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Sửa
+- Thứ tự dock, "Bỏ qua bản này" và lựa chọn trong Logs giờ được nhớ sau khi khởi động lại (tên cài đặt có dấu `:` bị từ chối âm thầm).
+- An ninh: "Chặn bằng ufw…" chèn luật lên đầu (`ufw insert 1`), trước đó luật nằm sau `ALLOW 22` nên không chặn được SSH; IP đã chặn hiện nhãn "đã chặn bằng ufw".
+- Terminal: lệnh gõ sẵn hiện sau prompt thay vì trước.
+
 ### Thêm
 - **Triển khai app** (Launchpad/Spotlight): trình hướng dẫn từ repo git / image / thư mục → systemd, compose, container hoặc tĩnh → site nginx → HTTPS; xem trước mọi lệnh, chạy từng bước trong Terminal, tổng kết và lệnh gỡ toàn bộ.
 - Git → **Deploy…**: công thức triển khai cho mỗi repo, lưu trên máy, chạy từng bước trong Terminal và dừng ở bước lỗi.

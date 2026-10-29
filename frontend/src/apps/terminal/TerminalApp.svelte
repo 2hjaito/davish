@@ -108,9 +108,9 @@
       termStart(win.serverID, term.cols, term.rows, settings.terminalPrompt, tab.startDir)
         .then((id) => {
           tab.session = id
-          // The shell buffers it and shows it at its prompt.
-          if (tab.startInput) void termWrite(id, tab.startInput)
-          tab.startInput = undefined
+          // Typed once the prompt is drawn: input written earlier is echoed
+          // by the terminal before the prompt, so it looks misplaced.
+          if (tab.startInput) typeWhenQuiet(tab, 3000)
         })
         .catch(() => {
           term.write(`\r\n\x1b[31m${t.terminal.startFailed}\x1b[0m\r\n`)
@@ -135,7 +135,9 @@
     if (!hasRuntime) return
     const offData = onTermData(({ id, b64 }) => {
       const tab = tabs.find((x) => x.session === id)
-      if (tab) terms.get(tab.id)?.write(decodeOutput(b64))
+      if (!tab) return
+      terms.get(tab.id)?.write(decodeOutput(b64))
+      if (tab.startInput) typeWhenQuiet(tab, 250)
     })
     const offExit = onTermExit(({ id, code }) => {
       const tab = tabs.find((x) => x.session === id)
@@ -153,6 +155,22 @@
       for (const tab of tabs) if (tab.session) void termClose(tab.session)
     }
   })
+
+  // Pending start input per tab: typed after ms without output, which is
+  // when the shell has finished drawing its prompt.
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity -- bookkeeping, never rendered
+  const quiet = new Map<number, ReturnType<typeof setTimeout>>()
+  function typeWhenQuiet(tab: Tab, ms: number) {
+    clearTimeout(quiet.get(tab.id))
+    quiet.set(
+      tab.id,
+      setTimeout(() => {
+        quiet.delete(tab.id)
+        if (tab.session && tab.startInput) void termWrite(tab.session, tab.startInput)
+        tab.startInput = undefined
+      }, ms),
+    )
+  }
 
   function newTab(req?: TerminalRequest) {
     const tab = tabAt(req)
