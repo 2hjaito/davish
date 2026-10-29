@@ -70,6 +70,7 @@ type App struct {
 	diag      *diag.Service
 	// logFile is the app log, nil when it could not be opened.
 	logFile *applog.Writer
+	log     *slog.Logger
 	version string
 }
 
@@ -86,6 +87,7 @@ func New(version string) (*App, error) {
 			a.logFile, log = w, applog.New(w)
 		}
 	}
+	a.log = log
 	log.Info("davish started", "version", version, "os", goruntime.GOOS, "arch", goruntime.GOARCH)
 	a.secrets = store.NewSecrets(store.OSKeyring{})
 	a.store = store.New(dir, a.secrets)

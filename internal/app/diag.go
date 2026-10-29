@@ -30,3 +30,13 @@ func (a *App) DiagSupportInfo() SupportInfo {
 	}
 	return info
 }
+
+// DiagFrontendError writes an error the interface hit to the log file, so
+// "Sao chép chi tiết" carries it to whoever helps. msg is the error's text
+// and stack, never user data.
+func (a *App) DiagFrontendError(msg string) {
+	if len(msg) > 2000 {
+		msg = msg[:2000]
+	}
+	a.log.Warn("frontend error", "err", msg)
+}

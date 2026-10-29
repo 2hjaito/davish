@@ -43,6 +43,8 @@ export function CronRuns(arg1:string,arg2:string):Promise<cron.Runs>;
 
 export function DeleteServer(arg1:string):Promise<void>;
 
+export function DiagFrontendError(arg1:string):Promise<void>;
+
 export function DiagRun(arg1:string):Promise<diag.Report>;
 
 export function DiagSupportInfo():Promise<app.SupportInfo>;
