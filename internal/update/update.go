@@ -423,6 +423,19 @@ func (s *Service) Restart() error {
 	return nil
 }
 
+// Relaunch starts a fresh copy of the running app, for settings that only
+// apply at start such as the UI language; the caller quits right after.
+func (s *Service) Relaunch() error {
+	target, err := s.target()
+	if err != nil {
+		return err
+	}
+	if err := launch(s.opts.GOOS, target); err != nil {
+		return fmt.Errorf("start davish again: %w", err)
+	}
+	return nil
+}
+
 // Cleanup removes what the previous update left: the replaced app.
 func Cleanup(goos string, exe func() (string, error)) {
 	s := &Service{opts: Options{GOOS: goos, Executable: exe}}

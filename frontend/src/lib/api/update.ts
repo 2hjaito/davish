@@ -28,6 +28,8 @@ export interface UpdateProgress {
 export const updateCheck = (): Promise<UpdateStatus> => App.UpdateCheck()
 export const updateInstall = (version: string): Promise<void> => App.UpdateInstall(version)
 export const updateRestart = (): Promise<void> => App.UpdateRestart()
+/** Quits and starts Davish again; fails outside an installed build. */
+export const relaunch = (): Promise<void> => App.Relaunch()
 
 export const onUpdateProgress = (h: (p: UpdateProgress) => void): (() => void) =>
   EventsOn('update:progress', h)

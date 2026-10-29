@@ -26,6 +26,15 @@ func (a *App) UpdateRestart() error {
 	return nil
 }
 
+// Relaunch quits and starts Davish again (docs/adr/0010-english-ui.md).
+func (a *App) Relaunch() error {
+	if err := a.updates.Relaunch(); err != nil {
+		return err
+	}
+	runtime.Quit(a.ctx)
+	return nil
+}
+
 // UpdateVersion is the running version.
 func (a *App) UpdateVersion() string {
 	return a.updates.Current()
