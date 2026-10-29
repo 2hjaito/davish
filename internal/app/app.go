@@ -4,6 +4,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 
+	"davish/internal/apperr"
 	"davish/internal/applog"
 	"davish/internal/audit"
 	"davish/internal/conn"
@@ -145,6 +147,20 @@ func (a *App) Shutdown(_ context.Context) {
 	a.tunnels.Close()
 	a.browser.Close()
 	a.conns.Close()
+}
+
+// ErrorFormatter turns binding errors into what the frontend reads, and
+// logs the ones without a code: the UI shows those only as "something went
+// wrong", so the log is the one place their cause survives. It is a plain
+// function because Wails binds every exported method of App.
+func ErrorFormatter(a *App) func(error) any {
+	return func(err error) any {
+		var ae *apperr.Error
+		if !errors.As(err, &ae) {
+			a.log.Warn("unclassified error", "err", err)
+		}
+		return apperr.Format(err)
+	}
 }
 
 // emitter lets services push events. It is a separate type because Wails

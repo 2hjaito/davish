@@ -18,7 +18,6 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
 
 	"davish/internal/app"
-	"davish/internal/apperr"
 )
 
 //go:embed all:frontend/dist
@@ -68,7 +67,7 @@ func main() {
 			EnableFileDrop:     true,
 			DisableWebViewDrop: true,
 		},
-		ErrorFormatter: apperr.Format,
+		ErrorFormatter: app.ErrorFormatter(a),
 		OnStartup:      a.Startup,
 		// make bench reads this line to time the start; nothing else does.
 		OnDomReady: func(context.Context) {

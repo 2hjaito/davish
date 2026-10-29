@@ -61,6 +61,13 @@ describe('persist with settings.json', () => {
     expect(load('missing', 5)).toBe(5)
   })
 
+  it('keeps stored arrays as arrays and drops a mismatched shape', async () => {
+    stored = { 'dock:pinned': '["files","terminal"]', 'logs:units': '{"a":1}' }
+    const { load } = await fresh()
+    expect(load('dock:pinned', ['terminal', 'files', 'monitor'])).toEqual(['files', 'terminal'])
+    expect(load('logs:units', ['x'])).toEqual(['x'])
+  })
+
   it('writes through to Go and serves the new value at once', async () => {
     const { load, save } = await fresh()
     save('monitor', { range: '15m' })
