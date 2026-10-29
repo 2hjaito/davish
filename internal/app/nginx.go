@@ -61,3 +61,27 @@ func (a *App) NginxRemove(serverID, sitePath string, withCerts bool, command str
 	}
 	return a.nginx.Remove(a.ctx, serverID, sitePath, withCerts, command)
 }
+
+// NginxSiteOptions tells where new sites go and which php-fpm sockets the
+// server has.
+func (a *App) NginxSiteOptions(serverID string) (nginx.SiteOptions, error) {
+	return a.nginx.Options(a.ctx, serverID)
+}
+
+// NginxRenderSite returns the config of a new site, for the preview.
+func (a *App) NginxRenderSite(site nginx.NewSite) (string, error) {
+	return nginx.RenderSite(site)
+}
+
+// NginxPlanCreate returns what writing config as a new site runs.
+func (a *App) NginxPlanCreate(serverID string, site nginx.NewSite, config string) (nginx.CreatePlan, error) {
+	return a.nginx.PlanCreate(a.ctx, serverID, site, config)
+}
+
+// NginxCreate runs the confirmed command of NginxPlanCreate.
+func (a *App) NginxCreate(serverID string, site nginx.NewSite, config, command string) (nginx.CreateResult, error) {
+	if err := a.lock.Check(); err != nil {
+		return nginx.CreateResult{}, err
+	}
+	return a.nginx.Create(a.ctx, serverID, site, config, command)
+}

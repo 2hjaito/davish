@@ -25,6 +25,7 @@
   import type { AppProps } from '../types'
   import { backend } from './backend'
   import ResultDialog from './ResultDialog.svelte'
+  import NewSiteDialog from './NewSiteDialog.svelte'
   import RemoveDialog from './RemoveDialog.svelte'
   import SiteInspector from './SiteInspector.svelte'
   import { type Filter, FILTERS, mainName, matches, siteKey, visible, worstCert } from './sites'
@@ -43,6 +44,7 @@
   let busy = $state(false)
   let toggling = $state.raw<TogglePlan | null>(null)
   let removing = $state.raw<RemovePlan | null>(null)
+  let creating = $state(false)
   /** The server refused the link change: its sudo form. */
   let toggleSudo = $state('')
   let flash = $state('')
@@ -220,6 +222,15 @@
   {#snippet actions()}
     <button
       class="tool"
+      aria-label={t.nginx.newSite.open}
+      title={t.nginx.newSite.open}
+      disabled={!connected || busy}
+      onclick={() => (creating = true)}
+    >
+      <Icon name="plus" size={15} strokeWidth={2.4} />
+    </button>
+    <button
+      class="tool"
       aria-label={t.nginx.test}
       title={t.nginx.test}
       disabled={!connected || busy}
@@ -302,6 +313,16 @@
   tone="primary"
   onclose={() => (reloadCommand = null)}
   onconfirm={() => void reload()}
+/>
+<NewSiteDialog
+  serverID={win.serverID}
+  open={creating}
+  onclose={() => (creating = false)}
+  oncreated={(name, path) => {
+    flash = t.nginx.newSite.created(name)
+    selected = path
+    void refresh()
+  }}
 />
 <ResultDialog serverID={win.serverID} {result} onclose={() => (result = null)} />
 <RemoveDialog

@@ -1,5 +1,15 @@
 // Demo data for the plain browser preview (vite dev), where there is no Go side.
-import type { NginxReload, NginxSite, NginxTest, RemovePlan, TogglePlan } from '../../lib/api/nginx'
+import type {
+  CreatePlan,
+  CreateResult,
+  NewSite,
+  NginxReload,
+  NginxSite,
+  NginxTest,
+  RemovePlan,
+  SiteOptions,
+  TogglePlan,
+} from '../../lib/api/nginx'
 
 const day = 86_400
 const now = () => Math.floor(Date.now() / 1000)
@@ -177,3 +187,41 @@ export const mockReload = (): Promise<NginxReload> =>
         },
     500,
   )
+
+export const mockSiteOptions = (): Promise<SiteOptions> =>
+  delay({ confD: false, phpSockets: ['/run/php/php8.3-fpm.sock'] })
+
+export function mockRenderSite(site: NewSite): Promise<string> {
+  const body =
+    site.type === 'proxy'
+      ? `    location / {\n        proxy_pass http://${site.upstream};\n        proxy_set_header Host $host;\n    }`
+      : `    root ${site.root};\n    index index.html;`
+  return delay(`server {\n    listen 80;\n    server_name ${site.names.join(' ')};\n\n${body}\n}\n`)
+}
+
+export function mockPlanCreate(site: NewSite, config: string): Promise<CreatePlan> {
+  const name = site.names[0] ?? 'site'
+  const path = `/etc/nginx/sites-available/${name}`
+  const link = `/etc/nginx/sites-enabled/${name}`
+  const command = `printf %s '${config}' | tee -- ${path} > /dev/null && ln -s -- ${path} ${link} && { nginx -t && systemctl reload nginx || { rm -- ${link}; false; }; }`
+  return delay({ name, path, config, command, sudo: command })
+}
+
+export async function mockCreate(plan: CreatePlan): Promise<CreateResult> {
+  await delay(null, 500)
+  const name = plan.name
+  sites = [
+    ...sites,
+    {
+      name,
+      path: plan.path,
+      kind: 'site',
+      enabled: true,
+      toggleable: true,
+      servers: [{ names: [name], listen: ['80'], ssl: false, certs: [], proxyPass: [], line: 1 }],
+      upstreams: [],
+      certs: [],
+    },
+  ]
+  return { created: true, test: okTest, needsRoot: false, sudo: plan.sudo }
+}
