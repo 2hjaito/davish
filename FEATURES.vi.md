@@ -79,7 +79,7 @@ Gói apt, dnf, yum hoặc apk đã cài và có bản cập nhật, bản vá b�
 
 ## Database
 
-Database MariaDB/MySQL và PostgreSQL kèm dung lượng, mở từ Launchpad hoặc Spotlight. Tạo database và user sở hữu nó với mật khẩu ngẫu nhiên, chỉ hiện một lần và không lưu ở đâu; câu lệnh gửi qua stdin nên mật khẩu không nằm trong nhật ký lệnh hay lịch sử shell. Xóa database sau khi gõ đúng tên. Mở database server qua tunnel để dùng công cụ của bạn. Davish kết nối bằng user của bạn, qua `sudo -n` hoặc user `postgres`; khi chỉ root vào được thì mở client trong Terminal.
+Database MariaDB/MySQL và PostgreSQL kèm dung lượng, mở từ Launchpad hoặc Spotlight. Tạo database và user sở hữu nó với mật khẩu ngẫu nhiên, chỉ hiện một lần và không lưu ở đâu; câu lệnh gửi qua stdin nên mật khẩu không nằm trong nhật ký lệnh hay lịch sử shell. Xóa database sau khi gõ đúng tên. Dump ra `~/db-backups` (`mysqldump` / `pg_dump`, nén gzip) rồi tải về từ Files, hoặc khôi phục từ bản dump sau khi xem lệnh chính xác và gõ đúng tên. Mở database server qua tunnel để dùng công cụ của bạn. Davish kết nối bằng user của bạn, qua `sudo -n` hoặc user `postgres`; khi chỉ root vào được thì mở client trong Terminal.
 
 ## Triển khai app
 

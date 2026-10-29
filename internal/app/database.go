@@ -34,3 +34,29 @@ func (a *App) DatabaseDrop(serverID, kind, db, sql string) error {
 	}
 	return a.databases.Drop(a.ctx, serverID, kind, db, sql)
 }
+
+// DatabaseDump writes a database to ~/db-backups and returns the file.
+func (a *App) DatabaseDump(serverID, kind, db string) (string, error) {
+	if err := a.lock.Check(); err != nil {
+		return "", err
+	}
+	return a.databases.Dump(a.ctx, serverID, kind, db)
+}
+
+// DatabaseDumps lists a database's dumps in ~/db-backups, newest first.
+func (a *App) DatabaseDumps(serverID, db string) ([]string, error) {
+	return a.databases.Dumps(a.ctx, serverID, db)
+}
+
+// DatabaseRestoreCommand is the line that loads a dump into a database.
+func (a *App) DatabaseRestoreCommand(serverID, kind, db, file string) (string, error) {
+	return a.databases.RestoreCommand(a.ctx, serverID, kind, db, file)
+}
+
+// DatabaseRestore runs the confirmed line of DatabaseRestoreCommand.
+func (a *App) DatabaseRestore(serverID, kind, db, file, command string) error {
+	if err := a.lock.Check(); err != nil {
+		return err
+	}
+	return a.databases.Restore(a.ctx, serverID, kind, db, file, command)
+}

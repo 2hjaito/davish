@@ -672,6 +672,7 @@ const en = {
         actions: [
           'Create a database and its user with a random password, shown once',
           'Delete a database after typing its name',
+          'Dump to ~/db-backups, restore from a dump after typing the name',
           'Open the database server through a tunnel for tools on this computer',
         ],
         keys: [],
@@ -1794,6 +1795,17 @@ const en = {
     dropBody: 'Every table and row in it is deleted. This cannot be undone. Runs:',
     typeName: (n: string) => `Type ${n} to confirm`,
     dropped: (n: string) => `Deleted ${n}.`,
+    dump: 'Dump',
+    working: 'Working…',
+    dumped: (f: string) => `Dumped to ${f}.`,
+    showInFiles: 'Show in Files',
+    restore: 'Restore…',
+    restoreTitle: (n: string) => `Restore “${n}” from a dump?`,
+    restoreFile: 'Dump on the server',
+    noDumps: 'No dump in ~/db-backups yet: type the path of a .sql or .sql.gz file.',
+    restoreBody:
+      'The dump runs against the database as it is: tables it contains are usually replaced. Dump first if unsure. Runs:',
+    restored: (n: string) => `Restored ${n}.`,
     tunnel: 'Open tunnel',
     tunnelOpen: (remote: number, local: number) =>
       `Tunnel open: connect your tool to 127.0.0.1:${local} (the server's port ${remote}).`,

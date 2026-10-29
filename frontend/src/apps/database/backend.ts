@@ -4,6 +4,10 @@ import {
   databaseCreateSQL,
   databaseDrop,
   databaseDropSQL,
+  databaseDump,
+  databaseDumps,
+  databaseRestore,
+  databaseRestoreCommand,
   databaseList,
   type DBEngine,
   type DBKind,
@@ -36,6 +40,10 @@ export const backend = hasRuntime
       dropSQL: databaseDropSQL,
       drop: databaseDrop,
       tunnel: (serverID: string, port: number) => tunnelStart(serverID, '127.0.0.1', port, ''),
+      dump: databaseDump,
+      dumps: databaseDumps,
+      restoreCommand: databaseRestoreCommand,
+      restore: databaseRestore,
     }
   : {
       list: (_serverID: string) => Promise.resolve(demo),
@@ -56,4 +64,12 @@ export const backend = hasRuntime
       },
       tunnel: (_serverID: string, port: number) =>
         Promise.resolve({ localPort: port + 10000, moved: true }),
+      dump: (_serverID: string, _kind: DBKind, db: string) =>
+        Promise.resolve(`/root/db-backups/${db}-20261029T080000Z.sql.gz`),
+      dumps: (_serverID: string, db: string) =>
+        Promise.resolve([`/root/db-backups/${db}-20261029T080000Z.sql.gz`]),
+      restoreCommand: (_serverID: string, _kind: DBKind, db: string, file: string) =>
+        Promise.resolve(`gzip -t -- ${file} && gzip -dc -- ${file} | mysql --batch ${db}`),
+      restore: (_serverID: string, _kind: DBKind, _db: string, _file: string, _command: string) =>
+        Promise.resolve(),
     }

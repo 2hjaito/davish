@@ -58,8 +58,24 @@ export function DatabaseDropSQL(arg1, arg2) {
   return window['go']['app']['App']['DatabaseDropSQL'](arg1, arg2);
 }
 
+export function DatabaseDump(arg1, arg2, arg3) {
+  return window['go']['app']['App']['DatabaseDump'](arg1, arg2, arg3);
+}
+
+export function DatabaseDumps(arg1, arg2) {
+  return window['go']['app']['App']['DatabaseDumps'](arg1, arg2);
+}
+
 export function DatabaseList(arg1) {
   return window['go']['app']['App']['DatabaseList'](arg1);
+}
+
+export function DatabaseRestore(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['app']['App']['DatabaseRestore'](arg1, arg2, arg3, arg4, arg5);
+}
+
+export function DatabaseRestoreCommand(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['DatabaseRestoreCommand'](arg1, arg2, arg3, arg4);
 }
 
 export function DeleteServer(arg1) {
