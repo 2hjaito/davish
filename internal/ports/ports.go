@@ -86,7 +86,8 @@ func (l *Lister) List(ctx context.Context, serverID string) (List, error) {
 func parse(out []byte) (List, error) {
 	head, docker, _ := bytes.Cut(out, []byte(sep+"\n"))
 	sc := bufio.NewScanner(bytes.NewReader(head))
-	var list List
+	// Never null in JSON: an empty list is a list (the frontend iterates it).
+	list := List{Ports: []Port{}}
 	if sc.Scan() {
 		list.Root = strings.TrimSpace(sc.Text()) == "0"
 	}
@@ -113,6 +114,10 @@ var procRe = regexp.MustCompile(`\(\("([^"]+)",pid=(\d+)`)
 // LISTEN 0 511 0.0.0.0:80 0.0.0.0:* users:(("nginx",pid=12,fd=6))
 func parseSS(line string) (Port, bool) {
 	f := strings.Fields(line)
+	// Some ss versions print the Netid column ("tcp") even with -t alone.
+	if len(f) > 0 && (f[0] == "tcp" || f[0] == "tcp6") {
+		f = f[1:]
+	}
 	if len(f) < 5 || f[0] != "LISTEN" {
 		return Port{}, false
 	}

@@ -71,7 +71,7 @@
           `${p.port} ${p.addr} ${p.process ?? ''} ${p.container ?? ''}`.toLowerCase().includes(q)),
     )
   })
-  const current = $derived(data?.ports.find((p) => keyOf(p) === selected) ?? null)
+  const current = $derived(data?.ports?.find((p) => keyOf(p) === selected) ?? null)
   const tunnel = $derived(current ? tunnelOf(current) : undefined)
   const localAddr = $derived(tunnel ? `127.0.0.1:${tunnel.localPort}` : '')
 
@@ -80,7 +80,7 @@
       id: f,
       label: t.ports.filters[f],
       icon: icons[f],
-      count: data ? data.ports.filter((p) => keep(p, f)).length : undefined,
+      count: data ? (data.ports ?? []).filter((p) => keep(p, f)).length : undefined,
     })),
   )
 

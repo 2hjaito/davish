@@ -780,7 +780,7 @@ export const t = {
       ok: {
         title: 'Server trả lời bình thường',
         advice:
-          'Lỗi có thể chỉ xảy ra một lúc. Thử lại; nếu vẫn lỗi, Sao chép chi tiết và gửi cho người hỗ trợ.',
+          'Server chạy lệnh bình thường, nên chỗ kẹt nằm ở Davish chứ không phải server. Bấm Thử lại; nếu vẫn vậy, bấm Sao chép chi tiết và gửi cho người phát triển (có kèm log lỗi của app, không có mật khẩu).',
       },
       'no-connection': {
         title: 'Mất kết nối SSH',

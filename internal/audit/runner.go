@@ -66,7 +66,11 @@ func (r *Runner) RunInput(ctx context.Context, serverID, app, line string, stdin
 		return Result{}, err
 	}
 	start := time.Now()
-	res, err := run(ctx, client, line, stdin)
+	// Lines are written for sh. sshd hands them to the user's login shell,
+	// which may be zsh (no word splitting of $vars) or fish (other syntax
+	// altogether), so they run under sh whatever that shell is. The log
+	// keeps the line as written.
+	res, err := run(ctx, client, shellx.Cmd("sh", "-c", line).String(), stdin)
 	exit := res.Exit
 	if err != nil {
 		exit = -1
