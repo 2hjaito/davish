@@ -390,6 +390,15 @@ const en = {
     install: (cmd: string) => `Install dependencies (${cmd})`,
     installHint:
       'Opens Terminal in the repo with the command typed in; press Enter yourself to run it and watch the output.',
+    deploy: {
+      open: 'Deploy…',
+      title: 'Deploy',
+      body: (dir: string) =>
+        `One command per line, run in ${dir} in order; the first that fails stops the rest. Lines starting with # are skipped. The recipe is saved on this computer, never on the server.`,
+      next: 'Preview',
+      commandIntro: 'Opens a terminal with this command typed in; press Enter to deploy. Command:',
+      run: 'Deploy in Terminal',
+    },
     clone: {
       more: 'More',
       title: {
@@ -754,6 +763,7 @@ const en = {
           'Fetch, Pull (blocked when the repo is dirty), switch branch through a confirmation dialog',
           'Install dependencies from the lockfile in Terminal',
           'Clone a repository (SSH host key of GitHub/GitLab pinned), git init, set a remote: typed into a terminal',
+          'Deploy recipe per repository (saved on this computer), run step by step in a terminal',
           'Add folders to search for repos',
         ],
         keys: ['↑↓ in the commit history'],

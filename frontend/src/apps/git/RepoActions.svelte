@@ -8,6 +8,7 @@
   import Icon from '../../lib/ui/Icon.svelte'
   import { openSelected, openTerminalAt } from '../../lib/wm/intents.svelte'
   import { backend } from './backend'
+  import DeployDialog from './DeployDialog.svelte'
 
   interface Props {
     serverID: string
@@ -29,6 +30,7 @@
   let result = $state.raw<(OpResult & { op: GitOp }) | null>(null)
   let branches = $state.raw<Branch[] | null>(null)
   let picking = $state(false)
+  let deploying = $state(false)
 
   // Another repository starts with nothing pending or shown.
   $effect(() => {
@@ -131,7 +133,19 @@
       {t.git.install(status.install)}
     </button>
   {/if}
+  <button type="button" class="btn btn-primary" onclick={() => (deploying = true)}>
+    <Icon name="play" size={13} />
+    {t.git.deploy.open}
+  </button>
 </div>
+
+<DeployDialog
+  {serverID}
+  {dir}
+  install={status.install}
+  open={deploying}
+  onclose={() => (deploying = false)}
+/>
 
 {#if busy}<p class="muted">{t.git.running}</p>{/if}
 {#if blocked}
