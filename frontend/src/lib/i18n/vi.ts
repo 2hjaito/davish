@@ -390,6 +390,25 @@ const vi = {
     branchRemote: 'trên remote',
     install: (cmd: string) => `Cài dependency (${cmd})`,
     installHint: 'Mở Terminal tại repo với lệnh điền sẵn, bạn tự nhấn Enter để chạy và xem output.',
+    clone: {
+      more: 'Thêm',
+      title: { clone: 'Clone repo…', init: 'Repo mới (git init)…', remote: 'Đặt remote…' },
+      url: 'URL repo (SSH hoặc HTTPS)',
+      urlOptional: 'URL remote (không bắt buộc)',
+      dir: 'Thư mục trên server',
+      branch: 'Nhánh',
+      branchDefault: 'nhánh mặc định',
+      remote: 'Tên remote',
+      remoteHint: (dir: string) => `Trong ${dir}. Remote đã có thì đổi URL, chưa có thì thêm mới.`,
+      sshPinned: (host: string) =>
+        `SSH cần một key được ${host} chấp nhận, ví dụ deploy key. Host key ${host} công bố được thêm vào known_hosts trước nên ssh không hỏi tin hay không.`,
+      sshUnpinned: (host: string) =>
+        `SSH cần một key được ${host} chấp nhận, ví dụ deploy key. Lần đầu ssh hiện fingerprint của ${host}: so với fingerprint host công bố trước khi gõ yes.`,
+      next: 'Xem trước',
+      commandIntro:
+        'Mở Terminal với lệnh gõ sẵn; nhấn Enter để chạy. HTTPS có thể hỏi tên người dùng và token ở đó. Lệnh:',
+      open: 'Mở trong Terminal',
+    },
     deployKey: 'Tạo deploy key',
     deployKeyHint:
       'Server chưa có key được remote chấp nhận. Tạo deploy key trên server trong Khóa SSH, rồi thêm public key vào repo trên GitHub/GitLab.',
@@ -721,6 +740,7 @@ const vi = {
       git: {
         does: 'Repo trên server: nhánh, ahead/behind, file thay đổi, diff, biểu đồ commit.',
         actions: [
+          'Clone repo (ghim host key GitHub/GitLab), git init, đặt remote: gõ sẵn vào Terminal',
           'Fetch, Pull (chặn khi repo bẩn), đổi nhánh qua hộp xác nhận',
           'Cài dependency theo lockfile trong Terminal',
           'Thêm thư mục để tìm repo',

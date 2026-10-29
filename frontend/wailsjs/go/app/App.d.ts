@@ -133,9 +133,15 @@ export function GitDiff(arg1:string,arg2:git.DiffRequest):Promise<git.Diff>;
 
 export function GitFind(arg1:string,arg2:Array<string>):Promise<Array<git.Repo>>;
 
+export function GitInitCommand(arg1:string,arg2:string,arg3:string):Promise<string>;
+
 export function GitLog(arg1:string,arg2:string,arg3:number):Promise<Array<git.Commit>>;
 
 export function GitPlan(arg1:string,arg2:string,arg3:string,arg4:string):Promise<git.Plan>;
+
+export function GitPlanClone(arg1:git.CloneSpec):Promise<git.ClonePlan>;
+
+export function GitRemoteCommand(arg1:string,arg2:string,arg3:string):Promise<string>;
 
 export function GitRun(arg1:string,arg2:string,arg3:string,arg4:string,arg5:string):Promise<git.Result>;
 

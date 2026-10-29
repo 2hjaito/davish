@@ -226,12 +226,24 @@ export function GitFind(arg1, arg2) {
   return window['go']['app']['App']['GitFind'](arg1, arg2);
 }
 
+export function GitInitCommand(arg1, arg2, arg3) {
+  return window['go']['app']['App']['GitInitCommand'](arg1, arg2, arg3);
+}
+
 export function GitLog(arg1, arg2, arg3) {
   return window['go']['app']['App']['GitLog'](arg1, arg2, arg3);
 }
 
 export function GitPlan(arg1, arg2, arg3, arg4) {
   return window['go']['app']['App']['GitPlan'](arg1, arg2, arg3, arg4);
+}
+
+export function GitPlanClone(arg1) {
+  return window['go']['app']['App']['GitPlanClone'](arg1);
+}
+
+export function GitRemoteCommand(arg1, arg2, arg3) {
+  return window['go']['app']['App']['GitRemoteCommand'](arg1, arg2, arg3);
 }
 
 export function GitRun(arg1, arg2, arg3, arg4, arg5) {

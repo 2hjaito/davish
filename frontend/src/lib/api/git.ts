@@ -112,3 +112,29 @@ export const gitRun = (
   branch: string,
   command: string,
 ): Promise<OpResult> => App.GitRun(serverID, dir, op, branch, command)
+
+/** The clone form (internal/git.CloneSpec). */
+export interface CloneSpec {
+  url: string
+  /** Empty only reads the URL. */
+  dir: string
+  branch: string
+}
+
+export interface ClonePlan {
+  /** The clone line typed into a terminal; empty without a folder. */
+  command: string
+  ssh: boolean
+  host: string
+  /** The host's published SSH key is added to known_hosts first. */
+  pinned: boolean
+  name: string
+}
+
+export const gitPlanClone = (spec: CloneSpec): Promise<ClonePlan> => App.GitPlanClone(spec)
+
+export const gitInitCommand = (dir: string, remote: string, url: string): Promise<string> =>
+  App.GitInitCommand(dir, remote, url)
+
+export const gitRemoteCommand = (dir: string, remote: string, url: string): Promise<string> =>
+  App.GitRemoteCommand(dir, remote, url)
