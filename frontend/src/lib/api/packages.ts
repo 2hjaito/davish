@@ -61,3 +61,17 @@ export const packagesPlan = (manager: Manager, op: PackageOp, names: string[]): 
   App.PackagesPlan(manager, op, names)
 export const packagesCheckSecurity = (serverID: string): Promise<void> =>
   App.PackagesCheckSecurity(serverID)
+
+/** An install recipe (internal/packages.Recipe). */
+export interface Recipe {
+  id: string
+  label: string
+  /** ServerApp ids that show it is installed. */
+  apps: string[]
+  /** The whole script, shown before it runs. */
+  script: string
+  /** Runs the script; typed into a terminal. */
+  command: string
+}
+
+export const packagesRecipes = (): Promise<Recipe[]> => App.PackagesRecipes()

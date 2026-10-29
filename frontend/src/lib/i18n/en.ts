@@ -240,7 +240,7 @@ const en = {
   },
   packages: {
     sections: 'View',
-    filters: { apps: 'Programs', updates: 'Updates', installed: 'Installed' },
+    filters: { apps: 'Programs', recipes: 'Install', updates: 'Updates', installed: 'Installed' },
     search: 'Search packages',
     loading: 'Reading packages…',
     offline: 'Server not connected',
@@ -249,11 +249,19 @@ const en = {
     noMatch: 'No items match.',
     empty: {
       apps: 'No well-known program found on the server.',
+      recipes: 'No recipes.',
       updates: 'No updates available.',
       installed: 'No packages yet.',
     },
     count: (n: number) => `${n} ${n === 1 ? 'item' : 'items'}`,
     kinds: { runtime: 'Languages', server: 'Background services', tool: 'Tools' },
+    recipes: {
+      installed: (v: string) => `Installed: ${v}`,
+      notInstalled: 'Not installed',
+      body: 'This script finds apt, dnf or apk and installs with it. It runs in a terminal, as you; sudo asks for your password where root is needed. The whole script:',
+      install: 'Install in Terminal',
+      reinstall: 'Run again in Terminal',
+    },
     security: 'Security update',
     manager: (m: string) => `Package manager: ${m}`,
     listsNever: 'apt has never downloaded the package lists, so available updates are unknown.',
@@ -714,7 +722,10 @@ const en = {
       },
       packages: {
         does: 'Installed packages and updates (security fixes first), runtimes and programs on the server, global npm packages.',
-        actions: ['Install, upgrade, remove: the sudo command is typed into Terminal'],
+        actions: [
+          'Install, upgrade, remove: the sudo command is typed into Terminal',
+          'Install recipes (nginx, Docker, Node, PHP-FPM, databases, Redis, certbot, fail2ban, ufw), whole script shown',
+        ],
         keys: [],
         runs: ['dpkg-query, apt list, dnf/yum/apk (read only)', 'each program’s --version'],
       },

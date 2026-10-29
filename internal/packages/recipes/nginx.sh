@@ -1,0 +1,2 @@
+pkg nginx
+start nginx

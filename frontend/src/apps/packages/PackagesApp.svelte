@@ -19,9 +19,11 @@
   import type { AppProps } from '../types'
   import { backend } from './backend'
   import PackageInspector, { type Selected } from './PackageInspector.svelte'
+  import RecipeInspector from './RecipeInspector.svelte'
+  import type { Recipe } from '../../lib/api/packages'
 
-  type Filter = 'apps' | 'updates' | 'installed'
-  const FILTERS: Filter[] = ['apps', 'updates', 'installed']
+  type Filter = 'apps' | 'recipes' | 'updates' | 'installed'
+  const FILTERS: Filter[] = ['apps', 'recipes', 'updates', 'installed']
   /** Package lists older than this are worth fetching again. */
   const STALE_DAYS = 7
 
@@ -33,6 +35,8 @@
   let query = $state('')
   let inv = $state.raw<Inventory | null>(null)
   let apps = $state.raw<ServerApp[] | null>(null)
+  let recipes = $state.raw<Recipe[]>([])
+  void backend.recipes().then((r) => (recipes = r))
   let error = $state('')
   let loading = $state(false)
   let selected = $state<string | null>(null)
@@ -47,7 +51,8 @@
   const security = $derived(inv?.updates.filter((u) => u.security) ?? [])
   const listsDays = $derived(inv && inv.listsAge >= 0 ? Math.floor(inv.listsAge / 86400) : -1)
 
-  type Row = StatusItem & { sel: Selected; text: string }
+  type Sel = Selected | { kind: 'recipe'; recipe: Recipe; version: string }
+  type Row = StatusItem & { sel: Sel; text: string }
 
   const rows = $derived.by<Row[]>(() => {
     const updates = new Map((inv?.updates ?? []).map((u) => [u.name, u]))
@@ -61,6 +66,19 @@
         sel: { kind: 'app', app: a },
         text: `${a.label} ${a.id} ${a.path}`,
       }))
+    if (filter === 'recipes')
+      return recipes.map((r) => {
+        const version = (apps ?? []).find((a) => r.apps.includes(a.id))?.version ?? ''
+        const found = (apps ?? []).some((a) => r.apps.includes(a.id))
+        return {
+          key: `recipe:${r.id}`,
+          name: r.label,
+          health: found ? 'ok' : 'off',
+          note: found ? version || t.packages.noVersion : t.packages.recipes.notInstalled,
+          sel: { kind: 'recipe', recipe: r, version: found ? version || '?' : '' },
+          text: `${r.label} ${r.id}`,
+        }
+      })
     const pkgs = new Map((inv?.installed ?? []).map((p) => [p.name, p]))
     if (filter === 'updates')
       return [...updates.values()]
@@ -94,9 +112,16 @@
     FILTERS.map((f) => ({
       id: f,
       label: t.packages.filters[f],
-      icon: f === 'apps' ? 'grid' : f === 'updates' ? 'download' : 'package',
+      icon:
+        f === 'apps' ? 'grid' : f === 'recipes' ? 'plus' : f === 'updates' ? 'download' : 'package',
       count:
-        f === 'apps' ? apps?.length : f === 'updates' ? inv?.updates.length : inv?.installed.length,
+        f === 'apps'
+          ? apps?.length
+          : f === 'recipes'
+            ? recipes.length
+            : f === 'updates'
+              ? inv?.updates.length
+              : inv?.installed.length,
       alert: f === 'updates' && security.length > 0,
     })),
   )
@@ -217,7 +242,9 @@
     />
   {/snippet}
   {#snippet detail()}
-    {#if current}
+    {#if current?.kind === 'recipe'}
+      <RecipeInspector serverID={win.serverID} recipe={current.recipe} version={current.version} />
+    {:else if current}
       <PackageInspector
         serverID={win.serverID}
         sel={current}

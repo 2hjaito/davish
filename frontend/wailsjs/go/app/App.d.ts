@@ -248,6 +248,8 @@ export function PackagesNpmGlobals(arg1:string):Promise<Array<packages.NpmGlobal
 
 export function PackagesPlan(arg1:string,arg2:string,arg3:Array<string>):Promise<string>;
 
+export function PackagesRecipes():Promise<Array<packages.Recipe>>;
+
 export function PortsList(arg1:string):Promise<ports.List>;
 
 export function PortsProbe(arg1:string,arg2:string,arg3:number,arg4:string):Promise<string>;

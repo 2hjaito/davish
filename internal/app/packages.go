@@ -27,3 +27,8 @@ func (a *App) PackagesPlan(manager, op string, names []string) (string, error) {
 func (a *App) PackagesCheckSecurity(serverID string) error {
 	return a.packages.CheckSecurity(a.ctx, serverID)
 }
+
+// PackagesRecipes returns the install recipes, each with its whole script.
+func (a *App) PackagesRecipes() []packages.Recipe {
+	return packages.Recipes()
+}

@@ -2117,6 +2117,26 @@ export namespace packages {
 	    }
 	}
 	
+	export class Recipe {
+	    id: string;
+	    label: string;
+	    apps: string[];
+	    script: string;
+	    command: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Recipe(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.label = source["label"];
+	        this.apps = source["apps"];
+	        this.script = source["script"];
+	        this.command = source["command"];
+	    }
+	}
 
 }
 

@@ -4,9 +4,10 @@ import {
   packagesInventory,
   packagesNpmGlobals,
   packagesPlan,
+  packagesRecipes,
 } from '../../lib/api/packages'
 import { hasRuntime } from '../../lib/api/runtime'
-import { mockApps, mockInventory, mockNpmGlobals, mockPlan } from './mock'
+import { mockApps, mockInventory, mockNpmGlobals, mockPlan, mockRecipes } from './mock'
 
 export const backend = hasRuntime
   ? {
@@ -14,10 +15,12 @@ export const backend = hasRuntime
       apps: packagesApps,
       npmGlobals: packagesNpmGlobals,
       plan: packagesPlan,
+      recipes: packagesRecipes,
     }
   : {
       inventory: (_serverID: string) => mockInventory(),
       apps: (_serverID: string) => mockApps(),
       npmGlobals: (_serverID: string) => mockNpmGlobals(),
       plan: mockPlan,
+      recipes: mockRecipes,
     }

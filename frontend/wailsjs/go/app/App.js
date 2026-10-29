@@ -454,6 +454,10 @@ export function PackagesPlan(arg1, arg2, arg3) {
   return window['go']['app']['App']['PackagesPlan'](arg1, arg2, arg3);
 }
 
+export function PackagesRecipes() {
+  return window['go']['app']['App']['PackagesRecipes']();
+}
+
 export function PortsList(arg1) {
   return window['go']['app']['App']['PortsList'](arg1);
 }

@@ -243,7 +243,12 @@ const vi = {
   },
   packages: {
     sections: 'Xem',
-    filters: { apps: 'Ứng dụng', updates: 'Có bản cập nhật', installed: 'Đã cài' },
+    filters: {
+      apps: 'Ứng dụng',
+      recipes: 'Cài thêm',
+      updates: 'Có bản cập nhật',
+      installed: 'Đã cài',
+    },
     search: 'Tìm gói',
     loading: 'Đang đọc gói…',
     offline: 'Server chưa kết nối',
@@ -251,12 +256,20 @@ const vi = {
     noSelection: 'Chọn một mục để xem',
     noMatch: 'Không có mục nào khớp.',
     empty: {
+      recipes: 'Không có công thức nào.',
       apps: 'Không thấy chương trình quen thuộc nào trên server.',
       updates: 'Không có bản cập nhật nào.',
       installed: 'Chưa có gói nào.',
     },
     count: (n: number) => `${n} mục`,
     kinds: { runtime: 'Ngôn ngữ', server: 'Dịch vụ nền', tool: 'Công cụ' },
+    recipes: {
+      installed: (v: string) => `Đã cài: ${v}`,
+      notInstalled: 'Chưa cài',
+      body: 'Script này tìm apt, dnf hoặc apk rồi cài bằng nó. Script chạy trong Terminal bằng user của bạn; sudo hỏi mật khẩu ở chỗ cần root. Toàn bộ script:',
+      install: 'Cài trong Terminal',
+      reinstall: 'Chạy lại trong Terminal',
+    },
     security: 'Bản vá bảo mật',
     manager: (m: string) => `Trình quản lý gói: ${m}`,
     listsNever: 'apt chưa từng tải danh sách gói, nên chưa biết có bản cập nhật nào.',
@@ -703,7 +716,10 @@ const vi = {
       },
       packages: {
         does: 'Gói đã cài và có bản cập nhật (bản vá bảo mật lên đầu), runtime và chương trình trên server, gói npm global.',
-        actions: ['Cài, nâng cấp, gỡ: gõ sẵn lệnh sudo vào Terminal'],
+        actions: [
+          'Cài, nâng cấp, gỡ: gõ sẵn lệnh sudo vào Terminal',
+          'Công thức cài (nginx, Docker, Node, PHP-FPM, database, Redis, certbot, fail2ban, ufw), hiện toàn bộ script',
+        ],
         keys: [],
         runs: [
           'dpkg-query, apt list, dnf/yum/apk (chỉ đọc)',

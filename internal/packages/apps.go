@@ -51,6 +51,8 @@ var programs = []known{
 	{"ruby", "Ruby", KindRuntime, "ruby", "-v", nil, nil},
 	{"git", "Git", KindTool, "git", "--version", nil, nil},
 	{"certbot", "Certbot", KindTool, "certbot", "--version", []string{"/etc/letsencrypt/cli.ini"}, []string{"certbot.timer"}},
+	{"fail2ban", "fail2ban", KindTool, "fail2ban-client", "--version", []string{"/etc/fail2ban/jail.local"}, []string{"fail2ban.service"}},
+	{"ufw", "ufw", KindTool, "ufw", "--version", []string{"/etc/ufw/ufw.conf"}, nil},
 }
 
 // App is a program found on the server.

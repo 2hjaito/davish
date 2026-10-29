@@ -1,5 +1,12 @@
 // Demo data for the plain browser preview (vite dev), where there is no Go side.
-import type { Inventory, Manager, NpmGlobal, PackageOp, ServerApp } from '../../lib/api/packages'
+import type {
+  Recipe,
+  Inventory,
+  Manager,
+  NpmGlobal,
+  PackageOp,
+  ServerApp,
+} from '../../lib/api/packages'
 
 const delay = <T>(v: T, ms = 200) => new Promise<T>((r) => setTimeout(() => r(v), ms))
 
@@ -188,4 +195,24 @@ export function mockPlan(_m: Manager, op: PackageOp, names: string[]): Promise<s
     refresh: 'sudo apt-get update',
   }
   return delay(cmd[op], 50)
+}
+
+export function mockRecipes(): Promise<Recipe[]> {
+  const prelude =
+    '# Davish install recipe. Runs as you; sudo is asked only where needed.\nset -e\n…\n'
+  return Promise.resolve(
+    [
+      ['nginx', 'nginx', ['nginx'], 'pkg nginx\nstart nginx'],
+      ['docker', 'Docker Engine', ['docker'], 'pkg docker.io\nstart docker'],
+      ['node', 'Node.js (nvm)', ['node'], 'nvm install --lts'],
+      ['redis', 'Redis', ['redis'], 'pkg redis-server'],
+      ['ufw', 'ufw', ['ufw'], 'pkg ufw'],
+    ].map(([id, label, apps, body]) => ({
+      id: id as string,
+      label: label as string,
+      apps: apps as string[],
+      script: prelude + (body as string),
+      command: `sh -c '${prelude}${body as string}'`,
+    })),
+  )
 }

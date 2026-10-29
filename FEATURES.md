@@ -77,6 +77,8 @@ What apt, dnf, yum or apk installed and can upgrade, security fixes first, with 
   <td><img src="assets/screenshots/packages-apps.jpg" alt="Programs found on the server"></td>
 </tr></table>
 
+**Install** lists recipes for nginx, Docker Engine, Node.js (nvm), PHP-FPM, MariaDB, PostgreSQL, Redis, Certbot, fail2ban and ufw, with the version already installed. Each one is a script that finds apt, dnf or apk; the whole script shows before it runs in a terminal. ufw is installed but left off, so SSH is never locked out.
+
 ## Deploy an app
 
 From Launchpad or Spotlight: a wizard from a git repository, a Docker image or a folder already on the server, run as a systemd service (the unit file is generated from a form), with docker compose, as a container or as static files, behind an nginx site on your domains with a Let's Encrypt certificate. Every file and command shows before anything runs; then it all runs step by step in a terminal and stops at the first step that fails. The last page lists what was made and gives one command that removes it all, to start over.
