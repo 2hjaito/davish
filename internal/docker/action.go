@@ -13,6 +13,8 @@ const (
 	ActionStart   = "start"
 	ActionStop    = "stop"
 	ActionRestart = "restart"
+	// ActionRemove deletes a stopped container; docker refuses a running one.
+	ActionRemove = "rm"
 )
 
 // Plan is what the UI shows before acting on a container.
@@ -45,7 +47,7 @@ func PlanAction(name, action string) (Plan, error) {
 		return Plan{}, err
 	}
 	switch action {
-	case ActionStart, ActionStop, ActionRestart:
+	case ActionStart, ActionStop, ActionRestart, ActionRemove:
 	default:
 		return Plan{}, apperr.New(apperr.InvalidInput, "unknown action")
 	}

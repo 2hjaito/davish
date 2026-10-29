@@ -7,10 +7,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"davish/internal/apperr"
 	"davish/internal/audit"
@@ -37,6 +39,30 @@ type Container struct {
 	Ports   string `json:"ports"`
 	Command string `json:"command"`
 	Created string `json:"created"`
+	// RunningFor is docker's "6 days ago": since it was created.
+	RunningFor string `json:"runningFor"`
+	// Project and Service come from docker compose's labels, empty for a
+	// container started by hand.
+	Project string `json:"project,omitempty"`
+	Service string `json:"service,omitempty"`
+}
+
+// readTimeout bounds a read: a hung docker daemon must not leave the app
+// waiting for ever. Volumes need longer, docker system df -v adds up sizes.
+const (
+	readTimeout   = 30 * time.Second
+	volumeTimeout = 90 * time.Second
+)
+
+// read runs a command that only reads, within limit.
+func (s *Service) read(ctx context.Context, serverID string, cmd shellx.Command, limit time.Duration) (audit.Result, error) {
+	ctx, cancel := context.WithTimeout(ctx, limit)
+	defer cancel()
+	res, err := s.run.Run(ctx, serverID, app, cmd)
+	if errors.Is(err, context.DeadlineExceeded) {
+		return res, apperr.New(apperr.CmdTimeout, "docker did not answer in time")
+	}
+	return res, err
 }
 
 // Service talks to the docker CLI on each server.
@@ -51,7 +77,7 @@ func New(run Runner) *Service {
 
 // List returns every container, running or not, sorted by name.
 func (s *Service) List(ctx context.Context, serverID string) ([]Container, error) {
-	res, err := s.run.Run(ctx, serverID, app, shellx.Cmd("docker", "ps", "-a", "--no-trunc", "--format", "{{json .}}"))
+	res, err := s.read(ctx, serverID, shellx.Cmd("docker", "ps", "-a", "--no-trunc", "--format", "{{json .}}"), readTimeout)
 	if err != nil {
 		return nil, err
 	}
@@ -65,20 +91,23 @@ func parsePS(out []byte) ([]Container, error) {
 	var list []Container
 	err := eachJSON(out, func(line []byte) error {
 		var r struct {
-			ID, Names, Image, State, Status, Ports, Command, CreatedAt string
+			ID, Names, Image, State, Status, Ports, Command, CreatedAt, RunningFor, Labels string
 		}
 		if err := json.Unmarshal(line, &r); err != nil {
 			return err
 		}
 		list = append(list, Container{
-			ID:      r.ID,
-			Name:    strings.Split(r.Names, ",")[0],
-			Image:   r.Image,
-			State:   r.State,
-			Status:  r.Status,
-			Ports:   r.Ports,
-			Command: strings.Trim(r.Command, `"`),
-			Created: r.CreatedAt,
+			ID:         r.ID,
+			Name:       strings.Split(r.Names, ",")[0],
+			Image:      r.Image,
+			State:      r.State,
+			Status:     r.Status,
+			Ports:      r.Ports,
+			Command:    strings.Trim(r.Command, `"`),
+			Created:    r.CreatedAt,
+			RunningFor: r.RunningFor,
+			Project:    label(r.Labels, "com.docker.compose.project"),
+			Service:    label(r.Labels, "com.docker.compose.service"),
 		})
 		return nil
 	})
@@ -87,6 +116,16 @@ func parsePS(out []byte) ([]Container, error) {
 	}
 	sort.Slice(list, func(i, j int) bool { return list[i].Name < list[j].Name })
 	return list, nil
+}
+
+// label reads key from docker's "k=v,k=v" label list.
+func label(labels, key string) string {
+	for kv := range strings.SplitSeq(labels, ",") {
+		if v, ok := strings.CutPrefix(kv, key+"="); ok {
+			return v
+		}
+	}
+	return ""
 }
 
 // eachJSON calls fn for every non-empty line of out.
@@ -118,7 +157,7 @@ type Stats struct {
 // second sample to compute CPU, so this takes about two seconds; the UI
 // asks for it apart from List.
 func (s *Service) Stats(ctx context.Context, serverID string) ([]Stats, error) {
-	res, err := s.run.Run(ctx, serverID, app, shellx.Cmd("docker", "stats", "--no-stream", "--no-trunc", "--format", "{{json .}}"))
+	res, err := s.read(ctx, serverID, shellx.Cmd("docker", "stats", "--no-stream", "--no-trunc", "--format", "{{json .}}"), readTimeout)
 	if err != nil {
 		return nil, err
 	}

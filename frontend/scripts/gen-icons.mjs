@@ -58,6 +58,7 @@ const ICONS = {
   list: 'FiList',
   info: 'FiInfo',
   help: 'FiHelpCircle',
+  more: 'FiMoreVertical',
   pause: 'FiPause',
   memory: 'LuMemoryStick',
   gpu: 'LuGpu',

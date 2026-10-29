@@ -27,6 +27,7 @@ const (
 	CmdNeedsRoot         Code = "CMD_NEEDS_ROOT"
 	CmdMissing           Code = "CMD_MISSING"
 	CmdFailed            Code = "CMD_FAILED"
+	CmdTimeout           Code = "CMD_TIMEOUT"
 	DockerDown           Code = "DOCKER_DOWN"
 	InvalidInput         Code = "INVALID_INPUT"
 	NotFound             Code = "NOT_FOUND"

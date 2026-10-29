@@ -36,7 +36,8 @@
     /** What to show until ready (offline, loading). */
     placeholder: Snippet
     list: Snippet
-    detail: Snippet
+    /** Beside the list; without it the list takes the whole width (Docker's tables). */
+    detail?: Snippet
     /** Buttons of the app before search, such as "add". */
     actions?: Snippet
     /** Under the list: a count, or an error. */
@@ -127,12 +128,12 @@
       {@render placeholder()}
     {:else}
       <div class="split">
-        <div class="list" style:width={listWidth}>
+        <div class="list" class:full={!detail} style:width={detail ? listWidth : undefined}>
           {#if error}<p class="error"><Icon name="warning" size={13} /> {error}</p>{/if}
           {@render list()}
-          <p class="footer">{footer}</p>
+          {#if footer}<p class="footer">{footer}</p>{/if}
         </div>
-        <div class="detail">{@render detail()}</div>
+        {#if detail}<div class="detail">{@render detail()}</div>{/if}
       </div>
     {/if}
   </div>
@@ -318,6 +319,12 @@
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--divider-soft);
+  }
+
+  .list.full {
+    flex: 1;
+    min-width: 0;
+    border-right: 0;
   }
 
   .detail {

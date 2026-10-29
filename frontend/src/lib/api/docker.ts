@@ -1,7 +1,8 @@
 // Typed wrappers for the Docker bindings (internal/app/docker.go).
 import * as App from '../../../wailsjs/go/app/App'
 
-export type ContainerAction = 'start' | 'stop' | 'restart'
+/** rm deletes a stopped container. */
+export type ContainerAction = 'start' | 'stop' | 'restart' | 'rm'
 
 /** One row of docker ps -a. */
 export interface Container {
@@ -15,6 +16,11 @@ export interface Container {
   ports: string
   command: string
   created: string
+  /** Docker's "6 days ago", in English. */
+  runningFor: string
+  /** docker compose project and service, when started by compose. */
+  project?: string
+  service?: string
 }
 
 export interface ContainerStats {
@@ -133,3 +139,30 @@ export const dockerImage = (serverID: string, ref: string): Promise<ImageDetail>
 export const dockerPlanImage = (ref: string): Promise<ImagePlan> => App.DockerPlanImage(ref)
 export const dockerRemoveImage = (serverID: string, ref: string, command: string): Promise<void> =>
   App.DockerRemoveImage(serverID, ref, command)
+
+/** One docker volume. */
+export interface Volume {
+  name: string
+  driver: string
+  mountpoint: string
+  created: string
+  /** -1 when docker cannot tell. */
+  size: number
+  containers: number
+  /** Named by docker with a hash, for one container. */
+  anonymous: boolean
+  project?: string
+}
+
+export interface VolumePlan {
+  name: string
+  command: string
+}
+
+export const dockerVolumes = (serverID: string): Promise<Volume[]> => App.DockerVolumes(serverID)
+export const dockerPlanVolume = (name: string): Promise<VolumePlan> => App.DockerPlanVolume(name)
+export const dockerRemoveVolume = (
+  serverID: string,
+  name: string,
+  command: string,
+): Promise<void> => App.DockerRemoveVolume(serverID, name, command)

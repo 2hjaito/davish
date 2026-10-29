@@ -37,7 +37,7 @@ func (s *Service) Inspect(ctx context.Context, serverID, name string) (Detail, e
 	if err := CheckName(name); err != nil {
 		return Detail{}, err
 	}
-	res, err := s.run.Run(ctx, serverID, app, shellx.Cmd("docker", "inspect", "--type", "container", name))
+	res, err := s.read(ctx, serverID, shellx.Cmd("docker", "inspect", "--type", "container", name), readTimeout)
 	if err != nil {
 		return Detail{}, err
 	}
@@ -135,7 +135,7 @@ func (s *Service) Logs(ctx context.Context, serverID, name string) (Logs, error)
 		return Logs{}, err
 	}
 	cmd := shellx.Cmd("docker", "logs", "--tail", strconv.Itoa(LogLines), "--timestamps", name)
-	res, err := s.run.Run(ctx, serverID, app, cmd)
+	res, err := s.read(ctx, serverID, cmd, readTimeout)
 	if err != nil {
 		return Logs{}, err
 	}

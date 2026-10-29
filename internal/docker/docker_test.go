@@ -138,7 +138,7 @@ func TestPlanAction(t *testing.T) {
 		t.Error("start asks for confirmation")
 	}
 	for _, bad := range [][2]string{
-		{"-v", "start"}, {"a b", "stop"}, {"$(id)", "stop"}, {"", "stop"}, {"web", "rm"}, {"web", "kill"},
+		{"-v", "start"}, {"a b", "stop"}, {"$(id)", "stop"}, {"", "stop"}, {"web", "kill"},
 	} {
 		if _, err := PlanAction(bad[0], bad[1]); err == nil {
 			t.Errorf("PlanAction(%q, %q) accepted", bad[0], bad[1])

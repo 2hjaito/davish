@@ -7,6 +7,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [1.1.0] - 2026-10-28
 
 ### Thêm
+- Docker làm lại theo kiểu Docker Desktop: bảng container (ID, image, cổng, CPU, RAM, trạng thái) gom theo project compose, thẻ CPU/RAM tổng, nút khởi động/dừng, menu ⋮ (log, shell trong container, khởi động lại, chi tiết) và xóa container ngay trên dòng; cổng publish bấm để mở trong Trình duyệt của Davish. Bảng image có thanh dung lượng; mục Volume mới (dung lượng, container đang dùng, xóa volume không dùng).
 - Tự cập nhật (ADR 0009): Davish tự kiểm tra GitHub Releases lúc mở và mỗi 6 giờ (tắt được trong Cài đặt), báo bản mới kèm nhật ký thay đổi với Cập nhật / Để sau / Bỏ qua bản này. Cập nhật tải đúng file của máy, kiểm chữ ký ed25519 và SHA-256, thay bản đang chạy rồi khởi động lại; không phải gỡ và cài lại. "Kiểm tra bản cập nhật…" trong menu hệ thống và Trợ giúp.
 - Chuột phải icon trên Dock như macOS: Mở/Hiện, Giữ trên Dock (bỏ chọn thì app rời Dock, app đang mở thì ở lại tới khi đóng), Đóng.
 - Docker: mục Image (tất cả, không dùng) với số container đang dùng; chi tiết image gồm các layer kèm dung lượng, nền tảng, entrypoint/cmd, cổng mở, biến môi trường; chạy image trong Terminal, xóa image qua xác nhận hiện đúng lệnh `docker rmi` (không `-f`).
@@ -34,6 +35,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 - Mở, đóng, thu nhỏ và khôi phục cửa sổ bằng hiệu ứng Genie như macOS: cửa sổ chảy ra từ icon của app trên Dock và chảy về đó.
 
 ### Sửa
+- Cổng và Docker không còn chờ mãi khi server không trả lời (ví dụ Docker daemon bị treo): mỗi lần đọc có giới hạn thời gian và báo rõ khi quá hạn.
 - Logs: nhãn trên toolbar không còn xuống dòng; cửa sổ hẹp thì ô nguồn và ô lọc co lại, hẹp hơn nữa thì toolbar xuống hàng thay vì che mất nút.
 - Logs: journal của một dịch vụ im lặng 5 giây thì giải thích lý do thường gặp (dịch vụ không ghi journal, hoặc tài khoản SSH không được đọc journal hệ thống) và đưa lệnh `sudo journalctl …` để chạy trong Terminal, thay vì chờ mãi.
 - Thông báo: đường dẫn dài (ví dụ đường dẫn chứng chỉ TLS) xuống dòng trong banner và bảng Thông báo thay vì tràn ra ngoài và đẩy nút đóng đi.

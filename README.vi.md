@@ -42,7 +42,7 @@ Không cài gì lên server.
 **Dịch vụ và ứng dụng**
 
 - [Services](FEATURES.vi.md#services): dịch vụ systemd, trạng thái, journal
-- [Docker](FEATURES.vi.md#docker): container, image và các layer
+- [Docker](FEATURES.vi.md#docker): container theo project compose, image và layer, volume
 - [Cron](FEATURES.vi.md#cron): lịch nói bằng lời
 - [Nginx](FEATURES.vi.md#nginx): site, `nginx -t` trước khi reload, hạn TLS
 - [Gói](FEATURES.vi.md#gói): bản cập nhật, bản vá bảo mật lên đầu, runtime
