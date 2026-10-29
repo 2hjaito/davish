@@ -17,4 +17,5 @@ const (
 	AuditEntry        = "audit:entry"
 	LockState         = "lock:state"
 	TunnelChanged     = "tunnel:changed"
+	UpdateProgress    = "update:progress"
 )

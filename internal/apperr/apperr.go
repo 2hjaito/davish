@@ -42,6 +42,10 @@ const (
 	GitNotFastForward    Code = "GIT_NOT_FAST_FORWARD"
 	GitNoUpstream        Code = "GIT_NO_UPSTREAM"
 	GitRemoteFailed      Code = "GIT_REMOTE_FAILED"
+	UpdateUnavailable    Code = "UPDATE_UNAVAILABLE"
+	UpdateUnsigned       Code = "UPDATE_UNSIGNED"
+	UpdateBadSignature   Code = "UPDATE_BAD_SIGNATURE"
+	UpdateNoWrite        Code = "UPDATE_NO_WRITE"
 )
 
 // Error is the only error type allowed to cross into the frontend.

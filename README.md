@@ -26,6 +26,7 @@ Nothing to install on the server.
 - **Secrets stay in your keychain.** Passwords and passphrases live only in the OS keychain. Davish never stores or types a `sudo` password: when root is needed, it opens a terminal with the command typed in and lets you press Enter.
 - **Locks when you step away.** A lock password of its own, Touch ID on macOS; it locks when the machine wakes, after idle time or with `⌘L`. Sessions keep running behind the lock, but nothing reaches a server until you unlock.
 - **Many servers, one desktop.** Each server is a workspace (`⌘1`…`⌘9`) that remembers its own windows. Copy files between servers by dragging them.
+- **Updates itself.** A new version shows its changes with Update, Later and Skip this version; Davish downloads it, checks its signature and restarts into it. No reinstalling.
 - **Your `~/.ssh/config` works.** Import its hosts in one go, keys and `ProxyJump` included; Davish only reads the file. Servers behind a bastion connect through it, each hop with its own host key check, and the whole chain reconnects on its own.
 
 ## Features
@@ -61,6 +62,7 @@ Nothing to install on the server.
 - [Spotlight & Launchpad](FEATURES.md#spotlight--launchpad): open anything with `⌘K`
 - [Menu bar and help](FEATURES.md#menu-bar-and-help): every command and shortcut, a `?` on each app
 - [App lock](FEATURES.md#app-lock): Touch ID or a password, locks on wake
+- [Updates](FEATURES.md#updates): one click to a new version, signature checked
 
 <table>
   <tr>

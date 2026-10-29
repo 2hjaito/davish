@@ -2203,3 +2203,62 @@ export namespace transfer {
 
 }
 
+export namespace update {
+	
+	export class Release {
+	    version: string;
+	    notes: string;
+	    url: string;
+	    signed: boolean;
+	    size: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Release(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.version = source["version"];
+	        this.notes = source["notes"];
+	        this.url = source["url"];
+	        this.signed = source["signed"];
+	        this.size = source["size"];
+	    }
+	}
+	export class Status {
+	    current: string;
+	    latest?: Release;
+	    available: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Status(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.current = source["current"];
+	        this.latest = this.convertValues(source["latest"], Release);
+	        this.available = source["available"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+

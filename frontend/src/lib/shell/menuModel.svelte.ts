@@ -4,6 +4,7 @@ import { t } from '../i18n/vi'
 import { appLock } from '../stores/lock.svelte'
 import { servers } from '../stores/servers.svelte'
 import { ui } from '../stores/ui.svelte'
+import { updates } from '../stores/updates.svelte'
 import { openAudit, openTerminalAt, openTransfers } from '../wm/intents.svelte'
 import { wm } from '../wm/windowManager.svelte'
 import { appMenus, type Menu, type MenuEntry } from './menus.svelte'
@@ -171,6 +172,7 @@ export function buildMenus(): Menu[] {
         { label: m.tour, run: () => (ui.tour = true) },
         { label: m.shortcuts, combo: '/', run: () => (ui.help = { kind: 'shortcuts' }) },
         null,
+        { label: t.update.check, run: () => void updates.check(true) },
         { label: m.about, run: () => (ui.help = { kind: 'about' }) },
         { label: m.changelog, run: () => (ui.help = { kind: 'about' }) },
       ],

@@ -13,6 +13,8 @@
   } from '../../lib/stores/settings.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
+  import { hasRuntime } from '../../lib/api/runtime'
+  import { updates } from '../../lib/stores/updates.svelte'
   import type { AppProps } from '../types'
 
   let { win }: AppProps = $props()
@@ -344,6 +346,30 @@
         >
       {/each}
     </div>
+  </div>
+
+  <h2 class="section">{t.settings.updates}</h2>
+
+  <label class="row">
+    <span>
+      <strong>{t.settings.autoUpdate}</strong>
+      <small>{t.settings.autoUpdateHint}</small>
+    </span>
+    <input
+      type="checkbox"
+      class="switch"
+      role="switch"
+      checked={settings.autoUpdate}
+      onchange={(e) => settings.set('autoUpdate', e.currentTarget.checked)}
+    />
+  </label>
+  <div class="row">
+    <span>
+      <strong>{t.settings.version(__APP_VERSION__)}</strong>
+    </span>
+    <button class="btn" disabled={!hasRuntime} onclick={() => void updates.check(true)}
+      >{t.settings.checkNow}</button
+    >
   </div>
 </div>
 

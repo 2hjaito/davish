@@ -40,6 +40,8 @@
   import ImportDialog from './ImportDialog.svelte'
   import HelpDialog from './HelpDialog.svelte'
   import Tour from './Tour.svelte'
+  import UpdateDialog from './UpdateDialog.svelte'
+  import { updates } from '../stores/updates.svelte'
   import SleepScreen from './SleepScreen.svelte'
   import { fadeOut } from '../motion'
   import { hasPrimaryModifier, isMac } from './platform'
@@ -131,6 +133,7 @@
   })
 
   $effect(() => audit.init())
+  $effect(() => updates.init())
 
   // Settings that reach outside the frontend's own components: the mono
   // font of every view, and the thresholds sysmon notifies at.
@@ -298,6 +301,11 @@
       apps={dockTiles}
       isOpen={(id) => wm.isOpen(id, serverID)}
       onlaunch={launchTile}
+      onclose={(id) =>
+        wm
+          .visible(serverID)
+          .filter((w) => w.appId === id)
+          .forEach((w) => wm.close(w.id))}
       bind:height={dockHeight}
     />
   {/if}
@@ -307,6 +315,7 @@
   <ImportDialog />
   <HelpDialog />
   <Tour />
+  <UpdateDialog />
   {#if isDemo}
     <div class="demo glass glass-strong" role="status">
       <span>{t.demo.banner}</span>

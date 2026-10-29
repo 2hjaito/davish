@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	goruntime "runtime"
 	"sync/atomic"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -30,6 +31,7 @@ import (
 	"davish/internal/sysmon"
 	"davish/internal/term"
 	"davish/internal/transfer"
+	"davish/internal/update"
 )
 
 // App is bound to the frontend; every exported method becomes a binding.
@@ -62,10 +64,11 @@ type App struct {
 	browser   *ports.Browser
 	disk      *disk.Service
 	security  *security.Service
+	updates   *update.Service
 }
 
 // New wires the services with their config under os.UserConfigDir()/davish.
-func New() (*App, error) {
+func New(version string) (*App, error) {
 	dir, err := store.DefaultDir()
 	if err != nil {
 		return nil, err
@@ -93,6 +96,9 @@ func New() (*App, error) {
 	a.keys = sshkeys.New(a.conns, runner)
 	a.packages = packages.New(runner, emitter{a})
 	a.git = git.New(runner)
+	// The app replaced by the last update is no longer needed.
+	update.Cleanup(goruntime.GOOS, os.Executable)
+	a.updates = update.New(version, emitter{a}, log, update.Options{})
 	a.ports = ports.NewLister(runner)
 	a.disk = disk.New(runner)
 	a.security = security.New(runner)
