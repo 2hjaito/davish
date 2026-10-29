@@ -342,6 +342,10 @@ export function NginxPlanRemove(arg1, arg2, arg3) {
   return window['go']['app']['App']['NginxPlanRemove'](arg1, arg2, arg3);
 }
 
+export function NginxPlanSSL(arg1, arg2, arg3) {
+  return window['go']['app']['App']['NginxPlanSSL'](arg1, arg2, arg3);
+}
+
 export function NginxPlanToggle(arg1, arg2, arg3) {
   return window['go']['app']['App']['NginxPlanToggle'](arg1, arg2, arg3);
 }

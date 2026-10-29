@@ -1425,6 +1425,24 @@ export namespace nginx {
 		    return a;
 		}
 	}
+	export class DNSCheck {
+	    name: string;
+	    ips: string[];
+	    ok: boolean;
+	    error?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new DNSCheck(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.ips = source["ips"];
+	        this.ok = source["ok"];
+	        this.error = source["error"];
+	    }
+	}
 	
 	export class NewSite {
 	    names: string[];
@@ -1509,6 +1527,46 @@ export namespace nginx {
 	        this.command = source["command"];
 	        this.sudo = source["sudo"];
 	    }
+	}
+	export class SSLPlan {
+	    names: string[];
+	    skipped: string[];
+	    serverIPs: string[];
+	    dns: DNSCheck[];
+	    redirect: boolean;
+	    sudo: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SSLPlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.names = source["names"];
+	        this.skipped = source["skipped"];
+	        this.serverIPs = source["serverIPs"];
+	        this.dns = this.convertValues(source["dns"], DNSCheck);
+	        this.redirect = source["redirect"];
+	        this.sudo = source["sudo"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class Server {
 	    names: string[];

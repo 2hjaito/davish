@@ -26,6 +26,7 @@
   import { backend } from './backend'
   import ResultDialog from './ResultDialog.svelte'
   import NewSiteDialog from './NewSiteDialog.svelte'
+  import SSLDialog from './SSLDialog.svelte'
   import RemoveDialog from './RemoveDialog.svelte'
   import SiteInspector from './SiteInspector.svelte'
   import { type Filter, FILTERS, mainName, matches, siteKey, visible, worstCert } from './sites'
@@ -45,6 +46,7 @@
   let toggling = $state.raw<TogglePlan | null>(null)
   let removing = $state.raw<RemovePlan | null>(null)
   let creating = $state(false)
+  let sslNames = $state.raw<string[] | null>(null)
   /** The server refused the link change: its sudo form. */
   let toggleSudo = $state('')
   let flash = $state('')
@@ -287,6 +289,7 @@
         ontoggle={(s) => void askToggle(s)}
         onremove={(s) => void askRemove(s)}
         onreload={() => void askReload()}
+        onssl={(s) => (sslNames = [...new Set(s.servers.flatMap((b) => b.names))])}
       />
     {:else}
       <Empty icon="globe2" title={t.nginx.noSelection} />
@@ -324,6 +327,7 @@
     void refresh()
   }}
 />
+<SSLDialog serverID={win.serverID} names={sslNames} onclose={() => (sslNames = null)} />
 <ResultDialog serverID={win.serverID} {result} onclose={() => (result = null)} />
 <RemoveDialog
   plan={removing}

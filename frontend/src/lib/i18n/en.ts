@@ -642,6 +642,7 @@ const en = {
           'Test the config (nginx -t)',
           'Delete a site, with certificates only it uses',
           'New site: reverse proxy, static or PHP-FPM, with a config preview',
+          'Turn on HTTPS: checks DNS, then types certbot --nginx into a terminal',
         ],
         keys: [],
         runs: [
@@ -1802,6 +1803,21 @@ const en = {
       'Runs certbot delete: certbot stops renewing this domain, so renewal errors stop too. Only this site uses the certificate.',
     sharedCerts: (names: string) => `Keeping certificate ${names} since other sites use it too.`,
     commandIntro: 'Command to run:',
+    ssl: {
+      open: 'Turn on HTTPS…',
+      title: 'Turn on HTTPS',
+      body: 'certbot gets a free Let’s Encrypt certificate and adds it to this site. Let’s Encrypt must reach each domain on port 80 of this server. Where the domains point now:',
+      noRecord: 'no DNS record',
+      dnsWarn: (ips: string) =>
+        `Some domains do not point to this server (${ips}). certbot will fail for them until DNS is updated, unless the server sits behind a proxy or NAT.`,
+      skipped: (names: string) =>
+        `No certificate for: ${names} (wildcards and IPs need another method).`,
+      noNames: 'This site has no domain names a certificate can be issued for.',
+      redirect: 'Redirect HTTP to HTTPS',
+      commandIntro:
+        'Opens a terminal with this command typed in; press Enter to run it. The first time, certbot asks for an email and to accept its terms. Command:',
+      run: 'Open in Terminal',
+    },
     newSite: {
       open: 'New site…',
       title: 'New site',

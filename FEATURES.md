@@ -55,6 +55,8 @@ Sites, server blocks and upstreams; turn sites on or off, `nginx -t` before ever
 
 **New site…** sets up a reverse proxy (to a port or a container, WebSocket optional), a static folder or PHP-FPM (the installed php-fpm socket is found for you). You see and can edit the generated config and the exact command before anything runs; the site is enabled only if `nginx -t` passes, otherwise it is turned off again and nginx's error is shown.
 
+**Turn on HTTPS…** checks, from your machine, that each domain points to the server, warns about those that do not, then opens a terminal with `sudo certbot --nginx -d …` typed in (redirect HTTP to HTTPS optional).
+
 <table><tr>
   <td><img src="assets/screenshots/nginx.jpg" alt="Nginx site with TLS certificate"></td>
   <td><img src="assets/screenshots/remove.jpg" alt="Deleting an nginx site with its certificate"></td>
