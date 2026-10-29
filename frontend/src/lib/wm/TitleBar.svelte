@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte'
 
-  import { t } from '../i18n/vi'
+  import { t } from '../i18n'
   import { ui } from '../stores/ui.svelte'
   import Icon from '../ui/Icon.svelte'
   import { getWindowContext } from './context'

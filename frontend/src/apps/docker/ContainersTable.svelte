@@ -4,7 +4,7 @@
   import type { ActionPlan, Container, ContainerAction, ContainerStats } from '../../lib/api/docker'
   import { toUserError } from '../../lib/api/errors'
   import { formatBytes, formatPct } from '../../lib/format'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import ActionMenu from '../../lib/ui/ActionMenu.svelte'
   import ConfirmCommand from '../../lib/ui/ConfirmCommand.svelte'
   import Icon from '../../lib/ui/Icon.svelte'

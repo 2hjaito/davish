@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { LocalKey } from '../../lib/api/keys'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import Dialog from '../../lib/ui/Dialog.svelte'
 
   export type FormKind = 'authorized' | 'server' | 'local'

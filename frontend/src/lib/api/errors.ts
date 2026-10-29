@@ -1,4 +1,4 @@
-import { t } from '../i18n/vi'
+import { t } from '../i18n'
 
 // Keep in sync with internal/apperr.
 export type ErrorCode = keyof typeof t.errors

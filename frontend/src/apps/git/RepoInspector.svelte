@@ -7,7 +7,7 @@
 
 <script lang="ts">
   import type { Diff, Status } from '../../lib/api/git'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import Empty from '../../lib/ui/Empty.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import { openFilesAt, openTerminalAt } from '../../lib/wm/intents.svelte'

@@ -4,7 +4,7 @@
   import { type Image, type ImageDetail, type ImagePlan, imageRef } from '../../lib/api/docker'
   import { toUserError } from '../../lib/api/errors'
   import { formatBytes } from '../../lib/format'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import ConfirmCommand from '../../lib/ui/ConfirmCommand.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import { openTerminalAt } from '../../lib/wm/intents.svelte'

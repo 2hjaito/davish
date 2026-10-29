@@ -1,7 +1,7 @@
 <script lang="ts">
   import { toUserError } from '../../lib/api/errors'
   import { type Entry, filesRename } from '../../lib/api/files'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import Dialog from '../../lib/ui/Dialog.svelte'
   import { renameProblem, stemLength } from './actions'
   import { joinPath, parentPath } from './listing'

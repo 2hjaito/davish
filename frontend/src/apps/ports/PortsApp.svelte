@@ -5,7 +5,7 @@
   import { toUserError } from '../../lib/api/errors'
   import type { Port, PortList } from '../../lib/api/ports'
   import { openURL } from '../../lib/api/runtime'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import { useAppMenu } from '../../lib/shell/menus.svelte'
   import { servers } from '../../lib/stores/servers.svelte'
   import Empty from '../../lib/ui/Empty.svelte'

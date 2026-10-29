@@ -3,7 +3,7 @@
 
   import { apps } from '../../apps/registry'
   import type { AppDef } from '../../apps/types'
-  import { t } from '../i18n/vi'
+  import { t } from '../i18n'
   import { score } from '../spotlight/search'
   import { dockPins } from '../stores/dock.svelte'
   import AppIcon from '../ui/AppIcon.svelte'

@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-29
+
+### Thêm
+- Giao diện tiếng Anh (ADR 0010): chọn Tiếng Việt hoặc English trong Cài đặt → Giao diện → Ngôn ngữ; lần đầu theo ngôn ngữ của máy. Ngày giờ và số định dạng theo ngôn ngữ đã chọn. Đổi ngôn ngữ thì Davish khởi động lại, server tự kết nối lại.
+- Menu bar hiện tên app in đậm cạnh menu hệ thống như macOS; bấm vào để mở menu hệ thống.
+
 ## [1.1.1] - 2026-10-29
 
 ### Sửa
@@ -136,7 +142,8 @@ M0–M3 · Khung dự án, desktop, kết nối, Terminal.
 - Kết nối SSH qua agent, key hoặc mật khẩu; bí mật trong keychain; xác nhận host key lần đầu, từ chối khi host key đổi; tự kết nối lại.
 - Terminal xterm.js nhiều tab, prompt Davish không cài gì lên server.
 
-[Unreleased]: https://github.com/2hjaito/davish/compare/v1.1.1...HEAD
+[Unreleased]: https://github.com/2hjaito/davish/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/2hjaito/davish/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/2hjaito/davish/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/2hjaito/davish/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/2hjaito/davish/compare/v0.9.0...v1.0.0

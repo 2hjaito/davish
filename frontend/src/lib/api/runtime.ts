@@ -11,8 +11,9 @@ export const isDemo =
 
 export const hasRuntime = typeof window !== 'undefined' && 'runtime' in window && !isDemo
 
-export function startDemo() {
-  location.search = '?demo'
+/** lang carries the UI language over, since demo mode does not read settings.json. */
+export function startDemo(lang: string) {
+  location.search = `?demo&lang=${encodeURIComponent(lang)}`
 }
 
 export function exitDemo() {

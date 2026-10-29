@@ -2,6 +2,7 @@ import { onConnStatus, onHostKeyPrompt, type HostKeyPrompt } from '../api/events
 import { type ErrorCode, toUserError } from '../api/errors'
 import { hasRuntime } from '../api/runtime'
 import * as api from '../api/servers'
+import { t } from '../i18n'
 import type { ConnState, ServerDraft, ServerInfo } from '../api/servers'
 import { load, save } from './persist'
 
@@ -27,7 +28,7 @@ const demoServers: Server[] = [
   },
   {
     id: 'nas',
-    name: 'NAS văn phòng',
+    name: t.demo.nas,
     host: '192.168.1.20',
     port: 22,
     user: 'dangth',

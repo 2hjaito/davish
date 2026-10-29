@@ -7,7 +7,7 @@ import {
 import { toUserError } from '../api/errors'
 import { hasRuntime } from '../api/runtime'
 import type { Job } from '../api/transfer'
-import { t } from '../i18n/vi'
+import { t } from '../i18n'
 import type { Notification } from './notifications.svelte'
 
 export type TransferState = 'running' | 'done' | 'failed' | 'canceled'
@@ -154,7 +154,7 @@ const demo: Transfer[] = hasRuntime
       {
         ...{ id: 'd2', kind: 'upload', serverID: 'dangth-vps', name: 'nginx.conf', dir: false },
         ...{ src: '~/nginx.conf', dst: '/etc/nginx/nginx.conf' },
-        ...{ done: 0, total: 2458, bps: 0, state: 'failed', error: 'Không có quyền truy cập.' },
+        ...{ done: 0, total: 2458, bps: 0, state: 'failed', error: t.demo.denied },
       },
       {
         ...{

@@ -1,5 +1,6 @@
 // Pure helpers of the Docker app: filters, states and times.
 import type { Container, ContainerAction, Image } from '../../lib/api/docker'
+import { t, type AgoUnit } from '../../lib/i18n'
 
 export type Filter = 'all' | 'running' | 'restarting' | 'stopped'
 
@@ -92,25 +93,15 @@ export function clock(rfc3339: string): string {
   return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`
 }
 
-const UNITS: Record<string, string> = {
-  second: 'giây',
-  minute: 'phút',
-  hour: 'giờ',
-  day: 'ngày',
-  week: 'tuần',
-  month: 'tháng',
-  year: 'năm',
-}
-
-/** Docker's "6 days ago", "About an hour ago" in Vietnamese; the text as is otherwise. */
+/** Docker's "6 days ago", "About an hour ago" in the UI language; the text as is otherwise. */
 export function ago(text: string): string {
   const s = text.trim()
-  if (/^less than a second/i.test(s)) return 'vừa xong'
+  if (/^less than a second/i.test(s)) return t.docker.justNow
   const m = /^(about an?|an?|\d+)\s+(second|minute|hour|day|week|month|year)s?\s+ago$/i.exec(s)
   if (!m) return s
-  const n = /^\d+$/.test(m[1] ?? '') ? m[1] : '1'
-  const about = /^about/i.test(m[1] ?? '') ? 'khoảng ' : ''
-  return `${about}${n} ${UNITS[(m[2] ?? '').toLowerCase()]} trước`
+  const n = /^\d+$/.test(m[1] ?? '') ? Number(m[1]) : 1
+  const unit = (m[2] ?? '').toLowerCase() as AgoUnit
+  return t.docker.ago(n, unit, /^about/i.test(m[1] ?? ''))
 }
 
 /** One published or exposed port of a container. */

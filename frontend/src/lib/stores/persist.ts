@@ -83,3 +83,8 @@ export function save(key: string, value: unknown): void {
       // A failed write only loses a preference; the next change retries.
     })
 }
+
+/** Resolves once every save so far has reached settings.json. */
+export function flushPersist(): Promise<void> {
+  return writing
+}

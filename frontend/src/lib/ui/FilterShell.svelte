@@ -16,7 +16,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte'
 
-  import { t } from '../i18n/vi'
+  import { t } from '../i18n'
   import { getWindowContext } from '../wm/context'
   import TitleBar from '../wm/TitleBar.svelte'
   import Icon from './Icon.svelte'

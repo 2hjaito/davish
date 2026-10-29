@@ -3,7 +3,7 @@
   import { monitorProcesses, type ProcessList } from '../../lib/api/monitor'
   import { hasRuntime } from '../../lib/api/runtime'
   import { formatBytes, formatDuration, formatPct } from '../../lib/format'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import Icon from '../../lib/ui/Icon.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
   import { mockProcesses } from './mock'

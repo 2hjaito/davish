@@ -4,7 +4,7 @@
   import type { Cleanup, Mount, Usage } from '../../lib/api/disk'
   import { toUserError } from '../../lib/api/errors'
   import { formatBytes } from '../../lib/format'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import { useAppMenu } from '../../lib/shell/menus.svelte'
   import { servers } from '../../lib/stores/servers.svelte'
   import ConfirmCommand from '../../lib/ui/ConfirmCommand.svelte'

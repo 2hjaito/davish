@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from '../i18n/vi'
+  import { t } from '../i18n'
   import { type ConnState, servers } from '../stores/servers.svelte'
   import { ui } from '../stores/ui.svelte'
   import Icon from '../ui/Icon.svelte'

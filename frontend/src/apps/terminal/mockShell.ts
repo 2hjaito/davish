@@ -3,6 +3,7 @@
 // input() receives keystrokes from xterm, emit() writes ANSI output back.
 import { joinPath as join } from '../files/listing'
 import { mockIsDir, mockList } from '../files/mockFs'
+import { t } from '../../lib/i18n'
 
 const GREEN = '\x1b[32m'
 const BLUE = '\x1b[34m'
@@ -126,8 +127,8 @@ export class MockShell {
       case '':
         break
       case 'help':
-        out('Lệnh có sẵn: ls, cd, pwd, cat, echo, clear, whoami, hostname, date, uname,')
-        out('             history, docker ps, systemctl status <unit>, exit')
+        out(t.demo.shellHelp)
+        out(t.demo.shellHelpMore)
         break
       case 'clear':
         this.#opts.emit('\x1b[2J\x1b[H')
@@ -182,10 +183,10 @@ export class MockShell {
         const parent = path.slice(0, path.lastIndexOf('/')) || '/'
         const name = path.slice(path.lastIndexOf('/') + 1)
         const entry = mockList(parent).find((e) => e.name === name)
-        if (!args[0]) out('cat: thiếu tên file')
+        if (!args[0]) out(t.demo.catMissing)
         else if (!entry) out(`cat: ${args[0]}: No such file or directory`)
         else if (entry.dir) out(`cat: ${args[0]}: Is a directory`)
-        else out(`# ${path} (nội dung mô phỏng)`)
+        else out(t.demo.catBody(path))
         break
       }
       case 'docker':
@@ -203,7 +204,7 @@ export class MockShell {
       case 'systemctl': {
         const unit = args[1] ?? 'nginx'
         if (args[0] !== 'status') {
-          out('Chỉ hỗ trợ: systemctl status <unit>')
+          out(t.demo.systemctlOnly)
           break
         }
         out(`${GREEN}●${RESET} ${unit}.service`)

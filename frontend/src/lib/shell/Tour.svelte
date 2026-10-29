@@ -1,7 +1,7 @@
 <script lang="ts">
   import { untrack } from 'svelte'
 
-  import { t } from '../i18n/vi'
+  import { t } from '../i18n'
   import { load, save } from '../stores/persist'
   import { servers } from '../stores/servers.svelte'
   import { ui } from '../stores/ui.svelte'

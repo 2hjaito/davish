@@ -3,7 +3,7 @@
 
   import type { CronJob, CronOp, CronRuns } from '../../lib/api/cron'
   import { toUserError } from '../../lib/api/errors'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import Icon from '../../lib/ui/Icon.svelte'
   import NeedsRoot from '../../lib/ui/NeedsRoot.svelte'
   import { openFileInEditor } from '../../lib/wm/intents.svelte'

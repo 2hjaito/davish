@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getApp } from '../../apps/registry'
   import { hasRuntime, quit } from '../api/runtime'
-  import { t } from '../i18n/vi'
+  import { t } from '../i18n'
   import { servers } from '../stores/servers.svelte'
   import { appLock } from '../stores/lock.svelte'
   import { sleep } from '../stores/sleep.svelte'

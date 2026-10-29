@@ -1,6 +1,6 @@
 // The status line under each transfer.
 import { formatBytes, formatDuration, formatRate } from '../../lib/format'
-import { t } from '../../lib/i18n/vi'
+import { t } from '../../lib/i18n'
 import type { Transfer } from '../../lib/stores/transfers.svelte'
 
 /** Time left at the current speed, or '' when it cannot be told. */

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { formatPct, formatRate } from '../../lib/format'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import { metrics, type Series } from '../../lib/stores/metrics.svelte'
   import { load, save } from '../../lib/stores/persist'
   import { servers } from '../../lib/stores/servers.svelte'

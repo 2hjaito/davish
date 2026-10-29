@@ -1,4 +1,5 @@
 import type { Process, ProcessSort } from '../../lib/api/monitor'
+import { locale } from '../../lib/i18n'
 
 export type ProcColumn = 'pid' | 'name' | 'user' | 'cpu' | 'mem' | 'threads' | 'age'
 
@@ -25,7 +26,7 @@ export function serverSort(column: ProcColumn): ProcessSort {
   return column === 'mem' ? 'mem' : 'cpu'
 }
 
-const collator = new Intl.Collator('vi', { numeric: true, sensitivity: 'base' })
+const collator = new Intl.Collator(locale, { numeric: true, sensitivity: 'base' })
 
 function compare(a: Process, b: Process, column: ProcColumn): number {
   switch (column) {

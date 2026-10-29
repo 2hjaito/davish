@@ -386,6 +386,10 @@ export function PortsProbe(arg1, arg2, arg3, arg4) {
   return window['go']['app']['App']['PortsProbe'](arg1, arg2, arg3, arg4);
 }
 
+export function Relaunch() {
+  return window['go']['app']['App']['Relaunch']();
+}
+
 export function ReorderServers(arg1) {
   return window['go']['app']['App']['ReorderServers'](arg1);
 }

@@ -16,7 +16,7 @@
   import { sleep } from '../stores/sleep.svelte'
   import { toUserError } from '../api/errors'
   import { transferReveal } from '../api/transfer'
-  import { t } from '../i18n/vi'
+  import { t } from '../i18n'
   import {
     describeTransfer,
     type Transfer,

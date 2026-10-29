@@ -1,4 +1,4 @@
-import { t } from '../../lib/i18n/vi'
+import { t } from '../../lib/i18n'
 import type { Series } from '../../lib/stores/metrics.svelte'
 
 export type Section =

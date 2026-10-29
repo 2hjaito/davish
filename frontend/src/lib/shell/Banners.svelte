@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from '../i18n/vi'
+  import { t } from '../i18n'
   import { fadeOut, popIn } from '../motion'
   import { levelIcon, notifications } from '../stores/notifications.svelte'
   import Icon from '../ui/Icon.svelte'

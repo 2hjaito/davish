@@ -10,7 +10,7 @@
     filesSave,
   } from '../../lib/api/files'
   import { hasRuntime } from '../../lib/api/runtime'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import { servers } from '../../lib/stores/servers.svelte'
   import Dialog from '../../lib/ui/Dialog.svelte'
   import Empty from '../../lib/ui/Empty.svelte'

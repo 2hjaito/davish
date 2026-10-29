@@ -4,7 +4,7 @@
 
 <script lang="ts">
   import type { UploadItem } from '../../lib/api/transfer'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import Dialog from '../../lib/ui/Dialog.svelte'
 
   interface Props {

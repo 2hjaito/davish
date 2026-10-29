@@ -1,6 +1,7 @@
 // Demo directory tree for running the frontend outside Wails (vite dev,
 // previews), shaped like the real file bindings.
 import type { Entry } from '../../lib/api/files'
+import { t } from '../../lib/i18n'
 import { joinPath } from './listing'
 
 type Node = { dir: true; days: number } | { dir: false; size: number; days: number }
@@ -106,5 +107,5 @@ fi
 export function mockRead(path: string): string {
   if (path.endsWith('nginx.conf')) return NGINX_CONF
   if (path.endsWith('.bashrc')) return BASHRC
-  return `# ${path}\n# Nội dung mô phỏng cho bản xem thử trên trình duyệt.\n`
+  return `# ${path}\n# ${t.demo.fileBody}\n`
 }

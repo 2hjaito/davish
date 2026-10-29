@@ -213,6 +213,8 @@ export function PortsList(arg1:string):Promise<ports.List>;
 
 export function PortsProbe(arg1:string,arg2:string,arg3:number,arg4:string):Promise<string>;
 
+export function Relaunch():Promise<void>;
+
 export function ReorderServers(arg1:Array<string>):Promise<void>;
 
 export function SSHConfigHosts():Promise<Array<sshconfig.Candidate>>;

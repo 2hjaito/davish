@@ -27,6 +27,7 @@ Không cài gì lên server.
 - **Tự khóa khi bạn rời máy.** Mật khẩu khóa riêng, Touch ID trên macOS; khóa khi máy ngủ dậy, sau thời gian không dùng, hoặc `⌘L`. Phiên SSH vẫn chạy sau màn khóa, nhưng không thao tác nào tới được server cho tới khi mở khóa.
 - **Nhiều server, một desktop.** Mỗi server là một workspace (`⌘1`…`⌘9`) nhớ cửa sổ riêng của nó. Kéo file để copy giữa các server.
 - **Tự cập nhật.** Có bản mới thì hiện thay đổi kèm Cập nhật, Để sau, Bỏ qua bản này; Davish tự tải, kiểm chữ ký rồi khởi động lại vào bản mới. Không phải cài lại.
+- **Tiếng Việt hoặc tiếng Anh.** Chọn ngôn ngữ trong Cài đặt; lần đầu Davish theo ngôn ngữ của máy.
 - **Dùng luôn `~/.ssh/config`.** Nhập host một lần, kèm key và `ProxyJump`; Davish chỉ đọc file. Server sau bastion kết nối qua nó, mỗi bậc kiểm tra host key riêng, cả chuỗi tự kết nối lại.
 
 ## Tính năng
@@ -63,6 +64,7 @@ Không cài gì lên server.
 - [Menu bar và trợ giúp](FEATURES.vi.md#menu-bar-và-trợ-giúp): mọi lệnh và phím tắt, nút `?` trên mỗi app
 - [Khóa app](FEATURES.vi.md#khóa-app): Touch ID hoặc mật khẩu, tự khóa khi máy dậy
 - [Cập nhật](FEATURES.vi.md#cập-nhật): một lần bấm lên bản mới, có kiểm chữ ký
+- [Ngôn ngữ](FEATURES.vi.md#ngôn-ngữ): tiếng Việt hoặc tiếng Anh
 
 <table>
   <tr>

@@ -10,7 +10,7 @@
     ServerApp,
   } from '../../lib/api/packages'
   import { formatBytes } from '../../lib/format'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import Icon from '../../lib/ui/Icon.svelte'
   import { openFileInEditor, openSelected, SERVICES_SIZE } from '../../lib/wm/intents.svelte'
   import { backend } from './backend'

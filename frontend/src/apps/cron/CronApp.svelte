@@ -4,7 +4,7 @@
 
   import type { CronChange, CronJob, CronOp, CronPlan, CronTable } from '../../lib/api/cron'
   import { toUserError } from '../../lib/api/errors'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import { load, save } from '../../lib/stores/persist'
   import { servers } from '../../lib/stores/servers.svelte'
   import Empty from '../../lib/ui/Empty.svelte'

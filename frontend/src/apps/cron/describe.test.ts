@@ -1,6 +1,7 @@
-import { expect, it } from 'vitest'
+import { afterAll, beforeAll, describe as group, expect, it } from 'vitest'
 
 import type { Schedule } from '../../lib/api/cron'
+import { loadLang } from '../../lib/i18n'
 import { describe } from './describe'
 
 const range = (lo: number, hi: number, k = 1) =>
@@ -70,3 +71,25 @@ it.each([
   [sched('@reboot', { reboot: true }), 'Khi server khởi động'],
   [sched('1,2,9 3-20/7 * * *', { minute: [1, 2, 9], hour: [3, 10, 17] }), '1,2,9 3-20/7 * * *'],
 ])('%s', (s, want) => expect(describe(s)).toBe(want))
+
+group('in English', () => {
+  beforeAll(() => loadLang('en'))
+  afterAll(() => loadLang('vi'))
+
+  it.each([
+    [sched('*/5 * * * *', { minute: range(0, 55, 5) }), 'Every 5 minutes'],
+    [sched('0 9,18 * * *', { minute: [0], hour: [9, 18] }), 'Every day at 09:00, 18:00'],
+    [
+      sched('30 9 * * 1-5', { minute: [30], hour: [9], dow: [1, 2, 3, 4, 5], dowAny: false }),
+      'Monday to Friday at 09:30',
+    ],
+    [
+      sched('0 8 1,15 * *', { minute: [0], hour: [8], dom: [1, 15], domAny: false }),
+      'On day 1 and 15 of the month at 08:00',
+    ],
+    [
+      sched('0 12 * 1,7 *', { minute: [0], hour: [12], month: [1, 7] }),
+      'Every day at 12:00 (months: 1 and 7)',
+    ],
+  ])('%s', (s, want) => expect(describe(s)).toBe(want))
+})

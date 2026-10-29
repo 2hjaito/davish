@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from '../i18n/vi'
+  import { locale, t } from '../i18n'
   import { fadeOut } from '../motion'
   import { sleep } from '../stores/sleep.svelte'
 
@@ -28,10 +28,10 @@
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div class="sleep" onpointerdown={wake} transition:fadeOut>
     <div class="clock">
-      {now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+      {now.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
     </div>
     <div class="date">
-      {now.toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long' })}
+      {now.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })}
     </div>
     <div class="hint">{t.system.wakeHint}</div>
   </div>

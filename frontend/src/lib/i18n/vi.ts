@@ -1,7 +1,21 @@
-// Every user-facing string lives here.
+// Every user-facing string lives here; en.ts follows its shape. Import
+// through lib/i18n, never this file directly.
 import { isMac } from '../shell/platform'
 
-export const t = {
+/** The units of Docker's relative times ("6 days ago"). */
+export type AgoUnit = 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year'
+
+const AGO_UNITS: Record<AgoUnit, string> = {
+  second: 'giây',
+  minute: 'phút',
+  hour: 'giờ',
+  day: 'ngày',
+  week: 'tuần',
+  month: 'tháng',
+  year: 'năm',
+}
+
+const vi = {
   app: {
     name: 'Davish',
   },
@@ -588,7 +602,7 @@ export const t = {
         runs: ['SFTP để đọc, ghi file tạm rồi đổi tên'],
       },
       settings: {
-        does: 'Giao diện, phông, ngưỡng cảnh báo, khóa app, prompt Terminal.',
+        does: 'Ngôn ngữ, giao diện, phông, ngưỡng cảnh báo, khóa app, prompt Terminal.',
         actions: [],
         keys: [],
         runs: [],
@@ -818,6 +832,17 @@ export const t = {
     start: 'Xem thử với dữ liệu mẫu',
     banner: 'Đang xem thử với dữ liệu mẫu, không kết nối server nào.',
     exit: 'Thoát xem thử',
+    // The sample data itself.
+    nas: 'NAS văn phòng',
+    restarting: 'lightrag trên dangth-vps đang khởi động lại liên tục',
+    restartingBody: 'Container đã khởi động lại 6 lần.',
+    denied: 'Không có quyền truy cập.',
+    shellHelp: 'Lệnh có sẵn: ls, cd, pwd, cat, echo, clear, whoami, hostname, date, uname,',
+    shellHelpMore: '             history, docker ps, systemctl status <unit>, exit',
+    catMissing: 'cat: thiếu tên file',
+    catBody: (path: string) => `# ${path} (nội dung mô phỏng)`,
+    systemctlOnly: 'Chỉ hỗ trợ: systemctl status <unit>',
+    fileBody: 'Nội dung mô phỏng cho bản xem thử trên trình duyệt.',
   },
   lock: {
     title: 'Davish đã khóa',
@@ -1138,6 +1163,12 @@ export const t = {
   },
   settings: {
     appearance: 'Giao diện',
+    language: 'Ngôn ngữ',
+    languageHint: 'Ngôn ngữ của giao diện.',
+    langs: { vi: 'Tiếng Việt', en: 'English' },
+    langRestart:
+      'Davish sẽ khởi động lại: terminal và chuyển file đang chạy sẽ dừng, server tự kết nối lại.',
+    langApply: 'Khởi động lại',
     reduceGlass: 'Giảm hiệu ứng kính',
     reduceGlassHint: 'Dùng nền đặc thay cho kính mờ. Nên bật trên máy yếu hoặc Linux.',
     reduceMotion: 'Giảm chuyển động',
@@ -1400,6 +1431,9 @@ export const t = {
     refreshLog: 'Làm mới log',
   },
   docker: {
+    justNow: 'vừa xong',
+    ago: (n: number, unit: AgoUnit, about: boolean) =>
+      `${about ? 'khoảng ' : ''}${n} ${AGO_UNITS[unit]} trước`,
     sections: 'Bộ lọc container',
     containersSection: 'CONTAINER',
     table: {
@@ -1853,3 +1887,5 @@ export const t = {
       'Repo này thuộc user khác nên git từ chối đọc (dubious ownership). Hãy đăng nhập bằng user sở hữu repo.',
   },
 } as const
+
+export default vi

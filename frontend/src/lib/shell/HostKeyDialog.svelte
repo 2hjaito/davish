@@ -1,6 +1,6 @@
 <script lang="ts">
   import { toUserError } from '../api/errors'
-  import { t } from '../i18n/vi'
+  import { t } from '../i18n'
   import { servers } from '../stores/servers.svelte'
   import Dialog from '../ui/Dialog.svelte'
 

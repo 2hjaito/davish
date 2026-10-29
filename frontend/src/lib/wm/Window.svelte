@@ -1,7 +1,7 @@
 <script lang="ts">
   import { type Snippet, untrack } from 'svelte'
 
-  import { t } from '../i18n/vi'
+  import { t } from '../i18n'
   import { dockTile, GENIE_MS, ms, windowZoom } from '../motion'
   import { setWindowContext } from './context'
   import { type Edge, type Rect, resizeRect, snapZone, zoneRect } from './geometry'

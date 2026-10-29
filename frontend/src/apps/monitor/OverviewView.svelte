@@ -1,6 +1,6 @@
 <script lang="ts">
   import { formatBytes, formatDuration, formatPct, formatRate } from '../../lib/format'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import { level } from '../../lib/ui/charts/scale'
   import TimeChart from '../../lib/ui/charts/TimeChart.svelte'
   import Card from './Card.svelte'

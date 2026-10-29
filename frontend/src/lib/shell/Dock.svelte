@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { AppId } from '../../apps/types'
-  import { t } from '../i18n/vi'
+  import { t } from '../i18n'
   import { dockPins } from '../stores/dock.svelte'
   import { ms } from '../motion'
   import AppIcon from '../ui/AppIcon.svelte'

@@ -2,7 +2,7 @@
   import { useAppMenu } from '../../lib/shell/menus.svelte'
   import { toUserError } from '../../lib/api/errors'
   import type { Branch, GitOp, OpResult, Status } from '../../lib/api/git'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import ConfirmCommand from '../../lib/ui/ConfirmCommand.svelte'
   import Dialog from '../../lib/ui/Dialog.svelte'
   import Icon from '../../lib/ui/Icon.svelte'

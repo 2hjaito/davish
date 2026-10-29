@@ -1,6 +1,6 @@
 <script lang="ts">
   import { formatPct } from '../../lib/format'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import Meter from '../../lib/ui/charts/Meter.svelte'
   import { level } from '../../lib/ui/charts/scale'
   import TimeChart from '../../lib/ui/charts/TimeChart.svelte'

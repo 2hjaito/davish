@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getApp } from '../../apps/registry'
-  import { t } from '../i18n/vi'
+  import { t } from '../i18n'
   import { ui } from '../stores/ui.svelte'
   import Dialog from '../ui/Dialog.svelte'
   import { buildMenus } from './menuModel.svelte'

@@ -2,7 +2,7 @@
   import { untrack } from 'svelte'
 
   import { toUserError } from '../api/errors'
-  import { t } from '../i18n/vi'
+  import { locale, t } from '../i18n'
   import { fadeOut } from '../motion'
   import { appLock } from '../stores/lock.svelte'
   import { notifications } from '../stores/notifications.svelte'
@@ -106,10 +106,10 @@
   out:fadeOut
 >
   <div class="clock">
-    {now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+    {now.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
   </div>
   <div class="date">
-    {now.toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long' })}
+    {now.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })}
   </div>
 
   <div class="card">
