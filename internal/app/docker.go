@@ -78,3 +78,14 @@ func (a *App) DockerRemoveVolume(serverID, name, command string) error {
 	}
 	return a.docker.RemoveVolume(a.ctx, serverID, name, command)
 }
+
+// DockerPullCommand is the docker pull line for a terminal.
+func (a *App) DockerPullCommand(ref string) (string, error) {
+	return docker.PullCommand(ref)
+}
+
+// DockerPlanRun builds the docker run line for a new container, for the
+// preview; it is typed into a terminal.
+func (a *App) DockerPlanRun(spec docker.RunSpec) (docker.RunPlan, error) {
+	return docker.PlanRun(spec)
+}

@@ -114,8 +114,16 @@ export function DockerPlanImage(arg1) {
   return window['go']['app']['App']['DockerPlanImage'](arg1);
 }
 
+export function DockerPlanRun(arg1) {
+  return window['go']['app']['App']['DockerPlanRun'](arg1);
+}
+
 export function DockerPlanVolume(arg1) {
   return window['go']['app']['App']['DockerPlanVolume'](arg1);
+}
+
+export function DockerPullCommand(arg1) {
+  return window['go']['app']['App']['DockerPullCommand'](arg1);
 }
 
 export function DockerRemoveImage(arg1, arg2, arg3) {

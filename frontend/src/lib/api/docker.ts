@@ -1,5 +1,6 @@
 // Typed wrappers for the Docker bindings (internal/app/docker.go).
 import * as App from '../../../wailsjs/go/app/App'
+import { docker } from '../../../wailsjs/go/models'
 
 /** rm deletes a stopped container. */
 export type ContainerAction = 'start' | 'stop' | 'restart' | 'rm'
@@ -166,3 +167,44 @@ export const dockerRemoveVolume = (
   name: string,
   command: string,
 ): Promise<void> => App.DockerRemoveVolume(serverID, name, command)
+
+/** A published port; host empty means 127.0.0.1. */
+export interface PortMap {
+  host: string
+  hostPort: number
+  containerPort: number
+  udp: boolean
+}
+
+/** A volume name or server path mounted into the container. */
+export interface Mount {
+  source: string
+  target: string
+  readOnly: boolean
+}
+
+/** The new container form (internal/docker.RunSpec). */
+export interface RunSpec {
+  name: string
+  image: string
+  ports: PortMap[]
+  /** KEY=value lines. */
+  env: string[]
+  envFile: string
+  mounts: Mount[]
+  restart: '' | 'no' | 'always' | 'unless-stopped' | 'on-failure'
+  network: string
+  args: string[]
+}
+
+export interface RunPlan {
+  /** The docker run line typed into a terminal. */
+  command: string
+  /** Ports bound to every address. */
+  public: string[]
+}
+
+export const dockerPullCommand = (ref: string): Promise<string> => App.DockerPullCommand(ref)
+
+export const dockerPlanRun = (spec: RunSpec): Promise<RunPlan> =>
+  App.DockerPlanRun(docker.RunSpec.createFrom(spec))

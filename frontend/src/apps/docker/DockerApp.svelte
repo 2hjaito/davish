@@ -39,6 +39,7 @@
   } from './containers'
   import ImageInspector from './ImageInspector.svelte'
   import ImagesTable from './ImagesTable.svelte'
+  import RunDialog from './RunDialog.svelte'
   import VolumesTable from './VolumesTable.svelte'
 
   let { win }: AppProps = $props()
@@ -58,6 +59,7 @@
   let images = $state.raw<Image[] | null>(null)
   let volumes = $state.raw<Volume[] | null>(null)
   let stats = $state.raw<Record<string, ContainerStats>>({})
+  let runMode = $state<'pull' | 'run' | null>(null)
   let error = $state('')
   let loading = $state(false)
   /** The detail page over the table, Docker Desktop style. */
@@ -240,6 +242,26 @@
   {error}
   onrefresh={() => void refresh()}
 >
+  {#snippet actions()}
+    <button
+      class="tool"
+      aria-label={d.run.pullTitle}
+      title={d.run.pullTitle}
+      disabled={!connected}
+      onclick={() => (runMode = 'pull')}
+    >
+      <Icon name="download" size={15} strokeWidth={2.2} />
+    </button>
+    <button
+      class="tool"
+      aria-label={d.run.title}
+      title={d.run.title}
+      disabled={!connected}
+      onclick={() => (runMode = 'run')}
+    >
+      <Icon name="plus" size={15} strokeWidth={2.4} />
+    </button>
+  {/snippet}
   {#snippet placeholder()}
     {#if !connected}
       <Empty icon="server" title={d.offline} hint={d.offlineHint} />
@@ -344,6 +366,8 @@
     </div>
   {/snippet}
 </FilterShell>
+
+<RunDialog serverID={win.serverID} mode={runMode} onclose={() => (runMode = null)} />
 
 <style>
   .of {

@@ -77,7 +77,11 @@ export function DockerPlan(arg1:string,arg2:string):Promise<docker.Plan>;
 
 export function DockerPlanImage(arg1:string):Promise<docker.ImagePlan>;
 
+export function DockerPlanRun(arg1:docker.RunSpec):Promise<docker.RunPlan>;
+
 export function DockerPlanVolume(arg1:string):Promise<docker.VolumePlan>;
+
+export function DockerPullCommand(arg1:string):Promise<string>;
 
 export function DockerRemoveImage(arg1:string,arg2:string,arg3:string):Promise<void>;
 

@@ -5,6 +5,8 @@ import {
   dockerImage,
   dockerImages,
   dockerPlanImage,
+  dockerPlanRun,
+  dockerPullCommand,
   dockerRemoveImage,
   dockerPlanVolume,
   dockerRemoveVolume,
@@ -25,6 +27,8 @@ import {
   mockLogs,
   mockPlan,
   mockPlanImage,
+  mockPlanRun,
+  mockPullCommand,
   mockRemoveImage,
   mockPlanVolume,
   mockRemoveVolume,
@@ -47,6 +51,8 @@ export const backend = hasRuntime
       volumes: dockerVolumes,
       planVolume: dockerPlanVolume,
       removeVolume: dockerRemoveVolume,
+      pullCommand: dockerPullCommand,
+      planRun: dockerPlanRun,
     }
   : {
       list: (_serverID: string) => mockList(),
@@ -62,4 +68,6 @@ export const backend = hasRuntime
       volumes: (_serverID: string) => mockVolumes(),
       planVolume: mockPlanVolume,
       removeVolume: (_serverID: string, name: string, _command: string) => mockRemoveVolume(name),
+      pullCommand: mockPullCommand,
+      planRun: mockPlanRun,
     }

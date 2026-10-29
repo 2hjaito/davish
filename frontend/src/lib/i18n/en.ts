@@ -589,6 +589,7 @@ const en = {
         actions: [
           'Select a container to see its logs and details',
           'Open its logs in the Logs app',
+          'Pull an image or run a new container from a form (typed into a terminal)',
         ],
         keys: [],
         runs: ['docker ps, stats, inspect, logs', 'docker start/stop/restart (with confirmation)'],
@@ -1511,6 +1512,39 @@ const en = {
       removeTitle: (n: string) => `Delete volume ${n.length > 20 ? `${n.slice(0, 12)}…` : n}?`,
       removeBody:
         'All data in the volume is deleted for good; there is no trash. Docker refuses if a container still uses it. Command to run:',
+    },
+    run: {
+      title: 'Run a new container…',
+      pullTitle: 'Pull an image…',
+      image: 'Image',
+      imageHint: 'name:tag, e.g. postgres:17 or ghcr.io/owner/app:latest',
+      name: 'Container name',
+      restart: 'Restart',
+      restarts: {
+        'unless-stopped': 'Unless stopped',
+        always: 'Always',
+        'on-failure': 'On failure',
+        no: 'Never',
+      },
+      ports: 'Ports (server → container)',
+      addPort: '+ Add a port',
+      portsHint:
+        'An empty address binds 127.0.0.1: reachable from the server only (nginx, a tunnel). 0.0.0.0 opens it to the Internet.',
+      mounts: 'Volumes and folders',
+      addMount: '+ Add a mount',
+      source: 'volume or /path on the server',
+      ro: 'Read only',
+      removeRow: 'Remove',
+      env: 'Environment (one KEY=value per line)',
+      envFile: '.env file on the server',
+      network: 'Network',
+      next: 'Preview',
+      back: 'Back',
+      publicWarn: (ports: string) =>
+        `${ports} binds every address: anyone on the Internet can reach it unless a firewall blocks it. Bind 127.0.0.1 and put nginx in front instead if you can.`,
+      commandIntro:
+        'Opens a terminal with this command typed in; press Enter to run it and watch the progress. Command:',
+      open: 'Open in Terminal',
     },
     img: {
       section: 'IMAGES',
