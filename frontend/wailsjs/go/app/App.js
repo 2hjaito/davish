@@ -86,6 +86,14 @@ export function DockerAct(arg1, arg2, arg3) {
   return window['go']['app']['App']['DockerAct'](arg1, arg2, arg3);
 }
 
+export function DockerComposeCommand(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['DockerComposeCommand'](arg1, arg2, arg3, arg4);
+}
+
+export function DockerCreateStack(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['DockerCreateStack'](arg1, arg2, arg3, arg4);
+}
+
 export function DockerImage(arg1, arg2) {
   return window['go']['app']['App']['DockerImage'](arg1, arg2);
 }
@@ -116,6 +124,10 @@ export function DockerPlanImage(arg1) {
 
 export function DockerPlanRun(arg1) {
   return window['go']['app']['App']['DockerPlanRun'](arg1);
+}
+
+export function DockerPlanStack(arg1, arg2) {
+  return window['go']['app']['App']['DockerPlanStack'](arg1, arg2);
 }
 
 export function DockerPlanVolume(arg1) {

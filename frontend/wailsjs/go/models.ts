@@ -516,6 +516,8 @@ export namespace docker {
 	    runningFor: string;
 	    project?: string;
 	    service?: string;
+	    projectDir?: string;
+	    projectFile?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Container(source);
@@ -534,6 +536,8 @@ export namespace docker {
 	        this.runningFor = source["runningFor"];
 	        this.project = source["project"];
 	        this.service = source["service"];
+	        this.projectDir = source["projectDir"];
+	        this.projectFile = source["projectFile"];
 	    }
 	}
 	export class Detail {
@@ -836,6 +840,22 @@ export namespace docker {
 		    }
 		    return a;
 		}
+	}
+	export class StackPlan {
+	    path: string;
+	    content: string;
+	    command: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new StackPlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.content = source["content"];
+	        this.command = source["command"];
+	    }
 	}
 	export class Stats {
 	    id: string;

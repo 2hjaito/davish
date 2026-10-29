@@ -40,6 +40,7 @@
   import ImageInspector from './ImageInspector.svelte'
   import ImagesTable from './ImagesTable.svelte'
   import RunDialog from './RunDialog.svelte'
+  import NewStackDialog from './NewStackDialog.svelte'
   import VolumesTable from './VolumesTable.svelte'
 
   let { win }: AppProps = $props()
@@ -60,6 +61,7 @@
   let volumes = $state.raw<Volume[] | null>(null)
   let stats = $state.raw<Record<string, ContainerStats>>({})
   let runMode = $state<'pull' | 'run' | null>(null)
+  let newStack = $state(false)
   let error = $state('')
   let loading = $state(false)
   /** The detail page over the table, Docker Desktop style. */
@@ -261,6 +263,15 @@
     >
       <Icon name="plus" size={15} strokeWidth={2.4} />
     </button>
+    <button
+      class="tool"
+      aria-label={d.stack.title}
+      title={d.stack.title}
+      disabled={!connected}
+      onclick={() => (newStack = true)}
+    >
+      <Icon name="grid" size={15} strokeWidth={2.2} />
+    </button>
   {/snippet}
   {#snippet placeholder()}
     {#if !connected}
@@ -368,6 +379,7 @@
 </FilterShell>
 
 <RunDialog serverID={win.serverID} mode={runMode} onclose={() => (runMode = null)} />
+<NewStackDialog serverID={win.serverID} open={newStack} onclose={() => (newStack = false)} />
 
 <style>
   .of {

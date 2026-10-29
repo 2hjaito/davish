@@ -1,0 +1,23 @@
+services:
+  app:
+    image: node:22-alpine
+    restart: unless-stopped
+    working_dir: /app
+    command: ["node", "server.js"]
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      REDIS_URL: redis://redis:6379
+    volumes:
+      - ./:/app
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis:/data
+
+volumes:
+  redis:

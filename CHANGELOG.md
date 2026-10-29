@@ -5,6 +5,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Thêm
+- Docker → Compose: up, pull, restart, down theo project; **Stack compose mới…** từ mẫu.
 - Docker → **Pull image…** và **Chạy container mới…** từ form; cổng mặc định bind `127.0.0.1`, cảnh báo `0.0.0.0`; lệnh gõ sẵn vào Terminal.
 
 ### Thêm

@@ -40,6 +40,8 @@ Laid out like Docker Desktop. Containers in a table (ID, image, ports, CPU, memo
 
 **Pull an image…** and **Run a new container…**: a form for name, image, ports, environment (typed or a `.env` file), volumes, restart policy and network builds the full `docker run` line. Ports bind `127.0.0.1` unless you say otherwise, with a warning for `0.0.0.0`. The command is typed into a terminal so you press Enter and watch the progress.
 
+**Compose**: each project's ⋮ menu has up, pull, restart and down, plus its compose file in the Editor; **New compose stack…** writes a `compose.yaml` from a template (one container, web + database, app + Redis) into a folder, never over an existing one.
+
 <table><tr>
   <td><img src="assets/screenshots/docker.jpg" alt="Docker with a container in a restart loop"></td>
   <td><img src="assets/screenshots/docker-images.jpg" alt="An image and its layers"></td>

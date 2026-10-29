@@ -1,5 +1,8 @@
 // Demo data for the plain browser preview (vite dev), where there is no Go side.
 import type {
+  ComposeAction,
+  StackPlan,
+  StackTemplate,
   RunPlan,
   RunSpec,
   ActionPlan,
@@ -261,3 +264,27 @@ export function mockPlanRun(spec: RunSpec): Promise<RunPlan> {
     public: ports.filter((p) => p.startsWith('0.0.0.0') || p.startsWith('[::]')),
   })
 }
+
+export function mockComposeCommand(
+  project: string,
+  dir: string,
+  file: string,
+  action: ComposeAction,
+): Promise<string> {
+  const where = dir ? `--project-directory ${dir}${file ? ` -f ${file}` : ''} ` : ''
+  return Promise.resolve(
+    `docker compose ${where}-p ${project} ${action === 'up' ? 'up -d' : action}`,
+  )
+}
+
+export function mockPlanStack(dir: string, template: StackTemplate): Promise<StackPlan> {
+  const path = `${dir.replace(/\/$/, '')}/compose.yaml`
+  const content = `services:\n  app:\n    image: nginx:alpine # ${template}\n`
+  return Promise.resolve({
+    path,
+    content,
+    command: `mkdir -p -- ${dir} && (set -C && printf %s '${content}' > ${path})`,
+  })
+}
+
+export const mockCreateStack = (): Promise<void> => delay(undefined)

@@ -590,6 +590,7 @@ const en = {
           'Select a container to see its logs and details',
           'Open its logs in the Logs app',
           'Pull an image or run a new container from a form (typed into a terminal)',
+          'Compose: new stack from a template; up, pull, restart, down per project (typed into a terminal)',
         ],
         keys: [],
         runs: ['docker ps, stats, inspect, logs', 'docker start/stop/restart (with confirmation)'],
@@ -1512,6 +1513,30 @@ const en = {
       removeTitle: (n: string) => `Delete volume ${n.length > 20 ? `${n.slice(0, 12)}…` : n}?`,
       removeBody:
         'All data in the volume is deleted for good; there is no trash. Docker refuses if a container still uses it. Command to run:',
+    },
+    compose: {
+      more: (p: string) => `Actions for ${p}`,
+      up: 'Up (docker compose up -d)…',
+      pull: 'Pull images…',
+      restart: 'Restart…',
+      down: 'Down (stop and remove containers)…',
+      file: 'Open the compose file',
+    },
+    stack: {
+      title: 'New compose stack…',
+      dir: 'Folder on the server',
+      dirHint: 'A compose.yaml is written here; an existing one is never replaced.',
+      template: 'Template',
+      templates: { blank: 'One container', 'web-db': 'Web + database', 'app-redis': 'App + Redis' },
+      next: 'Preview',
+      back: 'Back',
+      previewBody: (path: string) =>
+        `This is written to ${path}. Change passwords and ports in the Editor before starting it.`,
+      create: 'Create',
+      done: (path: string) => `Created ${path}. Edit it, then start the stack in a terminal.`,
+      edit: 'Open in Editor',
+      up: 'Start (up -d) in Terminal',
+      close: 'Close',
     },
     run: {
       title: 'Run a new container…',
