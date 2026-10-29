@@ -7,6 +7,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [1.1.1] - 2026-10-29
 
 ### Sửa
+- Server có shell đăng nhập là zsh hay fish: lệnh của Davish viết cho `sh` nên trước đây có thể ra kết quả trống (ví dụ app Cổng không thấy cổng nào). Giờ mọi lệnh chạy dưới `sh`, shell đăng nhập là gì cũng được.
 - App không còn chờ mãi khi server không trả lời (shell đăng nhập bị treo, Docker treo…). Mọi lệnh có hạn chót (mặc định 3 phút, đọc cổng 25 giây, Docker 30 giây) và trả lỗi ngay khi hết hạn, không đợi server đóng phiên; mở SFTP cũng vậy. Trước đây hạn chót chỉ yêu cầu đóng phiên nên vẫn đứng ở "Đang đọc…".
 - Nút làm mới bấm được cả khi đang tải: lần tải mới thay lần đang kẹt, kết quả muộn của lần cũ bị bỏ qua.
 
