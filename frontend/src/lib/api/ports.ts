@@ -11,11 +11,20 @@ export interface Port {
   /** The container docker-proxy publishes the port for. */
   container?: string
   loopback: boolean
+  /** Reachable from the Internet, given ufw and docker. */
+  exposed: 'yes' | 'no' | 'unknown'
+}
+
+/** What ufw lets in. */
+export interface Firewall {
+  state: 'none' | 'inactive' | 'active' | 'unknown'
+  defaultAllow: boolean
 }
 
 export interface PortList {
   ports: Port[]
   root: boolean
+  firewall: Firewall
 }
 
 /** A server port forwarded to 127.0.0.1:localPort on this machine. */
@@ -31,7 +40,8 @@ export interface Tunnel {
   conns: number
 }
 
-export const portsList = (serverID: string): Promise<PortList> => App.PortsList(serverID)
+export const portsList = (serverID: string): Promise<PortList> =>
+  App.PortsList(serverID) as Promise<PortList>
 
 export const portsProbe = (
   serverID: string,

@@ -49,22 +49,30 @@ type Port struct {
 	Container string `json:"container,omitempty"`
 	// Loopback is set when only the server itself can reach the port.
 	Loopback bool `json:"loopback"`
+	// Exposed is yes, no or unknown: reachable from the Internet, given
+	// where it listens, ufw and docker.
+	Exposed string `json:"exposed"`
 }
 
 // List is the ports and whether Davish could see every process.
 type List struct {
-	Ports []Port `json:"ports"`
-	Root  bool   `json:"root"`
+	Ports    []Port   `json:"ports"`
+	Root     bool     `json:"root"`
+	Firewall Firewall `json:"firewall"`
 }
 
-const sep = "--davish--"
+const (
+	sep   = "--davish--"
+	fwSep = "--davish-ufw--"
+)
 
 // listLine reads the uid, then ss, then docker's published ports, which
 // may be missing or refused. Each part has its own time limit: a docker
 // daemon that hangs must not hide the ports, and ss -p walks every process.
 var listLine = `t5=; t10=; command -v timeout >/dev/null && { t5='timeout 5'; t10='timeout 10'; }` +
 	`; id -u; command -v ss >/dev/null || echo NO_SS; $t10 ss -tlnp 2>/dev/null; echo ` + sep +
-	`; $t5 docker ps --format '{{.Names}}\t{{.Ports}}' 2>/dev/null; true`
+	`; $t5 docker ps --format '{{.Names}}\t{{.Ports}}' 2>/dev/null; echo ` + fwSep +
+	`; command -v ufw >/dev/null && { echo UFW; { ufw status verbose 2>/dev/null || sudo -n ufw status verbose 2>/dev/null; } | head -n 300; }; true`
 
 // listTimeout bounds a whole List, whatever the server's shell does.
 const listTimeout = 25 * time.Second
@@ -84,7 +92,8 @@ func (l *Lister) List(ctx context.Context, serverID string) (List, error) {
 }
 
 func parse(out []byte) (List, error) {
-	head, docker, _ := bytes.Cut(out, []byte(sep+"\n"))
+	head, rest, _ := bytes.Cut(out, []byte(sep+"\n"))
+	docker, ufw, _ := bytes.Cut(rest, []byte(fwSep+"\n"))
 	sc := bufio.NewScanner(bytes.NewReader(head))
 	// Never null in JSON: an empty list is a list (the frontend iterates it).
 	list := List{Ports: []Port{}}
@@ -119,6 +128,11 @@ func parse(out []byte) (List, error) {
 		if p.Process == "docker-proxy" {
 			list.Ports[i].Container = containers[p.Port]
 		}
+	}
+	installed := bytes.HasPrefix(ufw, []byte("UFW\n"))
+	list.Firewall = parseUFW(string(bytes.TrimPrefix(ufw, []byte("UFW\n"))), installed)
+	for i, p := range list.Ports {
+		list.Ports[i].Exposed = exposure(p, list.Firewall)
 	}
 	slices.SortStableFunc(list.Ports, func(a, b Port) int { return a.Port - b.Port })
 	return list, nil

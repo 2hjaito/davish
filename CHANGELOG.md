@@ -5,6 +5,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Thêm
+- Cổng: cột **Lộ ra Internet** (ufw + Docker), mở/đóng cổng bằng ufw (không đóng cổng SSH đang dùng), gợi ý đóng các cổng quản trị đang lộ ra.
 - Database: **Dump** ra `~/db-backups` và **Khôi phục…** từ bản dump (gõ tên để xác nhận).
 - App **Database** (MariaDB/MySQL, PostgreSQL): danh sách kèm dung lượng, tạo database + user với mật khẩu ngẫu nhiên chỉ hiện một lần, xóa phải gõ tên, mở qua tunnel.
 

@@ -38,8 +38,8 @@ func TestDuplicateSocketsAreOnePort(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := []Port{
-		{Addr: "172.27.0.1", Port: 53, Process: "dnsmasq", PID: 77},
-		{Addr: "0.0.0.0", Port: 80, Process: "nginx", PID: 12},
+		{Addr: "172.27.0.1", Port: 53, Process: "dnsmasq", PID: 77, Exposed: ExposedYes},
+		{Addr: "0.0.0.0", Port: 80, Process: "nginx", PID: 12, Exposed: ExposedYes},
 	}
 	if len(l.Ports) != len(want) {
 		t.Fatalf("ports = %+v", l.Ports)

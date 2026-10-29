@@ -23,10 +23,10 @@ db	3306/tcp
 		t.Error("uid 1000 reported as root")
 	}
 	want := []Port{
-		{Addr: "::", Port: 22},
-		{Addr: "127.0.0.53", Port: 53, Process: "systemd-resolve", PID: 600, Loopback: true},
-		{Addr: "0.0.0.0", Port: 80, Process: "nginx", PID: 1234},
-		{Addr: "0.0.0.0", Port: 8080, Process: "docker-proxy", PID: 900, Container: "web"},
+		{Addr: "::", Port: 22, Exposed: ExposedYes},
+		{Addr: "127.0.0.53", Port: 53, Process: "systemd-resolve", PID: 600, Loopback: true, Exposed: ExposedNo},
+		{Addr: "0.0.0.0", Port: 80, Process: "nginx", PID: 1234, Exposed: ExposedYes},
+		{Addr: "0.0.0.0", Port: 8080, Process: "docker-proxy", PID: 900, Container: "web", Exposed: ExposedYes},
 	}
 	if len(l.Ports) != len(want) {
 		t.Fatalf("ports = %+v", l.Ports)

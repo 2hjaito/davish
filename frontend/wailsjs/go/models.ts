@@ -2197,6 +2197,20 @@ export namespace packages {
 
 export namespace ports {
 	
+	export class Firewall {
+	    state: string;
+	    defaultAllow: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Firewall(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.state = source["state"];
+	        this.defaultAllow = source["defaultAllow"];
+	    }
+	}
 	export class Port {
 	    addr: string;
 	    port: number;
@@ -2204,6 +2218,7 @@ export namespace ports {
 	    pid?: number;
 	    container?: string;
 	    loopback: boolean;
+	    exposed: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Port(source);
@@ -2217,11 +2232,13 @@ export namespace ports {
 	        this.pid = source["pid"];
 	        this.container = source["container"];
 	        this.loopback = source["loopback"];
+	        this.exposed = source["exposed"];
 	    }
 	}
 	export class List {
 	    ports: Port[];
 	    root: boolean;
+	    firewall: Firewall;
 	
 	    static createFrom(source: any = {}) {
 	        return new List(source);
@@ -2231,6 +2248,7 @@ export namespace ports {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.ports = this.convertValues(source["ports"], Port);
 	        this.root = source["root"];
+	        this.firewall = this.convertValues(source["firewall"], Firewall);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
