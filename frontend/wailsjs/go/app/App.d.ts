@@ -185,9 +185,13 @@ export function NginxCheckCerts(arg1:string):Promise<void>;
 
 export function NginxCreate(arg1:string,arg2:nginx.NewSite,arg3:string,arg4:string):Promise<nginx.CreateResult>;
 
+export function NginxEdit(arg1:string,arg2:string,arg3:nginx.SiteEdit,arg4:string,arg5:string):Promise<nginx.CreateResult>;
+
 export function NginxList(arg1:string):Promise<Array<nginx.Site>>;
 
 export function NginxPlanCreate(arg1:string,arg2:nginx.NewSite,arg3:string):Promise<nginx.CreatePlan>;
+
+export function NginxPlanEdit(arg1:string,arg2:string,arg3:nginx.SiteEdit,arg4:string):Promise<nginx.EditPlan>;
 
 export function NginxPlanRemove(arg1:string,arg2:string,arg3:boolean):Promise<nginx.RemovePlan>;
 

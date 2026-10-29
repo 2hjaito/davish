@@ -57,6 +57,8 @@ Sites, server blocks and upstreams; turn sites on or off, `nginx -t` before ever
 
 **Turn on HTTPS…** checks, from your machine, that each domain points to the server, warns about those that do not, then opens a terminal with `sudo certbot --nginx -d …` typed in (redirect HTTP to HTTPS optional).
 
+**Quick change…** adds domains, points the proxy elsewhere (with what listens on the server as suggestions), turns gzip on or off and sets the upload size limit. The current file is backed up first and put back if `nginx -t` fails.
+
 <table><tr>
   <td><img src="assets/screenshots/nginx.jpg" alt="Nginx site with TLS certificate"></td>
   <td><img src="assets/screenshots/remove.jpg" alt="Deleting an nginx site with its certificate"></td>

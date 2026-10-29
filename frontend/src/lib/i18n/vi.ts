@@ -633,6 +633,7 @@ const vi = {
           'Xóa site, kèm chứng chỉ chỉ site đó dùng',
           'Site mới: reverse proxy, tĩnh hoặc PHP-FPM, xem trước cấu hình',
           'Bật HTTPS: kiểm tra DNS rồi gõ sẵn certbot --nginx vào Terminal',
+          'Sửa nhanh: thêm tên miền, đổi upstream, gzip, client_max_body_size',
         ],
         keys: [],
         runs: [
@@ -1777,6 +1778,23 @@ const vi = {
       'Chạy certbot delete: certbot thôi gia hạn tên miền này, hết báo lỗi gia hạn. Chỉ site này dùng chứng chỉ.',
     sharedCerts: (names: string) => `Giữ lại chứng chỉ ${names} vì site khác cũng dùng.`,
     commandIntro: 'Lệnh sẽ chạy:',
+    edit: {
+      open: 'Sửa nhanh…',
+      title: (n: string) => `Sửa “${n}”`,
+      body: 'Để trống ô nào thì giữ nguyên. Muốn sửa khác thì mở file trong Editor.',
+      addNames: 'Thêm tên miền',
+      upstream: 'Chuyển tới',
+      gzip: 'gzip',
+      keep: 'Giữ nguyên',
+      on: 'Bật',
+      off: 'Tắt',
+      maxBody: 'Dung lượng tải lên tối đa (client_max_body_size)',
+      previewBody: (backup: string) =>
+        `File sẽ thành như dưới đây. File hiện tại được chép sang ${backup} trước và được trả lại nếu nginx -t lỗi.`,
+      apply: 'Áp dụng và reload',
+      testFailed: 'nginx -t báo lỗi nên đã trả lại file cũ. nginx nói:',
+      done: (n: string) => `Đã sửa ${n} và reload nginx.`,
+    },
     ssl: {
       open: 'Bật HTTPS…',
       title: 'Bật HTTPS',

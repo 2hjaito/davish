@@ -643,6 +643,7 @@ const en = {
           'Delete a site, with certificates only it uses',
           'New site: reverse proxy, static or PHP-FPM, with a config preview',
           'Turn on HTTPS: checks DNS, then types certbot --nginx into a terminal',
+          'Quick change: add domains, change the upstream, gzip, client_max_body_size',
         ],
         keys: [],
         runs: [
@@ -1803,6 +1804,23 @@ const en = {
       'Runs certbot delete: certbot stops renewing this domain, so renewal errors stop too. Only this site uses the certificate.',
     sharedCerts: (names: string) => `Keeping certificate ${names} since other sites use it too.`,
     commandIntro: 'Command to run:',
+    edit: {
+      open: 'Quick change…',
+      title: (n: string) => `Change “${n}”`,
+      body: 'Leave a field empty to keep it as it is. For anything else, open the file in the Editor.',
+      addNames: 'Add domains',
+      upstream: 'Proxy to',
+      gzip: 'gzip',
+      keep: 'Keep',
+      on: 'On',
+      off: 'Off',
+      maxBody: 'Max upload size (client_max_body_size)',
+      previewBody: (backup: string) =>
+        `The file becomes what is shown below. The current one is copied to ${backup} first and put back if nginx -t fails.`,
+      apply: 'Apply and reload',
+      testFailed: 'nginx -t failed, so the old file was put back. nginx said:',
+      done: (n: string) => `Changed ${n} and reloaded nginx.`,
+    },
     ssl: {
       open: 'Turn on HTTPS…',
       title: 'Turn on HTTPS',

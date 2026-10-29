@@ -192,3 +192,37 @@ export const nginxPlanSSL = (
   names: string[],
   redirect: boolean,
 ): Promise<SSLPlan> => App.NginxPlanSSL(serverID, names, redirect)
+
+/** A quick change to a site; empty fields are kept. */
+export interface SiteEdit {
+  addNames: string[]
+  upstream: string
+  gzip: '' | 'on' | 'off'
+  maxBody: string
+}
+
+export interface EditPlan {
+  path: string
+  /** The current file is copied here first and put back if nginx -t fails. */
+  backup: string
+  before: string
+  after: string
+  /** Exactly what nginxEdit runs. */
+  command: string
+  sudo: string
+}
+
+export const nginxPlanEdit = (
+  serverID: string,
+  path: string,
+  edit: SiteEdit,
+  backup = '',
+): Promise<EditPlan> => App.NginxPlanEdit(serverID, path, edit, backup)
+
+/** Runs the confirmed command; FS_STALE when the file changed since. */
+export const nginxEdit = (
+  serverID: string,
+  edit: SiteEdit,
+  plan: EditPlan,
+): Promise<CreateResult> =>
+  App.NginxEdit(serverID, plan.path, edit, plan.backup, plan.command) as Promise<CreateResult>
