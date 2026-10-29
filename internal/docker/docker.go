@@ -25,6 +25,7 @@ const app = "docker"
 // Runner runs a command on a server and records it in the audit log.
 type Runner interface {
 	Run(ctx context.Context, serverID, app string, cmd shellx.Command) (audit.Result, error)
+	RunLine(ctx context.Context, serverID, app, line string) (audit.Result, error)
 }
 
 // Container is one row of docker ps -a.
@@ -45,6 +46,10 @@ type Container struct {
 	// container started by hand.
 	Project string `json:"project,omitempty"`
 	Service string `json:"service,omitempty"`
+	// ProjectDir and ProjectFile are where the compose project lives: its
+	// working folder and first compose file.
+	ProjectDir  string `json:"projectDir,omitempty"`
+	ProjectFile string `json:"projectFile,omitempty"`
 }
 
 // readTimeout bounds a read: a hung docker daemon must not leave the app
@@ -108,6 +113,10 @@ func parsePS(out []byte) ([]Container, error) {
 			RunningFor: r.RunningFor,
 			Project:    label(r.Labels, "com.docker.compose.project"),
 			Service:    label(r.Labels, "com.docker.compose.service"),
+			// Several compose files are joined with commas, which label
+			// splits on: the first one is kept.
+			ProjectDir:  label(r.Labels, "com.docker.compose.project.working_dir"),
+			ProjectFile: label(r.Labels, "com.docker.compose.project.config_files"),
 		})
 		return nil
 	})

@@ -1,0 +1,30 @@
+services:
+  web:
+    image: wordpress:6
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: app
+      WORDPRESS_DB_PASSWORD: change-me
+      WORDPRESS_DB_NAME: app
+    volumes:
+      - web:/var/www/html
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:11
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: app
+      MARIADB_USER: app
+      MARIADB_PASSWORD: change-me
+      MARIADB_RANDOM_ROOT_PASSWORD: "1"
+    volumes:
+      - db:/var/lib/mysql
+
+volumes:
+  web:
+  db:

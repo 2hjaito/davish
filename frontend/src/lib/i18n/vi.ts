@@ -589,6 +589,7 @@ const vi = {
           'Chọn container để xem log và chi tiết',
           'Mở log trong app Logs',
           'Pull image hoặc chạy container mới từ form (gõ sẵn vào Terminal)',
+          'Compose: tạo stack từ mẫu; up, pull, restart, down theo project (gõ sẵn vào Terminal)',
         ],
         keys: [],
         runs: ['docker ps, stats, inspect, logs', 'docker start/stop/restart (có xác nhận)'],
@@ -1490,6 +1491,30 @@ const vi = {
       removeTitle: (n: string) => `Xóa volume ${n.length > 20 ? `${n.slice(0, 12)}…` : n}?`,
       removeBody:
         'Mọi dữ liệu trong volume bị xóa vĩnh viễn, không có thùng rác. Docker từ chối nếu còn container dùng nó. Lệnh sẽ chạy:',
+    },
+    compose: {
+      more: (p: string) => `Thao tác cho ${p}`,
+      up: 'Up (docker compose up -d)…',
+      pull: 'Pull image…',
+      restart: 'Khởi động lại…',
+      down: 'Down (dừng và xóa container)…',
+      file: 'Mở file compose',
+    },
+    stack: {
+      title: 'Stack compose mới…',
+      dir: 'Thư mục trên server',
+      dirHint: 'compose.yaml được ghi vào đây; không bao giờ ghi đè file đã có.',
+      template: 'Mẫu',
+      templates: { blank: 'Một container', 'web-db': 'Web + database', 'app-redis': 'App + Redis' },
+      next: 'Xem trước',
+      back: 'Quay lại',
+      previewBody: (path: string) =>
+        `Nội dung này được ghi vào ${path}. Đổi mật khẩu và cổng trong Editor trước khi chạy.`,
+      create: 'Tạo',
+      done: (path: string) => `Đã tạo ${path}. Sửa file rồi chạy stack trong Terminal.`,
+      edit: 'Mở trong Editor',
+      up: 'Chạy (up -d) trong Terminal',
+      close: 'Đóng',
     },
     run: {
       title: 'Chạy container mới…',

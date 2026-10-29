@@ -89,3 +89,22 @@ func (a *App) DockerPullCommand(ref string) (string, error) {
 func (a *App) DockerPlanRun(spec docker.RunSpec) (docker.RunPlan, error) {
 	return docker.PlanRun(spec)
 }
+
+// DockerComposeCommand is the docker compose line for an action on a
+// project, for a terminal.
+func (a *App) DockerComposeCommand(project, dir, file, action string) (string, error) {
+	return docker.ComposeCommand(project, dir, file, action)
+}
+
+// DockerPlanStack describes writing a template as a new compose.yaml.
+func (a *App) DockerPlanStack(dir, template string) (docker.StackPlan, error) {
+	return docker.PlanStack(dir, template)
+}
+
+// DockerCreateStack runs the confirmed command of DockerPlanStack.
+func (a *App) DockerCreateStack(serverID, dir, template, command string) error {
+	if err := a.lock.Check(); err != nil {
+		return err
+	}
+	return a.docker.CreateStack(a.ctx, serverID, dir, template, command)
+}

@@ -22,6 +22,9 @@ export interface Container {
   /** docker compose project and service, when started by compose. */
   project?: string
   service?: string
+  /** The compose project's folder and first compose file. */
+  projectDir?: string
+  projectFile?: string
 }
 
 export interface ContainerStats {
@@ -208,3 +211,32 @@ export const dockerPullCommand = (ref: string): Promise<string> => App.DockerPul
 
 export const dockerPlanRun = (spec: RunSpec): Promise<RunPlan> =>
   App.DockerPlanRun(docker.RunSpec.createFrom(spec))
+
+export type ComposeAction = 'up' | 'down' | 'pull' | 'restart'
+
+export const dockerComposeCommand = (
+  project: string,
+  dir: string,
+  file: string,
+  action: ComposeAction,
+): Promise<string> => App.DockerComposeCommand(project, dir, file, action)
+
+export type StackTemplate = 'blank' | 'web-db' | 'app-redis'
+
+export interface StackPlan {
+  path: string
+  content: string
+  /** Exactly what dockerCreateStack runs. */
+  command: string
+}
+
+export const dockerPlanStack = (dir: string, template: StackTemplate): Promise<StackPlan> =>
+  App.DockerPlanStack(dir, template)
+
+/** FS_EXISTS when the folder has a compose.yaml already. */
+export const dockerCreateStack = (
+  serverID: string,
+  dir: string,
+  template: StackTemplate,
+  command: string,
+): Promise<void> => App.DockerCreateStack(serverID, dir, template, command)

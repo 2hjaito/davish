@@ -1,14 +1,25 @@
 <script lang="ts">
   import { SvelteSet } from 'svelte/reactivity'
 
-  import type { ActionPlan, Container, ContainerAction, ContainerStats } from '../../lib/api/docker'
+  import type {
+    ActionPlan,
+    ComposeAction,
+    Container,
+    ContainerAction,
+    ContainerStats,
+  } from '../../lib/api/docker'
   import { toUserError } from '../../lib/api/errors'
   import { formatBytes, formatPct } from '../../lib/format'
   import { t } from '../../lib/i18n'
   import ActionMenu from '../../lib/ui/ActionMenu.svelte'
   import ConfirmCommand from '../../lib/ui/ConfirmCommand.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
-  import { openInBrowser, openLogs, openTerminalAt } from '../../lib/wm/intents.svelte'
+  import {
+    openFileInEditor,
+    openInBrowser,
+    openLogs,
+    openTerminalAt,
+  } from '../../lib/wm/intents.svelte'
   import { backend } from './backend'
   import { ago, canDo, type Group, groups, health, parsePorts } from './containers'
 
@@ -102,6 +113,40 @@
         disabled: running(c),
         run: () => void act(c, 'rm'),
       },
+    ]
+  }
+
+  async function compose(g: Group, action: ComposeAction) {
+    const c = g.containers[0]
+    try {
+      const cmd = await backend.composeCommand(
+        g.project ?? '',
+        c?.projectDir ?? '',
+        c?.projectFile ?? '',
+        action,
+      )
+      openTerminalAt(serverID, c?.projectDir || undefined, cmd)
+    } catch (e) {
+      error = toUserError(e).message
+    }
+  }
+
+  // Compose commands are typed into a terminal: the user reads them and
+  // presses Enter (docs/SECURITY.md).
+  function projectMenu(g: Group) {
+    const c = g.containers[0]
+    const known = !!c?.projectDir
+    return [
+      { label: d.compose.up, disabled: !known, run: () => void compose(g, 'up') },
+      { label: d.compose.pull, disabled: !known, run: () => void compose(g, 'pull') },
+      { label: d.compose.restart, run: () => void compose(g, 'restart') },
+      {
+        label: d.compose.file,
+        disabled: !c?.projectFile,
+        run: () => c?.projectFile && openFileInEditor(serverID, c.projectFile),
+      },
+      null,
+      { label: d.compose.down, danger: true, run: () => void compose(g, 'down') },
     ]
   }
 
@@ -246,7 +291,9 @@
               <td class="num">{cpu !== undefined ? formatPct(cpu) : ''}</td>
               <td class="num">{mem !== undefined ? formatBytes(mem) : ''}</td>
               <td></td>
-              <td></td>
+              <td class="num" onclick={(e) => e.stopPropagation()}>
+                <ActionMenu label={d.compose.more(g.project)} actions={projectMenu(g)} />
+              </td>
             </tr>
             {#if open}
               {#each g.containers as c (c.id)}{@render row(c, true)}{/each}
