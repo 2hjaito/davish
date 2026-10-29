@@ -288,3 +288,11 @@ export function mockPlanStack(dir: string, template: StackTemplate): Promise<Sta
 }
 
 export const mockCreateStack = (): Promise<void> => delay(undefined)
+
+export const mockCreate = (): Promise<void> => delay(undefined)
+
+export const mockRunCommand = (name: string): Promise<RunPlan> =>
+  delay({
+    command: `docker run -d --name ${name} --restart unless-stopped -p 127.0.0.1:8080:80 -v ${name}-data:/data nginx:1.27`,
+    public: [],
+  })

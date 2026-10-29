@@ -240,3 +240,12 @@ export const dockerCreateStack = (
   template: StackTemplate,
   command: string,
 ): Promise<void> => App.DockerCreateStack(serverID, dir, template, command)
+
+export const dockerCreate = (
+  serverID: string,
+  kind: 'network' | 'volume',
+  name: string,
+): Promise<void> => App.DockerCreate(serverID, kind, name)
+
+export const dockerRunCommand = (serverID: string, name: string): Promise<RunPlan> =>
+  App.DockerRunCommand(serverID, name)

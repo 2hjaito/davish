@@ -108,3 +108,16 @@ func (a *App) DockerCreateStack(serverID, dir, template, command string) error {
 	}
 	return a.docker.CreateStack(a.ctx, serverID, dir, template, command)
 }
+
+// DockerCreate makes a network or a volume.
+func (a *App) DockerCreate(serverID, kind, name string) error {
+	if err := a.lock.Check(); err != nil {
+		return err
+	}
+	return a.docker.CreateObject(a.ctx, serverID, kind, name)
+}
+
+// DockerRunCommand rebuilds the docker run line of a container.
+func (a *App) DockerRunCommand(serverID, name string) (docker.RunPlan, error) {
+	return a.docker.RunCommand(a.ctx, serverID, name)
+}

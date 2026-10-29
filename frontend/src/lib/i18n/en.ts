@@ -591,6 +591,7 @@ const en = {
           'Open its logs in the Logs app',
           'Pull an image or run a new container from a form (typed into a terminal)',
           'Compose: new stack from a template; up, pull, restart, down per project (typed into a terminal)',
+          'New network or volume; copy a container as a docker run command',
         ],
         keys: [],
         runs: ['docker ps, stats, inspect, logs', 'docker start/stop/restart (with confirmation)'],
@@ -1513,6 +1514,20 @@ const en = {
       removeTitle: (n: string) => `Delete volume ${n.length > 20 ? `${n.slice(0, 12)}…` : n}?`,
       removeBody:
         'All data in the volume is deleted for good; there is no trash. Docker refuses if a container still uses it. Command to run:',
+    },
+    create: {
+      more: 'More',
+      title: { network: 'New network…', volume: 'New volume…' },
+      name: 'Name',
+      action: 'Create',
+    },
+    copyRun: {
+      label: 'Copy as docker run',
+      title: (n: string) => `docker run for “${n}”`,
+      body: 'A command that makes a container like this one: image, ports, environment the image does not set, mounts, restart policy, network and command:',
+      bodyPublic: (ports: string) =>
+        `A command that makes a container like this one. Note: ${ports} binds every address. Command:`,
+      copy: 'Copy',
     },
     compose: {
       more: (p: string) => `Actions for ${p}`,

@@ -590,6 +590,7 @@ const vi = {
           'Mở log trong app Logs',
           'Pull image hoặc chạy container mới từ form (gõ sẵn vào Terminal)',
           'Compose: tạo stack từ mẫu; up, pull, restart, down theo project (gõ sẵn vào Terminal)',
+          'Tạo network, volume; sao chép container thành lệnh docker run',
         ],
         keys: [],
         runs: ['docker ps, stats, inspect, logs', 'docker start/stop/restart (có xác nhận)'],
@@ -1491,6 +1492,20 @@ const vi = {
       removeTitle: (n: string) => `Xóa volume ${n.length > 20 ? `${n.slice(0, 12)}…` : n}?`,
       removeBody:
         'Mọi dữ liệu trong volume bị xóa vĩnh viễn, không có thùng rác. Docker từ chối nếu còn container dùng nó. Lệnh sẽ chạy:',
+    },
+    create: {
+      more: 'Thêm',
+      title: { network: 'Network mới…', volume: 'Volume mới…' },
+      name: 'Tên',
+      action: 'Tạo',
+    },
+    copyRun: {
+      label: 'Sao chép thành docker run',
+      title: (n: string) => `docker run cho “${n}”`,
+      body: 'Lệnh tạo container giống container này: image, cổng, biến môi trường image không tự đặt, mount, chính sách khởi động lại, network và lệnh chạy:',
+      bodyPublic: (ports: string) =>
+        `Lệnh tạo container giống container này. Lưu ý: ${ports} bind mọi địa chỉ. Lệnh:`,
+      copy: 'Sao chép',
     },
     compose: {
       more: (p: string) => `Thao tác cho ${p}`,
