@@ -152,3 +152,7 @@ Integration test chỉ nói chuyện với container trong `test/sshd/`, không 
 ## Nhật ký thay đổi
 
 Xem [CHANGELOG.md](CHANGELOG.md).
+
+## Giấy phép
+
+Davish là phần mềm tự do theo [GNU General Public License v3.0](LICENSE). Đóng góp code cần ký [Thỏa thuận đóng góp (CLA)](CLA.md), xem [CONTRIBUTING.md](CONTRIBUTING.md). Tên và logo Davish không nằm trong giấy phép: xem [TRADEMARKS.md](TRADEMARKS.md).
