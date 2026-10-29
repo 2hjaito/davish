@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- App **Database** (MariaDB/MySQL, PostgreSQL): danh sách kèm dung lượng, tạo database + user với mật khẩu ngẫu nhiên chỉ hiện một lần, xóa phải gõ tên, mở qua tunnel.
+
 ### Sửa
 - Thứ tự dock, "Bỏ qua bản này" và lựa chọn trong Logs giờ được nhớ sau khi khởi động lại (tên cài đặt có dấu `:` bị từ chối âm thầm).
 - An ninh: "Chặn bằng ufw…" chèn luật lên đầu (`ufw insert 1`), trước đó luật nằm sau `ALLOW 22` nên không chặn được SSH; IP đã chặn hiện nhãn "đã chặn bằng ufw".

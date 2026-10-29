@@ -16,6 +16,7 @@ import (
 	"davish/internal/audit"
 	"davish/internal/conn"
 	"davish/internal/cron"
+	"davish/internal/database"
 	"davish/internal/diag"
 	"davish/internal/disk"
 	"davish/internal/docker"
@@ -61,6 +62,7 @@ type App struct {
 	keys      *sshkeys.Service
 	packages  *packages.Service
 	git       *git.Service
+	databases *database.Service
 	ports     *ports.Lister
 	tunnels   *ports.Tunnels
 	browser   *ports.Browser
@@ -109,6 +111,7 @@ func New(version string) (*App, error) {
 	a.keys = sshkeys.New(a.conns, runner)
 	a.packages = packages.New(runner, emitter{a})
 	a.git = git.New(runner)
+	a.databases = database.New(runner)
 	// The app replaced by the last update is no longer needed.
 	update.Cleanup(goruntime.GOOS, os.Executable)
 	a.updates = update.New(version, emitter{a}, log, update.Options{})

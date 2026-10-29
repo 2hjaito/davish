@@ -77,6 +77,10 @@ Gói apt, dnf, yum hoặc apk đã cài và có bản cập nhật, bản vá b�
   <td><img src="assets/screenshots/packages-apps.jpg" alt="Chương trình trên server"></td>
 </tr></table>
 
+## Database
+
+Database MariaDB/MySQL và PostgreSQL kèm dung lượng, mở từ Launchpad hoặc Spotlight. Tạo database và user sở hữu nó với mật khẩu ngẫu nhiên, chỉ hiện một lần và không lưu ở đâu; câu lệnh gửi qua stdin nên mật khẩu không nằm trong nhật ký lệnh hay lịch sử shell. Xóa database sau khi gõ đúng tên. Mở database server qua tunnel để dùng công cụ của bạn. Davish kết nối bằng user của bạn, qua `sudo -n` hoặc user `postgres`; khi chỉ root vào được thì mở client trong Terminal.
+
 ## Triển khai app
 
 Mở từ Launchpad hoặc Spotlight: trình hướng dẫn từ repo git, image Docker hoặc thư mục có sẵn trên server, chạy bằng dịch vụ systemd (unit file sinh từ form), docker compose, container hoặc file tĩnh, sau một site nginx trên tên miền của bạn kèm chứng chỉ Let's Encrypt. Mọi file và lệnh hiện ra trước khi chạy; sau đó chạy từng bước trong Terminal, dừng ở bước đầu tiên bị lỗi. Trang cuối liệt kê những gì đã tạo và một lệnh gỡ toàn bộ để làm lại.

@@ -77,6 +77,10 @@ What apt, dnf, yum or apk installed and can upgrade, security fixes first, with 
   <td><img src="assets/screenshots/packages-apps.jpg" alt="Programs found on the server"></td>
 </tr></table>
 
+## Database
+
+MariaDB/MySQL and PostgreSQL databases with their size, from Launchpad or Spotlight. Create a database and a user that owns it with a random password, shown once and kept nowhere; the statement goes on stdin, so the password is neither in the command log nor in a shell history. Delete a database after typing its name. Open the database server through a tunnel to use your own tools. Davish connects as you, through `sudo -n` or as `postgres`; when only root may connect it opens the client in a terminal.
+
 ## Deploy an app
 
 From Launchpad or Spotlight: a wizard from a git repository, a Docker image or a folder already on the server, run as a systemd service (the unit file is generated from a form), with docker compose, as a container or as static files, behind an nginx site on your domains with a Let's Encrypt certificate. Every file and command shows before anything runs; then it all runs step by step in a terminal and stops at the first step that fails. The last page lists what was made and gives one command that removes it all, to start over.
