@@ -174,6 +174,16 @@ export const apps: AppDef[] = [
     dock: false,
     layout: false,
   },
+  {
+    id: 'deploy',
+    label: t.apps.deploy,
+    icon: 'play',
+    theme: 'light',
+    size: { w: 720, h: 620 },
+    load: () => import('./deploy/DeployApp.svelte'),
+    dock: false,
+    layout: false,
+  },
 ]
 
 /** Apps with a tile in the dock. */

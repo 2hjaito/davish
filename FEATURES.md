@@ -77,6 +77,10 @@ What apt, dnf, yum or apk installed and can upgrade, security fixes first, with 
   <td><img src="assets/screenshots/packages-apps.jpg" alt="Programs found on the server"></td>
 </tr></table>
 
+## Deploy an app
+
+From Launchpad or Spotlight: a wizard from a git repository, a Docker image or a folder already on the server, run as a systemd service (the unit file is generated from a form), with docker compose, as a container or as static files, behind an nginx site on your domains with a Let's Encrypt certificate. Every file and command shows before anything runs; then it all runs step by step in a terminal and stops at the first step that fails. The last page lists what was made and gives one command that removes it all, to start over.
+
 ## Git
 
 Finds the repositories in your home, `/var/www`, `/srv` and `/opt`, or folders you add. Branch, upstream and how far ahead or behind, changed files with their diffs, and a commit graph of every branch with merges and tags. Fetch, `pull --ff-only` (refused while the tree is dirty) and switch branches after confirming the exact command; `npm ci` / yarn / pnpm from the lockfile in a terminal. A rejected key leads to creating a deploy key.

@@ -5,6 +5,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Thêm
+- **Triển khai app** (Launchpad/Spotlight): trình hướng dẫn từ repo git / image / thư mục → systemd, compose, container hoặc tĩnh → site nginx → HTTPS; xem trước mọi lệnh, chạy từng bước trong Terminal, tổng kết và lệnh gỡ toàn bộ.
 - Git → **Deploy…**: công thức triển khai cho mỗi repo, lưu trên máy, chạy từng bước trong Terminal và dừng ở bước lỗi.
 - Git: **Clone repo…** (ghim host key GitHub/GitLab), **git init**, **Đặt remote…**.
 - Docker: tạo network, volume; **Sao chép thành docker run** từ container.

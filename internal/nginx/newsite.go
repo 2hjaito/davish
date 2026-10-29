@@ -271,3 +271,13 @@ func createResult(out string, exit int, sudo string) (CreateResult, error) {
 	}
 	return r, apperr.New(apperr.CmdFailed, "command failed")
 }
+
+// PlanCreateFor is PlanCreate without the server: for a plan made ahead,
+// such as the deploy wizard's, where the server's layout is passed in.
+func PlanCreateFor(n NewSite, config string, confD bool) (CreatePlan, error) {
+	n, err := n.check()
+	if err != nil {
+		return CreatePlan{}, err
+	}
+	return planCreate(n, config, confD), nil
+}

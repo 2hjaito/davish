@@ -46,6 +46,10 @@ export function DeleteServer(arg1) {
   return window['go']['app']['App']['DeleteServer'](arg1);
 }
 
+export function DeployPlan(arg1) {
+  return window['go']['app']['App']['DeployPlan'](arg1);
+}
+
 export function DiagFrontendError(arg1) {
   return window['go']['app']['App']['DiagFrontendError'](arg1);
 }

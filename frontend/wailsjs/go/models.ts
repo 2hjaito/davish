@@ -336,6 +336,144 @@ export namespace cron {
 
 }
 
+export namespace deploy {
+	
+	export class Step {
+	    title: string;
+	    command: string;
+	    file?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Step(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.title = source["title"];
+	        this.command = source["command"];
+	        this.file = source["file"];
+	    }
+	}
+	export class Plan {
+	    steps: Step[];
+	    line: string;
+	    created: string[];
+	    uninstall: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Plan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.steps = this.convertValues(source["steps"], Step);
+	        this.line = source["line"];
+	        this.created = source["created"];
+	        this.uninstall = source["uninstall"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Unit {
+	    name: string;
+	    execStart: string;
+	    user: string;
+	    workingDir: string;
+	    env: string[];
+	    envFile: string;
+	    restart: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Unit(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.execStart = source["execStart"];
+	        this.user = source["user"];
+	        this.workingDir = source["workingDir"];
+	        this.env = source["env"];
+	        this.envFile = source["envFile"];
+	        this.restart = source["restart"];
+	    }
+	}
+	export class Spec {
+	    source: string;
+	    repoURL: string;
+	    branch: string;
+	    image: string;
+	    dir: string;
+	    run: string;
+	    port: number;
+	    containerPort: number;
+	    name: string;
+	    unit: Unit;
+	    domains: string[];
+	    confD: boolean;
+	    ssl: boolean;
+	    redirect: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Spec(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.source = source["source"];
+	        this.repoURL = source["repoURL"];
+	        this.branch = source["branch"];
+	        this.image = source["image"];
+	        this.dir = source["dir"];
+	        this.run = source["run"];
+	        this.port = source["port"];
+	        this.containerPort = source["containerPort"];
+	        this.name = source["name"];
+	        this.unit = this.convertValues(source["unit"], Unit);
+	        this.domains = source["domains"];
+	        this.confD = source["confD"];
+	        this.ssl = source["ssl"];
+	        this.redirect = source["redirect"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+
+}
+
 export namespace diag {
 	
 	export class Finding {
