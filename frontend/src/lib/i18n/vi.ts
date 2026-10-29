@@ -756,6 +756,64 @@ export const t = {
     openPage: 'Mở trang tải',
     ok: 'OK',
   },
+  diag: {
+    slowTitle: 'Server trả lời chậm',
+    slowHint:
+      'Davish vẫn đang chờ. Nếu server không chạy được lệnh nào, việc chờ thêm không giúp gì: bấm Chẩn đoán để biết lý do.',
+    errorHint:
+      'Bấm Chẩn đoán để Davish tự tìm lý do, hoặc Sao chép chi tiết để gửi cho người hỗ trợ bạn.',
+    retry: 'Thử lại',
+    diagnose: 'Chẩn đoán',
+    running: 'Đang chẩn đoán…',
+    copy: 'Sao chép chi tiết',
+    copied: 'Đã sao chép',
+    copyError: 'Lỗi',
+    copyDiag: 'Chẩn đoán',
+    copyLog: 'Log gần đây',
+    findings: 'Các dòng có thể gây ra:',
+    steps: {
+      echo: 'Chạy lệnh đơn giản (echo)',
+      ss: 'Đọc cổng (ss -tlnp)',
+      docker: 'Hỏi Docker (docker ps)',
+    } as Record<string, string>,
+    verdicts: {
+      ok: {
+        title: 'Server trả lời bình thường',
+        advice:
+          'Lỗi có thể chỉ xảy ra một lúc. Thử lại; nếu vẫn lỗi, Sao chép chi tiết và gửi cho người hỗ trợ.',
+      },
+      'no-connection': {
+        title: 'Mất kết nối SSH',
+        advice:
+          'Davish đang không kết nối tới server. Kiểm tra mạng, hoặc kết nối lại ở menu chọn server.',
+      },
+      'shell-hangs': {
+        title: 'Server không chạy được lệnh nào',
+        advice:
+          'SSH vào được nhưng shell đăng nhập của user bị treo trước khi chạy lệnh, nên mọi app (kể cả Files) đều chờ mãi. Thường do ~/.bashrc, ~/.bash_profile, ~/.profile hoặc /etc/bash.bashrc chạy tmux/screen, "exec zsh", chờ nhập (read), hay một lệnh chạy lâu. Cách sửa: mở Terminal (Terminal có màn hình nên không bị ảnh hưởng), chuyển các lệnh đó xuống dưới dòng  [[ $- == *i* ]] || return  ở đầu file, để chúng chỉ chạy khi có người gõ.',
+      },
+      'shell-slow': {
+        title: 'Mỗi lệnh mất hơn 5 giây mới bắt đầu',
+        advice:
+          'File khởi động shell chạy chậm (nvm, conda, pyenv…), app nào cũng chậm theo. Đưa chúng xuống dưới dòng  [[ $- == *i* ]] || return  để chỉ chạy khi có terminal.',
+      },
+      'ss-hangs': {
+        title: 'Lệnh ss trên server không trả lời',
+        advice:
+          'Server quá tải hoặc có quá nhiều tiến trình. Danh sách cổng sẽ thiếu tên tiến trình.',
+      },
+      'docker-hangs': {
+        title: 'Docker trên server không trả lời',
+        advice:
+          'docker ps không xong trong 8 giây: Docker daemon có thể bị treo. Thử trong Terminal: sudo systemctl restart docker',
+      },
+    } as Record<string, { title: string; advice: string }>,
+    help: 'Sao chép thông tin hỗ trợ',
+    supportCopied: 'Đã sao chép thông tin hỗ trợ',
+    supportCopiedBody:
+      'Phiên bản, hệ điều hành và log gần đây (không có mật khẩu hay khóa). Dán vào tin nhắn gửi người hỗ trợ.',
+    supportFailed: 'Không sao chép được',
+  },
   demo: {
     start: 'Xem thử với dữ liệu mẫu',
     banner: 'Đang xem thử với dữ liệu mẫu, không kết nối server nào.',

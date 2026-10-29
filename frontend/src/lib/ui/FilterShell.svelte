@@ -30,6 +30,7 @@
     sidebarLabel: string
     searchLabel: string
     query: string
+    /** Loading: the refresh icon turns, and can still be pressed to retry. */
     refreshing: boolean
     /** False shows placeholder instead of the list and detail. */
     ready: boolean
@@ -116,7 +117,7 @@
         class="tool"
         aria-label={t.common.refresh}
         title={t.common.refresh}
-        disabled={refreshing}
+        class:spin={refreshing}
         onpointerdown={(e) => e.stopPropagation()}
         onclick={onrefresh}
       >
@@ -349,5 +350,15 @@
     border-top: 1px solid var(--divider-soft);
     font-size: var(--text-xs);
     color: var(--fg-muted);
+  }
+
+  .tool.spin :global(svg) {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      rotate: 360deg;
+    }
   }
 </style>

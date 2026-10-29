@@ -9,6 +9,8 @@
   import { servers } from '../../lib/stores/servers.svelte'
   import Dialog from '../../lib/ui/Dialog.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
+  import LoadState from '../../lib/ui/LoadState.svelte'
+  import { supersedes } from '../../lib/stores/latest'
   import FilterShell, { type FilterItem } from '../../lib/ui/FilterShell.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import StatusList, { type StatusItem } from '../../lib/ui/StatusList.svelte'
@@ -99,8 +101,12 @@
     })),
   )
 
+  const attempt = supersedes()
+
   async function refresh() {
-    if (loading || !connected) return
+    if (!connected) return
+    // A retry replaces a load still waiting on the server.
+    const current = attempt()
     loading = true
     try {
       ;[inv, apps] = await Promise.all([
@@ -109,9 +115,9 @@
       ])
       error = ''
     } catch (e) {
-      error = toUserError(e).message
+      if (current()) error = toUserError(e).message
     } finally {
-      loading = false
+      if (current()) loading = false
     }
   }
 
@@ -192,7 +198,13 @@
     {#if !connected}
       <Empty icon="server" title={t.packages.offline} hint={t.packages.offlineHint} />
     {:else}
-      <Empty icon={error ? 'warning' : 'package'} title={error || t.packages.loading} />
+      <LoadState
+        serverID={win.serverID}
+        {error}
+        icon="package"
+        loading={t.packages.loading}
+        onretry={() => void refresh()}
+      />
     {/if}
   {/snippet}
   {#snippet list()}

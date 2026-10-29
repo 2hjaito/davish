@@ -60,3 +60,14 @@ func Restart(t *testing.T, services ...string) {
 		t.Fatalf("restart test sshd: %v\n%s", err, out)
 	}
 }
+
+// Exec runs a command inside the main test container as root, bypassing
+// SSH: for putting things back that a test broke on purpose.
+func Exec(t *testing.T, args ...string) {
+	t.Helper()
+	compose := filepath.Join(Root(), "test", "sshd", "compose.yml")
+	cmd := append([]string{"compose", "-f", compose, "exec", "-T", "sshd"}, args...)
+	if out, err := exec.Command("docker", cmd...).CombinedOutput(); err != nil { //nolint:gosec // fixed test command
+		t.Errorf("exec in test sshd: %v\n%s", err, out)
+	}
+}

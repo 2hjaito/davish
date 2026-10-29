@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 	"strings"
+	"time"
 
 	"davish/internal/apperr"
 	"davish/internal/shellx"
@@ -119,6 +120,9 @@ func (s *Service) Run(ctx context.Context, serverID, dir, op, branch, confirmed 
 	if op == OpPull && plan.Dirty > 0 {
 		return Result{}, apperr.New(apperr.GitDirty, "uncommitted changes")
 	}
+	// fetch and pull of a big repository can outlast the default deadline.
+	ctx, cancel := context.WithTimeout(ctx, 15*time.Minute)
+	defer cancel()
 	res, err := s.run.RunLine(ctx, serverID, app, plan.Command)
 	if err != nil {
 		return Result{}, err

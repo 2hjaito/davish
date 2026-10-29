@@ -9,6 +9,8 @@
   import { useAppMenu } from '../../lib/shell/menus.svelte'
   import { servers } from '../../lib/stores/servers.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
+  import LoadState from '../../lib/ui/LoadState.svelte'
+  import { supersedes } from '../../lib/stores/latest'
   import FilterShell, { type FilterItem } from '../../lib/ui/FilterShell.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import type { IconName } from '../../lib/ui/icons'
@@ -92,16 +94,19 @@
     })),
   )
 
+  const attempt = supersedes()
+
   async function refresh() {
-    if (loading) return
+    // A retry replaces a load still waiting on the server.
+    const current = attempt()
     loading = true
     try {
       data = await backend.list(win.serverID)
       error = ''
     } catch (e) {
-      error = toUserError(e).message
+      if (current()) error = toUserError(e).message
     } finally {
-      loading = false
+      if (current()) loading = false
     }
   }
 
@@ -174,7 +179,13 @@
     {#if !connected}
       <Empty icon="server" title={t.ports.offline} hint={t.ports.offlineHint} />
     {:else}
-      <Empty icon={error ? 'warning' : 'network'} title={error || t.ports.loading} />
+      <LoadState
+        serverID={win.serverID}
+        {error}
+        icon="network"
+        loading={t.ports.loading}
+        onretry={() => void refresh()}
+      />
     {/if}
   {/snippet}
   {#snippet list()}

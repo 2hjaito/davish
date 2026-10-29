@@ -3,11 +3,12 @@
 import {audit} from '../models';
 import {ports} from '../models';
 import {cron} from '../models';
+import {diag} from '../models';
+import {app} from '../models';
 import {disk} from '../models';
 import {docker} from '../models';
 import {fs} from '../models';
 import {git} from '../models';
-import {app} from '../models';
 import {sshkeys} from '../models';
 import {lock} from '../models';
 import {logs} from '../models';
@@ -41,6 +42,10 @@ export function CronPreview(arg1:string,arg2:string):Promise<cron.Preview>;
 export function CronRuns(arg1:string,arg2:string):Promise<cron.Runs>;
 
 export function DeleteServer(arg1:string):Promise<void>;
+
+export function DiagRun(arg1:string):Promise<diag.Report>;
+
+export function DiagSupportInfo():Promise<app.SupportInfo>;
 
 export function Disconnect(arg1:string):Promise<void>;
 

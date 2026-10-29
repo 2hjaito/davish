@@ -15,6 +15,8 @@
   import { servers } from '../../lib/stores/servers.svelte'
   import ConfirmCommand from '../../lib/ui/ConfirmCommand.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
+  import LoadState from '../../lib/ui/LoadState.svelte'
+  import { supersedes } from '../../lib/stores/latest'
   import FilterShell, { type FilterItem } from '../../lib/ui/FilterShell.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import NeedsRoot from '../../lib/ui/NeedsRoot.svelte'
@@ -85,16 +87,19 @@
     }),
   )
 
+  const attempt = supersedes()
+
   async function refresh() {
-    if (loading) return
+    // A retry replaces a load still waiting on the server.
+    const current = attempt()
     loading = true
     try {
       sites = await backend.list(win.serverID)
       error = ''
     } catch (e) {
-      error = toUserError(e).message
+      if (current()) error = toUserError(e).message
     } finally {
-      loading = false
+      if (current()) loading = false
     }
   }
 
@@ -236,7 +241,13 @@
     {#if !connected}
       <Empty icon="server" title={t.nginx.offline} hint={t.nginx.offlineHint} />
     {:else}
-      <Empty icon={error ? 'warning' : 'globe2'} title={error || t.nginx.loading} />
+      <LoadState
+        serverID={win.serverID}
+        {error}
+        icon="globe2"
+        loading={t.nginx.loading}
+        onretry={() => void refresh()}
+      />
     {/if}
   {/snippet}
   {#snippet list()}

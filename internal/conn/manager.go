@@ -228,9 +228,9 @@ func (m *Manager) SFTP(id string) (*sftp.Client, error) {
 	// Opening the subsystem is a round trip; do it outside the lock.
 	// Concurrent writes can land out of order if a transfer fails midway;
 	// that is safe because every write goes to a temporary file first.
-	sc, err := sftp.NewClient(client, sftp.UseConcurrentWrites(true))
+	sc, err := openSFTP(client, m.opts.DialTimeout*2)
 	if err != nil {
-		return nil, apperr.Wrap(apperr.ConnNotConnected, "cannot open sftp", err)
+		return nil, err
 	}
 	m.mu.Lock()
 	switch {
@@ -260,6 +260,35 @@ func (m *Manager) SFTP(id string) (*sftp.Client, error) {
 		m.mu.Unlock()
 	}()
 	return sc, nil
+}
+
+// openSFTP starts the sftp subsystem within limit. sshd starts it through
+// the user's login shell, so a startup file that hangs would block it for
+// ever; past limit the caller gets CMD_TIMEOUT and a late client is closed.
+func openSFTP(client *ssh.Client, limit time.Duration) (*sftp.Client, error) {
+	type result struct {
+		sc  *sftp.Client
+		err error
+	}
+	done := make(chan result, 1)
+	go func() {
+		sc, err := sftp.NewClient(client, sftp.UseConcurrentWrites(true))
+		done <- result{sc, err}
+	}()
+	select {
+	case r := <-done:
+		if r.err != nil {
+			return nil, apperr.Wrap(apperr.ConnNotConnected, "cannot open sftp", r.err)
+		}
+		return r.sc, nil
+	case <-time.After(limit):
+		go func() {
+			if r := <-done; r.sc != nil {
+				r.sc.Close() //nolint:errcheck,gosec // nobody wants it any more
+			}
+		}()
+		return nil, apperr.New(apperr.CmdTimeout, "the server did not start sftp in time")
+	}
 }
 
 // State reports a server's connection state.
