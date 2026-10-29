@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Giao diện tiếng Anh (ADR 0010): chọn Tiếng Việt hoặc English trong Cài đặt → Giao diện → Ngôn ngữ; lần đầu theo ngôn ngữ của máy. Ngày giờ và số định dạng theo ngôn ngữ đã chọn. Đổi ngôn ngữ thì Davish khởi động lại, server tự kết nối lại.
+
 ## [1.1.1] - 2026-10-29
 
 ### Sửa
