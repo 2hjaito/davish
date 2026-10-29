@@ -585,7 +585,11 @@ const vi = {
       },
       docker: {
         does: 'Container với CPU, RAM, log, inspect; start, stop, restart; cảnh báo container khởi động lại liên tục.',
-        actions: ['Chọn container để xem log và chi tiết', 'Mở log trong app Logs'],
+        actions: [
+          'Chọn container để xem log và chi tiết',
+          'Mở log trong app Logs',
+          'Pull image hoặc chạy container mới từ form (gõ sẵn vào Terminal)',
+        ],
         keys: [],
         runs: ['docker ps, stats, inspect, logs', 'docker start/stop/restart (có xác nhận)'],
       },
@@ -1486,6 +1490,38 @@ const vi = {
       removeTitle: (n: string) => `Xóa volume ${n.length > 20 ? `${n.slice(0, 12)}…` : n}?`,
       removeBody:
         'Mọi dữ liệu trong volume bị xóa vĩnh viễn, không có thùng rác. Docker từ chối nếu còn container dùng nó. Lệnh sẽ chạy:',
+    },
+    run: {
+      title: 'Chạy container mới…',
+      pullTitle: 'Pull image…',
+      image: 'Image',
+      imageHint: 'tên:tag, ví dụ postgres:17 hoặc ghcr.io/owner/app:latest',
+      name: 'Tên container',
+      restart: 'Khởi động lại',
+      restarts: {
+        'unless-stopped': 'Trừ khi đã dừng',
+        always: 'Luôn luôn',
+        'on-failure': 'Khi lỗi',
+        no: 'Không',
+      },
+      ports: 'Cổng (server → container)',
+      addPort: '+ Thêm cổng',
+      portsHint:
+        'Để trống địa chỉ thì bind 127.0.0.1: chỉ server truy cập được (nginx, tunnel). 0.0.0.0 mở ra Internet.',
+      mounts: 'Volume và thư mục',
+      addMount: '+ Thêm mount',
+      source: 'volume hoặc /đường/dẫn trên server',
+      ro: 'Chỉ đọc',
+      removeRow: 'Bỏ',
+      env: 'Biến môi trường (mỗi dòng KEY=value)',
+      envFile: 'File .env trên server',
+      network: 'Network',
+      next: 'Xem trước',
+      back: 'Quay lại',
+      publicWarn: (ports: string) =>
+        `${ports} bind mọi địa chỉ: ai trên Internet cũng vào được nếu firewall không chặn. Nên bind 127.0.0.1 và đặt nginx phía trước nếu được.`,
+      commandIntro: 'Mở Terminal với lệnh gõ sẵn; nhấn Enter để chạy và xem tiến độ. Lệnh:',
+      open: 'Mở trong Terminal',
     },
     img: {
       section: 'IMAGE',

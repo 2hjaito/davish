@@ -38,6 +38,8 @@ systemd units by state, their status and journal; start, stop and restart. Remov
 
 Laid out like Docker Desktop. Containers in a table (ID, image, ports, CPU, memory, status), grouped by compose project, with the CPU and memory they use together on top; start, stop, a ⋮ menu (logs, a shell in the container, restart, details) and delete right on the row, every destructive one showing its exact command first. A published port opens in Davish's own browser. Images with how much space the used ones take, their layers and config; run one in a terminal or remove the unused. Volumes with their size and whether a container still uses them. Restart-loop alerts stay.
 
+**Pull an image…** and **Run a new container…**: a form for name, image, ports, environment (typed or a `.env` file), volumes, restart policy and network builds the full `docker run` line. Ports bind `127.0.0.1` unless you say otherwise, with a warning for `0.0.0.0`. The command is typed into a terminal so you press Enter and watch the progress.
+
 <table><tr>
   <td><img src="assets/screenshots/docker.jpg" alt="Docker with a container in a restart loop"></td>
   <td><img src="assets/screenshots/docker-images.jpg" alt="An image and its layers"></td>

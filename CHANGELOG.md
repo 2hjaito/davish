@@ -5,6 +5,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Thêm
+- Docker → **Pull image…** và **Chạy container mới…** từ form; cổng mặc định bind `127.0.0.1`, cảnh báo `0.0.0.0`; lệnh gõ sẵn vào Terminal.
+
+### Thêm
 - Nginx → **Sửa nhanh…**: thêm tên miền, đổi upstream, gzip, `client_max_body_size`; sao lưu trước, `nginx -t` lỗi thì trả lại file cũ.
 - Ô reverse proxy gợi ý cổng và container đang nghe trên server.
 - `SECURITY.md`: mô hình bảo mật và cách báo lỗ hổng riêng tư.

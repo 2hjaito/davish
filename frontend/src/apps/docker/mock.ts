@@ -1,5 +1,7 @@
 // Demo data for the plain browser preview (vite dev), where there is no Go side.
 import type {
+  RunPlan,
+  RunSpec,
   ActionPlan,
   Container,
   ContainerAction,
@@ -233,4 +235,29 @@ export const mockPlanVolume = (name: string): Promise<VolumePlan> =>
 export function mockRemoveVolume(name: string): Promise<void> {
   volumes = volumes.filter((v) => v.name !== name)
   return delay(undefined, 300)
+}
+
+export const mockPullCommand = (ref: string): Promise<string> =>
+  Promise.resolve(`docker pull ${ref}`)
+
+export function mockPlanRun(spec: RunSpec): Promise<RunPlan> {
+  const ports = spec.ports.map(
+    (p) => `${p.host || '127.0.0.1'}:${p.hostPort || ''}:${p.containerPort}${p.udp ? '/udp' : ''}`,
+  )
+  const parts = [
+    'docker run -d',
+    spec.name && `--name ${spec.name}`,
+    spec.restart && spec.restart !== 'no' && `--restart ${spec.restart}`,
+    spec.network && `--network ${spec.network}`,
+    ...ports.map((p) => `-p ${p}`),
+    ...spec.env.filter(Boolean).map((e) => `-e '${e}'`),
+    spec.envFile && `--env-file ${spec.envFile}`,
+    ...spec.mounts.map((m) => `-v ${m.source}:${m.target}${m.readOnly ? ':ro' : ''}`),
+    spec.image,
+    ...spec.args,
+  ]
+  return Promise.resolve({
+    command: parts.filter(Boolean).join(' '),
+    public: ports.filter((p) => p.startsWith('0.0.0.0') || p.startsWith('[::]')),
+  })
 }

@@ -723,6 +723,22 @@ export namespace docker {
 		    return a;
 		}
 	}
+	export class Mount {
+	    source: string;
+	    target: string;
+	    readOnly: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Mount(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.source = source["source"];
+	        this.target = source["target"];
+	        this.readOnly = source["readOnly"];
+	    }
+	}
 	export class Plan {
 	    name: string;
 	    action: string;
@@ -742,6 +758,84 @@ export namespace docker {
 	        this.confirm = source["confirm"];
 	        this.sudo = source["sudo"];
 	    }
+	}
+	export class PortMap {
+	    host: string;
+	    hostPort: number;
+	    containerPort: number;
+	    udp: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new PortMap(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.host = source["host"];
+	        this.hostPort = source["hostPort"];
+	        this.containerPort = source["containerPort"];
+	        this.udp = source["udp"];
+	    }
+	}
+	export class RunPlan {
+	    command: string;
+	    public: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new RunPlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.command = source["command"];
+	        this.public = source["public"];
+	    }
+	}
+	export class RunSpec {
+	    name: string;
+	    image: string;
+	    ports: PortMap[];
+	    env: string[];
+	    envFile: string;
+	    mounts: Mount[];
+	    restart: string;
+	    network: string;
+	    args: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new RunSpec(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.image = source["image"];
+	        this.ports = this.convertValues(source["ports"], PortMap);
+	        this.env = source["env"];
+	        this.envFile = source["envFile"];
+	        this.mounts = this.convertValues(source["mounts"], Mount);
+	        this.restart = source["restart"];
+	        this.network = source["network"];
+	        this.args = source["args"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class Stats {
 	    id: string;
