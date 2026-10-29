@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { blockCommand, deniedIPs } from './ufw'
   import { untrack } from 'svelte'
 
   import { toUserError } from '../../lib/api/errors'
@@ -28,6 +29,7 @@
   const server = $derived(servers.list.find((x) => x.id === win.serverID))
   const connected = $derived(server?.state === 'connected')
   const banned = $derived(new Set(report?.fail2ban.banned ?? []))
+  const denied = $derived(deniedIPs(report?.ufw.lines ?? []))
 
   const attempt = supersedes()
 
@@ -129,16 +131,15 @@
             {#each r.failed as a (a.ip)}
               <tr>
                 <td class="mono"
-                  >{a.ip}{#if banned.has(a.ip)}<span class="tag">{s.banned}</span>{/if}</td
+                  >{a.ip}{#if banned.has(a.ip)}<span class="tag">{s.banned}</span
+                    >{/if}{#if denied.has(a.ip)}<span class="tag">{s.blocked}</span>{/if}</td
                 >
                 <td class="num">{a.count}</td>
                 <td class="mono muted">{a.users.join(', ')}</td>
                 <td class="muted">{a.last}</td>
                 <td class="act">
-                  {#if r.ufw.installed}
-                    <button class="link" onclick={() => sudo(`sudo ufw deny from ${a.ip}`)}
-                      >{s.block}</button
-                    >
+                  {#if r.ufw.installed && !denied.has(a.ip)}
+                    <button class="link" onclick={() => sudo(blockCommand(a.ip))}>{s.block}</button>
                   {:else if r.fail2ban.installed && !banned.has(a.ip)}
                     <button
                       class="link"

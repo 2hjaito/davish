@@ -80,3 +80,17 @@ func TestSettingsSetsBrokenFileAside(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestSettingsKeys(t *testing.T) {
+	s := NewSettings(t.TempDir(), quietLog())
+	for _, k := range []string{"dock:pinned", "logs:srv-1", "update:skip"} {
+		if err := s.Set(k, `1`); err != nil {
+			t.Errorf("%s: %v", k, err)
+		}
+	}
+	for _, k := range []string{"", "a/b", "a b", strings.Repeat("x", 65)} {
+		if err := s.Set(k, `1`); err == nil {
+			t.Errorf("%q accepted", k)
+		}
+	}
+}
