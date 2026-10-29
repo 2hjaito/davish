@@ -6,7 +6,7 @@
     type Entry,
     filesPlanCompress,
   } from '../../lib/api/files'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import Dialog from '../../lib/ui/Dialog.svelte'
   import { FORMATS } from './actions'
 

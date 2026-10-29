@@ -8,7 +8,7 @@
     type LocalKey,
     type ServerKey,
   } from '../../lib/api/keys'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import Icon from '../../lib/ui/Icon.svelte'
 
   /** The selected key, tagged with the section it is in. */

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { toUserError } from '../../lib/api/errors'
-  import { t } from '../../lib/i18n/vi'
+  import { lang, type Lang, LANGS, locale, switchLang, t } from '../../lib/i18n'
   import { appLock, LOCK_AFTER, MIN_LOCK_PASSWORD } from '../../lib/stores/lock.svelte'
   import {
     ALERTS,
@@ -22,6 +22,9 @@
   function stepFont(dir: 1 | -1) {
     settings.set('terminalFontSize', settings.terminalFontSize + dir * TERMINAL_FONT.step)
   }
+
+  // A language change needs a restart, so it waits for a confirming click.
+  let pickedLang = $state<Lang>(lang)
 
   const fonts = Object.keys(MONO_FAMILIES) as MonoFont[]
   const backups: BackupMode[] = ['etc', 'always', 'never']
@@ -78,6 +81,28 @@
 
 <div class="body">
   <h2>{t.settings.appearance}</h2>
+
+  <div class="row">
+    <span>
+      <strong>{t.settings.language}</strong>
+      <small>{t.settings.languageHint}</small>
+    </span>
+    <div class="segmented" role="radiogroup" aria-label={t.settings.language}>
+      {#each LANGS as l (l)}
+        <button role="radio" aria-checked={pickedLang === l} onclick={() => (pickedLang = l)}
+          >{t.settings.langs[l]}</button
+        >
+      {/each}
+    </div>
+  </div>
+  {#if pickedLang !== lang}
+    <div class="row">
+      <small>{t.settings.langRestart}</small>
+      <button type="button" class="btn" onclick={() => switchLang(pickedLang)}
+        >{t.settings.langApply}</button
+      >
+    </div>
+  {/if}
 
   <label class="row">
     <span>
@@ -155,7 +180,7 @@
       >
         <Icon name="minus" size={12} strokeWidth={2.2} />
       </button>
-      <output aria-live="polite">{settings.terminalFontSize.toLocaleString('vi-VN')}</output>
+      <output aria-live="polite">{settings.terminalFontSize.toLocaleString(locale)}</output>
       <button
         aria-label={t.settings.fontLarger}
         disabled={settings.terminalFontSize >= TERMINAL_FONT.max}

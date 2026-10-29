@@ -2,7 +2,7 @@
   import { untrack } from 'svelte'
 
   import type { CronChange, CronJob, CronPreview } from '../../lib/api/cron'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import Dialog from '../../lib/ui/Dialog.svelte'
   import { backend } from './backend'
   import { describe } from './describe'

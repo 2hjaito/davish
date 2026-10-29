@@ -8,7 +8,7 @@
     filesCompress,
     filesPlanCompress,
   } from '../../lib/api/files'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import { notifications } from '../../lib/stores/notifications.svelte'
   import { hitTest, type Hit, NO_HIT } from '../../lib/ui/radial/radial'
   import RadialMenu, { type RadialItem } from '../../lib/ui/radial/RadialMenu.svelte'

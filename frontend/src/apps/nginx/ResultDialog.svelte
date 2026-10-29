@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { NginxReload, NginxTest } from '../../lib/api/nginx'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import Dialog from '../../lib/ui/Dialog.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import NeedsRoot from '../../lib/ui/NeedsRoot.svelte'

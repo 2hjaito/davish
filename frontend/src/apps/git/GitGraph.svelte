@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Commit, Ref } from '../../lib/api/git'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import Icon from '../../lib/ui/Icon.svelte'
   import { layout, type Segment } from './graph'
 

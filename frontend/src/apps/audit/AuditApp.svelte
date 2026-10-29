@@ -1,7 +1,7 @@
 <script lang="ts">
   import { copyText } from '../../lib/api/clipboard'
   import type { AuditEntry } from '../../lib/api/events'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import { audit } from '../../lib/stores/audit.svelte'
   import { servers } from '../../lib/stores/servers.svelte'
   import Empty from '../../lib/ui/Empty.svelte'

@@ -12,7 +12,7 @@
   } from '../../lib/api/docker'
   import { toUserError } from '../../lib/api/errors'
   import { formatBytes, formatDuration, formatPct } from '../../lib/format'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import { lineLevel } from '../../lib/logLevel'
   import ConfirmCommand from '../../lib/ui/ConfirmCommand.svelte'
   import Icon from '../../lib/ui/Icon.svelte'

@@ -17,7 +17,7 @@
     type UploadRequest,
   } from '../../lib/api/transfer'
   import { formatPct } from '../../lib/format'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import { hasPrimaryModifier, shortcut } from '../../lib/shell/platform'
   import { load, save } from '../../lib/stores/persist'
   import { notifications } from '../../lib/stores/notifications.svelte'

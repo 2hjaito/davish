@@ -1,6 +1,6 @@
 <script lang="ts">
   import { openURL } from '../api/runtime'
-  import { t } from '../i18n/vi'
+  import { t } from '../i18n'
   import { updates } from '../stores/updates.svelte'
   import Dialog from '../ui/Dialog.svelte'
 

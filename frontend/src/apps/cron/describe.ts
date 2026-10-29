@@ -1,6 +1,6 @@
-// Says when a cron schedule runs, in Vietnamese: "Mỗi ngày lúc 03:00".
+// Says when a cron schedule runs, in the UI language: "Every day at 03:00".
 import type { Schedule } from '../../lib/api/cron'
-import { t } from '../../lib/i18n/vi'
+import { t } from '../../lib/i18n'
 
 const pad = (n: number) => String(n).padStart(2, '0')
 

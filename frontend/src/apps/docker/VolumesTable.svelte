@@ -2,7 +2,7 @@
   import type { Volume, VolumePlan } from '../../lib/api/docker'
   import { toUserError } from '../../lib/api/errors'
   import { formatBytes } from '../../lib/format'
-  import { t } from '../../lib/i18n/vi'
+  import { locale, t } from '../../lib/i18n'
   import ActionMenu from '../../lib/ui/ActionMenu.svelte'
   import ConfirmCommand from '../../lib/ui/ConfirmCommand.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
@@ -30,7 +30,7 @@
 
   function created(iso: string): string {
     const ms = Date.parse(iso)
-    return Number.isNaN(ms) ? '–' : new Date(ms).toLocaleDateString('vi-VN')
+    return Number.isNaN(ms) ? '–' : new Date(ms).toLocaleDateString(locale)
   }
 
   async function askRemove(x: Volume) {

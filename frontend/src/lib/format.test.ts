@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { formatBytes, formatClock, formatDuration, formatGB, formatPct, formatRate } from './format'
-import { t } from './i18n/vi'
+import { t } from './i18n'
 
 describe('format', () => {
   it.each([

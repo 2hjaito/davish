@@ -5,7 +5,7 @@
   import { onTermData, onTermExit } from '../../lib/api/events'
   import { hasRuntime } from '../../lib/api/runtime'
   import { decodeOutput, termClose, termResize, termStart, termWrite } from '../../lib/api/terminal'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import { servers } from '../../lib/stores/servers.svelte'
   import { settings } from '../../lib/stores/settings.svelte'
   import Icon from '../../lib/ui/Icon.svelte'

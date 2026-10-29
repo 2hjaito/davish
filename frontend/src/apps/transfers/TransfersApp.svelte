@@ -1,7 +1,7 @@
 <script lang="ts">
   import { toUserError } from '../../lib/api/errors'
   import { transferCancel } from '../../lib/api/transfer'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import { notifications } from '../../lib/stores/notifications.svelte'
   import { servers } from '../../lib/stores/servers.svelte'
   import { type Transfer, transfers } from '../../lib/stores/transfers.svelte'

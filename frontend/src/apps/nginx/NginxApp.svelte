@@ -10,7 +10,7 @@
     RemovePlan,
     TogglePlan,
   } from '../../lib/api/nginx'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import { load, save } from '../../lib/stores/persist'
   import { servers } from '../../lib/stores/servers.svelte'
   import ConfirmCommand from '../../lib/ui/ConfirmCommand.svelte'

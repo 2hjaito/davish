@@ -10,6 +10,7 @@ import { mount } from 'svelte'
 
 import { reportFrontendErrors } from './lib/api/diag'
 import { hasRuntime } from './lib/api/runtime'
+import { loadLang } from './lib/i18n'
 import { initPersist } from './lib/stores/persist'
 
 const target = document.getElementById('app')
@@ -18,8 +19,9 @@ if (!target) throw new Error('missing #app')
 reportFrontendErrors(hasRuntime)
 
 // Stores read saved UI state when their modules load, so the app is only
-// imported once settings.json has arrived.
+// imported once settings.json has arrived and its language is loaded.
 await initPersist()
+await loadLang()
 const { default: App } = await import('./App.svelte')
 
 export default mount(App, { target })

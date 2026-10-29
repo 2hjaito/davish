@@ -2,7 +2,7 @@ import { onNotifyNew, type NotifyNew } from '../api/events'
 import type { LogSource } from '../api/logs'
 import { hasRuntime } from '../api/runtime'
 import { formatPct } from '../format'
-import { t } from '../i18n/vi'
+import { t } from '../i18n'
 
 export type Level = 'info' | 'warn' | 'error'
 
@@ -36,8 +36,8 @@ const demo: Notification[] = hasRuntime
       {
         id: 'n1',
         level: 'warn',
-        title: 'lightrag trên dangth-vps đang khởi động lại liên tục',
-        body: 'Container đã khởi động lại 6 lần.',
+        title: t.demo.restarting,
+        body: t.demo.restartingBody,
         serverID: 'dangth-vps',
         at: Date.now(),
       },

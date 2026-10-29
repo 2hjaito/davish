@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { Container } from '../../lib/api/docker'
+import { loadLang } from '../../lib/i18n'
 import {
   ago,
   canDo,
@@ -106,6 +107,17 @@ describe('ago', () => {
     expect(ago('a minute ago')).toBe('1 phút trước')
     expect(ago('Less than a second ago')).toBe('vừa xong')
     expect(ago('2026-10-28')).toBe('2026-10-28')
+  })
+
+  it('reads docker durations in English', async () => {
+    await loadLang('en')
+    try {
+      expect(ago('6 days ago')).toBe('6 days ago')
+      expect(ago('About an hour ago')).toBe('about 1 hour ago')
+      expect(ago('Less than a second ago')).toBe('just now')
+    } finally {
+      await loadLang('vi')
+    }
   })
 })
 

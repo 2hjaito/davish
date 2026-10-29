@@ -8,7 +8,7 @@
   import { backend as servicesBackend } from '../../apps/services/backend'
   import { filesStat } from '../api/files'
   import { hasRuntime } from '../api/runtime'
-  import { t } from '../i18n/vi'
+  import { t } from '../i18n'
   import { servers } from '../stores/servers.svelte'
   import { ui } from '../stores/ui.svelte'
   import AppIcon from '../ui/AppIcon.svelte'

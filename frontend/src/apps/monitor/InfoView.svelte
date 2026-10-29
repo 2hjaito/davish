@@ -4,7 +4,7 @@
   import { hasRuntime } from '../../lib/api/runtime'
   import { formatBytes, formatDuration } from '../../lib/format'
   import type { Sample } from '../../lib/stores/metrics.svelte'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import Card from './Card.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
   import { mockInfo } from './mock'

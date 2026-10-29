@@ -1,7 +1,7 @@
 <script lang="ts">
   import { lineLevel } from '../../lib/logLevel'
   import { findPaths } from '../../lib/logPaths'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
 
   interface Props {
     lines: readonly string[]

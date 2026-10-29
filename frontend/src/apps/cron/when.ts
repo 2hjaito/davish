@@ -1,5 +1,5 @@
 // Run times in the server's zone, as cron sees them.
-import { t } from '../../lib/i18n/vi'
+import { t } from '../../lib/i18n'
 
 /** "Hôm nay, 14:15", "Ngày mai, 03:00", "Th 4, 29/10 03:00", in zone. */
 export function formatRun(unix: number, zone: string, now = Date.now()): string {

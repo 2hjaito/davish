@@ -9,7 +9,7 @@ import {
   updateRestart,
   type UpdateStatus,
 } from '../api/update'
-import { t } from '../i18n/vi'
+import { t } from '../i18n'
 import { notifications } from './notifications.svelte'
 import { load, save } from './persist'
 import { settings } from './settings.svelte'

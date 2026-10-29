@@ -3,7 +3,7 @@
 
   import { toUserError } from '../../lib/api/errors'
   import type { SecurityReport } from '../../lib/api/security'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import { useAppMenu } from '../../lib/shell/menus.svelte'
   import { servers } from '../../lib/stores/servers.svelte'
   import Empty from '../../lib/ui/Empty.svelte'

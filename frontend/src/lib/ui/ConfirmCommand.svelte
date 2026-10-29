@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from '../i18n/vi'
+  import { t } from '../i18n'
   import Dialog from './Dialog.svelte'
 
   interface Props {

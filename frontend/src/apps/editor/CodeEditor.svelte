@@ -15,7 +15,7 @@
   } from '@codemirror/view'
   import { onMount, untrack } from 'svelte'
 
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import type { LanguageId } from './languages'
   import { highlighting, languageSupport } from './syntax'
 

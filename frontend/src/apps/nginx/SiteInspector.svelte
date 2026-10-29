@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { NginxSite } from '../../lib/api/nginx'
-  import { t } from '../../lib/i18n/vi'
+  import { locale, t } from '../../lib/i18n'
   import Icon from '../../lib/ui/Icon.svelte'
   import { openFileInEditor } from '../../lib/wm/intents.svelte'
   import { certState, daysLeft } from './sites'
@@ -18,7 +18,7 @@
 
   let { serverID, site, busy, flash, ontoggle, onremove, onreload }: Props = $props()
 
-  const fmtDate = new Intl.DateTimeFormat('vi-VN', {
+  const fmtDate = new Intl.DateTimeFormat(locale, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',

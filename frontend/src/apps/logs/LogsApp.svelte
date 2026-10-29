@@ -3,7 +3,7 @@
 
   import { toUserError } from '../../lib/api/errors'
   import type { LogKind, LogSource } from '../../lib/api/logs'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import { load, save } from '../../lib/stores/persist'
   import { servers } from '../../lib/stores/servers.svelte'
   import Empty from '../../lib/ui/Empty.svelte'

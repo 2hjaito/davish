@@ -1,7 +1,7 @@
 // How one app opens another (docs/ARCHITECTURE.md §5.2), without apps
 // importing the registry that imports them.
 import type { LogSource } from '../api/logs'
-import { t } from '../i18n/vi'
+import { t } from '../i18n'
 import { servers } from '../stores/servers.svelte'
 import { wm } from './windowManager.svelte'
 

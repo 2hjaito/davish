@@ -1,5 +1,5 @@
 <script lang="ts" generics="T extends { at: number }">
-  import { t } from '../../i18n/vi'
+  import { t } from '../../i18n'
   import { areaPath, type ChartSeries, linePath, nearestIndex, niceMax } from './scale'
 
   interface Props {

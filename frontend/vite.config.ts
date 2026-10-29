@@ -15,5 +15,6 @@ export default defineConfig({
   define: { __APP_VERSION__: JSON.stringify(wails.info.productVersion) },
   test: {
     include: ['src/**/*.test.ts'],
+    setupFiles: ['src/test-setup.ts'],
   },
 })

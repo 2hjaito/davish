@@ -1,7 +1,7 @@
 <script lang="ts">
   import { toUserError } from '../api/errors'
   import type { AuthMethod, ServerDraft } from '../api/servers'
-  import { t } from '../i18n/vi'
+  import { t } from '../i18n'
   import { servers } from '../stores/servers.svelte'
   import { ui } from '../stores/ui.svelte'
   import Dialog from '../ui/Dialog.svelte'

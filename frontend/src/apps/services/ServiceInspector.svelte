@@ -12,7 +12,7 @@
     UnitStatus,
   } from '../../lib/api/services'
   import { formatBytes, formatDuration } from '../../lib/format'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import Icon from '../../lib/ui/Icon.svelte'
   import { openFileInEditor, openLogs } from '../../lib/wm/intents.svelte'
   import { backend } from './backend'

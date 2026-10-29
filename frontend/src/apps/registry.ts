@@ -1,6 +1,6 @@
 import type { Component } from 'svelte'
 
-import { t } from '../lib/i18n/vi'
+import { t } from '../lib/i18n'
 import {
   AUDIT_SIZE,
   BROWSER_SIZE,

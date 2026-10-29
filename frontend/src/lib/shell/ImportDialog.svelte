@@ -2,7 +2,7 @@
   import { SvelteSet } from 'svelte/reactivity'
   import { toUserError } from '../api/errors'
   import { listConfigHosts, type ConfigHost } from '../api/servers'
-  import { t } from '../i18n/vi'
+  import { t } from '../i18n'
   import { servers } from '../stores/servers.svelte'
   import { ui } from '../stores/ui.svelte'
   import Dialog from '../ui/Dialog.svelte'

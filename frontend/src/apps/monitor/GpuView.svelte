@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Gpu } from '../../lib/api/events'
   import { formatBytes, formatPct } from '../../lib/format'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import Meter from '../../lib/ui/charts/Meter.svelte'
   import TimeChart from '../../lib/ui/charts/TimeChart.svelte'
   import Card from './Card.svelte'

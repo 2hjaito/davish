@@ -1,6 +1,6 @@
 <script lang="ts">
   import { formatClock, formatGB, formatRate } from '../format'
-  import { t } from '../i18n/vi'
+  import { t } from '../i18n'
   import { metrics } from '../stores/metrics.svelte'
   import { servers } from '../stores/servers.svelte'
   import { ui } from '../stores/ui.svelte'

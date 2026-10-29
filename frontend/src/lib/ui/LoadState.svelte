@@ -4,7 +4,7 @@
   import { copyText } from '../api/clipboard'
   import { diagRun, diagSupportInfo, type DiagReport } from '../api/diag'
   import { hasRuntime } from '../api/runtime'
-  import { t } from '../i18n/vi'
+  import { t } from '../i18n'
   import Empty from './Empty.svelte'
   import Icon from './Icon.svelte'
   import type { IconName } from './icons'

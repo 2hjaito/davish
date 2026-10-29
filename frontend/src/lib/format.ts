@@ -1,4 +1,6 @@
-const num = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 1 })
+import { locale } from './i18n'
+
+const num = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 })
 
 const UNITS = ['B', 'KB', 'MB', 'GB', 'TB'] as const
 

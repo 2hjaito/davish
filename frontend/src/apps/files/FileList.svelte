@@ -5,7 +5,7 @@
 <script lang="ts">
   import type { Entry } from '../../lib/api/files'
   import { formatBytes } from '../../lib/format'
-  import { t } from '../../lib/i18n/vi'
+  import { t } from '../../lib/i18n'
   import Icon from '../../lib/ui/Icon.svelte'
   import {
     formatModTime,
