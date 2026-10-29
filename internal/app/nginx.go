@@ -1,6 +1,10 @@
 package app
 
-import "davish/internal/nginx"
+import (
+	"net"
+
+	"davish/internal/nginx"
+)
 
 // NginxList returns the sites of sites-available, sites-enabled and
 // conf.d, with the certificates of enabled sites.
@@ -84,4 +88,14 @@ func (a *App) NginxCreate(serverID string, site nginx.NewSite, config, command s
 		return nginx.CreateResult{}, err
 	}
 	return a.nginx.Create(a.ctx, serverID, site, config, command)
+}
+
+// NginxPlanSSL checks the DNS of a site's domains against the server's
+// address and returns the certbot command to type into a terminal.
+func (a *App) NginxPlanSSL(serverID string, names []string, redirect bool) (nginx.SSLPlan, error) {
+	srv, err := a.store.Server(a.ctx, serverID)
+	if err != nil {
+		return nginx.SSLPlan{}, err
+	}
+	return nginx.PlanSSL(a.ctx, net.DefaultResolver, srv.Host, names, redirect), nil
 }

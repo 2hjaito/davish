@@ -165,3 +165,30 @@ export const nginxCreate = (
   plan: CreatePlan,
 ): Promise<CreateResult> =>
   App.NginxCreate(serverID, site, plan.config, plan.command) as Promise<CreateResult>
+
+/** Where one domain points, seen from this machine. */
+export interface DNSCheck {
+  name: string
+  ips: string[]
+  /** One of ips is the server's. */
+  ok: boolean
+  error?: string
+}
+
+/** Turning on HTTPS with certbot (internal/nginx.SSLPlan). */
+export interface SSLPlan {
+  names: string[]
+  /** Wildcards, IPs, "_": no certificate through certbot --nginx. */
+  skipped: string[]
+  serverIPs: string[]
+  dns: DNSCheck[]
+  redirect: boolean
+  /** The certbot command for a terminal; empty without names. */
+  sudo: string
+}
+
+export const nginxPlanSSL = (
+  serverID: string,
+  names: string[],
+  redirect: boolean,
+): Promise<SSLPlan> => App.NginxPlanSSL(serverID, names, redirect)

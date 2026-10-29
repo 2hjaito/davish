@@ -3,6 +3,7 @@ import {
   nginxCreate,
   nginxList,
   nginxPlanCreate,
+  nginxPlanSSL,
   nginxPlanRemove,
   nginxPlanToggle,
   nginxRemove,
@@ -22,6 +23,7 @@ import {
   mockCreate,
   mockList,
   mockPlanCreate,
+  mockPlanSSL,
   mockPlanRemove,
   mockPlanToggle,
   mockReload,
@@ -46,6 +48,7 @@ export const backend = hasRuntime
       renderSite: nginxRenderSite,
       planCreate: nginxPlanCreate,
       create: nginxCreate,
+      planSSL: nginxPlanSSL,
     }
   : {
       list: (_serverID: string) => mockList(),
@@ -63,4 +66,6 @@ export const backend = hasRuntime
       planCreate: (_serverID: string, site: NewSite, config: string) =>
         mockPlanCreate(site, config),
       create: (_serverID: string, _site: NewSite, plan: CreatePlan) => mockCreate(plan),
+      planSSL: (_serverID: string, names: string[], redirect: boolean) =>
+        mockPlanSSL(names, redirect),
     }

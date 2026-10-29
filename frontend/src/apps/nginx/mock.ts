@@ -8,6 +8,7 @@ import type {
   NginxTest,
   RemovePlan,
   SiteOptions,
+  SSLPlan,
   TogglePlan,
 } from '../../lib/api/nginx'
 
@@ -224,4 +225,22 @@ export async function mockCreate(plan: CreatePlan): Promise<CreateResult> {
     },
   ]
   return { created: true, test: okTest, needsRoot: false, sudo: plan.sudo }
+}
+
+export function mockPlanSSL(names: string[], redirect: boolean): Promise<SSLPlan> {
+  const ok = names.filter((n) => n.includes('.') && !n.startsWith('*'))
+  return delay({
+    names: ok,
+    skipped: names.filter((n) => !ok.includes(n)),
+    serverIPs: ['203.0.113.5'],
+    dns: ok.map((n, i) =>
+      i === 0
+        ? { name: n, ips: ['203.0.113.5'], ok: true }
+        : { name: n, ips: [], ok: false, error: 'no DNS record' },
+    ),
+    redirect,
+    sudo: ok.length
+      ? `sudo certbot --nginx ${ok.map((n) => `-d ${n}`).join(' ')} ${redirect ? '--redirect' : '--no-redirect'}`
+      : '',
+  })
 }

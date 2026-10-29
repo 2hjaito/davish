@@ -632,6 +632,7 @@ const vi = {
           'Kiểm tra cấu hình (nginx -t)',
           'Xóa site, kèm chứng chỉ chỉ site đó dùng',
           'Site mới: reverse proxy, tĩnh hoặc PHP-FPM, xem trước cấu hình',
+          'Bật HTTPS: kiểm tra DNS rồi gõ sẵn certbot --nginx vào Terminal',
         ],
         keys: [],
         runs: [
@@ -1776,6 +1777,21 @@ const vi = {
       'Chạy certbot delete: certbot thôi gia hạn tên miền này, hết báo lỗi gia hạn. Chỉ site này dùng chứng chỉ.',
     sharedCerts: (names: string) => `Giữ lại chứng chỉ ${names} vì site khác cũng dùng.`,
     commandIntro: 'Lệnh sẽ chạy:',
+    ssl: {
+      open: 'Bật HTTPS…',
+      title: 'Bật HTTPS',
+      body: 'certbot xin chứng chỉ Let’s Encrypt miễn phí và gắn vào site này. Let’s Encrypt phải truy cập được từng tên miền qua cổng 80 của server này. Các tên miền đang trỏ về:',
+      noRecord: 'chưa có bản ghi DNS',
+      dnsWarn: (ips: string) =>
+        `Có tên miền chưa trỏ về server này (${ips}). certbot sẽ lỗi với các tên đó cho tới khi sửa DNS, trừ khi server nằm sau proxy hoặc NAT.`,
+      skipped: (names: string) =>
+        `Không xin chứng chỉ cho: ${names} (wildcard và IP cần cách khác).`,
+      noNames: 'Site này không có tên miền nào xin được chứng chỉ.',
+      redirect: 'Chuyển HTTP sang HTTPS',
+      commandIntro:
+        'Mở Terminal với lệnh gõ sẵn; nhấn Enter để chạy. Lần đầu certbot hỏi email và đồng ý điều khoản. Lệnh:',
+      run: 'Mở trong Terminal',
+    },
     newSite: {
       open: 'Site mới…',
       title: 'Site mới',

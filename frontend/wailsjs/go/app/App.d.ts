@@ -191,6 +191,8 @@ export function NginxPlanCreate(arg1:string,arg2:nginx.NewSite,arg3:string):Prom
 
 export function NginxPlanRemove(arg1:string,arg2:string,arg3:boolean):Promise<nginx.RemovePlan>;
 
+export function NginxPlanSSL(arg1:string,arg2:Array<string>,arg3:boolean):Promise<nginx.SSLPlan>;
+
 export function NginxPlanToggle(arg1:string,arg2:string,arg3:boolean):Promise<nginx.TogglePlan>;
 
 export function NginxReload(arg1:string):Promise<nginx.ReloadResult>;

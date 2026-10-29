@@ -14,9 +14,10 @@
     ontoggle: (site: NginxSite) => void
     onremove: (site: NginxSite) => void
     onreload: () => void
+    onssl: (site: NginxSite) => void
   }
 
-  let { serverID, site, busy, flash, ontoggle, onremove, onreload }: Props = $props()
+  let { serverID, site, busy, flash, ontoggle, onremove, onreload, onssl }: Props = $props()
 
   const fmtDate = new Intl.DateTimeFormat(locale, {
     day: '2-digit',
@@ -42,6 +43,11 @@
     {#if site.toggleable}
       <button type="button" class="btn" disabled={busy} onclick={() => ontoggle(site)}>
         {site.enabled ? t.nginx.disable : t.nginx.enable}
+      </button>
+    {/if}
+    {#if site.enabled && !site.servers.some((s) => s.ssl)}
+      <button type="button" class="btn" disabled={busy} onclick={() => onssl(site)}>
+        {t.nginx.ssl.open}
       </button>
     {/if}
     <button type="button" class="btn" onclick={() => openFileInEditor(serverID, site.path)}>
