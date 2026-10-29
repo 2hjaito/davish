@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/icon/png/davish-128.png" width="96" height="96" alt="Davish icon">
+<img src="assets/social-preview.png" alt="Davish: a desktop for your Linux servers" width="100%">
 
 # Davish
 
