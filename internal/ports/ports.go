@@ -6,11 +6,13 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"errors"
 	"net"
 	"regexp"
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"davish/internal/apperr"
 	"davish/internal/audit"
@@ -58,13 +60,23 @@ type List struct {
 const sep = "--davish--"
 
 // listLine reads the uid, then ss, then docker's published ports, which
-// may be missing or refused.
-var listLine = `id -u; command -v ss >/dev/null || echo NO_SS; ss -tlnp 2>/dev/null; echo ` + sep +
-	`; docker ps --format '{{.Names}}\t{{.Ports}}' 2>/dev/null; true`
+// may be missing or refused. Each part has its own time limit: a docker
+// daemon that hangs must not hide the ports, and ss -p walks every process.
+var listLine = `t5=; t10=; command -v timeout >/dev/null && { t5='timeout 5'; t10='timeout 10'; }` +
+	`; id -u; command -v ss >/dev/null || echo NO_SS; $t10 ss -tlnp 2>/dev/null; echo ` + sep +
+	`; $t5 docker ps --format '{{.Names}}\t{{.Ports}}' 2>/dev/null; true`
+
+// listTimeout bounds a whole List, whatever the server's shell does.
+const listTimeout = 25 * time.Second
 
 // List reads the server's listening TCP ports.
 func (l *Lister) List(ctx context.Context, serverID string) (List, error) {
+	ctx, cancel := context.WithTimeout(ctx, listTimeout)
+	defer cancel()
 	res, err := l.run.RunLine(ctx, serverID, app, listLine)
+	if errors.Is(err, context.DeadlineExceeded) {
+		return List{}, apperr.New(apperr.CmdTimeout, "the server did not list its ports within 25 seconds")
+	}
 	if err != nil {
 		return List{}, err
 	}

@@ -91,3 +91,81 @@ export function clock(rfc3339: string): string {
   const p = (n: number) => String(n).padStart(2, '0')
   return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`
 }
+
+const UNITS: Record<string, string> = {
+  second: 'giây',
+  minute: 'phút',
+  hour: 'giờ',
+  day: 'ngày',
+  week: 'tuần',
+  month: 'tháng',
+  year: 'năm',
+}
+
+/** Docker's "6 days ago", "About an hour ago" in Vietnamese; the text as is otherwise. */
+export function ago(text: string): string {
+  const s = text.trim()
+  if (/^less than a second/i.test(s)) return 'vừa xong'
+  const m = /^(about an?|an?|\d+)\s+(second|minute|hour|day|week|month|year)s?\s+ago$/i.exec(s)
+  if (!m) return s
+  const n = /^\d+$/.test(m[1] ?? '') ? m[1] : '1'
+  const about = /^about/i.test(m[1] ?? '') ? 'khoảng ' : ''
+  return `${about}${n} ${UNITS[(m[2] ?? '').toLowerCase()]} trước`
+}
+
+/** One published or exposed port of a container. */
+export interface PortChip {
+  /** The port on the server; undefined when only exposed inside Docker. */
+  host?: number
+  container: string
+  /** Published on 127.0.0.1 only. */
+  local: boolean
+}
+
+/** Docker's "0.0.0.0:8080->80/tcp, :::8080->80/tcp, 5432/tcp", once per port. */
+export function parsePorts(ports: string): PortChip[] {
+  const out: PortChip[] = []
+  const seen = new Set<string>()
+  for (const raw of ports.split(',')) {
+    const p = raw.trim()
+    if (!p) continue
+    const m = /^(.*):(\d+)->(\S+)$/.exec(p)
+    const chip: PortChip = m
+      ? {
+          host: Number(m[2]),
+          container: (m[3] ?? '').replace(/\/tcp$/, ''),
+          local: m[1] === '127.0.0.1',
+        }
+      : { container: p.replace(/\/tcp$/, ''), local: false }
+    const key = `${chip.host ?? ''}:${chip.container}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push(chip)
+  }
+  return out
+}
+
+/** A compose project's containers, or one container on its own. */
+export interface Group {
+  key: string
+  /** The compose project; undefined for a lone container. */
+  project?: string
+  containers: Container[]
+}
+
+/** Compose projects first by name, each with its containers; lone ones after. */
+export function groups(list: readonly Container[]): Group[] {
+  const byProject = new Map<string, Container[]>()
+  const lone: Group[] = []
+  for (const c of list) {
+    if (!c.project) {
+      lone.push({ key: c.name, containers: [c] })
+      continue
+    }
+    byProject.set(c.project, [...(byProject.get(c.project) ?? []), c])
+  }
+  const projects = [...byProject.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([project, containers]) => ({ key: `project:${project}`, project, containers }))
+  return [...projects, ...lone]
+}

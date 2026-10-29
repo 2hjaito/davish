@@ -1,7 +1,18 @@
 import { describe, expect, it } from 'vitest'
 
 import type { Container } from '../../lib/api/docker'
-import { canDo, clock, counts, health, since, visible, visibleImages } from './containers'
+import {
+  ago,
+  canDo,
+  clock,
+  counts,
+  groups,
+  health,
+  parsePorts,
+  since,
+  visible,
+  visibleImages,
+} from './containers'
 
 const c = (name: string, state: string, image = 'nginx:1.27'): Container => ({
   id: name,
@@ -12,6 +23,7 @@ const c = (name: string, state: string, image = 'nginx:1.27'): Container => ({
   ports: '',
   command: '',
   created: '',
+  runningFor: '',
 })
 
 const list = [
@@ -84,5 +96,42 @@ describe('visibleImages', () => {
     expect(visibleImages(list, 'unused', '').map((i) => i.repository)).toEqual(['old-api'])
     expect(visibleImages(list, 'images', 'NGINX:lat').map((i) => i.repository)).toEqual(['nginx'])
     expect(visibleImages(list, 'images', 'sha256:old')).toHaveLength(1)
+  })
+})
+
+describe('ago', () => {
+  it('reads docker durations in Vietnamese', () => {
+    expect(ago('6 days ago')).toBe('6 ngày trước')
+    expect(ago('About an hour ago')).toBe('khoảng 1 giờ trước')
+    expect(ago('a minute ago')).toBe('1 phút trước')
+    expect(ago('Less than a second ago')).toBe('vừa xong')
+    expect(ago('2026-10-28')).toBe('2026-10-28')
+  })
+})
+
+describe('parsePorts', () => {
+  it('keeps one chip per port and tells loopback apart', () => {
+    expect(
+      parsePorts('0.0.0.0:8080->80/tcp, :::8080->80/tcp, 5432/tcp, 127.0.0.1:3000->3000/tcp'),
+    ).toEqual([
+      { host: 8080, container: '80', local: false },
+      { container: '5432', local: false },
+      { host: 3000, container: '3000', local: true },
+    ])
+    expect(parsePorts('')).toEqual([])
+  })
+})
+
+describe('groups', () => {
+  it('puts compose projects first, then lone containers', () => {
+    const c = (name: string, project?: string) => ({ name, project }) as Container
+    const g = groups([
+      c('migrate'),
+      c('shop-api-1', 'shop'),
+      c('shop-db-1', 'shop'),
+      c('a-1', 'alpha'),
+    ])
+    expect(g.map((x) => x.project ?? x.key)).toEqual(['alpha', 'shop', 'migrate'])
+    expect(g[1]?.containers).toHaveLength(2)
   })
 })

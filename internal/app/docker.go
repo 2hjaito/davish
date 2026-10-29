@@ -60,3 +60,21 @@ func (a *App) DockerRemoveImage(serverID, ref, command string) error {
 	}
 	return a.docker.RemoveImage(a.ctx, serverID, ref, command)
 }
+
+// DockerVolumes lists the server's volumes with their size and use.
+func (a *App) DockerVolumes(serverID string) ([]docker.Volume, error) {
+	return a.docker.Volumes(a.ctx, serverID)
+}
+
+// DockerPlanVolume gives the command that removes a volume.
+func (a *App) DockerPlanVolume(name string) (docker.VolumePlan, error) {
+	return docker.PlanVolume(name)
+}
+
+// DockerRemoveVolume runs docker volume rm after the user confirmed command.
+func (a *App) DockerRemoveVolume(serverID, name, command string) error {
+	if err := a.lock.Check(); err != nil {
+		return err
+	}
+	return a.docker.RemoveVolume(a.ctx, serverID, name, command)
+}

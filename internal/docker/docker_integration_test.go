@@ -168,3 +168,21 @@ func TestImagesAndLayers(t *testing.T) {
 		t.Fatal("removed an image in use")
 	}
 }
+
+func TestVolumes(t *testing.T) {
+	m, id := testsshd.Connect(t)
+	s := docker.New(audit.NewRunner(m, audit.New(discard{})))
+	testsshd.Run(t, m, id, "docker volume create davish-data >/dev/null")
+	t.Cleanup(func() { testsshd.Run(t, m, id, "docker volume rm -f davish-data >/dev/null") })
+	vs, err := s.Volumes(context.Background(), id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, v := range vs {
+		found = found || v.Name == "davish-data"
+	}
+	if !found {
+		t.Fatalf("davish-data not in %+v", vs)
+	}
+}

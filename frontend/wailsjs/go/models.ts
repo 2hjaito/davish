@@ -420,6 +420,9 @@ export namespace docker {
 	    ports: string;
 	    command: string;
 	    created: string;
+	    runningFor: string;
+	    project?: string;
+	    service?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Container(source);
@@ -435,6 +438,9 @@ export namespace docker {
 	        this.ports = source["ports"];
 	        this.command = source["command"];
 	        this.created = source["created"];
+	        this.runningFor = source["runningFor"];
+	        this.project = source["project"];
+	        this.service = source["service"];
 	    }
 	}
 	export class Detail {
@@ -662,6 +668,46 @@ export namespace docker {
 	        this.memUsed = source["memUsed"];
 	        this.memLimit = source["memLimit"];
 	        this.pids = source["pids"];
+	    }
+	}
+	export class Volume {
+	    name: string;
+	    driver: string;
+	    mountpoint: string;
+	    created: string;
+	    size: number;
+	    containers: number;
+	    anonymous: boolean;
+	    project?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Volume(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.driver = source["driver"];
+	        this.mountpoint = source["mountpoint"];
+	        this.created = source["created"];
+	        this.size = source["size"];
+	        this.containers = source["containers"];
+	        this.anonymous = source["anonymous"];
+	        this.project = source["project"];
+	    }
+	}
+	export class VolumePlan {
+	    name: string;
+	    command: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new VolumePlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.command = source["command"];
 	    }
 	}
 

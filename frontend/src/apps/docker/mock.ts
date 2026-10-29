@@ -9,25 +9,70 @@ import type {
   ImageDetail,
   ImagePlan,
   LogLine,
+  Volume,
+  VolumePlan,
 } from '../../lib/api/docker'
 
 const MB = 1024 ** 2
 
-const list: Container[] = [
-  ['api', 'myapp/api:2.4.1', 'running', 'Up 3 days', '0.0.0.0:8080->8080/tcp'],
-  ['db', 'postgres:16', 'running', 'Up 3 days', '5432/tcp'],
-  ['migrate', 'myapp/api:2.4.1', 'exited', 'Exited (0) 3 days ago', ''],
-  ['redis', 'redis:7-alpine', 'running', 'Up 3 days', '6379/tcp'],
-  ['worker', 'myapp/worker:2.4.1', 'restarting', 'Restarting (1) 4 seconds ago', ''],
-].map(([name, image, state, status, ports]) => ({
-  id: `${name}0123456789abcdef`,
-  name: name!,
-  image: image!,
-  state: state!,
-  status: status!,
-  ports: ports!,
+// A compose project (shop) beside containers started by hand.
+const list: Container[] = (
+  [
+    [
+      'shop-api-1',
+      'myapp/api:2.4.1',
+      'running',
+      'Up 3 days',
+      '0.0.0.0:8080->8080/tcp, :::8080->8080/tcp',
+      '3 days ago',
+      'shop',
+      'api',
+    ],
+    ['shop-db-1', 'postgres:16', 'running', 'Up 3 days', '5432/tcp', '3 days ago', 'shop', 'db'],
+    [
+      'shop-redis-1',
+      'redis:7-alpine',
+      'running',
+      'Up 3 days',
+      '6379/tcp',
+      '3 days ago',
+      'shop',
+      'redis',
+    ],
+    [
+      'shop-worker-1',
+      'myapp/worker:2.4.1',
+      'restarting',
+      'Restarting (1) 4 seconds ago',
+      '',
+      '3 days ago',
+      'shop',
+      'worker',
+    ],
+    ['migrate', 'myapp/api:2.4.1', 'exited', 'Exited (0) 3 days ago', '', '3 days ago', '', ''],
+    [
+      'zalo-oa-gateway',
+      'davitek/zalo-gateway:latest',
+      'running',
+      'Up 26 hours',
+      '127.0.0.1:3000->3000/tcp',
+      '4 weeks ago',
+      '',
+      '',
+    ],
+  ] as const
+).map(([name, image, state, status, ports, runningFor, project, service], i) => ({
+  id: `${(i + 10).toString(16)}cf41f40809010123456789abcdef`,
+  name,
+  image,
+  state,
+  status,
+  ports,
   command: 'docker-entrypoint.sh',
   created: '2026-10-24 08:00:00 +0700 +07',
+  runningFor,
+  project: project || undefined,
+  service: service || undefined,
 }))
 
 const delay = <T>(v: T, ms = 150) => new Promise<T>((r) => setTimeout(() => r(v), ms))
@@ -93,9 +138,12 @@ export function mockPlan(name: string, action: ContainerAction): Promise<ActionP
 /** Acts on the demo list; db refuses, to show the root path. */
 export async function mockAct(name: string, action: ContainerAction): Promise<void> {
   await delay(null)
-  if (name === 'db') throw { code: 'CMD_NEEDS_ROOT', message: 'needs root' }
-  const c = list.find((x) => x.name === name)
-  if (c) c.state = action === 'stop' ? 'exited' : 'running'
+  if (name === 'shop-db-1') throw { code: 'CMD_NEEDS_ROOT', message: 'needs root' }
+  const i = list.findIndex((x) => x.name === name)
+  const c = list[i]
+  if (!c) return
+  if (action === 'rm') list.splice(i, 1)
+  else c.state = action === 'stop' ? 'exited' : 'running'
 }
 
 let images: Image[] = [
@@ -158,4 +206,31 @@ export const mockPlanImage = (ref: string): Promise<ImagePlan> =>
 export function mockRemoveImage(ref: string): Promise<void> {
   images = images.filter((i) => (i.dangling ? i.id : `${i.repository}:${i.tag}`) !== ref)
   return delay(undefined, 400)
+}
+
+let volumes: Volume[] = [
+  ['shop_pgdata', 1.4 * 1024 * MB, 1, 'shop'],
+  ['shop_redis', 12 * MB, 1, 'shop'],
+  ['uploads', 438.6 * MB, 1, ''],
+  ['0a1b5a07404e73f21101ddc3cdadd630d36cc80f04883250ec280fa0a0a0a0a0', 227 * 1024, 0, ''],
+  ['old_backup', 785 * MB, 0, ''],
+].map(([name, size, containers, project]) => ({
+  name: name as string,
+  driver: 'local',
+  mountpoint: `/var/lib/docker/volumes/${name}/_data`,
+  created: '2026-10-28T01:37:55Z',
+  size: size as number,
+  containers: containers as number,
+  anonymous: (name as string).length === 64,
+  project: (project as string) || undefined,
+}))
+
+export const mockVolumes = () => delay(volumes.map((v) => ({ ...v })))
+
+export const mockPlanVolume = (name: string): Promise<VolumePlan> =>
+  delay({ name, command: `docker volume rm ${name}` })
+
+export function mockRemoveVolume(name: string): Promise<void> {
+  volumes = volumes.filter((v) => v.name !== name)
+  return delay(undefined, 300)
 }

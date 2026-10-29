@@ -36,7 +36,7 @@ Dịch vụ systemd theo trạng thái, chi tiết và journal; khởi động, 
 
 ## Docker
 
-Container với CPU và RAM, log có đánh dấu stderr, inspect, start/stop/restart, cảnh báo khởi động lại liên tục. Image kèm số container đang dùng, các layer và cấu hình; chạy image trong Terminal hoặc xóa image không dùng.
+Bố cục như Docker Desktop. Container dạng bảng (ID, image, cổng, CPU, RAM, trạng thái), gom theo project compose, phía trên là CPU và RAM chúng dùng chung; khởi động, dừng, menu ⋮ (log, shell trong container, khởi động lại, chi tiết) và xóa ngay trên dòng, mọi thao tác phá hủy đều hiện đúng lệnh trước. Cổng publish bấm là mở trong Trình duyệt của Davish. Image kèm dung lượng image đang được dùng, các layer và cấu hình; chạy image trong Terminal hoặc xóa image không dùng. Volume kèm dung lượng và còn container nào dùng không. Vẫn cảnh báo container khởi động lại liên tục.
 
 <table><tr>
   <td><img src="assets/screenshots/docker.jpg" alt="Docker với một container khởi động lại liên tục"></td>

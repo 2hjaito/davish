@@ -38,7 +38,7 @@ func (i Image) Ref() string {
 // use each. Old docker versions do not report the count, so it is taken
 // from docker ps then.
 func (s *Service) Images(ctx context.Context, serverID string) ([]Image, error) {
-	res, err := s.run.Run(ctx, serverID, app, shellx.Cmd("docker", "images", "--no-trunc", "--format", "{{json .}}"))
+	res, err := s.read(ctx, serverID, shellx.Cmd("docker", "images", "--no-trunc", "--format", "{{json .}}"), readTimeout)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (s *Service) Images(ctx context.Context, serverID string) ([]Image, error) 
 		return nil, err
 	}
 	if !counted {
-		ps, err := s.run.Run(ctx, serverID, app, shellx.Cmd("docker", "ps", "-a", "--format", "{{.Image}}"))
+		ps, err := s.read(ctx, serverID, shellx.Cmd("docker", "ps", "-a", "--format", "{{.Image}}"), readTimeout)
 		if err == nil && ps.Exit == 0 {
 			countUses(imgs, strings.Fields(string(ps.Stdout)))
 		}
@@ -151,7 +151,7 @@ func (s *Service) Image(ctx context.Context, serverID, ref string) (ImageDetail,
 	line := shellx.Cmd("docker", "history", "--no-trunc", "--format", "{{json .}}", ref).String() +
 		" && echo " + inspectSep + " && " +
 		shellx.Cmd("docker", "image", "inspect", "--format", "{{json .}}", ref).String()
-	res, err := s.run.Run(ctx, serverID, app, shellx.Cmd("sh", "-c", line))
+	res, err := s.read(ctx, serverID, shellx.Cmd("sh", "-c", line), readTimeout)
 	if err != nil {
 		return ImageDetail{}, err
 	}

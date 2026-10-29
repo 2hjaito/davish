@@ -1,0 +1,312 @@
+/* The Docker app's tables (Containers, Images, Volumes), shared by their
+   components. Global on purpose, under the .dk prefix. */
+
+.dk-view {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
+.dk-summary {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px 4px;
+}
+
+.dk-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--fill-soft);
+}
+
+.dk-card small {
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+}
+
+.dk-card strong {
+  font-size: var(--text-lg);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.dk-meter {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--fill-track);
+  overflow: hidden;
+}
+
+.dk-meter span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width var(--dur-slow) var(--ease-out);
+}
+
+.dk-meter.warn span {
+  background: var(--warn);
+}
+
+.dk-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 6px 10px 10px;
+}
+
+.dk-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--text-sm);
+}
+
+.dk-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 7px 8px;
+  text-align: left;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--fg-label);
+  background: var(--content-bg);
+  border-bottom: 1px solid var(--divider);
+  white-space: nowrap;
+}
+
+.dk-table td {
+  padding: 0 8px;
+  height: 40px;
+  border-bottom: 1px solid var(--divider-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+}
+
+.dk-table tbody tr {
+  cursor: default;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.dk-table tbody tr:hover {
+  background: var(--fill-soft);
+}
+
+.dk-table tr.dk-group td {
+  font-weight: 600;
+}
+
+.dk-table tr.dk-child td.dk-name {
+  padding-left: 34px;
+}
+
+.dk-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.dk-table .mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+}
+
+.dk-table .muted {
+  color: var(--fg-muted);
+}
+
+.dk-name > * {
+  vertical-align: middle;
+}
+
+.dk-name > * + * {
+  margin-left: 8px;
+}
+
+.dk-name .dk-sub {
+  font-size: var(--text-xs);
+  font-weight: 400;
+  color: var(--fg-subtle);
+}
+
+.dk-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid var(--fg-subtle);
+  box-sizing: border-box;
+}
+
+.dk-dot.ok {
+  background: var(--ok);
+  border-color: var(--ok);
+}
+
+.dk-dot.busy {
+  background: var(--warn);
+  border-color: var(--warn);
+}
+
+.dk-dot.failed {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+.dk-chevron {
+  display: inline-flex;
+  border: 0;
+  padding: 2px;
+  background: none;
+  color: var(--fg-muted);
+  transition: rotate var(--dur-fast) var(--ease-out);
+}
+
+.dk-chevron.open {
+  rotate: 90deg;
+}
+
+.dk-link {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dk-link:hover {
+  text-decoration: underline;
+}
+
+.dk-chip {
+  display: inline-block;
+  margin-right: 4px;
+  padding: 1px 7px;
+  border-radius: 10px;
+  border: 0;
+  font: inherit;
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  background: var(--fill-soft);
+  color: var(--fg-muted);
+}
+
+button.dk-chip {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+button.dk-chip:hover {
+  background: var(--accent);
+  color: var(--fg-on-accent);
+}
+
+.dk-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dk-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+}
+
+.dk-actions .icon-btn,
+.dk-view .icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: var(--fg-muted);
+}
+
+.dk-actions .icon-btn:hover:not(:disabled),
+.dk-view .icon-btn:hover:not(:disabled) {
+  background: var(--glass-hover);
+  color: var(--fg);
+}
+
+.dk-actions .icon-btn.go {
+  color: var(--accent);
+}
+
+.dk-actions .icon-btn.danger {
+  color: var(--danger);
+}
+
+.dk-actions .icon-btn:disabled {
+  opacity: 0.35;
+}
+
+.dk-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 16px 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--fill-soft);
+  font-size: var(--text-sm);
+}
+
+.dk-banner.error {
+  color: var(--danger);
+}
+
+.dk-banner .grow {
+  flex: 1;
+}
+
+.dk-empty {
+  padding: 40px 0;
+  text-align: center;
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+}
+
+.dk-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--divider-soft);
+}
+
+.dk-back button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  padding: 3px 8px;
+  border-radius: 7px;
+  background: none;
+  color: var(--accent);
+  font-size: var(--text-sm);
+}
+
+.dk-back button:hover {
+  background: var(--fill-soft);
+}
+
+.dk-back .crumb {
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
+}

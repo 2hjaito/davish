@@ -36,7 +36,7 @@ systemd units by state, their status and journal; start, stop and restart. Remov
 
 ## Docker
 
-Containers with live CPU and memory, logs with stderr marked, inspect, start/stop/restart, restart-loop alerts. Images with the containers using them, their layers and config; run one in a terminal or remove the unused.
+Laid out like Docker Desktop. Containers in a table (ID, image, ports, CPU, memory, status), grouped by compose project, with the CPU and memory they use together on top; start, stop, a ⋮ menu (logs, a shell in the container, restart, details) and delete right on the row, every destructive one showing its exact command first. A published port opens in Davish's own browser. Images with how much space the used ones take, their layers and config; run one in a terminal or remove the unused. Volumes with their size and whether a container still uses them. Restart-loop alerts stay.
 
 <table><tr>
   <td><img src="assets/screenshots/docker.jpg" alt="Docker with a container in a restart loop"></td>

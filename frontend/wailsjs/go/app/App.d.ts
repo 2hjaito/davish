@@ -70,9 +70,15 @@ export function DockerPlan(arg1:string,arg2:string):Promise<docker.Plan>;
 
 export function DockerPlanImage(arg1:string):Promise<docker.ImagePlan>;
 
+export function DockerPlanVolume(arg1:string):Promise<docker.VolumePlan>;
+
 export function DockerRemoveImage(arg1:string,arg2:string,arg3:string):Promise<void>;
 
+export function DockerRemoveVolume(arg1:string,arg2:string,arg3:string):Promise<void>;
+
 export function DockerStats(arg1:string):Promise<Array<docker.Stats>>;
+
+export function DockerVolumes(arg1:string):Promise<Array<docker.Volume>>;
 
 export function FilesAccess(arg1:string,arg2:string):Promise<fs.Access>;
 

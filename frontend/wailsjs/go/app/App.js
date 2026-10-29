@@ -102,12 +102,24 @@ export function DockerPlanImage(arg1) {
   return window['go']['app']['App']['DockerPlanImage'](arg1);
 }
 
+export function DockerPlanVolume(arg1) {
+  return window['go']['app']['App']['DockerPlanVolume'](arg1);
+}
+
 export function DockerRemoveImage(arg1, arg2, arg3) {
   return window['go']['app']['App']['DockerRemoveImage'](arg1, arg2, arg3);
 }
 
+export function DockerRemoveVolume(arg1, arg2, arg3) {
+  return window['go']['app']['App']['DockerRemoveVolume'](arg1, arg2, arg3);
+}
+
 export function DockerStats(arg1) {
   return window['go']['app']['App']['DockerStats'](arg1);
+}
+
+export function DockerVolumes(arg1) {
+  return window['go']['app']['App']['DockerVolumes'](arg1);
 }
 
 export function FilesAccess(arg1, arg2) {
