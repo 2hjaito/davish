@@ -52,6 +52,7 @@ interface SettingsData {
   alertHold: number
   editorBackup: BackupMode
   lockAfter: number
+  autoUpdate: boolean
 }
 
 const defaults: SettingsData = {
@@ -67,6 +68,7 @@ const defaults: SettingsData = {
   alertHold: ALERTS.defaults.hold,
   editorBackup: 'etc',
   lockAfter: 15,
+  autoUpdate: true,
 }
 
 class Settings {
@@ -112,6 +114,11 @@ class Settings {
     return ['etc', 'always', 'never'].includes(this.#data.editorBackup)
       ? this.#data.editorBackup
       : 'etc'
+  }
+
+  /** Look for a new Davish on GitHub on its own (ADR 0009). */
+  get autoUpdate() {
+    return this.#data.autoUpdate !== false
   }
 
   /** Idle minutes before the app locks; 0 is never. */

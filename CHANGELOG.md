@@ -7,6 +7,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [1.1.0] - 2026-10-28
 
 ### Thêm
+- Tự cập nhật (ADR 0009): Davish tự kiểm tra GitHub Releases lúc mở và mỗi 6 giờ (tắt được trong Cài đặt), báo bản mới kèm nhật ký thay đổi với Cập nhật / Để sau / Bỏ qua bản này. Cập nhật tải đúng file của máy, kiểm chữ ký ed25519 và SHA-256, thay bản đang chạy rồi khởi động lại; không phải gỡ và cài lại. "Kiểm tra bản cập nhật…" trong menu hệ thống và Trợ giúp.
+- Chuột phải icon trên Dock như macOS: Mở/Hiện, Giữ trên Dock (bỏ chọn thì app rời Dock, app đang mở thì ở lại tới khi đóng), Đóng.
 - Docker: mục Image (tất cả, không dùng) với số container đang dùng; chi tiết image gồm các layer kèm dung lượng, nền tảng, entrypoint/cmd, cổng mở, biến môi trường; chạy image trong Terminal, xóa image qua xác nhận hiện đúng lệnh `docker rmi` (không `-f`).
 - App Trình duyệt (ADR 0008): mở `localhost:<cổng>` của VPS ngay trong Davish, qua proxy nghe `127.0.0.1` ở cổng ngẫu nhiên nên không đụng cổng nào trên máy; redirect về cổng khác vẫn ở lại VPS, websocket chạy, cookie đăng nhập do Davish giữ. Trang ở origin riêng, không gọi được Davish. App Cổng có nút "Mở trong Davish".
 - App An ninh: lần thử đăng nhập SSH sai trong 7 ngày gom theo IP (nhiều nhất lên đầu, user đã thử), đăng nhập thành công gần đây, `last`/`lastb`, trạng thái ufw và fail2ban; chặn một IP hoặc tắt đăng nhập mật khẩu bằng lệnh sudo gõ sẵn vào Terminal (có `sshd -t` trước khi reload, tự gỡ nếu lỗi).

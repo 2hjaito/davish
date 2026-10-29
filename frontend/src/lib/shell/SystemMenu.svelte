@@ -6,6 +6,7 @@
   import { appLock } from '../stores/lock.svelte'
   import { sleep } from '../stores/sleep.svelte'
   import { ui } from '../stores/ui.svelte'
+  import { updates } from '../stores/updates.svelte'
   import Icon from '../ui/Icon.svelte'
   import { openAudit } from '../wm/intents.svelte'
   import { wm } from '../wm/windowManager.svelte'
@@ -50,6 +51,15 @@
     <button role="menuitem" class="item" onclick={() => run(() => openAudit(servers.activeId))}>
       <Icon name="list" size={15} />
       <span class="text">{t.system.audit}</span>
+    </button>
+    <button
+      role="menuitem"
+      class="item"
+      disabled={!hasRuntime}
+      onclick={() => run(() => void updates.check(true))}
+    >
+      <Icon name="download" size={15} />
+      <span class="text">{t.update.check}</span>
     </button>
     <div class="divider"></div>
     {#if appLock.state.enabled}

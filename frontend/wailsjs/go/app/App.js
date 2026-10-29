@@ -481,3 +481,19 @@ export function Unlock(arg1) {
 export function UnlockTouchID(arg1) {
   return window['go']['app']['App']['UnlockTouchID'](arg1);
 }
+
+export function UpdateCheck() {
+  return window['go']['app']['App']['UpdateCheck']();
+}
+
+export function UpdateInstall(arg1) {
+  return window['go']['app']['App']['UpdateInstall'](arg1);
+}
+
+export function UpdateRestart() {
+  return window['go']['app']['App']['UpdateRestart']();
+}
+
+export function UpdateVersion() {
+  return window['go']['app']['App']['UpdateVersion']();
+}

@@ -139,3 +139,7 @@ Touch ID hoặc mật khẩu riêng che mọi thứ khi bạn rời máy. Quên 
   <td><img src="assets/screenshots/lock.jpg" alt="Màn khóa"></td>
   <td><img src="assets/screenshots/genie.jpg" alt="Hiệu ứng Genie"></td>
 </tr></table>
+
+## Cập nhật
+
+Davish tìm bản mới trên GitHub lúc mở và mỗi 6 giờ (tắt được trong Cài đặt, vẫn kiểm tra tay được từ menu). Có bản mới thì hiện những gì thay đổi, kèm **Cập nhật**, **Để sau** và **Bỏ qua bản này**. Cập nhật tải đúng bản cho máy bạn, đối chiếu với danh sách checksum được ký bằng khóa phát hành của Davish, thay bản đang chạy rồi khởi động lại. Không phải gỡ hay cài lại; bản cũ được giữ tới lần mở sau phòng khi bản mới không chạy. Chuột phải icon trên Dock để mở, giữ trên Dock hoặc đóng, như macOS.

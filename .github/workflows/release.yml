@@ -105,6 +105,21 @@ jobs:
           path: dist
           merge-multiple: true
 
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      # The checksum list, signed with the key the in-app updater trusts
+      # (docs/adr/0009-self-update.md). No key, no release: an unsigned one
+      # would leave users on the manual download.
+      - name: Checksums and signature
+        env:
+          DAVISH_UPDATE_KEY: ${{ secrets.DAVISH_UPDATE_KEY }}
+        run: |
+          test -n "$DAVISH_UPDATE_KEY" || { echo "secret DAVISH_UPDATE_KEY is missing"; exit 1; }
+          (cd dist && sha256sum * > SHA256SUMS.txt)
+          go run ./cmd/updatesign sign dist/SHA256SUMS.txt
+
       # The section of CHANGELOG.md for this version, without its heading.
       - name: Release notes
         run: |
@@ -122,7 +137,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          (cd dist && sha256sum * > SHA256SUMS.txt)
           gh release create "$GITHUB_REF_NAME" dist/* \
             --title "Davish ${GITHUB_REF_NAME}" \
             --notes-file notes.md \

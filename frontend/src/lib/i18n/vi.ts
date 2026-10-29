@@ -735,6 +735,27 @@ export const t = {
       },
     ],
   },
+  update: {
+    title: 'Cập nhật Davish',
+    check: 'Kiểm tra bản cập nhật…',
+    checking: 'Đang hỏi GitHub…',
+    available: (v: string) => `Có Davish ${v}`,
+    availableBody: 'Bấm để xem có gì mới và cập nhật.',
+    show: 'Xem',
+    newer: (v: string, cur: string) => `Davish ${v} đã có (bạn đang dùng ${cur}).`,
+    upToDate: (cur: string) => `Bạn đang dùng bản mới nhất (${cur}).`,
+    unsigned: 'Bản này chưa được ký để tự cập nhật; mở trang phát hành để tải.',
+    downloading: (pct: number) => `Đang tải và kiểm tra chữ ký… ${pct}%`,
+    ready: (v: string) =>
+      `Đã cài Davish ${v}. Khởi động lại để dùng bản mới; phiên SSH hiện tại sẽ đóng.`,
+    install: 'Cập nhật',
+    installing: 'Đang cập nhật…',
+    restart: 'Khởi động lại',
+    later: 'Để sau',
+    skip: 'Bỏ qua bản này',
+    openPage: 'Mở trang tải',
+    ok: 'OK',
+  },
   demo: {
     start: 'Xem thử với dữ liệu mẫu',
     banner: 'Đang xem thử với dữ liệu mẫu, không kết nối server nào.',
@@ -866,6 +887,10 @@ export const t = {
   },
   dock: {
     label: 'Dock',
+    open: 'Mở',
+    show: 'Hiện',
+    keep: 'Giữ trên Dock',
+    close: 'Đóng',
   },
   launchpad: {
     label: 'Launchpad',
@@ -1102,6 +1127,12 @@ export const t = {
     lockNow: 'Khóa ngay',
     lockAfter: 'Tự khóa khi không dùng',
     lockAfterHint: 'Davish luôn tự khóa khi máy ngủ dậy.',
+    updates: 'Cập nhật',
+    autoUpdate: 'Tự kiểm tra bản mới',
+    autoUpdateHint:
+      'Hỏi GitHub Releases lúc mở app và mỗi 6 giờ. Đây là kết nối ra Internet duy nhất ngoài SSH; không gửi thông tin gì về bạn.',
+    version: (v: string) => `Davish ${v}`,
+    checkNow: 'Kiểm tra ngay',
     lockAfters: { 0: 'Không', 5: '5 phút', 15: '15 phút', 30: '30 phút', 60: '1 giờ' },
     lockChange: 'Đổi mật khẩu',
     lockSave: 'Lưu mật khẩu mới',
@@ -1692,6 +1723,12 @@ export const t = {
       'Không pull thẳng được: nhánh trên server và remote đã rẽ nhánh. Cần merge hoặc rebase trong Terminal.',
     GIT_NO_UPSTREAM: 'Nhánh này chưa theo dõi nhánh remote nào.',
     GIT_REMOTE_FAILED: 'Không kết nối được tới remote.',
+    UPDATE_UNAVAILABLE: 'Không kiểm tra được bản cập nhật (GitHub không trả lời).',
+    UPDATE_UNSIGNED: 'Bản này chưa được ký để tự cập nhật. Hãy tải từ trang phát hành.',
+    UPDATE_BAD_SIGNATURE:
+      'File tải về không khớp chữ ký nên không được cài. Hãy tải từ trang phát hành.',
+    UPDATE_NO_WRITE:
+      'Davish không ghi được vào thư mục cài đặt. Hãy tải bản mới từ trang phát hành.',
     GIT_UNSAFE_OWNER:
       'Repo này thuộc user khác nên git từ chối đọc (dubious ownership). Hãy đăng nhập bằng user sở hữu repo.',
   },

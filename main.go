@@ -4,6 +4,7 @@ package main
 import (
 	"context"
 	"embed"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -23,9 +24,21 @@ import (
 //go:embed all:frontend/dist
 var assets embed.FS
 
+// wails.json holds the version a release is tagged with; the updater
+// compares against it.
+//
+//go:embed wails.json
+var wailsJSON []byte
+
 func main() {
 	start := time.Now()
-	a, err := app.New()
+	var cfg struct {
+		Info struct{ ProductVersion string }
+	}
+	if err := json.Unmarshal(wailsJSON, &cfg); err != nil {
+		log.Fatal(err)
+	}
+	a, err := app.New(cfg.Info.ProductVersion)
 	if err != nil {
 		log.Fatal(err)
 	}

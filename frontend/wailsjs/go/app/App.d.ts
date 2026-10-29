@@ -18,6 +18,7 @@ import {sshconfig} from '../models';
 import {security} from '../models';
 import {svc} from '../models';
 import {transfer} from '../models';
+import {update} from '../models';
 
 export function AcceptHostKey(arg1:string,arg2:string):Promise<void>;
 
@@ -258,3 +259,11 @@ export function TunnelStop(arg1:string):Promise<void>;
 export function Unlock(arg1:string):Promise<void>;
 
 export function UnlockTouchID(arg1:string):Promise<void>;
+
+export function UpdateCheck():Promise<update.Status>;
+
+export function UpdateInstall(arg1:string):Promise<void>;
+
+export function UpdateRestart():Promise<void>;
+
+export function UpdateVersion():Promise<string>;
