@@ -2,11 +2,13 @@
 import type {
   CreatePlan,
   CreateResult,
+  EditPlan,
   NewSite,
   NginxReload,
   NginxSite,
   NginxTest,
   RemovePlan,
+  SiteEdit,
   SiteOptions,
   SSLPlan,
   TogglePlan,
@@ -244,3 +246,19 @@ export function mockPlanSSL(names: string[], redirect: boolean): Promise<SSLPlan
       : '',
   })
 }
+
+export function mockPlanEdit(path: string, edit: SiteEdit): Promise<EditPlan> {
+  const backup = `${path}.bak-20261029T080000Z`
+  const lines = [
+    edit.addNames.length ? `    server_name … ${edit.addNames.join(' ')};` : '',
+    edit.upstream ? `        proxy_pass http://${edit.upstream};` : '',
+    edit.gzip ? `    gzip ${edit.gzip};` : '',
+    edit.maxBody ? `    client_max_body_size ${edit.maxBody};` : '',
+  ].filter(Boolean)
+  const after = `server {\n    listen 80;\n${lines.join('\n')}\n}\n`
+  const command = `cp -p -- ${path} ${backup} && printf %s '${after}' | tee -- ${path} > /dev/null && { nginx -t && systemctl reload nginx || { cp -p -- ${backup} ${path}; false; }; }`
+  return delay({ path, backup, before: '', after, command, sudo: command })
+}
+
+export const mockEdit = (plan: EditPlan): Promise<CreateResult> =>
+  delay({ created: true, test: okTest, needsRoot: false, sudo: plan.sudo }, 500)

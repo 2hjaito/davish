@@ -5,6 +5,7 @@
   import Dialog from '../../lib/ui/Dialog.svelte'
   import NeedsRoot from '../../lib/ui/NeedsRoot.svelte'
   import { backend } from './backend'
+  import { upstreamChoices, type Choice } from './upstreams'
 
   interface Props {
     serverID: string
@@ -30,6 +31,7 @@
   let result = $state.raw<CreateResult | null>(null)
   let error = $state('')
   let busy = $state(false)
+  let suggestions = $state.raw<Choice[]>([])
 
   $effect(() => {
     if (!open) return
@@ -37,6 +39,7 @@
     error = ''
     plan = null
     result = null
+    void upstreamChoices(serverID).then((c) => (suggestions = c))
     backend
       .siteOptions(serverID)
       .then((o) => {
@@ -124,7 +127,16 @@
     {#if type === 'proxy'}
       <label class="field">
         <span>{t.nginx.newSite.upstream}</span>
-        <input class="input" type="text" bind:value={upstream} spellcheck="false" />
+        <input
+          class="input"
+          type="text"
+          list="new-site-upstreams"
+          bind:value={upstream}
+          spellcheck="false"
+        />
+        <datalist id="new-site-upstreams">
+          {#each suggestions as c (c.value)}<option value={c.value}>{c.label}</option>{/each}
+        </datalist>
         <small>{t.nginx.newSite.upstreamHint}</small>
       </label>
       <label class="check">

@@ -5,6 +5,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Thêm
+- Nginx → **Sửa nhanh…**: thêm tên miền, đổi upstream, gzip, `client_max_body_size`; sao lưu trước, `nginx -t` lỗi thì trả lại file cũ.
+- Ô reverse proxy gợi ý cổng và container đang nghe trên server.
 - `SECURITY.md`: mô hình bảo mật và cách báo lỗ hổng riêng tư.
 - README nêu "Mở là vào": không đăng nhập, không mở thêm cổng trên server.
 - Nginx → **Site mới…**: reverse proxy, tĩnh hoặc PHP-FPM; xem trước và sửa cấu hình; chỉ bật khi `nginx -t` qua, lỗi thì tắt lại.

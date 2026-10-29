@@ -330,12 +330,20 @@ export function NginxCreate(arg1, arg2, arg3, arg4) {
   return window['go']['app']['App']['NginxCreate'](arg1, arg2, arg3, arg4);
 }
 
+export function NginxEdit(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['app']['App']['NginxEdit'](arg1, arg2, arg3, arg4, arg5);
+}
+
 export function NginxList(arg1) {
   return window['go']['app']['App']['NginxList'](arg1);
 }
 
 export function NginxPlanCreate(arg1, arg2, arg3) {
   return window['go']['app']['App']['NginxPlanCreate'](arg1, arg2, arg3);
+}
+
+export function NginxPlanEdit(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['NginxPlanEdit'](arg1, arg2, arg3, arg4);
 }
 
 export function NginxPlanRemove(arg1, arg2, arg3) {

@@ -27,6 +27,7 @@
   import ResultDialog from './ResultDialog.svelte'
   import NewSiteDialog from './NewSiteDialog.svelte'
   import SSLDialog from './SSLDialog.svelte'
+  import EditSiteDialog from './EditSiteDialog.svelte'
   import RemoveDialog from './RemoveDialog.svelte'
   import SiteInspector from './SiteInspector.svelte'
   import { type Filter, FILTERS, mainName, matches, siteKey, visible, worstCert } from './sites'
@@ -47,6 +48,7 @@
   let removing = $state.raw<RemovePlan | null>(null)
   let creating = $state(false)
   let sslNames = $state.raw<string[] | null>(null)
+  let editing = $state.raw<NginxSite | null>(null)
   /** The server refused the link change: its sudo form. */
   let toggleSudo = $state('')
   let flash = $state('')
@@ -289,6 +291,7 @@
         ontoggle={(s) => void askToggle(s)}
         onremove={(s) => void askRemove(s)}
         onreload={() => void askReload()}
+        onedit={(s) => (editing = s)}
         onssl={(s) => (sslNames = [...new Set(s.servers.flatMap((b) => b.names))])}
       />
     {:else}
@@ -324,6 +327,15 @@
   oncreated={(name, path) => {
     flash = t.nginx.newSite.created(name)
     selected = path
+    void refresh()
+  }}
+/>
+<EditSiteDialog
+  serverID={win.serverID}
+  site={editing}
+  onclose={() => (editing = null)}
+  ondone={(name) => {
+    flash = t.nginx.edit.done(name)
     void refresh()
   }}
 />

@@ -99,3 +99,17 @@ func (a *App) NginxPlanSSL(serverID string, names []string, redirect bool) (ngin
 	}
 	return nginx.PlanSSL(a.ctx, net.DefaultResolver, srv.Host, names, redirect), nil
 }
+
+// NginxPlanEdit describes a quick change to a site; backup repeats an
+// earlier plan's backup name, or is empty for a new one.
+func (a *App) NginxPlanEdit(serverID, sitePath string, edit nginx.SiteEdit, backup string) (nginx.EditPlan, error) {
+	return a.nginx.PlanEdit(a.ctx, serverID, sitePath, edit, backup)
+}
+
+// NginxEdit runs the confirmed command of NginxPlanEdit.
+func (a *App) NginxEdit(serverID, sitePath string, edit nginx.SiteEdit, backup, command string) (nginx.CreateResult, error) {
+	if err := a.lock.Check(); err != nil {
+		return nginx.CreateResult{}, err
+	}
+	return a.nginx.Edit(a.ctx, serverID, sitePath, edit, backup, command)
+}

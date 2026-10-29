@@ -1443,6 +1443,28 @@ export namespace nginx {
 	        this.error = source["error"];
 	    }
 	}
+	export class EditPlan {
+	    path: string;
+	    backup: string;
+	    before: string;
+	    after: string;
+	    command: string;
+	    sudo: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new EditPlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.backup = source["backup"];
+	        this.before = source["before"];
+	        this.after = source["after"];
+	        this.command = source["command"];
+	        this.sudo = source["sudo"];
+	    }
+	}
 	
 	export class NewSite {
 	    names: string[];
@@ -1637,6 +1659,24 @@ export namespace nginx {
 		    }
 		    return a;
 		}
+	}
+	export class SiteEdit {
+	    addNames: string[];
+	    upstream: string;
+	    gzip: string;
+	    maxBody: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SiteEdit(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.addNames = source["addNames"];
+	        this.upstream = source["upstream"];
+	        this.gzip = source["gzip"];
+	        this.maxBody = source["maxBody"];
+	    }
 	}
 	export class SiteOptions {
 	    confD: boolean;

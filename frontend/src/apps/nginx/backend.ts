@@ -1,8 +1,10 @@
 // The nginx calls, or demo data in the plain browser preview.
 import {
   nginxCreate,
+  nginxEdit,
   nginxList,
   nginxPlanCreate,
+  nginxPlanEdit,
   nginxPlanSSL,
   nginxPlanRemove,
   nginxPlanToggle,
@@ -14,15 +16,19 @@ import {
   nginxTest,
   nginxToggle,
   type CreatePlan,
+  type EditPlan,
   type NewSite,
   type RemovePlan,
+  type SiteEdit,
   type TogglePlan,
 } from '../../lib/api/nginx'
 import { hasRuntime } from '../../lib/api/runtime'
 import {
   mockCreate,
+  mockEdit,
   mockList,
   mockPlanCreate,
+  mockPlanEdit,
   mockPlanSSL,
   mockPlanRemove,
   mockPlanToggle,
@@ -49,6 +55,8 @@ export const backend = hasRuntime
       planCreate: nginxPlanCreate,
       create: nginxCreate,
       planSSL: nginxPlanSSL,
+      planEdit: nginxPlanEdit,
+      edit: nginxEdit,
     }
   : {
       list: (_serverID: string) => mockList(),
@@ -68,4 +76,6 @@ export const backend = hasRuntime
       create: (_serverID: string, _site: NewSite, plan: CreatePlan) => mockCreate(plan),
       planSSL: (_serverID: string, names: string[], redirect: boolean) =>
         mockPlanSSL(names, redirect),
+      planEdit: (_serverID: string, path: string, edit: SiteEdit) => mockPlanEdit(path, edit),
+      edit: (_serverID: string, _edit: SiteEdit, plan: EditPlan) => mockEdit(plan),
     }

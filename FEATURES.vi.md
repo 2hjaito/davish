@@ -57,6 +57,8 @@ Site, server block và upstream; bật/tắt site, `nginx -t` trước mỗi l�
 
 **Bật HTTPS…** kiểm tra (từ máy bạn) từng tên miền đã trỏ về server chưa, cảnh báo tên nào chưa, rồi mở Terminal với `sudo certbot --nginx -d …` gõ sẵn (tùy chọn chuyển HTTP sang HTTPS).
 
+**Sửa nhanh…** thêm tên miền, đổi địa chỉ proxy (gợi ý từ những gì đang nghe trên server), bật/tắt gzip, đặt giới hạn dung lượng tải lên. File hiện tại được sao lưu trước và trả lại nếu `nginx -t` lỗi.
+
 <table><tr>
   <td><img src="assets/screenshots/nginx.jpg" alt="Site nginx với chứng chỉ TLS"></td>
   <td><img src="assets/screenshots/remove.jpg" alt="Xóa site nginx cùng chứng chỉ"></td>
