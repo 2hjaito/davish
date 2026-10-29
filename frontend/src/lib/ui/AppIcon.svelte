@@ -274,6 +274,25 @@
       <path d="M23 13v34M13 37l10 10 10-10" />
       <path d="M41 51V17M31 27l10-10 10 10" opacity="0.75" />
     </g>
+  {:else if id === 'database'}
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#8aa4ff" />
+        <stop offset="1" stop-color="#3b4fd8" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    <g fill="#fff">
+      <ellipse cx="32" cy="17" rx="16" ry="6" />
+      <path
+        d="M16 21c0 3.3 7.2 6 16 6s16-2.7 16-6v9c0 3.3-7.2 6-16 6s-16-2.7-16-6z"
+        opacity="0.9"
+      />
+      <path
+        d="M16 34c0 3.3 7.2 6 16 6s16-2.7 16-6v9c0 3.3-7.2 6-16 6s-16-2.7-16-6z"
+        opacity="0.8"
+      />
+    </g>
   {:else if id === 'deploy'}
     <defs>
       <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">

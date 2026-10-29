@@ -3,6 +3,7 @@
 import {audit} from '../models';
 import {ports} from '../models';
 import {cron} from '../models';
+import {database} from '../models';
 import {deploy} from '../models';
 import {diag} from '../models';
 import {app} from '../models';
@@ -41,6 +42,16 @@ export function CronPlan(arg1:string,arg2:cron.Change):Promise<cron.Plan>;
 export function CronPreview(arg1:string,arg2:string):Promise<cron.Preview>;
 
 export function CronRuns(arg1:string,arg2:string):Promise<cron.Runs>;
+
+export function DatabaseCreate(arg1:string,arg2:string,arg3:string,arg4:string):Promise<database.CreateResult>;
+
+export function DatabaseCreateSQL(arg1:string,arg2:string,arg3:string):Promise<string>;
+
+export function DatabaseDrop(arg1:string,arg2:string,arg3:string,arg4:string):Promise<void>;
+
+export function DatabaseDropSQL(arg1:string,arg2:string):Promise<string>;
+
+export function DatabaseList(arg1:string):Promise<Array<database.Engine>>;
 
 export function DeleteServer(arg1:string):Promise<void>;
 

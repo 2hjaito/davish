@@ -175,6 +175,15 @@ export const apps: AppDef[] = [
     layout: false,
   },
   {
+    id: 'database',
+    label: t.apps.database,
+    icon: 'disk',
+    theme: 'light',
+    size: { w: 640, h: 560 },
+    load: () => import('./database/DatabaseApp.svelte'),
+    dock: false,
+  },
+  {
     id: 'deploy',
     label: t.apps.deploy,
     icon: 'play',

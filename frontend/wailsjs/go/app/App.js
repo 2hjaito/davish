@@ -42,6 +42,26 @@ export function CronRuns(arg1, arg2) {
   return window['go']['app']['App']['CronRuns'](arg1, arg2);
 }
 
+export function DatabaseCreate(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['DatabaseCreate'](arg1, arg2, arg3, arg4);
+}
+
+export function DatabaseCreateSQL(arg1, arg2, arg3) {
+  return window['go']['app']['App']['DatabaseCreateSQL'](arg1, arg2, arg3);
+}
+
+export function DatabaseDrop(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['DatabaseDrop'](arg1, arg2, arg3, arg4);
+}
+
+export function DatabaseDropSQL(arg1, arg2) {
+  return window['go']['app']['App']['DatabaseDropSQL'](arg1, arg2);
+}
+
+export function DatabaseList(arg1) {
+  return window['go']['app']['App']['DatabaseList'](arg1);
+}
+
 export function DeleteServer(arg1) {
   return window['go']['app']['App']['DeleteServer'](arg1);
 }

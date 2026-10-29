@@ -69,7 +69,7 @@
   })
 
   function appItems(): Item[] {
-    const extra = ['deploy', 'audit', 'transfers']
+    const extra = ['deploy', 'database', 'audit', 'transfers']
       .map((id) => getApp(id))
       .filter((a) => a !== undefined)
     return [...dockApps, ...extra].map((a) => ({
