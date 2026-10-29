@@ -92,16 +92,32 @@ func parse(out []byte) (List, error) {
 		list.Root = strings.TrimSpace(sc.Text()) == "0"
 	}
 	containers := parseDocker(docker)
+	// Several sockets can share an address and port: one per interface
+	// (172.17.0.1%docker0:53), or SO_REUSEPORT workers. They are one port
+	// to the user, and the frontend keys its list on addr:port.
+	seen := map[string]int{}
 	for sc.Scan() {
 		line := sc.Text()
 		if line == "NO_SS" {
 			return List{}, apperr.New(apperr.CmdMissing, "ss is not installed on the server")
 		}
-		if p, ok := parseSS(line); ok {
-			if p.Process == "docker-proxy" {
-				p.Container = containers[p.Port]
+		p, ok := parseSS(line)
+		if !ok {
+			continue
+		}
+		key := net.JoinHostPort(p.Addr, strconv.Itoa(p.Port))
+		if i, dup := seen[key]; dup {
+			if list.Ports[i].Process == "" {
+				list.Ports[i].Process, list.Ports[i].PID = p.Process, p.PID
 			}
-			list.Ports = append(list.Ports, p)
+			continue
+		}
+		seen[key] = len(list.Ports)
+		list.Ports = append(list.Ports, p)
+	}
+	for i, p := range list.Ports {
+		if p.Process == "docker-proxy" {
+			list.Ports[i].Container = containers[p.Port]
 		}
 	}
 	slices.SortStableFunc(list.Ports, func(a, b Port) int { return a.Port - b.Port })
