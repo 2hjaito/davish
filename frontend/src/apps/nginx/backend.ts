@@ -1,23 +1,33 @@
 // The nginx calls, or demo data in the plain browser preview.
 import {
+  nginxCreate,
   nginxList,
+  nginxPlanCreate,
   nginxPlanRemove,
   nginxPlanToggle,
   nginxRemove,
   nginxReload,
   nginxReloadCommand,
+  nginxRenderSite,
+  nginxSiteOptions,
   nginxTest,
   nginxToggle,
+  type CreatePlan,
+  type NewSite,
   type RemovePlan,
   type TogglePlan,
 } from '../../lib/api/nginx'
 import { hasRuntime } from '../../lib/api/runtime'
 import {
+  mockCreate,
   mockList,
+  mockPlanCreate,
   mockPlanRemove,
   mockPlanToggle,
   mockReload,
   mockRemove,
+  mockRenderSite,
+  mockSiteOptions,
   mockTest,
   mockToggle,
 } from './mock'
@@ -32,6 +42,10 @@ export const backend = hasRuntime
       reload: nginxReload,
       planRemove: nginxPlanRemove,
       remove: nginxRemove,
+      siteOptions: nginxSiteOptions,
+      renderSite: nginxRenderSite,
+      planCreate: nginxPlanCreate,
+      create: nginxCreate,
     }
   : {
       list: (_serverID: string) => mockList(),
@@ -44,4 +58,9 @@ export const backend = hasRuntime
       planRemove: (_serverID: string, path: string, withCerts: boolean) =>
         mockPlanRemove(path, withCerts),
       remove: (_serverID: string, plan: RemovePlan) => mockRemove(plan),
+      siteOptions: (_serverID: string) => mockSiteOptions(),
+      renderSite: mockRenderSite,
+      planCreate: (_serverID: string, site: NewSite, config: string) =>
+        mockPlanCreate(site, config),
+      create: (_serverID: string, _site: NewSite, plan: CreatePlan) => mockCreate(plan),
     }

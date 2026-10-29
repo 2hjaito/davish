@@ -7,6 +7,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ### Thêm
 - `SECURITY.md`: mô hình bảo mật và cách báo lỗ hổng riêng tư.
 - README nêu "Mở là vào": không đăng nhập, không mở thêm cổng trên server.
+- Nginx → **Site mới…**: reverse proxy, tĩnh hoặc PHP-FPM; xem trước và sửa cấu hình; chỉ bật khi `nginx -t` qua, lỗi thì tắt lại.
 - `scripts/repo-meta.sh` đặt mô tả/topic repo; `scripts/social-preview.sh` sinh ảnh social preview.
 
 ## [1.2.0] - 2026-10-29

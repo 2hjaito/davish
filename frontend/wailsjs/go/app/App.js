@@ -326,8 +326,16 @@ export function NginxCheckCerts(arg1) {
   return window['go']['app']['App']['NginxCheckCerts'](arg1);
 }
 
+export function NginxCreate(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['NginxCreate'](arg1, arg2, arg3, arg4);
+}
+
 export function NginxList(arg1) {
   return window['go']['app']['App']['NginxList'](arg1);
+}
+
+export function NginxPlanCreate(arg1, arg2, arg3) {
+  return window['go']['app']['App']['NginxPlanCreate'](arg1, arg2, arg3);
 }
 
 export function NginxPlanRemove(arg1, arg2, arg3) {
@@ -348,6 +356,14 @@ export function NginxReloadCommand() {
 
 export function NginxRemove(arg1, arg2, arg3, arg4) {
   return window['go']['app']['App']['NginxRemove'](arg1, arg2, arg3, arg4);
+}
+
+export function NginxRenderSite(arg1) {
+  return window['go']['app']['App']['NginxRenderSite'](arg1);
+}
+
+export function NginxSiteOptions(arg1) {
+  return window['go']['app']['App']['NginxSiteOptions'](arg1);
 }
 
 export function NginxTest(arg1) {

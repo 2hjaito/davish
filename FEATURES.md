@@ -53,6 +53,8 @@ Your crontab and the system ones, schedules in plain words, next runs in the ser
 
 Sites, server blocks and upstreams; turn sites on or off, `nginx -t` before every reload, errors that open at the right line; TLS expiry alerts. Delete a site, and its Let's Encrypt certificate if no other site uses it.
 
+**New site…** sets up a reverse proxy (to a port or a container, WebSocket optional), a static folder or PHP-FPM (the installed php-fpm socket is found for you). You see and can edit the generated config and the exact command before anything runs; the site is enabled only if `nginx -t` passes, otherwise it is turned off again and nginx's error is shown.
+
 <table><tr>
   <td><img src="assets/screenshots/nginx.jpg" alt="Nginx site with TLS certificate"></td>
   <td><img src="assets/screenshots/remove.jpg" alt="Deleting an nginx site with its certificate"></td>

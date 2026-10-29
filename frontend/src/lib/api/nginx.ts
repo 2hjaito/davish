@@ -112,3 +112,56 @@ export const nginxRemove = (serverID: string, plan: RemovePlan): Promise<void> =
   App.NginxRemove(serverID, plan.path, plan.withCerts, plan.command)
 
 export const nginxCheckCerts = (serverID: string): Promise<void> => App.NginxCheckCerts(serverID)
+
+/** The new site form (internal/nginx.NewSite). */
+export interface NewSite {
+  names: string[]
+  type: 'static' | 'proxy' | 'php'
+  root: string
+  /** host:port or a URL. */
+  upstream: string
+  websocket: boolean
+  phpSocket: string
+}
+
+export interface SiteOptions {
+  /** No sites-available: new sites go to conf.d. */
+  confD: boolean
+  phpSockets: string[]
+}
+
+export interface CreatePlan {
+  name: string
+  path: string
+  config: string
+  /** Exactly what nginxCreate runs. */
+  command: string
+  sudo: string
+}
+
+export interface CreateResult {
+  created: boolean
+  /** nginx -t's verdict; a failing test leaves the site off. */
+  test?: NginxTest
+  needsRoot: boolean
+  sudo: string
+}
+
+export const nginxSiteOptions = (serverID: string): Promise<SiteOptions> =>
+  App.NginxSiteOptions(serverID)
+
+export const nginxRenderSite = (site: NewSite): Promise<string> => App.NginxRenderSite(site)
+
+export const nginxPlanCreate = (
+  serverID: string,
+  site: NewSite,
+  config: string,
+): Promise<CreatePlan> => App.NginxPlanCreate(serverID, site, config)
+
+/** Runs the confirmed command; FS_STALE when anything changed since. */
+export const nginxCreate = (
+  serverID: string,
+  site: NewSite,
+  plan: CreatePlan,
+): Promise<CreateResult> =>
+  App.NginxCreate(serverID, site, plan.config, plan.command) as Promise<CreateResult>
