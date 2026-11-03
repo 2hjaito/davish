@@ -4,6 +4,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.3.3] - 2026-11-03
+
 ### Sửa
 - Mở thư mục trong Files từ app khác (ví dụ "Mở trong Files" của Git) khi Files chưa mở: cửa sổ đôi khi mở ở thư mục lần trước thay vì thư mục được chọn, phải bấm lần nữa.
 - Lỗi JS khi chuyển qua lại giữa các repo trong app Git.
@@ -181,7 +183,8 @@ M0–M3 · Khung dự án, desktop, kết nối, Terminal.
 - Kết nối SSH qua agent, key hoặc mật khẩu; bí mật trong keychain; xác nhận host key lần đầu, từ chối khi host key đổi; tự kết nối lại.
 - Terminal xterm.js nhiều tab, prompt Davish không cài gì lên server.
 
-[Unreleased]: https://github.com/2hjaito/davish/compare/v1.3.2...HEAD
+[Unreleased]: https://github.com/2hjaito/davish/compare/v1.3.3...HEAD
+[1.3.3]: https://github.com/2hjaito/davish/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/2hjaito/davish/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/2hjaito/davish/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/2hjaito/davish/compare/v1.2.0...v1.3.0
