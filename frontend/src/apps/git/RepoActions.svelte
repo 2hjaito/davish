@@ -97,9 +97,15 @@
     return r.error in t.errors ? t.errors[r.error as keyof typeof t.errors] : t.errors.CMD_FAILED
   }
 
+  // The menu bar reads these after Git drops the status of the repository
+  // it leaves, while this component is going away: status can be null then.
   useAppMenu(() => [
     { label: `${t.git.fetch}…`, disabled: busy, run: () => void plan('fetch') },
-    { label: `${t.git.pull}…`, disabled: busy || !status.upstream, run: () => void plan('pull') },
+    {
+      label: `${t.git.pull}…`,
+      disabled: busy || !(status as Status | null)?.upstream,
+      run: () => void plan('pull'),
+    },
   ])
 </script>
 
@@ -139,13 +145,7 @@
   </button>
 </div>
 
-<DeployDialog
-  {serverID}
-  {dir}
-  suggested={status.recipe ?? []}
-  open={deploying}
-  onclose={() => (deploying = false)}
-/>
+<DeployDialog {serverID} {dir} open={deploying} onclose={() => (deploying = false)} />
 
 {#if busy}<p class="muted">{t.git.running}</p>{/if}
 {#if blocked}
