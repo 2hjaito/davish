@@ -159,3 +159,7 @@ See [CHANGELOG.md](CHANGELOG.md).
 ## License
 
 Davish is free software under the [GNU General Public License v3.0](LICENSE). Contributions need the [Contributor License Agreement](CLA.md); see [CONTRIBUTING.md](CONTRIBUTING.md). The Davish name and logo are not covered by the license: see [TRADEMARKS.md](TRADEMARKS.md).
+
+## Code signing policy
+
+Free code signing for the Windows builds is provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org). Team roles, what is signed and what Davish sends over the network: [CODE_SIGNING.md](CODE_SIGNING.md).
