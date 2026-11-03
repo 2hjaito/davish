@@ -2213,6 +2213,9 @@ const vi = {
       'File tải về không khớp chữ ký nên không được cài. Hãy tải từ trang phát hành.',
     UPDATE_NO_WRITE:
       'Davish không ghi được vào thư mục cài đặt. Hãy tải bản mới từ trang phát hành.',
+    UPDATE_BROKEN:
+      'File của Davish trên máy đã bị thay hoặc xóa trong lúc app đang chạy (build lại, cài lại). Thoát Davish rồi mở lại, hoặc tải bản mới từ trang phát hành.',
+    UPDATE_DEV_BUILD: 'Bản dev không tự cập nhật. Hãy tải bản mới từ trang phát hành.',
     GIT_UNSAFE_OWNER:
       'Repo này thuộc user khác nên git từ chối đọc (dubious ownership). Hãy đăng nhập bằng user sở hữu repo.',
   },
