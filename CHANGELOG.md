@@ -4,6 +4,11 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Deploy có tiến trình: Terminal hiện từng bước đang chạy, xong hay lỗi kèm thời gian; thông báo khi deploy xong hoặc dừng ở bước lỗi; app Git liệt kê các lần deploy gần đây (commit, kết quả, thời gian).
+- Công thức deploy đầu tiên được gợi ý từ nội dung repo: lockfile, script `build`, file compose, `Dockerfile`, `go.mod`, `Makefile`.
+- Repo đã có công thức thì nút Deploy mở thẳng tới lệnh sẽ chạy, bấm thêm một lần là deploy.
+
 ## [1.3.2] - 2026-10-29
 
 ### Sửa

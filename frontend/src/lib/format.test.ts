@@ -1,9 +1,24 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatBytes, formatClock, formatDuration, formatGB, formatPct, formatRate } from './format'
+import {
+  formatBytes,
+  formatClock,
+  formatDuration,
+  formatElapsed,
+  formatGB,
+  formatPct,
+  formatRate,
+} from './format'
 import { t } from './i18n'
 
 describe('format', () => {
+  it('formats elapsed time as a stopwatch', () => {
+    expect(formatElapsed(0)).toBe('0:00')
+    expect(formatElapsed(42_900)).toBe('0:42')
+    expect(formatElapsed(725_000)).toBe('12:05')
+    expect(formatElapsed(3_723_000)).toBe('1:02:03')
+  })
+
   it.each([
     [0, '0 B'],
     [210, '210 B'],

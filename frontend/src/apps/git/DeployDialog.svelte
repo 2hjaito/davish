@@ -1,31 +1,38 @@
 <script lang="ts">
+  import { untrack } from 'svelte'
+
   import { toUserError } from '../../lib/api/errors'
+  import type { DeployLine } from '../../lib/api/git'
   import { t } from '../../lib/i18n'
+  import { deploys } from '../../lib/stores/deploys.svelte'
   import Dialog from '../../lib/ui/Dialog.svelte'
   import { openTerminalAt } from '../../lib/wm/intents.svelte'
   import { backend } from './backend'
-  import { loadRecipe, saveRecipe } from './recipe'
+  import { hasRecipe, loadRecipe, saveRecipe } from './recipe'
 
   interface Props {
     serverID: string
     dir: string
-    install: string
+    /** Steps guessed from the repository, until a recipe is saved. */
+    suggested: string[]
     open: boolean
     onclose: () => void
   }
 
-  let { serverID, dir, install, open, onclose }: Props = $props()
+  let { serverID, dir, suggested, open, onclose }: Props = $props()
   const g = t.git.deploy
 
   let steps = $state('')
-  let command = $state('')
+  let command = $state<DeployLine>()
   let error = $state('')
 
   $effect(() => {
     if (!open) return
-    steps = loadRecipe(serverID, dir, install).join('\n')
-    command = ''
+    steps = loadRecipe(serverID, dir, suggested).join('\n')
+    command = undefined
     error = ''
+    // A saved recipe goes straight to its command: one more click deploys.
+    if (hasRecipe(serverID, dir)) untrack(() => void preview())
   })
 
   const list = $derived(steps.split('\n'))
@@ -41,7 +48,9 @@
   }
 
   function run() {
-    openTerminalAt(serverID, undefined, command)
+    if (!command) return
+    deploys.watch(serverID, dir, command.nonce, command.steps)
+    openTerminalAt(serverID, undefined, command.line, command.nonce)
     onclose()
   }
 </script>
@@ -52,11 +61,11 @@
     class="input steps"
     rows="7"
     bind:value={steps}
-    oninput={() => (command = '')}
+    oninput={() => (command = undefined)}
     spellcheck="false"></textarea>
   {#if command}
     <p>{g.commandIntro}</p>
-    <pre class="command">{command}</pre>
+    <pre class="command">{command.line}</pre>
   {/if}
   {#if error}<p class="error" role="alert">{error}</p>{/if}
 

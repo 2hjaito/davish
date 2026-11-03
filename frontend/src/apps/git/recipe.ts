@@ -6,17 +6,16 @@ import { load, save } from '../../lib/stores/persist'
 const SETTING = 'deploy-recipes'
 const key = (serverID: string, dir: string) => `${serverID}:${dir}`
 
-/** The saved steps, or a first recipe from what the repository holds. */
-export function loadRecipe(serverID: string, dir: string, install: string): string[] {
+/** The saved steps, or suggested: a first recipe from what the repository holds. */
+export function loadRecipe(serverID: string, dir: string, suggested: string[]): string[] {
   const saved = load<Record<string, string[]>>(SETTING, {})[key(serverID, dir)]
   if (saved && saved.length > 0) return saved
-  return [
-    'git pull --ff-only',
-    ...(install ? [install] : []),
-    '# npm run build',
-    '# sudo systemctl restart my-app',
-    '# docker compose up -d --build',
-  ]
+  return suggested.length > 0 ? suggested : ['git pull --ff-only']
+}
+
+/** Whether a recipe was saved for this repository. */
+export function hasRecipe(serverID: string, dir: string): boolean {
+  return (load<Record<string, string[]>>(SETTING, {})[key(serverID, dir)]?.length ?? 0) > 0
 }
 
 export function saveRecipe(serverID: string, dir: string, steps: string[]): void {

@@ -142,7 +142,7 @@
 <DeployDialog
   {serverID}
   {dir}
-  install={status.install}
+  suggested={status.recipe ?? []}
   open={deploying}
   onclose={() => (deploying = false)}
 />

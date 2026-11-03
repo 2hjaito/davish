@@ -1480,6 +1480,22 @@ export namespace git {
 		    return a;
 		}
 	}
+	export class Deploy {
+	    line: string;
+	    nonce: string;
+	    steps: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Deploy(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.line = source["line"];
+	        this.nonce = source["nonce"];
+	        this.steps = source["steps"];
+	    }
+	}
 	export class Diff {
 	    text: string;
 	    truncated: boolean;
@@ -1564,6 +1580,7 @@ export namespace git {
 	    changes: Change[];
 	    truncated: boolean;
 	    install: string;
+	    recipe: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Status(source);
@@ -1579,6 +1596,7 @@ export namespace git {
 	        this.changes = this.convertValues(source["changes"], Change);
 	        this.truncated = source["truncated"];
 	        this.install = source["install"];
+	        this.recipe = source["recipe"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

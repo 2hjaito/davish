@@ -187,3 +187,42 @@ g switch -qc feature; g push -q origin feature 2>/dev/null`)
 		t.Fatalf("auth failure: %+v", r)
 	}
 }
+
+// The deploy line, run by the server's shell, marks each step and the end
+// with its exit code, and stops at the step that fails.
+func TestDeployLineMarks(t *testing.T) {
+	m, id := testsshd.Connect(t)
+	testsshd.Run(t, m, id, `set -e; rm -rf ~/gitdeploy; mkdir -p ~/gitdeploy; cd ~/gitdeploy; git init -q
+git -c user.name=Tester -c user.email=t@example.com commit -q --allow-empty -m first`)
+	t.Cleanup(func() { testsshd.Run(t, m, id, `rm -rf ~/gitdeploy`) })
+
+	mark := func(nonce, ev string) string { return "\x1b]7761;davish-deploy;" + nonce + ";" + ev + "\a" }
+	for _, c := range []struct {
+		steps []string
+		want  []string
+		not   string
+	}{
+		{[]string{"echo one", `echo "it's $(echo two)"`}, []string{"begin;2", "step;1", "one", "step;2", "it's two", "end;0;"}, "end;1"},
+		{[]string{"true", "f() { return 3; }; f", "echo never"}, []string{"begin;3", "step;2", "end;3"}, "never"},
+	} {
+		d, err := git.DeployLine("/home/tester/gitdeploy", c.steps)
+		if err != nil {
+			t.Fatal(err)
+		}
+		out := testsshd.Run(t, m, id, d.Line)
+		at := 0
+		for _, w := range c.want {
+			if strings.HasPrefix(w, "begin") || strings.HasPrefix(w, "step") || strings.HasPrefix(w, "end") {
+				w = strings.TrimSuffix(mark(d.Nonce, w), "\a")
+			}
+			i := strings.Index(out[at:], w)
+			if i < 0 {
+				t.Fatalf("%v: %q missing after offset %d in %q", c.steps, w, at, out)
+			}
+			at += i + len(w)
+		}
+		if strings.Contains(out, c.not) {
+			t.Errorf("%v: output has %q: %q", c.steps, c.not, out)
+		}
+	}
+}

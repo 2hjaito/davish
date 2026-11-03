@@ -80,6 +80,9 @@ type Status struct {
 	// Install installs the Node.js dependencies as the lockfile at the
 	// root pins them, such as "npm ci"; empty without package.json.
 	Install string `json:"install"`
+	// Recipe is a first deploy recipe from what the root holds, for the
+	// user to edit; lines starting with # are hints, not run.
+	Recipe []string `json:"recipe"`
 }
 
 // checkDir accepts an absolute folder, without line breaks.
@@ -104,8 +107,18 @@ var lockfiles = []struct{ file, install string }{
 	{"npm-shrinkwrap.json", "npm ci"},
 }
 
+// composeFiles are the names docker compose looks for.
+var composeFiles = []string{"docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"}
+
+// buildFiles are the other root files a deploy recipe is guessed from.
+var buildFiles = append(slices.Clone(composeFiles), "Dockerfile", "go.mod", "Makefile")
+
+// buildScript is printed among the files when package.json has a build
+// script. A rough match is enough: the recipe is only a suggestion.
+const buildScript = "+build-script"
+
 // statusLine prints the last commit on one line, which is empty without
-// commits, then the Node.js files at the root on one line, then the
+// commits, then the build files at the root on one line, then the
 // porcelain status with NUL separated entries, so file names need no
 // unquoting.
 func statusLine(dir string) string {
@@ -113,9 +126,11 @@ func statusLine(dir string) string {
 	for _, l := range lockfiles {
 		files = append(files, l.file)
 	}
+	files = append(files, buildFiles...)
 	return readOnly + shellx.Cmd("cd", "--", dir).String() + ` && { ` +
 		`printf '%s\n' "$(` + shellx.Cmd("git", "log", "-1", "--format=%H%x09%h%x09%an%x09%at%x09%s").String() + ` 2>/dev/null)"; ` +
-		`for f in ` + strings.Join(files, " ") + `; do [ -f "$f" ] && printf '%s ' "$f"; done; echo; ` +
+		`for f in ` + strings.Join(files, " ") + `; do [ -f "$f" ] && printf '%s ' "$f"; done; ` +
+		`grep -qs '"build"[[:space:]]*:' package.json && printf '%s ' ` + buildScript + `; echo; ` +
 		shellx.Cmd("git", "status", "--porcelain=v2", "--branch", "-z").String() + `; }`
 }
 
@@ -137,7 +152,9 @@ func (s *Service) Status(ctx context.Context, serverID, dir string) (Status, err
 	node, rest, _ := bytes.Cut(rest, []byte("\n"))
 	st := parseStatus(rest)
 	st.Last = parseCommit(string(head), "\t")
-	st.Install = installFor(strings.Fields(string(node)))
+	files := strings.Fields(string(node))
+	st.Install = installFor(files)
+	st.Recipe = recipeFor(files)
 	return st, nil
 }
 

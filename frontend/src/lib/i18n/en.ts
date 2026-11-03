@@ -818,7 +818,7 @@ const en = {
           'Fetch, Pull (blocked when the repo is dirty), switch branch through a confirmation dialog',
           'Install dependencies from the lockfile in Terminal',
           'Clone a repository (SSH host key of GitHub/GitLab pinned), git init, set a remote: typed into a terminal',
-          'Deploy recipe per repository (saved on this computer), run step by step in a terminal',
+          'Deploy recipe per repository (suggested from the lockfile, compose, go.mod…; saved on this computer), run step by step in a terminal with progress, history and a notification when done',
           'Add folders to search for repos',
         ],
         keys: ['↑↓ in the commit history'],
@@ -1095,6 +1095,30 @@ const en = {
     pin: (app: string) => `Pin ${app} to the Dock`,
     unpin: (app: string) => `Remove ${app} from the Dock`,
     hint: '←→↑↓ select · Enter open · Esc close',
+  },
+  deploys: {
+    doneTitle: (repo: string, server: string) => `Deployed ${repo} on ${server}`,
+    failedTitle: (repo: string, server: string) => `Deploying ${repo} on ${server} failed`,
+    stoppedTitle: (repo: string, server: string) => `Stopped deploying ${repo} on ${server}`,
+    doneBody: (steps: number, commit?: string) =>
+      `${steps} ${steps === 1 ? 'step' : 'steps'} done${commit ? `, now at commit ${commit}` : ''}.`,
+    failedBody: (step: number, command: string, exit?: number) =>
+      step === 0
+        ? 'Could not enter the repository folder.'
+        : `Stopped at step ${step}: ${command}${exit ? ` (exit code ${exit})` : ''}`,
+    showTerminal: 'Show Terminal',
+    progress: 'Deploy progress',
+    waiting: 'Press Enter in the terminal to start the deploy',
+    running: (step: number, steps: number) => `Step ${step}/${steps}`,
+    ok: 'Deploy finished',
+    failed: (step: number) =>
+      step === 0 ? 'Deploy failed before the first step' : `Failed at step ${step}`,
+    stopped: 'Deploy stopped',
+    hide: 'Hide progress',
+    history: 'Deploys',
+    never: 'No deploys from this computer yet.',
+    state: { ok: 'Succeeded', failed: 'Failed', stopped: 'Stopped' },
+    atStep: (step: number) => `at step ${step}`,
   },
   terminal: {
     waiting: 'Waiting for the server connection…',

@@ -4,6 +4,7 @@ import type {
   CloneSpec,
   Branch,
   Commit,
+  DeployLine,
   Diff,
   DiffRequest,
   GitOp,
@@ -109,6 +110,7 @@ export const mockStatus = (dir: string): Promise<Status> => {
       changes: [],
       truncated: false,
       install: '',
+      recipe: ['git pull --ff-only', '# sudo systemctl restart my-app'],
     })
   return delay({
     branch: dir === '/home/deploy/api' ? 'develop' : 'main',
@@ -131,6 +133,10 @@ export const mockStatus = (dir: string): Promise<Status> => {
     ],
     truncated: false,
     install: dir === '/var/www/shop' ? 'npm ci' : '',
+    recipe:
+      dir === '/var/www/shop'
+        ? ['git pull --ff-only', 'npm ci', 'npm run build', '# sudo systemctl restart shop']
+        : ['git pull --ff-only', 'docker compose up -d --build'],
   })
 }
 
@@ -232,11 +238,11 @@ export const mockInitCommand = (dir: string, remote: string, url: string): Promi
 export const mockRemoteCommand = (dir: string, remote: string, url: string): Promise<string> =>
   Promise.resolve(`cd -- ${dir} && git remote set-url ${remote || 'origin'} ${url}`)
 
-export function mockDeployLine(dir: string, steps: string[]): Promise<string> {
+export function mockDeployLine(dir: string, steps: string[]): Promise<DeployLine> {
   const kept = steps.map((s) => s.trim()).filter((s) => s && !s.startsWith('#'))
   const body = kept.flatMap((s, i) => [`echo '▶ ${i + 1}/${kept.length}  ${s}'`, `{ ${s}; }`])
-  return Promise.resolve(
+  const line =
     [`cd -- ${dir}`, ...body, "echo '✓ Deploy finished'"].join(' && ') +
-      " || echo '✗ Deploy stopped: the step above failed'",
-  )
+    " || echo '✗ Deploy stopped: the step above failed'"
+  return Promise.resolve({ line, nonce: 'mock', steps: kept })
 }

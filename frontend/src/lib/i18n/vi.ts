@@ -803,7 +803,7 @@ const vi = {
         does: 'Repo trên server: nhánh, ahead/behind, file thay đổi, diff, biểu đồ commit.',
         actions: [
           'Clone repo (ghim host key GitHub/GitLab), git init, đặt remote: gõ sẵn vào Terminal',
-          'Công thức triển khai cho mỗi repo (lưu trên máy này), chạy từng bước trong Terminal',
+          'Công thức triển khai cho mỗi repo (gợi ý sẵn từ lockfile, compose, go.mod…; lưu trên máy này), chạy từng bước trong Terminal, có tiến trình, lịch sử và thông báo khi xong',
           'Fetch, Pull (chặn khi repo bẩn), đổi nhánh qua hộp xác nhận',
           'Cài dependency theo lockfile trong Terminal',
           'Thêm thư mục để tìm repo',
@@ -1075,6 +1075,29 @@ const vi = {
     pin: (app: string) => `Ghim ${app} vào Dock`,
     unpin: (app: string) => `Bỏ ${app} khỏi Dock`,
     hint: '←→↑↓ chọn · Enter mở · Esc đóng',
+  },
+  deploys: {
+    doneTitle: (repo: string, server: string) => `Đã deploy ${repo} trên ${server}`,
+    failedTitle: (repo: string, server: string) => `Deploy ${repo} trên ${server} bị lỗi`,
+    stoppedTitle: (repo: string, server: string) => `Đã dừng deploy ${repo} trên ${server}`,
+    doneBody: (steps: number, commit?: string) =>
+      `Xong ${steps} bước${commit ? `, đang ở commit ${commit}` : ''}.`,
+    failedBody: (step: number, command: string, exit?: number) =>
+      step === 0
+        ? 'Không vào được thư mục của repo.'
+        : `Dừng ở bước ${step}: ${command}${exit ? ` (mã thoát ${exit})` : ''}`,
+    showTerminal: 'Xem Terminal',
+    progress: 'Tiến trình deploy',
+    waiting: 'Nhấn Enter trong Terminal để bắt đầu deploy',
+    running: (step: number, steps: number) => `Bước ${step}/${steps}`,
+    ok: 'Deploy xong',
+    failed: (step: number) => (step === 0 ? 'Deploy lỗi trước bước đầu' : `Lỗi ở bước ${step}`),
+    stopped: 'Đã dừng deploy',
+    hide: 'Ẩn tiến trình',
+    history: 'Các lần deploy',
+    never: 'Chưa deploy lần nào từ máy này.',
+    state: { ok: 'Thành công', failed: 'Lỗi', stopped: 'Đã dừng' },
+    atStep: (step: number) => `ở bước ${step}`,
   },
   terminal: {
     waiting: 'Đang chờ kết nối tới server…',

@@ -52,6 +52,8 @@ export interface Status {
   truncated: boolean
   /** Installs Node.js dependencies as the lockfile pins them; empty when none. */
   install: string
+  /** A first deploy recipe from the files at the root; # lines are hints. */
+  recipe: string[]
 }
 
 /** A commit when commit is set, else file in the working tree against HEAD. */
@@ -139,6 +141,15 @@ export const gitInitCommand = (dir: string, remote: string, url: string): Promis
 export const gitRemoteCommand = (dir: string, remote: string, url: string): Promise<string> =>
   App.GitRemoteCommand(dir, remote, url)
 
+/** A recipe as one terminal line (internal/git.Deploy). */
+export interface DeployLine {
+  line: string
+  /** Tags the progress marks the line prints (docs/adr/0012). */
+  nonce: string
+  /** The steps that run, without blanks and comments. */
+  steps: string[]
+}
+
 /** A deploy recipe's steps as one terminal line that stops at a failure. */
-export const gitDeployLine = (dir: string, steps: string[]): Promise<string> =>
+export const gitDeployLine = (dir: string, steps: string[]): Promise<DeployLine> =>
   App.GitDeployLine(dir, steps)

@@ -58,7 +58,7 @@ func (a *App) GitRemoteCommand(dir, remote, url string) (string, error) {
 }
 
 // GitDeployLine joins a deploy recipe's steps into one line for a
-// terminal, stopping at the first that fails.
-func (a *App) GitDeployLine(dir string, steps []string) (string, error) {
+// terminal, stopping at the first that fails, with progress marks.
+func (a *App) GitDeployLine(dir string, steps []string) (git.Deploy, error) {
 	return git.DeployLine(dir, steps)
 }
