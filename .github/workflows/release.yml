@@ -131,6 +131,9 @@ jobs:
             on { print }
           ' CHANGELOG.md > notes.md
           test -s notes.md || echo "Davish ${GITHUB_REF_NAME}" > notes.md
+          # SignPath requires the policy on the download page too.
+          url="https://github.com/${GITHUB_REPOSITORY}/blob/main/CODE_SIGNING.md"
+          printf '\n---\n[Code signing policy](%s)\n' "$url" >> notes.md
           cat notes.md
 
       - name: Publish

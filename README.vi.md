@@ -160,4 +160,6 @@ Xem [CHANGELOG.md](CHANGELOG.md).
 
 Davish là phần mềm tự do theo [GNU General Public License v3.0](LICENSE). Đóng góp code cần ký [Thỏa thuận đóng góp (CLA)](CLA.md), xem [CONTRIBUTING.md](CONTRIBUTING.md). Tên và logo Davish không nằm trong giấy phép: xem [TRADEMARKS.md](TRADEMARKS.md).
 
-Cách bản Windows được ký số và Davish gửi gì ra mạng: [CODE_SIGNING.md](CODE_SIGNING.md) (tiếng Anh).
+## Chính sách ký số
+
+Free code signing for the Windows builds is provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org). Vai trò trong nhóm, những file được ký và những gì Davish gửi ra mạng: [CODE_SIGNING.md](CODE_SIGNING.md) (tiếng Anh).
