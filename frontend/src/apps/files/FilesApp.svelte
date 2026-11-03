@@ -69,6 +69,8 @@
   let home = $state<string | null>(null)
   /** The folder on screen; it only changes once its listing has arrived. */
   let cwd = $state<string | null>(null)
+  /** A folder another window asked for before the first listing: start there. */
+  let asked: string | null = null
   let listing = $state.raw<Entry[]>([])
   let fetchedAt = $state(new Date())
   let loading = $state(false)
@@ -245,7 +247,11 @@
       error = toUserError(e).message
       return
     }
-    // Back where the last run left this server, if that folder still opens.
+    // A folder asked for while opening wins, else back where the last run
+    // left this server, if that folder still opens.
+    const want = asked
+    asked = null
+    if (want && (await show(want))) return
     const last = lastDir(win.serverID)
     if (last && last !== home && (await show(last, true))) return
     await show(home)
@@ -253,7 +259,10 @@
 
   function reload() {
     if (cwd === null) void start()
-    else void show(cwd)
+    else if (asked) {
+      void go(asked)
+      asked = null
+    } else void show(cwd)
   }
 
   /** After a change on the server: list again, then select path if given. */
@@ -297,7 +306,11 @@
     if (!filesRequests.list.some((r) => r.serverID === win.serverID)) return
     untrack(() => {
       const [req] = filesRequests.take(win.serverID).slice(-1)
-      if (req && connected) void go(req.path)
+      if (!req) return
+      // Before the first listing, start() would land on the last folder
+      // after this one: hand it the folder instead.
+      if (cwd === null || !connected) asked = req.path
+      else void go(req.path)
     })
   })
 
