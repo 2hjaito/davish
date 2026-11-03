@@ -4,6 +4,10 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Sửa
+- Mở thư mục trong Files từ app khác (ví dụ "Mở trong Files" của Git) khi Files chưa mở: cửa sổ đôi khi mở ở thư mục lần trước thay vì thư mục được chọn, phải bấm lần nữa.
+- Lỗi JS khi chuyển qua lại giữa các repo trong app Git.
+
 ## [1.3.2] - 2026-10-29
 
 ### Sửa
