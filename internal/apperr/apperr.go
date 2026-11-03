@@ -47,6 +47,8 @@ const (
 	UpdateUnsigned       Code = "UPDATE_UNSIGNED"
 	UpdateBadSignature   Code = "UPDATE_BAD_SIGNATURE"
 	UpdateNoWrite        Code = "UPDATE_NO_WRITE"
+	UpdateBroken         Code = "UPDATE_BROKEN"
+	UpdateDevBuild       Code = "UPDATE_DEV_BUILD"
 )
 
 // Error is the only error type allowed to cross into the frontend.

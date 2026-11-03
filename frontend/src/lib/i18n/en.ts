@@ -2240,6 +2240,10 @@ const en = {
       'The download does not match its signature, so it was not installed. Download it from the release page.',
     UPDATE_NO_WRITE:
       'Davish cannot write to its install folder. Download the new version from the release page.',
+    UPDATE_BROKEN:
+      "Davish's files on this computer were replaced or removed while it ran (a rebuild, a reinstall). Quit Davish and open it again, or download the new version from the release page.",
+    UPDATE_DEV_BUILD:
+      'A development build does not update itself. Download the new version from the release page.',
     GIT_UNSAFE_OWNER:
       'This repo belongs to another user, so git refuses to read it (dubious ownership). Log in as the user who owns the repo.',
   },

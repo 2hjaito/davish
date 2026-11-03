@@ -56,6 +56,8 @@ type Options struct {
 	// GOOS picks the archive; default runtime.GOOS.
 	GOOS   string
 	Client *http.Client
+	// Dev refuses to install, as a wails dev build does.
+	Dev bool
 }
 
 // Release is a published version.
@@ -118,6 +120,7 @@ func New(current string, emit Emitter, log *slog.Logger, opts Options) *Service 
 	if opts.Client == nil {
 		opts.Client = &http.Client{Timeout: 5 * time.Minute}
 	}
+	opts.Dev = opts.Dev || devBuild
 	key, _ := base64.StdEncoding.DecodeString(opts.PublicKey)
 	return &Service{current: current, opts: opts, pub: ed25519.PublicKey(key), emit: emit, log: log}
 }
@@ -219,6 +222,17 @@ func (s *Service) Install(ctx context.Context, version string) error {
 		return apperr.New(apperr.InvalidInput, "an update is already being installed")
 	}
 	defer s.mu.Unlock()
+	err := s.install(ctx, version)
+	if err != nil {
+		s.log.Warn("update failed", "version", version, "err", err)
+	}
+	return err
+}
+
+func (s *Service) install(ctx context.Context, version string) error {
+	if s.opts.Dev {
+		return apperr.New(apperr.UpdateDevBuild, "a development build does not update itself")
+	}
 
 	rel, err := s.latest(ctx)
 	if err != nil {
@@ -233,6 +247,11 @@ func (s *Service) Install(ctx context.Context, version string) error {
 	target, err := s.target()
 	if err != nil {
 		return err
+	}
+	// Something replaced or emptied the app while it ran (a rebuild, a
+	// reinstall): swapping it now would leave a bundle that cannot start.
+	if !s.complete(target) {
+		return apperr.New(apperr.UpdateBroken, "the running app is no longer complete on disk")
 	}
 
 	sums, err := s.fetch(ctx, rel.sums, 1<<20)
@@ -278,6 +297,9 @@ func (s *Service) Install(ctx context.Context, version string) error {
 			return apperr.New(apperr.UpdateBadSignature, "the update does not contain Davish")
 		}
 	}
+	if !s.complete(fresh) {
+		return apperr.New(apperr.UpdateBadSignature, "the update is not a complete app")
+	}
 	if err := swap(target, fresh); err != nil {
 		return apperr.Wrap(apperr.UpdateNoWrite, "cannot replace the app", err)
 	}
@@ -294,6 +316,16 @@ func appName(goos string) string {
 		return "Davish.exe"
 	}
 	return "Davish"
+}
+
+// complete reports whether the app at path has its program: on macOS the
+// executable inside the bundle, elsewhere the file itself.
+func (s *Service) complete(path string) bool {
+	if s.opts.GOOS == "darwin" {
+		path = filepath.Join(path, "Contents", "MacOS", strings.TrimSuffix(filepath.Base(path), ".app"))
+	}
+	fi, err := os.Stat(path)
+	return err == nil && fi.Mode().IsRegular() && fi.Size() > 0
 }
 
 // target is what gets replaced: the .app bundle on macOS, the binary
@@ -436,10 +468,23 @@ func (s *Service) Relaunch() error {
 	return nil
 }
 
-// Cleanup removes what the previous update left: the replaced app.
+// staleStage is how old a staging folder must be before Cleanup takes it:
+// a younger one may belong to another copy of Davish updating right now.
+const staleStage = time.Hour
+
+// Cleanup removes what earlier updates left: the replaced app, and staging
+// folders an update that did not finish left beside it.
 func Cleanup(goos string, exe func() (string, error)) {
 	s := &Service{opts: Options{GOOS: goos, Executable: exe}}
-	if target, err := s.target(); err == nil {
-		os.RemoveAll(target + ".old") //nolint:errcheck,gosec // best effort
+	target, err := s.target()
+	if err != nil {
+		return
+	}
+	os.RemoveAll(target + ".old") //nolint:errcheck,gosec // best effort
+	stages, _ := filepath.Glob(filepath.Join(filepath.Dir(target), ".davish-update-*"))
+	for _, d := range stages {
+		if fi, err := os.Stat(d); err == nil && fi.IsDir() && time.Since(fi.ModTime()) > staleStage {
+			os.RemoveAll(d) //nolint:errcheck,gosec // best effort
+		}
 	}
 }

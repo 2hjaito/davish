@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Sửa
+- Tự cập nhật không còn làm hỏng app khi file của Davish đã bị thay hoặc xóa trong lúc chạy (ví dụ bản chạy từ thư mục build bị `wails dev` dọn): Davish kiểm tra app đang chạy và bản tải về đều đủ file trước khi tráo, nếu không thì dừng và nói rõ lý do. Bản dev không tự cập nhật. Thư mục tạm của lần cập nhật dở được dọn ở lần mở sau, và mọi lần cập nhật lỗi đều ghi nguyên nhân vào `davish.log`.
+
 ## [1.3.3] - 2026-11-03
 
 ### Sửa
