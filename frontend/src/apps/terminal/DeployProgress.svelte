@@ -38,7 +38,7 @@
   const label = $derived.by(() => {
     switch (run.state) {
       case 'waiting':
-        return d.waiting
+        return run.auto ? d.starting : d.waiting
       case 'running':
         return d.running(Math.max(run.current, 1), run.steps.length)
       case 'ok':
@@ -62,7 +62,7 @@
   <span class="icon"><Icon name={icon} size={13} /></span>
   <span class="label">{label}</span>
   {#if step && run.state !== 'ok'}
-    <code class="step" title={step}>{step}</code>
+    <span class="step" title={step}>{step}</span>
   {/if}
   {#if run.state !== 'waiting'}
     <span class="time">{formatElapsed(total)}</span>
@@ -122,7 +122,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--fg-on-dark-muted);
-    font-family: var(--font-mono);
   }
 
   .time {

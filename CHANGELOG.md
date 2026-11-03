@@ -6,8 +6,12 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ### Thêm
 - Deploy có tiến trình: Terminal hiện từng bước đang chạy, xong hay lỗi kèm thời gian; thông báo khi deploy xong hoặc dừng ở bước lỗi; app Git liệt kê các lần deploy gần đây (commit, kết quả, thời gian).
-- Công thức deploy đầu tiên được gợi ý từ nội dung repo: lockfile, script `build`, file compose, `Dockerfile`, `go.mod`, `Makefile`.
-- Repo đã có công thức thì nút Deploy mở thẳng tới lệnh sẽ chạy, bấm thêm một lần là deploy.
+- Hộp thoại Deploy làm lại, không còn phải tự viết lệnh: Davish xem repo (lockfile, script trong `package.json`, compose, `go.mod`, `Makefile`) và tìm app đang chạy từ thư mục đó (pm2, systemd, Docker compose), rồi đưa ra các bước bật/tắt được: lấy code mới, cài thư viện, build, khởi động lại app, thêm bước tùy chỉnh. Lệnh thật vẫn hiện dưới mỗi bước. Lựa chọn được nhớ cho lần sau.
+- Bấm Deploy là chạy luôn trong Terminal; chỉ khi có bước cần sudo thì Davish gõ sẵn để bạn nhấn Enter và nhập mật khẩu.
+
+### Sửa
+- Mở thư mục trong Files từ app khác (ví dụ "Mở trong Files" của Git) khi Files chưa mở: cửa sổ mở ở thư mục lần trước thay vì thư mục được chọn.
+- Lỗi JS khi chuyển qua lại giữa các repo trong app Git.
 
 ## [1.3.2] - 2026-10-29
 

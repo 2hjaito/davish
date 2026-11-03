@@ -425,12 +425,42 @@ const en = {
       'Opens Terminal in the repo with the command typed in; press Enter yourself to run it and watch the output.',
     deploy: {
       open: 'Deploy…',
-      title: 'Deploy',
-      body: (dir: string) =>
-        `One command per line, run in ${dir} in order; the first that fails stops the rest. Lines starting with # are skipped. The recipe is saved on this computer, never on the server.`,
-      next: 'Preview',
-      commandIntro: 'Opens a terminal with this command typed in; press Enter to deploy. Command:',
-      run: 'Deploy in Terminal',
+      title: (repo: string) => `Deploy ${repo}`,
+      looking: 'Looking at the repository and what runs it on the server…',
+      found: 'Davish looked at the repository and the server:',
+      runsWith: (kind: 'pm2' | 'systemd' | 'compose', name: string) =>
+        kind === 'pm2'
+          ? `runs with pm2 “${name}”`
+          : kind === 'systemd'
+            ? `runs with systemd “${name}”`
+            : `runs with Docker compose${name ? ` “${name}”` : ''}`,
+      notRunning: 'nothing seems to run from this folder',
+      pull: 'Get the new code',
+      install: 'Install dependencies',
+      build: 'Build',
+      buildStep: (name: string) => `Build (${name})`,
+      restart: 'Restart the app',
+      runner: (kind: 'pm2' | 'systemd' | 'compose', name: string) =>
+        kind === 'compose' ? `Docker compose${name ? `: ${name}` : ''}` : `${kind}: ${name}`,
+      restartStep: (kind: 'pm2' | 'systemd' | 'compose', name: string) =>
+        kind === 'compose' ? 'Rebuild and run the containers' : `Restart ${name}`,
+      lostRestart: (name: string) =>
+        `Last time “${name}” was restarted, but it no longer runs. Pick again in the last step.`,
+      noRunner:
+        'No pm2, systemd or Docker compose runs the app from this folder. If it runs another way, add its restart command as a custom step.',
+      composeNote: 'Docker compose installs and builds inside the image.',
+      custom: 'Custom step',
+      customPlaceholder: 'A command, such as npm run migrate',
+      addCustom: 'Add a custom step',
+      removeCustom: 'Remove this step',
+      sudoNote:
+        'A step needs sudo: Davish types it into the terminal; press Enter and type your password.',
+      runNote:
+        'Runs in a terminal right away, with progress for each step and a notification when done.',
+      saved: 'Your choices are saved on this computer for next time, never on the server.',
+      empty: 'Pick at least one step.',
+      retry: 'Try again',
+      run: 'Deploy',
     },
     clone: {
       more: 'More',
@@ -818,13 +848,14 @@ const en = {
           'Fetch, Pull (blocked when the repo is dirty), switch branch through a confirmation dialog',
           'Install dependencies from the lockfile in Terminal',
           'Clone a repository (SSH host key of GitHub/GitLab pinned), git init, set a remote: typed into a terminal',
-          'Deploy recipe per repository (suggested from the lockfile, compose, go.mod…; saved on this computer), run step by step in a terminal with progress, history and a notification when done',
+          'Deploy: Davish finds how to build and what runs the app (pm2, systemd, compose), you switch steps on or off; runs in a terminal with progress, history and a notification when done',
           'Add folders to search for repos',
         ],
         keys: ['↑↓ in the commit history'],
         runs: [
           'git status, log, diff',
           'git fetch, git pull --ff-only, git switch (with confirmation)',
+          'When Deploy opens: reads package.json, pm2 jlist, systemctl show, docker ps (read only)',
         ],
       },
     } as Record<string, { does: string; actions: string[]; keys: string[]; runs: string[] }>,
@@ -1107,6 +1138,7 @@ const en = {
         ? 'Could not enter the repository folder.'
         : `Stopped at step ${step}: ${command}${exit ? ` (exit code ${exit})` : ''}`,
     showTerminal: 'Show Terminal',
+    starting: 'Starting the deploy…',
     progress: 'Deploy progress',
     waiting: 'Press Enter in the terminal to start the deploy',
     running: (step: number, steps: number) => `Step ${step}/${steps}`,

@@ -34,6 +34,8 @@ export interface TerminalRequest {
   input?: string
   /** Nonce of the deploy run input starts, whose progress the tab shows. */
   deploy?: string
+  /** Press Enter after input: the user already confirmed it in a dialog. */
+  run?: boolean
 }
 
 /** Folders waiting for a terminal tab; the Terminal app takes them. */
@@ -60,8 +62,9 @@ export function openTerminalAt(
   dir: string | undefined,
   input?: string,
   deploy?: string,
+  run?: boolean,
 ) {
-  terminalRequests.list.push({ serverID, dir, input, deploy })
+  terminalRequests.list.push({ serverID, dir, input, deploy, run })
   focusTerminal(serverID)
 }
 

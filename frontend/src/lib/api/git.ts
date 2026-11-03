@@ -52,8 +52,6 @@ export interface Status {
   truncated: boolean
   /** Installs Node.js dependencies as the lockfile pins them; empty when none. */
   install: string
-  /** A first deploy recipe from the files at the root; # lines are hints. */
-  recipe: string[]
 }
 
 /** A commit when commit is set, else file in the working tree against HEAD. */
@@ -141,15 +139,52 @@ export const gitInitCommand = (dir: string, remote: string, url: string): Promis
 export const gitRemoteCommand = (dir: string, remote: string, url: string): Promise<string> =>
   App.GitRemoteCommand(dir, remote, url)
 
+/** A deploy step Davish offers, its command ready to run in the repository. */
+export interface DeployOption {
+  /** A script name, a pm2 process, a systemd unit, a compose project. */
+  name: string
+  command: string
+  /** The command asks for a password in the terminal. */
+  sudo: boolean
+}
+
+export type RunnerKind = 'pm2' | 'systemd' | 'compose'
+
+/** Something running the app now, found on the server. */
+export interface AppRunner extends DeployOption {
+  kind: RunnerKind
+}
+
+/** What a deploy of a repository can be made of (internal/git.DeployInfo). */
+export interface DeployInfo {
+  pull: DeployOption
+  install: DeployOption | null
+  builds: DeployOption[]
+  runners: AppRunner[]
+  /** The folder has a compose file. */
+  compose: boolean
+}
+
+export const gitDeployInfo = (serverID: string, dir: string): Promise<DeployInfo> =>
+  App.GitDeployInfo(serverID, dir) as Promise<DeployInfo>
+
+/** A step to run: the command, and the words shown for it. */
+export interface DeployStep {
+  label: string
+  command: string
+}
+
 /** A recipe as one terminal line (internal/git.Deploy). */
 export interface DeployLine {
   line: string
   /** Tags the progress marks the line prints (docs/adr/0012). */
   nonce: string
-  /** The steps that run, without blanks and comments. */
+  /** Labels of the steps that run. */
   steps: string[]
+  /** A step runs sudo: the user presses Enter and types the password. */
+  sudo: boolean
 }
 
-/** A deploy recipe's steps as one terminal line that stops at a failure. */
-export const gitDeployLine = (dir: string, steps: string[]): Promise<DeployLine> =>
+/** Deploy steps as one terminal line that stops at a failure. */
+export const gitDeployLine = (dir: string, steps: DeployStep[]): Promise<DeployLine> =>
   App.GitDeployLine(dir, steps)

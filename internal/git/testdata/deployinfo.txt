@@ -1,0 +1,28 @@
+@@uid
+1000
+@@root
+package.json
+pnpm-lock.yaml
+compose.yaml
+Makefile
+@@package
+{"name": "shop", "scripts": {"start:prod": "node dist", "lint": "eslint .", "build": "vite build"}}
+
+@@pm2
+[{"name":"shop","pm2_env":{"pm_cwd":"/srv/shop","SECRET_TOKEN":"never-kept"}},{"name":"shop worker","pm2_env":{"pm_cwd":"/srv/shop/worker"}},{"name":"blog","pm2_env":{"pm_cwd":"/srv/shop-blog"}},{"name":"shop","pm2_env":{"pm_cwd":"/srv/shop"}}]
+
+@@systemd
+Id=shop-api.service
+WorkingDirectory=/srv/shop
+ExecStart={ path=/usr/bin/node ; argv[]=/usr/bin/node dist/main.js ; ignore_errors=no }
+
+Id=shop-cron.service
+WorkingDirectory=
+ExecStart={ path=/usr/bin/node ; argv[]=/usr/bin/node /srv/shop/cron.js ; ignore_errors=no }
+
+Id=nginx.service
+WorkingDirectory=
+ExecStart={ path=/usr/sbin/nginx ; argv[]=/usr/sbin/nginx -g daemon on; ignore_errors=no }
+
+@@compose
+shop

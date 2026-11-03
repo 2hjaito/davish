@@ -57,8 +57,14 @@ func (a *App) GitRemoteCommand(dir, remote, url string) (string, error) {
 	return git.RemoteCommand(dir, remote, url)
 }
 
+// GitDeployInfo looks at a repository and what runs it, for the steps
+// a deploy can be made of.
+func (a *App) GitDeployInfo(serverID, dir string) (git.DeployInfo, error) {
+	return a.git.DeployInfo(a.ctx, serverID, dir)
+}
+
 // GitDeployLine joins a deploy recipe's steps into one line for a
 // terminal, stopping at the first that fails, with progress marks.
-func (a *App) GitDeployLine(dir string, steps []string) (git.Deploy, error) {
+func (a *App) GitDeployLine(dir string, steps []git.Step) (git.Deploy, error) {
 	return git.DeployLine(dir, steps)
 }

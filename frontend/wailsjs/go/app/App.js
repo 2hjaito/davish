@@ -258,6 +258,10 @@ export function GitBranches(arg1, arg2) {
   return window['go']['app']['App']['GitBranches'](arg1, arg2);
 }
 
+export function GitDeployInfo(arg1, arg2) {
+  return window['go']['app']['App']['GitDeployInfo'](arg1, arg2);
+}
+
 export function GitDeployLine(arg1, arg2) {
   return window['go']['app']['App']['GitDeployLine'](arg1, arg2);
 }

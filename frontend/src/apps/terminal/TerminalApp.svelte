@@ -34,6 +34,8 @@
     startInput?: string
     /** Nonce of the deploy run startInput starts, shown above the terminal. */
     deploy?: string
+    /** startInput was confirmed in a dialog: press Enter after it. */
+    startRun?: boolean
     /** Title the remote shell sets (bash sets "user@host: cwd" for xterm). */
     title?: string
     /** Remote PTY session, while one is open. */
@@ -52,6 +54,7 @@
     startDir: req?.dir,
     startInput: req?.input,
     deploy: req?.deploy,
+    startRun: req?.run,
   })
   // A window opened to show a folder starts there instead of at home.
   const asked = untrack(() => terminalRequests.take(win.serverID))
@@ -181,7 +184,8 @@
       tab.id,
       setTimeout(() => {
         quiet.delete(tab.id)
-        if (tab.session && tab.startInput) void termWrite(tab.session, tab.startInput)
+        if (tab.session && tab.startInput)
+          void termWrite(tab.session, tab.startInput + (tab.startRun ? '\r' : ''))
         tab.startInput = undefined
       }, ms),
     )

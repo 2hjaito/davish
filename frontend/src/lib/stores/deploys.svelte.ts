@@ -45,6 +45,8 @@ export interface DeployRun {
   steps: string[]
   /** waiting: typed but not yet run; stopped: Ctrl-C or the tab closed. */
   state: RunState
+  /** Davish presses Enter itself; otherwise the user does (sudo). */
+  auto: boolean
   /** The 1-based step running, or the one that failed or was stopped; 0 before the first. */
   current: number
   /** When each step started, ms since epoch. */
@@ -97,8 +99,17 @@ class Deploys {
   history = $state<Record<string, DeployRecord[]>>(load(HISTORY, {}))
 
   /** Starts following a deploy line about to be typed into a terminal. */
-  watch(serverID: string, dir: string, nonce: string, steps: string[]) {
-    this.runs[nonce] = { nonce, serverID, dir, steps, state: 'waiting', current: 0, stepAt: [] }
+  watch(serverID: string, dir: string, nonce: string, steps: string[], auto = false) {
+    this.runs[nonce] = {
+      nonce,
+      serverID,
+      dir,
+      steps,
+      state: 'waiting',
+      auto,
+      current: 0,
+      stepAt: [],
+    }
   }
 
   historyOf(serverID: string, dir: string): DeployRecord[] {

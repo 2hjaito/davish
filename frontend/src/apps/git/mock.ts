@@ -4,7 +4,9 @@ import type {
   CloneSpec,
   Branch,
   Commit,
+  DeployInfo,
   DeployLine,
+  DeployStep,
   Diff,
   DiffRequest,
   GitOp,
@@ -110,7 +112,6 @@ export const mockStatus = (dir: string): Promise<Status> => {
       changes: [],
       truncated: false,
       install: '',
-      recipe: ['git pull --ff-only', '# sudo systemctl restart my-app'],
     })
   return delay({
     branch: dir === '/home/deploy/api' ? 'develop' : 'main',
@@ -133,10 +134,6 @@ export const mockStatus = (dir: string): Promise<Status> => {
     ],
     truncated: false,
     install: dir === '/var/www/shop' ? 'npm ci' : '',
-    recipe:
-      dir === '/var/www/shop'
-        ? ['git pull --ff-only', 'npm ci', 'npm run build', '# sudo systemctl restart shop']
-        : ['git pull --ff-only', 'docker compose up -d --build'],
   })
 }
 
@@ -238,11 +235,45 @@ export const mockInitCommand = (dir: string, remote: string, url: string): Promi
 export const mockRemoteCommand = (dir: string, remote: string, url: string): Promise<string> =>
   Promise.resolve(`cd -- ${dir} && git remote set-url ${remote || 'origin'} ${url}`)
 
-export function mockDeployLine(dir: string, steps: string[]): Promise<DeployLine> {
-  const kept = steps.map((s) => s.trim()).filter((s) => s && !s.startsWith('#'))
-  const body = kept.flatMap((s, i) => [`echo '▶ ${i + 1}/${kept.length}  ${s}'`, `{ ${s}; }`])
+export function mockDeployInfo(dir: string): Promise<DeployInfo> {
+  const shop = dir === '/var/www/shop'
+  return delay({
+    pull: { name: 'git pull', command: 'git pull --ff-only', sudo: false },
+    install: shop ? { name: 'npm', command: 'npm ci', sudo: false } : null,
+    builds: shop
+      ? [
+          { name: 'build', command: 'npm run build', sudo: false },
+          { name: 'lint', command: 'npm run lint', sudo: false },
+        ]
+      : [],
+    runners: shop
+      ? [
+          { kind: 'pm2', name: 'shop', command: 'pm2 restart shop', sudo: false },
+          {
+            kind: 'systemd',
+            name: 'shop-worker.service',
+            command: 'sudo systemctl restart shop-worker.service',
+            sudo: true,
+          },
+        ]
+      : [{ kind: 'compose', name: 'api', command: 'docker compose up -d --build', sudo: false }],
+    compose: !shop,
+  })
+}
+
+export function mockDeployLine(dir: string, steps: DeployStep[]): Promise<DeployLine> {
+  const kept = steps.filter((s) => s.command.trim() && !s.command.trim().startsWith('#'))
+  const body = kept.flatMap((s, i) => [
+    `echo '▶ ${i + 1}/${kept.length}  ${s.label}'`,
+    `{ ${s.command}; }`,
+  ])
   const line =
     [`cd -- ${dir}`, ...body, "echo '✓ Deploy finished'"].join(' && ') +
     " || echo '✗ Deploy stopped: the step above failed'"
-  return Promise.resolve({ line, nonce: 'mock', steps: kept })
+  return Promise.resolve({
+    line,
+    nonce: 'mock',
+    steps: kept.map((s) => s.label || s.command),
+    sudo: kept.some((s) => /(^|[\s;&|(])sudo\s/.test(s.command)),
+  })
 }

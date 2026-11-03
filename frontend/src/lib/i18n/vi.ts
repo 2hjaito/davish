@@ -421,12 +421,40 @@ const vi = {
     installHint: 'Mở Terminal tại repo với lệnh điền sẵn, bạn tự nhấn Enter để chạy và xem output.',
     deploy: {
       open: 'Deploy…',
-      title: 'Triển khai',
-      body: (dir: string) =>
-        `Mỗi dòng một lệnh, chạy lần lượt trong ${dir}; lệnh nào lỗi thì dừng các lệnh sau. Dòng bắt đầu bằng # được bỏ qua. Công thức lưu trên máy này, không ghi lên server.`,
-      next: 'Xem trước',
-      commandIntro: 'Mở Terminal với lệnh gõ sẵn; nhấn Enter để triển khai. Lệnh:',
-      run: 'Deploy trong Terminal',
+      title: (repo: string) => `Triển khai ${repo}`,
+      looking: 'Đang xem repo và app đang chạy trên server…',
+      found: 'Davish đã xem repo và server:',
+      runsWith: (kind: 'pm2' | 'systemd' | 'compose', name: string) =>
+        kind === 'pm2'
+          ? `đang chạy bằng pm2 “${name}”`
+          : kind === 'systemd'
+            ? `đang chạy bằng systemd “${name}”`
+            : `chạy bằng Docker compose${name ? ` “${name}”` : ''}`,
+      notRunning: 'chưa thấy app nào chạy từ thư mục này',
+      pull: 'Lấy code mới',
+      install: 'Cài thư viện',
+      build: 'Build',
+      buildStep: (name: string) => `Build (${name})`,
+      restart: 'Khởi động lại app',
+      runner: (kind: 'pm2' | 'systemd' | 'compose', name: string) =>
+        kind === 'compose' ? `Docker compose${name ? `: ${name}` : ''}` : `${kind}: ${name}`,
+      restartStep: (kind: 'pm2' | 'systemd' | 'compose', name: string) =>
+        kind === 'compose' ? 'Dựng lại và chạy container' : `Khởi động lại ${name}`,
+      lostRestart: (name: string) =>
+        `Lần trước khởi động lại “${name}”, giờ không thấy nó chạy nữa. Chọn lại ở bước cuối.`,
+      noRunner:
+        'Không thấy pm2, systemd hay Docker compose nào chạy app từ thư mục này. App chạy kiểu khác thì thêm lệnh khởi động lại ở bước tùy chỉnh.',
+      composeNote: 'Docker compose tự cài thư viện và build trong image.',
+      custom: 'Bước tùy chỉnh',
+      customPlaceholder: 'Lệnh, ví dụ npm run migrate',
+      addCustom: 'Thêm bước tùy chỉnh',
+      removeCustom: 'Xóa bước này',
+      sudoNote: 'Có bước cần sudo: Davish gõ sẵn vào Terminal, bạn nhấn Enter rồi nhập mật khẩu.',
+      runNote: 'Chạy ngay trong Terminal, có tiến trình từng bước và thông báo khi xong.',
+      saved: 'Lựa chọn được lưu trên máy này cho lần sau, không ghi lên server.',
+      empty: 'Chọn ít nhất một bước.',
+      retry: 'Thử lại',
+      run: 'Deploy',
     },
     clone: {
       more: 'Thêm',
@@ -803,13 +831,17 @@ const vi = {
         does: 'Repo trên server: nhánh, ahead/behind, file thay đổi, diff, biểu đồ commit.',
         actions: [
           'Clone repo (ghim host key GitHub/GitLab), git init, đặt remote: gõ sẵn vào Terminal',
-          'Công thức triển khai cho mỗi repo (gợi ý sẵn từ lockfile, compose, go.mod…; lưu trên máy này), chạy từng bước trong Terminal, có tiến trình, lịch sử và thông báo khi xong',
+          'Deploy: Davish tìm cách build và app đang chạy (pm2, systemd, compose), bạn bật/tắt từng bước; chạy trong Terminal với tiến trình, lịch sử và thông báo khi xong',
           'Fetch, Pull (chặn khi repo bẩn), đổi nhánh qua hộp xác nhận',
           'Cài dependency theo lockfile trong Terminal',
           'Thêm thư mục để tìm repo',
         ],
         keys: ['↑↓ trong lịch sử commit'],
-        runs: ['git status, log, diff', 'git fetch, git pull --ff-only, git switch (có xác nhận)'],
+        runs: [
+          'git status, log, diff',
+          'git fetch, git pull --ff-only, git switch (có xác nhận)',
+          'Khi mở Deploy: đọc package.json, pm2 jlist, systemctl show, docker ps (chỉ đọc)',
+        ],
       },
     } as Record<string, { does: string; actions: string[]; keys: string[]; runs: string[] }>,
   },
@@ -1087,6 +1119,7 @@ const vi = {
         ? 'Không vào được thư mục của repo.'
         : `Dừng ở bước ${step}: ${command}${exit ? ` (mã thoát ${exit})` : ''}`,
     showTerminal: 'Xem Terminal',
+    starting: 'Đang bắt đầu deploy…',
     progress: 'Tiến trình deploy',
     waiting: 'Nhấn Enter trong Terminal để bắt đầu deploy',
     running: (step: number, steps: number) => `Bước ${step}/${steps}`,

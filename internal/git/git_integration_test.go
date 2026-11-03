@@ -198,12 +198,12 @@ git -c user.name=Tester -c user.email=t@example.com commit -q --allow-empty -m f
 
 	mark := func(nonce, ev string) string { return "\x1b]7761;davish-deploy;" + nonce + ";" + ev + "\a" }
 	for _, c := range []struct {
-		steps []string
+		steps []git.Step
 		want  []string
 		not   string
 	}{
-		{[]string{"echo one", `echo "it's $(echo two)"`}, []string{"begin;2", "step;1", "one", "step;2", "it's two", "end;0;"}, "end;1"},
-		{[]string{"true", "f() { return 3; }; f", "echo never"}, []string{"begin;3", "step;2", "end;3"}, "never"},
+		{[]git.Step{{Command: "echo one"}, {Command: `echo "it's $(echo two)"`}}, []string{"begin;2", "step;1", "one", "step;2", "it's two", "end;0;"}, "end;1"},
+		{[]git.Step{{Command: "true"}, {Command: "f() { return 3; }; f"}, {Command: "echo never"}}, []string{"begin;3", "step;2", "end;3"}, "never"},
 	} {
 		d, err := git.DeployLine("/home/tester/gitdeploy", c.steps)
 		if err != nil {
@@ -224,5 +224,36 @@ git -c user.name=Tester -c user.email=t@example.com commit -q --allow-empty -m f
 		if strings.Contains(out, c.not) {
 			t.Errorf("%v: output has %q: %q", c.steps, c.not, out)
 		}
+	}
+}
+
+// The deploy info script runs on the server's sh and finds the Node
+// scripts and compose file of a repository.
+func TestDeployInfo(t *testing.T) {
+	m, id := testsshd.Connect(t)
+	s := git.New(audit.NewRunner(m, audit.New(discard{})))
+	testsshd.Run(t, m, id, `set -e; rm -rf '/tmp/deploy info'; mkdir -p '/tmp/deploy info'; cd '/tmp/deploy info'; git init -q
+printf '{"scripts":{"build":"vite build","test":"vitest"}}' > package.json
+echo '{}' > package-lock.json; echo 'services: {}' > compose.yaml`)
+	t.Cleanup(func() { testsshd.Run(t, m, id, `rm -rf '/tmp/deploy info'`) })
+
+	info, err := s.DeployInfo(context.Background(), id, "/tmp/deploy info")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Install == nil || info.Install.Command != "npm ci" {
+		t.Errorf("install = %+v", info.Install)
+	}
+	if len(info.Builds) != 2 || info.Builds[0].Command != "npm run build" {
+		t.Errorf("builds = %+v", info.Builds)
+	}
+	if !info.Compose || len(info.Runners) == 0 || info.Runners[len(info.Runners)-1].Kind != "compose" {
+		t.Errorf("compose = %v, runners = %+v", info.Compose, info.Runners)
+	}
+
+	_, err = s.DeployInfo(context.Background(), id, "/tmp/no such repo")
+	var ae *apperr.Error
+	if !errors.As(err, &ae) || ae.Code != apperr.NotFound {
+		t.Errorf("missing folder: %v", err)
 	}
 }

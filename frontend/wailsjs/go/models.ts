@@ -1352,6 +1352,24 @@ export namespace fs {
 
 export namespace git {
 	
+	export class AppRunner {
+	    name: string;
+	    command: string;
+	    sudo: boolean;
+	    kind: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new AppRunner(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.command = source["command"];
+	        this.sudo = source["sudo"];
+	        this.kind = source["kind"];
+	    }
+	}
 	export class Branch {
 	    name: string;
 	    remote: boolean;
@@ -1484,6 +1502,7 @@ export namespace git {
 	    line: string;
 	    nonce: string;
 	    steps: string[];
+	    sudo: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Deploy(source);
@@ -1494,7 +1513,62 @@ export namespace git {
 	        this.line = source["line"];
 	        this.nonce = source["nonce"];
 	        this.steps = source["steps"];
+	        this.sudo = source["sudo"];
 	    }
+	}
+	export class Option {
+	    name: string;
+	    command: string;
+	    sudo: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Option(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.command = source["command"];
+	        this.sudo = source["sudo"];
+	    }
+	}
+	export class DeployInfo {
+	    pull: Option;
+	    install?: Option;
+	    builds: Option[];
+	    runners: AppRunner[];
+	    compose: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new DeployInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.pull = this.convertValues(source["pull"], Option);
+	        this.install = this.convertValues(source["install"], Option);
+	        this.builds = this.convertValues(source["builds"], Option);
+	        this.runners = this.convertValues(source["runners"], AppRunner);
+	        this.compose = source["compose"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class Diff {
 	    text: string;
@@ -1528,6 +1602,7 @@ export namespace git {
 	        this.untracked = source["untracked"];
 	    }
 	}
+	
 	export class Plan {
 	    command: string;
 	    dirty: number;
@@ -1580,7 +1655,6 @@ export namespace git {
 	    changes: Change[];
 	    truncated: boolean;
 	    install: string;
-	    recipe: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Status(source);
@@ -1596,7 +1670,6 @@ export namespace git {
 	        this.changes = this.convertValues(source["changes"], Change);
 	        this.truncated = source["truncated"];
 	        this.install = source["install"];
-	        this.recipe = source["recipe"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -1616,6 +1689,20 @@ export namespace git {
 		    }
 		    return a;
 		}
+	}
+	export class Step {
+	    label: string;
+	    command: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Step(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.label = source["label"];
+	        this.command = source["command"];
+	    }
 	}
 
 }
