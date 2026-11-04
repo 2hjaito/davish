@@ -24,6 +24,9 @@
 
   let { apps, isOpen, onlaunch, onclose, height = $bindable(0) }: Props = $props()
 
+  /** Closest the right-click menu's center gets to a screen edge: half its width and a margin. */
+  const MENU_EDGE = 100
+
   // The right-click menu, like the macOS Dock's: open, keep in Dock, close.
   let menu = $state<{ app: Tile & { id: AppId }; x: number; y: number } | null>(null)
   let menuEl = $state<HTMLElement>()
@@ -34,7 +37,7 @@
     const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
     menu = {
       app: { ...app, id: app.id },
-      x: r.left + r.width / 2,
+      x: Math.min(Math.max(r.left + r.width / 2, MENU_EDGE), window.innerWidth - MENU_EDGE),
       y: window.innerHeight - r.top + 10,
     }
     requestAnimationFrame(() =>
@@ -121,6 +124,7 @@
   class="dock glass"
   class:menu-open={menu !== null}
   aria-label={t.dock.label}
+  style:--count={apps.length}
   bind:this={dock}
   bind:offsetHeight={height}
   onpointermove={(e) => aim(e.clientX)}
@@ -235,7 +239,13 @@
     background: var(--divider);
   }
 
+  /*
+   * Tiles shrink so every one stays on screen, however many are pinned. The
+   * 84px holds the dock's padding, a margin and what magnify adds at the edges.
+   */
   .dock {
+    --dock-tile: min(56px, calc((100vw - 84px) / var(--count) - var(--dock-gap)));
+    --dock-tile-radius: calc(var(--dock-tile) * 0.27);
     position: absolute;
     bottom: var(--dock-bottom);
     left: 50%;
@@ -288,6 +298,8 @@
 
   .tile :global(svg) {
     display: block;
+    width: 100%;
+    height: 100%;
   }
 
   .tile::after {

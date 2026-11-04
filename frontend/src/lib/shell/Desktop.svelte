@@ -377,8 +377,15 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    width: max-content;
+    max-width: calc(100vw - 24px);
     padding: 6px 8px 6px 14px;
     border-radius: 12px;
     font-size: var(--text-sm);
+  }
+
+  .demo .btn {
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 </style>
