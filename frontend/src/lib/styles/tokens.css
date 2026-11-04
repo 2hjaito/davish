@@ -183,6 +183,7 @@
   --item-radius: 9px;
   --control-radius: 7px;
   --sidebar-w: 180px;
+  --sidebar-rail-w: 80px;
 }
 
 /* Reduced glass: Settings toggle, or the OS preference. */

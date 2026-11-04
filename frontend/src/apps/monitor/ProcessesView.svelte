@@ -94,7 +94,7 @@
   {:else}
     {#if error}<p class="error"><Icon name="warning" size={13} /> {error}</p>{/if}
     <div class="scroll">
-      <table class="mon-table">
+      <table class="mon-table mon-procs">
         <thead>
           <tr>
             {#each columns as c (c.key)}

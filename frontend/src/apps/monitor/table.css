@@ -48,3 +48,12 @@
 .mon-table .muted {
   color: var(--fg-muted);
 }
+
+/* In a narrow window, keep the columns a glance is for. */
+@container window (max-width: 680px) {
+  .mon-procs :is(th, td):is(:nth-child(3), :nth-child(6), :nth-child(7)),
+  .mon-net :is(th, td):is(:nth-child(4), :nth-child(5)),
+  .mon-disks :is(th, td):is(:nth-child(2), :nth-child(5)) {
+    display: none;
+  }
+}

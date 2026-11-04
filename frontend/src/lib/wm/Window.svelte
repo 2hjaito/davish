@@ -187,6 +187,8 @@
     flex-direction: column;
     border-radius: var(--window-radius);
     overflow: hidden;
+    /* Apps lay out by their window's width, not the screen's: a snapped window is narrow on any screen. */
+    container: window / inline-size;
     transform-origin: center;
     will-change: translate, transform;
     transition:

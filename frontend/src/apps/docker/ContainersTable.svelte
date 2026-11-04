@@ -260,7 +260,7 @@
   {#if shown.length === 0}
     <p class="dk-empty">{d.noMatch}</p>
   {:else}
-    <table class="dk-table">
+    <table class="dk-table dk-containers">
       <thead>
         <tr>
           <th>{tb.name}</th>

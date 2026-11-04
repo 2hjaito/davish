@@ -59,7 +59,7 @@
     onclick={() => (open = !open)}
   >
     <span class="dot" style:background={dotColor[servers.active?.state ?? 'disconnected']}></span>
-    {servers.active?.name ?? t.servers.none}
+    <span class="name">{servers.active?.name ?? t.servers.none}</span>
     <Icon name="chevronDown" size={10} strokeWidth={3} />
   </button>
 
@@ -145,6 +145,13 @@
     align-items: center;
     gap: 6px;
     background: var(--glass-highlight);
+  }
+
+  /* A long name must not push the menus off the bar. */
+  .picker .name {
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .dot {

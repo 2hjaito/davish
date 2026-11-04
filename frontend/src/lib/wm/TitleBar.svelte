@@ -141,4 +141,11 @@
   .inactive:not(:hover) .light {
     background: var(--tl-inactive);
   }
+
+  /* The sidebar's rail only fits the lights; the Help menu still has this. */
+  @container window (max-width: 560px) {
+    .titlebar.bare .help {
+      display: none;
+    }
+  }
 </style>

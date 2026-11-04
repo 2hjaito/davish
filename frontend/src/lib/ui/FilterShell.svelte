@@ -83,6 +83,8 @@
           class="item"
           class:active={filter === f.id}
           aria-current={filter === f.id ? 'page' : undefined}
+          aria-label={f.label}
+          title={f.label}
           onclick={() => (filter = f.id)}
         >
           <Icon name={f.icon} size={16} />
@@ -129,7 +131,7 @@
       {@render placeholder()}
     {:else}
       <div class="split">
-        <div class="list" class:full={!detail} style:width={detail ? listWidth : undefined}>
+        <div class="list" class:full={!detail} style:--list-w={listWidth}>
           {#if error}<p class="error"><Icon name="warning" size={13} /> {error}</p>{/if}
           {@render list()}
           {#if footer}<p class="footer">{footer}</p>{/if}
@@ -238,6 +240,7 @@
   }
 
   .title {
+    min-width: 0;
     margin: 0;
     font-size: var(--text-lg);
     font-weight: 600;
@@ -251,6 +254,7 @@
   }
 
   .actions {
+    flex-shrink: 0;
     display: flex;
     gap: 4px;
   }
@@ -273,6 +277,8 @@
   }
 
   .search {
+    flex: 0 1 180px;
+    min-width: 72px;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -286,12 +292,14 @@
   .search input {
     border: 0;
     background: transparent;
-    width: 150px;
+    flex: 1;
+    width: 0;
     outline: none;
     color: var(--fg);
   }
 
   .tool {
+    flex-shrink: 0;
     display: flex;
     padding: 6px;
     border: 0;
@@ -316,6 +324,7 @@
   }
 
   .list {
+    width: var(--list-w);
     min-width: 220px;
     display: flex;
     flex-direction: column;
@@ -324,6 +333,7 @@
 
   .list.full {
     flex: 1;
+    width: auto;
     min-width: 0;
     border-right: 0;
   }
@@ -354,6 +364,56 @@
 
   .tool.spin :global(svg) {
     animation: spin 1s linear infinite;
+  }
+
+  /* Narrow window: the sidebar becomes a rail of icons. */
+  @container window (max-width: 560px) {
+    .sidebar {
+      width: var(--sidebar-rail-w);
+    }
+
+    .group,
+    .label,
+    .value {
+      display: none;
+    }
+
+    .item {
+      position: relative;
+      justify-content: center;
+    }
+
+    /* Something needing attention still shows on the icon. */
+    .value.alert {
+      display: block;
+      position: absolute;
+      top: 0;
+      right: 8px;
+    }
+
+    .title {
+      display: none;
+    }
+  }
+
+  /* Too narrow for two panes well before the sidebar has to shrink. */
+  @container window (max-width: 720px) {
+    .split {
+      flex-direction: column;
+    }
+
+    .list:not(.full) {
+      flex: 0 0 45%;
+      width: auto;
+      min-width: 0;
+      min-height: 0;
+      border-right: 0;
+      border-bottom: 1px solid var(--divider-soft);
+    }
+
+    .detail {
+      min-height: 0;
+    }
   }
 
   @keyframes spin {

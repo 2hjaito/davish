@@ -39,7 +39,7 @@
       <p class="muted">{t.monitor.noIfaces}</p>
     {:else}
       <div class="scroll">
-        <table class="mon-table">
+        <table class="mon-table mon-net">
           <thead>
             <tr>
               <th>{t.monitor.ifaceName}</th>

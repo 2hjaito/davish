@@ -481,6 +481,8 @@
           class="place"
           class:active={activePlace?.path === p.path}
           disabled={!connected}
+          aria-label={p.label}
+          title={p.label}
           onclick={() => void go(p.path)}
         >
           <Icon name={p.icon} size={16} />
@@ -498,6 +500,7 @@
             class="place"
             class:drop={dropHover?.serverID === o.server.id && dropHover.path === p.path}
             disabled={!o.online}
+            aria-label={t.files.otherPlace(p.title, o.server.name)}
             title={t.files.otherPlace(p.title, o.server.name)}
             data-drop-server={o.server.id}
             data-drop-path={p.path}
@@ -611,17 +614,19 @@
     {/if}
 
     <nav class="pathbar" aria-label={t.files.path}>
-      <button class="crumb" disabled={!connected} onclick={() => void go('/')}>
-        <Icon name="server" size={12} />
-        {server?.name ?? '/'}
-      </button>
-      {#each crumbs(cwd ?? '/') as c (c.path)}
-        <Icon name="chevronRight" size={10} strokeWidth={2.4} />
-        <button class="crumb" onclick={() => void go(c.path)}>
-          <Icon name="folder" size={12} />
-          {c.name}
+      <div class="crumbs">
+        <button class="crumb" disabled={!connected} onclick={() => void go('/')}>
+          <Icon name="server" size={12} />
+          {server?.name ?? '/'}
         </button>
-      {/each}
+        {#each crumbs(cwd ?? '/') as c (c.path)}
+          <Icon name="chevronRight" size={10} strokeWidth={2.4} />
+          <button class="crumb" onclick={() => void go(c.path)}>
+            <Icon name="folder" size={12} />
+            {c.name}
+          </button>
+        {/each}
+      </div>
       {#if flash}
         <span class="count flash" role="status">{flash}</span>
       {:else if busy.count > 0}
@@ -785,17 +790,19 @@
     flex-shrink: 0;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 6px;
     padding: 0 10px 0 8px;
     border-bottom: 1px solid var(--divider-soft);
   }
 
   .nav {
+    flex-shrink: 0;
     display: flex;
   }
 
   .nav button,
   .tool {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -832,6 +839,8 @@
   }
 
   .search {
+    flex: 0 1 140px;
+    min-width: 72px;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -845,7 +854,8 @@
   .search input {
     border: 0;
     background: transparent;
-    width: 110px;
+    flex: 1;
+    width: 0;
     outline: none;
     color: var(--fg);
   }
@@ -898,7 +908,18 @@
     overflow: hidden;
   }
 
+  /* A deep path gives way to the count and the transfer progress. */
+  .crumbs {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    overflow: hidden;
+  }
+
   .crumb {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -918,7 +939,7 @@
   }
 
   .count {
-    margin-left: auto;
+    flex-shrink: 0;
     padding-left: 12px;
     font-variant-numeric: tabular-nums;
   }
@@ -938,5 +959,46 @@
 
   .count.busy:hover {
     background: var(--accent-soft);
+  }
+
+  /* Narrow window: the sidebar becomes a rail of icons; the toolbar drops the folder name. */
+  @container window (max-width: 560px) {
+    .sidebar {
+      width: var(--sidebar-rail-w);
+    }
+
+    .group,
+    .place .label {
+      display: none;
+    }
+
+    /* Another server's places still need setting apart from this one's. */
+    .group.other {
+      display: block;
+      height: 1px;
+      margin: 6px 8px;
+      padding: 0;
+      overflow: hidden;
+      background: var(--divider);
+      color: transparent;
+    }
+
+    .place {
+      justify-content: center;
+    }
+
+    .title {
+      flex: 0 0 0;
+      visibility: hidden;
+    }
+
+    /* The folder name is gone, so the path shows its end, not its start. */
+    .crumbs {
+      justify-content: flex-end;
+    }
+
+    .search {
+      margin-left: auto;
+    }
   }
 </style>
