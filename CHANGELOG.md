@@ -4,6 +4,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.3.4] - 2026-11-04
+
 ### Sửa
 - Giao diện khi cửa sổ hẹp: Dock không còn tràn khỏi màn hình và tự thu nhỏ icon; menu bar không xuống dòng, chỉ số tự ẩn dần khi thiếu chỗ.
 - App trong cửa sổ hẹp (snap nửa màn hình chẳng hạn): nút và ô tìm kiếm không còn bị đẩy ra ngoài, sidebar thu thành dải icon, danh sách xếp trên chi tiết, bảng Docker và Monitor ẩn bớt cột phụ thay vì bắt cuộn ngang.
@@ -189,7 +191,8 @@ M0–M3 · Khung dự án, desktop, kết nối, Terminal.
 - Kết nối SSH qua agent, key hoặc mật khẩu; bí mật trong keychain; xác nhận host key lần đầu, từ chối khi host key đổi; tự kết nối lại.
 - Terminal xterm.js nhiều tab, prompt Davish không cài gì lên server.
 
-[Unreleased]: https://github.com/2hjaito/davish/compare/v1.3.3...HEAD
+[Unreleased]: https://github.com/2hjaito/davish/compare/v1.3.4...HEAD
+[1.3.4]: https://github.com/2hjaito/davish/compare/v1.3.3...v1.3.4
 [1.3.3]: https://github.com/2hjaito/davish/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/2hjaito/davish/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/2hjaito/davish/compare/v1.3.0...v1.3.1
