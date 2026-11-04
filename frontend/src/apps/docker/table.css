@@ -108,6 +108,77 @@
   padding-left: 34px;
 }
 
+/*
+ * Narrower windows drop the columns that the row's detail page repeats, so name,
+ * state and the actions stay in view without scrolling sideways. Widths are the
+ * window's and leave room for the sidebar.
+ */
+@container window (max-width: 1000px) {
+  .dk-containers :is(th, td):is(:nth-child(2), :nth-child(4)) {
+    display: none;
+  }
+
+  .dk-containers td:is(:nth-child(3), :nth-child(7)) {
+    max-width: 130px;
+  }
+
+  .dk-containers td.dk-name {
+    max-width: 200px;
+  }
+}
+
+@container window (max-width: 900px) {
+  .dk-images :is(th, td):nth-child(3) {
+    display: none;
+  }
+}
+
+@container window (max-width: 760px) {
+  .dk-containers :is(th, td):nth-child(3),
+  .dk-images :is(th, td):nth-child(4),
+  .dk-volumes :is(th, td):nth-child(3) {
+    display: none;
+  }
+
+  .dk-containers td:nth-child(7) {
+    max-width: 110px;
+  }
+
+  .dk-containers td.dk-name {
+    max-width: 170px;
+  }
+}
+
+@container window (max-width: 660px) {
+  .dk-containers :is(th, td):nth-child(7),
+  .dk-volumes :is(th, td):nth-child(2) {
+    display: none;
+  }
+
+  .dk-containers td.dk-name {
+    max-width: 150px;
+  }
+}
+
+@container window (max-width: 560px) {
+  .dk-containers :is(th, td):nth-child(5),
+  .dk-images :is(th, td):nth-child(5) {
+    display: none;
+  }
+
+  .dk-table td.dk-name {
+    max-width: 130px;
+  }
+
+  .dk-summary {
+    flex-wrap: wrap;
+  }
+
+  .dk-card {
+    min-width: 96px;
+  }
+}
+
 .dk-table .num {
   text-align: right;
   font-variant-numeric: tabular-nums;

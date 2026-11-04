@@ -4,6 +4,11 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Sửa
+- Giao diện khi cửa sổ hẹp: Dock không còn tràn khỏi màn hình và tự thu nhỏ icon; menu bar không xuống dòng, chỉ số tự ẩn dần khi thiếu chỗ.
+- App trong cửa sổ hẹp (snap nửa màn hình chẳng hạn): nút và ô tìm kiếm không còn bị đẩy ra ngoài, sidebar thu thành dải icon, danh sách xếp trên chi tiết, bảng Docker và Monitor ẩn bớt cột phụ thay vì bắt cuộn ngang.
+- Thu nhỏ cửa sổ Davish không còn làm cửa sổ con nằm ngoài tầm với.
+
 ## [1.3.3] - 2026-11-03
 
 ### Sửa

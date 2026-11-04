@@ -85,7 +85,7 @@
   {#if images.length === 0}
     <p class="dk-empty">{all.length ? d.noMatch : d.none}</p>
   {:else}
-    <table class="dk-table">
+    <table class="dk-table dk-images">
       <thead>
         <tr>
           <th>{tb.name}</th>
