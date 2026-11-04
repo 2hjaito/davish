@@ -49,6 +49,17 @@ describe('WindowManager', () => {
     expect(wm.frame(wm.windows[0]!)).toEqual(a.rect)
   })
 
+  it('keeps a window on screen while the work area is smaller, without losing its place', () => {
+    const a = wm.open('terminal', 's1', opts)
+    wm.setRect(a.id, { x: 900, y: 200, w: 300, h: 300 })
+    const area = wm.area
+    wm.area = { ...area, w: 960 }
+    const frame = wm.frame(wm.windows[0]!)
+    expect(frame.x).toBeLessThan(960)
+    wm.area = area
+    expect(wm.frame(wm.windows[0]!).x).toBe(900)
+  })
+
   it('reopens an app where it was closed', () => {
     const a = wm.open('terminal', 's1', opts)
     wm.setRect(a.id, { x: 200, y: 150, w: 500, h: 350 })
