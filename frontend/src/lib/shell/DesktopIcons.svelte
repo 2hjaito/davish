@@ -5,11 +5,10 @@
   import { deploys } from '../stores/deploys.svelte'
   import { notifications } from '../stores/notifications.svelte'
   import { servers } from '../stores/servers.svelte'
-  import { type Shortcut, shortcuts } from '../stores/shortcuts.svelte'
+  import { type Shortcut, type ShortcutLook, shortcuts } from '../stores/shortcuts.svelte'
   import Dialog from '../ui/Dialog.svelte'
   import Icon from '../ui/Icon.svelte'
   import PopupMenu from '../ui/PopupMenu.svelte'
-  import type { IconName } from '../ui/icons'
   import {
     focusTerminal,
     openFileInEditor,
@@ -19,14 +18,12 @@
   import { wm } from '../wm/windowManager.svelte'
   import { cellAt, cellPosition, gridOf, layout } from './iconGrid'
   import { hasChanged, needsConfirm, simulateRun } from './shortcutActions'
+  import ShortcutCustomize from './ShortcutCustomize.svelte'
+  import { iconOf, titleOf } from './shortcutLook'
   import ShortcutRunDialog from './ShortcutRunDialog.svelte'
+  import ShortcutTile from './ShortcutTile.svelte'
 
   const s = t.shortcuts
-  const ICONS: Record<Shortcut['kind'], IconName> = {
-    script: 'terminal',
-    file: 'file',
-    folder: 'folder',
-  }
 
   // A press becomes a drag only after it moves this far, so clicks and
   // double-clicks stay what they are.
@@ -45,6 +42,7 @@
   let dialog = $state<{ item: Shortcut; target: ShortcutTarget; serverID: string } | null>(null)
   let missing = $state<Shortcut | null>(null)
   let menu = $state<{ item: Shortcut; x: number; y: number } | null>(null)
+  let customizing = $state<Shortcut | null>(null)
 
   function fail(e: unknown, title: string) {
     notifications.add({
@@ -80,7 +78,7 @@
   async function run(item: Shortcut, target: ShortcutTarget, id: string) {
     try {
       const r = await shortcutRun(id, item.path, target.hash)
-      deploys.watch(id, item.path, r.nonce, [item.name], true, 'script')
+      deploys.watch(id, item.path, r.nonce, [titleOf(item)], true, 'script')
       openTerminalAt(id, undefined, r.line, r.nonce, true)
       simulateRun(r.nonce)
     } catch (e) {
@@ -121,11 +119,17 @@
         run: () => openFilesAt(serverID, parentOf(item.path)),
         disabled: !online,
       },
+      { label: s.customize, run: () => (customizing = item) },
       item.trusted
         ? { label: s.untrust, run: () => shortcuts.trust(serverID, item.path, undefined) }
         : null,
       { label: s.remove, run: () => shortcuts.remove(serverID, item.path), danger: true },
     ]
+  }
+
+  function saveLook(look: ShortcutLook) {
+    if (customizing) shortcuts.customize(serverID, customizing.path, look)
+    customizing = null
   }
 
   /** The result of the last run, as a dot on the icon. */
@@ -171,6 +175,9 @@
       void open(item)
     } else if (ev.key === 'Delete') {
       shortcuts.remove(serverID, item.path)
+    } else if (ev.key === 'F2') {
+      ev.preventDefault()
+      customizing = item
     } else if (ev.key === 'ContextMenu' || (ev.key === 'F10' && ev.shiftKey)) {
       // The menu has no button: this is its keyboard way in.
       ev.preventDefault()
@@ -203,6 +210,7 @@
       {@const active = deploys.active(serverID, item.path)}
       {@const moving = drag?.path === item.path}
       {@const last = lastRun(item)}
+      {@const title = titleOf(item)}
       <li
         class:selected={selected === item.path}
         class:off={!online}
@@ -224,21 +232,25 @@
           onpointerup={onPointerUp}
           onpointercancel={onPointerUp}
         >
-          <span class="tile glass" class:running={!!active}>
-            <Icon name={ICONS[item.kind]} size={24} />
+          <ShortcutTile
+            icon={iconOf(item)}
+            color={item.color}
+            image={shortcuts.image(item)}
+            running={!!active}
+          >
             {#if !active && item.kind === 'script' && last && last !== 'stopped'}
               <span class="dot {last}"></span>
             {/if}
-          </span>
-          <span class="name">{item.name}</span>
+          </ShortcutTile>
+          <span class="name">{title}</span>
         </button>
         {#if active}
           <button
             type="button"
             class="stop"
-            aria-label={s.stop(item.name)}
+            aria-label={s.stop(title)}
             data-own-tooltip
-            title={s.stop(item.name)}
+            title={s.stop(title)}
             onclick={() => deploys.interrupt(active.nonce)}
           >
             <Icon name="close" size={11} strokeWidth={3} />
@@ -253,9 +265,18 @@
   <PopupMenu
     x={menu.x}
     y={menu.y}
-    label={s.actions(menu.item.name)}
+    label={s.actions(titleOf(menu.item))}
     actions={actions(menu.item)}
     onclose={() => (menu = null)}
+  />
+{/if}
+
+{#if customizing}
+  <ShortcutCustomize
+    item={customizing}
+    currentImage={shortcuts.image(customizing)}
+    onclose={() => (customizing = null)}
+    onsave={saveLook}
   />
 {/if}
 
@@ -316,8 +337,7 @@
     opacity: 0.8;
   }
 
-  li.off .tile,
-  li.off .name {
+  li.off .icon {
     opacity: 0.5;
   }
 
@@ -341,32 +361,6 @@
   .icon:focus-visible {
     background: var(--fill-soft);
     outline: none;
-  }
-
-  .tile {
-    position: relative;
-    display: grid;
-    place-items: center;
-    width: 52px;
-    height: 52px;
-    border-radius: var(--dock-tile-radius);
-  }
-
-  .tile.running {
-    box-shadow: 0 0 0 2px var(--accent);
-    animation: pulse 1.6s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    50% {
-      box-shadow: 0 0 0 2px transparent;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .tile.running {
-      animation: none;
-    }
   }
 
   .dot {
