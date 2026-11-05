@@ -4,8 +4,13 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.5.2] - 2026-11-05
+
 ### Thêm
 - Lối tắt trên màn hình chính: chuột phải chọn "Tùy chỉnh…" (hoặc nhấn `F2`) để đổi tên hiển thị, chọn icon có sẵn kèm màu, hoặc dùng ảnh từ máy (PNG, JPG, WebP, tự cắt vuông). File trên server giữ nguyên và hộp thoại chạy script vẫn hiện tên thật của file.
+
+### Sửa
+- Bản 1.5.1 được đóng gói nhầm từ code của 1.5.0 nên tự nhận là 1.5.0, không có tính năng mới và cứ báo có bản cập nhật. Bản này sửa lỗi đó. Đang dùng 1.5.0 hay 1.5.1 thì cập nhật lên 1.5.2 như bình thường.
 
 ## [1.5.0] - 2026-11-05
 
