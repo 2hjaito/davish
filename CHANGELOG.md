@@ -4,6 +4,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-11-05
+
 ### Thêm
 - Files: tạo tệp và thư mục mới. Chuột phải vào khoảng trống, kể cả trong thư mục rỗng, để mở menu của thư mục đang xem; bấm vào khoảng trống thì bỏ chọn, như trên hệ điều hành. `⌘⇧N` tạo thư mục.
 
