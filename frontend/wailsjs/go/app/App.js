@@ -210,6 +210,10 @@ export function FilesCompress(arg1, arg2, arg3, arg4) {
   return window['go']['app']['App']['FilesCompress'](arg1, arg2, arg3, arg4);
 }
 
+export function FilesCreate(arg1, arg2) {
+  return window['go']['app']['App']['FilesCreate'](arg1, arg2);
+}
+
 export function FilesHome(arg1) {
   return window['go']['app']['App']['FilesHome'](arg1);
 }

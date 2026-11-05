@@ -17,11 +17,20 @@
   import { hitTest, type Hit, NO_HIT } from '../../lib/ui/radial/radial'
   import RadialMenu, { type RadialItem } from '../../lib/ui/radial/RadialMenu.svelte'
   import { openFileInEditor, openTerminalAt } from '../../lib/wm/intents.svelte'
-  import { ACTIONS, type ActionId, FORMATS, menuFor, type MenuId, petalsFor } from './actions'
+  import {
+    ACTIONS,
+    type ActionId,
+    blankMenu,
+    FORMATS,
+    menuFor,
+    type MenuId,
+    petalsFor,
+  } from './actions'
   import CompressDialog from './CompressDialog.svelte'
   import DeleteDialog from './DeleteDialog.svelte'
   import type { DragPhase } from './FileList.svelte'
   import { baseName } from './listing'
+  import NewEntryDialog from './NewEntryDialog.svelte'
   import type { DropTarget } from './remotes.svelte'
   import RenameDialog from './RenameDialog.svelte'
 
@@ -84,16 +93,43 @@
       : [],
   )
 
-  let context = $state<{ entry: Entry; x: number; y: number } | null>(null)
+  /** entry is null for empty space, which stands for the folder on screen. */
+  let context = $state<{ entry: Entry | null; x: number; y: number } | null>(null)
+  let creating = $state<'file' | 'folder' | null>(null)
 
-  /** Opens the right-click menu of entry. */
-  export function showMenu(entry: Entry, x: number, y: number) {
+  /** Opens the right-click menu of entry, or of the folder when null. */
+  export function showMenu(entry: Entry | null, x: number, y: number) {
     context = { entry, x, y }
+  }
+
+  /** Asks for the name of a new file or folder in the folder on screen. */
+  export function create(kind: 'file' | 'folder') {
+    creating = kind
+  }
+
+  function blankAction(id: MenuId): Action {
+    const here = cwd ?? ''
+    const run: Partial<Record<MenuId, () => void>> = {
+      newFile: () => create('file'),
+      newFolder: () => create('folder'),
+      terminal: () => act('terminal', null),
+      desktop: () => void pin(here),
+      copyPath: () => copyPath(here),
+      refresh: () => onchanged(null),
+    }
+    const label =
+      id === 'newFile' || id === 'newFolder' || id === 'refresh'
+        ? t.files[id]
+        : id === 'terminal' || id === 'desktop' || id === 'copyPath'
+          ? t.files.actions[id]
+          : ''
+    return { label, run: run[id] ?? (() => {}) }
   }
 
   function menuAction(id: MenuId, entry: Entry): Action {
     if (id === 'open') return { label: t.files.open, run: () => onopen(entry) }
     if (id === 'download') return { label: t.files.download, run: ondownload }
+    if (id === 'newFile' || id === 'newFolder' || id === 'refresh') return blankAction(id)
     return {
       label: t.files.actions[id],
       run: () => act(id, entry),
@@ -101,11 +137,13 @@
     }
   }
 
-  const contextActions = $derived(
-    context
-      ? menuFor().map((id) => (id === null || !context ? null : menuAction(id, context.entry)))
-      : [],
-  )
+  const contextActions = $derived.by(() => {
+    if (!context) return []
+    const { entry } = context
+    return entry
+      ? menuFor().map((id) => (id === null ? null : menuAction(id, entry)))
+      : blankMenu().map((id) => (id === null ? null : blankAction(id)))
+  })
 
   /** Follows a drag from the file list (FileList's ondrag). */
   export function drag(entry: Entry, phase: DragPhase, x: number, y: number) {
@@ -157,7 +195,7 @@
     }
     if (menu.away) {
       menu = null
-      if (onSurface(x, y)) void pin(entry, { x, y })
+      if (onSurface(x, y)) void pin(entry.path, { x, y })
       return
     }
     // Released: run what is under the pointer; the center or nothing cancels.
@@ -170,13 +208,13 @@
   }
 
   /** Puts entry on the desktop, at the drop point when dragged there. */
-  async function pin(entry: Entry, at?: { x: number; y: number }) {
+  async function pin(path: string, at?: { x: number; y: number }) {
     try {
-      const added = await addShortcut(serverID, entry.path, at)
+      const added = await addShortcut(serverID, path, at)
       onflash(added ? t.files.pinned : t.files.alreadyPinned)
     } catch (e) {
       notifications.add({
-        id: `pin-${entry.path}`,
+        id: `pin-${path}`,
         level: 'error',
         title: t.shortcuts.addFailed,
         body: toUserError(e).message,
@@ -196,7 +234,7 @@
       return
     }
     if (id === 'desktop') {
-      if (entry) void pin(entry)
+      if (entry) void pin(entry.path)
       return
     }
     if (id === 'terminal') {
@@ -207,7 +245,7 @@
     if (!entry) return
     switch (id) {
       case 'copyPath':
-        void copyText(entry.path).then((ok) => onflash(ok ? t.files.copied : t.files.copyFailed))
+        copyPath(entry.path)
         return
       case 'compress':
         if (format) void compressNow(entry, format)
@@ -217,6 +255,10 @@
       case 'delete':
         dialog = { kind: id, entry }
     }
+  }
+
+  function copyPath(path: string) {
+    void copyText(path).then((ok) => onflash(ok ? t.files.copied : t.files.copyFailed))
   }
 
   async function compressNow(entry: Entry, format: ArchiveFormat) {
@@ -274,7 +316,7 @@
   <PopupMenu
     x={context.x}
     y={context.y}
-    label={context.entry.name}
+    label={context.entry?.name ?? cwd ?? ''}
     actions={contextActions}
     onclose={() => (context = null)}
   />
@@ -305,6 +347,16 @@
   />
 {/if}
 
+<NewEntryDialog
+  {serverID}
+  dir={cwd}
+  kind={creating}
+  onclose={() => (creating = null)}
+  ondone={(path) => {
+    creating = null
+    onchanged(path)
+  }}
+/>
 <DeleteDialog
   {serverID}
   entry={dialog?.kind === 'delete' ? dialog.entry : null}

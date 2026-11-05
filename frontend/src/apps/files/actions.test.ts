@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { actionForKey, menuFor, petalsFor, renameProblem, stemLength } from './actions'
+import { actionForKey, blankMenu, menuFor, petalsFor, renameProblem, stemLength } from './actions'
 
 const key = (over: Partial<Parameters<typeof actionForKey>[0]>) => ({
   key: '',
@@ -16,6 +16,14 @@ describe('menuFor', () => {
     const menu = menuFor()
     expect(menu).toContain('desktop')
     expect(menu.at(-1)).toBe('delete')
+  })
+})
+
+describe('blankMenu', () => {
+  it('creates, and offers nothing that removes the folder', () => {
+    const menu = blankMenu()
+    expect(menu.slice(0, 2)).toEqual(['newFile', 'newFolder'])
+    for (const id of ['delete', 'rename', 'compress'] as const) expect(menu).not.toContain(id)
   })
 })
 

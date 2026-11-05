@@ -31,7 +31,7 @@ export function petalsFor(e: Pick<Entry, 'dir'>): ActionId[] {
 }
 
 /** What the right-click menu offers; null is a divider. */
-export type MenuId = ActionId | 'open' | 'download'
+export type MenuId = ActionId | 'open' | 'download' | 'newFile' | 'newFolder' | 'refresh'
 
 export function menuFor(): (MenuId | null)[] {
   return [
@@ -47,6 +47,11 @@ export function menuFor(): (MenuId | null)[] {
     null,
     'delete',
   ]
+}
+
+/** The menu of empty space, which acts on the folder on screen. */
+export function blankMenu(): (MenuId | null)[] {
+  return ['newFile', 'newFolder', null, 'terminal', 'desktop', 'copyPath', null, 'refresh']
 }
 
 export const FORMATS: { id: ArchiveFormat; label: string }[] = [

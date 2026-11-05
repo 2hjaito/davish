@@ -63,6 +63,10 @@ export const filesWrite = (serverID: string, path: string, data: Uint8Array): Pr
 export const filesMkdir = (serverID: string, path: string): Promise<void> =>
   App.FilesMkdir(serverID, path)
 
+/** Makes an empty file; fails with FS_EXISTS rather than replacing one. */
+export const filesCreate = (serverID: string, path: string): Promise<void> =>
+  App.FilesCreate(serverID, path)
+
 /** Fails with FS_EXISTS rather than replacing `to`. */
 export const filesRename = (serverID: string, from: string, to: string): Promise<void> =>
   App.FilesRename(serverID, from, to)

@@ -12,7 +12,7 @@ xterm.js with tabs, copy/paste, GPU rendering, and an optional powerline prompt 
 
 ## Files
 
-Finder-style browser over SFTP: upload, download, drag and drop from your OS, rename, delete, compress, and copy between servers through your machine.
+Finder-style browser over SFTP: upload, download, drag and drop from your OS, rename, delete, compress, and copy between servers through your machine. Right-click empty space to create a file or folder in the folder on screen; Davish never overwrites an existing file.
 
 ## Desktop shortcuts
 

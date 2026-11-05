@@ -208,6 +208,34 @@ func TestReadWrite(t *testing.T) {
 	wantCode(t, err, apperr.FSTooLarge)
 }
 
+func TestCreate(t *testing.T) {
+	e := setup(t)
+	ctx := context.Background()
+
+	if err := e.svc.Create(ctx, e.id, e.path("new.txt")); err != nil {
+		t.Fatal(err)
+	}
+	got, err := e.svc.Stat(ctx, e.id, e.path("new.txt"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Size != 0 || got.Dir {
+		t.Fatalf("got %+v, want an empty file", got)
+	}
+	if _, err := e.svc.Write(ctx, e.id, e.path("kept"), []byte("kept")); err != nil {
+		t.Fatal(err)
+	}
+	wantCode(t, e.svc.Create(ctx, e.id, e.path("kept")), apperr.FSExists)
+	f, err := e.svc.Read(ctx, e.id, e.path("kept"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(f.Data) != "kept" {
+		t.Fatalf("content = %q: Create must not touch an existing file", f.Data)
+	}
+	wantCode(t, e.svc.Create(ctx, e.id, e.path("no/parent")), apperr.NotFound)
+}
+
 func TestMkdirRename(t *testing.T) {
 	e := setup(t)
 	ctx := context.Background()
