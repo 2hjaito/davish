@@ -30,6 +30,7 @@
   import Window from '../wm/Window.svelte'
   import { wm } from '../wm/windowManager.svelte'
   import Spotlight from '../spotlight/Spotlight.svelte'
+  import DesktopIcons from './DesktopIcons.svelte'
   import Dock from './Dock.svelte'
   import { dockItems } from './dockItems'
   import Launchpad from './Launchpad.svelte'
@@ -268,6 +269,10 @@
   <MenuBar />
   <Spotlight open={ui.spotlight} onclose={() => (ui.spotlight = false)} />
   <Launchpad open={ui.launchpad} onclose={() => (ui.launchpad = false)} onlaunch={launch} />
+
+  {#if servers.ready && servers.list.length > 0}
+    <DesktopIcons />
+  {/if}
 
   {#if wm.snapPreview}
     {@const p = wm.snapPreview}

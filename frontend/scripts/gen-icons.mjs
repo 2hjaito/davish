@@ -40,6 +40,7 @@ const ICONS = {
   power: 'FiPower',
   refresh: 'FiRefreshCw',
   play: 'FiPlay',
+  pin: 'FiMapPin',
   stop: 'FiSquare',
   trash: 'FiTrash2',
   upload: 'FiUpload',

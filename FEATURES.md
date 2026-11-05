@@ -14,6 +14,14 @@ xterm.js with tabs, copy/paste, GPU rendering, and an optional powerline prompt 
 
 Finder-style browser over SFTP: upload, download, drag and drop from your OS, rename, delete, compress, and copy between servers through your machine.
 
+## Desktop shortcuts
+
+Drag a file, folder or script from Files onto the wallpaper, or right-click it and choose "Add to desktop" (`⌘⌥P`). Double-click to open: folders in Files, files in the Editor, scripts in a terminal tab. Each server has its own desktop, so staging's `deploy.sh` never shows on production. Davish stores only the path, on your computer.
+
+The first time a script runs, Davish shows the server name and the exact command. Choose "Run directly next time" and it runs right away from then on, as long as the script is unchanged; if it was edited, Davish asks again with a warning. While it runs, the terminal shows the elapsed time and a **Stop** button, and the icon shows an X; both send Ctrl-C to that session. A notification reports the end with the exit code, and every run goes in the command log.
+
+![A script running from a desktop shortcut](assets/screenshots/shortcuts.jpg)
+
 ## Editor
 
 CodeMirror 6 with highlighting for nginx, YAML, JSON, shell, env and config files. Atomic saves that keep mode and owner, backups under `/etc`, and a warning if the file changed on the server.
@@ -50,6 +58,8 @@ Laid out like Docker Desktop. Containers in a table (ID, image, ports, CPU, memo
 ## Cron
 
 Your crontab and the system ones, schedules in plain words, next runs in the server's time zone, safe edits with a backup.
+
+Each job lists the files and folders in its command (script, log, `cd` folder), one click from the Editor or Files. System jobs open their cron file and its folder.
 
 <img src="assets/screenshots/cron.jpg" alt="Cron jobs with schedules in plain words" width="100%">
 

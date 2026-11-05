@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { actionForKey, petalsFor, renameProblem, stemLength } from './actions'
+import { actionForKey, menuFor, petalsFor, renameProblem, stemLength } from './actions'
 
 const key = (over: Partial<Parameters<typeof actionForKey>[0]>) => ({
   key: '',
@@ -11,10 +11,24 @@ const key = (over: Partial<Parameters<typeof actionForKey>[0]>) => ({
   ...over,
 })
 
+describe('menuFor', () => {
+  it('offers the desktop, and ends with what cannot be undone', () => {
+    const menu = menuFor()
+    expect(menu).toContain('desktop')
+    expect(menu.at(-1)).toBe('delete')
+  })
+})
+
 describe('petalsFor', () => {
   it('fits files and folders', () => {
-    expect(petalsFor({ dir: false })).toEqual(['editor', 'rename', 'delete', 'copyPath'])
-    expect(petalsFor({ dir: true })).toEqual(['terminal', 'rename', 'delete', 'compress'])
+    expect(petalsFor({ dir: false })).toEqual(['editor', 'rename', 'delete', 'copyPath', 'desktop'])
+    expect(petalsFor({ dir: true })).toEqual([
+      'terminal',
+      'rename',
+      'delete',
+      'compress',
+      'desktop',
+    ])
   })
 })
 

@@ -3,6 +3,7 @@
   import { untrack } from 'svelte'
 
   import { onTermData, onTermExit } from '../../lib/api/events'
+  import { filesHome } from '../../lib/api/files'
   import { hasRuntime } from '../../lib/api/runtime'
   import { decodeOutput, termClose, termResize, termStart, termWrite } from '../../lib/api/terminal'
   import { t } from '../../lib/i18n'
@@ -11,10 +12,12 @@
   import { settings } from '../../lib/stores/settings.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import { getWindowContext } from '../../lib/wm/context'
-  import { type TerminalRequest, terminalRequests } from '../../lib/wm/intents.svelte'
+  import { openFilesAt, type TerminalRequest, terminalRequests } from '../../lib/wm/intents.svelte'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import { wm } from '../../lib/wm/windowManager.svelte'
+  import { mockHome } from '../files/mockFs'
   import type { AppProps } from '../types'
+  import { absoluteCwd, cwdFromTitle, parseOsc7 } from './cwd'
   import DeployProgress from './DeployProgress.svelte'
   import { MockShell } from './mockShell'
   import XTerm from './XTerm.svelte'
@@ -36,6 +39,8 @@
     deploy?: string
     /** startInput was confirmed in a dialog: press Enter after it. */
     startRun?: boolean
+    /** The shell says its folder by OSC 7, so titles need not be read for it. */
+    osc7?: boolean
     /** Title the remote shell sets (bash sets "user@host: cwd" for xterm). */
     title?: string
     /** Remote PTY session, while one is open. */
@@ -74,6 +79,15 @@
   }
 
   function connect(tab: Tab, term: Terminal) {
+    if (tab.deploy) deploys.onInterrupt(tab.deploy, () => interrupt(tab))
+    term.parser.registerOscHandler(7, (data) => {
+      const cwd = parseOsc7(data)
+      if (cwd) {
+        tab.cwd = cwd
+        tab.osc7 = true
+      }
+      return true
+    })
     // Deploy marks are swallowed whatever they hold; only this tab's run
     // takes them (docs/adr/0012).
     term.parser.registerOscHandler(DEPLOY_OSC, (data) => {
@@ -94,9 +108,28 @@
     term.onResize(({ cols, rows }) => {
       if (tab.session) void termResize(tab.session, cols, rows)
     })
-    term.onTitleChange((title) => (tab.title = title))
+    term.onTitleChange((title) => {
+      tab.title = title
+      const cwd = tab.osc7 ? null : cwdFromTitle(title)
+      if (cwd) tab.cwd = cwd
+    })
     tab.ready = true
     if (!online) term.write(`\x1b[2m${t.terminal.waiting}\x1b[0m\r\n`)
+  }
+
+  /** Shows the active tab's folder in Files. */
+  async function openInFiles() {
+    const cwd = tabs.find((x) => x.id === activeId)?.cwd ?? '~'
+    const home = cwd.startsWith('~') ? (hasRuntime ? await filesHome(win.serverID) : mockHome) : ''
+    const path = absoluteCwd(cwd, home)
+    if (path) openFilesAt(win.serverID, path)
+  }
+
+  /** Ctrl-C for the tab's run; a line not typed yet is never typed. */
+  function interrupt(tab: Tab) {
+    tab.startInput = undefined
+    if (tab.session) void termWrite(tab.session, '\x03')
+    if (tab.deploy) deploys.stop(tab.deploy)
   }
 
   // The browser preview has no Go side: run the scripted shell instead.
@@ -251,7 +284,17 @@
       <Icon name="plus" size={12} strokeWidth={2.2} />
     </button>
   </div>
-  <span class="spacer"></span>
+  <span class="spacer">
+    <button
+      class="add"
+      aria-label={t.terminal.openInFiles}
+      title={t.terminal.openInFiles}
+      disabled={!online}
+      onclick={() => void openInFiles()}
+    >
+      <Icon name="folder" size={13} />
+    </button>
+  </span>
 </TitleBar>
 
 <div class="screen" class:solid={settings.terminalGpu}>
@@ -264,6 +307,7 @@
     {#if tab.deploy && tab.id === activeId && deploys.runs[tab.deploy]}
       <DeployProgress
         run={deploys.runs[tab.deploy]!}
+        onstop={() => interrupt(tab)}
         onhide={() => {
           if (tab.deploy) deploys.forget(tab.deploy)
           tab.deploy = undefined
@@ -357,8 +401,17 @@
     color: var(--fg-on-dark-muted);
   }
 
+  /* Balances the traffic lights, keeping the tabs centered. */
   .spacer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
     width: 52px;
+    margin-right: 26px;
+  }
+
+  .add:disabled {
+    opacity: 0.5;
   }
 
   .screen {

@@ -40,6 +40,8 @@ export type RunState = 'waiting' | 'running' | 'ok' | 'failed' | 'stopped'
 
 export interface DeployRun {
   nonce: string
+  /** A deploy has steps; a script from the desktop is one long step. */
+  kind: 'deploy' | 'script'
   serverID: string
   dir: string
   steps: string[]
@@ -97,11 +99,21 @@ class Deploys {
   runs = $state<Record<string, DeployRun>>({})
   /** Finished runs per server and folder, newest first. */
   history = $state<Record<string, DeployRecord[]>>(load(HISTORY, {}))
+  /** Press Ctrl-C in the session of a run, by nonce; set by its terminal tab. */
+  #interrupts = new Map<string, () => void>()
 
   /** Starts following a deploy line about to be typed into a terminal. */
-  watch(serverID: string, dir: string, nonce: string, steps: string[], auto = false) {
+  watch(
+    serverID: string,
+    dir: string,
+    nonce: string,
+    steps: string[],
+    auto = false,
+    kind: DeployRun['kind'] = 'deploy',
+  ) {
     this.runs[nonce] = {
       nonce,
+      kind,
       serverID,
       dir,
       steps,
@@ -114,6 +126,26 @@ class Deploys {
 
   historyOf(serverID: string, dir: string): DeployRecord[] {
     return this.history[historyKey(serverID, dir)] ?? []
+  }
+
+  /** The run going for dir on serverID, if any. */
+  active(serverID: string, dir: string): DeployRun | undefined {
+    return Object.values(this.runs).find(
+      (r) =>
+        r.serverID === serverID &&
+        r.dir === dir &&
+        (r.state === 'waiting' || r.state === 'running'),
+    )
+  }
+
+  /** The terminal tab showing a run says how to interrupt it. */
+  onInterrupt(nonce: string, interrupt: () => void) {
+    this.#interrupts.set(nonce, interrupt)
+  }
+
+  /** Stops a run from outside its terminal: the Stop button, the desktop icon. */
+  interrupt(nonce: string) {
+    this.#interrupts.get(nonce)?.()
   }
 
   /** Applies a mark, if it belongs to a run still going. */
@@ -148,6 +180,7 @@ class Deploys {
   forget(nonce: string) {
     const run = this.runs[nonce]
     if (run && run.state !== 'running') delete this.runs[nonce]
+    this.#interrupts.delete(nonce)
   }
 
   #finish(run: DeployRun, state: 'ok' | 'failed' | 'stopped', now: number) {
@@ -162,6 +195,10 @@ class Deploys {
   #notify(run: DeployRun) {
     const server = servers.list.find((s) => s.id === run.serverID)?.name ?? run.serverID
     const d = t.deploys
+    if (run.kind === 'script') {
+      this.#notifyScript(run, server)
+      return
+    }
     const name = repoName(run.dir)
     const step = run.steps[run.current - 1] ?? ''
     notifications.add({
@@ -180,6 +217,27 @@ class Deploys {
       serverID: run.serverID,
       at: run.endedAt ?? Date.now(),
       action: { label: d.showTerminal, run: () => focusTerminal(run.serverID) },
+    })
+  }
+
+  #notifyScript(run: DeployRun, server: string) {
+    const s = t.deploys.script
+    const name = run.steps[0] ?? repoName(run.dir)
+    const texts = {
+      ok: [s.doneTitle(name, server), s.doneBody],
+      failed: [s.failedTitle(name, server), run.current === 0 ? s.noDir : s.exitBody(run.exit)],
+      stopped: [s.stoppedTitle(name, server), s.stoppedBody],
+    } as const
+    const [title, body] =
+      texts[run.state === 'ok' || run.state === 'failed' ? run.state : 'stopped']
+    notifications.add({
+      id: `deploy:${run.nonce}`,
+      level: run.state === 'ok' ? 'info' : run.state === 'failed' ? 'error' : 'warn',
+      title,
+      body,
+      serverID: run.serverID,
+      at: run.endedAt ?? Date.now(),
+      action: { label: t.deploys.showTerminal, run: () => focusTerminal(run.serverID) },
     })
   }
 }

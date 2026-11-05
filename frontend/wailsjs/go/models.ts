@@ -2535,6 +2535,43 @@ export namespace security {
 
 }
 
+export namespace shortcut {
+	
+	export class Run {
+	    line: string;
+	    nonce: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Run(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.line = source["line"];
+	        this.nonce = source["nonce"];
+	    }
+	}
+	export class Target {
+	    name: string;
+	    kind: string;
+	    hash: string;
+	    command: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Target(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.kind = source["kind"];
+	        this.hash = source["hash"];
+	        this.command = source["command"];
+	    }
+	}
+
+}
+
 export namespace sshconfig {
 	
 	export class Candidate {

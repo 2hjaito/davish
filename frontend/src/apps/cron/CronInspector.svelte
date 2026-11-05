@@ -6,9 +6,10 @@
   import { t } from '../../lib/i18n'
   import Icon from '../../lib/ui/Icon.svelte'
   import NeedsRoot from '../../lib/ui/NeedsRoot.svelte'
-  import { openFileInEditor } from '../../lib/wm/intents.svelte'
+  import { openFileInEditor, openFilesAt } from '../../lib/wm/intents.svelte'
   import { backend } from './backend'
   import { describe } from './describe'
+  import { commandPaths, folderOf } from './paths'
   import { formatRun } from './when'
 
   interface Props {
@@ -23,13 +24,39 @@
 
   let runs = $state.raw<CronRuns | null>(null)
   let runsError = $state('')
+  /** What the command mentions that exists on the server. */
+  let paths = $state.raw<{ path: string; dir: boolean }[]>([])
   const id = $derived(job.id)
   const sourceLabel = $derived(job.source === 'user' ? t.cron.mine : job.source)
 
   $effect(() => {
     void id
-    untrack(() => void loadRuns())
+    untrack(() => {
+      void loadRuns()
+      void loadPaths()
+    })
   })
+
+  async function loadPaths() {
+    const command = job.command
+    paths = []
+    try {
+      // Another user's job runs from that user's home, which is unknown here.
+      const home = job.user ? '' : await backend.home(serverID)
+      const found = await Promise.all(
+        commandPaths(command, home).map(async (path) => {
+          try {
+            return { path, dir: await backend.isDir(serverID, path) }
+          } catch {
+            return null
+          }
+        }),
+      )
+      if (job.command === command) paths = found.filter((p) => p !== null)
+    } catch {
+      // Without links the job still shows; they are a convenience.
+    }
+  }
 
   async function loadRuns() {
     const command = job.command
@@ -80,12 +107,47 @@
       >
         {t.cron.openFile}
       </button>
+      <button type="button" class="btn" onclick={() => openFilesAt(serverID, folderOf(job.source))}>
+        {t.cron.showFolder}
+      </button>
     </div>
   {/if}
 
   <dl class="facts">
     <dt>{t.cron.command}</dt>
     <dd><code class="cmd">{job.command}</code></dd>
+    {#if paths.length > 0}
+      <dt>{t.cron.files}</dt>
+      <dd>
+        <ul class="paths">
+          {#each paths as p (p.path)}
+            <li>
+              <code title={p.path}>{p.path}</code>
+              {#if !p.dir}
+                <button
+                  type="button"
+                  class="icon-btn"
+                  aria-label={t.cron.editFile(p.path)}
+                  title={t.cron.editFile(p.path)}
+                  onclick={() => openFileInEditor(serverID, p.path)}
+                >
+                  <Icon name="editor" size={13} />
+                </button>
+              {/if}
+              <button
+                type="button"
+                class="icon-btn"
+                aria-label={t.cron.openFolder(p.path)}
+                title={t.cron.openFolder(p.path)}
+                onclick={() => openFilesAt(serverID, p.dir ? p.path : folderOf(p.path))}
+              >
+                <Icon name="folder" size={13} />
+              </button>
+            </li>
+          {/each}
+        </ul>
+      </dd>
+    {/if}
     <dt>{t.cron.source}</dt>
     <dd>
       {sourceLabel}{#if job.user}
@@ -132,6 +194,30 @@
 </section>
 
 <style>
+  .paths {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .paths li {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .paths code {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .inspector {
     flex: 1;
     min-height: 0;

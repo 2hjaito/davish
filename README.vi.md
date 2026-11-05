@@ -49,6 +49,7 @@ Không cài gì lên server.
 - [Nginx](FEATURES.vi.md#nginx): site, `nginx -t` trước khi reload, hạn TLS
 - [Gói](FEATURES.vi.md#gói): bản cập nhật, bản vá bảo mật lên đầu, runtime
 - [Git](FEATURES.vi.md#git): trạng thái, diff, biểu đồ commit, fetch và pull
+- [Lối tắt](FEATURES.vi.md#lối-tắt-trên-màn-hình-chính): kéo `deploy.sh` ra màn hình, double-click là chạy, có nút dừng
 
 **Mạng và an ninh**
 

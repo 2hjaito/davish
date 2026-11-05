@@ -2,7 +2,8 @@
 import type { ArchiveFormat, Entry } from '../../lib/api/files'
 import type { IconName } from '../../lib/ui/icons'
 
-export type ActionId = 'editor' | 'terminal' | 'rename' | 'delete' | 'copyPath' | 'compress'
+export type ActionId =
+  'editor' | 'terminal' | 'rename' | 'delete' | 'copyPath' | 'compress' | 'desktop'
 
 export interface ActionDef {
   id: ActionId
@@ -16,16 +17,36 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
   delete: { id: 'delete', icon: 'trash' },
   copyPath: { id: 'copyPath', icon: 'copy' },
   compress: { id: 'compress', icon: 'archive' },
+  desktop: { id: 'desktop', icon: 'pin' },
 }
 
 /**
- * The four petals of the drag menu, clockwise from the top. Files and
+ * The petals of the drag menu, clockwise from the top. Files and
  * folders get the actions that fit them; the rest stay on the keyboard.
  */
 export function petalsFor(e: Pick<Entry, 'dir'>): ActionId[] {
   return e.dir
-    ? ['terminal', 'rename', 'delete', 'compress']
-    : ['editor', 'rename', 'delete', 'copyPath']
+    ? ['terminal', 'rename', 'delete', 'compress', 'desktop']
+    : ['editor', 'rename', 'delete', 'copyPath', 'desktop']
+}
+
+/** What the right-click menu offers; null is a divider. */
+export type MenuId = ActionId | 'open' | 'download'
+
+export function menuFor(): (MenuId | null)[] {
+  return [
+    'open',
+    'terminal',
+    null,
+    'desktop',
+    'download',
+    'copyPath',
+    null,
+    'rename',
+    'compress',
+    null,
+    'delete',
+  ]
 }
 
 export const FORMATS: { id: ArchiveFormat; label: string }[] = [
@@ -54,6 +75,7 @@ export function actionForKey(k: KeyInfo): ActionId | null {
   if (k.alt) {
     if (k.code === 'KeyC') return 'copyPath'
     if (k.code === 'KeyZ') return 'compress'
+    if (k.code === 'KeyP') return 'desktop'
     return null
   }
   if (k.key === 'Backspace') return 'delete'
