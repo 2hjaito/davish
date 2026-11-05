@@ -9,7 +9,10 @@
     filesPlanCompress,
   } from '../../lib/api/files'
   import { t } from '../../lib/i18n'
+  import { addShortcut, onSurface } from '../../lib/shell/shortcutActions'
   import { notifications } from '../../lib/stores/notifications.svelte'
+  import Icon from '../../lib/ui/Icon.svelte'
+  import { portal } from '../../lib/ui/portal'
   import { hitTest, type Hit, NO_HIT } from '../../lib/ui/radial/radial'
   import RadialMenu, { type RadialItem } from '../../lib/ui/radial/RadialMenu.svelte'
   import { openFileInEditor, openTerminalAt } from '../../lib/wm/intents.svelte'
@@ -49,6 +52,8 @@
     hit: Hit
     /** Over another server's folder: the menu steps aside for the drop. */
     target: DropTarget | null
+    /** Out of the window: the file follows the pointer, to the wallpaper. */
+    away: { x: number; y: number; over: boolean } | null
   } | null>(null)
 
   const items = $derived<RadialItem[]>(
@@ -66,7 +71,7 @@
   /** Follows a drag from the file list (FileList's ondrag). */
   export function drag(entry: Entry, phase: DragPhase, x: number, y: number) {
     if (phase === 'start') {
-      menu = { entry, x, y, hit: NO_HIT, target: null }
+      menu = { entry, x, y, hit: NO_HIT, target: null, away: null }
       return
     }
     if (!menu) return
@@ -95,17 +100,25 @@
     }
     if (phase === 'move') {
       const b = bounds()
-      // Leaving the window cancels; other servers are reached through the sidebar.
+      // Out of the window is the way to the wallpaper; other servers are
+      // reached through the sidebar.
       if (b && (x < b.left || x > b.right || y < b.top || y > b.bottom)) {
-        menu = null
+        menu.hit = NO_HIT
+        menu.away = { x, y, over: onSurface(x, y) }
         return
       }
+      menu.away = null
       menu.hit = hitTest(
         x - menu.x,
         y - menu.y,
         items.length,
         (i) => items[i]?.children?.length ?? 0,
       )
+      return
+    }
+    if (menu.away) {
+      menu = null
+      if (onSurface(x, y)) void pin(entry, { x, y })
       return
     }
     // Released: run what is under the pointer; the center or nothing cancels.
@@ -117,6 +130,23 @@
     act(item.id as ActionId, entry, sub?.id as ArchiveFormat | undefined)
   }
 
+  /** Puts entry on the desktop, at the drop point when dragged there. */
+  async function pin(entry: Entry, at?: { x: number; y: number }) {
+    try {
+      const added = await addShortcut(serverID, entry.path, at)
+      onflash(added ? t.files.pinned : t.files.alreadyPinned)
+    } catch (e) {
+      notifications.add({
+        id: `pin-${entry.path}`,
+        level: 'error',
+        title: t.shortcuts.addFailed,
+        body: toUserError(e).message,
+        serverID,
+        at: Date.now(),
+      })
+    }
+  }
+
   /**
    * Runs an action on entry, from the menu or a shortcut. Destructive ones
    * open their confirmation dialog first.
@@ -124,6 +154,10 @@
   export function act(id: ActionId, entry: Entry | null, format?: ArchiveFormat) {
     if (id === 'editor') {
       if (entry && !entry.dir) openFileInEditor(serverID, entry.path)
+      return
+    }
+    if (id === 'desktop') {
+      if (entry) void pin(entry)
       return
     }
     if (id === 'terminal') {
@@ -197,7 +231,20 @@
   }
 </script>
 
-{#if menu && !menu.target}
+{#if menu?.away}
+  <div
+    use:portal
+    class="away glass glass-strong"
+    class:over={menu.away.over}
+    style:transform="translate({menu.away.x + 14}px, {menu.away.y + 14}px)"
+  >
+    <Icon name={menu.entry.dir ? 'folder' : 'file'} size={14} />
+    <span class="name">{menu.entry.name}</span>
+    <span class="hint">{menu.away.over ? t.files.dropDesktopHere : t.files.dropDesktop}</span>
+  </div>
+{/if}
+
+{#if menu && !menu.target && !menu.away}
   <RadialMenu
     x={menu.x}
     y={menu.y}
@@ -233,3 +280,36 @@
   onclose={() => (dialog = null)}
   onconfirm={(e, format, plan) => void runCompress(e, format, plan)}
 />
+
+<style>
+  /* Above every window, dialogs aside; the wallpaper must stay hit-testable. */
+  .away {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 320px;
+    padding: 6px 10px;
+    border-radius: var(--control-radius);
+    font-size: var(--text-sm);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+  }
+
+  .hint {
+    color: var(--fg-muted);
+  }
+
+  .over .hint {
+    color: var(--accent);
+  }
+</style>

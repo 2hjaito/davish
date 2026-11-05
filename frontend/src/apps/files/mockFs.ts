@@ -20,7 +20,12 @@ const tree: Record<string, Record<string, Node>> = {
     ]),
   ),
   '/home': { dangth: d(2) },
-  '/home/dangth': { projects: d(2), '.bashrc': f(3800, 87), '.profile': f(807, 87) },
+  '/home/dangth': {
+    projects: d(2),
+    'deploy.sh': f(1240, 1),
+    '.bashrc': f(3800, 87),
+    '.profile': f(807, 87),
+  },
   '/etc': { nginx: d(7), systemd: d(15), hosts: f(221, 87), fstab: f(657, 87) },
   '/etc/nginx': {
     'conf.d': d(15),

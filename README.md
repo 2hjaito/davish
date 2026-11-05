@@ -49,6 +49,7 @@ Nothing to install on the server.
 - [Nginx](FEATURES.md#nginx): sites, `nginx -t` before reload, TLS expiry
 - [Packages](FEATURES.md#packages): updates with security fixes first, runtimes
 - [Git](FEATURES.md#git): status, diffs, commit graph, fetch and pull
+- [Shortcuts](FEATURES.md#desktop-shortcuts): drag `deploy.sh` onto the desktop, double-click to run, with a stop button
 
 **Network and security**
 

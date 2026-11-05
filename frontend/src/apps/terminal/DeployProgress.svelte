@@ -7,9 +7,11 @@
   interface Props {
     run: DeployRun
     onhide: () => void
+    /** Stops the run, as Ctrl-C in the terminal does. */
+    onstop: () => void
   }
 
-  let { run, onhide }: Props = $props()
+  let { run, onhide, onstop }: Props = $props()
   const d = t.deploys
 
   // Ticks while the run goes, for the running step's time.
@@ -35,7 +37,17 @@
           : 'clock',
   )
 
+  const script = $derived(run.kind === 'script')
+  const stoppable = $derived(run.state === 'running' || (run.state === 'waiting' && run.auto))
+
   const label = $derived.by(() => {
+    if (script) {
+      const s = d.script
+      if (run.state === 'ok') return s.ok
+      if (run.state === 'failed') return s.failed(run.exit)
+      if (run.state === 'stopped') return s.stopped
+      return run.state === 'running' ? s.running(step) : s.starting
+    }
     switch (run.state) {
       case 'waiting':
         return run.auto ? d.starting : d.waiting
@@ -61,21 +73,28 @@
 <div class="progress glass-dark {run.state}" role="status" aria-label={d.progress}>
   <span class="icon"><Icon name={icon} size={13} /></span>
   <span class="label">{label}</span>
-  {#if step && run.state !== 'ok'}
+  {#if step && run.state !== 'ok' && !script}
     <span class="step" title={step}>{step}</span>
   {/if}
   {#if run.state !== 'waiting'}
     <span class="time">{formatElapsed(total)}</span>
   {/if}
-  <ol class="segments">
-    {#each run.steps as s, i (i)}
-      <li
-        class={segment(i + 1)}
-        title={took[i] === undefined ? s : `${s} · ${formatElapsed(took[i] ?? 0)}`}
-      ></li>
-    {/each}
-  </ol>
-  {#if run.state !== 'running' && run.state !== 'waiting'}
+  {#if !script}
+    <ol class="segments">
+      {#each run.steps as s, i (i)}
+        <li
+          class={segment(i + 1)}
+          title={took[i] === undefined ? s : `${s} · ${formatElapsed(took[i] ?? 0)}`}
+        ></li>
+      {/each}
+    </ol>
+  {/if}
+  {#if stoppable}
+    <button class="stop" title={d.stopHint} onclick={onstop}>
+      <Icon name="close" size={11} strokeWidth={2.5} />
+      {d.stop}
+    </button>
+  {:else if run.state !== 'running' && run.state !== 'waiting'}
     <button class="hide" aria-label={d.hide} onclick={onhide}>
       <Icon name="close" size={10} strokeWidth={2.5} />
     </button>
@@ -154,6 +173,24 @@
 
   .segments .failed {
     background: var(--danger-on-dark);
+  }
+
+  .stop {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px 2px 6px;
+    border: none;
+    border-radius: var(--control-radius);
+    background: var(--danger);
+    color: var(--fg-on-accent);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .stop:hover,
+  .stop:focus-visible {
+    filter: brightness(1.15);
   }
 
   .hide {

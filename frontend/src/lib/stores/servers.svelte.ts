@@ -5,6 +5,7 @@ import * as api from '../api/servers'
 import { t } from '../i18n'
 import type { ConnState, ServerDraft, ServerInfo } from '../api/servers'
 import { load, save } from './persist'
+import { shortcuts } from './shortcuts.svelte'
 
 export type { ConnState }
 
@@ -120,6 +121,7 @@ class Servers {
 
   async remove(id: string) {
     await api.deleteServer(id)
+    shortcuts.forgetServer(id)
     await this.reload()
     if (this.activeId === id) this.select(this.list[0]?.id ?? '')
   }

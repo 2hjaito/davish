@@ -13,8 +13,14 @@ const key = (over: Partial<Parameters<typeof actionForKey>[0]>) => ({
 
 describe('petalsFor', () => {
   it('fits files and folders', () => {
-    expect(petalsFor({ dir: false })).toEqual(['editor', 'rename', 'delete', 'copyPath'])
-    expect(petalsFor({ dir: true })).toEqual(['terminal', 'rename', 'delete', 'compress'])
+    expect(petalsFor({ dir: false })).toEqual(['editor', 'rename', 'delete', 'copyPath', 'desktop'])
+    expect(petalsFor({ dir: true })).toEqual([
+      'terminal',
+      'rename',
+      'delete',
+      'compress',
+      'desktop',
+    ])
   })
 })
 

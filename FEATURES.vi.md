@@ -14,6 +14,14 @@ xterm.js nhiều tab, copy/paste, vẽ bằng GPU, và prompt powerline tùy ch�
 
 Trình duyệt kiểu Finder qua SFTP: tải lên, tải xuống, kéo thả từ hệ điều hành, đổi tên, xóa, nén, và copy giữa các server qua máy bạn.
 
+## Lối tắt trên màn hình chính
+
+Kéo file, thư mục hoặc script từ Files ra nền desktop (hoặc dùng menu tròn, `⌘⌥P`). Double-click để mở: thư mục vào Files, file vào Editor, script chạy trong một tab Terminal. Mỗi server có màn hình riêng, nên `deploy.sh` của staging không xuất hiện trên production. Davish chỉ lưu đường dẫn trên máy bạn.
+
+Lần đầu chạy một script, Davish hiện tên server và đúng lệnh. Chọn "Lần sau chạy luôn" thì lần sau chạy ngay, với điều kiện nội dung script còn nguyên; script bị sửa thì Davish hỏi lại kèm cảnh báo. Trong lúc chạy, Terminal hiện thời gian và nút **Dừng**, icon có nút X; cả hai gửi Ctrl-C vào đúng phiên đó. Xong thì có thông báo kèm mã thoát, và mỗi lần chạy được ghi vào nhật ký lệnh.
+
+![Script chạy từ lối tắt trên màn hình chính](assets/screenshots/shortcuts.jpg)
+
 ## Editor
 
 CodeMirror 6, tô màu cho nginx, YAML, JSON, shell, env và file cấu hình. Lưu atomic giữ nguyên mode và chủ file, sao lưu file trong `/etc`, cảnh báo khi file đã đổi trên server.

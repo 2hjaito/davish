@@ -135,3 +135,46 @@ describe('deploys', () => {
     expect(deploys.historyOf('s1', '/srv/app')).toHaveLength(HISTORY_MAX)
   })
 })
+
+describe('scripts and stopping', () => {
+  const M = 'cd34'
+
+  beforeEach(() => {
+    deploys.runs = {}
+  })
+
+  it('finds the run going for a path, and no longer once it ended', () => {
+    deploys.watch('s1', '/srv/deploy.sh', M, ['deploy.sh'], true, 'script')
+    expect(deploys.active('s1', '/srv/deploy.sh')?.nonce).toBe(M)
+    expect(deploys.active('s2', '/srv/deploy.sh')).toBeUndefined()
+    deploys.apply({ nonce: M, kind: 'begin', steps: 1 })
+    deploys.apply({ nonce: M, kind: 'step', step: 1 })
+    deploys.apply({ nonce: M, kind: 'end', exit: 0 })
+    expect(deploys.runs[M]?.state).toBe('ok')
+    expect(deploys.active('s1', '/srv/deploy.sh')).toBeUndefined()
+  })
+
+  it('reaches the tab that holds the run, and only until it is forgotten', () => {
+    const stop = vi.fn()
+    deploys.onInterrupt(M, stop)
+    deploys.interrupt('other')
+    expect(stop).not.toHaveBeenCalled()
+    deploys.interrupt(M)
+    expect(stop).toHaveBeenCalledOnce()
+    deploys.forget(M)
+    deploys.interrupt(M)
+    expect(stop).toHaveBeenCalledOnce()
+  })
+
+  it('names the script when it fails, with its exit code', () => {
+    const add = vi.spyOn(notifications, 'add')
+    deploys.watch('s1', '/srv/deploy.sh', M, ['deploy.sh'], true, 'script')
+    deploys.apply({ nonce: M, kind: 'begin', steps: 1 })
+    deploys.apply({ nonce: M, kind: 'step', step: 1 })
+    deploys.apply({ nonce: M, kind: 'end', exit: 3 })
+    const n = add.mock.lastCall?.[0]
+    expect(n?.title).toContain('deploy.sh')
+    expect(n?.body).toContain('3')
+    expect(n?.level).toBe('error')
+  })
+})

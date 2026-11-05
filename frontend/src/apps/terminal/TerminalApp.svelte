@@ -74,6 +74,7 @@
   }
 
   function connect(tab: Tab, term: Terminal) {
+    if (tab.deploy) deploys.onInterrupt(tab.deploy, () => interrupt(tab))
     // Deploy marks are swallowed whatever they hold; only this tab's run
     // takes them (docs/adr/0012).
     term.parser.registerOscHandler(DEPLOY_OSC, (data) => {
@@ -97,6 +98,13 @@
     term.onTitleChange((title) => (tab.title = title))
     tab.ready = true
     if (!online) term.write(`\x1b[2m${t.terminal.waiting}\x1b[0m\r\n`)
+  }
+
+  /** Ctrl-C for the tab's run; a line not typed yet is never typed. */
+  function interrupt(tab: Tab) {
+    tab.startInput = undefined
+    if (tab.session) void termWrite(tab.session, '\x03')
+    if (tab.deploy) deploys.stop(tab.deploy)
   }
 
   // The browser preview has no Go side: run the scripted shell instead.
@@ -264,6 +272,7 @@
     {#if tab.deploy && tab.id === activeId && deploys.runs[tab.deploy]}
       <DeployProgress
         run={deploys.runs[tab.deploy]!}
+        onstop={() => interrupt(tab)}
         onhide={() => {
           if (tab.deploy) deploys.forget(tab.deploy)
           tab.deploy = undefined

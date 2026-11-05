@@ -8,6 +8,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 - Deploy có tiến trình: Terminal hiện từng bước đang chạy, xong hay lỗi kèm thời gian; thông báo khi deploy xong hoặc dừng ở bước lỗi; app Git liệt kê các lần deploy gần đây (commit, kết quả, thời gian).
 - Hộp thoại Deploy làm lại, không còn phải tự viết lệnh: Davish xem repo (lockfile, script trong `package.json`, compose, `go.mod`, `Makefile`) và tìm app đang chạy từ thư mục đó (pm2, systemd, Docker compose), rồi đưa ra các bước bật/tắt được: lấy code mới, cài thư viện, build, khởi động lại app, thêm bước tùy chỉnh. Lệnh thật vẫn hiện dưới mỗi bước. Lựa chọn được nhớ cho lần sau.
 - Bấm Deploy là chạy luôn trong Terminal; chỉ khi có bước cần sudo thì Davish gõ sẵn để bạn nhấn Enter và nhập mật khẩu.
+- Lối tắt trên màn hình chính: kéo file, thư mục hoặc script từ Files ra nền (hoặc dùng menu tròn, `⌘⌥P`). Double-click để mở: thư mục vào Files, file vào Editor, script chạy trong Terminal. Mỗi server có màn hình riêng.
+- Script lần đầu chạy sẽ hiện đúng lệnh; chọn "Lần sau chạy luôn" thì lần sau chạy ngay, trừ khi nội dung script đã đổi.
+- Nút dừng khi đang chạy, trên dải tiến trình của Terminal và trên icon, gửi Ctrl-C vào đúng phiên đó. Deploy cũng có nút này.
 
 ## [1.3.4] - 2026-11-04
 
