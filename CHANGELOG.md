@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Lối tắt trên màn hình chính: chuột phải chọn "Tùy chỉnh…" (hoặc nhấn `F2`) để đổi tên hiển thị, chọn icon có sẵn kèm màu, hoặc dùng ảnh từ máy (PNG, JPG, WebP, tự cắt vuông). File trên server giữ nguyên và hộp thoại chạy script vẫn hiện tên thật của file.
+
 ## [1.5.0] - 2026-11-05
 
 ### Thêm
