@@ -87,8 +87,19 @@ __davish_seg() {
 	__davish_width=$((__davish_width + ${#text} + 3))
 }
 
+# Says the folder as OSC 7, for the terminal's "open in Files" button. Only
+# what would end the sequence early, or read as an escape, is encoded.
+__davish_cwd() {
+	local p=${PWD//\%/%25}
+	p=${p//$'\a'/%07}
+	p=${p//$'\e'/%1B}
+	p=${p//$'\n'/%0A}
+	printf '\e]7;file://%s%s\a' "${HOSTNAME:-}" "$p"
+}
+
 __davish_prompt() {
 	local code=$? now elapsed=0 dir branch status=''
+	__davish_cwd
 	if [ -n "${EPOCHREALTIME:-}" ]; then now=${EPOCHREALTIME/[.,]/}; else now=$((SECONDS * 1000000)); fi
 	[ -n "$__davish_t0" ] && elapsed=$((now - __davish_t0))
 	__davish_t0=
