@@ -7,6 +7,11 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ### Thêm
 - Files: tạo tệp và thư mục mới. Chuột phải vào khoảng trống, kể cả trong thư mục rỗng, để mở menu của thư mục đang xem; bấm vào khoảng trống thì bỏ chọn, như trên hệ điều hành. `⌘⇧N` tạo thư mục.
 
+## [1.4.1] - 2026-11-05
+
+### Sửa
+- Bản 1.4.0 được đóng gói nhầm với số phiên bản cũ nên tự nhận là 1.3.4 và cứ báo có bản cập nhật. Bản này sửa lỗi đó, tính năng giữ nguyên như 1.4.0. Đang dùng 1.4.0 thì cập nhật lên 1.4.1 như bình thường.
+
 ## [1.4.0] - 2026-11-05
 
 ### Thêm
