@@ -151,7 +151,9 @@ export function FilesWrite(arg1:string,arg2:string,arg3:Array<number>):Promise<f
 
 export function GitBranches(arg1:string,arg2:string):Promise<Array<git.Branch>>;
 
-export function GitDeployLine(arg1:string,arg2:Array<string>):Promise<string>;
+export function GitDeployInfo(arg1:string,arg2:string):Promise<git.DeployInfo>;
+
+export function GitDeployLine(arg1:string,arg2:Array<git.Step>):Promise<git.Deploy>;
 
 export function GitDiff(arg1:string,arg2:git.DiffRequest):Promise<git.Diff>;
 

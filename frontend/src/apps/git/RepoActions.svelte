@@ -145,13 +145,7 @@
   </button>
 </div>
 
-<DeployDialog
-  {serverID}
-  {dir}
-  install={status.install}
-  open={deploying}
-  onclose={() => (deploying = false)}
-/>
+<DeployDialog {serverID} {dir} open={deploying} onclose={() => (deploying = false)} />
 
 {#if busy}<p class="muted">{t.git.running}</p>{/if}
 {#if blocked}

@@ -22,6 +22,7 @@ const app = "git"
 // Runner runs a command on a server and records it in the audit log.
 type Runner interface {
 	RunLine(ctx context.Context, serverID, app, line string) (audit.Result, error)
+	RunInput(ctx context.Context, serverID, app, line string, stdin []byte) (audit.Result, error)
 }
 
 // Service reads repositories on each server.

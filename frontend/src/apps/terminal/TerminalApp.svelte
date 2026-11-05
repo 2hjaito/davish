@@ -6,6 +6,7 @@
   import { hasRuntime } from '../../lib/api/runtime'
   import { decodeOutput, termClose, termResize, termStart, termWrite } from '../../lib/api/terminal'
   import { t } from '../../lib/i18n'
+  import { deploys, DEPLOY_OSC, parseMark } from '../../lib/stores/deploys.svelte'
   import { servers } from '../../lib/stores/servers.svelte'
   import { settings } from '../../lib/stores/settings.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
@@ -14,6 +15,7 @@
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import { wm } from '../../lib/wm/windowManager.svelte'
   import type { AppProps } from '../types'
+  import DeployProgress from './DeployProgress.svelte'
   import { MockShell } from './mockShell'
   import XTerm from './XTerm.svelte'
 
@@ -30,6 +32,10 @@
     startDir?: string
     /** Typed at the first prompt, not run. */
     startInput?: string
+    /** Nonce of the deploy run startInput starts, shown above the terminal. */
+    deploy?: string
+    /** startInput was confirmed in a dialog: press Enter after it. */
+    startRun?: boolean
     /** Title the remote shell sets (bash sets "user@host: cwd" for xterm). */
     title?: string
     /** Remote PTY session, while one is open. */
@@ -47,6 +53,8 @@
     cwd: req?.dir ?? '~',
     startDir: req?.dir,
     startInput: req?.input,
+    deploy: req?.deploy,
+    startRun: req?.run,
   })
   // A window opened to show a folder starts there instead of at home.
   const asked = untrack(() => terminalRequests.take(win.serverID))
@@ -66,6 +74,13 @@
   }
 
   function connect(tab: Tab, term: Terminal) {
+    // Deploy marks are swallowed whatever they hold; only this tab's run
+    // takes them (docs/adr/0012).
+    term.parser.registerOscHandler(DEPLOY_OSC, (data) => {
+      const m = parseMark(data)
+      if (m && m.nonce === tab.deploy) deploys.apply(m)
+      return true
+    })
     if (!hasRuntime) {
       mock(tab, term)
       return
@@ -73,6 +88,8 @@
     terms.set(tab.id, term)
     term.onData((data) => {
       if (tab.session) void termWrite(tab.session, data)
+      // Ctrl-C ends the deploy line, which then prints no end mark.
+      if (tab.deploy && data.includes('\x03')) deploys.stop(tab.deploy)
     })
     term.onResize(({ cols, rows }) => {
       if (tab.session) void termResize(tab.session, cols, rows)
@@ -143,6 +160,7 @@
       const tab = tabs.find((x) => x.session === id)
       if (!tab) return
       tab.session = undefined
+      if (tab.deploy) deploys.stop(tab.deploy)
       // -1: the connection dropped, not the shell; keep the tab to reopen it.
       if (code === -1) {
         terms.get(tab.id)?.write(`${RESTORE}\r\n\x1b[33m${t.terminal.lost}\x1b[0m\r\n`)
@@ -166,7 +184,8 @@
       tab.id,
       setTimeout(() => {
         quiet.delete(tab.id)
-        if (tab.session && tab.startInput) void termWrite(tab.session, tab.startInput)
+        if (tab.session && tab.startInput)
+          void termWrite(tab.session, tab.startInput + (tab.startRun ? '\r' : ''))
         tab.startInput = undefined
       }, ms),
     )
@@ -191,6 +210,11 @@
     if (i === -1) return
     const session = tabs[i]?.session
     if (session) void termClose(session)
+    const nonce = tabs[i]?.deploy
+    if (nonce) {
+      deploys.stop(nonce)
+      deploys.forget(nonce)
+    }
     terms.delete(id)
     tabs.splice(i, 1)
     const next = tabs[Math.min(i, tabs.length - 1)]
@@ -237,6 +261,15 @@
       active={tab.id === activeId}
       onready={(term) => connect(tab, term)}
     />
+    {#if tab.deploy && tab.id === activeId && deploys.runs[tab.deploy]}
+      <DeployProgress
+        run={deploys.runs[tab.deploy]!}
+        onhide={() => {
+          if (tab.deploy) deploys.forget(tab.deploy)
+          tab.deploy = undefined
+        }}
+      />
+    {/if}
     {#if tab.lost && tab.id === activeId}
       <div class="lost glass-dark" role="status">
         <Icon name="warning" size={13} />

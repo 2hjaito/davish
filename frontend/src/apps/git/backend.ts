@@ -2,6 +2,7 @@
 import {
   gitBranches,
   gitDiff,
+  gitDeployInfo,
   gitDeployLine,
   gitFind,
   gitInitCommand,
@@ -15,6 +16,7 @@ import {
 import { hasRuntime } from '../../lib/api/runtime'
 import {
   mockBranches,
+  mockDeployInfo,
   mockDeployLine,
   mockDiff,
   mockFind,
@@ -39,6 +41,7 @@ export const backend = hasRuntime
       planClone: gitPlanClone,
       initCommand: gitInitCommand,
       remoteCommand: gitRemoteCommand,
+      deployInfo: gitDeployInfo,
       deployLine: gitDeployLine,
     }
   : {
@@ -52,5 +55,6 @@ export const backend = hasRuntime
       planClone: mockPlanClone,
       initCommand: mockInitCommand,
       remoteCommand: mockRemoteCommand,
+      deployInfo: (_serverID: string, dir: string) => mockDeployInfo(dir),
       deployLine: mockDeployLine,
     }

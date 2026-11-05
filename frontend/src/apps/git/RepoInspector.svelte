@@ -11,6 +11,7 @@
   import Empty from '../../lib/ui/Empty.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import { openFilesAt, openTerminalAt } from '../../lib/wm/intents.svelte'
+  import DeployHistory from './DeployHistory.svelte'
   import DiffView from './DiffView.svelte'
   import RepoActions from './RepoActions.svelte'
 
@@ -99,6 +100,7 @@
       </button>
     </div>
     <RepoActions {serverID} {dir} {status} {onchanged} />
+    <DeployHistory {serverID} {dir} />
   </section>
 {:else}
   <Empty icon="gitBranch" title={t.git.loading} />

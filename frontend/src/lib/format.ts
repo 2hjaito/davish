@@ -50,3 +50,12 @@ export function formatDuration(seconds: number, u: DurationUnits): string {
   if (h > 0) return m > 0 ? `${h} ${u.hour} ${m} ${u.minute}` : `${h} ${u.hour}`
   return `${m} ${u.minute}`
 }
+
+/** A stopwatch reading: "0:42", "12:05", "1:02:03". */
+export function formatElapsed(ms: number): string {
+  const s = Math.max(0, Math.floor(ms / 1000))
+  const h = Math.floor(s / 3600)
+  const mm = Math.floor((s % 3600) / 60)
+  const ss = String(s % 60).padStart(2, '0')
+  return h > 0 ? `${h}:${String(mm).padStart(2, '0')}:${ss}` : `${mm}:${ss}`
+}

@@ -32,6 +32,10 @@ export interface TerminalRequest {
   dir?: string
   /** Typed at the prompt without Enter, for the user to check and run. */
   input?: string
+  /** Nonce of the deploy run input starts, whose progress the tab shows. */
+  deploy?: string
+  /** Press Enter after input: the user already confirmed it in a dialog. */
+  run?: boolean
 }
 
 /** Folders waiting for a terminal tab; the Terminal app takes them. */
@@ -53,8 +57,19 @@ export const terminalRequests = new TerminalRequests()
  * typed at the prompt but not run: commands needing root are prefilled
  * this way and the user presses Enter (docs/SECURITY.md).
  */
-export function openTerminalAt(serverID: string, dir: string | undefined, input?: string) {
-  terminalRequests.list.push({ serverID, dir, input })
+export function openTerminalAt(
+  serverID: string,
+  dir: string | undefined,
+  input?: string,
+  deploy?: string,
+  run?: boolean,
+) {
+  terminalRequests.list.push({ serverID, dir, input, deploy, run })
+  focusTerminal(serverID)
+}
+
+/** Brings serverID's Terminal window to the front, opening one if needed. */
+export function focusTerminal(serverID: string) {
   wm.openOrFocus('terminal', serverID, { title: t.apps.terminal, size: TERMINAL_SIZE })
 }
 
