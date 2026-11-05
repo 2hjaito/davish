@@ -6,7 +6,6 @@
   import { notifications } from '../stores/notifications.svelte'
   import { servers } from '../stores/servers.svelte'
   import { type Shortcut, shortcuts } from '../stores/shortcuts.svelte'
-  import ActionMenu from '../ui/ActionMenu.svelte'
   import Dialog from '../ui/Dialog.svelte'
   import Icon from '../ui/Icon.svelte'
   import PopupMenu from '../ui/PopupMenu.svelte'
@@ -172,6 +171,12 @@
       void open(item)
     } else if (ev.key === 'Delete') {
       shortcuts.remove(serverID, item.path)
+    } else if (ev.key === 'ContextMenu' || (ev.key === 'F10' && ev.shiftKey)) {
+      // The menu has no button: this is its keyboard way in.
+      ev.preventDefault()
+      const r = (ev.currentTarget as HTMLElement).getBoundingClientRect()
+      selected = item.path
+      menu = { item, x: r.right, y: r.top }
     }
   }
 
@@ -239,8 +244,6 @@
             <Icon name="close" size={11} strokeWidth={3} />
           </button>
         {/if}
-        <span class="more"><ActionMenu label={s.actions(item.name)} actions={actions(item)} /></span
-        >
       </li>
     {/each}
   </ul>
@@ -412,18 +415,6 @@
     background: var(--danger);
     color: var(--fg-on-accent);
     cursor: pointer;
-  }
-
-  .more {
-    position: absolute;
-    top: 2px;
-    right: 8px;
-    opacity: 0;
-  }
-
-  li:hover .more,
-  .more:focus-within {
-    opacity: 1;
   }
 
   p {
