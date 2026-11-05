@@ -1,14 +1,12 @@
 package git
 
 import (
-	"crypto/rand"
-	"encoding/hex"
-	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"davish/internal/apperr"
+	"davish/internal/runmark"
 	"davish/internal/shellx"
 )
 
@@ -31,25 +29,16 @@ type Deploy struct {
 	Sudo bool `json:"sudo"`
 }
 
-// markFn prints an OSC 7761 sequence that the terminal swallows and the
-// frontend reads as progress. Defined for the line and removed after it,
-// so the marks do not repeat the printf on every step.
-const markFn = `__davish_mark() { printf '\033]7761;davish-deploy;%s\007' "$1"; }`
-
-// clearScreen leaves the steps' own output on screen, not the long line
-// that was typed; the dialog showed every command before.
-const clearScreen = `printf '\033[H\033[2J'`
-
 var sudoWord = regexp.MustCompile(`(^|[\s;&|(])sudo\s`)
 
 // DeployLine runs steps one after another in dir, stopping at the first
 // that fails, with a heading and progress marks around each.
 func DeployLine(dir string, steps []Step) (Deploy, error) {
-	b := make([]byte, 16)
-	if _, err := rand.Read(b); err != nil {
-		return Deploy{}, fmt.Errorf("deploy nonce: %w", err)
+	nonce, err := runmark.Nonce()
+	if err != nil {
+		return Deploy{}, err
 	}
-	return deployLine(dir, hex.EncodeToString(b), steps)
+	return deployLine(dir, nonce, steps)
 }
 
 func deployLine(dir, nonce string, steps []Step) (Deploy, error) {
@@ -76,9 +65,7 @@ func deployLine(dir, nonce string, steps []Step) (Deploy, error) {
 		return Deploy{}, apperr.New(apperr.InvalidInput, "the recipe has no steps")
 	}
 	n := strconv.Itoa(len(kept))
-	// The ; inside a mark must be quoted. The end marks are in double
-	// quotes for $? and the commit; the nonce is hex, safe there.
-	mark := func(ev string) string { return "__davish_mark " + shellx.Quote(nonce+";"+ev) }
+	mark := func(ev string) string { return runmark.Mark(nonce, ev) }
 	head := shellx.Cmd("git", "-C", dir, "rev-parse", "--short", "HEAD").String()
 
 	d := Deploy{Nonce: nonce}
@@ -94,10 +81,10 @@ func deployLine(dir, nonce string, steps []Step) (Deploy, error) {
 		d.Sudo = d.Sudo || sudoWord.MatchString(s.Command)
 	}
 	parts = append(parts,
-		`__davish_mark "`+nonce+`;end;0;$(`+head+` 2>/dev/null)"`,
+		runmark.Expand(nonce, `end;0;$(`+head+` 2>/dev/null)`),
 		shellx.Cmd("echo", "✓ Deploy finished").String())
-	failed := `{ __davish_mark "` + nonce + `;end;$?"; ` +
+	failed := "{ " + runmark.Expand(nonce, "end;$?") + "; " +
 		shellx.Cmd("echo", "✗ Deploy stopped: the step above failed").String() + "; }"
-	d.Line = markFn + "; " + clearScreen + "; " + strings.Join(parts, " && ") + " || " + failed + "; unset -f __davish_mark"
+	d.Line = runmark.Define + "; " + runmark.ClearScreen + "; " + strings.Join(parts, " && ") + " || " + failed + "; " + runmark.Undefine
 	return d, nil
 }
