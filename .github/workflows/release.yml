@@ -11,7 +11,19 @@ permissions:
   contents: read
 
 jobs:
+  # The app reads its version from wails.json and its notes come from
+  # CHANGELOG.md, both at the tagged commit. A tag put on a commit without
+  # them ships an app that keeps asking to update (v1.4.0, v1.5.1).
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the tag matches this commit
+        run: scripts/check-release.sh "${GITHUB_REF_NAME#v}"
+
   build:
+    needs: check
     strategy:
       fail-fast: true
       matrix:
