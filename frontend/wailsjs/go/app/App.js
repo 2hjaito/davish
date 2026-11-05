@@ -558,6 +558,14 @@ export function SettingsSave(arg1, arg2) {
   return window['go']['app']['App']['SettingsSave'](arg1, arg2);
 }
 
+export function ShortcutInspect(arg1, arg2) {
+  return window['go']['app']['App']['ShortcutInspect'](arg1, arg2);
+}
+
+export function ShortcutRun(arg1, arg2, arg3) {
+  return window['go']['app']['App']['ShortcutRun'](arg1, arg2, arg3);
+}
+
 export function TermClose(arg1) {
   return window['go']['app']['App']['TermClose'](arg1);
 }

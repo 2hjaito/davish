@@ -43,6 +43,7 @@ const (
 	GitNotFastForward    Code = "GIT_NOT_FAST_FORWARD"
 	GitNoUpstream        Code = "GIT_NO_UPSTREAM"
 	GitRemoteFailed      Code = "GIT_REMOTE_FAILED"
+	ShortcutChanged      Code = "SHORTCUT_CHANGED"
 	UpdateUnavailable    Code = "UPDATE_UNAVAILABLE"
 	UpdateUnsigned       Code = "UPDATE_UNSIGNED"
 	UpdateBadSignature   Code = "UPDATE_BAD_SIGNATURE"

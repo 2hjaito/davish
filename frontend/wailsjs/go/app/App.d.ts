@@ -20,6 +20,7 @@ import {packages} from '../models';
 import {sshconfig} from '../models';
 import {security} from '../models';
 import {svc} from '../models';
+import {shortcut} from '../models';
 import {transfer} from '../models';
 import {update} from '../models';
 
@@ -300,6 +301,10 @@ export function ServicesStatus(arg1:string,arg2:string):Promise<svc.Status>;
 export function SettingsLoad():Promise<Record<string, string>>;
 
 export function SettingsSave(arg1:string,arg2:string):Promise<void>;
+
+export function ShortcutInspect(arg1:string,arg2:string):Promise<shortcut.Target>;
+
+export function ShortcutRun(arg1:string,arg2:string,arg3:string):Promise<shortcut.Run>;
 
 export function TermClose(arg1:string):Promise<void>;
 
