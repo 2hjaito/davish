@@ -23,7 +23,8 @@
     /** When the listing was fetched; dates read "today" relative to it. */
     now: Date
     onsort: (key: SortKey) => void
-    onselect: (path: string) => void
+    /** null when empty space was clicked. */
+    onselect: (path: string | null) => void
     onopen: (entry: Entry) => void
     /**
      * A row dragged out of place, for the drag menu. Positions are in
@@ -208,6 +209,9 @@
     onscroll={() => scroller && (scrollTop = scroller.scrollTop)}
     {onkeydown}
     {onpointermove}
+    onclick={(ev) => {
+      if (!(ev.target as Element).closest('.row')) onselect(null)
+    }}
     onpointerup={(ev) => endDrag(ev, 'end')}
     onpointercancel={(ev) => endDrag(ev, 'cancel')}
   >
@@ -228,6 +232,8 @@
           ondblclick={() => onopen(e)}
           oncontextmenu={(ev) => {
             ev.preventDefault()
+            // Empty space around the rows has a menu of its own.
+            ev.stopPropagation()
             onmenu?.(e, ev.clientX, ev.clientY)
           }}
           title={e.kind === 'link' && e.target ? `${e.name} → ${e.target}` : e.name}

@@ -42,6 +42,14 @@ func (a *App) FilesMkdir(serverID, path string) error {
 	return a.files.Mkdir(a.ctx, serverID, path)
 }
 
+// FilesCreate makes an empty file, never replacing one.
+func (a *App) FilesCreate(serverID, path string) error {
+	if err := a.lock.Check(); err != nil {
+		return err
+	}
+	return a.files.Create(a.ctx, serverID, path)
+}
+
 // FilesRename moves from to to without replacing anything.
 func (a *App) FilesRename(serverID, from, to string) error {
 	if err := a.lock.Check(); err != nil {

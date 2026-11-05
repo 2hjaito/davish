@@ -234,6 +234,26 @@ func (s *Service) Mkdir(_ context.Context, serverID, p string) error {
 	return nil
 }
 
+// Create makes the empty file p. It never replaces anything: O_EXCL also
+// covers a file that appears after the check.
+func (s *Service) Create(_ context.Context, serverID, p string) error {
+	if err := CheckPath(p); err != nil {
+		return err
+	}
+	sc, err := s.conns.SFTP(serverID)
+	if err != nil {
+		return err
+	}
+	if err := mustNotExist(sc, p); err != nil {
+		return err
+	}
+	f, err := sc.OpenFile(p, os.O_WRONLY|os.O_CREATE|os.O_EXCL)
+	if err != nil {
+		return mapErr("create", err)
+	}
+	return f.Close()
+}
+
 // Rename moves from to to. It never replaces an existing to.
 func (s *Service) Rename(_ context.Context, serverID, from, to string) error {
 	if err := CheckPath(from); err != nil {

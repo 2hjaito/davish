@@ -64,6 +64,14 @@ export function mockList(dir: string): Entry[] {
   }))
 }
 
+/** Adds to the demo tree, as creating on a server does. */
+export function mockCreate(dir: string, name: string, folder: boolean) {
+  const here = tree[dir]
+  if (!here) return
+  here[name] = folder ? d(0) : f(0, 0)
+  if (folder) tree[joinPath(dir, name)] = {}
+}
+
 export function mockIsDir(path: string): boolean {
   return path in tree
 }

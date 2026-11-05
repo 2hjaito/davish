@@ -128,6 +128,8 @@ export function FilesAccess(arg1:string,arg2:string):Promise<fs.Access>;
 
 export function FilesCompress(arg1:string,arg2:string,arg3:string,arg4:string):Promise<fs.CompressPlan>;
 
+export function FilesCreate(arg1:string,arg2:string):Promise<void>;
+
 export function FilesHome(arg1:string):Promise<string>;
 
 export function FilesList(arg1:string,arg2:string):Promise<Array<fs.Entry>>;

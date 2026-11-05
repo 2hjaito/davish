@@ -463,8 +463,29 @@
     action()
   }
 
+  /** Empty space, whether around the rows or a whole empty folder. */
+  function onBlankMenu(e: MouseEvent) {
+    const bar = (e.target as Element).closest('.toolbar, .pathbar, input')
+    if (bar || !connected || cwd === null) return
+    e.preventDefault()
+    selected = null
+    actions?.showMenu(null, e.clientX, e.clientY)
+  }
+
   useAppMenu(
-    () => [],
+    () => [
+      {
+        label: t.files.newFile,
+        run: () => actions?.create('file'),
+        disabled: !connected || cwd === null,
+      },
+      {
+        label: t.files.newFolder,
+        run: () => actions?.create('folder'),
+        combo: 'shift+N',
+        disabled: !connected || cwd === null,
+      },
+    ],
     () => void reload(),
   )
 </script>
@@ -514,7 +535,8 @@
     </div>
   </nav>
 
-  <div class="main" bind:this={main}>
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div class="main" bind:this={main} oncontextmenu={onBlankMenu}>
     <!-- Pointer handlers here only add window dragging, as on the title bar. -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="toolbar" onpointerdown={ctx.startDrag} ondblclick={ctx.toggleMaximize}>
