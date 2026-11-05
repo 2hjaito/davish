@@ -113,7 +113,9 @@ export class WindowManager {
 
   /** Effective on-screen geometry, accounting for snap and maximize. */
   frame(w: WindowState): Rect {
-    return w.snap ? zoneRect(w.snap, this.area) : w.rect
+    // Clamped without storing it: a smaller OS window must not strand a window
+    // off screen, and it returns to its place once there is room again.
+    return w.snap ? zoneRect(w.snap, this.area) : clampRect(w.rect, this.area)
   }
 
   visible(serverID: string): WindowState[] {

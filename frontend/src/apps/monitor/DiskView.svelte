@@ -42,7 +42,7 @@
 
   <Card title={t.monitor.mounts} icon="folder">
     <div class="scroll">
-      <table class="mon-table">
+      <table class="mon-table mon-disks">
         <thead>
           <tr>
             <th>{t.monitor.mountPath}</th>

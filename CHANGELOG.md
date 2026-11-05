@@ -9,8 +9,18 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 - Hộp thoại Deploy làm lại, không còn phải tự viết lệnh: Davish xem repo (lockfile, script trong `package.json`, compose, `go.mod`, `Makefile`) và tìm app đang chạy từ thư mục đó (pm2, systemd, Docker compose), rồi đưa ra các bước bật/tắt được: lấy code mới, cài thư viện, build, khởi động lại app, thêm bước tùy chỉnh. Lệnh thật vẫn hiện dưới mỗi bước. Lựa chọn được nhớ cho lần sau.
 - Bấm Deploy là chạy luôn trong Terminal; chỉ khi có bước cần sudo thì Davish gõ sẵn để bạn nhấn Enter và nhập mật khẩu.
 
+## [1.3.4] - 2026-11-04
+
 ### Sửa
-- Mở thư mục trong Files từ app khác (ví dụ "Mở trong Files" của Git) khi Files chưa mở: cửa sổ mở ở thư mục lần trước thay vì thư mục được chọn.
+- Giao diện khi cửa sổ hẹp: Dock không còn tràn khỏi màn hình và tự thu nhỏ icon; menu bar không xuống dòng, chỉ số tự ẩn dần khi thiếu chỗ.
+- App trong cửa sổ hẹp (snap nửa màn hình chẳng hạn): nút và ô tìm kiếm không còn bị đẩy ra ngoài, sidebar thu thành dải icon, danh sách xếp trên chi tiết, bảng Docker và Monitor ẩn bớt cột phụ thay vì bắt cuộn ngang.
+- Thu nhỏ cửa sổ Davish không còn làm cửa sổ con nằm ngoài tầm với.
+- Tự cập nhật không còn làm hỏng app khi file của Davish đã bị thay hoặc xóa trong lúc chạy (ví dụ bản chạy từ thư mục build bị `wails dev` dọn): Davish kiểm tra app đang chạy và bản tải về đều đủ file trước khi tráo, nếu không thì dừng và nói rõ lý do. Bản dev không tự cập nhật. Thư mục tạm của lần cập nhật dở được dọn ở lần mở sau, và mọi lần cập nhật lỗi đều ghi nguyên nhân vào `davish.log`.
+
+## [1.3.3] - 2026-11-03
+
+### Sửa
+- Mở thư mục trong Files từ app khác (ví dụ "Mở trong Files" của Git) khi Files chưa mở: cửa sổ đôi khi mở ở thư mục lần trước thay vì thư mục được chọn, phải bấm lần nữa.
 - Lỗi JS khi chuyển qua lại giữa các repo trong app Git.
 
 ## [1.3.2] - 2026-10-29
@@ -186,7 +196,9 @@ M0–M3 · Khung dự án, desktop, kết nối, Terminal.
 - Kết nối SSH qua agent, key hoặc mật khẩu; bí mật trong keychain; xác nhận host key lần đầu, từ chối khi host key đổi; tự kết nối lại.
 - Terminal xterm.js nhiều tab, prompt Davish không cài gì lên server.
 
-[Unreleased]: https://github.com/2hjaito/davish/compare/v1.3.2...HEAD
+[Unreleased]: https://github.com/2hjaito/davish/compare/v1.3.4...HEAD
+[1.3.4]: https://github.com/2hjaito/davish/compare/v1.3.3...v1.3.4
+[1.3.3]: https://github.com/2hjaito/davish/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/2hjaito/davish/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/2hjaito/davish/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/2hjaito/davish/compare/v1.2.0...v1.3.0

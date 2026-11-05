@@ -20,7 +20,9 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
+	"time"
 
 	"davish/internal/apperr"
 )
@@ -236,5 +238,84 @@ func TestOlderReleaseIsNotOffered(t *testing.T) {
 	}
 	if err := s.Install(context.Background(), "1.0.0"); err == nil {
 		t.Error("installed an older version")
+	}
+}
+
+// A bundle whose program went away while it ran (wails dev cleaning up,
+// a rebuild) is not touched: nothing is downloaded, nothing left behind.
+func TestRefusesIncompleteRunningApp(t *testing.T) {
+	pub, priv, _ := ed25519.GenerateKey(rand.Reader)
+	name := "Davish-v1.2.0-macos-universal.zip"
+	srv := fakeGitHub(t, "1.2.0", name, zipOf(t, map[string]string{"Davish.app/Contents/MacOS/Davish": "new"}, nil), priv, false)
+	apps := t.TempDir()
+	exe := filepath.Join(apps, "Davish.app", "Contents", "MacOS", "Davish")
+	os.MkdirAll(filepath.Dir(exe), 0o755) //nolint:errcheck,gosec
+	s, _ := service(t, srv, pub, "darwin", exe)
+	if err := s.Install(context.Background(), "1.2.0"); code(err) != apperr.UpdateBroken {
+		t.Fatalf("err = %v", err)
+	}
+	entries, _ := os.ReadDir(apps)
+	if len(entries) != 1 || entries[0].Name() != "Davish.app" {
+		t.Errorf("left beside the app: %v", entries)
+	}
+}
+
+// An archive without the program inside its bundle is never swapped in.
+func TestRefusesIncompleteUpdate(t *testing.T) {
+	pub, priv, _ := ed25519.GenerateKey(rand.Reader)
+	name := "Davish-v1.2.0-macos-universal.zip"
+	srv := fakeGitHub(t, "1.2.0", name, zipOf(t, map[string]string{"Davish.app/Contents/Info.plist": "plist"}, nil), priv, false)
+	apps := t.TempDir()
+	exe := filepath.Join(apps, "Davish.app", "Contents", "MacOS", "Davish")
+	os.MkdirAll(filepath.Dir(exe), 0o755)   //nolint:errcheck,gosec
+	os.WriteFile(exe, []byte("old"), 0o755) //nolint:errcheck,gosec
+	s, _ := service(t, srv, pub, "darwin", exe)
+	if err := s.Install(context.Background(), "1.2.0"); code(err) != apperr.UpdateBadSignature {
+		t.Fatalf("err = %v", err)
+	}
+	if b, _ := os.ReadFile(exe); string(b) != "old" { //nolint:gosec // test temp dir
+		t.Errorf("binary = %q", b)
+	}
+	entries, _ := os.ReadDir(apps)
+	if len(entries) != 1 {
+		t.Errorf("left beside the app: %v", entries)
+	}
+}
+
+func TestDevBuildDoesNotInstall(t *testing.T) {
+	pub, priv, _ := ed25519.GenerateKey(rand.Reader)
+	srv := fakeGitHub(t, "1.2.0", "Davish-v1.2.0-linux-amd64.tar.gz", tarGz(t, map[string]string{"Davish": "new"}), priv, false)
+	exe := filepath.Join(t.TempDir(), "Davish")
+	os.WriteFile(exe, []byte("old"), 0o755) //nolint:errcheck,gosec
+	s := New("1.1.0", &progress{}, slog.New(slog.NewTextHandler(io.Discard, nil)), Options{
+		API: srv.URL, Repo: "o/r", GOOS: "linux", Dev: true,
+		PublicKey:  base64.StdEncoding.EncodeToString(pub),
+		Executable: func() (string, error) { return exe, nil },
+	})
+	if err := s.Install(context.Background(), "1.2.0"); code(err) != apperr.UpdateDevBuild {
+		t.Fatalf("err = %v", err)
+	}
+	if b, _ := os.ReadFile(exe); string(b) != "old" { //nolint:gosec // test temp dir
+		t.Errorf("binary = %q", b)
+	}
+}
+
+func TestCleanupRemovesStaleStaging(t *testing.T) {
+	apps := t.TempDir()
+	exe := filepath.Join(apps, "Davish.app", "Contents", "MacOS", "Davish")
+	os.MkdirAll(filepath.Dir(exe), 0o755) //nolint:errcheck,gosec
+	for _, d := range []string{"Davish.app.old/Contents", ".davish-update-1/new", ".davish-update-2"} {
+		os.MkdirAll(filepath.Join(apps, d), 0o755) //nolint:errcheck,gosec
+	}
+	old := time.Now().Add(-2 * staleStage)
+	os.Chtimes(filepath.Join(apps, ".davish-update-1"), old, old) //nolint:errcheck,gosec
+	Cleanup("darwin", func() (string, error) { return exe, nil })
+	var left []string
+	entries, _ := os.ReadDir(apps)
+	for _, e := range entries {
+		left = append(left, e.Name())
+	}
+	if strings.Join(left, ",") != ".davish-update-2,Davish.app" {
+		t.Errorf("left = %v", left)
 	}
 }

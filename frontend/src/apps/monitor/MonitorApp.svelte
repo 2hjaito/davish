@@ -92,6 +92,8 @@
             class="item"
             class:active={section === it.id}
             aria-current={section === it.id ? 'page' : undefined}
+            aria-label={sectionLabels[it.id]}
+            title={sectionLabels[it.id]}
             onclick={() => (section = it.id)}
           >
             <Icon name={it.icon} size={16} />
@@ -259,10 +261,13 @@
   }
 
   .title {
+    min-width: 0;
     margin: 0;
     font-size: var(--text-lg);
     font-weight: 600;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .paused {
@@ -278,6 +283,7 @@
   }
 
   .segmented {
+    flex-shrink: 0;
     display: flex;
     padding: 2px;
     border-radius: 8px;
@@ -337,5 +343,26 @@
   /* The process table scrolls by itself under a fixed search bar. */
   .content.fill {
     overflow: hidden;
+  }
+
+  /* Narrow window: the sidebar becomes a rail of icons; the toolbar keeps the range and pause. */
+  @container window (max-width: 560px) {
+    .sidebar {
+      width: var(--sidebar-rail-w);
+    }
+
+    .group,
+    .label,
+    .value {
+      display: none;
+    }
+
+    .item {
+      justify-content: center;
+    }
+
+    .toolbar {
+      padding-left: 12px;
+    }
   }
 </style>

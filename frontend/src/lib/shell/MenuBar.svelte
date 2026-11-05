@@ -55,23 +55,25 @@
 
   <div class="right">
     {#if m}
-      <span class="stat {level(m.cpu, 85, 95)}">
-        <span class="label">{t.menubar.cpu}</span>
-        <span class="bar"><span style:width="{m.cpu}%"></span></span>
-        <span>{Math.round(m.cpu)}%</span>
-      </span>
-      <span class="stat {level(memPct, 90, 95)}">
-        <span class="label">{t.menubar.ram}</span>
-        <span>{formatGB(m.memUsed)} / {formatGB(m.memTotal)} GB</span>
-      </span>
-      <span class="stat {level(m.diskPct, 85, 95)}">
-        <span class="label">{t.menubar.disk}</span>
-        <span>{m.diskPct}%</span>
-      </span>
-      <span class="stat net" aria-label={t.menubar.network}>
-        <Icon name="network" size={13} strokeWidth={2.2} />
-        <span>{formatRate(m.rxBps)}</span>
-      </span>
+      <div class="stats">
+        <span class="stat {level(m.cpu, 85, 95)}">
+          <span class="label">{t.menubar.cpu}</span>
+          <span class="bar"><span style:width="{m.cpu}%"></span></span>
+          <span>{Math.round(m.cpu)}%</span>
+        </span>
+        <span class="stat {level(memPct, 90, 95)}">
+          <span class="label">{t.menubar.ram}</span>
+          <span>{formatGB(m.memUsed)} / {formatGB(m.memTotal)} GB</span>
+        </span>
+        <span class="stat {level(m.diskPct, 85, 95)}">
+          <span class="label">{t.menubar.disk}</span>
+          <span>{m.diskPct}%</span>
+        </span>
+        <span class="stat net" aria-label={t.menubar.network}>
+          <Icon name="network" size={13} strokeWidth={2.2} />
+          <span>{formatRate(m.rxBps)}</span>
+        </span>
+      </div>
     {/if}
     <button
       class="mbtn search"
@@ -139,12 +141,32 @@
   }
 
   .left {
+    flex-shrink: 0;
     gap: 2px;
   }
 
   .right {
+    flex: 1;
+    min-width: 0;
+    justify-content: flex-end;
     gap: 16px;
+    margin-left: 16px;
     font-variant-numeric: tabular-nums;
+  }
+
+  /*
+   * Stats that do not fit wrap onto a second line, which the height hides, so
+   * the last ones go first on any font, language or server name.
+   */
+  .stats {
+    flex: 1;
+    min-width: 0;
+    height: var(--menubar-h);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    column-gap: 16px;
+    overflow: hidden;
   }
 
   /* Custom properties inherit, so reset it for everything inside the bar,
@@ -154,6 +176,7 @@
   }
 
   .menubar :global(.mbtn) {
+    white-space: nowrap;
     background: transparent;
     border: 0;
     padding: 2px 9px;
@@ -170,9 +193,11 @@
   }
 
   .stat {
+    height: var(--menubar-h);
     display: flex;
     align-items: center;
     gap: 6px;
+    white-space: nowrap;
   }
 
   .stat.net {
@@ -213,6 +238,8 @@
   }
 
   .clock {
+    flex-shrink: 0;
     font-weight: 500;
+    white-space: nowrap;
   }
 </style>

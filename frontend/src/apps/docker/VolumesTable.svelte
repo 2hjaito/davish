@@ -78,7 +78,7 @@
   {#if volumes.length === 0}
     <p class="dk-empty">{all.length ? v.noMatch : v.none}</p>
   {:else}
-    <table class="dk-table">
+    <table class="dk-table dk-volumes">
       <thead>
         <tr>
           <th>{tb.name}</th>
