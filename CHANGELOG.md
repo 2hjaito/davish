@@ -4,6 +4,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-11-05
+
 ### Thêm
 - Deploy có tiến trình: Terminal hiện từng bước đang chạy, xong hay lỗi kèm thời gian; thông báo khi deploy xong hoặc dừng ở bước lỗi; app Git liệt kê các lần deploy gần đây (commit, kết quả, thời gian).
 - Hộp thoại Deploy làm lại, không còn phải tự viết lệnh: Davish xem repo (lockfile, script trong `package.json`, compose, `go.mod`, `Makefile`) và tìm app đang chạy từ thư mục đó (pm2, systemd, Docker compose), rồi đưa ra các bước bật/tắt được: lấy code mới, cài thư viện, build, khởi động lại app, thêm bước tùy chỉnh. Lệnh thật vẫn hiện dưới mỗi bước. Lựa chọn được nhớ cho lần sau.
