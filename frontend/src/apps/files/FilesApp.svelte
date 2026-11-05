@@ -609,6 +609,10 @@
         onselect={(path) => (selected = path)}
         onopen={openEntry}
         ondrag={(entry, phase, x, y) => actions?.drag(entry, phase, x, y)}
+        onmenu={(entry, x, y) => {
+          selected = entry.path
+          actions?.showMenu(entry, x, y)
+        }}
         bind:this={list}
       />
     {/if}
@@ -644,6 +648,8 @@
 </div>
 
 <FileActions
+  onopen={openEntry}
+  ondownload={() => void download()}
   bind:this={actions}
   serverID={win.serverID}
   {cwd}

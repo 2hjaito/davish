@@ -12,11 +12,12 @@
   import { addShortcut, onSurface } from '../../lib/shell/shortcutActions'
   import { notifications } from '../../lib/stores/notifications.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
+  import PopupMenu, { type Action } from '../../lib/ui/PopupMenu.svelte'
   import { portal } from '../../lib/ui/portal'
   import { hitTest, type Hit, NO_HIT } from '../../lib/ui/radial/radial'
   import RadialMenu, { type RadialItem } from '../../lib/ui/radial/RadialMenu.svelte'
   import { openFileInEditor, openTerminalAt } from '../../lib/wm/intents.svelte'
-  import { ACTIONS, type ActionId, FORMATS, petalsFor } from './actions'
+  import { ACTIONS, type ActionId, FORMATS, menuFor, type MenuId, petalsFor } from './actions'
   import CompressDialog from './CompressDialog.svelte'
   import DeleteDialog from './DeleteDialog.svelte'
   import type { DragPhase } from './FileList.svelte'
@@ -40,9 +41,24 @@
     onhover?: (target: DropTarget | null) => void
     /** The entry was dropped on another server's folder. */
     ondropcopy?: (entry: Entry, target: DropTarget) => void
+    /** Opens the entry, as a double-click does. */
+    onopen: (entry: Entry) => void
+    /** Downloads the selection, which the right-click menu just set. */
+    ondownload: () => void
   }
 
-  let { serverID, cwd, bounds, onchanged, onflash, dropAt, onhover, ondropcopy }: Props = $props()
+  let {
+    serverID,
+    cwd,
+    bounds,
+    onchanged,
+    onflash,
+    dropAt,
+    onhover,
+    ondropcopy,
+    onopen,
+    ondownload,
+  }: Props = $props()
 
   let dialog = $state<{ kind: 'rename' | 'delete' | 'compress'; entry: Entry } | null>(null)
   let menu = $state<{
@@ -65,6 +81,29 @@
           children:
             id === 'compress' ? FORMATS.map((f) => ({ id: f.id, label: f.label })) : undefined,
         }))
+      : [],
+  )
+
+  let context = $state<{ entry: Entry; x: number; y: number } | null>(null)
+
+  /** Opens the right-click menu of entry. */
+  export function showMenu(entry: Entry, x: number, y: number) {
+    context = { entry, x, y }
+  }
+
+  function menuAction(id: MenuId, entry: Entry): Action {
+    if (id === 'open') return { label: t.files.open, run: () => onopen(entry) }
+    if (id === 'download') return { label: t.files.download, run: ondownload }
+    return {
+      label: t.files.actions[id],
+      run: () => act(id, entry),
+      danger: id === 'delete',
+    }
+  }
+
+  const contextActions = $derived(
+    context
+      ? menuFor().map((id) => (id === null || !context ? null : menuAction(id, context.entry)))
       : [],
   )
 
@@ -230,6 +269,16 @@
     })
   }
 </script>
+
+{#if context}
+  <PopupMenu
+    x={context.x}
+    y={context.y}
+    label={context.entry.name}
+    actions={contextActions}
+    onclose={() => (context = null)}
+  />
+{/if}
 
 {#if menu?.away}
   <div

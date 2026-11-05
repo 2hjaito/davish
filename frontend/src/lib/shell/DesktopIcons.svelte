@@ -9,6 +9,7 @@
   import ActionMenu from '../ui/ActionMenu.svelte'
   import Dialog from '../ui/Dialog.svelte'
   import Icon from '../ui/Icon.svelte'
+  import PopupMenu from '../ui/PopupMenu.svelte'
   import type { IconName } from '../ui/icons'
   import {
     focusTerminal,
@@ -44,6 +45,7 @@
   let press: { path: string; x: number; y: number; pointer: number } | null = null
   let dialog = $state<{ item: Shortcut; target: ShortcutTarget; serverID: string } | null>(null)
   let missing = $state<Shortcut | null>(null)
+  let menu = $state<{ item: Shortcut; x: number; y: number } | null>(null)
 
   function fail(e: unknown, title: string) {
     notifications.add({
@@ -173,12 +175,10 @@
     }
   }
 
-  // Opens the same menu as the ⋮ button, where the button is.
-  function onContextMenu(ev: MouseEvent) {
+  function onContextMenu(ev: MouseEvent, item: Shortcut) {
     ev.preventDefault()
-    ;(ev.currentTarget as HTMLElement).parentElement
-      ?.querySelector<HTMLElement>('.more button')
-      ?.click()
+    selected = item.path
+    menu = { item, x: ev.clientX, y: ev.clientY }
   }
 </script>
 
@@ -213,7 +213,7 @@
           onclick={() => (selected = item.path)}
           ondblclick={() => void open(item)}
           onkeydown={(e) => onKeyDown(e, item)}
-          oncontextmenu={onContextMenu}
+          oncontextmenu={(e) => onContextMenu(e, item)}
           onpointerdown={(e) => onPointerDown(e, item)}
           onpointermove={onPointerMove}
           onpointerup={onPointerUp}
@@ -245,6 +245,16 @@
     {/each}
   </ul>
 </div>
+
+{#if menu}
+  <PopupMenu
+    x={menu.x}
+    y={menu.y}
+    label={s.actions(menu.item.name)}
+    actions={actions(menu.item)}
+    onclose={() => (menu = null)}
+  />
+{/if}
 
 <ShortcutRunDialog
   target={dialog?.target ?? null}

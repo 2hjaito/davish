@@ -30,6 +30,25 @@ export function petalsFor(e: Pick<Entry, 'dir'>): ActionId[] {
     : ['editor', 'rename', 'delete', 'copyPath', 'desktop']
 }
 
+/** What the right-click menu offers; null is a divider. */
+export type MenuId = ActionId | 'open' | 'download'
+
+export function menuFor(): (MenuId | null)[] {
+  return [
+    'open',
+    'terminal',
+    null,
+    'desktop',
+    'download',
+    'copyPath',
+    null,
+    'rename',
+    'compress',
+    null,
+    'delete',
+  ]
+}
+
 export const FORMATS: { id: ArchiveFormat; label: string }[] = [
   { id: 'zip', label: 'ZIP' },
   { id: 'tar.gz', label: 'GZ' },

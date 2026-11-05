@@ -30,9 +30,11 @@
      * viewport pixels; start gives where the press began.
      */
     ondrag?: (entry: Entry, phase: DragPhase, x: number, y: number) => void
+    /** A row right-clicked, at screen coordinates. */
+    onmenu?: (entry: Entry, x: number, y: number) => void
   }
 
-  let { entries, order, selected, now, onsort, onselect, onopen, ondrag }: Props = $props()
+  let { entries, order, selected, now, onsort, onselect, onopen, ondrag, onmenu }: Props = $props()
 
   // Must match .row's height in CSS; the virtual window is computed from it.
   const ROW_H = 30
@@ -224,6 +226,10 @@
           onpointerdown={(ev) => onRowPointerDown(ev, e)}
           onclick={() => onRowClick(e.path)}
           ondblclick={() => onopen(e)}
+          oncontextmenu={(ev) => {
+            ev.preventDefault()
+            onmenu?.(e, ev.clientX, ev.clientY)
+          }}
           title={e.kind === 'link' && e.target ? `${e.name} → ${e.target}` : e.name}
         >
           <span class="name" class:dir={e.dir}>

@@ -12,11 +12,11 @@ xterm.js nhiều tab, copy/paste, vẽ bằng GPU, và prompt powerline tùy ch�
 
 ## Files
 
-Trình duyệt kiểu Finder qua SFTP: tải lên, tải xuống, kéo thả từ hệ điều hành, đổi tên, xóa, nén, và copy giữa các server qua máy bạn.
+Trình duyệt kiểu Finder qua SFTP: tải lên, tải xuống, kéo thả từ hệ điều hành, đổi tên, xóa, nén, và copy giữa các server qua máy bạn. Chuột phải trên file để thấy mọi thao tác.
 
 ## Lối tắt trên màn hình chính
 
-Kéo file, thư mục hoặc script từ Files ra nền desktop (hoặc dùng menu tròn, `⌘⌥P`). Double-click để mở: thư mục vào Files, file vào Editor, script chạy trong một tab Terminal. Mỗi server có màn hình riêng, nên `deploy.sh` của staging không xuất hiện trên production. Davish chỉ lưu đường dẫn trên máy bạn.
+Kéo file, thư mục hoặc script từ Files ra nền desktop, hoặc chuột phải và chọn "Thêm vào màn hình chính" (`⌘⌥P`). Double-click để mở: thư mục vào Files, file vào Editor, script chạy trong một tab Terminal. Mỗi server có màn hình riêng, nên `deploy.sh` của staging không xuất hiện trên production. Davish chỉ lưu đường dẫn trên máy bạn.
 
 Lần đầu chạy một script, Davish hiện tên server và đúng lệnh. Chọn "Lần sau chạy luôn" thì lần sau chạy ngay, với điều kiện nội dung script còn nguyên; script bị sửa thì Davish hỏi lại kèm cảnh báo. Trong lúc chạy, Terminal hiện thời gian và nút **Dừng**, icon có nút X; cả hai gửi Ctrl-C vào đúng phiên đó. Xong thì có thông báo kèm mã thoát, và mỗi lần chạy được ghi vào nhật ký lệnh.
 
@@ -58,6 +58,8 @@ Bố cục như Docker Desktop. Container dạng bảng (ID, image, cổng, CPU,
 ## Cron
 
 Crontab của bạn và của hệ thống, lịch nói bằng lời, lần chạy kế tiếp theo giờ server, sửa an toàn có sao lưu.
+
+Mỗi tác vụ liệt kê các file và thư mục trong lệnh của nó (script, log, thư mục `cd`), bấm là mở trong Editor hoặc Files. Tác vụ hệ thống mở được file cron và thư mục chứa nó.
 
 <img src="assets/screenshots/cron.jpg" alt="Tác vụ cron với lịch nói bằng lời" width="100%">
 

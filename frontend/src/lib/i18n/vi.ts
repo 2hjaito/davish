@@ -632,6 +632,7 @@ const vi = {
         does: 'Shell trên server qua SSH, nhiều tab, copy/dán, prompt powerline tùy chọn.',
         actions: [
           'Tab mới bằng nút +',
+          'Nút thư mục mở thư mục đang đứng trong Files',
           'Kéo thư mục từ Files vào để cd',
           'Mở lại phiên khi mất kết nối',
         ],
@@ -644,6 +645,7 @@ const vi = {
           'Kéo file từ máy vào để tải lên',
           'Kéo file sang server khác trên sidebar để copy',
           'Kéo file ra nền màn hình để tạo lối tắt',
+          'Chuột phải file để xem mọi thao tác, kể cả thêm vào màn hình chính',
           'Nhấp đúp file để mở trong Editor',
         ],
         keys: [
@@ -742,7 +744,11 @@ const vi = {
       },
       cron: {
         does: 'Crontab của bạn và của hệ thống, lịch bằng lời, lần chạy tới theo giờ server.',
-        actions: ['Thêm, sửa, tắt tác vụ (có sao lưu)', 'Xem các lần chạy gần đây'],
+        actions: [
+          'Thêm, sửa, tắt tác vụ (có sao lưu)',
+          'Xem các lần chạy gần đây',
+          'Mở script và thư mục trong lệnh của tác vụ',
+        ],
         keys: [],
         runs: ['crontab -l, crontab - (có xác nhận)', 'đọc /etc/cron.d'],
       },
@@ -1189,6 +1195,7 @@ const vi = {
     lostBar: 'Phiên terminal đã mất kết nối tới server.',
     reopen: 'Mở lại',
     startFailed: 'Không mở được phiên terminal.',
+    openInFiles: 'Mở thư mục này trong Files',
     newTab: 'Tab mới',
     closeTab: 'Đóng tab',
     mockBanner:
@@ -1243,6 +1250,7 @@ const vi = {
       desktop: 'Thêm vào màn hình chính',
     },
     dragHint: 'Thả vào một cánh để chọn, thả ở giữa hoặc nhấn Esc để hủy',
+    open: 'Mở',
     pinned: 'Đã thêm vào màn hình chính',
     alreadyPinned: 'Đã có trên màn hình chính',
     dropDesktop: 'Thả ra nền để thêm vào màn hình chính',
@@ -2053,6 +2061,10 @@ const vi = {
     edit: 'Sửa…',
     remove: 'Xóa…',
     openFile: 'Mở file trong Editor',
+    showFolder: 'Mở thư mục',
+    files: 'File liên quan',
+    editFile: (path: string) => `Mở ${path} trong Editor`,
+    openFolder: (path: string) => `Mở thư mục của ${path} trong Files`,
     systemHint: 'Tác vụ hệ thống cần quyền root để sửa. Mở file trong Editor để sửa bằng sudo.',
     runs: 'Lần chạy gần nhất',
     runsEmpty: 'Chưa thấy lần chạy nào trong journal.',

@@ -643,6 +643,7 @@ const en = {
         does: 'A shell on the server over SSH, with tabs, copy/paste and an optional powerline prompt.',
         actions: [
           'New tab with the + button',
+          'The folder button opens the current folder in Files',
           'Drop a folder from Files to cd into it',
           'Reopen the session after a lost connection',
         ],
@@ -655,6 +656,7 @@ const en = {
           'Drop files from your computer to upload them',
           'Drag files onto another server in the sidebar to copy them',
           'Drag a file onto the wallpaper to make a shortcut',
+          'Right-click a file for every action, including adding it to the desktop',
           'Double-click a file to open it in Editor',
         ],
         keys: [
@@ -757,7 +759,11 @@ const en = {
       },
       cron: {
         does: 'Your crontab and the system’s, schedules in words, next runs in server time.',
-        actions: ['Add, edit, disable jobs (with backup)', 'See recent runs'],
+        actions: [
+          'Add, edit, disable jobs (with backup)',
+          'See recent runs',
+          'Open the scripts and folders in a job’s command',
+        ],
         keys: [],
         runs: ['crontab -l, crontab - (with confirmation)', 'reads /etc/cron.d'],
       },
@@ -1210,6 +1216,7 @@ const en = {
     lostBar: 'The terminal session lost its connection to the server.',
     reopen: 'Reopen',
     startFailed: 'Could not open a terminal session.',
+    openInFiles: 'Open this folder in Files',
     newTab: 'New tab',
     closeTab: 'Close tab',
     mockBanner:
@@ -1265,6 +1272,7 @@ const en = {
       compress: 'Compress',
       desktop: 'Add to desktop',
     },
+    open: 'Open',
     pinned: 'Added to the desktop',
     alreadyPinned: 'Already on the desktop',
     dropDesktop: 'Drop on the wallpaper to add to the desktop',
@@ -2080,6 +2088,10 @@ const en = {
     edit: 'Edit…',
     remove: 'Delete…',
     openFile: 'Open the file in Editor',
+    showFolder: 'Open folder',
+    files: 'Related files',
+    editFile: (path: string) => `Open ${path} in Editor`,
+    openFolder: (path: string) => `Open the folder of ${path} in Files`,
     systemHint: 'System jobs need root to change. Open the file in Editor to edit it with sudo.',
     runs: 'Recent runs',
     runsEmpty: 'No runs found in the journal.',
