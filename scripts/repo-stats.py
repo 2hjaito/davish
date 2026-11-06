@@ -89,6 +89,14 @@ def merge(path, fields, rows, key):
         writer.writerows(merged[k] for k in sorted(merged))
 
 
+def badge(folder, row):
+    """Writes the README's download badge. Shields' own counts checksum files too."""
+    data = {"schemaVersion": 1, "label": "downloads", "message": str(row["installers"]), "color": "0a64d8"}
+    with open(os.path.join(folder, "downloads.json"), "w", encoding="utf-8") as f:
+        json.dump(data, f)
+        f.write("\n")
+
+
 def traffic(folder, today, token):
     views = get(f"/repos/{REPO}/traffic/views", token)["views"]
     clones = get(f"/repos/{REPO}/traffic/clones", token)["clones"]
@@ -112,6 +120,7 @@ def main():
     today = datetime.datetime.now(datetime.timezone.utc).date().isoformat()
     row = daily(today, os.environ.get("GITHUB_TOKEN"))
     merge(os.path.join(folder, "daily.csv"), DAILY, [row], lambda r: r["date"])
+    badge(folder, row)
     print(row)
 
     token = os.environ.get("TRAFFIC_TOKEN")
