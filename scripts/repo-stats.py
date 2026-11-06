@@ -21,6 +21,9 @@ REPO = os.environ.get("GITHUB_REPOSITORY", "2hjaito/davish")
 DAILY = ["date", "stars", "forks", "watchers", "installers", "macos", "windows", "linux", "checksums"]
 TRAFFIC = ["date", "views", "unique_views", "clones", "unique_clones"]
 REFERRERS = ["date", "referrer", "views", "unique_views"]
+PATHS = ["date", "path", "views", "unique_views"]
+# The whole 14 days: unique visitors of each day add up to more than this.
+WINDOW = ["date", "views", "unique_views", "clones", "unique_clones"]
 
 
 def get(path, token):
@@ -98,21 +101,34 @@ def badge(folder, row):
 
 
 def traffic(folder, today, token):
-    views = get(f"/repos/{REPO}/traffic/views", token)["views"]
-    clones = get(f"/repos/{REPO}/traffic/clones", token)["clones"]
+    views = get(f"/repos/{REPO}/traffic/views", token)
+    clones = get(f"/repos/{REPO}/traffic/clones", token)
     days = {}
-    for v in views:
+    for v in views["views"]:
         day = v["timestamp"][:10]
         days[day] = {"date": day, "views": v["count"], "unique_views": v["uniques"], "clones": 0, "unique_clones": 0}
-    for c in clones:
+    for c in clones["clones"]:
         day = c["timestamp"][:10]
         row = days.setdefault(day, {"date": day, "views": 0, "unique_views": 0})
         row.update(clones=c["count"], unique_clones=c["uniques"])
     merge(os.path.join(folder, "traffic.csv"), TRAFFIC, days.values(), lambda r: r["date"])
 
+    window = {
+        "date": today,
+        "views": views["count"],
+        "unique_views": views["uniques"],
+        "clones": clones["count"],
+        "unique_clones": clones["uniques"],
+    }
+    merge(os.path.join(folder, "traffic-14d.csv"), WINDOW, [window], lambda r: r["date"])
+
     refs = get(f"/repos/{REPO}/traffic/popular/referrers", token)
     rows = [{"date": today, "referrer": r["referrer"], "views": r["count"], "unique_views": r["uniques"]} for r in refs]
     merge(os.path.join(folder, "referrers.csv"), REFERRERS, rows, lambda r: (r["date"], r["referrer"]))
+
+    paths = get(f"/repos/{REPO}/traffic/popular/paths", token)
+    rows = [{"date": today, "path": r["path"], "views": r["count"], "unique_views": r["uniques"]} for r in paths]
+    merge(os.path.join(folder, "paths.csv"), PATHS, rows, lambda r: (r["date"], r["path"]))
 
 
 def main():
