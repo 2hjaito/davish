@@ -1,0 +1,47 @@
+name: repo-stats
+
+# Saves stars, downloads and traffic every day to the `stats` branch, because
+# GitHub forgets traffic after 14 days. A branch of its own keeps these commits
+# out of main. Views and referrers need the TRAFFIC_TOKEN secret: a fine-grained
+# token for this repo with "Administration: read".
+on:
+  schedule:
+    - cron: "17 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: repo-stats
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Open the stats branch
+        run: |
+          if git fetch --depth=1 origin stats; then
+            git worktree add -B stats data FETCH_HEAD
+          else
+            git worktree add --orphan -b stats data
+          fi
+
+      - name: Collect
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TRAFFIC_TOKEN: ${{ secrets.TRAFFIC_TOKEN }}
+        run: python3 scripts/repo-stats.py data
+
+      - name: Save
+        working-directory: data
+        run: |
+          git add -A
+          git diff --cached --quiet && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(repo): stats for $(date -u +%F)"
+          git push origin stats
