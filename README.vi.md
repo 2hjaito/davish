@@ -8,6 +8,9 @@
 Terminal, file, dịch vụ, Docker, log, cron, nginx, cổng, trình duyệt, ổ đĩa, an ninh đăng nhập, khóa SSH, gói phần mềm và git qua SSH thuần, gom trong một giao diện như một hệ điều hành.<br>
 Không cài gì lên server.
 
+[![Stars](https://img.shields.io/github/stars/2hjaito/davish?color=f6cf8f)](https://github.com/2hjaito/davish/stargazers)
+[![Downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2F2hjaito%2Fdavish%2Fstats%2Fdownloads.json)](https://github.com/2hjaito/davish/releases)
+[![Release](https://img.shields.io/github/v/release/2hjaito/davish?color=0a64d8)](https://github.com/2hjaito/davish/releases/latest)
 [![CI](https://github.com/2hjaito/davish/actions/workflows/ci.yml/badge.svg)](https://github.com/2hjaito/davish/actions/workflows/ci.yml)
 ![Nền tảng](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-6b7180)
 ![Go](https://img.shields.io/badge/Go-1.27-00ADD8?logo=go&logoColor=white)
