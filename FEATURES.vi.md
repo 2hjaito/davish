@@ -182,6 +182,14 @@ Davish có giao diện sáng và tối. Mặc định theo máy và tự đổi 
 
 <img src="assets/screenshots/dark.jpg" alt="Davish ở giao diện tối">
 
+<table><tr>
+  <td><img src="assets/screenshots/dark-settings.jpg" alt="Cài đặt với lựa chọn chế độ"></td>
+  <td><img src="assets/screenshots/dark-git.jpg" alt="Git ở giao diện tối"></td>
+</tr><tr>
+  <td><img src="assets/screenshots/dark-docker.jpg" alt="Docker ở giao diện tối"></td>
+  <td><img src="assets/screenshots/dark-spotlight.jpg" alt="Spotlight ở giao diện tối"></td>
+</tr></table>
+
 ## Ngôn ngữ
 
 Toàn bộ giao diện có tiếng Việt và tiếng Anh: menu, hộp thoại, trợ giúp, thông báo lỗi, ngày tháng và số. Lần đầu Davish theo ngôn ngữ của máy; sau đó chọn trong Cài đặt → Giao diện → Ngôn ngữ. Davish khởi động lại để đổi, server tự kết nối lại.

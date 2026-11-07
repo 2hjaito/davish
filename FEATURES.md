@@ -182,6 +182,14 @@ Davish comes in a light and a dark look. By default it follows your computer and
 
 <img src="assets/screenshots/dark.jpg" alt="Davish in the dark theme">
 
+<table><tr>
+  <td><img src="assets/screenshots/dark-settings.jpg" alt="Settings with the theme picker"></td>
+  <td><img src="assets/screenshots/dark-git.jpg" alt="Git in the dark theme"></td>
+</tr><tr>
+  <td><img src="assets/screenshots/dark-docker.jpg" alt="Docker in the dark theme"></td>
+  <td><img src="assets/screenshots/dark-spotlight.jpg" alt="Spotlight in the dark theme"></td>
+</tr></table>
+
 ## Language
 
 The whole interface comes in English and Vietnamese: menus, dialogs, help, error messages, the dates and numbers. The first time, Davish follows your system's language; after that, pick one in Settings → Appearance → Language. Davish restarts to switch, and your servers reconnect on their own.
