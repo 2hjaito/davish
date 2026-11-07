@@ -22,6 +22,17 @@ export const MONO_FAMILIES: Record<MonoFont, string> = {
     "ui-monospace, 'SF Mono', Menlo, Consolas, 'Cascadia Mono', 'DejaVu Sans Mono', 'Symbols Nerd Font Mono', monospace",
 }
 
+/** The color scheme: follow the OS, or always light or dark. */
+export type Theme = 'system' | 'light' | 'dark'
+
+export const THEMES: readonly Theme[] = ['system', 'light', 'dark']
+
+/** The scheme to draw: theme, with 'system' read from the OS. */
+export function resolveTheme(theme: Theme, systemDark: boolean): 'light' | 'dark' {
+  if (theme === 'system') return systemDark ? 'dark' : 'light'
+  return theme
+}
+
 /** When RAM and disk readings notify (internal/sysmon.Thresholds). */
 export const ALERTS = {
   pct: { min: 50, max: 99, step: 5 },
@@ -40,6 +51,7 @@ export function clampPct(v: number, fallback: number): number {
 }
 
 interface SettingsData {
+  theme: Theme
   reduceGlass: boolean
   reduceMotion: boolean
   wallpaperAccent: string
@@ -56,6 +68,7 @@ interface SettingsData {
 }
 
 const defaults: SettingsData = {
+  theme: 'system',
   reduceGlass: false,
   reduceMotion: false,
   wallpaperAccent: WALLPAPER_ACCENTS[0],
@@ -74,6 +87,9 @@ const defaults: SettingsData = {
 class Settings {
   #data = $state<SettingsData>(load('settings', defaults))
 
+  get theme(): Theme {
+    return THEMES.includes(this.#data.theme) ? this.#data.theme : 'system'
+  }
   get reduceGlass() {
     return this.#data.reduceGlass
   }

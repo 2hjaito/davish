@@ -94,6 +94,8 @@
   --wallpaper-pink: #f2a7c3;
   --wallpaper-teal: #8fd3c4;
   --wallpaper-gold: #f6cf8f;
+  /* How much of each blob shows over the base. */
+  --wallpaper-mix: 100%;
 
   /* App tiles */
   --app-terminal: #24262d;
@@ -186,6 +188,114 @@
   --sidebar-rail-w: 80px;
 }
 
+/* Dark theme: App.svelte sets data-theme from Settings or the OS. Only colors
+   change; light glass turns smoky, and tokens already meant for dark glass
+   (Terminal, Logs) stay as they are. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Text */
+  --fg: #e7e9ee;
+  --fg-label: #c9ccd4;
+  --fg-muted: #a4a9b6;
+  --fg-subtle: #7f8490;
+
+  /* Accent: one value serves as text on the dark panes and behind white
+     text, so it sits between the two (about 4:1 each way). */
+  --accent: #3383ee;
+  --accent-strong: #6aa6f5;
+  --accent-soft: rgba(51, 131, 238, 0.24);
+  --row-hover: rgba(51, 131, 238, 0.14);
+  --row-stripe: rgba(255, 255, 255, 0.03);
+  --selection-inactive: rgba(255, 255, 255, 0.12);
+  --sidebar-active: rgba(255, 255, 255, 0.1);
+  --content-bg: rgba(30, 32, 39, 0.92);
+
+  /* Status */
+  --ok: #3ec97a;
+  --warn: #f0a43a;
+  --danger: #ea5a3c;
+  --offline: #7f8490;
+  --diff-removed: rgba(255, 107, 107, 0.16);
+  --diff-added: rgba(126, 226, 168, 0.14);
+
+  /* Traffic lights */
+  --tl-inactive: #4a4e58;
+
+  /* Smoky glass */
+  --glass-bg: rgba(34, 36, 44, 0.42);
+  --glass-bg-strong: rgba(30, 32, 40, 0.7);
+  --glass-bg-menu: rgba(38, 40, 48, 0.72);
+  --glass-highlight: rgba(255, 255, 255, 0.12);
+  --glass-hover: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 -1px 0 rgba(255, 255, 255, 0.03),
+    0 12px 40px rgba(0, 0, 0, 0.45);
+  --glass-shadow-inactive:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 -1px 0 rgba(255, 255, 255, 0.03),
+    0 12px 40px rgba(0, 0, 0, 0.25);
+  --glass-dark-bg: rgba(16, 17, 22, 0.66);
+  --glass-dark-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 20px 60px rgba(0, 0, 0, 0.5);
+  --glass-dark-shadow-inactive:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 20px 60px rgba(0, 0, 0, 0.28);
+
+  /* Lines and fills */
+  --divider: rgba(255, 255, 255, 0.1);
+  --divider-soft: rgba(255, 255, 255, 0.06);
+  --fill-soft: rgba(255, 255, 255, 0.08);
+  --fill-track: rgba(255, 255, 255, 0.16);
+  --switch-knob-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --tab-active-light: rgba(255, 255, 255, 0.1);
+  --overlay: rgba(0, 0, 0, 0.5);
+
+  /* Wallpaper: the same blobs, mixed into a night-blue base. */
+  --wallpaper-base: #161b27;
+  --wallpaper-mix: 38%;
+
+  --tile-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 14px rgba(0, 0, 0, 0.4);
+  --dock-dot: rgba(231, 233, 238, 0.8);
+
+  /* Files */
+  --file-stroke: #a4a9b6;
+
+  /* Monitor charts and Git lanes, lifted for the dark panes. */
+  --chart-1: #4f94ec;
+  --chart-2: #f07a48;
+  --chart-3: #2fc58d;
+  --chart-grid: rgba(255, 255, 255, 0.08);
+  --chart-crosshair: rgba(255, 255, 255, 0.3);
+  --chart-surface: #2a2d36;
+  --graph-1: #4f94ec;
+  --graph-2: #f07a48;
+  --graph-3: #2fc58d;
+  --graph-4: #b383ef;
+  --graph-5: #f07f88;
+  --graph-6: #e0b52e;
+  --graph-7: #2fc2c7;
+  --card-bg: rgba(255, 255, 255, 0.04);
+
+  /* Editor syntax: at least 4.5:1 on the dark content pane. */
+  --code-comment: #8a8f9b;
+  --code-keyword: #d28ae6;
+  --code-string: #9ccf7f;
+  --code-number: #e0a46a;
+  --code-property: #6cb2f5;
+  --code-variable: #f07f88;
+  --code-meta: #b39cf2;
+  --editor-gutter-fg: #6b7180;
+  --editor-active-line: rgba(255, 255, 255, 0.04);
+  --editor-selection: rgba(51, 131, 238, 0.32);
+  --editor-match: rgba(240, 164, 58, 0.28);
+}
+
+/* Before App sets data-theme, paint the OS scheme so a dark start does not flash. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --wallpaper-base: #161b27;
+  }
+}
+
 /* Reduced glass: Settings toggle, or the OS preference. */
 :root[data-reduce-glass='true'] {
   --glass-bg: rgba(246, 247, 250, 0.96);
@@ -196,6 +306,13 @@
   --glass-dark-blur: none;
 }
 
+:root[data-theme='dark'][data-reduce-glass='true'] {
+  --glass-bg: rgba(30, 32, 39, 0.97);
+  --glass-bg-strong: rgba(30, 32, 39, 0.97);
+  --glass-bg-menu: rgba(36, 38, 46, 0.97);
+  --glass-dark-bg: rgba(18, 19, 24, 0.97);
+}
+
 @media (prefers-reduced-transparency: reduce) {
   :root:not([data-reduce-glass='false']) {
     --glass-bg: rgba(246, 247, 250, 0.96);
@@ -204,6 +321,13 @@
     --glass-dark-bg: rgba(24, 26, 32, 0.97);
     --glass-blur: none;
     --glass-dark-blur: none;
+  }
+
+  :root[data-theme='dark']:not([data-reduce-glass='false']) {
+    --glass-bg: rgba(30, 32, 39, 0.97);
+    --glass-bg-strong: rgba(30, 32, 39, 0.97);
+    --glass-bg-menu: rgba(36, 38, 46, 0.97);
+    --glass-dark-bg: rgba(18, 19, 24, 0.97);
   }
 }
 

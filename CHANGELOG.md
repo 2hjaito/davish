@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Giao diện tối. Mặc định theo chế độ sáng/tối của máy và tự đổi theo; chọn Sáng hoặc Tối trong Cài đặt → Giao diện → Chế độ để giữ cố định. Editor, biểu đồ Monitor và đồ thị Git có bảng màu riêng cho nền tối.
+
 ## [1.5.2] - 2026-11-05
 
 ### Thêm

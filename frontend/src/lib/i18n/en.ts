@@ -722,7 +722,7 @@ const en = {
         runs: ['SFTP to read, write a temporary file, then rename it'],
       },
       settings: {
-        does: 'Language, appearance, fonts, alert thresholds, app lock, Terminal prompt.',
+        does: 'Language, light or dark theme, appearance, fonts, alert thresholds, app lock, Terminal prompt.',
         actions: [],
         keys: [],
         runs: [],
@@ -1454,6 +1454,9 @@ const en = {
   },
   settings: {
     appearance: 'Appearance',
+    theme: 'Theme',
+    themeHint: 'Auto follows the light or dark setting of your computer.',
+    themes: { system: 'Auto', light: 'Light', dark: 'Dark' },
     language: 'Language',
     languageHint: 'The language of the interface.',
     langs: { vi: 'Tiếng Việt', en: 'English' },

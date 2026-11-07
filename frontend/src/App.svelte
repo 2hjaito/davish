@@ -1,13 +1,19 @@
 <script lang="ts">
   import { untrack } from 'svelte'
+  import { MediaQuery } from 'svelte/reactivity'
 
+  import { setWindowBackground } from './lib/api/runtime'
   import Desktop from './lib/shell/Desktop.svelte'
   import LockScreen from './lib/shell/LockScreen.svelte'
   import { appLock } from './lib/stores/lock.svelte'
-  import { settings } from './lib/stores/settings.svelte'
+  import { resolveTheme, settings } from './lib/stores/settings.svelte'
+
+  const systemDark = new MediaQuery('prefers-color-scheme: dark')
 
   $effect(() => {
     const root = document.documentElement
+    root.dataset.theme = resolveTheme(settings.theme, systemDark.current)
+    setWindowBackground(getComputedStyle(root).getPropertyValue('--wallpaper-base').trim())
     root.dataset.reduceGlass = String(settings.reduceGlass)
     root.dataset.reduceMotion = String(settings.reduceMotion)
     root.style.setProperty('--wallpaper-accent', settings.wallpaperAccent)

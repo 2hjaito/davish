@@ -9,6 +9,7 @@
     type MonoFont,
     settings,
     TERMINAL_FONT,
+    THEMES,
     WALLPAPER_ACCENTS,
   } from '../../lib/stores/settings.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
@@ -81,6 +82,22 @@
 
 <div class="body">
   <h2>{t.settings.appearance}</h2>
+
+  <div class="row">
+    <span>
+      <strong>{t.settings.theme}</strong>
+      <small>{t.settings.themeHint}</small>
+    </span>
+    <div class="segmented" role="radiogroup" aria-label={t.settings.theme}>
+      {#each THEMES as th (th)}
+        <button
+          role="radio"
+          aria-checked={settings.theme === th}
+          onclick={() => settings.set('theme', th)}>{t.settings.themes[th]}</button
+        >
+      {/each}
+    </div>
+  </div>
 
   <div class="row">
     <span>
