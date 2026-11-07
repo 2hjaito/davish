@@ -705,7 +705,7 @@ const vi = {
         runs: ['SFTP để đọc, ghi file tạm rồi đổi tên'],
       },
       settings: {
-        does: 'Ngôn ngữ, giao diện, phông, ngưỡng cảnh báo, khóa app, prompt Terminal.',
+        does: 'Ngôn ngữ, chế độ sáng tối, giao diện, phông, ngưỡng cảnh báo, khóa app, prompt Terminal.',
         actions: [],
         keys: [],
         runs: [],
@@ -1428,6 +1428,9 @@ const vi = {
   },
   settings: {
     appearance: 'Giao diện',
+    theme: 'Chế độ',
+    themeHint: 'Tự động theo chế độ sáng hoặc tối của máy.',
+    themes: { system: 'Tự động', light: 'Sáng', dark: 'Tối' },
     language: 'Ngôn ngữ',
     languageHint: 'Ngôn ngữ của giao diện.',
     langs: { vi: 'Tiếng Việt', en: 'English' },

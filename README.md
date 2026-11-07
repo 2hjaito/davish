@@ -69,6 +69,7 @@ Nothing to install on the server.
 - [Menu bar and help](FEATURES.md#menu-bar-and-help): every command and shortcut, a `?` on each app
 - [App lock](FEATURES.md#app-lock): Touch ID or a password, locks on wake
 - [Updates](FEATURES.md#updates): one click to a new version, signature checked
+- [Light and dark](FEATURES.md#light-and-dark): follows your system, or pick one
 - [Language](FEATURES.md#language): English or Vietnamese
 
 <table>

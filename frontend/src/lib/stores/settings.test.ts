@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { clampFontSize, TERMINAL_FONT } from './settings.svelte'
+import { clampFontSize, resolveTheme, TERMINAL_FONT } from './settings.svelte'
 
 describe('clampFontSize', () => {
   it.each([
@@ -17,5 +17,16 @@ describe('clampFontSize', () => {
 
   it('falls back to the default for a non-number from storage', () => {
     expect(clampFontSize('big' as unknown as number)).toBe(TERMINAL_FONT.default)
+  })
+})
+
+describe('resolveTheme', () => {
+  it.each([
+    ['system', false, 'light'],
+    ['system', true, 'dark'],
+    ['light', true, 'light'],
+    ['dark', false, 'dark'],
+  ] as const)('resolveTheme(%s, systemDark=%s) = %s', (theme, systemDark, want) => {
+    expect(resolveTheme(theme, systemDark)).toBe(want)
   })
 })

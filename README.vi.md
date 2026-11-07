@@ -69,6 +69,7 @@ Không cài gì lên server.
 - [Menu bar và trợ giúp](FEATURES.vi.md#menu-bar-và-trợ-giúp): mọi lệnh và phím tắt, nút `?` trên mỗi app
 - [Khóa app](FEATURES.vi.md#khóa-app): Touch ID hoặc mật khẩu, tự khóa khi máy dậy
 - [Cập nhật](FEATURES.vi.md#cập-nhật): một lần bấm lên bản mới, có kiểm chữ ký
+- [Sáng và tối](FEATURES.vi.md#sáng-và-tối): theo máy, hoặc tự chọn
 - [Ngôn ngữ](FEATURES.vi.md#ngôn-ngữ): tiếng Việt hoặc tiếng Anh
 
 <table>

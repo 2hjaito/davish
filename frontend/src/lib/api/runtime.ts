@@ -1,6 +1,6 @@
 // Typed access to the Wails runtime. The frontend also runs in a plain browser
 // (vite dev, previews), where window.runtime does not exist.
-import { BrowserOpenURL, Quit } from '../../../wailsjs/runtime/runtime'
+import { BrowserOpenURL, Quit, WindowSetBackgroundColour } from '../../../wailsjs/runtime/runtime'
 
 /**
  * The welcome page's "try it" mode: the app reloads with ?demo and runs on
@@ -29,4 +29,14 @@ export function quit() {
 export function openURL(url: string) {
   if (hasRuntime) BrowserOpenURL(url)
   else window.open(url, '_blank', 'noopener')
+}
+
+/**
+ * Paints the native window behind the webview in the wallpaper's base color,
+ * so a resize or a slow first frame does not flash the other theme.
+ */
+export function setWindowBackground(hex: string) {
+  if (!hasRuntime || !/^#[0-9a-f]{6}$/i.test(hex)) return
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
+  WindowSetBackgroundColour(r ?? 0, g ?? 0, b ?? 0, 255)
 }

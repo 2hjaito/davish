@@ -339,11 +339,28 @@
        screen must not scroll the whole desktop sideways. */
     overflow: clip;
     background-color: var(--wallpaper-base);
+    /* The dark theme dims each blob toward the base (--wallpaper-mix). */
     background-image:
-      radial-gradient(circle at 18% 22%, var(--wallpaper-accent) 0, transparent 38%),
-      radial-gradient(circle at 82% 30%, var(--wallpaper-pink) 0, transparent 34%),
-      radial-gradient(circle at 60% 88%, var(--wallpaper-teal) 0, transparent 40%),
-      radial-gradient(circle at 30% 80%, var(--wallpaper-gold) 0, transparent 30%);
+      radial-gradient(
+        circle at 18% 22%,
+        color-mix(in srgb, var(--wallpaper-accent) var(--wallpaper-mix), var(--wallpaper-base)) 0,
+        transparent 38%
+      ),
+      radial-gradient(
+        circle at 82% 30%,
+        color-mix(in srgb, var(--wallpaper-pink) var(--wallpaper-mix), var(--wallpaper-base)) 0,
+        transparent 34%
+      ),
+      radial-gradient(
+        circle at 60% 88%,
+        color-mix(in srgb, var(--wallpaper-teal) var(--wallpaper-mix), var(--wallpaper-base)) 0,
+        transparent 40%
+      ),
+      radial-gradient(
+        circle at 30% 80%,
+        color-mix(in srgb, var(--wallpaper-gold) var(--wallpaper-mix), var(--wallpaper-base)) 0,
+        transparent 30%
+      );
   }
 
   .workspace.hidden {
