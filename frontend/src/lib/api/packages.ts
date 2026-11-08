@@ -1,6 +1,8 @@
 // Typed wrappers for the package bindings (internal/app/packages.go).
 import * as App from '../../../wailsjs/go/app/App'
 
+import { hasRuntime } from './runtime'
+
 export type Manager = 'apt' | 'dnf' | 'yum' | 'apk'
 
 export interface Package {
@@ -47,6 +49,20 @@ export interface NpmGlobal {
   version: string
 }
 
+/** A tool an app offers to install when the server lacks it. */
+export type SetupTool = 'docker' | 'nginx' | 'git' | 'mariadb' | 'postgres'
+
+/** How to install a tool (internal/packages.Setup). */
+export interface Setup {
+  tool: SetupTool
+  /** '' when the server has no package manager Davish knows. */
+  manager: Manager | ''
+  /** '' when the user has to install it themselves. */
+  command: string
+  /** The command adds the user to a group: reconnect afterwards. */
+  relogin: boolean
+}
+
 export type PackageOp =
   'install' | 'remove' | 'upgrade' | 'upgrade-all' | 'upgrade-security' | 'refresh'
 
@@ -61,3 +77,26 @@ export const packagesPlan = (manager: Manager, op: PackageOp, names: string[]): 
   App.PackagesPlan(manager, op, names)
 export const packagesCheckSecurity = (serverID: string): Promise<void> =>
   App.PackagesCheckSecurity(serverID)
+
+// The browser preview has no server: an Ubuntu one, as a stand-in.
+const mockSetup: Record<SetupTool, string> = {
+  docker:
+    'sudo apt-get update && sudo apt-get install docker.io && sudo systemctl enable --now docker && sudo usermod -aG docker "$USER"',
+  nginx: 'sudo apt-get update && sudo apt-get install nginx && sudo systemctl enable --now nginx',
+  git: 'sudo apt-get update && sudo apt-get install git',
+  mariadb:
+    'sudo apt-get update && sudo apt-get install mariadb-server && sudo systemctl enable --now mariadb',
+  postgres:
+    'sudo apt-get update && sudo apt-get install postgresql && sudo systemctl enable --now postgresql',
+}
+
+/** The command that installs tool, to type into a terminal; nothing runs. */
+export const packagesSetup = (serverID: string, tool: SetupTool): Promise<Setup> =>
+  hasRuntime
+    ? (App.PackagesSetup(serverID, tool) as Promise<Setup>)
+    : Promise.resolve({
+        tool,
+        manager: 'apt',
+        command: mockSetup[tool],
+        relogin: tool === 'docker',
+      })

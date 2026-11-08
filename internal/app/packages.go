@@ -27,3 +27,9 @@ func (a *App) PackagesPlan(manager, op string, names []string) (string, error) {
 func (a *App) PackagesCheckSecurity(serverID string) error {
 	return a.packages.CheckSecurity(a.ctx, serverID)
 }
+
+// PackagesSetup is the command that installs a missing tool, to type into
+// a terminal; Davish never runs it.
+func (a *App) PackagesSetup(serverID, tool string) (packages.Setup, error) {
+	return a.packages.Setup(a.ctx, serverID, tool)
+}
