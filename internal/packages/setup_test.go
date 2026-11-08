@@ -62,24 +62,55 @@ func TestPlanSetupUnknown(t *testing.T) {
 	}
 }
 
+// fakeRunner answers each command in turn.
 type fakeRunner struct {
-	out   string
+	outs  []string
 	calls int
 }
 
 func (f *fakeRunner) RunLine(context.Context, string, string, string) (audit.Result, error) {
+	out := ""
+	if f.calls < len(f.outs) {
+		out = f.outs[f.calls]
+	}
 	f.calls++
-	return audit.Result{Stdout: []byte(f.out)}, nil
+	return audit.Result{Stdout: []byte(out)}, nil
 }
 
 func TestServiceSetup(t *testing.T) {
-	run := &fakeRunner{out: "dnf\n"}
+	run := &fakeRunner{outs: []string{"dnf\n", "1000\ndeploy wheel\n"}}
 	s := New(run, nil)
 	got, err := s.Setup(context.Background(), "srv", ToolGit)
-	if err != nil || got.Command != "sudo dnf install git" {
+	if err != nil || got.Command != "sudo dnf install git" || !got.CanInstall {
 		t.Errorf("setup = %+v, %v", got, err)
 	}
-	if _, err := s.Setup(context.Background(), "srv", "nope"); err == nil || run.calls != 1 {
+	if _, err := s.Setup(context.Background(), "srv", "nope"); err == nil || run.calls != 2 {
 		t.Errorf("unknown tool: err %v, %d calls", err, run.calls)
+	}
+	// No command to run: no need to ask about rights.
+	run = &fakeRunner{outs: []string{"\n"}}
+	if got, err := New(run, nil).Setup(context.Background(), "srv", ToolGit); err != nil || got.CanInstall || run.calls != 1 {
+		t.Errorf("no manager = %+v, %v, %d calls", got, err, run.calls)
+	}
+}
+
+func TestParsePriv(t *testing.T) {
+	tests := []struct {
+		out  string
+		want bool
+	}{
+		{"0\nroot\n", true},
+		{"1000\ndeploy sudo docker\n", true},
+		{"1000\ndeploy wheel\n", true},
+		{"1000\ndeploy admin\n", true},
+		{"1000\ndeploy\nsudo-ok\n", true},
+		{"1000\ndeploy www-data sudoers\n", false},
+		{"1000\ndeploy\n", false},
+		{"", false},
+	}
+	for _, tt := range tests {
+		if got := parsePriv([]byte(tt.out)); got != tt.want {
+			t.Errorf("%q = %v, want %v", tt.out, got, tt.want)
+		}
 	}
 }

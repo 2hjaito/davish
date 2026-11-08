@@ -2,6 +2,7 @@ package packages
 
 import (
 	"context"
+	"slices"
 	"strings"
 
 	"davish/internal/apperr"
@@ -28,6 +29,10 @@ type Setup struct {
 	// Relogin is set when the command adds the user to a group, which
 	// only takes effect on a new SSH connection.
 	Relogin bool `json:"relogin"`
+	// CanInstall tells whether the login user may run it: root, a member
+	// of a group sudo usually trusts, or sudo without a password. Without
+	// it the UI only says to ask whoever runs the server.
+	CanInstall bool `json:"canInstall"`
 }
 
 // tool is what installing one tool takes.
@@ -118,7 +123,29 @@ func PlanSetup(manager, name string) (Setup, error) {
 	return s, nil
 }
 
-// Setup plans installing tool on the server, for its package manager.
+// privLine prints the user's id and groups, and sudo-ok when sudo needs
+// no password. sudo -n never prompts, so it cannot hang.
+const privLine = `id -u; id -nG; sudo -n true 2>/dev/null && echo sudo-ok; true`
+
+// sudoGroups are the groups distributions give sudo rights by default.
+var sudoGroups = []string{"sudo", "wheel", "admin"}
+
+// parsePriv reads privLine's output.
+func parsePriv(out []byte) bool {
+	ls := lines(out)
+	if len(ls) == 0 {
+		return false
+	}
+	if strings.TrimSpace(ls[0]) == "0" || slices.Contains(ls, "sudo-ok") {
+		return true
+	}
+	return len(ls) > 1 && slices.ContainsFunc(strings.Fields(ls[1]), func(g string) bool {
+		return slices.Contains(sudoGroups, g)
+	})
+}
+
+// Setup plans installing tool on the server, for its package manager, and
+// tells whether the login user may run it.
 func (s *Service) Setup(ctx context.Context, serverID, tool string) (Setup, error) {
 	if _, ok := tools[tool]; !ok {
 		return Setup{}, apperr.New(apperr.InvalidInput, "unknown tool")
@@ -127,5 +154,14 @@ func (s *Service) Setup(ctx context.Context, serverID, tool string) (Setup, erro
 	if err != nil {
 		return Setup{}, err
 	}
-	return PlanSetup(m, tool)
+	plan, err := PlanSetup(m, tool)
+	if err != nil || plan.Command == "" {
+		return plan, err
+	}
+	out, err := s.read(ctx, serverID, privLine)
+	if err != nil {
+		return Setup{}, err
+	}
+	plan.CanInstall = parsePriv(out)
+	return plan, nil
 }

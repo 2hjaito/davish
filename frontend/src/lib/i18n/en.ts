@@ -69,6 +69,8 @@ const en = {
     reconnect: 'Disconnect and reconnect',
     unknownManager:
       'Davish does not know this server’s package manager. Install it the way your Linux distribution documents, then press Check again.',
+    noRights:
+      'This SSH account has no sudo rights, so it cannot install it. Ask whoever runs the server to install it, then press Check again.',
     check: 'Check again',
   },
   apps: {

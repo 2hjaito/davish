@@ -61,6 +61,8 @@ export interface Setup {
   command: string
   /** The command adds the user to a group: reconnect afterwards. */
   relogin: boolean
+  /** The login user may run it (root, sudo group, or passwordless sudo). */
+  canInstall: boolean
 }
 
 export type PackageOp =
@@ -99,4 +101,5 @@ export const packagesSetup = (serverID: string, tool: SetupTool): Promise<Setup>
         manager: 'apt',
         command: mockSetup[tool],
         relogin: tool === 'docker',
+        canInstall: true,
       })

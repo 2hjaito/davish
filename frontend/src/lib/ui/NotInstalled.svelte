@@ -76,6 +76,8 @@
       <p class="note">{n.planning}</p>
     {:else if !setup.command}
       <p class="note">{n.unknownManager}</p>
+    {:else if !setup.canInstall}
+      <p class="note">{n.noRights}</p>
     {:else}
       <NeedsRoot {serverID} command={setup.command} message={n.needsRoot} />
       {#if tool === 'docker'}

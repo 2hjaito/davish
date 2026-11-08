@@ -82,6 +82,8 @@ const vi = {
     reconnect: 'Ngắt và kết nối lại',
     unknownManager:
       'Davish chưa biết trình quản lý gói của server này. Hãy cài theo hướng dẫn của bản Linux đang dùng rồi bấm Kiểm tra lại.',
+    noRights:
+      'Tài khoản SSH này không có quyền sudo nên không cài được. Nhờ người quản trị server cài giúp rồi bấm Kiểm tra lại.',
     check: 'Kiểm tra lại',
   },
   apps: {
