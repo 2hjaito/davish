@@ -111,16 +111,7 @@ func (s *Service) Usage(ctx context.Context, serverID, dir, token string) (Usage
 	dir = path.Clean(dir)
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	if token != "" {
-		s.mu.Lock()
-		s.scans[token] = cancel
-		s.mu.Unlock()
-		defer func() {
-			s.mu.Lock()
-			delete(s.scans, token)
-			s.mu.Unlock()
-		}()
-	}
+	defer s.track(token, cancel)()
 	res, err := s.run.RunLine(ctx, serverID, app, usageLine(dir))
 	if err != nil {
 		return Usage{}, err

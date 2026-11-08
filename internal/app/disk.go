@@ -12,7 +12,13 @@ func (a *App) DiskUsage(serverID, dir, token string) (disk.Usage, error) {
 	return a.disk.Usage(a.ctx, serverID, dir, token)
 }
 
-// DiskCancel stops a running DiskUsage.
+// DiskOverview measures where a filesystem's space goes; token names it
+// for DiskCancel.
+func (a *App) DiskOverview(serverID, mount, token string) (disk.Overview, error) {
+	return a.disk.Overview(a.ctx, serverID, mount, token)
+}
+
+// DiskCancel stops a running DiskUsage or DiskOverview.
 func (a *App) DiskCancel(token string) {
 	a.disk.Cancel(token)
 }

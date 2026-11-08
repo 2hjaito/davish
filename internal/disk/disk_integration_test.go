@@ -5,6 +5,7 @@ package disk_test
 import (
 	"context"
 	"errors"
+	"slices"
 	"testing"
 	"time"
 
@@ -50,5 +51,48 @@ func TestCancel(t *testing.T) {
 	_, err := s.Usage(context.Background(), id, "/usr", "scan-1")
 	if !errors.Is(err, context.Canceled) {
 		t.Skipf("du finished before the cancel (err = %v)", err)
+	}
+}
+
+func TestOverviewFindsWhatFillsTheDisk(t *testing.T) {
+	m, id := testsshd.Connect(t)
+	s := disk.New(audit.NewRunner(m, audit.New(discard{})))
+	// A big file, a deleted file a process still holds, and a folder only
+	// root may read.
+	testsshd.Run(t, m, id, `rm -rf ~/ov && mkdir ~/ov && head -c 100000000 /dev/zero > ~/ov/big.bin
+setsid sh -c 'exec 3>"$HOME/ov/held.log"; head -c 60000000 /dev/zero >&3; rm "$HOME/ov/held.log"; exec sleep 120' </dev/null >/dev/null 2>&1 &
+sleep 1`)
+	testsshd.Exec(t, "sh", "-c", "mkdir -p /var/lib/davish-secret && head -c 20000000 /dev/zero > /var/lib/davish-secret/f && chmod 700 /var/lib/davish-secret")
+	t.Cleanup(func() {
+		testsshd.Run(t, m, id, `pkill -u tester -x sleep; rm -rf ~/ov; true`)
+		testsshd.Exec(t, "rm", "-rf", "/var/lib/davish-secret")
+	})
+
+	o, err := s.Overview(context.Background(), id, "/", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if o.Root || o.Measured == 0 || o.Mount.Used == 0 {
+		t.Fatalf("overview = root %v, measured %d, mount %+v", o.Root, o.Measured, o.Mount)
+	}
+	found := false
+	for _, f := range o.Files {
+		found = found || (f.Path == "/home/tester/ov/big.bin" && f.Size == 100000000)
+	}
+	if !found {
+		t.Errorf("big.bin not in %+v", o.Files)
+	}
+	held := false
+	for _, d := range o.Deleted {
+		held = held || (d.Path == "/home/tester/ov/held.log" && d.Size == 60000000 && d.PID > 0)
+	}
+	if !held {
+		t.Errorf("held.log not in %+v", o.Deleted)
+	}
+	if !slices.Contains(o.Unreadable, "/var/lib/davish-secret") {
+		t.Errorf("unreadable = %q", o.Unreadable)
+	}
+	if len(o.Dirs) == 0 || o.Dirs[0].Size < o.Dirs[len(o.Dirs)-1].Size {
+		t.Errorf("dirs not largest first: %d", len(o.Dirs))
 	}
 }

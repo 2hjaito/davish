@@ -82,6 +82,8 @@ export function DiskCleanups(arg1:string):Promise<Array<disk.Cleanup>>;
 
 export function DiskMounts(arg1:string):Promise<Array<disk.Mount>>;
 
+export function DiskOverview(arg1:string,arg2:string,arg3:string):Promise<disk.Overview>;
+
 export function DiskUsage(arg1:string,arg2:string,arg3:string):Promise<disk.Usage>;
 
 export function DockerAct(arg1:string,arg2:string,arg3:string):Promise<void>;

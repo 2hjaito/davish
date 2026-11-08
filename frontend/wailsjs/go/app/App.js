@@ -118,6 +118,10 @@ export function DiskMounts(arg1) {
   return window['go']['app']['App']['DiskMounts'](arg1);
 }
 
+export function DiskOverview(arg1, arg2, arg3) {
+  return window['go']['app']['App']['DiskOverview'](arg1, arg2, arg3);
+}
+
 export function DiskUsage(arg1, arg2, arg3) {
   return window['go']['app']['App']['DiskUsage'](arg1, arg2, arg3);
 }
