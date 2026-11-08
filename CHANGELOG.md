@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Đổi
+- Dock lần đầu mở chỉ ghim các app dùng hằng ngày: Terminal, Tệp, Monitor, Services, Docker, Logs, Editor, Cài đặt. App khác mở từ Launchpad hoặc Spotlight và ghim thêm được như cũ. Ai đã tự ghim hoặc bỏ ghim thì Dock giữ nguyên.
+
 ## [1.6.2] - 2026-11-08
 
 ### Sửa

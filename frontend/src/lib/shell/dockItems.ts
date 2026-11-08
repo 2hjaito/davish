@@ -2,6 +2,21 @@
 // with a window open that are not pinned, so a minimized window of an
 // app opened from Launchpad can always be brought back.
 
+/**
+ * The apps pinned on a first run: the everyday ones. The rest are in
+ * Launchpad and Spotlight, and can be pinned from there.
+ */
+export const DEFAULT_PINS: readonly string[] = [
+  'terminal',
+  'files',
+  'monitor',
+  'services',
+  'docker',
+  'logs',
+  'editor',
+  'settings',
+]
+
 /** The apps to show, pinned first; ids no longer in all are skipped. */
 export function dockItems<T extends { id: string }>(
   all: readonly T[],
