@@ -636,7 +636,7 @@ const vi = {
           'Kéo thư mục từ Files vào để cd',
           'Mở lại phiên khi mất kết nối',
         ],
-        keys: ['⌘C / ⌘V: copy, dán', 'Ctrl+Shift+C / V ngoài macOS'],
+        keys: ['⌘C / ⌘V: copy, dán', 'Ctrl+Shift+C / V hoặc chuột phải ngoài macOS'],
         runs: ['Shell đăng nhập của user (giống ssh)'],
       },
       files: {
@@ -1244,6 +1244,10 @@ const vi = {
     openInFiles: 'Mở thư mục này trong Files',
     newTab: 'Tab mới',
     closeTab: 'Đóng tab',
+    menu: 'Thao tác terminal',
+    copy: 'Sao chép',
+    paste: 'Dán',
+    selectAll: 'Chọn tất cả',
     mockBanner:
       '\x1b[33mPhiên mô phỏng:\x1b[0m chưa kết nối SSH thật (có từ M2/M3). Gõ \x1b[1mhelp\x1b[0m để xem lệnh.',
   },

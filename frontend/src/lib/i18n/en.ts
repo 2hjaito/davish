@@ -647,7 +647,7 @@ const en = {
           'Drop a folder from Files to cd into it',
           'Reopen the session after a lost connection',
         ],
-        keys: ['⌘C / ⌘V: copy, paste', 'Ctrl+Shift+C / V outside macOS'],
+        keys: ['⌘C / ⌘V: copy, paste', 'Ctrl+Shift+C / V or right-click outside macOS'],
         runs: ['The user’s login shell (like ssh)'],
       },
       files: {
@@ -1266,6 +1266,10 @@ const en = {
     openInFiles: 'Open this folder in Files',
     newTab: 'New tab',
     closeTab: 'Close tab',
+    menu: 'Terminal actions',
+    copy: 'Copy',
+    paste: 'Paste',
+    selectAll: 'Select all',
     mockBanner:
       '\x1b[33mSimulated session:\x1b[0m no real SSH connection. Type \x1b[1mhelp\x1b[0m to see the commands.',
   },

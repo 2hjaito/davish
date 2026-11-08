@@ -6,8 +6,10 @@
   import { type ITheme, Terminal } from '@xterm/xterm'
   import { untrack } from 'svelte'
 
+  import { t as i18n } from '../../lib/i18n'
   import { isMac } from '../../lib/shell/platform'
   import { settings } from '../../lib/stores/settings.svelte'
+  import PopupMenu from '../../lib/ui/PopupMenu.svelte'
 
   interface Props {
     /** Whether this terminal is the visible tab; hidden ones keep their buffer. */
@@ -23,6 +25,8 @@
   let term: Terminal | undefined
   let fit: FitAddon | undefined
   let webgl: WebglAddon | undefined
+  /** The right-click menu, outside macOS. */
+  let menu = $state<{ x: number; y: number; selection: boolean } | null>(null)
 
   function token(name: string): string {
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
@@ -47,20 +51,34 @@
     }
   }
 
+  function copy() {
+    if (term?.hasSelection()) void navigator.clipboard.writeText(term.getSelection())
+  }
+
+  function paste() {
+    void navigator.clipboard.readText().then((text) => term?.paste(text))
+  }
+
   // Ctrl+Shift+C/V on Windows and Linux, where plain Ctrl+C must reach the shell.
-  // macOS uses ⌘C/⌘V through the native Edit menu.
+  // macOS uses ⌘C/⌘V through the native Edit menu. preventDefault matters:
+  // WebView2 reads Ctrl+Shift+V as "paste as plain text" and would fire a
+  // paste event that xterm handles too, pasting twice.
   function clipboardKeys(e: KeyboardEvent): boolean {
     if (isMac || e.type !== 'keydown' || !e.ctrlKey || !e.shiftKey) return true
     const key = e.key.toLowerCase()
-    if (key === 'c' && term?.hasSelection()) {
-      void navigator.clipboard.writeText(term.getSelection())
-      return false
-    }
-    if (key === 'v') {
-      void navigator.clipboard.readText().then((text) => term?.paste(text))
+    if ((key === 'c' && term?.hasSelection()) || key === 'v') {
+      e.preventDefault()
+      if (key === 'c') copy()
+      else paste()
       return false
     }
     return true
+  }
+
+  function openMenu(e: MouseEvent) {
+    if (isMac || !term) return
+    e.preventDefault()
+    menu = { x: e.clientX, y: e.clientY, selection: term.hasSelection() }
   }
 
   /**
@@ -141,8 +159,11 @@
       if (host?.offsetParent) f.fit()
     })
     ro.observe(host)
+    const h = host
+    h.addEventListener('contextmenu', openMenu)
 
     return () => {
+      h.removeEventListener('contextmenu', openMenu)
       ro.disconnect()
       t.dispose()
       term = undefined
@@ -186,6 +207,24 @@
 </script>
 
 <div class="host" class:hidden={!active} bind:this={host}></div>
+
+{#if menu}
+  <PopupMenu
+    x={menu.x}
+    y={menu.y}
+    label={i18n.terminal.menu}
+    actions={[
+      { label: i18n.terminal.copy, disabled: !menu.selection, run: copy },
+      { label: i18n.terminal.paste, run: paste },
+      null,
+      { label: i18n.terminal.selectAll, run: () => term?.selectAll() },
+    ]}
+    onclose={() => {
+      menu = null
+      term?.focus()
+    }}
+  />
+{/if}
 
 <style>
   .host {
