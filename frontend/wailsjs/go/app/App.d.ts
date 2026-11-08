@@ -8,8 +8,8 @@ import {deploy} from '../models';
 import {diag} from '../models';
 import {app} from '../models';
 import {disk} from '../models';
-import {docker} from '../models';
 import {fs} from '../models';
+import {docker} from '../models';
 import {git} from '../models';
 import {sshkeys} from '../models';
 import {lock} from '../models';
@@ -81,6 +81,16 @@ export function DiskClean(arg1:string,arg2:string,arg3:string):Promise<void>;
 export function DiskCleanups(arg1:string):Promise<Array<disk.Cleanup>>;
 
 export function DiskMounts(arg1:string):Promise<Array<disk.Mount>>;
+
+export function DiskOverview(arg1:string,arg2:string,arg3:string):Promise<disk.Overview>;
+
+export function DiskPlanRemove(arg1:string,arg2:string):Promise<fs.RemovePlan>;
+
+export function DiskPlanTruncate(arg1:string):Promise<disk.TruncatePlan>;
+
+export function DiskRemove(arg1:string,arg2:string,arg3:string):Promise<void>;
+
+export function DiskTruncate(arg1:string,arg2:string,arg3:string):Promise<void>;
 
 export function DiskUsage(arg1:string,arg2:string,arg3:string):Promise<disk.Usage>;
 

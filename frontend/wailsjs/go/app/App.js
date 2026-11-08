@@ -118,6 +118,26 @@ export function DiskMounts(arg1) {
   return window['go']['app']['App']['DiskMounts'](arg1);
 }
 
+export function DiskOverview(arg1, arg2, arg3) {
+  return window['go']['app']['App']['DiskOverview'](arg1, arg2, arg3);
+}
+
+export function DiskPlanRemove(arg1, arg2) {
+  return window['go']['app']['App']['DiskPlanRemove'](arg1, arg2);
+}
+
+export function DiskPlanTruncate(arg1) {
+  return window['go']['app']['App']['DiskPlanTruncate'](arg1);
+}
+
+export function DiskRemove(arg1, arg2, arg3) {
+  return window['go']['app']['App']['DiskRemove'](arg1, arg2, arg3);
+}
+
+export function DiskTruncate(arg1, arg2, arg3) {
+  return window['go']['app']['App']['DiskTruncate'](arg1, arg2, arg3);
+}
+
 export function DiskUsage(arg1, arg2, arg3) {
   return window['go']['app']['App']['DiskUsage'](arg1, arg2, arg3);
 }

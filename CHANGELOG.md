@@ -6,6 +6,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ### Thêm
 - Docker, Nginx, Git và Database: server chưa cài chương trình thì app báo rõ và hiện lệnh cài đúng cho bản Linux của server (apt, dnf, yum, apk), kèm bật dịch vụ. Nút "Chạy trong Terminal" gõ sẵn lệnh để bạn xem rồi tự nhấn Enter. Docker được cài bằng gói của distro và thêm bạn vào nhóm `docker` (app nói rõ nhóm này ngang quyền root, có nút kết nối lại). Cài xong, quay lại cửa sổ là app tự mở (#79). Tài khoản SSH không có quyền sudo thì app chỉ báo nhờ người quản trị cài, không hiện lệnh.
+- Ổ đĩa: mở một ổ là quét cả ổ một lần và hiện tổng quan: thanh chia thành thư mục đo được, file đã xóa còn bị giữ, phần chưa đo được và chỗ trống. Phần chưa đo được có lý do: thư mục user SSH không đọc được (kèm lệnh `sudo du` gõ sẵn vào Terminal), file đã xóa mà tiến trình nào còn giữ. Khi sudo không cần mật khẩu thì đo bằng root nên thấy đủ.
+- Ổ đĩa: thư mục dạng cây mở tại chỗ, tab File lớn (từ 50 MB). Xóa thư mục hoặc file, làm rỗng file log, sau khi xem đúng lệnh; từ 1 GB hoặc thư mục có nội dung thì gõ tên. Thư mục hệ thống, dữ liệu Docker và database, thư mục home không xóa được từ đây.
+- Dọn dẹp: Docker tách thành image không dùng, container dừng, cache build, volume (cảnh báo là dữ liệu) và log container quá 10 MB; thêm dump lỗi, file tạm cũ hơn 7 ngày, bản snap cũ, `~/.cache`, cache npm.
 
 ### Đổi
 - Dock lần đầu mở chỉ ghim các app dùng hằng ngày: Terminal, Tệp, Monitor, Services, Docker, Logs, Editor, Cài đặt. App khác mở từ Launchpad hoặc Spotlight và ghim thêm được như cũ. Ai đã tự ghim hoặc bỏ ghim thì Dock giữ nguyên.
@@ -13,6 +16,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ### Sửa
 - Git: server chưa cài git từng hiện "Chưa có repo"; giờ báo chưa cài và đề nghị cài.
 - Lệnh dài trong khung "cần quyền root" không còn bị ngắt dòng giữa chữ.
+- Dọn dẹp Docker từng chạy `docker system prune -f`, chỉ xóa image treo, nên ổ vẫn đầy dù app báo lấy lại được nhiều GB. Giờ mỗi loại có lệnh riêng đúng với dung lượng hiện ra.
 
 ## [1.6.2] - 2026-11-08
 

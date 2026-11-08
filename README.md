@@ -58,7 +58,7 @@ Nothing to install on the server.
 
 - [Ports & tunnels](FEATURES.md#ports--tunnels): listening ports, tunnels to `127.0.0.1`
 - [Browser](FEATURES.md#browser): open the server's `localhost:3000` inside Davish
-- [Disk](FEATURES.md#disk): what fills the disk, cleanups
+- [Disk](FEATURES.md#disk): where the space goes as a tree, what could not be measured and why, delete and clean up
 - [Security](FEATURES.md#security): failed logins by address, ufw, fail2ban
 - [SSH keys](FEATURES.md#ssh-keys): authorized_keys, deploy keys, your own keys
 - [~/.ssh/config and ProxyJump](FEATURES.md#sshconfig-and-proxyjump): import hosts, connect through a bastion

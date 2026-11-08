@@ -1,7 +1,8 @@
 <script lang="ts">
   import { untrack } from 'svelte'
+  import { SvelteSet } from 'svelte/reactivity'
 
-  import type { Cleanup, Mount, Usage } from '../../lib/api/disk'
+  import type { Cleanup, Mount, Overview, Usage } from '../../lib/api/disk'
   import { toUserError } from '../../lib/api/errors'
   import { formatBytes } from '../../lib/format'
   import { t } from '../../lib/i18n'
@@ -17,10 +18,22 @@
   import { openFilesAt, openTerminalAt, selectRequests } from '../../lib/wm/intents.svelte'
   import type { AppProps } from '../types'
   import { backend } from './backend'
+  import OverviewPanel from './OverviewPanel.svelte'
+  import RemoveDialog, { type RemoveTarget } from './RemoveDialog.svelte'
+  import {
+    buildTree,
+    matchingRows,
+    nameOf,
+    parentOf,
+    type Row,
+    visibleRows,
+    withoutPath,
+  } from './tree'
 
   let { win }: AppProps = $props()
 
   const ctx = getWindowContext()
+  const d = t.disk
   const CLEAN = ':clean'
 
   let filter = $state('/')
@@ -29,23 +42,28 @@
   let error = $state('')
   let loading = $state(false)
 
-  // Measurements by folder, so going back up shows what was measured.
-  let usages = $state.raw<Record<string, Usage>>({})
-  let dir = $state('/')
+  // One overview per mount, then the folders measured one level at a time
+  // below its depth.
+  let overviews = $state.raw<Record<string, Overview>>({})
+  let measured = $state.raw<Record<string, Usage>>({})
+  const expanded = new SvelteSet<string>()
   let scanning = $state('')
+  let measuring = $state('')
+  let tab = $state<'dirs' | 'files'>('dirs')
+  /** A folder or file path, or a cleanup id. */
   let selected = $state<string | null>(null)
 
   let cleanups = $state.raw<Cleanup[] | null>(null)
   let confirming = $state<Cleanup | null>(null)
+  let removing = $state<RemoveTarget | null>(null)
   let note = $state('')
 
   const server = $derived(servers.list.find((s) => s.id === win.serverID))
   const connected = $derived(server?.state === 'connected')
-  const usage = $derived(usages[dir])
   const isClean = $derived(filter === CLEAN)
+  const overview = $derived(isClean ? undefined : overviews[filter])
 
   const pct = (m: Mount) => Math.round((m.used / m.total) * 100)
-  const base = (p: string) => p.slice(p.lastIndexOf('/') + 1) || p
 
   const filters = $derived<FilterItem[]>([
     ...(mounts ?? []).map((m) => ({
@@ -55,23 +73,35 @@
       count: pct(m),
       alert: pct(m) >= 85,
     })),
-    { id: CLEAN, label: t.disk.clean, icon: 'trash', count: cleanups?.length },
+    { id: CLEAN, label: d.clean, icon: 'trash', count: cleanups?.length },
   ])
 
-  const entries = $derived.by(() => {
+  const tree = $derived(buildTree(overview?.dirs ?? [], measured))
+  const rows = $derived.by<Row[]>(() => {
+    if (!overview) return []
+    if (query.trim()) return matchingRows(filter, tree, query)
+    return visibleRows(filter, overview.measured, tree, measured, expanded)
+  })
+  const files = $derived.by(() => {
     const q = query.trim().toLowerCase()
-    return (usage?.entries ?? []).filter((e) => !q || base(e.path).toLowerCase().includes(q))
+    return (overview?.files ?? []).filter((f) => !q || f.path.toLowerCase().includes(q))
   })
   const shownCleanups = $derived(
     (cleanups ?? []).filter(
-      (c) => !query.trim() || t.disk.cleanups[c.id]?.title.toLowerCase().includes(query.trim()),
+      (c) => !query.trim() || d.cleanups[c.id]?.title.toLowerCase().includes(query.trim()),
     ),
   )
-  const largest = $derived(Math.max(1, ...entries.map((e) => e.size)))
-  const current = $derived(
-    isClean
-      ? shownCleanups.find((c) => c.id === selected)
-      : entries.find((e) => e.path === selected),
+  const cleanable = $derived((cleanups ?? []).reduce((s, c) => s + c.bytes, 0))
+
+  const selCleanup = $derived(isClean ? shownCleanups.find((c) => c.id === selected) : undefined)
+  const selFile = $derived(
+    !isClean && tab === 'files' ? files.find((f) => f.path === selected) : undefined,
+  )
+  const selDir = $derived(
+    !isClean && tab === 'dirs' ? rows.find((r) => r.path === selected) : undefined,
+  )
+  const footer = $derived(
+    isClean ? d.count(shownCleanups.length) : d.count(tab === 'files' ? files.length : rows.length),
   )
 
   const attempt = supersedes()
@@ -101,16 +131,17 @@
     }
   }
 
-  async function measure(path: string) {
+  async function scan(mount: string) {
     if (scanning) return
     const token = `${win.id}-${Date.now()}`
     scanning = token
-    dir = path
-    selected = null
     error = ''
     try {
-      const u = await backend.usage(win.serverID, path, token)
-      usages = { ...usages, [path]: u }
+      const o = await backend.overview(win.serverID, mount, token)
+      overviews = { ...overviews, [mount]: o }
+      measured = Object.fromEntries(
+        Object.entries(measured).filter(([p]) => !p.startsWith(mount === '/' ? '/' : mount + '/')),
+      )
     } catch (e) {
       // A cancel is not an error to show.
       if (scanning === '') return
@@ -121,23 +152,33 @@
   }
 
   function cancel() {
-    const token = scanning
+    const token = scanning || measuring
     scanning = ''
-    void backend.cancel(token)
+    measuring = ''
+    if (token) void backend.cancel(token)
   }
 
-  function up() {
-    if (dir === filter) return
-    const parent = dir.slice(0, dir.lastIndexOf('/')) || '/'
-    dir = parent.length < filter.length ? filter : parent
-    selected = null
+  // Below the overview's depth a folder is measured when opened.
+  async function measureDir(path: string) {
+    if (measuring) return
+    const token = `${win.id}-m-${Date.now()}`
+    measuring = token
+    try {
+      const u = await backend.usage(win.serverID, path, token)
+      measured = { ...measured, [path]: u }
+      expanded.add(path)
+    } catch (e) {
+      if (measuring === '') return
+      error = toUserError(e).message
+    } finally {
+      if (measuring === token) measuring = ''
+    }
   }
 
-  function open(path: string) {
-    if (usages[path]) {
-      dir = path
-      selected = null
-    } else void measure(path)
+  function toggle(r: Row) {
+    if (expanded.has(r.path)) expanded.delete(r.path)
+    else if (!r.known) void measureDir(r.path)
+    else if (r.hasChildren) expanded.add(r.path)
   }
 
   async function clean(c: Cleanup) {
@@ -145,20 +186,40 @@
     note = ''
     try {
       await backend.clean(win.serverID, c.id, c.command)
-      note = t.disk.done
+      note = d.done
       void refresh()
     } catch (e) {
       note = toUserError(e).message
     }
   }
 
-  // A new mount starts at its root; the cleanup list keeps its own state.
+  function removed(tg: RemoveTarget) {
+    removing = null
+    selected = null
+    note = tg.op === 'remove' ? d.removed(nameOf(tg.path)) : d.truncated(nameOf(tg.path))
+    const o = overviews[filter]
+    if (o) overviews = { ...overviews, [filter]: withoutPath(o, tg.path, tg.size) }
+    measured = Object.fromEntries(
+      Object.entries(measured)
+        .filter(([p]) => p !== tg.path && !p.startsWith(tg.path + '/'))
+        .map(([p, u]) => [p, { ...u, entries: u.entries.filter((e) => e.path !== tg.path) }]),
+    )
+    void refresh()
+  }
+
+  function showFile(path: string) {
+    tab = 'files'
+    query = ''
+    selected = path
+  }
+
+  // A new mount starts with its overview; the cleanup list keeps its own.
   $effect(() => {
     const f = filter
     untrack(() => {
       selected = null
       note = ''
-      if (f !== CLEAN) dir = f
+      if (f !== CLEAN && connected && mounts && !overviews[f]) void scan(f)
     })
   })
 
@@ -172,7 +233,11 @@
   })
 
   $effect(() => {
-    if (connected) untrack(() => void refresh())
+    if (connected)
+      untrack(async () => {
+        await refresh()
+        if (!isClean && !overviews[filter]) void scan(filter)
+      })
   })
   let wasFocused = untrack(() => ctx.focused)
   $effect(() => {
@@ -182,17 +247,17 @@
   })
 
   function onListKey(e: KeyboardEvent) {
-    if (isClean) return
-    if (e.key === 'Enter' && selected) open(selected)
-    else if (e.key === 'Backspace') up()
+    const r = selDir
+    if (!r) return
+    if (e.key === 'Enter' || (e.key === 'ArrowRight' && !expanded.has(r.path))) toggle(r)
+    else if (e.key === 'ArrowLeft' && expanded.has(r.path)) expanded.delete(r.path)
+    else if (e.key === 'ArrowLeft' && parentOf(r.path) !== filter) selected = parentOf(r.path)
     else return
     e.preventDefault()
   }
 
   useAppMenu(
-    () => [
-      { label: t.disk.measure, disabled: !!scanning || isClean, run: () => void measure(dir) },
-    ],
+    () => [{ label: d.scan, disabled: !!scanning || isClean, run: () => void scan(filter) }],
     () => void refresh(),
   )
 </script>
@@ -201,25 +266,25 @@
   group={server?.name ?? ''}
   {filters}
   bind:filter
-  sidebarLabel={t.disk.sections}
-  searchLabel={t.disk.search}
+  sidebarLabel={d.sections}
+  searchLabel={d.search}
   bind:query
   refreshing={!connected || loading}
   ready={connected && mounts !== null}
-  footer={isClean ? t.disk.count(shownCleanups.length) : t.disk.count(entries.length)}
+  {footer}
   {error}
   listWidth="55%"
   onrefresh={() => void refresh()}
 >
   {#snippet placeholder()}
     {#if !connected}
-      <Empty icon="server" title={t.disk.offline} hint={t.disk.offlineHint} />
+      <Empty icon="server" title={d.offline} hint={d.offlineHint} />
     {:else}
       <LoadState
         serverID={win.serverID}
         {error}
         icon="disk"
-        loading={t.disk.loading}
+        loading={d.loading}
         onretry={() => void refresh()}
       />
     {/if}
@@ -229,47 +294,82 @@
     <div class="rows" onkeydown={onListKey}>
       {#if isClean}
         {#if cleanups === null}
-          <p class="muted pad">{t.disk.cleanLoading}</p>
+          <p class="muted pad">{d.cleanLoading}</p>
         {:else if shownCleanups.length === 0}
-          <p class="muted pad">{t.disk.cleanEmpty}</p>
+          <p class="muted pad">{d.cleanEmpty}</p>
         {/if}
         {#each shownCleanups as c (c.id)}
           <button class="row" class:sel={selected === c.id} onclick={() => (selected = c.id)}>
-            <span class="name">{t.disk.cleanups[c.id]?.title ?? c.id}</span>
+            <span class="name">{d.cleanups[c.id]?.title ?? c.id}</span>
             <span class="size">{formatBytes(c.bytes)}</span>
           </button>
         {/each}
       {:else}
         <div class="crumb">
-          <button class="tool" aria-label={t.disk.up} disabled={dir === filter} onclick={up}>
-            <Icon name="arrowRight" size={13} />
-          </button>
-          <span class="path mono" title={dir}>{dir}</span>
-          {#if scanning}
-            <button class="btn small" onclick={cancel}>{t.disk.cancel}</button>
+          <div class="seg" role="group">
+            <button class:on={tab === 'dirs'} onclick={() => ((tab = 'dirs'), (selected = null))}
+              >{d.tabs.dirs}</button
+            >
+            <button class:on={tab === 'files'} onclick={() => ((tab = 'files'), (selected = null))}
+              >{d.tabs.files}</button
+            >
+          </div>
+          <span class="spacer"></span>
+          {#if scanning || measuring}
+            <button class="btn small" onclick={cancel}>{d.cancel}</button>
           {:else}
-            <button class="btn small" onclick={() => void measure(dir)}>{t.disk.measure}</button>
+            <button class="btn small" onclick={() => void scan(filter)}>{d.scan}</button>
           {/if}
         </div>
         {#if scanning}
-          <p class="muted pad">{t.disk.measuring}</p>
-        {:else if !usage}
-          <p class="muted pad">{t.disk.empty}</p>
-          <p class="hint pad">{t.disk.measureHint}</p>
-        {:else}
-          {#if usage.partial}<p class="warn pad">{t.disk.partial}</p>{/if}
-          {#if entries.length === 0}<p class="muted pad">{t.disk.noChildren}</p>{/if}
-          {#each entries as e (e.path)}
-            <button
-              class="row"
-              class:sel={selected === e.path}
-              onclick={() => (selected = e.path)}
-              ondblclick={() => open(e.path)}
-            >
-              <span class="name">{base(e.path)}</span>
-              <span class="bar"><span style:width="{(e.size / largest) * 100}%"></span></span>
-              <span class="size">{formatBytes(e.size)}</span>
+          <p class="muted pad">{d.scanning}</p>
+        {:else if !overview}
+          <p class="muted pad">{d.loading}</p>
+        {:else if tab === 'files'}
+          {#if files.length === 0}<p class="muted pad">{d.noFiles}</p>{/if}
+          {#each files as f (f.path)}
+            <button class="row" class:sel={selected === f.path} onclick={() => (selected = f.path)}>
+              <span class="name" title={f.path}
+                >{nameOf(f.path)} <span class="dim">{parentOf(f.path)}</span></span
+              >
+              <span class="size">{formatBytes(f.size)}</span>
             </button>
+          {/each}
+        {:else}
+          {#each rows as r (r.path)}
+            {@const open = expanded.has(r.path)}
+            <div
+              class="row"
+              class:sel={selected === r.path}
+              style:padding-left="{10 + r.depth * 16}px"
+              role="treeitem"
+              aria-selected={selected === r.path}
+              aria-expanded={r.hasChildren || !r.known ? open : undefined}
+              tabindex="0"
+              onclick={() => (selected = r.path)}
+              ondblclick={() => toggle(r)}
+              onkeydown={(e) => e.key === ' ' && (e.preventDefault(), (selected = r.path))}
+            >
+              {#if !query.trim() && (r.hasChildren || !r.known)}
+                <button
+                  class="chev"
+                  class:open
+                  aria-label={open ? d.collapse : d.expand}
+                  disabled={!!measuring && !r.known}
+                  onclick={(e) => (e.stopPropagation(), toggle(r))}
+                >
+                  <Icon name="chevronRight" size={12} />
+                </button>
+              {:else}
+                <span class="chev"></span>
+              {/if}
+              <span class="name" title={r.path}>{r.name}</span>
+              {#if measuring && !r.known && !open}<span class="dim">{d.measuring}</span>{/if}
+              <span class="bar"
+                ><span style:width="{(r.size / Math.max(1, r.parentSize)) * 100}%"></span></span
+              >
+              <span class="size">{formatBytes(r.size)}</span>
+            </div>
           {/each}
         {/if}
       {/if}
@@ -277,48 +377,75 @@
   {/snippet}
   {#snippet detail()}
     <div class="detail">
-      {#if isClean && current && 'command' in current}
-        {@const c = current}
-        <h3>{t.disk.cleanups[c.id]?.title ?? c.id}</h3>
+      {#if selCleanup}
+        {@const c = selCleanup}
+        <h3>{d.cleanups[c.id]?.title ?? c.id}</h3>
         <p>
-          {t.disk.frees(formatBytes(c.bytes))}{#if c.count}
-            · {t.disk.files(c.count)}{/if}
+          {d.frees(formatBytes(c.bytes))}{#if c.count}{` · ${d.files(c.count)}`}{/if}
         </p>
-        <pre class="command">{c.root ? `sudo ${c.command}` : c.command}</pre>
+        {#if c.danger}<p class="danger">{d.dangerous}</p>{/if}
+        <pre class="command">{c.root ? c.sudoCommand : c.command}</pre>
         {#if c.root}
-          <p class="hint">{t.disk.needsRoot}</p>
+          <p class="hint">{d.needsRoot}</p>
           <button
             class="btn btn-primary"
-            onclick={() => openTerminalAt(win.serverID, undefined, `sudo ${c.command}`)}
-            >{t.disk.toTerminal}</button
+            onclick={() => openTerminalAt(win.serverID, undefined, c.sudoCommand)}
+            >{d.toTerminal}</button
           >
         {:else}
-          <button class="btn btn-danger" onclick={() => (confirming = c)}>{t.disk.run}</button>
+          <button class="btn btn-danger" onclick={() => (confirming = c)}>{d.run}</button>
         {/if}
-      {:else if !isClean && current && 'path' in current}
-        {@const e = current}
-        <h3 class="mono">{e.path}</h3>
-        <p>{formatBytes(e.size)}</p>
+      {:else if selDir && overview}
+        {@const r = selDir}
+        <h3 class="mono">{r.path}</h3>
+        <p>
+          {formatBytes(r.size)} · {d.ofDisk(Math.round((r.size / overview.mount.total) * 100))}
+          · {d.share(Math.round((r.size / Math.max(1, r.parentSize)) * 100))}
+        </p>
         <div class="actions">
-          <button class="btn btn-primary" disabled={!!scanning} onclick={() => open(e.path)}
-            >{t.disk.drill}</button
+          <button class="btn" onclick={() => openFilesAt(win.serverID, r.path)}
+            >{d.openFiles}</button
           >
-          <button class="btn" onclick={() => openFilesAt(win.serverID, e.path)}
-            >{t.disk.openFiles}</button
+          {#if !r.known || r.path in measured}
+            <button class="btn" disabled={!!measuring} onclick={() => void measureDir(r.path)}
+              >{d.measureHere}</button
+            >
+          {/if}
+          <button
+            class="btn btn-danger"
+            onclick={() => (removing = { path: r.path, size: r.size, op: 'remove' })}
+            >{d.removeAction}</button
           >
         </div>
-      {:else if !isClean}
-        {@const m = mounts?.find((x) => x.path === filter)}
-        {#if m}
-          <h3 class="mono">{m.path}</h3>
-          <p>{t.disk.used(formatBytes(m.used), formatBytes(m.total), pct(m))}</p>
-          <div class="meter" class:alert={pct(m) >= 85}>
-            <span style:width="{pct(m)}%"></span>
-          </div>
-        {/if}
-        <p class="muted">{t.disk.noSelection}</p>
+      {:else if selFile && overview}
+        {@const f = selFile}
+        <h3 class="mono">{f.path}</h3>
+        <p>{formatBytes(f.size)} · {d.ofDisk(Math.round((f.size / overview.mount.total) * 100))}</p>
+        <div class="actions">
+          <button class="btn" onclick={() => openFilesAt(win.serverID, parentOf(f.path))}
+            >{d.openFolder}</button
+          >
+          <button
+            class="btn"
+            onclick={() => (removing = { path: f.path, size: f.size, op: 'truncate' })}
+            >{d.truncateAction}</button
+          >
+          <button
+            class="btn btn-danger"
+            onclick={() => (removing = { path: f.path, size: f.size, op: 'remove' })}
+            >{d.removeAction}</button
+          >
+        </div>
+      {:else if overview}
+        <OverviewPanel
+          serverID={win.serverID}
+          {overview}
+          {cleanable}
+          onclean={() => (filter = CLEAN)}
+          onfile={showFile}
+        />
       {:else}
-        <p class="muted">{t.disk.noSelection}</p>
+        <p class="muted">{isClean ? d.noSelection : d.scanning}</p>
       {/if}
       {#if note}<p class="note">{note}</p>{/if}
     </div>
@@ -327,11 +454,18 @@
 
 <ConfirmCommand
   command={confirming?.command ?? null}
-  title={confirming ? (t.disk.cleanups[confirming.id]?.title ?? '') : ''}
-  body={confirming ? (t.disk.cleanups[confirming.id]?.body ?? '') : ''}
-  action={t.disk.run}
+  title={confirming ? (d.cleanups[confirming.id]?.title ?? '') : ''}
+  body={confirming ? (d.cleanups[confirming.id]?.body ?? '') : ''}
+  action={d.run}
   onclose={() => (confirming = null)}
   onconfirm={() => confirming && void clean(confirming)}
+/>
+
+<RemoveDialog
+  serverID={win.serverID}
+  target={removing}
+  onclose={() => (removing = null)}
+  ondone={removed}
 />
 
 <style>
@@ -348,21 +482,58 @@
     padding: 4px 4px 8px;
   }
 
-  .crumb .tool {
-    border: 0;
-    background: none;
-    padding: 3px;
-    rotate: 180deg;
-    display: flex;
+  .spacer {
+    flex: 1;
   }
 
-  .path {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .seg {
+    display: flex;
+    padding: 2px;
+    border-radius: var(--control-radius);
+    background: var(--fill-soft);
+  }
+
+  .seg button {
+    padding: 2px 10px;
+    border: 0;
+    border-radius: calc(var(--control-radius) - 2px);
+    background: none;
     font-size: var(--text-sm);
+    color: var(--fg-muted);
+  }
+
+  .seg button.on {
+    background: var(--card-bg);
+    color: var(--fg);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 12%);
+  }
+
+  .chev {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    transition: rotate var(--dur-fast) var(--ease-out);
+  }
+
+  .chev.open {
+    rotate: 90deg;
+  }
+
+  .dim {
+    color: var(--fg-subtle);
+    font-size: var(--text-xs);
+  }
+
+  .row.sel .dim {
+    color: inherit;
+    opacity: 0.75;
   }
 
   .small {
@@ -373,7 +544,9 @@
   .row {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    flex-shrink: 0;
+    cursor: default;
     height: 30px;
     padding: 0 10px;
     border: 0;
@@ -404,8 +577,7 @@
     overflow: hidden;
   }
 
-  .bar span,
-  .meter span {
+  .bar span {
     display: block;
     height: 100%;
     background: var(--accent);
@@ -435,9 +607,9 @@
     font-size: var(--text-xs);
   }
 
-  .warn {
-    color: var(--warn);
-    font-size: var(--text-xs);
+  .danger {
+    color: var(--danger);
+    font-size: var(--text-sm);
   }
 
   .detail {
@@ -468,24 +640,12 @@
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     white-space: pre-wrap;
-    word-break: break-all;
+    overflow-wrap: anywhere;
   }
 
   .actions {
     display: flex;
     gap: 8px;
-  }
-
-  .meter {
-    align-self: stretch;
-    height: 8px;
-    border-radius: 4px;
-    background: var(--fill-track);
-    overflow: hidden;
-  }
-
-  .meter.alert span {
-    background: var(--danger);
   }
 
   .note {

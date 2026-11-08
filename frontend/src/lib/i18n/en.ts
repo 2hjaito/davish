@@ -185,12 +185,79 @@ const en = {
     needsRoot:
       'Needs root: Davish types the command into Terminal with sudo; check it, then press Enter.',
     toTerminal: 'Open Terminal with the command',
+    dangerous: 'This may delete real data, not only caches. Check before you clean it.',
+    tabs: { dirs: 'Folders', files: 'Large files' },
+    scan: 'Scan again',
+    scanning: 'Scanning the whole disk, this can take a minute or two…',
+    noFiles: 'No file of 50 MB or more.',
+    expand: 'Expand',
+    collapse: 'Collapse',
+    measureHere: 'Measure inside',
+    share: (pct: number) => `${pct}% of its folder`,
+    ofDisk: (pct: number) => `${pct}% of the disk`,
+    remove: 'Delete',
+    removeAction: 'Delete…',
+    truncate: 'Empty',
+    truncateAction: 'Empty the file…',
+    openFolder: 'Open its folder in Files',
+    working: 'Working…',
+    removed: (name: string) => `Deleted ${name}.`,
+    truncated: (name: string) => `Emptied ${name}.`,
+    removeTitle: (name: string) => `Delete “${name}”?`,
+    truncateTitle: (name: string) => `Empty “${name}”?`,
+    removeFile: (size: string) =>
+      `The file (${size}) is deleted from the server for good; there is no trash. Command to run:`,
+    removeDir: (size: string) =>
+      `The folder and everything in it (${size}) are deleted from the server for good; there is no trash. Command to run:`,
+    truncateBody:
+      'The file’s content is removed but the file stays, so a program writing it (such as a log) carries on. Command to run:',
+    protected:
+      'Disk does not delete system folders, database data or home folders. Use Clean up or the app that owns them.',
+    ov: {
+      asRoot: 'measured as root (sudo -n)',
+      barLabel: 'Disk space by part',
+      measured: 'Measured folders',
+      held: 'Deleted files still open',
+      unmeasured: 'Not measured',
+      free: 'Free',
+      partial: 'The scan ran out of time, so some large folders may be missing.',
+      unmeasuredTitle: (size: string) => `${size} not measured`,
+      unreadableBody:
+        'This SSH user cannot read the folders below, so du skipped them, and that is often where a full disk is (Docker, databases, /root). Davish measures them only when sudo needs no password; you can measure them with sudo in a terminal.',
+      more: (n: number) => `and ${n} more`,
+      measureSudo: 'Measure with sudo in Terminal',
+      unmeasuredOther:
+        'This is in no measured folder: the scan may have run out of time, files may be half written, or the filesystem reserves it.',
+      heldTitle: (size: string) => `${size} held by deleted files`,
+      heldBody:
+        'These files were deleted, but a process still has them open, so the disk has not got the space back. Restart the process (or the service running it) to free it.',
+      heldBy: (cmd: string, pid: number) => `${cmd} (PID ${pid})`,
+      cleanTitle: (size: string) => `Clean up could free about ${size}`,
+      cleanOpen: 'See what to clean',
+      largest: 'Largest files',
+    },
     run: 'Clean…',
     done: 'Cleaned up.',
     cleanups: {
-      docker: {
-        title: 'Docker: stopped containers, unused images and build cache',
-        body: 'Removes stopped containers, unused networks, dangling images and build cache. Volumes are kept. Command to run:',
+      'docker-images': {
+        title: 'Docker: images no container uses',
+        body: 'Removes every image no container uses, tagged ones too; the next run pulls them again. Command to run:',
+      },
+      'docker-containers': {
+        title: 'Docker: stopped containers',
+        body: 'Removes stopped containers and their writable layers. Command to run:',
+      },
+      'docker-cache': {
+        title: 'Docker: build cache',
+        body: 'Removes the whole build cache; the next build is slower. Command to run:',
+      },
+      'docker-volumes': {
+        title: 'Docker: volumes no container uses',
+        body: 'Careful: a volume may hold the data (databases, uploads) of a removed container. Removing it loses that for good. Command to run:',
+      },
+      'docker-logs': {
+        title: 'Docker: container logs over 10 MB',
+        body: 'Empties the containers’ JSON log files in /var/lib/docker/containers; the containers keep running and logging. Command to run:',
       },
       journal: {
         title: 'systemd journal',
@@ -207,6 +274,26 @@ const en = {
       dnf: {
         title: 'dnf package cache',
         body: 'Removes dnf’s cached metadata and packages. Command to run:',
+      },
+      coredumps: {
+        title: 'Crash dumps',
+        body: 'Removes the dumps crashed programs left in /var/lib/systemd/coredump and /var/crash. Command to run:',
+      },
+      tmp: {
+        title: 'Temporary files older than 7 days',
+        body: 'Removes files in /tmp and /var/tmp nobody has read for 7 days. Command to run:',
+      },
+      snap: {
+        title: 'Old snap revisions',
+        body: 'Removes the disabled snap revisions snap keeps after each update. Command to run:',
+      },
+      'home-cache': {
+        title: 'Caches in ~/.cache',
+        body: 'Removes programs’ caches (pip, yarn, build tools…); they rebuild them when needed. Command to run:',
+      },
+      npm: {
+        title: 'npm cache',
+        body: 'Removes the npm packages downloaded into ~/.npm. Command to run:',
       },
     } as Record<string, { title: string; body: string }>,
   },
@@ -849,16 +936,20 @@ const en = {
         ],
       },
       disk: {
-        does: 'What fills the disk: measure one folder at a time, drill down level by level; cleanup suggestions with the space they free.',
+        does: 'Where a disk’s space goes: one scan of the whole disk, as a tree and the largest files, with what could not be measured and deleted files still held; clean up, delete or empty files.',
         actions: [
-          'Measure a folder, double-click to drill down',
-          'Clean Docker, the journal, old logs, package caches',
+          'Overview: the disk split by part, why some is not measured, deleted files still open',
+          'Folder tree: click the arrow or double-click to open; deeper levels are measured when opened',
+          'Large files: files from 50 MB, empty (logs) or delete',
+          'Clean up: Docker (images, containers, build cache, volumes, logs), the journal, old logs, package caches, /tmp, snap, ~/.cache, npm',
+          'Delete a folder or file after seeing the exact command; from 1 GB or a folder with content, type its name; system folders are refused',
         ],
-        keys: ['Enter: drill down', 'Backspace: up to the parent folder'],
+        keys: ['Enter, →: open a folder', '←: collapse, up to the parent'],
         runs: [
-          'df, du -x -d 1 (when you click Measure)',
-          'docker system df, journalctl --disk-usage, find /var/log',
-          'cleanup commands (with confirmation; through Terminal when root is needed)',
+          'df, du -x -d 3, find -size +50M, /proc/*/fd (through sudo -n when it needs no password)',
+          'du -x -d 1 when opening a deeper folder',
+          'docker system df, journalctl --disk-usage, find',
+          'rm, truncate, cleanup commands (with confirmation; through Terminal when root is needed)',
         ],
       },
       ports: {

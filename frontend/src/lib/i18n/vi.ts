@@ -197,12 +197,79 @@ const vi = {
     files: (n: number) => `${n} file`,
     needsRoot: 'Lệnh cần root: Davish gõ sẵn vào Terminal với sudo, bạn xem rồi tự nhấn Enter.',
     toTerminal: 'Mở Terminal với lệnh',
+    dangerous: 'Mục này có thể xóa dữ liệu thật, không chỉ cache. Kiểm tra kỹ trước khi dọn.',
+    tabs: { dirs: 'Thư mục', files: 'File lớn' },
+    scan: 'Quét lại',
+    scanning: 'Đang quét cả ổ đĩa, có thể mất một hai phút…',
+    noFiles: 'Không có file nào từ 50 MB trở lên.',
+    expand: 'Mở rộng',
+    collapse: 'Thu gọn',
+    measureHere: 'Đo bên trong',
+    share: (pct: number) => `${pct}% thư mục cha`,
+    ofDisk: (pct: number) => `${pct}% ổ đĩa`,
+    remove: 'Xóa',
+    removeAction: 'Xóa…',
+    truncate: 'Làm rỗng',
+    truncateAction: 'Làm rỗng file…',
+    openFolder: 'Mở thư mục chứa trong Files',
+    working: 'Đang làm…',
+    removed: (name: string) => `Đã xóa ${name}.`,
+    truncated: (name: string) => `Đã làm rỗng ${name}.`,
+    removeTitle: (name: string) => `Xóa “${name}”?`,
+    truncateTitle: (name: string) => `Làm rỗng “${name}”?`,
+    removeFile: (size: string) =>
+      `File (${size}) sẽ bị xóa hẳn khỏi server, không có thùng rác. Lệnh sẽ chạy:`,
+    removeDir: (size: string) =>
+      `Thư mục và mọi thứ bên trong (${size}) sẽ bị xóa hẳn khỏi server, không có thùng rác. Lệnh sẽ chạy:`,
+    truncateBody:
+      'Nội dung file bị xóa, file vẫn còn nên chương trình đang ghi (như log) vẫn ghi tiếp. Lệnh sẽ chạy:',
+    protected:
+      'Ổ đĩa không xóa thư mục hệ thống, dữ liệu database hay thư mục home. Dùng mục Dọn dẹp hoặc app tương ứng.',
+    ov: {
+      asRoot: 'đo bằng root (sudo -n)',
+      barLabel: 'Dung lượng ổ đĩa theo phần',
+      measured: 'Thư mục đo được',
+      held: 'File đã xóa còn mở',
+      unmeasured: 'Chưa đo được',
+      free: 'Còn trống',
+      partial: 'Quét hết giờ nên số liệu chưa đủ; các thư mục lớn có thể thiếu.',
+      unmeasuredTitle: (size: string) => `${size} chưa đo được`,
+      unreadableBody:
+        'User SSH này không đọc được các thư mục dưới đây nên du bỏ qua, mà chỗ ổ đầy thường nằm ở đây (Docker, database, /root). Davish chỉ đo đủ khi sudo không cần mật khẩu; bạn có thể tự đo bằng sudo trong Terminal.',
+      more: (n: number) => `và ${n} thư mục khác`,
+      measureSudo: 'Đo bằng sudo trong Terminal',
+      unmeasuredOther:
+        'Phần này không nằm trong thư mục nào đo được: có thể do quét hết giờ, file đang ghi dở hoặc dung lượng dành riêng của hệ thống file.',
+      heldTitle: (size: string) => `${size} bị giữ bởi file đã xóa`,
+      heldBody:
+        'Các file này đã bị xóa nhưng tiến trình vẫn còn mở nên ổ chưa được trả lại chỗ. Khởi động lại tiến trình (hoặc dịch vụ chạy nó) để lấy lại.',
+      heldBy: (cmd: string, pid: number) => `${cmd} (PID ${pid})`,
+      cleanTitle: (size: string) => `Dọn dẹp lấy lại được khoảng ${size}`,
+      cleanOpen: 'Xem gợi ý dọn',
+      largest: 'File lớn nhất',
+    },
     run: 'Dọn…',
     done: 'Đã dọn xong.',
     cleanups: {
-      docker: {
-        title: 'Docker: container dừng, image và cache build không dùng',
-        body: 'Xóa container đã dừng, network không dùng, image treo và cache build. Volume được giữ lại. Lệnh sẽ chạy:',
+      'docker-images': {
+        title: 'Docker: image không container nào dùng',
+        body: 'Xóa mọi image không có container nào dùng, kể cả image có tag; lần chạy sau sẽ tải lại. Lệnh sẽ chạy:',
+      },
+      'docker-containers': {
+        title: 'Docker: container đã dừng',
+        body: 'Xóa các container đã dừng cùng lớp ghi của chúng. Lệnh sẽ chạy:',
+      },
+      'docker-cache': {
+        title: 'Docker: cache build',
+        body: 'Xóa toàn bộ cache build; lần build sau chậm hơn. Lệnh sẽ chạy:',
+      },
+      'docker-volumes': {
+        title: 'Docker: volume không container nào dùng',
+        body: 'Cẩn thận: volume có thể chứa dữ liệu (database, file tải lên) của container đã xóa. Xóa là mất hẳn. Lệnh sẽ chạy:',
+      },
+      'docker-logs': {
+        title: 'Docker: log container quá 10 MB',
+        body: 'Làm rỗng file log JSON của container trong /var/lib/docker/containers; container vẫn chạy và ghi tiếp. Lệnh sẽ chạy:',
       },
       journal: {
         title: 'Journal của systemd',
@@ -214,6 +281,26 @@ const vi = {
       },
       apt: { title: 'Cache gói apt', body: 'Xóa các gói .deb đã tải về. Lệnh sẽ chạy:' },
       dnf: { title: 'Cache gói dnf', body: 'Xóa cache metadata và gói của dnf. Lệnh sẽ chạy:' },
+      coredumps: {
+        title: 'Dump lỗi (core dump)',
+        body: 'Xóa các bản dump khi chương trình bị crash trong /var/lib/systemd/coredump và /var/crash. Lệnh sẽ chạy:',
+      },
+      tmp: {
+        title: 'File tạm cũ hơn 7 ngày',
+        body: 'Xóa file trong /tmp và /var/tmp không ai đọc suốt 7 ngày. Lệnh sẽ chạy:',
+      },
+      snap: {
+        title: 'Bản snap cũ',
+        body: 'Gỡ các bản snap cũ đã tắt (snap giữ lại sau mỗi lần cập nhật). Lệnh sẽ chạy:',
+      },
+      'home-cache': {
+        title: 'Cache trong ~/.cache',
+        body: 'Xóa cache của các chương trình (pip, yarn, trình build…); chúng tự tạo lại khi cần. Lệnh sẽ chạy:',
+      },
+      npm: {
+        title: 'Cache npm',
+        body: 'Xóa các gói npm đã tải về trong ~/.npm. Lệnh sẽ chạy:',
+      },
     } as Record<string, { title: string; body: string }>,
   },
   ports: {
@@ -837,13 +924,20 @@ const vi = {
         ],
       },
       disk: {
-        does: 'Thứ gì chiếm ổ đĩa: đo từng thư mục một, đi sâu từng tầng; gợi ý dọn dẹp kèm dung lượng lấy lại.',
-        actions: ['Đo thư mục, bấm đúp để đi sâu', 'Dọn Docker, journal, log cũ, cache gói'],
-        keys: ['Enter: đi sâu', 'Backspace: lên thư mục cha'],
+        does: 'Ổ đĩa nặng ở đâu: quét cả ổ một lần, xem dạng cây và file lớn nhất, chỉ ra phần chưa đo được và file đã xóa còn bị giữ; dọn, xóa hoặc làm rỗng file.',
+        actions: [
+          'Tổng quan: thanh ổ đĩa theo phần, lý do phần chưa đo được, file đã xóa còn mở',
+          'Cây thư mục: bấm mũi tên hoặc bấm đúp để mở, tầng sâu được đo khi mở',
+          'File lớn: file từ 50 MB, làm rỗng (log) hoặc xóa',
+          'Dọn dẹp: Docker (image, container, cache build, volume, log), journal, log cũ, cache gói, /tmp, snap, ~/.cache, npm',
+          'Xóa thư mục hoặc file sau khi xem đúng lệnh; từ 1 GB hoặc thư mục có nội dung thì gõ tên; không xóa thư mục hệ thống',
+        ],
+        keys: ['Enter, →: mở thư mục', '←: thu gọn, lên thư mục cha'],
         runs: [
-          'df, du -x -d 1 (khi bấm Đo)',
-          'docker system df, journalctl --disk-usage, find /var/log',
-          'lệnh dọn dẹp (có xác nhận, cần root thì qua Terminal)',
+          'df, du -x -d 3, find -size +50M, /proc/*/fd (qua sudo -n nếu không cần mật khẩu)',
+          'du -x -d 1 khi mở thư mục sâu hơn',
+          'docker system df, journalctl --disk-usage, find',
+          'rm, truncate, lệnh dọn dẹp (có xác nhận, cần root thì qua Terminal)',
         ],
       },
       ports: {
