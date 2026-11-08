@@ -39,8 +39,6 @@
       cursor: token('--fg-on-dark'),
       cursorAccent: token('--app-terminal'),
       selectionBackground: token('--term-selection'),
-      selectionInactiveBackground: token('--term-selection-inactive'),
-      selectionForeground: token('--term-selection-fg'),
       scrollbarSliderBackground: token('--term-scrollbar'),
       scrollbarSliderHoverBackground: token('--term-scrollbar-hover'),
       scrollbarSliderActiveBackground: token('--term-scrollbar-hover'),
@@ -97,6 +95,33 @@
   }
 
   /**
+   * xterm's DOM renderer paints each selected cell with the selection colour in
+   * place of its own background, so coloured segments (a powerline prompt)
+   * lose their colour. It also draws the selection as a layer of its own, which
+   * the CSS puts under the rows: without the per-cell paint, the selection shows
+   * on plain cells and coloured ones keep their colours. This reaches into
+   * xterm 6 internals; if they move, xterm paints the selection as before.
+   */
+  function keepCellColors(t: Terminal) {
+    type Internals = {
+      _core?: {
+        _renderService?: {
+          _renderer?: { value?: { _rowFactory?: { handleSelectionChanged?: unknown } } }
+        }
+      }
+    }
+    const rows = (t as unknown as Internals)._core?._renderService?._renderer?.value?._rowFactory
+    if (typeof rows?.handleSelectionChanged === 'function') rows.handleSelectionChanged = () => {}
+  }
+
+  /** The selection layer is not redrawn on resize, so the selection is made again. */
+  function reselect(t: Terminal) {
+    const p = t.getSelectionPosition()
+    if (!p) return
+    t.select(p.start.x, p.start.y, (p.end.y - p.start.y) * t.cols + p.end.x - p.start.x)
+  }
+
+  /**
    * The DOM renderer draws on the transparent glass. WebGL (Settings → GPU)
    * bakes each cell's background into its glyph atlas, which misplaces any
    * coloured cell (selection, vim's status line, powerline prompts) on a
@@ -122,6 +147,7 @@
     webgl = undefined
     t.options.allowTransparency = true
     t.options.theme = theme(false)
+    keepCellColors(t)
     fitCursor(t)
   }
 
@@ -147,6 +173,8 @@
     t.loadAddon(f)
     t.attachCustomKeyEventHandler(clipboardKeys)
     t.open(host)
+    keepCellColors(t)
+    t.onResize(() => requestAnimationFrame(() => reselect(t)))
     setRenderer(
       t,
       untrack(() => settings.terminalGpu),
@@ -258,6 +286,12 @@
     box-shadow: none !important;
     background: linear-gradient(var(--fg-on-dark), var(--fg-on-dark)) no-repeat left center / 2px
       var(--cursor-h);
+  }
+
+  /* The selection layer goes under the rows: cells with a background of their own stay on top. */
+  .host :global(.xterm-screen .xterm-rows) {
+    position: relative;
+    z-index: 2;
   }
 
   /*

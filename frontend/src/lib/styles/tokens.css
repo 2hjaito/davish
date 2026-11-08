@@ -143,13 +143,8 @@
   --term-path: #8ab4ff;
   --term-warn: #ffb86b;
 
-  /* Terminal selection, tab hover. xterm blends the selection with the
-     terminal background, which is transparent on the glass, so a faint
-     colour turns into dark navy under coloured text: the selection is
-     near-solid and its text white, readable on any wallpaper. */
-  --term-selection: rgba(64, 112, 214, 0.92);
-  --term-selection-inactive: rgba(92, 98, 112, 0.92);
-  --term-selection-fg: #ffffff;
+  /* Terminal selection, tab hover */
+  --term-selection: rgba(138, 180, 255, 0.35);
   --term-bg-solid: #1d1f25;
   --term-scrollbar: rgba(255, 255, 255, 0.28);
   --term-scrollbar-hover: rgba(255, 255, 255, 0.45);
