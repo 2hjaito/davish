@@ -4,6 +4,13 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.6.2] - 2026-11-08
+
+### Sửa
+- Terminal trên Windows: `Ctrl+Shift+V` dán hai lần; giờ dán một lần. Chuột phải trong Terminal (Windows, Linux) mở menu Sao chép, Dán, Chọn tất cả (#82).
+- Terminal: bôi đen không còn đè lên các ô có nền màu riêng, như các đoạn của prompt powerline; màu chữ và màu nền của chúng giữ nguyên.
+- Terminal: con trỏ là thanh dọc đứng yên như Terminal của macOS, không còn nhấp nháy và không đổi thành khối rỗng khi mất focus.
+
 ## [1.6.1] - 2026-11-08
 
 ### Sửa
