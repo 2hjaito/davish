@@ -4,6 +4,13 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Docker, Nginx, Git và Database: server chưa cài chương trình thì app báo rõ và hiện lệnh cài đúng cho bản Linux của server (apt, dnf, yum, apk), kèm bật dịch vụ. Nút "Chạy trong Terminal" gõ sẵn lệnh để bạn xem rồi tự nhấn Enter. Docker được cài bằng gói của distro và thêm bạn vào nhóm `docker` (app nói rõ nhóm này ngang quyền root, có nút kết nối lại). Cài xong, quay lại cửa sổ là app tự mở (#79).
+
+### Sửa
+- Git: server chưa cài git từng hiện "Chưa có repo"; giờ báo chưa cài và đề nghị cài.
+- Lệnh dài trong khung "cần quyền root" không còn bị ngắt dòng giữa chữ.
+
 ## [1.6.2] - 2026-11-08
 
 ### Sửa

@@ -155,6 +155,10 @@
     color: var(--warn);
   }
 
+  .btn {
+    color: var(--fg);
+  }
+
   .link {
     padding: 0;
     border: 0;

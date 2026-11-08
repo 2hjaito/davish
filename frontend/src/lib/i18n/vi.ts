@@ -696,6 +696,7 @@ const vi = {
       docker: {
         does: 'Container với CPU, RAM, log, inspect; start, stop, restart; cảnh báo container khởi động lại liên tục.',
         actions: [
+          'Server chưa cài Docker: gõ sẵn lệnh cài theo bản Linux vào Terminal',
           'Chọn container để xem log và chi tiết',
           'Mở log trong app Logs',
           'Pull image hoặc chạy container mới từ form (gõ sẵn vào Terminal)',
@@ -738,6 +739,7 @@ const vi = {
       database: {
         does: 'Database MariaDB/MySQL và PostgreSQL kèm dung lượng.',
         actions: [
+          'Chưa cài MariaDB hoặc PostgreSQL: gõ sẵn lệnh cài theo bản Linux vào Terminal',
           'Tạo database và user với mật khẩu ngẫu nhiên, chỉ hiện một lần',
           'Xóa database sau khi gõ đúng tên',
           'Dump ra ~/db-backups, khôi phục từ bản dump sau khi gõ đúng tên',
@@ -771,6 +773,7 @@ const vi = {
       nginx: {
         does: 'Site, server block, upstream; bật/tắt site, kiểm tra cấu hình trước khi reload, hạn chứng chỉ TLS.',
         actions: [
+          'Server chưa cài nginx: gõ sẵn lệnh cài theo bản Linux vào Terminal',
           'Bật/tắt site',
           'Kiểm tra cấu hình (nginx -t)',
           'Xóa site, kèm chứng chỉ chỉ site đó dùng',
@@ -859,6 +862,7 @@ const vi = {
       git: {
         does: 'Repo trên server: nhánh, ahead/behind, file thay đổi, diff, biểu đồ commit.',
         actions: [
+          'Server chưa cài git: gõ sẵn lệnh cài theo bản Linux vào Terminal',
           'Clone repo (ghim host key GitHub/GitLab), git init, đặt remote: gõ sẵn vào Terminal',
           'Deploy: Davish tìm cách build và app đang chạy (pm2, systemd, compose), bạn bật/tắt từng bước; chạy trong Terminal với tiến trình, lịch sử và thông báo khi xong',
           'Fetch, Pull (chặn khi repo bẩn), đổi nhánh qua hộp xác nhận',

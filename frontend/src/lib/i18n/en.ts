@@ -707,6 +707,7 @@ const en = {
       docker: {
         does: 'Containers with CPU, RAM, logs, inspect; start, stop, restart; alerts on containers stuck restarting.',
         actions: [
+          'No Docker on the server: types the install command for its Linux into a terminal',
           'Select a container to see its logs and details',
           'Open its logs in the Logs app',
           'Pull an image or run a new container from a form (typed into a terminal)',
@@ -755,6 +756,7 @@ const en = {
       database: {
         does: 'MariaDB/MySQL and PostgreSQL databases with their size.',
         actions: [
+          'No MariaDB or PostgreSQL: types the install command for its Linux into a terminal',
           'Create a database and its user with a random password, shown once',
           'Delete a database after typing its name',
           'Dump to ~/db-backups, restore from a dump after typing the name',
@@ -786,6 +788,7 @@ const en = {
       nginx: {
         does: 'Sites, server blocks, upstreams; enable/disable sites, test the config before reload, TLS certificate expiry.',
         actions: [
+          'No nginx on the server: types the install command for its Linux into a terminal',
           'Enable/disable a site',
           'Test the config (nginx -t)',
           'Delete a site, with certificates only it uses',
@@ -874,6 +877,7 @@ const en = {
       git: {
         does: 'Repos on the server: branch, ahead/behind, changed files, diffs, commit graph.',
         actions: [
+          'No git on the server: types the install command for its Linux into a terminal',
           'Fetch, Pull (blocked when the repo is dirty), switch branch through a confirmation dialog',
           'Install dependencies from the lockfile in Terminal',
           'Clone a repository (SSH host key of GitHub/GitLab pinned), git init, set a remote: typed into a terminal',
