@@ -127,7 +127,7 @@ func TestEveryCleanupHasACommand(t *testing.T) {
 }
 
 func TestCleanRefusesOtherCommand(t *testing.T) {
-	s := New(nil)
+	s := New(nil, nil)
 	if err := s.Clean(t.Context(), "x", "docker", "rm -rf /"); err == nil {
 		t.Fatal("ran a command that was not confirmed")
 	}

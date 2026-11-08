@@ -121,7 +121,7 @@ func New(version string) (*App, error) {
 	update.Cleanup(goruntime.GOOS, os.Executable)
 	a.updates = update.New(version, emitter{a}, log, update.Options{})
 	a.ports = ports.NewLister(runner)
-	a.disk = disk.New(runner)
+	a.disk = disk.New(runner, a.files)
 	a.security = security.New(runner)
 	a.diag = diag.New(runner, a.conns)
 	a.tunnels = ports.NewTunnels(a.conns, emitter{a}, log)

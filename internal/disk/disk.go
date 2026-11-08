@@ -28,7 +28,8 @@ type Runner interface {
 
 // Service measures folders and cleans up.
 type Service struct {
-	run Runner
+	run   Runner
+	files Remover
 
 	mu sync.Mutex
 	// scans holds the cancel of each running measurement, by the token
@@ -36,9 +37,9 @@ type Service struct {
 	scans map[string]context.CancelFunc
 }
 
-// New creates the service.
-func New(run Runner) *Service {
-	return &Service{run: run, scans: map[string]context.CancelFunc{}}
+// New creates the service; files deletes what the user picks.
+func New(run Runner, files Remover) *Service {
+	return &Service{run: run, files: files, scans: map[string]context.CancelFunc{}}
 }
 
 // Mount is one mounted filesystem.

@@ -744,6 +744,20 @@ export namespace disk {
 		    return a;
 		}
 	}
+	export class TruncatePlan {
+	    command: string;
+	    sudo: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TruncatePlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.command = source["command"];
+	        this.sudo = source["sudo"];
+	    }
+	}
 	export class Usage {
 	    dir: string;
 	    size: number;
