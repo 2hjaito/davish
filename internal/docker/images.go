@@ -59,7 +59,7 @@ func (s *Service) Images(ctx context.Context, serverID string) ([]Image, error) 
 }
 
 func parseImages(out []byte) ([]Image, bool, error) {
-	var list []Image
+	list := []Image{}
 	counted := true
 	err := eachJSON(out, func(line []byte) error {
 		var r struct {
