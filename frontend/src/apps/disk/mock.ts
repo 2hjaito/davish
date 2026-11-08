@@ -63,16 +63,51 @@ let cleaned = new Set<string>()
 
 export function mockCleanups(): Promise<Cleanup[]> {
   const all: Cleanup[] = [
-    { id: 'docker', bytes: 6.4 * GB, command: 'docker system prune -f', root: false },
-    { id: 'journal', bytes: 3.8 * GB, command: 'journalctl --vacuum-size=100M', root: true },
+    { id: 'docker-images', bytes: 6.4 * GB, command: 'docker image prune -a -f', root: false },
+    {
+      id: 'docker-logs',
+      bytes: 4.2 * GB,
+      count: 3,
+      command: `find /var/lib/docker/containers -name '*-json.log' -size +10M -exec truncate -s 0 {} +`,
+      root: true,
+      sudoCommand: `sudo find /var/lib/docker/containers -name '*-json.log' -size +10M -exec truncate -s 0 {} +`,
+    },
+    {
+      id: 'journal',
+      bytes: 3.8 * GB,
+      command: 'journalctl --vacuum-size=100M',
+      root: true,
+      sudoCommand: 'sudo journalctl --vacuum-size=100M',
+    },
+    { id: 'docker-cache', bytes: 1.7 * GB, command: 'docker builder prune -a -f', root: false },
     {
       id: 'logs',
       bytes: 0.9 * GB,
       count: 214,
       command: `find /var/log -xdev -type f \\( -name '*.gz' -o -name '*.[0-9]' -o -name '*.old' \\) -delete`,
       root: true,
+      sudoCommand: `sudo find /var/log -xdev -type f \\( -name '*.gz' -o -name '*.[0-9]' -o -name '*.old' \\) -delete`,
     },
-    { id: 'apt', bytes: 0.4 * GB, command: 'apt-get clean', root: true },
+    {
+      id: 'docker-volumes',
+      bytes: 0.8 * GB,
+      command: 'docker volume prune -a -f',
+      root: false,
+      danger: true,
+    },
+    {
+      id: 'apt',
+      bytes: 0.4 * GB,
+      command: 'apt-get clean',
+      root: true,
+      sudoCommand: 'sudo apt-get clean',
+    },
+    {
+      id: 'home-cache',
+      bytes: 0.3 * GB,
+      command: 'find "$HOME/.cache" -mindepth 1 -delete',
+      root: false,
+    },
   ]
   return delay(all.filter((c) => !cleaned.has(c.id)))
 }

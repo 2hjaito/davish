@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -94,5 +95,35 @@ sleep 1`)
 	}
 	if len(o.Dirs) == 0 || o.Dirs[0].Size < o.Dirs[len(o.Dirs)-1].Size {
 		t.Errorf("dirs not largest first: %d", len(o.Dirs))
+	}
+}
+
+func TestCleanupsSeeCachesAndOldTmp(t *testing.T) {
+	m, id := testsshd.Connect(t)
+	s := disk.New(audit.NewRunner(m, audit.New(discard{})))
+	testsshd.Run(t, m, id, `mkdir -p ~/.cache/davish-test && head -c 3000000 /dev/zero > ~/.cache/davish-test/blob
+head -c 2000000 /dev/zero > /tmp/davish-old && touch -a -d '10 days ago' /tmp/davish-old`)
+	t.Cleanup(func() { testsshd.Run(t, m, id, `rm -rf ~/.cache/davish-test /tmp/davish-old`) })
+
+	cs, err := s.Cleanups(context.Background(), id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]disk.Cleanup{}
+	for _, c := range cs {
+		got[c.ID] = c
+	}
+	if c := got["home-cache"]; c.Bytes < 3000000 || c.Root {
+		t.Errorf("home cache = %+v", c)
+	}
+	if c := got["tmp"]; c.Bytes < 2000000 || !c.Root {
+		t.Errorf("tmp = %+v", c)
+	}
+	// Davish runs a cleanup the user may run, and only the one confirmed.
+	if err := s.Clean(context.Background(), id, "home-cache", got["home-cache"].Command); err != nil {
+		t.Fatal(err)
+	}
+	if out := testsshd.Run(t, m, id, `ls -A ~/.cache | wc -l`); strings.TrimSpace(out) != "0" {
+		t.Errorf("~/.cache still holds %s entries", out)
 	}
 }

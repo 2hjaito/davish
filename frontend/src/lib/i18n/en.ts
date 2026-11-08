@@ -170,12 +170,29 @@ const en = {
     needsRoot:
       'Needs root: Davish types the command into Terminal with sudo; check it, then press Enter.',
     toTerminal: 'Open Terminal with the command',
+    dangerous: 'This may delete real data, not only caches. Check before you clean it.',
     run: 'Clean…',
     done: 'Cleaned up.',
     cleanups: {
-      docker: {
-        title: 'Docker: stopped containers, unused images and build cache',
-        body: 'Removes stopped containers, unused networks, dangling images and build cache. Volumes are kept. Command to run:',
+      'docker-images': {
+        title: 'Docker: images no container uses',
+        body: 'Removes every image no container uses, tagged ones too; the next run pulls them again. Command to run:',
+      },
+      'docker-containers': {
+        title: 'Docker: stopped containers',
+        body: 'Removes stopped containers and their writable layers. Command to run:',
+      },
+      'docker-cache': {
+        title: 'Docker: build cache',
+        body: 'Removes the whole build cache; the next build is slower. Command to run:',
+      },
+      'docker-volumes': {
+        title: 'Docker: volumes no container uses',
+        body: 'Careful: a volume may hold the data (databases, uploads) of a removed container. Removing it loses that for good. Command to run:',
+      },
+      'docker-logs': {
+        title: 'Docker: container logs over 10 MB',
+        body: 'Empties the containers’ JSON log files in /var/lib/docker/containers; the containers keep running and logging. Command to run:',
       },
       journal: {
         title: 'systemd journal',
@@ -192,6 +209,26 @@ const en = {
       dnf: {
         title: 'dnf package cache',
         body: 'Removes dnf’s cached metadata and packages. Command to run:',
+      },
+      coredumps: {
+        title: 'Crash dumps',
+        body: 'Removes the dumps crashed programs left in /var/lib/systemd/coredump and /var/crash. Command to run:',
+      },
+      tmp: {
+        title: 'Temporary files older than 7 days',
+        body: 'Removes files in /tmp and /var/tmp nobody has read for 7 days. Command to run:',
+      },
+      snap: {
+        title: 'Old snap revisions',
+        body: 'Removes the disabled snap revisions snap keeps after each update. Command to run:',
+      },
+      'home-cache': {
+        title: 'Caches in ~/.cache',
+        body: 'Removes programs’ caches (pip, yarn, build tools…); they rebuild them when needed. Command to run:',
+      },
+      npm: {
+        title: 'npm cache',
+        body: 'Removes the npm packages downloaded into ~/.npm. Command to run:',
       },
     } as Record<string, { title: string; body: string }>,
   },

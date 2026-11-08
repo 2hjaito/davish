@@ -284,12 +284,13 @@
           {t.disk.frees(formatBytes(c.bytes))}{#if c.count}
             · {t.disk.files(c.count)}{/if}
         </p>
-        <pre class="command">{c.root ? `sudo ${c.command}` : c.command}</pre>
+        {#if c.danger}<p class="danger">{t.disk.dangerous}</p>{/if}
+        <pre class="command">{c.root ? c.sudoCommand : c.command}</pre>
         {#if c.root}
           <p class="hint">{t.disk.needsRoot}</p>
           <button
             class="btn btn-primary"
-            onclick={() => openTerminalAt(win.serverID, undefined, `sudo ${c.command}`)}
+            onclick={() => openTerminalAt(win.serverID, undefined, c.sudoCommand)}
             >{t.disk.toTerminal}</button
           >
         {:else}
@@ -433,6 +434,11 @@
   .hint {
     color: var(--fg-muted);
     font-size: var(--text-xs);
+  }
+
+  .danger {
+    color: var(--danger);
+    font-size: var(--text-sm);
   }
 
   .warn {

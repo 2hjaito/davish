@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"davish/internal/apperr"
+	"davish/internal/shellx"
 )
 
 // Cleanup is one way to free space, with what it would free.
@@ -22,9 +23,12 @@ type Cleanup struct {
 	Count int `json:"count,omitempty"`
 	// Command is exactly what runs; it never holds user input.
 	Command string `json:"command"`
-	// Root is set when the command needs root: Davish types it with sudo
+	// Root is set when the command needs root: Davish types SudoCommand
 	// into a terminal instead of running it.
-	Root bool `json:"root"`
+	Root        bool   `json:"root"`
+	SudoCommand string `json:"sudoCommand,omitempty"`
+	// Danger is set when it may delete data, not only caches and leftovers.
+	Danger bool `json:"danger,omitempty"`
 }
 
 // journalKeep is what vacuuming leaves of the journal.
@@ -32,20 +36,57 @@ const journalKeep = 100 << 20
 
 // The cleanups, by ID. Each command is fixed text.
 var commands = map[string]string{
-	"docker":  "docker system prune -f",
-	"journal": "journalctl --vacuum-size=100M",
-	"logs":    `find /var/log -xdev -type f \( -name '*.gz' -o -name '*.[0-9]' -o -name '*.old' \) -delete`,
-	"apt":     "apt-get clean",
-	"dnf":     "dnf clean all",
+	"docker-images":     "docker image prune -a -f",
+	"docker-containers": "docker container prune -f",
+	"docker-cache":      "docker builder prune -a -f",
+	"docker-volumes":    "docker volume prune -a -f",
+	"docker-logs":       `find /var/lib/docker/containers -name '*-json.log' -size +10M -exec truncate -s 0 {} +`,
+	"journal":           "journalctl --vacuum-size=100M",
+	"logs":              `find /var/log -xdev -type f \( -name '*.gz' -o -name '*.[0-9]' -o -name '*.old' \) -delete`,
+	"apt":               "apt-get clean",
+	"dnf":               "dnf clean all",
+	"coredumps":         "find /var/lib/systemd/coredump /var/crash -xdev -type f -delete",
+	"tmp":               "find /tmp /var/tmp -xdev -type f -atime +7 -delete",
+	"snap":              `snap list --all | awk '$6 ~ /disabled/ {print $1, $3}' | while read -r n r; do snap remove "$n" --revision="$r"; done`,
+	"home-cache":        `find "$HOME/.cache" -mindepth 1 -delete`,
+	"npm":               "npm cache clean --force",
 }
 
-// probeLine measures every cleanup in one command; missing tools print
-// nothing in their section.
-const probeLine = `id -u; echo --docker--; docker system df --format '{{.Type}}\t{{.Reclaimable}}' 2>/dev/null;` +
-	` echo --journal--; journalctl --disk-usage 2>/dev/null;` +
-	` echo --logs--; find /var/log -xdev -type f \( -name '*.gz' -o -name '*.[0-9]' -o -name '*.old' \) -printf '%s\n' 2>/dev/null | awk '{s+=$1;n++} END {print s+0, n+0}';` +
+// rootCleanups need root unless the user is root.
+var rootCleanups = []string{"docker-logs", "journal", "logs", "apt", "dnf", "coredumps", "tmp", "snap"}
+
+// sumFiles prints the total size and count of the files find lists.
+const sumFiles = ` -printf '%s\n' 2>/dev/null | awk '{s+=$1;n++} END {print s+0, n+0}'`
+
+// userProbe measures what the login user may clean; it runs as the user
+// since its paths are under their home.
+const userProbe = `export LC_ALL=C; id -u; echo --docker--; docker system df --format '{{.Type}}\t{{.Reclaimable}}' 2>/dev/null;` +
+	` echo --home-cache--; [ -d "$HOME/.cache" ] && du -sk "$HOME/.cache" 2>/dev/null;` +
+	` echo --npm--; [ -d "$HOME/.npm/_cacache" ] && du -sk "$HOME/.npm/_cacache" 2>/dev/null;`
+
+// systemProbe measures the rest, as root when sudo needs no password so
+// that root-owned folders count; missing tools print nothing.
+const systemProbe = `export LC_ALL=C; echo --journal--; journalctl --disk-usage 2>/dev/null;` +
+	` echo --logs--; find /var/log -xdev -type f \( -name '*.gz' -o -name '*.[0-9]' -o -name '*.old' \)` + sumFiles + `;` +
+	` echo --docker-logs--; find /var/lib/docker/containers -name '*-json.log' -size +10M` + sumFiles + `;` +
+	` echo --coredumps--; find /var/lib/systemd/coredump /var/crash -xdev -type f` + sumFiles + `;` +
+	` echo --tmp--; find /tmp /var/tmp -xdev -type f -atime +7` + sumFiles + `;` +
 	` echo --apt--; [ -d /var/cache/apt/archives ] && du -sk /var/cache/apt/archives 2>/dev/null;` +
-	` echo --dnf--; [ -d /var/cache/dnf ] && du -sk /var/cache/dnf 2>/dev/null; true`
+	` echo --dnf--; [ -d /var/cache/dnf ] && du -sk /var/cache/dnf 2>/dev/null;` +
+	` echo --snap--; command -v snap >/dev/null && snap list --all 2>/dev/null | awk '$6 ~ /disabled/ {print "/var/lib/snapd/snaps/" $1 "_" $3 ".snap"}' | xargs -r du -ck 2>/dev/null | tail -n 1; true`
+
+// probeLine measures every cleanup in one command.
+var probeLine = userProbe + ` if sudo -n true 2>/dev/null; then sudo -n sh -c ` + shellx.Quote(systemProbe) +
+	`; else sh -c ` + shellx.Quote(systemProbe) + `; fi`
+
+// withSudo prefixes sudo, or runs the whole line under it when it is more
+// than one command, so every part of a pipeline or loop gets root.
+func withSudo(line string) string {
+	if strings.ContainsAny(line, "|;&") {
+		return "sudo sh -c " + shellx.Quote(line)
+	}
+	return "sudo " + line
+}
 
 // Cleanups lists what could be cleaned, largest first; those that would
 // free nothing are left out.
@@ -73,41 +114,55 @@ func parseCleanups(out []byte) []Cleanup {
 	}
 	root := len(sections["uid"]) > 0 && sections["uid"][0] == "0"
 	var cs []Cleanup
-	add := func(id string, bytes int64, count int, needsRoot bool) {
+	add := func(id string, bytes int64, count int) {
 		if bytes <= 0 {
 			return
 		}
-		cs = append(cs, Cleanup{ID: id, Bytes: bytes, Count: count, Command: commands[id], Root: needsRoot && !root})
+		c := Cleanup{
+			ID: id, Bytes: bytes, Count: count, Command: commands[id],
+			Root: slices.Contains(rootCleanups, id) && !root, Danger: id == "docker-volumes",
+		}
+		if c.Root {
+			c.SudoCommand = withSudo(c.Command)
+		}
+		cs = append(cs, c)
 	}
 
 	// Docker answered, so this user may run it.
-	var docker int64
-	for _, l := range sections["docker"] {
-		_, rec, _ := strings.Cut(l, "\t")
-		docker += parseSize(rec)
+	dockerIDs := map[string]string{
+		"Images": "docker-images", "Containers": "docker-containers",
+		"Build Cache": "docker-cache", "Local Volumes": "docker-volumes",
 	}
-	add("docker", docker, 0, false)
-
+	for _, l := range sections["docker"] {
+		typ, rec, _ := strings.Cut(l, "\t")
+		if id, ok := dockerIDs[typ]; ok {
+			add(id, parseSize(rec), 0)
+		}
+	}
 	if j := sections["journal"]; len(j) > 0 {
 		if m := journalRe.FindStringSubmatch(j[0]); m != nil {
-			add("journal", parseSize(m[1])-journalKeep, 0, true)
+			add("journal", parseSize(m[1])-journalKeep, 0)
 		}
 	}
-	if l := sections["logs"]; len(l) > 0 {
-		f := strings.Fields(l[0])
-		if len(f) == 2 {
-			n, _ := strconv.ParseInt(f[0], 10, 64)
-			c, _ := strconv.Atoi(f[1])
-			add("logs", n, c, true)
+	// "bytes count" from sumFiles.
+	for _, id := range []string{"logs", "docker-logs", "coredumps", "tmp"} {
+		if l := sections[id]; len(l) > 0 {
+			f := strings.Fields(l[0])
+			if len(f) == 2 {
+				n, _ := strconv.ParseInt(f[0], 10, 64)
+				c, _ := strconv.Atoi(f[1])
+				add(id, n, c)
+			}
 		}
 	}
-	for _, id := range []string{"apt", "dnf"} {
+	// "KB<tab>path" from du -sk, or "KB<tab>total" from du -ck.
+	for _, id := range []string{"apt", "dnf", "home-cache", "npm", "snap"} {
 		if l := sections[id]; len(l) > 0 {
 			kb, _, _ := strings.Cut(l[0], "\t")
 			n, _ := strconv.ParseInt(kb, 10, 64)
 			// An empty cache still holds a few KB of lock and partial dirs.
 			if n > 1024 {
-				add(id, n<<10, 0, true)
+				add(id, n<<10, 0)
 			}
 		}
 	}

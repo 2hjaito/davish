@@ -25,8 +25,11 @@ export interface Cleanup {
   bytes: number
   count?: number
   command: string
-  /** Typed with sudo into a terminal instead of run. */
+  /** Typed into a terminal as sudoCommand instead of run. */
   root: boolean
+  sudoCommand?: string
+  /** May delete data, not only caches and leftovers. */
+  danger?: boolean
 }
 
 export const diskMounts = (serverID: string): Promise<Mount[]> => App.DiskMounts(serverID)

@@ -182,12 +182,29 @@ const vi = {
     files: (n: number) => `${n} file`,
     needsRoot: 'Lệnh cần root: Davish gõ sẵn vào Terminal với sudo, bạn xem rồi tự nhấn Enter.',
     toTerminal: 'Mở Terminal với lệnh',
+    dangerous: 'Mục này có thể xóa dữ liệu thật, không chỉ cache. Kiểm tra kỹ trước khi dọn.',
     run: 'Dọn…',
     done: 'Đã dọn xong.',
     cleanups: {
-      docker: {
-        title: 'Docker: container dừng, image và cache build không dùng',
-        body: 'Xóa container đã dừng, network không dùng, image treo và cache build. Volume được giữ lại. Lệnh sẽ chạy:',
+      'docker-images': {
+        title: 'Docker: image không container nào dùng',
+        body: 'Xóa mọi image không có container nào dùng, kể cả image có tag; lần chạy sau sẽ tải lại. Lệnh sẽ chạy:',
+      },
+      'docker-containers': {
+        title: 'Docker: container đã dừng',
+        body: 'Xóa các container đã dừng cùng lớp ghi của chúng. Lệnh sẽ chạy:',
+      },
+      'docker-cache': {
+        title: 'Docker: cache build',
+        body: 'Xóa toàn bộ cache build; lần build sau chậm hơn. Lệnh sẽ chạy:',
+      },
+      'docker-volumes': {
+        title: 'Docker: volume không container nào dùng',
+        body: 'Cẩn thận: volume có thể chứa dữ liệu (database, file tải lên) của container đã xóa. Xóa là mất hẳn. Lệnh sẽ chạy:',
+      },
+      'docker-logs': {
+        title: 'Docker: log container quá 10 MB',
+        body: 'Làm rỗng file log JSON của container trong /var/lib/docker/containers; container vẫn chạy và ghi tiếp. Lệnh sẽ chạy:',
       },
       journal: {
         title: 'Journal của systemd',
@@ -199,6 +216,26 @@ const vi = {
       },
       apt: { title: 'Cache gói apt', body: 'Xóa các gói .deb đã tải về. Lệnh sẽ chạy:' },
       dnf: { title: 'Cache gói dnf', body: 'Xóa cache metadata và gói của dnf. Lệnh sẽ chạy:' },
+      coredumps: {
+        title: 'Dump lỗi (core dump)',
+        body: 'Xóa các bản dump khi chương trình bị crash trong /var/lib/systemd/coredump và /var/crash. Lệnh sẽ chạy:',
+      },
+      tmp: {
+        title: 'File tạm cũ hơn 7 ngày',
+        body: 'Xóa file trong /tmp và /var/tmp không ai đọc suốt 7 ngày. Lệnh sẽ chạy:',
+      },
+      snap: {
+        title: 'Bản snap cũ',
+        body: 'Gỡ các bản snap cũ đã tắt (snap giữ lại sau mỗi lần cập nhật). Lệnh sẽ chạy:',
+      },
+      'home-cache': {
+        title: 'Cache trong ~/.cache',
+        body: 'Xóa cache của các chương trình (pip, yarn, trình build…); chúng tự tạo lại khi cần. Lệnh sẽ chạy:',
+      },
+      npm: {
+        title: 'Cache npm',
+        body: 'Xóa các gói npm đã tải về trong ~/.npm. Lệnh sẽ chạy:',
+      },
     } as Record<string, { title: string; body: string }>,
   },
   ports: {

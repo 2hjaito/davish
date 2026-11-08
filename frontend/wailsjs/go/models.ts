@@ -632,6 +632,8 @@ export namespace disk {
 	    count?: number;
 	    command: string;
 	    root: boolean;
+	    sudoCommand?: string;
+	    danger?: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Cleanup(source);
@@ -644,6 +646,8 @@ export namespace disk {
 	        this.count = source["count"];
 	        this.command = source["command"];
 	        this.root = source["root"];
+	        this.sudoCommand = source["sudoCommand"];
+	        this.danger = source["danger"];
 	    }
 	}
 	export class DeletedFile {
