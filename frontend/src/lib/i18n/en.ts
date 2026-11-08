@@ -1997,7 +1997,7 @@ const en = {
     loading: 'Reading databases…',
     refresh: 'Refresh',
     engines: { mysql: 'MariaDB / MySQL', postgres: 'PostgreSQL' },
-    notInstalled: 'Not installed. Packages → Install has a recipe.',
+    notInstalled: 'Not installed on this server.',
     needsRoot:
       'Only root may connect, and sudo asks for a password, which Davish never types. Open the client in a terminal instead:',
     openClient: (c: string) => `Open ${c}`,

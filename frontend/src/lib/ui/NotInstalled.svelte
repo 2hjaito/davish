@@ -15,12 +15,14 @@
     tool: SetupTool
     /** The program's name, e.g. "Docker". */
     name: string
-    icon: IconName
+    icon?: IconName
     /** Looks again, after the user installed it. */
     onretry: () => void
+    /** Inside a section that already names the program: no heading. */
+    compact?: boolean
   }
 
-  let { serverID, tool, name, icon, onretry }: Props = $props()
+  let { serverID, tool, name, icon = 'package', onretry, compact = false }: Props = $props()
 
   const n = t.install
 
@@ -60,10 +62,12 @@
   }
 </script>
 
-<div class="missing">
-  <Icon name={icon} size={28} strokeWidth={1.6} />
-  <strong>{n.title(name)}</strong>
-  <span class="hint">{n.hint}</span>
+<div class="missing" class:compact>
+  {#if !compact}
+    <Icon name={icon} size={28} strokeWidth={1.6} />
+    <strong>{n.title(name)}</strong>
+    <span class="hint">{n.hint}</span>
+  {/if}
 
   <div class="setup">
     {#if error}
@@ -103,6 +107,17 @@
     padding: 24px;
     text-align: center;
     color: var(--fg-subtle);
+  }
+
+  .compact {
+    flex: none;
+    align-items: flex-start;
+    min-height: 0;
+    padding: 0;
+  }
+
+  .compact .setup {
+    margin-top: 0;
   }
 
   strong {

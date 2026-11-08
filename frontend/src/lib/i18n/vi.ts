@@ -1965,7 +1965,7 @@ const vi = {
     loading: 'Đang đọc database…',
     refresh: 'Làm mới',
     engines: { mysql: 'MariaDB / MySQL', postgres: 'PostgreSQL' },
-    notInstalled: 'Chưa cài. Gói → Cài thêm có công thức cài.',
+    notInstalled: 'Chưa cài trên server này.',
     needsRoot:
       'Chỉ root được kết nối, và sudo hỏi mật khẩu (Davish không bao giờ tự gõ). Mở client trong Terminal:',
     openClient: (c: string) => `Mở ${c}`,
