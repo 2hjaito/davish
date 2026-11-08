@@ -39,6 +39,8 @@
       cursor: token('--fg-on-dark'),
       cursorAccent: token('--app-terminal'),
       selectionBackground: token('--term-selection'),
+      selectionInactiveBackground: token('--term-selection-inactive'),
+      selectionForeground: token('--term-selection-fg'),
       scrollbarSliderBackground: token('--term-scrollbar'),
       scrollbarSliderHoverBackground: token('--term-scrollbar-hover'),
       scrollbarSliderActiveBackground: token('--term-scrollbar-hover'),
@@ -82,7 +84,7 @@
   }
 
   /**
-   * The block cursor fills the whole row, which lineHeight makes taller than the
+   * The cursor fills the whole row, which lineHeight makes taller than the
    * text. Keep the row height but paint only the glyph's own height (see CSS).
    * Only the DOM renderer has these rows; WebGL paints the full-height cursor.
    */
@@ -127,7 +129,12 @@
     if (!host) return
     const t = new Terminal({
       allowTransparency: true,
-      cursorBlink: true,
+      // A steady bar, as in macOS Terminal: no blinking, and the same shape
+      // whether the terminal has focus or not.
+      cursorBlink: false,
+      cursorStyle: 'bar',
+      cursorWidth: 2,
+      cursorInactiveStyle: 'bar',
       fontFamily: untrack(() => settings.monoFamily),
       // Read once here; the effect below applies later changes in place.
       fontSize: untrack(() => settings.terminalFontSize),
@@ -244,6 +251,13 @@
     line-height: var(--cursor-h);
     padding-block: var(--cursor-inset);
     background-clip: content-box;
+  }
+
+  /* The same for the bar: xterm draws it as an inset shadow as tall as the row. */
+  .host :global(.xterm-rows .xterm-cursor.xterm-cursor-bar) {
+    box-shadow: none !important;
+    background: linear-gradient(var(--fg-on-dark), var(--fg-on-dark)) no-repeat left center / 2px
+      var(--cursor-h);
   }
 
   /*
