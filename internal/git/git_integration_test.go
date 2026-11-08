@@ -257,3 +257,16 @@ echo '{}' > package-lock.json; echo 'services: {}' > compose.yaml`)
 		t.Errorf("missing folder: %v", err)
 	}
 }
+
+func TestFindOnServerWithoutGit(t *testing.T) {
+	m, id := testsshd.Connect(t)
+	s := git.New(audit.NewRunner(m, audit.New(discard{})))
+	testsshd.Exec(t, "mv", "/usr/bin/git", "/usr/bin/git.off")
+	t.Cleanup(func() { testsshd.Exec(t, "mv", "/usr/bin/git.off", "/usr/bin/git") })
+
+	_, err := s.Find(context.Background(), id, nil)
+	var ae *apperr.Error
+	if !errors.As(err, &ae) || ae.Code != apperr.CmdMissing {
+		t.Errorf("err = %v, want CMD_MISSING", err)
+	}
+}

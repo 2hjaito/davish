@@ -15,6 +15,7 @@
   import { load, save } from '../../lib/stores/persist'
   import { servers } from '../../lib/stores/servers.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
+  import NotInstalled from '../../lib/ui/NotInstalled.svelte'
   import FilterShell, { type FilterItem } from '../../lib/ui/FilterShell.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import StatusList, { type StatusItem } from '../../lib/ui/StatusList.svelte'
@@ -43,6 +44,8 @@
   let lastRepo = $state<Record<string, string>>(saved.repo)
   let repos = $state.raw<Repo[] | null>(null)
   let findError = $state('')
+  /** The server has no git: offer to install it. */
+  let missing = $state(false)
   let finding = $state(false)
   let repo = $state('')
   let cloneMode = $state<'clone' | 'init' | 'remote' | null>(null)
@@ -131,12 +134,16 @@
       const found = await backend.find(win.serverID, extra)
       repos = found
       findError = ''
+      missing = false
       if (!found.some((r) => r.path === repo)) {
         const last = lastRepo[win.serverID]
         repo = found.find((r) => r.path === last)?.path ?? found[0]?.path ?? ''
       }
     } catch (e) {
-      findError = toUserError(e).message
+      const u = toUserError(e)
+      findError = u.message
+      missing = u.code === 'CMD_MISSING'
+      if (missing) repos = null
     } finally {
       finding = false
     }
@@ -224,7 +231,9 @@
   let wasFocused = untrack(() => ctx.focused)
   $effect(() => {
     const f = ctx.focused
-    if (f && !wasFocused && connected && repo) untrack(() => void loadStatus(repo))
+    // Coming back after installing git looks for repositories again.
+    if (f && !wasFocused && connected && missing) untrack(() => void findRepos())
+    else if (f && !wasFocused && connected && repo) untrack(() => void loadStatus(repo))
     wasFocused = f
   })
 
@@ -284,6 +293,14 @@
   {#snippet placeholder()}
     {#if !connected}
       <Empty icon="server" title={t.git.offline} hint={t.git.offlineHint} />
+    {:else if missing}
+      <NotInstalled
+        serverID={win.serverID}
+        tool="git"
+        name="Git"
+        icon="gitBranch"
+        onretry={() => void findRepos()}
+      />
     {:else if findError}
       <Empty icon="warning" title={findError} />
     {:else if repos === null}

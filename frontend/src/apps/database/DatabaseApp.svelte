@@ -10,11 +10,14 @@
   import Dialog from '../../lib/ui/Dialog.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
+  import NotInstalled from '../../lib/ui/NotInstalled.svelte'
+  import { getWindowContext } from '../../lib/wm/context'
   import { openFilesAt, openTerminalAt } from '../../lib/wm/intents.svelte'
   import type { AppProps } from '../types'
   import { backend } from './backend'
 
   let { win }: AppProps = $props()
+  const ctx = getWindowContext()
   const d = t.database
 
   const server = $derived(servers.list.find((s) => s.id === win.serverID))
@@ -53,6 +56,14 @@
 
   $effect(() => {
     if (connected) untrack(() => void refresh())
+  })
+  // Coming back after installing an engine shows it.
+  let wasFocused = untrack(() => ctx.focused)
+  $effect(() => {
+    const f = ctx.focused
+    if (f && !wasFocused && connected && engines?.some((e) => !e.installed))
+      untrack(() => void refresh())
+    wasFocused = f
   })
 
   async function previewCreate() {
@@ -235,6 +246,13 @@
         </div>
         {#if !e.installed}
           <p class="muted">{d.notInstalled}</p>
+          <NotInstalled
+            compact
+            serverID={win.serverID}
+            tool={e.kind === 'mysql' ? 'mariadb' : 'postgres'}
+            name={d.engines[e.kind]}
+            onretry={() => void refresh()}
+          />
         {:else if e.needsRoot}
           <p class="muted">{d.needsRoot}</p>
           <button

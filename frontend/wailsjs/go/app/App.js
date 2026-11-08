@@ -518,6 +518,10 @@ export function PackagesPlan(arg1, arg2, arg3) {
   return window['go']['app']['App']['PackagesPlan'](arg1, arg2, arg3);
 }
 
+export function PackagesSetup(arg1, arg2) {
+  return window['go']['app']['App']['PackagesSetup'](arg1, arg2);
+}
+
 export function PortsList(arg1) {
   return window['go']['app']['App']['PortsList'](arg1);
 }

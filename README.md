@@ -50,7 +50,7 @@ Nothing to install on the server.
 - [Docker](FEATURES.md#docker): containers by compose project, images and layers, volumes
 - [Cron](FEATURES.md#cron): schedules in plain words
 - [Nginx](FEATURES.md#nginx): sites, `nginx -t` before reload, TLS expiry
-- [Packages](FEATURES.md#packages): updates with security fixes first, runtimes
+- [Packages](FEATURES.md#packages): updates with security fixes first, runtimes; one-click install command when Docker, nginx, git or a database is missing
 - [Git](FEATURES.md#git): status, diffs, commit graph, fetch and pull
 - [Shortcuts](FEATURES.md#desktop-shortcuts): drag `deploy.sh` onto the desktop, double-click to run, with a stop button
 
@@ -105,7 +105,7 @@ Prebuilt apps for macOS (universal), Windows and Linux are attached to each [rel
 |---|---|
 | Everything | OpenSSH server with the SFTP subsystem |
 | Services, Logs (journal) | systemd; to read system logs, a user in the `adm` or `systemd-journal` group |
-| Docker | the `docker` CLI; a user in the `docker` group |
+| Docker | the `docker` CLI; a user in the `docker` group (Davish offers the install command when it is missing) |
 | Cron | `crontab` |
 | Nginx | nginx with `sites-available` / `sites-enabled` or `conf.d` |
 
