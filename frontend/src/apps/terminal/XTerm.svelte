@@ -6,8 +6,10 @@
   import { type ITheme, Terminal } from '@xterm/xterm'
   import { untrack } from 'svelte'
 
+  import { t as i18n } from '../../lib/i18n'
   import { isMac } from '../../lib/shell/platform'
   import { settings } from '../../lib/stores/settings.svelte'
+  import PopupMenu from '../../lib/ui/PopupMenu.svelte'
 
   interface Props {
     /** Whether this terminal is the visible tab; hidden ones keep their buffer. */
@@ -23,6 +25,8 @@
   let term: Terminal | undefined
   let fit: FitAddon | undefined
   let webgl: WebglAddon | undefined
+  /** The right-click menu, outside macOS. */
+  let menu = $state<{ x: number; y: number; selection: boolean } | null>(null)
 
   function token(name: string): string {
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
@@ -47,24 +51,38 @@
     }
   }
 
+  function copy() {
+    if (term?.hasSelection()) void navigator.clipboard.writeText(term.getSelection())
+  }
+
+  function paste() {
+    void navigator.clipboard.readText().then((text) => term?.paste(text))
+  }
+
   // Ctrl+Shift+C/V on Windows and Linux, where plain Ctrl+C must reach the shell.
-  // macOS uses ⌘C/⌘V through the native Edit menu.
+  // macOS uses ⌘C/⌘V through the native Edit menu. preventDefault matters:
+  // WebView2 reads Ctrl+Shift+V as "paste as plain text" and would fire a
+  // paste event that xterm handles too, pasting twice.
   function clipboardKeys(e: KeyboardEvent): boolean {
     if (isMac || e.type !== 'keydown' || !e.ctrlKey || !e.shiftKey) return true
     const key = e.key.toLowerCase()
-    if (key === 'c' && term?.hasSelection()) {
-      void navigator.clipboard.writeText(term.getSelection())
-      return false
-    }
-    if (key === 'v') {
-      void navigator.clipboard.readText().then((text) => term?.paste(text))
+    if ((key === 'c' && term?.hasSelection()) || key === 'v') {
+      e.preventDefault()
+      if (key === 'c') copy()
+      else paste()
       return false
     }
     return true
   }
 
+  function openMenu(e: MouseEvent) {
+    if (isMac || !term) return
+    e.preventDefault()
+    menu = { x: e.clientX, y: e.clientY, selection: term.hasSelection() }
+  }
+
   /**
-   * The block cursor fills the whole row, which lineHeight makes taller than the
+   * The cursor fills the whole row, which lineHeight makes taller than the
    * text. Keep the row height but paint only the glyph's own height (see CSS).
    * Only the DOM renderer has these rows; WebGL paints the full-height cursor.
    */
@@ -74,6 +92,33 @@
     const glyph = row.offsetHeight / LINE_HEIGHT
     host.style.setProperty('--cursor-h', `${glyph}px`)
     host.style.setProperty('--cursor-inset', `${(row.offsetHeight - glyph) / 2}px`)
+  }
+
+  /**
+   * xterm's DOM renderer paints each selected cell with the selection colour in
+   * place of its own background, so coloured segments (a powerline prompt)
+   * lose their colour. It also draws the selection as a layer of its own, which
+   * the CSS puts under the rows: without the per-cell paint, the selection shows
+   * on plain cells and coloured ones keep their colours. This reaches into
+   * xterm 6 internals; if they move, xterm paints the selection as before.
+   */
+  function keepCellColors(t: Terminal) {
+    type Internals = {
+      _core?: {
+        _renderService?: {
+          _renderer?: { value?: { _rowFactory?: { handleSelectionChanged?: unknown } } }
+        }
+      }
+    }
+    const rows = (t as unknown as Internals)._core?._renderService?._renderer?.value?._rowFactory
+    if (typeof rows?.handleSelectionChanged === 'function') rows.handleSelectionChanged = () => {}
+  }
+
+  /** The selection layer is not redrawn on resize, so the selection is made again. */
+  function reselect(t: Terminal) {
+    const p = t.getSelectionPosition()
+    if (!p) return
+    t.select(p.start.x, p.start.y, (p.end.y - p.start.y) * t.cols + p.end.x - p.start.x)
   }
 
   /**
@@ -102,6 +147,7 @@
     webgl = undefined
     t.options.allowTransparency = true
     t.options.theme = theme(false)
+    keepCellColors(t)
     fitCursor(t)
   }
 
@@ -109,7 +155,12 @@
     if (!host) return
     const t = new Terminal({
       allowTransparency: true,
-      cursorBlink: true,
+      // A steady bar, as in macOS Terminal: no blinking, and the same shape
+      // whether the terminal has focus or not.
+      cursorBlink: false,
+      cursorStyle: 'bar',
+      cursorWidth: 2,
+      cursorInactiveStyle: 'bar',
       fontFamily: untrack(() => settings.monoFamily),
       // Read once here; the effect below applies later changes in place.
       fontSize: untrack(() => settings.terminalFontSize),
@@ -122,6 +173,8 @@
     t.loadAddon(f)
     t.attachCustomKeyEventHandler(clipboardKeys)
     t.open(host)
+    keepCellColors(t)
+    t.onResize(() => requestAnimationFrame(() => reselect(t)))
     setRenderer(
       t,
       untrack(() => settings.terminalGpu),
@@ -141,8 +194,11 @@
       if (host?.offsetParent) f.fit()
     })
     ro.observe(host)
+    const h = host
+    h.addEventListener('contextmenu', openMenu)
 
     return () => {
+      h.removeEventListener('contextmenu', openMenu)
       ro.disconnect()
       t.dispose()
       term = undefined
@@ -187,6 +243,24 @@
 
 <div class="host" class:hidden={!active} bind:this={host}></div>
 
+{#if menu}
+  <PopupMenu
+    x={menu.x}
+    y={menu.y}
+    label={i18n.terminal.menu}
+    actions={[
+      { label: i18n.terminal.copy, disabled: !menu.selection, run: copy },
+      { label: i18n.terminal.paste, run: paste },
+      null,
+      { label: i18n.terminal.selectAll, run: () => term?.selectAll() },
+    ]}
+    onclose={() => {
+      menu = null
+      term?.focus()
+    }}
+  />
+{/if}
+
 <style>
   .host {
     position: absolute;
@@ -205,6 +279,19 @@
     line-height: var(--cursor-h);
     padding-block: var(--cursor-inset);
     background-clip: content-box;
+  }
+
+  /* The same for the bar: xterm draws it as an inset shadow as tall as the row. */
+  .host :global(.xterm-rows .xterm-cursor.xterm-cursor-bar) {
+    box-shadow: none !important;
+    background: linear-gradient(var(--fg-on-dark), var(--fg-on-dark)) no-repeat left center / 2px
+      var(--cursor-h);
+  }
+
+  /* The selection layer goes under the rows: cells with a background of their own stay on top. */
+  .host :global(.xterm-screen .xterm-rows) {
+    position: relative;
+    z-index: 2;
   }
 
   /*
