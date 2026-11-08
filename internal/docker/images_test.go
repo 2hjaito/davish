@@ -18,6 +18,9 @@ func TestParseImages(t *testing.T) {
 	if imgs[1].Ref() != "e-office:test" || imgs[1].Containers != 2 || imgs[1].Size != 431_000_000 {
 		t.Errorf("e-office = %+v", imgs[1])
 	}
+	if got, _, err := parseImages(nil); err != nil || got == nil || len(got) != 0 {
+		t.Errorf("empty = %v, %v", got, err)
+	}
 }
 
 func TestCountUsesOnOldDocker(t *testing.T) {

@@ -42,7 +42,8 @@ func TestParsePS(t *testing.T) {
 	if _, err := parsePS([]byte("not json\n")); err == nil {
 		t.Error("bad output parsed")
 	}
-	if got, err := parsePS(nil); err != nil || len(got) != 0 {
+	// No containers must read as [] in JSON: null keeps the app loading.
+	if got, err := parsePS(nil); err != nil || got == nil || len(got) != 0 {
 		t.Errorf("empty = %v, %v", got, err)
 	}
 }

@@ -93,7 +93,8 @@ func (s *Service) List(ctx context.Context, serverID string) ([]Container, error
 }
 
 func parsePS(out []byte) ([]Container, error) {
-	var list []Container
+	// An empty list, not nil: JSON null reads as "still loading" in the app.
+	list := []Container{}
 	err := eachJSON(out, func(line []byte) error {
 		var r struct {
 			ID, Names, Image, State, Status, Ports, Command, CreatedAt, RunningFor, Labels string
