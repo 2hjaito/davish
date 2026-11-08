@@ -4,6 +4,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-11-08
+
 ### Thêm
 - Docker, Nginx, Git và Database: server chưa cài chương trình thì app báo rõ và hiện lệnh cài đúng cho bản Linux của server (apt, dnf, yum, apk), kèm bật dịch vụ. Nút "Chạy trong Terminal" gõ sẵn lệnh để bạn xem rồi tự nhấn Enter. Docker được cài bằng gói của distro và thêm bạn vào nhóm `docker` (app nói rõ nhóm này ngang quyền root, có nút kết nối lại). Cài xong, quay lại cửa sổ là app tự mở (#79). Tài khoản SSH không có quyền sudo thì app chỉ báo nhờ người quản trị cài, không hiện lệnh.
 - Ổ đĩa: mở một ổ là quét cả ổ một lần và hiện tổng quan: thanh chia thành thư mục đo được, file đã xóa còn bị giữ, phần chưa đo được và chỗ trống. Phần chưa đo được có lý do: thư mục user SSH không đọc được (kèm lệnh `sudo du` gõ sẵn vào Terminal), file đã xóa mà tiến trình nào còn giữ. Khi sudo không cần mật khẩu thì đo bằng root nên thấy đủ.
