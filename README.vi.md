@@ -50,7 +50,7 @@ Không cài gì lên server.
 - [Docker](FEATURES.vi.md#docker): container theo project compose, image và layer, volume
 - [Cron](FEATURES.vi.md#cron): lịch nói bằng lời
 - [Nginx](FEATURES.vi.md#nginx): site, `nginx -t` trước khi reload, hạn TLS
-- [Gói](FEATURES.vi.md#gói): bản cập nhật, bản vá bảo mật lên đầu, runtime
+- [Gói](FEATURES.vi.md#gói): bản cập nhật, bản vá bảo mật lên đầu, runtime; thiếu Docker, nginx, git hay database thì gõ sẵn lệnh cài
 - [Git](FEATURES.vi.md#git): trạng thái, diff, biểu đồ commit, fetch và pull
 - [Lối tắt](FEATURES.vi.md#lối-tắt-trên-màn-hình-chính): kéo `deploy.sh` ra màn hình, double-click là chạy, có nút dừng
 
@@ -105,7 +105,7 @@ Bản build sẵn cho macOS (universal), Windows và Linux nằm trong từng [r
 |---|---|
 | Tất cả | OpenSSH server có subsystem SFTP |
 | Services, Logs (journal) | systemd; muốn đọc log hệ thống thì user thuộc nhóm `adm` hoặc `systemd-journal` |
-| Docker | lệnh `docker`; user thuộc nhóm `docker` |
+| Docker | lệnh `docker`; user thuộc nhóm `docker` (chưa có thì Davish gợi ý lệnh cài) |
 | Cron | `crontab` |
 | Nginx | nginx với `sites-available` / `sites-enabled` hoặc `conf.d` |
 

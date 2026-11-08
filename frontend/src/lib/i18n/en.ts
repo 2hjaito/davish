@@ -58,6 +58,21 @@ const en = {
       'Davish never stores sudo passwords. Open Terminal with the command typed in, check it, then press Enter yourself.',
     runInTerminal: 'Run in Terminal',
   },
+  install: {
+    title: (name: string) => `${name} is not installed on this server`,
+    hint: 'Davish types in the install command for the server’s Linux. Once it is done, come back to this window and the app opens.',
+    planning: 'Finding the install command…',
+    needsRoot: 'Installing needs root.',
+    dockerGroup:
+      'This adds you to the docker group so Davish can run docker without sudo. Members of the docker group are as powerful as root on the server.',
+    relogin: 'After installing, reconnect so the new group takes effect.',
+    reconnect: 'Disconnect and reconnect',
+    unknownManager:
+      'Davish does not know this server’s package manager. Install it the way your Linux distribution documents, then press Check again.',
+    noRights:
+      'This SSH account has no sudo rights, so it cannot install it. Ask whoever runs the server to install it, then press Check again.',
+    check: 'Check again',
+  },
   apps: {
     database: 'Database',
     deploy: 'Deploy an app',
@@ -694,6 +709,7 @@ const en = {
       docker: {
         does: 'Containers with CPU, RAM, logs, inspect; start, stop, restart; alerts on containers stuck restarting.',
         actions: [
+          'No Docker on the server: types the install command for its Linux into a terminal',
           'Select a container to see its logs and details',
           'Open its logs in the Logs app',
           'Pull an image or run a new container from a form (typed into a terminal)',
@@ -742,6 +758,7 @@ const en = {
       database: {
         does: 'MariaDB/MySQL and PostgreSQL databases with their size.',
         actions: [
+          'No MariaDB or PostgreSQL: types the install command for its Linux into a terminal',
           'Create a database and its user with a random password, shown once',
           'Delete a database after typing its name',
           'Dump to ~/db-backups, restore from a dump after typing the name',
@@ -773,6 +790,7 @@ const en = {
       nginx: {
         does: 'Sites, server blocks, upstreams; enable/disable sites, test the config before reload, TLS certificate expiry.',
         actions: [
+          'No nginx on the server: types the install command for its Linux into a terminal',
           'Enable/disable a site',
           'Test the config (nginx -t)',
           'Delete a site, with certificates only it uses',
@@ -861,6 +879,7 @@ const en = {
       git: {
         does: 'Repos on the server: branch, ahead/behind, changed files, diffs, commit graph.',
         actions: [
+          'No git on the server: types the install command for its Linux into a terminal',
           'Fetch, Pull (blocked when the repo is dirty), switch branch through a confirmation dialog',
           'Install dependencies from the lockfile in Terminal',
           'Clone a repository (SSH host key of GitHub/GitLab pinned), git init, set a remote: typed into a terminal',
@@ -1984,7 +2003,7 @@ const en = {
     loading: 'Reading databases…',
     refresh: 'Refresh',
     engines: { mysql: 'MariaDB / MySQL', postgres: 'PostgreSQL' },
-    notInstalled: 'Not installed. Packages → Install has a recipe.',
+    notInstalled: 'Not installed on this server.',
     needsRoot:
       'Only root may connect, and sudo asks for a password, which Davish never types. Open the client in a terminal instead:',
     openClient: (c: string) => `Open ${c}`,

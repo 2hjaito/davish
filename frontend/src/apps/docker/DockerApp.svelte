@@ -18,6 +18,7 @@
   import { servers } from '../../lib/stores/servers.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
   import LoadState from '../../lib/ui/LoadState.svelte'
+  import NotInstalled from '../../lib/ui/NotInstalled.svelte'
   import { supersedes } from '../../lib/stores/latest'
   import FilterShell, { type FilterItem } from '../../lib/ui/FilterShell.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
@@ -66,6 +67,8 @@
   let newStack = $state(false)
   let creating = $state<'network' | 'volume' | null>(null)
   let error = $state('')
+  /** The server has no docker: offer to install it. */
+  let missing = $state(false)
   let loading = $state(false)
   /** The detail page over the table, Docker Desktop style. */
   let page = $state<{ kind: 'container'; name: string } | { kind: 'image'; ref: string } | null>(
@@ -172,8 +175,14 @@
       images = await backend.images(win.serverID).catch(() => images)
       if (kind === 'volumes') volumes = await backend.volumes(win.serverID)
       error = ''
+      missing = false
     } catch (e) {
-      if (current()) error = toUserError(e).message
+      if (current()) {
+        const u = toUserError(e)
+        error = u.message
+        missing = u.code === 'CMD_MISSING'
+        if (missing) containers = null
+      }
     } finally {
       if (current()) loading = false
     }
@@ -286,6 +295,14 @@
   {#snippet placeholder()}
     {#if !connected}
       <Empty icon="server" title={d.offline} hint={d.offlineHint} />
+    {:else if missing}
+      <NotInstalled
+        serverID={win.serverID}
+        tool="docker"
+        name="Docker"
+        icon="docker"
+        onretry={() => void refresh()}
+      />
     {:else}
       <LoadState
         serverID={win.serverID}

@@ -4,8 +4,15 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Docker, Nginx, Git và Database: server chưa cài chương trình thì app báo rõ và hiện lệnh cài đúng cho bản Linux của server (apt, dnf, yum, apk), kèm bật dịch vụ. Nút "Chạy trong Terminal" gõ sẵn lệnh để bạn xem rồi tự nhấn Enter. Docker được cài bằng gói của distro và thêm bạn vào nhóm `docker` (app nói rõ nhóm này ngang quyền root, có nút kết nối lại). Cài xong, quay lại cửa sổ là app tự mở (#79). Tài khoản SSH không có quyền sudo thì app chỉ báo nhờ người quản trị cài, không hiện lệnh.
+
 ### Đổi
 - Dock lần đầu mở chỉ ghim các app dùng hằng ngày: Terminal, Tệp, Monitor, Services, Docker, Logs, Editor, Cài đặt. App khác mở từ Launchpad hoặc Spotlight và ghim thêm được như cũ. Ai đã tự ghim hoặc bỏ ghim thì Dock giữ nguyên.
+
+### Sửa
+- Git: server chưa cài git từng hiện "Chưa có repo"; giờ báo chưa cài và đề nghị cài.
+- Lệnh dài trong khung "cần quyền root" không còn bị ngắt dòng giữa chữ.
 
 ## [1.6.2] - 2026-11-08
 

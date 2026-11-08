@@ -2297,6 +2297,26 @@ export namespace packages {
 	    }
 	}
 	
+	export class Setup {
+	    tool: string;
+	    manager: string;
+	    command: string;
+	    relogin: boolean;
+	    canInstall: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Setup(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.tool = source["tool"];
+	        this.manager = source["manager"];
+	        this.command = source["command"];
+	        this.relogin = source["relogin"];
+	        this.canInstall = source["canInstall"];
+	    }
+	}
 
 }
 

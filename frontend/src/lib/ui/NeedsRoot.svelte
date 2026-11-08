@@ -71,7 +71,7 @@
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     white-space: pre-wrap;
-    word-break: break-all;
+    overflow-wrap: anywhere;
     user-select: text;
   }
 </style>

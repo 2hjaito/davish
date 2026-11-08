@@ -1,6 +1,7 @@
 package git
 
 import (
+	"context"
 	"errors"
 	"strconv"
 	"strings"
@@ -51,6 +52,32 @@ func TestCheckExtra(t *testing.T) {
 				t.Fatalf("got %q, %v; want %q", got, err, tt.want)
 			}
 		})
+	}
+}
+
+// stdoutRunner answers every command with out.
+type stdoutRunner struct{ out string }
+
+func (r stdoutRunner) RunLine(context.Context, string, string, string) (audit.Result, error) {
+	return audit.Result{Stdout: []byte(r.out)}, nil
+}
+
+func (r stdoutRunner) RunInput(context.Context, string, string, string, []byte) (audit.Result, error) {
+	return audit.Result{Stdout: []byte(r.out)}, nil
+}
+
+func TestFindWithoutGit(t *testing.T) {
+	if line := findLine(nil); !strings.HasPrefix(line, "command -v git >/dev/null 2>&1 || { echo "+noGit+"; exit 0; }; ") {
+		t.Errorf("line %q does not check for git first", line)
+	}
+	_, err := New(stdoutRunner{noGit + "\n"}).Find(context.Background(), "srv", nil)
+	var ae *apperr.Error
+	if !errors.As(err, &ae) || ae.Code != apperr.CmdMissing {
+		t.Errorf("err = %v, want CMD_MISSING", err)
+	}
+	repos, err := New(stdoutRunner{"/srv/a/.git\n"}).Find(context.Background(), "srv", nil)
+	if err != nil || len(repos) != 1 {
+		t.Errorf("with git = %v, %v", repos, err)
 	}
 }
 

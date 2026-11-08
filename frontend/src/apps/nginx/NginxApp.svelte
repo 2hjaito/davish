@@ -16,6 +16,7 @@
   import ConfirmCommand from '../../lib/ui/ConfirmCommand.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
   import LoadState from '../../lib/ui/LoadState.svelte'
+  import NotInstalled from '../../lib/ui/NotInstalled.svelte'
   import { supersedes } from '../../lib/stores/latest'
   import FilterShell, { type FilterItem } from '../../lib/ui/FilterShell.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
@@ -41,6 +42,8 @@
   let query = $state('')
   let sites = $state.raw<NginxSite[] | null>(null)
   let error = $state('')
+  /** The server has no nginx: offer to install it. */
+  let missing = $state(false)
   let loading = $state(false)
   let selected = $state<string | null>(null)
   let busy = $state(false)
@@ -102,8 +105,14 @@
     try {
       sites = await backend.list(win.serverID)
       error = ''
+      missing = false
     } catch (e) {
-      if (current()) error = toUserError(e).message
+      if (current()) {
+        const u = toUserError(e)
+        error = u.message
+        missing = u.code === 'CMD_MISSING'
+        if (missing) sites = null
+      }
     } finally {
       if (current()) loading = false
     }
@@ -255,6 +264,14 @@
   {#snippet placeholder()}
     {#if !connected}
       <Empty icon="server" title={t.nginx.offline} hint={t.nginx.offlineHint} />
+    {:else if missing}
+      <NotInstalled
+        serverID={win.serverID}
+        tool="nginx"
+        name="Nginx"
+        icon="globe2"
+        onretry={() => void refresh()}
+      />
     {:else}
       <LoadState
         serverID={win.serverID}
