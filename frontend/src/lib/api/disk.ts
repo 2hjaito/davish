@@ -59,6 +59,8 @@ export interface Overview {
   /** Measured as root through sudo -n. */
   root: boolean
   partial: boolean
+  /** Read-only, typed into a terminal: measures as root with the user's password. */
+  sudoMeasure: string
 }
 
 /** How a file would be emptied (internal/disk.TruncatePlan). */

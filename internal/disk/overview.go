@@ -37,6 +37,9 @@ type Overview struct {
 	Root bool `json:"root"`
 	// Partial is set when the measurement ran out of time.
 	Partial bool `json:"partial"`
+	// SudoMeasure is a read-only command for the user to run in a terminal
+	// with their password, measuring what the user could not read.
+	SudoMeasure string `json:"sudoMeasure"`
 }
 
 // DeletedFile is a deleted file a process keeps open.
@@ -97,7 +100,9 @@ func (s *Service) Overview(ctx context.Context, serverID, mount, token string) (
 	if err != nil {
 		return Overview{}, err
 	}
-	return parseOverview(res.Stdout, mount), nil
+	o := parseOverview(res.Stdout, mount)
+	o.SudoMeasure = shellx.Cmd("sudo", "du", "-xh", "-d", "2", "--", mount).String() + ` 2>/dev/null | sort -h | tail -n 25`
+	return o, nil
 }
 
 // track lets Cancel stop the scan named token until the returned func runs.

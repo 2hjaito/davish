@@ -98,6 +98,9 @@ sleep 1`)
 	if !held {
 		t.Errorf("held.log not in %+v", o.Deleted)
 	}
+	if o.SudoMeasure != "sudo du -xh -d 2 -- / 2>/dev/null | sort -h | tail -n 25" {
+		t.Errorf("sudo measure = %q", o.SudoMeasure)
+	}
 	if !slices.Contains(o.Unreadable, "/var/lib/davish-secret") {
 		t.Errorf("unreadable = %q", o.Unreadable)
 	}

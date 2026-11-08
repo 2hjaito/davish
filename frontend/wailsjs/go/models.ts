@@ -708,6 +708,7 @@ export namespace disk {
 	    unmeasured: number;
 	    root: boolean;
 	    partial: boolean;
+	    sudoMeasure: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Overview(source);
@@ -724,6 +725,7 @@ export namespace disk {
 	        this.unmeasured = source["unmeasured"];
 	        this.root = source["root"];
 	        this.partial = source["partial"];
+	        this.sudoMeasure = source["sudoMeasure"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
