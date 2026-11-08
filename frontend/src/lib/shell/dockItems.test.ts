@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { dockItems, togglePin } from './dockItems'
+import { dockApps } from '../../apps/registry'
+import { DEFAULT_PINS, dockItems, togglePin } from './dockItems'
 
 const all = [{ id: 'terminal' }, { id: 'files' }, { id: 'logs' }, { id: 'audit' }]
 
@@ -25,5 +26,12 @@ describe('togglePin', () => {
   it('pins at the end and unpins in place', () => {
     expect(togglePin(['terminal'], 'logs')).toEqual(['terminal', 'logs'])
     expect(togglePin(['terminal', 'logs', 'files'], 'logs')).toEqual(['terminal', 'files'])
+  })
+})
+
+describe('DEFAULT_PINS', () => {
+  it('names only apps the dock can show', () => {
+    const ids = dockApps.map((a) => a.id)
+    for (const id of DEFAULT_PINS) expect(ids).toContain(id)
   })
 })
