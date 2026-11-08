@@ -58,7 +58,9 @@ type Repo struct {
 // worktree or submodule) at most maxDepth below a root, not looking into
 // node_modules, vendor or hidden folders such as ~/.nvm, which is itself a
 // clone. -mindepth 1 keeps a root that is hidden, or a repo itself, from
-// being pruned. Missing roots are fine, so errors are dropped.
+// being pruned. Missing roots are fine, so errors are dropped. Without git
+// it prints noGit instead, so the app offers to install git rather than
+// showing no repositories.
 func findLine(extra []string) string {
 	roots := []string{`"$HOME"`}
 	for _, r := range Roots {
@@ -67,11 +69,15 @@ func findLine(extra []string) string {
 	for _, r := range extra {
 		roots = append(roots, shellx.Quote(r))
 	}
-	return `timeout 15 find ` + strings.Join(roots, " ") +
+	return `command -v git >/dev/null 2>&1 || { echo ` + noGit + `; exit 0; }; ` +
+		`timeout 15 find ` + strings.Join(roots, " ") +
 		` -mindepth 1 -maxdepth ` + strconv.Itoa(maxDepth) +
 		` \( -name .git -print -prune \) -o \( -name node_modules -o -name vendor -o -name '.?*' \) -prune` +
 		` 2>/dev/null | head -n ` + strconv.Itoa(maxRepos) + `; true`
 }
+
+// noGit is what findLine prints when git is missing; no path ends so.
+const noGit = "davish:no-git"
 
 // checkExtra accepts absolute folders only, so a relative one cannot be
 // read as a find option, and no line breaks, which would split the output.
@@ -99,6 +105,9 @@ func (s *Service) Find(ctx context.Context, serverID string, extra []string) ([]
 	res, err := s.run.RunLine(ctx, serverID, app, findLine(extra))
 	if err != nil {
 		return nil, err
+	}
+	if strings.TrimSpace(string(res.Stdout)) == noGit {
+		return nil, apperr.New(apperr.CmdMissing, "git is not installed on the server")
 	}
 	return parseFind(res.Stdout), nil
 }
