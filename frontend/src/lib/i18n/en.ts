@@ -918,16 +918,20 @@ const en = {
         ],
       },
       disk: {
-        does: 'What fills the disk: measure one folder at a time, drill down level by level; cleanup suggestions with the space they free.',
+        does: 'Where a disk’s space goes: one scan of the whole disk, as a tree and the largest files, with what could not be measured and deleted files still held; clean up, delete or empty files.',
         actions: [
-          'Measure a folder, double-click to drill down',
-          'Clean Docker, the journal, old logs, package caches',
+          'Overview: the disk split by part, why some is not measured, deleted files still open',
+          'Folder tree: click the arrow or double-click to open; deeper levels are measured when opened',
+          'Large files: files from 50 MB, empty (logs) or delete',
+          'Clean up: Docker (images, containers, build cache, volumes, logs), the journal, old logs, package caches, /tmp, snap, ~/.cache, npm',
+          'Delete a folder or file after seeing the exact command; from 1 GB or a folder with content, type its name; system folders are refused',
         ],
-        keys: ['Enter: drill down', 'Backspace: up to the parent folder'],
+        keys: ['Enter, →: open a folder', '←: collapse, up to the parent'],
         runs: [
-          'df, du -x -d 1 (when you click Measure)',
-          'docker system df, journalctl --disk-usage, find /var/log',
-          'cleanup commands (with confirmation; through Terminal when root is needed)',
+          'df, du -x -d 3, find -size +50M, /proc/*/fd (through sudo -n when it needs no password)',
+          'du -x -d 1 when opening a deeper folder',
+          'docker system df, journalctl --disk-usage, find',
+          'rm, truncate, cleanup commands (with confirmation; through Terminal when root is needed)',
         ],
       },
       ports: {

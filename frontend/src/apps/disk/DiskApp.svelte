@@ -381,8 +381,7 @@
         {@const c = selCleanup}
         <h3>{d.cleanups[c.id]?.title ?? c.id}</h3>
         <p>
-          {d.frees(formatBytes(c.bytes))}{#if c.count}
-            · {d.files(c.count)}{/if}
+          {d.frees(formatBytes(c.bytes))}{#if c.count}{` · ${d.files(c.count)}`}{/if}
         </p>
         {#if c.danger}<p class="danger">{d.dangerous}</p>{/if}
         <pre class="command">{c.root ? c.sudoCommand : c.command}</pre>
@@ -641,7 +640,7 @@
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     white-space: pre-wrap;
-    word-break: break-all;
+    overflow-wrap: anywhere;
   }
 
   .actions {

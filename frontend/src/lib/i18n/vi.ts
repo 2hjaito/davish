@@ -906,13 +906,20 @@ const vi = {
         ],
       },
       disk: {
-        does: 'Thứ gì chiếm ổ đĩa: đo từng thư mục một, đi sâu từng tầng; gợi ý dọn dẹp kèm dung lượng lấy lại.',
-        actions: ['Đo thư mục, bấm đúp để đi sâu', 'Dọn Docker, journal, log cũ, cache gói'],
-        keys: ['Enter: đi sâu', 'Backspace: lên thư mục cha'],
+        does: 'Ổ đĩa nặng ở đâu: quét cả ổ một lần, xem dạng cây và file lớn nhất, chỉ ra phần chưa đo được và file đã xóa còn bị giữ; dọn, xóa hoặc làm rỗng file.',
+        actions: [
+          'Tổng quan: thanh ổ đĩa theo phần, lý do phần chưa đo được, file đã xóa còn mở',
+          'Cây thư mục: bấm mũi tên hoặc bấm đúp để mở, tầng sâu được đo khi mở',
+          'File lớn: file từ 50 MB, làm rỗng (log) hoặc xóa',
+          'Dọn dẹp: Docker (image, container, cache build, volume, log), journal, log cũ, cache gói, /tmp, snap, ~/.cache, npm',
+          'Xóa thư mục hoặc file sau khi xem đúng lệnh; từ 1 GB hoặc thư mục có nội dung thì gõ tên; không xóa thư mục hệ thống',
+        ],
+        keys: ['Enter, →: mở thư mục', '←: thu gọn, lên thư mục cha'],
         runs: [
-          'df, du -x -d 1 (khi bấm Đo)',
-          'docker system df, journalctl --disk-usage, find /var/log',
-          'lệnh dọn dẹp (có xác nhận, cần root thì qua Terminal)',
+          'df, du -x -d 3, find -size +50M, /proc/*/fd (qua sudo -n nếu không cần mật khẩu)',
+          'du -x -d 1 khi mở thư mục sâu hơn',
+          'docker system df, journalctl --disk-usage, find',
+          'rm, truncate, lệnh dọn dẹp (có xác nhận, cần root thì qua Terminal)',
         ],
       },
       ports: {

@@ -122,10 +122,14 @@ Gõ `localhost:3000` để xem web app đang chạy trên server, ngay trong m�
 
 ## Ổ đĩa
 
-Thứ gì chiếm từng ổ đĩa, đo từng thư mục một và đi sâu khi bấm đúp, không quét cả cây. Gợi ý dọn dẹp kèm dung lượng lấy lại (Docker, journal, log xoay vòng, cache gói), mỗi mục hiện đúng lệnh; thông báo ổ đầy mở thẳng đúng mount.
+Ổ đĩa nặng ở đâu, từ một lần quét cả ổ (bằng root qua `sudo -n` nếu sudo không cần mật khẩu). Trang tổng quan chia ổ thành thư mục đo được, file đã xóa mà tiến trình còn giữ, phần chưa đo được và chỗ trống, rồi giải thích phần hụt: các thư mục user này không đọc được, kèm lệnh `sudo du` để chạy trong Terminal, và tiến trình nào giữ file đã xóa nào. Thư mục mở tại chỗ dạng cây, tầng sâu hơn được đo khi mở; tab File lớn liệt kê mọi file từ 50 MB.
+
+Xóa thư mục hoặc file, hoặc làm rỗng file như log để chương trình đang ghi vẫn ghi tiếp, sau khi xem đúng lệnh; từ 1 GB hoặc thư mục có nội dung thì phải gõ tên. Thư mục hệ thống, cơ sở dữ liệu gói, dữ liệu của Docker và database, thư mục home đều bị từ chối; file của root thì chuyển sang Terminal với `sudo`. Mục Dọn dẹp kèm dung lượng lấy lại: image, container dừng, cache build, volume (đánh dấu là dữ liệu) và log container của Docker, journal, log xoay vòng, cache gói, dump lỗi, file tạm cũ, bản snap cũ, `~/.cache` và cache npm, mỗi mục hiện đúng lệnh. Thông báo ổ đầy mở thẳng đúng mount.
+
+<p><img src="assets/screenshots/disk.jpg" alt="Tổng quan ổ đĩa: phần đo được, phần chưa đo được và lý do, file đã xóa còn mở"></p>
 
 <table><tr>
-  <td><img src="assets/screenshots/disk.jpg" alt="Thứ gì chiếm ổ đĩa, từng thư mục một"></td>
+  <td><img src="assets/screenshots/disk-tree.jpg" alt="Thư mục dạng cây, đang chọn containers của Docker"></td>
   <td><img src="assets/screenshots/disk-clean.jpg" alt="Gợi ý dọn dẹp kèm dung lượng lấy lại"></td>
 </tr></table>
 

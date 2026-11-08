@@ -4,6 +4,14 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Ổ đĩa: mở một ổ là quét cả ổ một lần và hiện tổng quan: thanh chia thành thư mục đo được, file đã xóa còn bị giữ, phần chưa đo được và chỗ trống. Phần chưa đo được có lý do: thư mục user SSH không đọc được (kèm lệnh `sudo du` gõ sẵn vào Terminal), file đã xóa mà tiến trình nào còn giữ. Khi sudo không cần mật khẩu thì đo bằng root nên thấy đủ.
+- Ổ đĩa: thư mục dạng cây mở tại chỗ, tab File lớn (từ 50 MB). Xóa thư mục hoặc file, làm rỗng file log, sau khi xem đúng lệnh; từ 1 GB hoặc thư mục có nội dung thì gõ tên. Thư mục hệ thống, dữ liệu Docker và database, thư mục home không xóa được từ đây.
+- Dọn dẹp: Docker tách thành image không dùng, container dừng, cache build, volume (cảnh báo là dữ liệu) và log container quá 10 MB; thêm dump lỗi, file tạm cũ hơn 7 ngày, bản snap cũ, `~/.cache`, cache npm.
+
+### Sửa
+- Dọn dẹp Docker từng chạy `docker system prune -f`, chỉ xóa image treo, nên ổ vẫn đầy dù app báo lấy lại được nhiều GB. Giờ mỗi loại có lệnh riêng đúng với dung lượng hiện ra.
+
 ## [1.6.2] - 2026-11-08
 
 ### Sửa
