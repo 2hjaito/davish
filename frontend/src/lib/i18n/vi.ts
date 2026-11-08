@@ -71,6 +71,19 @@ const vi = {
       'Davish không lưu mật khẩu sudo. Mở Terminal với lệnh đã điền sẵn, kiểm tra rồi tự nhấn Enter.',
     runInTerminal: 'Chạy trong Terminal',
   },
+  install: {
+    title: (name: string) => `${name} chưa được cài trên server này`,
+    hint: 'Davish điền sẵn lệnh cài cho bản Linux của server. Cài xong, quay lại cửa sổ này là app tự mở.',
+    planning: 'Đang tìm lệnh cài…',
+    needsRoot: 'Cài đặt cần quyền root.',
+    dockerGroup:
+      'Lệnh này thêm bạn vào nhóm docker để Davish chạy docker không cần sudo. Thành viên nhóm docker có quyền ngang root trên server.',
+    relogin: 'Cài xong, cần kết nối lại để nhóm mới có hiệu lực.',
+    reconnect: 'Ngắt và kết nối lại',
+    unknownManager:
+      'Davish chưa biết trình quản lý gói của server này. Hãy cài theo hướng dẫn của bản Linux đang dùng rồi bấm Kiểm tra lại.',
+    check: 'Kiểm tra lại',
+  },
   apps: {
     database: 'Database',
     deploy: 'Triển khai app',

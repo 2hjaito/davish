@@ -58,6 +58,19 @@ const en = {
       'Davish never stores sudo passwords. Open Terminal with the command typed in, check it, then press Enter yourself.',
     runInTerminal: 'Run in Terminal',
   },
+  install: {
+    title: (name: string) => `${name} is not installed on this server`,
+    hint: 'Davish types in the install command for the server’s Linux. Once it is done, come back to this window and the app opens.',
+    planning: 'Finding the install command…',
+    needsRoot: 'Installing needs root.',
+    dockerGroup:
+      'This adds you to the docker group so Davish can run docker without sudo. Members of the docker group are as powerful as root on the server.',
+    relogin: 'After installing, reconnect so the new group takes effect.',
+    reconnect: 'Disconnect and reconnect',
+    unknownManager:
+      'Davish does not know this server’s package manager. Install it the way your Linux distribution documents, then press Check again.',
+    check: 'Check again',
+  },
   apps: {
     database: 'Database',
     deploy: 'Deploy an app',
