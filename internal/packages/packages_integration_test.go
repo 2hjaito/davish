@@ -70,3 +70,18 @@ func TestAppsFindsNginx(t *testing.T) {
 		t.Errorf("nginx = %+v (nginx -v says %s); all: %+v", nginx, want, apps)
 	}
 }
+
+func TestSetupWithoutSudo(t *testing.T) {
+	m, id := testsshd.Connect(t)
+	s := packages.New(audit.NewRunner(m, audit.New(discard{})), discard{})
+
+	// tester is in no sudo group and the image has no sudo at all.
+	got, err := s.Setup(context.Background(), id, packages.ToolPostgres)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "sudo apt-get update && sudo apt-get install postgresql && sudo systemctl enable --now postgresql"
+	if got.Manager != packages.Apt || got.Command != want || got.CanInstall || got.Relogin {
+		t.Errorf("setup = %+v", got)
+	}
+}
