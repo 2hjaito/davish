@@ -4,8 +4,10 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.8.1] - 2026-11-09
+
 ### Sửa
-- Windows và Linux: cửa sổ Davish luôn phóng to, không kéo sang màn hình khác và không thu nhỏ được. Giờ cuối thanh menu có nút Thu nhỏ, Phóng to/Thu về và Đóng; kéo vùng trống của thanh menu (chỗ số liệu và đồng hồ) để di chuyển cửa sổ, nhấp đúp để phóng to hoặc thu về; kéo mép cửa sổ để đổi kích thước.
+- Windows và Linux: cửa sổ Davish luôn phóng to, không kéo sang màn hình khác và không thu nhỏ được. Giờ cuối thanh menu có nút Thu nhỏ, Phóng to/Thu về và Đóng; kéo vùng trống của thanh menu (chỗ số liệu và đồng hồ) để di chuyển cửa sổ, nhấp đúp để phóng to hoặc thu về; kéo mép cửa sổ để đổi kích thước (#93).
 
 ## [1.8.0] - 2026-11-09
 
