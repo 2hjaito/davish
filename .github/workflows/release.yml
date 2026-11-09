@@ -132,16 +132,32 @@ jobs:
           (cd dist && sha256sum * > SHA256SUMS.txt)
           go run ./cmd/updatesign sign dist/SHA256SUMS.txt
 
-      # The section of CHANGELOG.md for this version, without its heading.
+      # The section of each changelog for this version, without its heading:
+      # English first, then Vietnamese folded after a marker the update
+      # dialog splits on (frontend/src/lib/shell/releaseNotes.ts).
       - name: Release notes
         run: |
           version="${GITHUB_REF_NAME#v}"
-          awk -v v="$version" '
-            $0 ~ "^## \\[" v "\\]" { on = 1; next }
-            on && /^## \[/ { exit }
-            on && /^\[[^]]+\]: / { exit }
-            on { print }
-          ' CHANGELOG.md > notes.md
+          section() {
+            awk -v v="$version" '
+              $0 ~ "^## \\[" v "\\]" { on = 1; next }
+              on && /^## \[/ { exit }
+              on && /^\[[^]]+\]: / { exit }
+              on { print }
+            ' "$1"
+          }
+          section CHANGELOG.en.md > en.md
+          section CHANGELOG.md > vi.md
+          if [ -s en.md ]; then
+            cat en.md > notes.md
+            if [ -s vi.md ]; then
+              printf '\n<!-- davish:vi -->\n<details><summary>Tiếng Việt</summary>\n\n' >> notes.md
+              cat vi.md >> notes.md
+              printf '\n</details>\n' >> notes.md
+            fi
+          else
+            cat vi.md > notes.md
+          fi
           test -s notes.md || echo "Davish ${GITHUB_REF_NAME}" > notes.md
           # SignPath requires the policy on the download page too.
           url="https://github.com/${GITHUB_REPOSITORY}/blob/main/CODE_SIGNING.md"

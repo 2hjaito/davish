@@ -1564,7 +1564,7 @@ const vi = {
     themes: { system: 'Tự động', light: 'Sáng', dark: 'Tối' },
     language: 'Ngôn ngữ',
     languageHint: 'Ngôn ngữ của giao diện.',
-    langs: { vi: 'Tiếng Việt', en: 'English' },
+    langs: { vi: 'Tiếng Việt', en: 'English', zh: '简体中文' },
     langRestart:
       'Davish sẽ khởi động lại: terminal và chuyển file đang chạy sẽ dừng, server tự kết nối lại.',
     langApply: 'Khởi động lại',

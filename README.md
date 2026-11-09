@@ -16,9 +16,9 @@ Nothing to install on the server.
 ![Go](https://img.shields.io/badge/Go-1.27-00ADD8?logo=go&logoColor=white)
 ![Svelte](https://img.shields.io/badge/Svelte-5-FF3E00?logo=svelte&logoColor=white)
 
-**English** · [Tiếng Việt](README.vi.md)
+**English** · [Tiếng Việt](README.vi.md) · [简体中文](README.zh-CN.md)
 
-<img src="assets/screenshots/desktop.jpg" alt="Davish desktop with Terminal, Monitor and Files" width="100%">
+<img src="assets/screenshots/en/desktop.jpg" alt="Davish desktop with Terminal, Monitor and Files" width="100%">
 
 </div>
 
@@ -31,7 +31,7 @@ Nothing to install on the server.
 - **Locks when you step away.** A lock password of its own, Touch ID on macOS; it locks when the machine wakes, after idle time or with `⌘L`. Sessions keep running behind the lock, but nothing reaches a server until you unlock.
 - **Many servers, one desktop.** Each server is a workspace (`⌘1`…`⌘9`) that remembers its own windows. Copy files between servers by dragging them.
 - **Updates itself.** A new version shows its changes with Update, Later and Skip this version; Davish downloads it, checks its signature and restarts into it. No reinstalling.
-- **English or Vietnamese.** Pick the language in Settings; the first time, Davish follows your system's.
+- **English, Vietnamese or Simplified Chinese.** Pick the language in Settings; the first time, Davish follows your system's.
 - **Your `~/.ssh/config` works.** Import its hosts in one go, keys and `ProxyJump` included; Davish only reads the file. Servers behind a bastion connect through it, each hop with its own host key check, and the whole chain reconnects on its own.
 
 ## Features
@@ -70,20 +70,20 @@ Nothing to install on the server.
 - [App lock](FEATURES.md#app-lock): Touch ID or a password, locks on wake
 - [Updates](FEATURES.md#updates): one click to a new version, signature checked
 - [Light and dark](FEATURES.md#light-and-dark): follows your system, or pick one
-- [Language](FEATURES.md#language): English or Vietnamese
+- [Language](FEATURES.md#language): English, Vietnamese or Simplified Chinese
 
 <table>
   <tr>
-    <td><img src="assets/screenshots/browser.jpg" alt="A web app on the server, inside Davish"></td>
-    <td><img src="assets/screenshots/docker-images.jpg" alt="Docker image layers"></td>
+    <td><img src="assets/screenshots/en/browser.jpg" alt="A web app on the server, inside Davish"></td>
+    <td><img src="assets/screenshots/en/docker-images.jpg" alt="Docker image layers"></td>
   </tr>
   <tr>
-    <td><img src="assets/screenshots/ports.jpg" alt="Ports and tunnels"></td>
-    <td><img src="assets/screenshots/git.jpg" alt="Git commit graph"></td>
+    <td><img src="assets/screenshots/en/ports.jpg" alt="Ports and tunnels"></td>
+    <td><img src="assets/screenshots/en/git.jpg" alt="Git commit graph"></td>
   </tr>
   <tr>
-    <td><img src="assets/screenshots/security.jpg" alt="Failed logins by address"></td>
-    <td><img src="assets/screenshots/disk.jpg" alt="What fills the disk"></td>
+    <td><img src="assets/screenshots/en/security.jpg" alt="Failed logins by address"></td>
+    <td><img src="assets/screenshots/en/disk.jpg" alt="What fills the disk"></td>
   </tr>
 </table>
 

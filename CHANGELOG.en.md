@@ -1,0 +1,46 @@
+# Changelog
+
+Notable changes to Davish, in English. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and versions follow [SemVer](https://semver.org/). Versions before 1.7.0 are only in the Vietnamese [CHANGELOG.md](CHANGELOG.md).
+
+## [Unreleased]
+
+### Added
+- Simplified Chinese interface (简体中文): pick it in Settings → Appearance → Language; on a Chinese system Davish picks it the first time. Release notes show in English.
+
+### Changed
+- Release notes come in English and Vietnamese; the update dialog shows the ones in your interface language.
+
+## [1.8.2] - 2026-11-09
+
+### Fixed
+- Updates: when GitHub fails a download (like the 504 outage on 2026-11-09), Davish tries again and then downloads through the GitHub API instead of giving up.
+- A failed update now says so at the top of the dialog, naming the step that failed (checking or downloading), with Try again, Download manually and Details. Details show the error code and the updater's log lines, with Copy for a bug report and a button to open the log folder.
+
+## [1.8.1] - 2026-11-09
+
+### Fixed
+- Windows and Linux: the Davish window was always maximized and could not be moved to another monitor or minimized. The menu bar now ends with Minimize, Maximize/Restore and Close; drag the empty part of the menu bar (the stats and clock) to move the window, double-click it to maximize or restore, and drag the window's edges to resize it (#93).
+
+## [1.8.0] - 2026-11-09
+
+### Added
+- Settings → Dock: pick the Dock size (Small, Medium, Large) and turn on Automatically hide. The Dock slides below the screen; move the pointer to the bottom edge to bring it back, and maximized or snapped windows use that space.
+
+### Fixed
+- Disk: the folder, Large files and Clean up lists did not scroll, so the rows at the bottom were cut off; they scroll now.
+
+## [1.7.0] - 2026-11-08
+
+### Added
+- Docker, Nginx, Git and Database: when the server lacks the program, the app says so and shows the install command for the server's Linux (apt, dnf, yum, apk), with enabling the service. "Run in Terminal" types the command for you to read and press Enter. Docker is installed from the distro's packages and adds you to the `docker` group (the app says this group is as good as root, with a button to reconnect). Once installed, coming back to the window opens the app (#79). An SSH user without sudo is told to ask an administrator, with no command.
+- Disk: opening a disk scans it once and shows an overview: a bar split into measured folders, deleted files still held open, what could not be measured and free space. What could not be measured comes with the reason: folders the SSH user cannot read (with a `sudo du` command typed into a Terminal) and deleted files a process still holds. When sudo needs no password, Davish measures as root and sees everything.
+- Disk: folders as a tree that opens in place, and a Large files tab (from 50 MB). Delete a folder or file, or empty a log file, after seeing the exact command; from 1 GB, or for a folder with contents, type its name. System folders, Docker and database data and home folders cannot be deleted from here.
+- Clean up: Docker is split into unused images, stopped containers, build cache, volumes (with a warning that they hold data) and container logs over 10 MB; plus crash dumps, temporary files older than 7 days, old snap revisions, `~/.cache` and the npm cache.
+
+### Changed
+- On first start the Dock pins only the everyday apps: Terminal, Files, Monitor, Services, Docker, Logs, Editor, Settings. Other apps open from Launchpad or Spotlight and can be pinned as before. A Dock you already pinned or unpinned stays as it is.
+
+### Fixed
+- Git: a server without git used to show "No repository"; it now says git is missing and offers to install it.
+- Long commands in the "needs root" box no longer break in the middle of a word.
+- Docker clean up used to run `docker system prune -f`, which only removes dangling images, so the disk stayed full while the app reported many GB freed. Each kind now has its own command that matches the size shown.

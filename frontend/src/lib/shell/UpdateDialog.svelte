@@ -3,9 +3,10 @@
   import { diagRevealLog, diagSupportInfo, type SupportInfo } from '../api/diag'
   import { toUserError } from '../api/errors'
   import { hasRuntime, openURL } from '../api/runtime'
-  import { t } from '../i18n'
+  import { lang, t } from '../i18n'
   import { updates } from '../stores/updates.svelte'
   import Dialog from '../ui/Dialog.svelte'
+  import { releaseNotes } from './releaseNotes'
   import { updateReport } from './updateReport'
 
   /** Where to download by hand when the check itself failed. */
@@ -19,7 +20,7 @@
   // Release notes are Markdown; headings and bullets read fine as text
   // once their markers are gone.
   const notes = $derived(
-    (latest?.notes ?? '')
+    releaseNotes(latest?.notes ?? '', lang)
       .split('\n')
       .map((l) =>
         l

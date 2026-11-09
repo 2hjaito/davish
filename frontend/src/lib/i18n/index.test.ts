@@ -42,6 +42,10 @@ describe('i18n', () => {
     expect(savedLang()).toBe('en')
     system('fr-FR')
     expect(savedLang()).toBe('en')
+    system('zh-CN')
+    expect(savedLang()).toBe('zh')
+    system('zh-TW')
+    expect(savedLang()).toBe('zh')
   })
 
   it('prefers the saved choice, and the URL over both', async () => {
@@ -63,6 +67,9 @@ describe('i18n', () => {
     expect(i18n.t.apps.settings).toBe('Settings')
     await i18n.loadLang('vi')
     expect(i18n.t.apps.settings).toBe('Cài đặt')
+    await i18n.loadLang('zh')
+    expect(i18n.locale).toBe('zh-CN')
+    expect(i18n.t.apps.settings).toBe('设置')
   })
 
   it('saves the new language and restarts Davish', async () => {

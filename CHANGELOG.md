@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Giao diện tiếng Trung giản thể (简体中文): chọn trong Cài đặt → Giao diện → Ngôn ngữ; máy dùng tiếng Trung thì lần đầu Davish tự chọn. Ghi chú phát hành hiện bằng tiếng Anh.
+
+### Đổi
+- Ghi chú phát hành có cả tiếng Anh và tiếng Việt; hộp thoại cập nhật hiện bản theo ngôn ngữ giao diện.
+
 ## [1.8.2] - 2026-11-09
 
 ### Sửa

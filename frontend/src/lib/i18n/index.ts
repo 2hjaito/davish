@@ -8,9 +8,9 @@ import type vi from './vi'
 
 export type { AgoUnit } from './vi'
 
-export type Lang = 'vi' | 'en'
+export type Lang = 'vi' | 'en' | 'zh'
 
-export const LANGS: readonly Lang[] = ['vi', 'en']
+export const LANGS: readonly Lang[] = ['vi', 'en', 'zh']
 
 // vi.ts is `as const`; another language must match its shape, not its text.
 // Icon names stay literal since they are not translated.
@@ -30,7 +30,7 @@ type Widen<T> = T extends IconName
 
 export type Messages = Widen<typeof vi>
 
-const LOCALES: Record<Lang, string> = { vi: 'vi-VN', en: 'en-US' }
+const LOCALES: Record<Lang, string> = { vi: 'vi-VN', en: 'en-US', zh: 'zh-CN' }
 
 /** Every user-facing string, in the current language. */
 export let t: Messages
@@ -40,7 +40,7 @@ export let lang: Lang
 export let locale: string
 
 function isLang(v: unknown): v is Lang {
-  return v === 'vi' || v === 'en'
+  return v === 'vi' || v === 'en' || v === 'zh'
 }
 
 /** The saved choice; before one is made, the system's language. */
@@ -51,13 +51,19 @@ export function savedLang(): Lang {
   if (isLang(param)) return param
   const saved = load<unknown>('lang', null)
   if (isLang(saved)) return saved
-  const sys = typeof navigator === 'undefined' ? 'vi' : navigator.language
-  return sys.toLowerCase().startsWith('vi') ? 'vi' : 'en'
+  const sys = (typeof navigator === 'undefined' ? 'vi' : navigator.language).toLowerCase()
+  if (sys.startsWith('vi')) return 'vi'
+  return sys.startsWith('zh') ? 'zh' : 'en'
 }
 
 /** Loads the strings of pick (the saved language by default); call before mounting. */
 export async function loadLang(pick: Lang = savedLang()): Promise<void> {
-  const mod = pick === 'en' ? await import('./en') : await import('./vi')
+  const mod =
+    pick === 'en'
+      ? await import('./en')
+      : pick === 'zh'
+        ? await import('./zh')
+        : await import('./vi')
   t = mod.default
   lang = pick
   locale = LOCALES[pick]
