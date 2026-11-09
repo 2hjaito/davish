@@ -23,6 +23,8 @@ class Updates {
   phase = $state<Phase>('idle')
   progress = $state(0)
   error = $state('')
+  /** What failed, for the dialog's details: the error code and the backend's text. */
+  errorDetail = $state('')
   dialog = $state(false)
   /** The version "Bỏ qua bản này" was pressed for. */
   skipped = $state(load('update:skip', ''))
@@ -52,11 +54,12 @@ class Updates {
     }
     this.phase = 'checking'
     this.error = ''
+    this.errorDetail = ''
     if (manual) this.dialog = true
     try {
       this.status = await updateCheck()
     } catch (e) {
-      this.error = toUserError(e).message
+      this.fail(e)
     } finally {
       this.phase = 'idle'
     }
@@ -80,11 +83,12 @@ class Updates {
     this.phase = 'downloading'
     this.progress = 0
     this.error = ''
+    this.errorDetail = ''
     try {
       await updateInstall(v)
       this.phase = 'ready'
     } catch (e) {
-      this.error = toUserError(e).message
+      this.fail(e)
       this.phase = 'idle'
     }
   }
@@ -93,8 +97,14 @@ class Updates {
     try {
       await updateRestart()
     } catch (e) {
-      this.error = toUserError(e).message
+      this.fail(e)
     }
+  }
+
+  private fail(e: unknown) {
+    const err = toUserError(e)
+    this.error = err.message
+    this.errorDetail = `${err.code}: ${err.detail}`
   }
 
   skip() {

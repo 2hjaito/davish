@@ -50,6 +50,7 @@ const (
 	UpdateNoWrite        Code = "UPDATE_NO_WRITE"
 	UpdateBroken         Code = "UPDATE_BROKEN"
 	UpdateDevBuild       Code = "UPDATE_DEV_BUILD"
+	UpdateDownloadFailed Code = "UPDATE_DOWNLOAD_FAILED"
 )
 
 // Error is the only error type allowed to cross into the frontend.

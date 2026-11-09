@@ -1028,6 +1028,15 @@ const vi = {
     skip: 'Bỏ qua bản này',
     openPage: 'Mở trang tải',
     ok: 'OK',
+    failed: 'Cập nhật không thành công',
+    retry: 'Thử lại',
+    manual: 'Tải thủ công',
+    details: 'Chi tiết',
+    hideDetails: 'Ẩn chi tiết',
+    detailsHint: 'Gửi nội dung này khi báo lỗi. Log không chứa mật khẩu hay key.',
+    copy: 'Sao chép',
+    copied: 'Đã sao chép',
+    openLog: 'Mở thư mục log',
   },
   diag: {
     slowTitle: 'Server trả lời chậm',
@@ -2526,6 +2535,8 @@ const vi = {
     UPDATE_BROKEN:
       'File của Davish trên máy đã bị thay hoặc xóa trong lúc app đang chạy (build lại, cài lại). Thoát Davish rồi mở lại, hoặc tải bản mới từ trang phát hành.',
     UPDATE_DEV_BUILD: 'Bản dev không tự cập nhật. Hãy tải bản mới từ trang phát hành.',
+    UPDATE_DOWNLOAD_FAILED:
+      'Không tải được bản cập nhật: GitHub không trả lời hoặc mạng chập chờn. Thử lại sau ít phút, hoặc tải thủ công từ trang phát hành.',
     GIT_UNSAFE_OWNER:
       'Repo này thuộc user khác nên git từ chối đọc (dubious ownership). Hãy đăng nhập bằng user sở hữu repo.',
   },

@@ -21,6 +21,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -71,6 +73,15 @@ func zipOf(t *testing.T, files map[string]string, links map[string]string) []byt
 // list signed by priv (or a broken signature when tamper).
 func fakeGitHub(t *testing.T, version, assetName string, archive []byte, priv ed25519.PrivateKey, tamper bool) *httptest.Server {
 	t.Helper()
+	srv, _ := flakyGitHub(t, version, assetName, archive, priv, tamper, 0, 0)
+	return srv
+}
+
+// flakyGitHub is fakeGitHub whose github.com links answer browserStatus and
+// API links apiStatus when not 0. hits counts requests per path.
+func flakyGitHub(t *testing.T, version, assetName string, archive []byte, priv ed25519.PrivateKey, tamper bool, browserStatus, apiStatus int) (*httptest.Server, *sync.Map) {
+	t.Helper()
+	hits := &sync.Map{}
 	sum := sha256.Sum256(archive)
 	sums := []byte(hex.EncodeToString(sum[:]) + "  " + assetName + "\n")
 	sig := ed25519.Sign(priv, sums)
@@ -84,24 +95,47 @@ func fakeGitHub(t *testing.T, version, assetName string, archive []byte, priv ed
 		json.NewEncoder(w).Encode(map[string]any{ //nolint:errcheck,gosec // test server
 			"tag_name": "v" + version, "body": "notes", "html_url": srv.URL + "/page",
 			"assets": []map[string]any{
-				{"name": assetName, "browser_download_url": srv.URL + "/a/" + assetName, "size": len(archive)},
-				{"name": sumsName, "browser_download_url": srv.URL + "/a/" + sumsName},
-				{"name": sigName, "browser_download_url": srv.URL + "/a/" + sigName},
+				{"name": assetName, "browser_download_url": srv.URL + "/a/" + assetName, "url": srv.URL + "/api/" + assetName, "size": len(archive)},
+				{"name": sumsName, "browser_download_url": srv.URL + "/a/" + sumsName, "url": srv.URL + "/api/" + sumsName},
+				{"name": sigName, "browser_download_url": srv.URL + "/a/" + sigName, "url": srv.URL + "/api/" + sigName},
 			},
 		})
 	})
-	mux.HandleFunc("/a/"+assetName, func(w http.ResponseWriter, _ *http.Request) { w.Write(archive) })                                      //nolint:errcheck,gosec // test server
-	mux.HandleFunc("/a/"+sumsName, func(w http.ResponseWriter, _ *http.Request) { w.Write(sums) })                                          //nolint:errcheck,gosec // test server
-	mux.HandleFunc("/a/"+sigName, func(w http.ResponseWriter, _ *http.Request) { w.Write([]byte(base64.StdEncoding.EncodeToString(sig))) }) //nolint:errcheck,gosec // test server
+	files := map[string][]byte{assetName: archive, sumsName: sums, sigName: []byte(base64.StdEncoding.EncodeToString(sig))}
+	for name, body := range files {
+		serve := func(prefix string, status int) {
+			mux.HandleFunc(prefix+name, func(w http.ResponseWriter, r *http.Request) {
+				n, _ := hits.LoadOrStore(r.URL.Path, new(atomic.Int32))
+				n.(*atomic.Int32).Add(1)
+				switch {
+				case status != 0:
+					w.WriteHeader(status)
+				case prefix == "/api/" && r.Header.Get("Accept") != "application/octet-stream":
+					w.Write([]byte(`{"name":"metadata, not the file"}`)) //nolint:errcheck,gosec // test server
+				default:
+					w.Write(body) //nolint:errcheck,gosec // test server
+				}
+			})
+		}
+		serve("/a/", browserStatus)
+		serve("/api/", apiStatus)
+	}
 	srv = httptest.NewServer(mux)
 	t.Cleanup(srv.Close)
-	return srv
+	return srv, hits
+}
+
+func hitCount(hits *sync.Map, path string) int32 {
+	if n, ok := hits.Load(path); ok {
+		return n.(*atomic.Int32).Load()
+	}
+	return 0
 }
 
 func service(_ *testing.T, srv *httptest.Server, pub ed25519.PublicKey, goos, exe string) (*Service, *progress) {
 	p := &progress{}
 	s := New("1.1.0", p, slog.New(slog.NewTextHandler(io.Discard, nil)), Options{
-		API: srv.URL, Repo: "o/r", GOOS: goos,
+		API: srv.URL, Repo: "o/r", GOOS: goos, Retry: []time.Duration{time.Millisecond},
 		PublicKey:  base64.StdEncoding.EncodeToString(pub),
 		Executable: func() (string, error) { return exe, nil },
 	})
@@ -317,5 +351,61 @@ func TestCleanupRemovesStaleStaging(t *testing.T) {
 	}
 	if strings.Join(left, ",") != ".davish-update-2,Davish.app" {
 		t.Errorf("left = %v", left)
+	}
+}
+
+func TestDownloadFallsBackToAPIWhenGitHubFails(t *testing.T) {
+	pub, priv, _ := ed25519.GenerateKey(rand.Reader)
+	name := "Davish-v1.2.0-linux-amd64.tar.gz"
+	srv, hits := flakyGitHub(t, "1.2.0", name, tarGz(t, map[string]string{"Davish": "new binary"}), priv, false, http.StatusGatewayTimeout, 0)
+	exe := filepath.Join(t.TempDir(), "Davish")
+	os.WriteFile(exe, []byte("old binary"), 0o755) //nolint:errcheck,gosec
+	s, _ := service(t, srv, pub, "linux", exe)
+
+	if err := s.Install(context.Background(), "1.2.0"); err != nil {
+		t.Fatal(err)
+	}
+	if b, _ := os.ReadFile(exe); string(b) != "new binary" { //nolint:gosec // test temp dir
+		t.Errorf("app = %q", b)
+	}
+	// One try and one retry on the github.com link, then the API link.
+	if got := hitCount(hits, "/a/"+name); got != 2 {
+		t.Errorf("github.com link tried %d times, want 2", got)
+	}
+	if got := hitCount(hits, "/api/"+name); got != 1 {
+		t.Errorf("API link tried %d times, want 1", got)
+	}
+}
+
+func TestDownloadFailsWhenBothLinksFail(t *testing.T) {
+	pub, priv, _ := ed25519.GenerateKey(rand.Reader)
+	name := "Davish-v1.2.0-linux-amd64.tar.gz"
+	srv, _ := flakyGitHub(t, "1.2.0", name, tarGz(t, map[string]string{"Davish": "new"}), priv, false, http.StatusServiceUnavailable, http.StatusBadGateway)
+	exe := filepath.Join(t.TempDir(), "Davish")
+	os.WriteFile(exe, []byte("old binary"), 0o755) //nolint:errcheck,gosec
+	s, _ := service(t, srv, pub, "linux", exe)
+
+	err := s.Install(context.Background(), "1.2.0")
+	if code(err) != apperr.UpdateDownloadFailed || !strings.Contains(err.Error(), "502") {
+		t.Fatalf("err = %v", err)
+	}
+	if b, _ := os.ReadFile(exe); string(b) != "old binary" { //nolint:gosec // test temp dir
+		t.Errorf("app changed to %q", b)
+	}
+}
+
+func TestDownloadDoesNotRetryNotFound(t *testing.T) {
+	pub, priv, _ := ed25519.GenerateKey(rand.Reader)
+	name := "Davish-v1.2.0-linux-amd64.tar.gz"
+	srv, hits := flakyGitHub(t, "1.2.0", name, tarGz(t, map[string]string{"Davish": "new"}), priv, false, http.StatusNotFound, http.StatusNotFound)
+	exe := filepath.Join(t.TempDir(), "Davish")
+	os.WriteFile(exe, []byte("old binary"), 0o755) //nolint:errcheck,gosec
+	s, _ := service(t, srv, pub, "linux", exe)
+
+	if err := s.Install(context.Background(), "1.2.0"); code(err) != apperr.UpdateDownloadFailed {
+		t.Fatalf("err = %v", err)
+	}
+	if got := hitCount(hits, "/a/"+sumsName); got != 1 {
+		t.Errorf("github.com link tried %d times on 404, want 1", got)
 	}
 }

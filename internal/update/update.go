@@ -58,6 +58,9 @@ type Options struct {
 	Client *http.Client
 	// Dev refuses to install, as a wails dev build does.
 	Dev bool
+	// Retry is how long to wait before each new try of a download that
+	// failed on GitHub's side; default 3s, so two tries per link.
+	Retry []time.Duration
 }
 
 // Release is a published version.
@@ -70,8 +73,14 @@ type Release struct {
 	Signed bool  `json:"signed"`
 	Size   int64 `json:"size"`
 
-	asset, sums, sig string // download URLs
+	asset, sums, sig source
 }
+
+// source is where a release file downloads from: its github.com link, and
+// the API's link to the same asset. GitHub serves them by different paths:
+// on 2026-11-09 releases/download answered 504 for minutes while the API
+// kept working.
+type source struct{ url, api string }
 
 // Status is what a check found.
 type Status struct {
@@ -120,6 +129,9 @@ func New(current string, emit Emitter, log *slog.Logger, opts Options) *Service 
 	if opts.Client == nil {
 		opts.Client = &http.Client{Timeout: 5 * time.Minute}
 	}
+	if opts.Retry == nil {
+		opts.Retry = []time.Duration{3 * time.Second}
+	}
 	opts.Dev = opts.Dev || devBuild
 	key, _ := base64.StdEncoding.DecodeString(opts.PublicKey)
 	return &Service{current: current, opts: opts, pub: ed25519.PublicKey(key), emit: emit, log: log}
@@ -162,6 +174,7 @@ func (s *Service) latest(ctx context.Context) (*Release, error) {
 		Assets  []struct {
 			Name string `json:"name"`
 			URL  string `json:"browser_download_url"`
+			API  string `json:"url"`
 			Size int64  `json:"size"`
 		} `json:"assets"`
 	}
@@ -171,16 +184,17 @@ func (s *Service) latest(ctx context.Context) (*Release, error) {
 	rel := &Release{Version: strings.TrimPrefix(r.TagName, "v"), Notes: r.Body, URL: r.HTMLURL}
 	suffix := assetSuffix(s.opts.GOOS)
 	for _, a := range r.Assets {
+		src := source{url: a.URL, api: a.API}
 		switch {
 		case a.Name == sumsName:
-			rel.sums = a.URL
+			rel.sums = src
 		case a.Name == sigName:
-			rel.sig = a.URL
+			rel.sig = src
 		case strings.HasSuffix(a.Name, suffix) && strings.HasPrefix(a.Name, "Davish-"):
-			rel.asset, rel.Size = a.URL, a.Size
+			rel.asset, rel.Size = src, a.Size
 		}
 	}
-	rel.Signed = rel.sums != "" && rel.sig != "" && rel.asset != ""
+	rel.Signed = rel.sums.url != "" && rel.sig.url != "" && rel.asset.url != ""
 	return rel, nil
 }
 
@@ -267,7 +281,7 @@ func (s *Service) install(ctx context.Context, version string) error {
 		s.log.Warn("update signature rejected", "version", rel.Version)
 		return apperr.New(apperr.UpdateBadSignature, "checksum list signature does not verify")
 	}
-	assetName := rel.asset[strings.LastIndex(rel.asset, "/")+1:]
+	assetName := rel.asset.url[strings.LastIndex(rel.asset.url, "/")+1:]
 	want := checksum(sums, assetName)
 	if want == "" {
 		return apperr.New(apperr.UpdateBadSignature, "the archive is not in the signed checksum list")
@@ -348,35 +362,79 @@ func (s *Service) target() (string, error) {
 	return exe, nil
 }
 
-func (s *Service) fetch(ctx context.Context, url string, limit int64) ([]byte, error) {
-	resp, err := s.get(ctx, url)
+func (s *Service) fetch(ctx context.Context, src source, limit int64) ([]byte, error) {
+	resp, err := s.open(ctx, src)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close() //nolint:errcheck // read-only
-	return io.ReadAll(io.LimitReader(resp.Body, limit))
+	b, err := io.ReadAll(io.LimitReader(resp.Body, limit))
+	if err != nil {
+		return nil, apperr.Wrap(apperr.UpdateDownloadFailed, "download interrupted", err)
+	}
+	return b, nil
 }
 
-func (s *Service) get(ctx context.Context, url string) (*http.Response, error) {
+// open starts downloading src. A failure on GitHub's side (5xx, 429, a
+// dropped connection) is tried again after each Retry wait, then the same
+// way through the API link. Anything else, such as 404, is not tried again
+// on the same link.
+func (s *Service) open(ctx context.Context, src source) (*http.Response, error) {
+	var last error
+	for _, link := range []struct {
+		url string
+		api bool
+	}{{src.url, false}, {src.api, true}} {
+		if link.url == "" {
+			continue
+		}
+		for try := 0; ; try++ {
+			resp, again, err := s.get(ctx, link.url, link.api)
+			if err == nil {
+				return resp, nil
+			}
+			last = err
+			if !again || try == len(s.opts.Retry) {
+				break
+			}
+			s.log.Info("update download retry", "api", link.api, "try", try+1, "err", err)
+			select {
+			case <-ctx.Done():
+				return nil, apperr.Wrap(apperr.UpdateDownloadFailed, "download cancelled", ctx.Err())
+			case <-time.After(s.opts.Retry[try]):
+			}
+		}
+	}
+	return nil, last
+}
+
+// get requests url once; again reports whether the failure is GitHub's
+// and worth another try. The API link answers with the file itself only
+// when asked for octet-stream.
+func (s *Service) get(ctx context.Context, url string, api bool) (resp *http.Response, again bool, err error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, false, apperr.Wrap(apperr.UpdateDownloadFailed, "bad download link", err)
 	}
 	req.Header.Set("User-Agent", "Davish/"+s.current)
-	resp, err := s.opts.Client.Do(req)
+	if api {
+		req.Header.Set("Accept", "application/octet-stream")
+	}
+	resp, err = s.opts.Client.Do(req)
 	if err != nil {
-		return nil, apperr.Wrap(apperr.UpdateUnavailable, "cannot download the update", err)
+		return nil, ctx.Err() == nil, apperr.Wrap(apperr.UpdateDownloadFailed, "cannot download the update", err)
 	}
 	if resp.StatusCode != http.StatusOK {
 		resp.Body.Close() //nolint:errcheck,gosec // failing
-		return nil, apperr.New(apperr.UpdateUnavailable, "download answered "+resp.Status)
+		again = resp.StatusCode >= 500 || resp.StatusCode == http.StatusTooManyRequests
+		return nil, again, apperr.New(apperr.UpdateDownloadFailed, "download answered "+resp.Status)
 	}
-	return resp, nil
+	return resp, false, nil
 }
 
-// download writes url to path, reporting progress, and checks its hash.
-func (s *Service) download(ctx context.Context, url, path string, size int64, want string) error {
-	resp, err := s.get(ctx, url)
+// download writes src to path, reporting progress, and checks its hash.
+func (s *Service) download(ctx context.Context, src source, path string, size int64, want string) error {
+	resp, err := s.open(ctx, src)
 	if err != nil {
 		return err
 	}
@@ -412,7 +470,7 @@ func (s *Service) download(ctx context.Context, url, path string, size int64, wa
 			break
 		}
 		if rerr != nil {
-			return apperr.Wrap(apperr.UpdateUnavailable, "download interrupted", rerr)
+			return apperr.Wrap(apperr.UpdateDownloadFailed, "download interrupted", rerr)
 		}
 	}
 	s.emit.Emit(events.UpdateProgress, Progress{Done: done, Total: done})

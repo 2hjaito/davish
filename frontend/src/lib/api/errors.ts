@@ -6,6 +6,8 @@ export type ErrorCode = keyof typeof t.errors
 export interface UserError {
   code: ErrorCode
   message: string
+  /** The backend's own English text ("download answered 504 …"), for a bug report. */
+  detail: string
 }
 
 function isErrorCode(code: unknown): code is ErrorCode {
@@ -16,5 +18,9 @@ function isErrorCode(code: unknown): code is ErrorCode {
 export function toUserError(e: unknown): UserError {
   const code =
     typeof e === 'object' && e !== null && 'code' in e && isErrorCode(e.code) ? e.code : 'INTERNAL'
-  return { code, message: t.errors[code] }
+  const detail =
+    typeof e === 'object' && e !== null && 'message' in e && typeof e.message === 'string'
+      ? e.message
+      : String(e)
+  return { code, message: t.errors[code], detail }
 }
