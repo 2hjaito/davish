@@ -681,6 +681,11 @@ const vi = {
     network: 'Mạng',
     search: (key: string) => `Tìm kiếm (${key})`,
     notifications: (n: number) => (n > 0 ? `Thông báo: ${n} cảnh báo` : 'Thông báo'),
+    windowControls: 'Cửa sổ',
+    minimize: 'Thu nhỏ',
+    maximize: 'Phóng to',
+    restore: 'Thu về kích thước cũ',
+    close: 'Đóng Davish',
     weekdays: ['CN', 'Th 2', 'Th 3', 'Th 4', 'Th 5', 'Th 6', 'Th 7'],
   },
   menu: {

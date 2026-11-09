@@ -9,9 +9,11 @@
   import MenuDropdown from './MenuDropdown.svelte'
   import { buildMenus } from './menuModel.svelte'
   import NotificationMenu from './NotificationMenu.svelte'
-  import { hasNativeTrafficLights, shortcut } from './platform'
+  import { toggleMaximizeWindow } from '../api/runtime'
+  import { hasNativeTrafficLights, needsWindowControls, shortcut } from './platform'
   import ServerPicker from './ServerPicker.svelte'
   import SystemMenu from './SystemMenu.svelte'
+  import WindowControls from './WindowControls.svelte'
 
   let now = $state(new Date())
   const menus = $derived(buildMenus())
@@ -35,9 +37,20 @@
   $effect(() => {
     if (watchedId) return metrics.watch(watchedId)
   })
+
+  // As on a title bar: double-clicking the empty part maximizes or restores.
+  function onDoubleClick(e: MouseEvent) {
+    const drag = getComputedStyle(e.target as Element).getPropertyValue('--wails-draggable')
+    if (drag.trim() === 'drag') toggleMaximizeWindow()
+  }
 </script>
 
-<header class="menubar glass" class:native-lights={hasNativeTrafficLights}>
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<header
+  class="menubar glass"
+  class:native-lights={hasNativeTrafficLights}
+  ondblclick={onDoubleClick}
+>
   <nav class="left" aria-label={t.menubar.label}>
     <SystemMenu />
     <ServerPicker />
@@ -86,6 +99,7 @@
     </button>
     <NotificationMenu />
     <span class="clock">{formatClock(now, t.menubar.weekdays)}</span>
+    {#if needsWindowControls}<WindowControls />{/if}
   </div>
 </header>
 
@@ -148,6 +162,7 @@
   .right {
     flex: 1;
     min-width: 0;
+    align-self: stretch;
     justify-content: flex-end;
     gap: 16px;
     margin-left: 16px;
@@ -173,6 +188,16 @@
      otherwise clicks on buttons and menus would start a window drag. */
   .menubar :global(*) {
     --wails-draggable: no-drag;
+  }
+
+  /* Except what only shows text: the stats and the clock fill most of the
+     bar, and are where the window is grabbed to move it. */
+  .right,
+  .stats,
+  .stat,
+  .stat :global(*),
+  .clock {
+    --wails-draggable: drag;
   }
 
   .menubar :global(.mbtn) {

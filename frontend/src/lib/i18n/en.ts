@@ -692,6 +692,11 @@ const en = {
     search: (key: string) => `Search (${key})`,
     notifications: (n: number) =>
       n > 0 ? `Notifications: ${n} ${n === 1 ? 'alert' : 'alerts'}` : 'Notifications',
+    windowControls: 'Window',
+    minimize: 'Minimize',
+    maximize: 'Maximize',
+    restore: 'Restore down',
+    close: 'Close Davish',
     weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
   },
   menu: {
