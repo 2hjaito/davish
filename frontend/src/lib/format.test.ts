@@ -8,6 +8,7 @@ import {
   formatGB,
   formatPct,
   formatRate,
+  formatRateShort,
 } from './format'
 import { t } from './i18n'
 
@@ -31,6 +32,11 @@ describe('format', () => {
   it('formats rates and GB', () => {
     expect(formatRate(1.2 * 1024 ** 2)).toBe('1,2 MB/s')
     expect(formatGB(5.1 * 1024 ** 3)).toBe('5,1')
+  })
+
+  it('drops the decimal from rates of 100 and up when space is short', () => {
+    expect(formatRateShort(42.4 * 1024)).toBe('42,4 KB/s')
+    expect(formatRateShort(542.2 * 1024)).toBe('542 KB/s')
   })
 
   it('formats the menu bar clock', () => {

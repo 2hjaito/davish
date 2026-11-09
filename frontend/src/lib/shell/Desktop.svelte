@@ -49,7 +49,10 @@
   import { buildMenus } from './menuModel.svelte'
   import { findShortcut } from './menus.svelte'
 
-  const MENUBAR_H = 30
+  // The bar's height lives in tokens.css; windows start under it.
+  const MENUBAR_H = parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue('--menubar-h'),
+  )
   const DOCK_BOTTOM = 14
 
   let innerWidth = $state(window.innerWidth)

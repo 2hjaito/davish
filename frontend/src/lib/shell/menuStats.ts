@@ -1,7 +1,15 @@
-// What each reading in the menu bar shows: a ring and a short value in the
-// bar, a larger value, a line of detail and a 15 minute chart on hover.
+// What each reading in the menu bar shows: a ring with a number in it (or
+// an icon and a short value) in the bar, a larger value, a line of detail
+// and a 15 minute chart on hover.
 // Pure, so it can be tested without the bar.
-import { formatBytes, formatDuration, formatGB, formatPct, formatRate } from '../format'
+import {
+  formatBytes,
+  formatDuration,
+  formatGB,
+  formatPct,
+  formatRate,
+  formatRateShort,
+} from '../format'
 import { t } from '../i18n'
 import type { Sample } from '../stores/metrics.svelte'
 import { type ChartSeries, level, type Level } from '../ui/charts/scale'
@@ -29,7 +37,9 @@ export interface StatView {
   icon: IconName
   /** The name beside the ring in the bar; empty where the icon says it. */
   short: string
-  /** The short value in the bar. */
+  /** The number inside the ring; empty where the icon sits there instead. */
+  inner: string
+  /** The short value; beside the icon in the bar, and read out for the ring. */
   text: string
   level: Level
   /** The large value on hover. */
@@ -43,6 +53,12 @@ export const loadFormat = (v: number) => v.toFixed(v < 10 ? 2 : 1)
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, Number.isFinite(v) ? v : 0))
 
+/** A share as a whole number that fits in the ring, 0 to 100. */
+export const ringPct = (pct: number) => String(Math.round(clamp01(pct / 100) * 100))
+
+/** Load in at most three characters, so it fits in the ring. */
+export const ringLoad = (v: number) => (v < 9.95 ? v.toFixed(1) : String(Math.round(v)))
+
 /** The view of one reading; null when the server has nothing to show for it. */
 export function statView(id: StatId, s: Sample): StatView | null {
   const m = t.menubar.stats
@@ -54,6 +70,7 @@ export function statView(id: StatId, s: Sample): StatView | null {
         ring: clamp01(s.cpu / 100),
         icon: 'cpu',
         short: m.short.cpu,
+        inner: ringPct(s.cpu),
         text: formatPct(s.cpu),
         level: level(s.cpu, 85, 95),
         hero: formatPct(s.cpu),
@@ -72,6 +89,7 @@ export function statView(id: StatId, s: Sample): StatView | null {
         ring: clamp01(pct / 100),
         icon: 'memory',
         short: m.short.mem,
+        inner: ringPct(pct),
         text: `${formatGB(s.memUsed)} GB`,
         level: level(pct, 90, 95),
         hero: formatBytes(s.memUsed),
@@ -91,6 +109,7 @@ export function statView(id: StatId, s: Sample): StatView | null {
         ring: clamp01(s.diskPct / 100),
         icon: 'disk',
         short: m.short.disk,
+        inner: ringPct(s.diskPct),
         text: formatPct(s.diskPct),
         level: level(s.diskPct, 85, 95),
         hero: formatPct(s.diskPct),
@@ -108,7 +127,8 @@ export function statView(id: StatId, s: Sample): StatView | null {
         ring: null,
         icon: 'network',
         short: '',
-        text: formatRate(s.rxBps),
+        inner: '',
+        text: formatRateShort(s.rxBps),
         level: '',
         hero: formatRate(s.rxBps),
         sub: m.netSub(formatRate(s.txBps)),
@@ -131,6 +151,7 @@ export function statView(id: StatId, s: Sample): StatView | null {
         ring: clamp01(ratio),
         icon: 'monitor',
         short: m.short.load,
+        inner: ringLoad(s.load1),
         text: loadFormat(s.load1),
         // Load equal to the core count means every core is busy.
         level: level(ratio * 100, 100, 150),
@@ -150,7 +171,8 @@ export function statView(id: StatId, s: Sample): StatView | null {
         ring: null,
         icon: 'disk',
         short: m.short.io,
-        text: formatRate(s.readBps + s.writeBps),
+        inner: '',
+        text: formatRateShort(s.readBps + s.writeBps),
         level: '',
         hero: formatRate(s.readBps + s.writeBps),
         sub: m.ioSub(formatRate(s.readBps), formatRate(s.writeBps)),
@@ -173,6 +195,7 @@ export function statView(id: StatId, s: Sample): StatView | null {
         ring: clamp01(g.util / 100),
         icon: 'gpu',
         short: m.short.gpu,
+        inner: ringPct(g.util),
         text: formatPct(g.util),
         level: level(g.util, 90, 98),
         hero: formatPct(g.util),
@@ -193,6 +216,7 @@ export function statView(id: StatId, s: Sample): StatView | null {
         ring: clamp01(pct / 100),
         icon: 'memory',
         short: m.short.swap,
+        inner: ringPct(pct),
         text: formatPct(pct),
         level: level(pct, 50, 80),
         hero: formatBytes(s.swapUsed),
@@ -212,6 +236,7 @@ export function statView(id: StatId, s: Sample): StatView | null {
         ring: null,
         icon: 'clock',
         short: '',
+        inner: '',
         text: formatDuration(s.uptime, t.units),
         level: '',
         hero: formatDuration(s.uptime, t.units),

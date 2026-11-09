@@ -4,6 +4,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Changed
+- Menu bar: each reading is a gauge open at the bottom, with the number inside and its name below; each one has a fixed width, so a changing value no longer shifts the others. The menu bar is a little taller (34px).
+
 ## [1.10.0] - 2026-11-09
 
 ### Added

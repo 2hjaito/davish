@@ -15,10 +15,12 @@
 
   let { view, history, end }: Props = $props()
 
-  // A ring in the bar; on hover, the value large with the last
-  // 15 minutes under it, like the Monitor's cards.
-  const R = 7
+  // A ring in the bar with the number in it; on hover, the value large
+  // with the last 15 minutes under it, like the Monitor's cards.
+  const R = 7.75
   const C = 2 * Math.PI * R
+  // A gauge open at the bottom: three quarters of a turn.
+  const ARC = C * 0.75
   const POP_W = 300
   const SHOW_MS = 120
   const HIDE_MS = 150
@@ -50,28 +52,26 @@
 <span
   bind:this={anchor}
   class="stat {view.level}"
+  class:wide={!view.inner}
   role="img"
   aria-label="{view.label}: {view.text}"
   onmouseenter={show}
   onmouseleave={hide}
 >
-  {#if view.ring !== null}
-    <svg class="ring" viewBox="0 0 18 18" aria-hidden="true">
-      <circle class="track" cx="9" cy="9" r={R} />
-      <circle
-        class="fill"
-        cx="9"
-        cy="9"
-        r={R}
-        stroke-dasharray={C}
-        stroke-dashoffset={C * (1 - view.ring)}
-      />
+  <span class="ring">
+    <svg viewBox="0 0 18 18" aria-hidden="true">
+      <circle class="track" cx="9" cy="9" r={R} stroke-dasharray="{ARC} {C}" />
+      {#if view.ring !== null}
+        <circle class="fill" cx="9" cy="9" r={R} stroke-dasharray="{ARC * view.ring} {C}" />
+      {/if}
     </svg>
-  {:else}
-    <Icon name={view.icon} size={13} strokeWidth={2.2} />
-  {/if}
-  {#if view.short}<span class="label">{view.short}</span>{/if}
-  <span class="value">{view.text}</span>
+    {#if view.inner}
+      <span class="inner" class:long={view.inner.length > 2}>{view.inner}</span>
+    {:else}
+      <Icon name={view.icon} size={9} strokeWidth={2.4} />
+    {/if}
+  </span>
+  <span class="label">{view.inner ? view.short : view.text}</span>
 </span>
 
 {#if open}
@@ -107,13 +107,23 @@
 {/if}
 
 <style>
+  /* The ring with its name under it, as on a phone's battery widget. */
+  /* A fixed width, so a value that grows or shrinks does not shift the
+     readings beside it; wider where the value sits under the ring. */
   .stat {
+    width: 30px;
     height: var(--menubar-h);
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 5px;
+    justify-content: center;
+    gap: 2px;
     white-space: nowrap;
     border-radius: 6px;
+  }
+
+  .stat.wide {
+    width: 44px;
   }
 
   /* The bar's readings are where a frameless window is grabbed to move it;
@@ -124,20 +134,48 @@
   }
 
   .label {
-    font-size: var(--text-xs);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 8.5px;
+    line-height: 1;
     color: var(--fg-label);
   }
 
   .ring {
-    width: 16px;
-    height: 16px;
-    rotate: -90deg;
+    position: relative;
+    width: 18px;
+    height: 18px;
+    display: grid;
+    place-items: center;
     flex-shrink: 0;
+  }
+
+  .ring svg {
+    position: absolute;
+    inset: 0;
+    /* Starts the arc at bottom left, so the gap sits under the number. */
+    rotate: 135deg;
   }
 
   .ring circle {
     fill: none;
-    stroke-width: 2.6;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+  }
+
+  .inner {
+    position: relative;
+    font-size: 7.5px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  /* 100 and loads like 2.4 need a little less to stay inside the ring. */
+  .inner.long {
+    font-size: 6px;
+    letter-spacing: -0.04em;
   }
 
   .track {
@@ -145,12 +183,11 @@
   }
 
   .fill {
-    stroke: var(--accent);
-    stroke-linecap: round;
-    transition: stroke-dashoffset var(--dur-slow) var(--ease-out);
+    stroke: var(--ok);
+    transition: stroke-dasharray var(--dur-slow) var(--ease-out);
   }
 
-  .warn {
+  .warn .inner {
     color: var(--warn);
   }
 
@@ -158,7 +195,7 @@
     stroke: var(--warn);
   }
 
-  .danger {
+  .danger .inner {
     color: var(--danger);
   }
 

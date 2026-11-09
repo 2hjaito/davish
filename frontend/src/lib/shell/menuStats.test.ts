@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { Sample } from '../stores/metrics.svelte'
 import { firstMockTick } from '../stores/mockMetrics'
-import { DEFAULT_STATS, STAT_IDS, statView, statViews } from './menuStats'
+import { DEFAULT_STATS, ringLoad, ringPct, STAT_IDS, statView, statViews } from './menuStats'
 
 const sample = (over: Partial<Sample> = {}): Sample => ({ ...firstMockTick(), at: 0, ...over })
 
@@ -36,6 +36,19 @@ describe('statView', () => {
   it('draws rates and uptime with an icon instead of a ring', () => {
     for (const id of ['net', 'io', 'uptime'] as const) {
       expect(statView(id, sample())?.ring).toBeNull()
+    }
+  })
+
+  it('puts a number of at most three characters in the ring', () => {
+    expect(ringPct(19.4)).toBe('19')
+    expect(ringPct(140)).toBe('100')
+    expect(ringPct(Number.NaN)).toBe('0')
+    expect(ringLoad(0.52)).toBe('0.5')
+    expect(ringLoad(9.96)).toBe('10')
+    expect(ringLoad(123.4)).toBe('123')
+    expect(statView('mem', sample({ memUsed: 1, memTotal: 4 }))?.inner).toBe('25')
+    for (const id of ['net', 'io', 'uptime'] as const) {
+      expect(statView(id, sample())?.inner).toBe('')
     }
   })
 
