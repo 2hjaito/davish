@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Đổi
+- Ghi chú phát hành có cả tiếng Anh và tiếng Việt; hộp thoại cập nhật hiện bản theo ngôn ngữ giao diện.
+
 ## [1.8.2] - 2026-11-09
 
 ### Sửa
