@@ -470,6 +470,9 @@
 
 <style>
   .rows {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     padding: 4px 6px;

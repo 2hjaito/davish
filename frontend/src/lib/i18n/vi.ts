@@ -1560,6 +1560,13 @@ const vi = {
     reduceMotionHint: 'Tắt hiệu ứng mở, đóng, thu nhỏ cửa sổ và dock.',
     wallpaper: 'Màu hình nền',
     wallpaperColor: (c: string) => `Màu ${c}`,
+    dock: 'Dock',
+    dockSize: 'Kích thước',
+    dockSizeHint: 'Dock vẫn tự thu nhỏ khi ghim nhiều app hơn màn hình chứa được.',
+    dockSizes: { small: 'Nhỏ', medium: 'Vừa', large: 'Lớn' },
+    dockAutohide: 'Tự động ẩn',
+    dockAutohideHint:
+      'Ẩn Dock, đưa chuột xuống cạnh dưới màn hình để hiện lại. Cửa sổ phóng to dùng cả phần đó.',
     terminal: 'Terminal',
     fontSize: 'Cỡ chữ',
     fontSizeHint: 'Áp dụng cho mọi cửa sổ Terminal.',

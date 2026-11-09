@@ -1584,6 +1584,13 @@ const en = {
     reduceMotionHint: 'Turns off the open, close and minimize animations of windows and the Dock.',
     wallpaper: 'Wallpaper color',
     wallpaperColor: (c: string) => `Color ${c}`,
+    dock: 'Dock',
+    dockSize: 'Size',
+    dockSizeHint: 'The Dock still shrinks when more apps are pinned than the screen can fit.',
+    dockSizes: { small: 'Small', medium: 'Medium', large: 'Large' },
+    dockAutohide: 'Automatically hide',
+    dockAutohideHint:
+      'Hides the Dock; move the pointer to the bottom edge of the screen to show it. Maximized windows use that space.',
     terminal: 'Terminal',
     fontSize: 'Font size',
     fontSizeHint: 'Applies to every Terminal window.',

@@ -2,6 +2,7 @@
   import type { AppId } from '../../apps/types'
   import { t } from '../i18n'
   import { dockPins } from '../stores/dock.svelte'
+  import { DOCK_SIZES, settings } from '../stores/settings.svelte'
   import { ms } from '../motion'
   import AppIcon from '../ui/AppIcon.svelte'
   import { approach, magnify, MAX_LIFT, MAX_SCALE } from './magnify'
@@ -106,6 +107,25 @@
 
   $effect(() => () => cancelAnimationFrame(frame))
 
+  // Autohide: the dock rests below the screen's edge and comes up while the
+  // pointer, keyboard focus or its menu is on it.
+  const HIDE_DELAY = 300
+  let shown = $state(false)
+  let hideTimer = 0
+  const hidden = $derived(settings.dockAutohide && !shown && menu === null)
+
+  function reveal() {
+    clearTimeout(hideTimer)
+    shown = true
+  }
+
+  function hideSoon() {
+    clearTimeout(hideTimer)
+    hideTimer = window.setTimeout(() => (shown = false), HIDE_DELAY)
+  }
+
+  $effect(() => () => clearTimeout(hideTimer))
+
   function launch(app: Tile) {
     if (!onlaunch(app.id)) return
     bouncing = null
@@ -120,17 +140,33 @@
   onblur={() => (menu = null)}
 />
 
+{#if settings.dockAutohide}
+  <div class="edge" aria-hidden="true" onpointerenter={reveal}></div>
+{/if}
+
 <nav
   class="dock glass"
   class:menu-open={menu !== null}
+  class:hidden
   aria-label={t.dock.label}
   style:--count={apps.length}
+  style:--dock-size="{DOCK_SIZES[settings.dockSize]}px"
   bind:this={dock}
   bind:offsetHeight={height}
+  onpointerenter={reveal}
   onpointermove={(e) => aim(e.clientX)}
-  onpointerleave={() => aim(null)}
-  onfocusin={aimAtTile}
-  onfocusout={() => aim(null)}
+  onpointerleave={() => {
+    aim(null)
+    hideSoon()
+  }}
+  onfocusin={(e) => {
+    reveal()
+    aimAtTile(e)
+  }}
+  onfocusout={() => {
+    aim(null)
+    hideSoon()
+  }}
 >
   {#each apps as app, i (app.id)}
     {@const scale = scales[i] ?? 1}
@@ -244,7 +280,7 @@
    * 84px holds the dock's padding, a margin and what magnify adds at the edges.
    */
   .dock {
-    --dock-tile: min(56px, calc((100vw - 84px) / var(--count) - var(--dock-gap)));
+    --dock-tile: min(var(--dock-size), calc((100vw - 84px) / var(--count) - var(--dock-gap)));
     --dock-tile-radius: calc(var(--dock-tile) * 0.27);
     position: absolute;
     bottom: var(--dock-bottom);
@@ -256,6 +292,22 @@
     /* The gap lives in the slots' padding so the hover area has no dead zones. */
     padding: 9px calc(12px - var(--dock-gap) / 2) 7px;
     border-radius: var(--dock-radius);
+    transition: translate var(--dur) var(--ease-out);
+  }
+
+  .dock.hidden {
+    /* Past the bottom edge, shadow and all. */
+    translate: 0 calc(100% + var(--dock-bottom) + 12px);
+  }
+
+  /* Under the hidden dock: reaching the screen's bottom edge brings it up. */
+  .edge {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 4px;
+    z-index: 899;
   }
 
   /*

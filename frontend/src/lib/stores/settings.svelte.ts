@@ -41,6 +41,11 @@ export const ALERTS = {
   defaults: { mem: 90, disk: 85, hold: 60 },
 } as const
 
+/** The Dock's tile size, in px at rest. */
+export const DOCK_SIZES = { small: 44, medium: 56, large: 68 } as const
+
+export type DockSize = keyof typeof DOCK_SIZES
+
 /** Which files the Editor backs up before saving over them. */
 export type BackupMode = 'etc' | 'always' | 'never'
 
@@ -59,6 +64,8 @@ interface SettingsData {
   terminalGpu: boolean
   terminalPrompt: boolean
   monoFont: MonoFont
+  dockSize: DockSize
+  dockAutohide: boolean
   alertMem: number
   alertDisk: number
   alertHold: number
@@ -76,6 +83,8 @@ const defaults: SettingsData = {
   terminalGpu: false,
   terminalPrompt: true,
   monoFont: 'jetbrains',
+  dockSize: 'medium',
+  dockAutohide: false,
   alertMem: ALERTS.defaults.mem,
   alertDisk: ALERTS.defaults.disk,
   alertHold: ALERTS.defaults.hold,
@@ -114,6 +123,13 @@ class Settings {
   /** The CSS font-family of monoFont. */
   get monoFamily() {
     return MONO_FAMILIES[this.monoFont]
+  }
+  get dockSize(): DockSize {
+    return this.#data.dockSize in DOCK_SIZES ? this.#data.dockSize : 'medium'
+  }
+  /** Slides the Dock off screen until the pointer reaches the bottom edge. */
+  get dockAutohide() {
+    return this.#data.dockAutohide === true
   }
   get alertMem() {
     return clampPct(this.#data.alertMem, ALERTS.defaults.mem)

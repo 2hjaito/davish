@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Cài đặt → Dock: chọn kích thước Dock (Nhỏ, Vừa, Lớn) và bật Tự động ẩn. Dock ẩn xuống dưới màn hình, đưa chuột xuống cạnh dưới để hiện lại; cửa sổ phóng to hoặc snap dùng cả phần đó.
+
+### Sửa
+- Ổ đĩa: danh sách thư mục, File lớn và Dọn dẹp không cuộn được, các dòng dưới bị cắt mất; giờ cuộn được.
+
 ## [1.7.0] - 2026-11-08
 
 ### Thêm
