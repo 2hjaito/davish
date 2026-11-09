@@ -5,6 +5,8 @@
   import {
     ALERTS,
     type BackupMode,
+    DOCK_SIZES,
+    type DockSize,
     MONO_FAMILIES,
     type MonoFont,
     settings,
@@ -28,6 +30,7 @@
   let pickedLang = $state<Lang>(lang)
 
   const fonts = Object.keys(MONO_FAMILIES) as MonoFont[]
+  const dockSizes = Object.keys(DOCK_SIZES) as DockSize[]
   const backups: BackupMode[] = ['etc', 'always', 'never']
   // Lock password forms: one at a time (set, change or turn off).
   let lockForm = $state<'change' | 'disable' | null>(null)
@@ -181,6 +184,38 @@
       {/each}
     </div>
   </div>
+
+  <h2 class="section">{t.settings.dock}</h2>
+
+  <div class="row">
+    <span>
+      <strong>{t.settings.dockSize}</strong>
+      <small>{t.settings.dockSizeHint}</small>
+    </span>
+    <div class="segmented" role="radiogroup" aria-label={t.settings.dockSize}>
+      {#each dockSizes as s (s)}
+        <button
+          role="radio"
+          aria-checked={settings.dockSize === s}
+          onclick={() => settings.set('dockSize', s)}>{t.settings.dockSizes[s]}</button
+        >
+      {/each}
+    </div>
+  </div>
+
+  <label class="row">
+    <span>
+      <strong>{t.settings.dockAutohide}</strong>
+      <small>{t.settings.dockAutohideHint}</small>
+    </span>
+    <input
+      type="checkbox"
+      class="switch"
+      role="switch"
+      checked={settings.dockAutohide}
+      onchange={(e) => settings.set('dockAutohide', e.currentTarget.checked)}
+    />
+  </label>
 
   <h2 class="section">{t.settings.terminal}</h2>
 

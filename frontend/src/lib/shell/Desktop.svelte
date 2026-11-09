@@ -64,7 +64,11 @@
       x: 0,
       y: MENUBAR_H,
       w: innerWidth,
-      h: Math.max(200, innerHeight - MENUBAR_H - dockHeight - DOCK_BOTTOM - 6),
+      // A hidden dock leaves the whole height to windows, as on macOS.
+      h: Math.max(
+        200,
+        innerHeight - MENUBAR_H - (settings.dockAutohide ? 0 : dockHeight + DOCK_BOTTOM + 6),
+      ),
     }
   })
 
