@@ -4,6 +4,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-11-09
+
 ### Thêm
 - Cài đặt → Dock: chọn kích thước Dock (Nhỏ, Vừa, Lớn) và bật Tự động ẩn. Dock ẩn xuống dưới màn hình, đưa chuột xuống cạnh dưới để hiện lại; cửa sổ phóng to hoặc snap dùng cả phần đó.
 
