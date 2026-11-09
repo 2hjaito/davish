@@ -36,6 +36,12 @@ Follow a unit's journal, a file or a container. Filter, pause, highlight errors,
 
 CPU per core, memory and swap, disks, network per interface, NVIDIA GPUs, processes. RAM and disk alerts you can tune.
 
+## All servers
+
+Every server in one window, from the server menu, Launchpad or Spotlight: connected or not, CPU, memory, the `/` disk, load, uptime and network, with its alerts (a failed service, a restart loop, a full disk…) counted and the latest one shown. Connect a server or switch to it from its card. Readings are collected only while the window is open, over the same session Monitor uses.
+
+<img src="assets/screenshots/en/servers.jpg" alt="Every server at a glance" width="100%">
+
 ## Services
 
 systemd units by state, their status and journal; start, stop and restart. Remove a unit you no longer use: an admin's unit is deleted, a package's (such as an old `certbot`) is masked with the timer that runs it.

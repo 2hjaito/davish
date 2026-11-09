@@ -2,6 +2,7 @@
   import { t } from '../i18n'
   import { type ConnState, servers } from '../stores/servers.svelte'
   import { ui } from '../stores/ui.svelte'
+  import { openServers } from '../wm/intents.svelte'
   import Icon from '../ui/Icon.svelte'
   import { shortcut } from './platform'
   import Popover from './Popover.svelte'
@@ -109,6 +110,19 @@
       <p class="empty">{t.servers.none}</p>
     {/each}
     <div class="divider"></div>
+    {#if servers.activeId}
+      <button
+        role="menuitem"
+        class="item"
+        onclick={() => {
+          open = false
+          openServers(servers.activeId)
+        }}
+      >
+        <Icon name="grid" size={14} />
+        {t.servers.overview.open}
+      </button>
+    {/if}
     <button
       role="menuitem"
       class="item"

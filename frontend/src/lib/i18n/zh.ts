@@ -103,6 +103,7 @@ const zh = {
     disk: '磁盘',
     security: '安全',
     browser: '浏览器',
+    servers: '所有服务器',
   },
   browser: {
     back: '后退',
@@ -839,6 +840,12 @@ const zh = {
         keys: ['⌘S：保存', '⌘F：查找'],
         runs: ['用 SFTP 读取，写入临时文件后再重命名'],
       },
+      servers: {
+        does: '一屏查看所有服务器：是否已连接、CPU、内存、磁盘 /、负载、运行时间、网络和最新告警。',
+        actions: ['连接服务器', '切换到服务器'],
+        keys: [],
+        runs: ['与监视器相同的 /proc 读取，针对每台已连接的服务器，仅在窗口打开时'],
+      },
       settings: {
         does: '语言、浅色或深色主题、外观、字体、警报阈值、应用锁、终端提示符。',
         actions: [],
@@ -1170,6 +1177,21 @@ const zh = {
       reconnecting: '连接断开，正在重试…',
       disconnected: '未连接',
       failed: '连接失败',
+    },
+    overview: {
+      open: '所有服务器…',
+      connected: (up: number, all: number) => `已连接 ${up}/${all}`,
+      emptyHint: '从服务器菜单添加服务器后会显示在这里。',
+      cpu: 'CPU',
+      ram: '内存',
+      disk: '磁盘 /',
+      load: '负载',
+      uptime: '运行',
+      waiting: '正在等待第一批数据…',
+      connect: '连接',
+      switch: '切换过去',
+      here: '当前服务器',
+      hint: '只有这个窗口打开时才会采集数据。告警来自通知。',
     },
   },
   importDialog: {
