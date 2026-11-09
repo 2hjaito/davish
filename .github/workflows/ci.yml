@@ -53,9 +53,19 @@ jobs:
       - name: Bundle budget
         run: cd frontend && npm run budget
 
+      # The action downloads golangci-lint from GitHub Releases, which answers
+      # 504 now and then. On any failure, lint again with the same version
+      # built through the Go module proxy: a download error passes, a real
+      # lint error fails again.
       - uses: golangci/golangci-lint-action@v8
+        id: lint
+        continue-on-error: true
         with:
           version: v2.15.0
+
+      - name: golangci-lint (again, through the Go module proxy)
+        if: steps.lint.outcome == 'failure'
+        run: go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.15.0 run
 
       - name: Check
         run: |
