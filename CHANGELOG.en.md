@@ -4,6 +4,8 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-11-09
+
 ### Added
 - Simplified Chinese interface (简体中文): pick it in Settings → Appearance → Language; on a Chinese system Davish picks it the first time. Release notes show in English.
 

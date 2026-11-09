@@ -4,6 +4,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-11-09
+
 ### Thêm
 - Giao diện tiếng Trung giản thể (简体中文): chọn trong Cài đặt → Giao diện → Ngôn ngữ; máy dùng tiếng Trung thì lần đầu Davish tự chọn. Ghi chú phát hành hiện bằng tiếng Anh.
 
