@@ -16,9 +16,9 @@ Nothing to install on the server.
 ![Go](https://img.shields.io/badge/Go-1.27-00ADD8?logo=go&logoColor=white)
 ![Svelte](https://img.shields.io/badge/Svelte-5-FF3E00?logo=svelte&logoColor=white)
 
-**English** · [Tiếng Việt](README.vi.md)
+**English** · [Tiếng Việt](README.vi.md) · [简体中文](README.zh-CN.md)
 
-<img src="assets/screenshots/desktop.jpg" alt="Davish desktop with Terminal, Monitor and Files" width="100%">
+<img src="assets/screenshots/en/desktop.jpg" alt="Davish desktop with Terminal, Monitor and Files" width="100%">
 
 </div>
 
@@ -74,16 +74,16 @@ Nothing to install on the server.
 
 <table>
   <tr>
-    <td><img src="assets/screenshots/browser.jpg" alt="A web app on the server, inside Davish"></td>
-    <td><img src="assets/screenshots/docker-images.jpg" alt="Docker image layers"></td>
+    <td><img src="assets/screenshots/en/browser.jpg" alt="A web app on the server, inside Davish"></td>
+    <td><img src="assets/screenshots/en/docker-images.jpg" alt="Docker image layers"></td>
   </tr>
   <tr>
-    <td><img src="assets/screenshots/ports.jpg" alt="Ports and tunnels"></td>
-    <td><img src="assets/screenshots/git.jpg" alt="Git commit graph"></td>
+    <td><img src="assets/screenshots/en/ports.jpg" alt="Ports and tunnels"></td>
+    <td><img src="assets/screenshots/en/git.jpg" alt="Git commit graph"></td>
   </tr>
   <tr>
-    <td><img src="assets/screenshots/security.jpg" alt="Failed logins by address"></td>
-    <td><img src="assets/screenshots/disk.jpg" alt="What fills the disk"></td>
+    <td><img src="assets/screenshots/en/security.jpg" alt="Failed logins by address"></td>
+    <td><img src="assets/screenshots/en/disk.jpg" alt="What fills the disk"></td>
   </tr>
 </table>
 

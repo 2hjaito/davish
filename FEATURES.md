@@ -2,13 +2,13 @@
 
 **English** · [Tiếng Việt](FEATURES.vi.md) · [Back to README](README.md)
 
-Every app in Davish, what it does and what it runs on the server. The interface is in Vietnamese; screenshots show demo data from the browser preview.
+Every app in Davish, what it does and what it runs on the server. The interface is in English or Vietnamese; screenshots show demo data from the browser preview, and some are still of the Vietnamese interface.
 
 ## Terminal
 
 xterm.js with tabs, copy/paste, GPU rendering, and an optional powerline prompt injected into bash at login, with nothing written on the server.
 
-<img src="assets/screenshots/desktop.jpg" alt="Terminal, Monitor and Files" width="100%">
+<img src="assets/screenshots/en/desktop.jpg" alt="Terminal, Monitor and Files" width="100%">
 
 ## Files
 
@@ -52,7 +52,7 @@ Laid out like Docker Desktop. Containers in a table (ID, image, ports, CPU, memo
 
 <table><tr>
   <td><img src="assets/screenshots/docker.jpg" alt="Docker with a container in a restart loop"></td>
-  <td><img src="assets/screenshots/docker-images.jpg" alt="An image and its layers"></td>
+  <td><img src="assets/screenshots/en/docker-images.jpg" alt="An image and its layers"></td>
 </tr></table>
 
 ## Cron
@@ -106,7 +106,7 @@ Finds the repositories in your home, `/var/www`, `/srv` and `/opt`, or folders y
 **Clone a repository…** (SSH or HTTPS, folder, branch), **git init** and **Set a remote…** type the command into a terminal. For GitHub and GitLab over SSH, the host key they publish is added to `known_hosts` first; a button leads to creating a deploy key. **Deploy…** keeps a recipe per repository on your computer (pull, install, build, restart…) and runs it step by step in a terminal, stopping at the first step that fails. Davish looks at the repository (lockfile, `package.json` scripts, compose file, `go.mod`, `Makefile`) and at what runs the app from that folder (pm2, systemd, Docker compose), and offers the steps as switches: get the new code, install dependencies, build, restart the app, plus custom steps. Each step shows its exact command, and the choices are remembered. Deploy runs right away in a terminal; when a step needs sudo, the line is typed for you to press Enter and type the password. The terminal shows each step as done, running or failed with its time, a notification says when the deploy finished or which step failed, and the repository lists its last deploys with commit and duration.
 
 <table><tr>
-  <td><img src="assets/screenshots/git.jpg" alt="The commit graph of every branch"></td>
+  <td><img src="assets/screenshots/en/git.jpg" alt="The commit graph of every branch"></td>
   <td><img src="assets/screenshots/git-changes.jpg" alt="Changed files and a diff"></td>
 </tr></table>
 
@@ -114,7 +114,7 @@ Finds the repositories in your home, `/var/www`, `/srv` and `/opt`, or folders y
 
 Every TCP port the server listens on, with its process or container. Open one in Davish's own browser window, or forward it to `127.0.0.1` on your machine over the SSH connection you already have, open it in your browser or point a database tool at it, even as a domain name for nginx sites. Nothing is opened to the outside.
 
-<img src="assets/screenshots/ports.jpg" alt="Listening ports and a tunnel" width="100%">
+<img src="assets/screenshots/en/ports.jpg" alt="Listening ports and a tunnel" width="100%">
 
 **Open to the Internet** tells, for each port, whether the Internet can reach it, from where it listens, ufw's rules (read with `sudo -n` when needed) and Docker, whose published ports bypass ufw. Open or close a port with `ufw`, typed into a terminal; the port of the SSH session in use is never closed, and closing 80/443 warns about nginx sites. Databases and admin tools found open (Redis, PostgreSQL, Grafana…) are listed with one command that closes them all.
 
@@ -122,7 +122,7 @@ Every TCP port the server listens on, with its process or container. Open one in
 
 Type `localhost:3000` and see the web app running on the server, inside a Davish window: back, forward, reload, redirects and websockets (hot reload) stay on the server, logins keep working. It goes over SSH through a proxy on a random `127.0.0.1` port, so nothing clashes with what runs on your machine, and the page lives at its own origin, never able to reach Davish.
 
-<img src="assets/screenshots/browser.jpg" alt="A web app on the server, opened inside Davish" width="100%">
+<img src="assets/screenshots/en/browser.jpg" alt="A web app on the server, opened inside Davish" width="100%">
 
 ## Disk
 
@@ -130,7 +130,7 @@ Where each disk's space goes, from one scan of the whole disk (as root through `
 
 Delete a folder or file, or empty a file such as a log so the program writing it carries on, after seeing the exact command; anything from 1 GB, or a folder with content, asks for its name. System folders, package databases, Docker's and databases' data and home folders are refused, and root's files go to a terminal with `sudo`. Cleanups list the space they free: Docker images, stopped containers, build cache, volumes (flagged as data) and container logs, the journal, rotated logs, package caches, crash dumps, old temporary files, old snap revisions, `~/.cache` and the npm cache, each with its exact command. A full-disk alert opens it at the right mount.
 
-<p><img src="assets/screenshots/disk.jpg" alt="Disk overview: what is measured, what is not and why, deleted files still open"></p>
+<p><img src="assets/screenshots/en/disk.jpg" alt="Disk overview: what is measured, what is not and why, deleted files still open"></p>
 
 <table><tr>
   <td><img src="assets/screenshots/disk-tree.jpg" alt="Folders as a tree, Docker's containers selected"></td>
@@ -141,7 +141,7 @@ Delete a folder or file, or empty a file such as a log so the program writing it
 
 Who logs in over SSH and who keeps trying: failed attempts grouped by address with the names they tried, recent logins, ufw and fail2ban. Block an address or turn password logins off with a `sudo` command typed into a terminal, checked by `sshd -t` before the reload.
 
-<img src="assets/screenshots/security.jpg" alt="Failed logins grouped by address" width="100%">
+<img src="assets/screenshots/en/security.jpg" alt="Failed logins grouped by address" width="100%">
 
 ## SSH keys
 

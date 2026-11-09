@@ -16,7 +16,7 @@ Không cài gì lên server.
 ![Go](https://img.shields.io/badge/Go-1.27-00ADD8?logo=go&logoColor=white)
 ![Svelte](https://img.shields.io/badge/Svelte-5-FF3E00?logo=svelte&logoColor=white)
 
-[English](README.md) · **Tiếng Việt**
+[English](README.md) · **Tiếng Việt** · [简体中文](README.zh-CN.md)
 
 <img src="assets/screenshots/desktop.jpg" alt="Desktop Davish với Terminal, Monitor và Files" width="100%">
 
