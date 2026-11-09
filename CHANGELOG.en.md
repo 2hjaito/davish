@@ -4,6 +4,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Added
+- Menu bar: each reading has a small ring and its name; hover it for the value, details and the last 15 minutes as a chart. Load, Disk I/O and GPU (only when the server has an NVIDIA GPU) are new; Swap and Uptime can be turned on in Settings → Menu bar, which turns each reading on or off.
+
 ## [1.9.0] - 2026-11-09
 
 ### Added

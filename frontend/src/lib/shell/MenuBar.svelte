@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { formatClock, formatGB, formatRate } from '../format'
+  import { formatClock } from '../format'
   import { t } from '../i18n'
   import { metrics } from '../stores/metrics.svelte'
   import { servers } from '../stores/servers.svelte'
   import { ui } from '../stores/ui.svelte'
-  import { level } from '../ui/charts/scale'
   import Icon from '../ui/Icon.svelte'
   import MenuDropdown from './MenuDropdown.svelte'
   import { buildMenus } from './menuModel.svelte'
@@ -12,6 +11,9 @@
   import { toggleMaximizeWindow } from '../api/runtime'
   import { hasNativeTrafficLights, needsWindowControls, shortcut } from './platform'
   import ServerPicker from './ServerPicker.svelte'
+  import MenuStat from './MenuStat.svelte'
+  import { statViews } from './menuStats'
+  import { settings } from '../stores/settings.svelte'
   import SystemMenu from './SystemMenu.svelte'
   import WindowControls from './WindowControls.svelte'
 
@@ -27,7 +29,8 @@
   // collector and the numbers disappear while the server is unreachable.
   const watchedId = $derived(servers.active?.state === 'connected' ? servers.active.id : '')
   const m = $derived(watchedId ? metrics.latest(watchedId) : undefined)
-  const memPct = $derived(m && m.memTotal > 0 ? (m.memUsed / m.memTotal) * 100 : 0)
+  const hist = $derived(watchedId ? metrics.history(watchedId) : [])
+  const views = $derived(m ? statViews(settings.menubarStats, m) : [])
 
   $effect(() => {
     const timer = setInterval(() => (now = new Date()), 1000)
@@ -69,23 +72,9 @@
   <div class="right">
     {#if m}
       <div class="stats">
-        <span class="stat {level(m.cpu, 85, 95)}">
-          <span class="label">{t.menubar.cpu}</span>
-          <span class="bar"><span style:width="{m.cpu}%"></span></span>
-          <span>{Math.round(m.cpu)}%</span>
-        </span>
-        <span class="stat {level(memPct, 90, 95)}">
-          <span class="label">{t.menubar.ram}</span>
-          <span>{formatGB(m.memUsed)} / {formatGB(m.memTotal)} GB</span>
-        </span>
-        <span class="stat {level(m.diskPct, 85, 95)}">
-          <span class="label">{t.menubar.disk}</span>
-          <span>{m.diskPct}%</span>
-        </span>
-        <span class="stat net" aria-label={t.menubar.network}>
-          <Icon name="network" size={13} strokeWidth={2.2} />
-          <span>{formatRate(m.rxBps)}</span>
-        </span>
+        {#each views as view (view.id)}
+          <MenuStat {view} history={hist} end={m.at} />
+        {/each}
       </div>
     {/if}
     <button
@@ -194,8 +183,6 @@
      bar, and are where the window is grabbed to move it. */
   .right,
   .stats,
-  .stat,
-  .stat :global(*),
   .clock {
     --wails-draggable: drag;
   }
@@ -215,51 +202,6 @@
 
   .menubar :global(.mbtn.picker) {
     background: var(--glass-highlight);
-  }
-
-  .stat {
-    height: var(--menubar-h);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    white-space: nowrap;
-  }
-
-  .stat.net {
-    gap: 4px;
-  }
-
-  .label {
-    font-size: var(--text-xs);
-    color: var(--fg-label);
-  }
-
-  .bar {
-    width: 34px;
-    height: 6px;
-    border-radius: 3px;
-    background: var(--fill-track);
-    overflow: hidden;
-  }
-
-  .bar span {
-    display: block;
-    height: 100%;
-    background: var(--fg);
-    transition: width var(--dur-slow) var(--ease-out);
-  }
-
-  .warn {
-    color: var(--warn);
-  }
-  .warn .bar span {
-    background: var(--warn);
-  }
-  .danger {
-    color: var(--danger);
-  }
-  .danger .bar span {
-    background: var(--danger);
   }
 
   .clock {

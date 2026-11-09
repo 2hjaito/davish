@@ -16,6 +16,7 @@
   } from '../../lib/stores/settings.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
+  import { STAT_IDS, type StatId } from '../../lib/shell/statIds'
   import { hasRuntime } from '../../lib/api/runtime'
   import { updates } from '../../lib/stores/updates.svelte'
   import type { AppProps } from '../types'
@@ -31,6 +32,11 @@
 
   const fonts = Object.keys(MONO_FAMILIES) as MonoFont[]
   const dockSizes = Object.keys(DOCK_SIZES) as DockSize[]
+
+  function toggleStat(id: StatId) {
+    const on = settings.menubarStats
+    settings.set('menubarStats', on.includes(id) ? on.filter((s) => s !== id) : [...on, id])
+  }
   const backups: BackupMode[] = ['etc', 'always', 'never']
   // Lock password forms: one at a time (set, change or turn off).
   let lockForm = $state<'change' | 'disable' | null>(null)
@@ -180,6 +186,22 @@
           aria-checked={settings.monoFont === f}
           style:font-family={MONO_FAMILIES[f]}
           onclick={() => settings.set('monoFont', f)}>{t.settings.monoFonts[f]}</button
+        >
+      {/each}
+    </div>
+  </div>
+
+  <h2 class="section">{t.settings.menubar}</h2>
+
+  <div class="row stack">
+    <span>
+      <strong>{t.settings.menubarStats}</strong>
+      <small>{t.settings.menubarStatsHint}</small>
+    </span>
+    <div class="chips" role="group" aria-label={t.settings.menubarStats}>
+      {#each STAT_IDS as id (id)}
+        <button aria-pressed={settings.menubarStats.includes(id)} onclick={() => toggleStat(id)}
+          >{t.menubar.stats.names[id]}</button
         >
       {/each}
     </div>
@@ -547,6 +569,37 @@
     color: var(--fg);
     font-weight: 600;
     box-shadow: var(--switch-knob-shadow);
+  }
+
+  .row.stack {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .chips button {
+    padding: 3px 10px;
+    border: 1px solid var(--divider);
+    border-radius: 999px;
+    background: none;
+    font-size: var(--text-xs);
+    color: var(--fg-muted);
+    transition:
+      background var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
+  }
+
+  .chips button[aria-pressed='true'] {
+    border-color: transparent;
+    background: var(--accent);
+    color: var(--fg-on-accent);
+    font-weight: 600;
   }
 
   /* Segmented − value + control, like the macOS font size stepper. */

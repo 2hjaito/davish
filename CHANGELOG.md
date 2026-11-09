@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Thanh menu: mỗi số liệu có vòng tròn nhỏ và nhãn; rê chuột vào hiện số lớn, chi tiết và biểu đồ 15 phút. Thêm Load, Đọc/ghi đĩa và GPU (chỉ hiện khi server có GPU NVIDIA); Swap và Thời gian chạy bật được trong Cài đặt → Thanh menu, nơi bật/tắt từng số liệu.
+
 ## [1.9.0] - 2026-11-09
 
 ### Thêm
