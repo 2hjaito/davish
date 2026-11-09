@@ -1,8 +1,15 @@
 <script lang="ts">
-  import { openURL } from '../api/runtime'
+  import { copyText } from '../api/clipboard'
+  import { diagRevealLog, diagSupportInfo, type SupportInfo } from '../api/diag'
+  import { toUserError } from '../api/errors'
+  import { hasRuntime, openURL } from '../api/runtime'
   import { t } from '../i18n'
   import { updates } from '../stores/updates.svelte'
   import Dialog from '../ui/Dialog.svelte'
+  import { updateReport } from './updateReport'
+
+  /** Where to download by hand when the check itself failed. */
+  const RELEASES_URL = 'https://github.com/2hjaito/davish/releases/latest'
 
   const u = t.update
   const st = $derived(updates.status)
@@ -27,9 +34,70 @@
   const close = () => {
     if (!busy) updates.dialog = false
   }
+
+  // A failure says what went wrong up top, with a way forward and, on
+  // request, what to send in a bug report.
+  let showDetails = $state(false)
+  let info = $state.raw<SupportInfo | null>(null)
+  let copied = $state(false)
+  let revealError = $state('')
+  const report = $derived(updateReport(info, updates.errorDetail))
+
+  $effect(() => {
+    if (!updates.error) showDetails = false
+  })
+
+  function retry() {
+    if (st?.available && latest?.signed) void updates.install()
+    else void updates.check(true)
+  }
+
+  async function toggleDetails() {
+    showDetails = !showDetails
+    copied = false
+    revealError = ''
+    if (showDetails && hasRuntime) info = await diagSupportInfo()
+  }
+
+  async function copy() {
+    copied = await copyText(report)
+  }
+
+  async function reveal() {
+    revealError = ''
+    try {
+      await diagRevealLog()
+    } catch (e) {
+      revealError = toUserError(e).message
+    }
+  }
 </script>
 
 <Dialog open={updates.dialog} title={u.title} onclose={close} width={480}>
+  {#if updates.error && !busy}
+    <div class="failure" role="alert">
+      <p class="lead">{u.failed}</p>
+      <p>{updates.error}</p>
+      <div class="actions">
+        <button class="btn" disabled={updates.phase !== 'idle'} onclick={retry}>{u.retry}</button>
+        <button class="btn" onclick={() => openURL(latest?.url ?? RELEASES_URL)}>{u.manual}</button>
+        <button class="btn link" aria-expanded={showDetails} onclick={() => void toggleDetails()}
+          >{showDetails ? u.hideDetails : u.details}</button
+        >
+      </div>
+      {#if showDetails}
+        <pre class="detail">{report}</pre>
+        <p class="hint">{u.detailsHint}</p>
+        <div class="actions">
+          <button class="btn" onclick={() => void copy()}>{copied ? u.copied : u.copy}</button>
+          {#if hasRuntime}
+            <button class="btn" onclick={() => void reveal()}>{u.openLog}</button>
+          {/if}
+        </div>
+        {#if revealError}<p class="hint">{revealError}</p>{/if}
+      {/if}
+    </div>
+  {/if}
   {#if updates.phase === 'checking'}
     <p>{u.checking}</p>
   {:else if updates.phase === 'ready'}
@@ -47,7 +115,6 @@
   {:else if st}
     <p>{u.upToDate(st.current)}</p>
   {/if}
-  {#if updates.error}<p class="error" role="alert">{updates.error}</p>{/if}
 
   {#snippet footer()}
     {#if updates.phase === 'ready'}
@@ -116,8 +183,42 @@
     transition: width var(--dur-fast) linear;
   }
 
-  .error {
+  .failure {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border-radius: var(--control-radius);
+    border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent);
+    background: color-mix(in srgb, var(--danger) 10%, transparent);
+  }
+
+  .failure .lead {
     color: var(--danger);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+
+  .link {
+    background: none;
+    color: var(--accent);
+  }
+
+  .detail {
+    max-height: 180px;
+    overflow: auto;
+    margin: 8px 0 6px;
+    padding: 8px 10px;
+    border-radius: var(--control-radius);
+    background: var(--fill-soft);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    user-select: text;
   }
 
   .skip {

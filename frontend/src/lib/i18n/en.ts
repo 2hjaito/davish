@@ -1043,6 +1043,15 @@ const en = {
     skip: 'Skip this version',
     openPage: 'Open download page',
     ok: 'OK',
+    failed: 'The update did not go through',
+    retry: 'Try again',
+    manual: 'Download manually',
+    details: 'Details',
+    hideDetails: 'Hide details',
+    detailsHint: 'Send this when reporting the problem. The log holds no passwords or keys.',
+    copy: 'Copy',
+    copied: 'Copied',
+    openLog: 'Open log folder',
   },
   diag: {
     slowTitle: 'The server is slow to answer',
@@ -2553,6 +2562,8 @@ const en = {
       "Davish's files on this computer were replaced or removed while it ran (a rebuild, a reinstall). Quit Davish and open it again, or download the new version from the release page.",
     UPDATE_DEV_BUILD:
       'A development build does not update itself. Download the new version from the release page.',
+    UPDATE_DOWNLOAD_FAILED:
+      'Could not download the update: GitHub did not answer or the network dropped. Try again in a few minutes, or download it from the release page.',
     GIT_UNSAFE_OWNER:
       'This repo belongs to another user, so git refuses to read it (dubious ownership). Log in as the user who owns the repo.',
   },

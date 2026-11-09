@@ -7,6 +7,12 @@ describe('toUserError', () => {
     expect(toUserError({ code: 'CMD_NEEDS_ROOT', message: 'x' }).code).toBe('CMD_NEEDS_ROOT')
   })
 
+  it("keeps the backend's text as detail", () => {
+    const e = toUserError({ code: 'UPDATE_DOWNLOAD_FAILED', message: 'download answered 504' })
+    expect(e.detail).toBe('download answered 504')
+    expect(e.message).not.toBe('download answered 504')
+  })
+
   it.each([
     ['unknown code', { code: 'NOPE' }],
     ['plain string', 'boom'],

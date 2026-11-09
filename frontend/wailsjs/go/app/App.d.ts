@@ -68,6 +68,8 @@ export function DeployPlan(arg1:deploy.Spec):Promise<deploy.Plan>;
 
 export function DiagFrontendError(arg1:string):Promise<void>;
 
+export function DiagRevealLog():Promise<void>;
+
 export function DiagRun(arg1:string):Promise<diag.Report>;
 
 export function DiagSupportInfo():Promise<app.SupportInfo>;

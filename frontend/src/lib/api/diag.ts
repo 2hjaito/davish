@@ -29,6 +29,8 @@ export interface SupportInfo {
 export const diagRun = (serverID: string): Promise<DiagReport> =>
   App.DiagRun(serverID) as Promise<DiagReport>
 export const diagSupportInfo = (): Promise<SupportInfo> => App.DiagSupportInfo()
+/** Shows the log file in Finder, Explorer or the Linux file manager. */
+export const diagRevealLog = (): Promise<void> => App.DiagRevealLog()
 
 let reported = 0
 
