@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { untrack } from 'svelte'
+  import { tick, untrack } from 'svelte'
 
+  import { CATEGORY, CATEGORIES, gridMove, grouped, type Category } from '../../apps/categories'
   import { apps } from '../../apps/registry'
   import type { AppDef } from '../../apps/types'
   import { t } from '../i18n'
@@ -23,19 +24,32 @@
 
   let query = $state('')
   let index = $state(0)
+  let tab = $state<'all' | Category>('all')
+  let confirmReset = $state(false)
   let input = $state<HTMLInputElement>()
+  let panel = $state<HTMLElement>()
   const gridId = $props.id()
 
-  // Registry order when nothing is typed, best match first otherwise.
-  const shown = $derived(
-    query.trim()
-      ? apps
-          .map((a) => ({ a, s: score(query, a.label) }))
-          .filter((x) => x.s > 0)
-          .sort((x, y) => y.s - x.s)
-          .map((x) => x.a)
-      : apps,
-  )
+  // A search looks in every group, best match first. Otherwise "All"
+  // shows each group under its name, and a group tab shows only it.
+  const sections = $derived.by((): { category: Category | null; apps: AppDef[] }[] => {
+    if (query.trim()) {
+      const found = apps
+        .map((a) => ({ a, s: score(query, a.label) }))
+        .filter((x) => x.s > 0)
+        .sort((x, y) => y.s - x.s)
+        .map((x) => x.a)
+      return found.length ? [{ category: null, apps: found }] : []
+    }
+    if (tab === 'all') return grouped(apps)
+    return [{ category: null, apps: apps.filter((a) => CATEGORY[a.id] === tab) }]
+  })
+  const shown = $derived(sections.flatMap((x) => x.apps))
+  // Where each section starts in shown.
+  const starts = $derived.by(() => {
+    let n = 0
+    return sections.map((x) => (n += x.apps.length) - x.apps.length)
+  })
 
   $effect(() => {
     if (!open) return
@@ -51,27 +65,53 @@
     untrack(() => (index = Math.min(index, Math.max(0, shown.length - 1))))
   })
 
+  // Keep the selected tile in view when the arrows move past the edge.
+  $effect(() => {
+    void index
+    void tick().then(() =>
+      panel?.querySelector('.cell.active')?.scrollIntoView({ block: 'nearest' }),
+    )
+  })
+
+  function pickTab(next: 'all' | Category) {
+    tab = next
+    query = ''
+    index = 0
+    input?.focus()
+  }
+
+  function resetDock() {
+    if (!confirmReset) {
+      confirmReset = true
+      setTimeout(() => (confirmReset = false), 3000)
+      return
+    }
+    confirmReset = false
+    dockPins.reset()
+  }
+
   function choose(app: AppDef | undefined) {
     if (!app) return
     onclose()
     onlaunch(app)
   }
 
-  const moves: Record<string, number> = {
-    ArrowRight: 1,
-    ArrowLeft: -1,
-    ArrowDown: COLS,
-    ArrowUp: -COLS,
-  }
+  const arrows = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'] as const
+  type Arrow = (typeof arrows)[number]
+  const isArrow = (k: string): k is Arrow => (arrows as readonly string[]).includes(k)
 
   function onkeydown(e: KeyboardEvent) {
-    const step = moves[e.key]
-    if (step !== undefined) {
+    if (isArrow(e.key)) {
       // Left and right stay in the text while there is a query to edit.
-      if (Math.abs(step) === 1 && query) return
+      if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && query) return
       e.preventDefault()
-      const next = index + step
-      if (next >= 0 && next < shown.length) index = next
+      if (shown.length)
+        index = gridMove(
+          sections.map((x) => x.apps.length),
+          index,
+          e.key,
+          COLS,
+        )
     } else if (e.key === 'Enter') {
       e.preventDefault()
       choose(shown[index])
@@ -89,6 +129,7 @@
   <div class="backdrop" use:portal onclick={onclose}>
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <div
+      bind:this={panel}
       class="panel glass glass-strong"
       role="dialog"
       aria-label={t.launchpad.label}
@@ -110,36 +151,60 @@
         />
       </div>
 
+      <div class="tabs" role="tablist" aria-label={t.launchpad.groups}>
+        {#each ['all', ...CATEGORIES] as const as c (c)}
+          <button
+            role="tab"
+            aria-selected={tab === c && !query}
+            class:on={tab === c && !query}
+            onclick={() => pickTab(c)}
+            >{c === 'all' ? t.launchpad.all : t.launchpad.categories[c]}</button
+          >
+        {/each}
+      </div>
+
       {#if shown.length > 0}
-        <ul id={gridId} class="grid" style:--cols={COLS}>
-          {#each shown as app, i (app.id)}
-            {@const pinned = dockPins.has(app.id)}
-            <li class="cell" class:active={i === index}>
-              <button
-                class="app"
-                data-launchpad-app={app.id}
-                onclick={() => choose(app)}
-                onpointerenter={() => (index = i)}
-              >
-                <span class="art"><AppIcon id={app.id} size={60} /></span>
-                <span class="name">{app.label}</span>
-              </button>
-              <button
-                class="pin"
-                aria-label={pinned ? t.launchpad.unpin(app.label) : t.launchpad.pin(app.label)}
-                title={pinned ? t.launchpad.unpin(app.label) : t.launchpad.pin(app.label)}
-                aria-pressed={pinned}
-                onclick={() => dockPins.toggle(app.id)}
-              >
-                <Icon name={pinned ? 'minus' : 'plus'} size={11} strokeWidth={2.8} />
-              </button>
-            </li>
+        <div class="scroll" id={gridId}>
+          {#each sections as sec, k (sec.category ?? k)}
+            {#if sec.category}<h4>{t.launchpad.categories[sec.category]}</h4>{/if}
+            <ul class="grid" style:--cols={COLS}>
+              {#each sec.apps as app, j (app.id)}
+                {@const i = (starts[k] ?? 0) + j}
+                {@const pinned = dockPins.has(app.id)}
+                <li class="cell" class:active={i === index}>
+                  <button
+                    class="app"
+                    data-launchpad-app={app.id}
+                    onclick={() => choose(app)}
+                    onpointerenter={() => (index = i)}
+                  >
+                    <span class="art"><AppIcon id={app.id} size={60} /></span>
+                    <span class="name">{app.label}</span>
+                  </button>
+                  <button
+                    class="pin"
+                    class:pinned
+                    aria-label={pinned ? t.launchpad.unpin(app.label) : t.launchpad.pin(app.label)}
+                    title={pinned ? t.launchpad.unpin(app.label) : t.launchpad.pin(app.label)}
+                    aria-pressed={pinned}
+                    onclick={() => dockPins.toggle(app.id)}
+                  >
+                    <Icon name={pinned ? 'minus' : 'plus'} size={11} strokeWidth={2.8} />
+                  </button>
+                </li>
+              {/each}
+            </ul>
           {/each}
-        </ul>
+        </div>
       {:else}
         <p class="none">{t.launchpad.none}</p>
       {/if}
-      <p class="hint">{t.launchpad.hint}</p>
+      <div class="foot">
+        <p class="hint">{t.launchpad.hint}</p>
+        <button class="reset" disabled={dockPins.isDefault} onclick={resetDock}
+          >{confirmReset ? t.launchpad.resetConfirm : t.launchpad.resetDock}</button
+        >
+      </div>
     </div>
   </div>
 {/if}
@@ -157,7 +222,7 @@
   }
 
   .panel {
-    width: min(660px, calc(100vw - 40px));
+    width: min(720px, calc(100vw - 40px));
     max-height: 76vh;
     display: flex;
     flex-direction: column;
@@ -196,15 +261,57 @@
     color: var(--fg);
   }
 
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2px;
+    margin-top: 12px;
+    padding: 2px;
+    border-radius: 8px;
+    background: var(--fill-soft);
+  }
+
+  .tabs button {
+    padding: 2px 10px;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    font-size: var(--text-xs);
+    color: var(--fg-muted);
+    white-space: nowrap;
+    transition: background var(--dur-fast) var(--ease-out);
+  }
+
+  .tabs button.on {
+    background: var(--chart-surface);
+    color: var(--fg);
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  }
+
+  .scroll {
+    width: 100%;
+    margin-top: 10px;
+    overflow-y: auto;
+  }
+
+  h4 {
+    margin: 10px 6px 2px;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--fg-label);
+  }
+
   .grid {
     width: 100%;
-    margin: 14px 0 0;
+    margin: 0;
     padding: 0;
     list-style: none;
     display: grid;
     grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
     gap: 6px;
-    overflow-y: auto;
   }
 
   .cell {
@@ -264,14 +371,43 @@
     opacity: 1;
   }
 
+  /* A pinned app shows its mark all the time, so the Dock's apps stand out. */
+  .pin.pinned {
+    opacity: 1;
+    background: var(--accent);
+  }
+
   .none {
     margin: 28px 0 22px;
     color: var(--fg-subtle);
   }
 
+  .foot {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 10px;
+    padding: 0 6px;
+  }
+
   .hint {
-    margin: 10px 0 0;
+    margin: 0;
     font-size: var(--text-xs);
     color: var(--fg-subtle);
+  }
+
+  .reset {
+    padding: 3px 10px;
+    border: 0;
+    border-radius: var(--control-radius);
+    background: var(--fill-soft);
+    font-size: var(--text-xs);
+    color: var(--fg);
+  }
+
+  .reset:disabled {
+    opacity: 0.5;
   }
 </style>

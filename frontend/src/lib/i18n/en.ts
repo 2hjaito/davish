@@ -1299,6 +1299,18 @@ const en = {
     pin: (app: string) => `Pin ${app} to the Dock`,
     unpin: (app: string) => `Remove ${app} from the Dock`,
     hint: '←→↑↓ select · Enter open · Esc close',
+    all: 'All',
+    groups: 'App groups',
+    categories: {
+      files: 'Files & terminal',
+      monitor: 'Monitoring',
+      web: 'Web & containers',
+      security: 'Security & access',
+      dev: 'Development',
+      system: 'System',
+    },
+    resetDock: 'Restore the default Dock',
+    resetConfirm: 'Click again to restore',
   },
   deploys: {
     doneTitle: (repo: string, server: string) => `Deployed ${repo} on ${server}`,

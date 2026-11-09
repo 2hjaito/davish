@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Launchpad chia app theo nhóm (Tệp & terminal, Giám sát, Web & container, Bảo mật & truy cập, Phát triển, Hệ thống) với tab cho từng nhóm; phím mũi tên đi qua các nhóm; app đã ghim luôn có dấu trên icon; nút "Khôi phục Dock mặc định" (bấm hai lần).
+
 ## [1.10.1] - 2026-11-09
 
 ### Đổi

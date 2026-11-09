@@ -1264,6 +1264,18 @@ const zh = {
     pin: (app: string) => `把 ${app} 固定到程序坞`,
     unpin: (app: string) => `从程序坞移除 ${app}`,
     hint: '←→↑↓ 选择 · 回车 打开 · Esc 关闭',
+    all: '全部',
+    groups: '应用分组',
+    categories: {
+      files: '文件与终端',
+      monitor: '监控',
+      web: '网站与容器',
+      security: '安全与访问',
+      dev: '开发',
+      system: '系统',
+    },
+    resetDock: '恢复默认程序坞',
+    resetConfirm: '再点一次以恢复',
   },
   deploys: {
     doneTitle: (repo: string, server: string) => `已在 ${server} 上部署 ${repo}`,

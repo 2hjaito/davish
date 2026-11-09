@@ -1282,6 +1282,18 @@ const vi = {
     pin: (app: string) => `Ghim ${app} vào Dock`,
     unpin: (app: string) => `Bỏ ${app} khỏi Dock`,
     hint: '←→↑↓ chọn · Enter mở · Esc đóng',
+    all: 'Tất cả',
+    groups: 'Nhóm app',
+    categories: {
+      files: 'Tệp & terminal',
+      monitor: 'Giám sát',
+      web: 'Web & container',
+      security: 'Bảo mật & truy cập',
+      dev: 'Phát triển',
+      system: 'Hệ thống',
+    },
+    resetDock: 'Khôi phục Dock mặc định',
+    resetConfirm: 'Bấm lần nữa để khôi phục',
   },
   deploys: {
     doneTitle: (repo: string, server: string) => `Đã deploy ${repo} trên ${server}`,
