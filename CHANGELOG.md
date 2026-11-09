@@ -4,6 +4,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.8.2] - 2026-11-09
+
 ### Sửa
 - Cập nhật: khi GitHub trả lỗi lúc tải (như sự cố 504 ngày 2026-11-09), Davish tự thử lại rồi tải qua đường GitHub API thay vì dừng ngay.
 - Cập nhật không thành công giờ báo rõ ở đầu hộp thoại, đúng bước bị lỗi (kiểm tra hay tải về), kèm nút Thử lại, Tải thủ công và Chi tiết. Chi tiết hiện mã lỗi và các dòng log về cập nhật, có nút Sao chép để gửi khi báo lỗi và nút mở thư mục log.
