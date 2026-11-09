@@ -1,7 +1,8 @@
 // Fails when the built JS grows past its budget (docs/PLAN.md M21). The
 // initial bundle is what the first screen loads: the entry, the shell it
 // imports right away (App.svelte) and their static imports. App windows
-// load later, on first use, and count only toward the total.
+// load later, on first use, and count only toward the total. A run loads one
+// language (ADR 0010), so the total counts the largest of them, not all.
 import { readFileSync } from 'node:fs'
 import process from 'node:process'
 import { gzipSync } from 'node:zlib'
@@ -32,8 +33,12 @@ const js = new Set(
     .filter((f) => f.endsWith('.js')),
 )
 const sum = (files) => [...files].filter((f) => f.endsWith('.js')).reduce((s, f) => s + gz(f), 0)
+const locales = Object.entries(manifest)
+  .filter(([key]) => /^src\/lib\/i18n\/[a-z]+\.ts$/.test(key) && !key.endsWith('index.ts'))
+  .map(([, c]) => c.file)
+for (const f of locales) js.delete(f)
 const initialKB = sum(initial)
-const totalKB = sum(js)
+const totalKB = sum(js) + Math.max(0, ...locales.map(gz))
 
 console.log(`initial JS: ${initialKB.toFixed(1)} kB gzip (budget ${BUDGET.initialKB})`)
 console.log(`total JS:   ${totalKB.toFixed(1)} kB gzip (budget ${BUDGET.totalKB})`)
