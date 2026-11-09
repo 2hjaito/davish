@@ -1,3 +1,4 @@
+import { DEFAULT_STATS, STAT_IDS, type StatId } from '../shell/statIds'
 import { load, save } from './persist'
 
 export const WALLPAPER_ACCENTS = ['#8fb2ff', '#c3a6ff', '#9fe0c8', '#ffb38a'] as const
@@ -66,6 +67,7 @@ interface SettingsData {
   monoFont: MonoFont
   dockSize: DockSize
   dockAutohide: boolean
+  menubarStats: StatId[]
   alertMem: number
   alertDisk: number
   alertHold: number
@@ -85,6 +87,7 @@ const defaults: SettingsData = {
   monoFont: 'jetbrains',
   dockSize: 'medium',
   dockAutohide: false,
+  menubarStats: [...DEFAULT_STATS],
   alertMem: ALERTS.defaults.mem,
   alertDisk: ALERTS.defaults.disk,
   alertHold: ALERTS.defaults.hold,
@@ -130,6 +133,11 @@ class Settings {
   /** Slides the Dock off screen until the pointer reaches the bottom edge. */
   get dockAutohide() {
     return this.#data.dockAutohide === true
+  }
+  /** The readings the menu bar shows; unknown ids from other versions drop out. */
+  get menubarStats(): StatId[] {
+    const ids = this.#data.menubarStats
+    return Array.isArray(ids) ? STAT_IDS.filter((id) => ids.includes(id)) : [...DEFAULT_STATS]
   }
   get alertMem() {
     return clampPct(this.#data.alertMem, ALERTS.defaults.mem)
