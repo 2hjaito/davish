@@ -4,6 +4,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.10.1] - 2026-11-09
+
 ### Đổi
 - Thanh menu: mỗi số liệu là một cung tròn hở ở đáy, số nằm trong cung và tên nằm dưới; mỗi ô rộng cố định nên số thay đổi không làm các ô khác xê dịch. Thanh menu cao hơn một chút (34px).
 
