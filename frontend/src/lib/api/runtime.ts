@@ -1,6 +1,13 @@
 // Typed access to the Wails runtime. The frontend also runs in a plain browser
 // (vite dev, previews), where window.runtime does not exist.
-import { BrowserOpenURL, Quit, WindowSetBackgroundColour } from '../../../wailsjs/runtime/runtime'
+import {
+  BrowserOpenURL,
+  Quit,
+  WindowIsMaximised,
+  WindowMinimise,
+  WindowSetBackgroundColour,
+  WindowToggleMaximise,
+} from '../../../wailsjs/runtime/runtime'
 
 /**
  * The welcome page's "try it" mode: the app reloads with ?demo and runs on
@@ -23,6 +30,21 @@ export function exitDemo() {
 /** Quits the app; a no-op outside Wails. */
 export function quit() {
   if (hasRuntime) Quit()
+}
+
+/** Minimizes the app's OS window; a no-op outside Wails. */
+export function minimizeWindow() {
+  if (hasRuntime) WindowMinimise()
+}
+
+/** Maximizes the app's OS window, or restores it to its last size. */
+export function toggleMaximizeWindow() {
+  if (hasRuntime) WindowToggleMaximise()
+}
+
+/** Whether the app's OS window fills the screen; false outside Wails. */
+export async function isWindowMaximized(): Promise<boolean> {
+  return hasRuntime ? WindowIsMaximised() : false
 }
 
 /** Opens url in the user's default browser. */
