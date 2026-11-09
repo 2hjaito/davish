@@ -2,7 +2,7 @@
 
 **English** · [Tiếng Việt](FEATURES.vi.md) · [Back to README](README.md)
 
-Every app in Davish, what it does and what it runs on the server. The interface is in English or Vietnamese; screenshots show demo data from the browser preview, and some are still of the Vietnamese interface.
+Every app in Davish, what it does and what it runs on the server. The interface is in English, Vietnamese or Simplified Chinese; screenshots show demo data from the browser preview, and some are still of the Vietnamese interface.
 
 ## Terminal
 
@@ -200,4 +200,4 @@ Davish comes in a light and a dark look. By default it follows your computer and
 
 ## Language
 
-The whole interface comes in English and Vietnamese: menus, dialogs, help, error messages, the dates and numbers. The first time, Davish follows your system's language; after that, pick one in Settings → Appearance → Language. Davish restarts to switch, and your servers reconnect on their own.
+The whole interface comes in English, Vietnamese and Simplified Chinese: menus, dialogs, help, error messages, the dates and numbers. The first time, Davish follows your system's language; after that, pick one in Settings → Appearance → Language. Davish restarts to switch, and your servers reconnect on their own.

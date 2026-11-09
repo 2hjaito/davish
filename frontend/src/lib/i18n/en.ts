@@ -1587,7 +1587,7 @@ const en = {
     themes: { system: 'Auto', light: 'Light', dark: 'Dark' },
     language: 'Language',
     languageHint: 'The language of the interface.',
-    langs: { vi: 'Tiếng Việt', en: 'English' },
+    langs: { vi: 'Tiếng Việt', en: 'English', zh: '简体中文' },
     langRestart:
       'Davish will restart: running terminals and transfers stop, and servers reconnect on their own.',
     langApply: 'Restart',
