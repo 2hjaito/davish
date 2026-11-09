@@ -2,20 +2,33 @@ import { locale } from './i18n'
 
 const num = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 })
 
+const whole = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 })
+
 const UNITS = ['B', 'KB', 'MB', 'GB', 'TB'] as const
 
-export function formatBytes(bytes: number): string {
+function scale(bytes: number): [number, (typeof UNITS)[number]] {
   let v = bytes
   let i = 0
   while (v >= 1024 && i < UNITS.length - 1) {
     v /= 1024
     i++
   }
-  return `${num.format(v)} ${UNITS[i]}`
+  return [v, UNITS[i] ?? 'B']
+}
+
+export function formatBytes(bytes: number): string {
+  const [v, unit] = scale(bytes)
+  return `${num.format(v)} ${unit}`
 }
 
 export function formatRate(bps: number): string {
   return `${formatBytes(bps)}/s`
+}
+
+/** A rate in at most three digits, for tight spots like the menu bar. */
+export function formatRateShort(bps: number): string {
+  const [v, unit] = scale(bps)
+  return `${(v < 100 ? num : whole).format(v)} ${unit}/s`
 }
 
 export function formatGB(bytes: number): string {

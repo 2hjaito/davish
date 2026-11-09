@@ -169,7 +169,7 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
-    column-gap: 16px;
+    column-gap: 6px;
     overflow: hidden;
   }
 
