@@ -2739,6 +2739,9 @@ const vi = {
     UPDATE_BROKEN:
       'File của Davish trên máy đã bị thay hoặc xóa trong lúc app đang chạy (build lại, cài lại). Thoát Davish rồi mở lại, hoặc tải bản mới từ trang phát hành.',
     UPDATE_DEV_BUILD: 'Bản dev không tự cập nhật. Hãy tải bản mới từ trang phát hành.',
+    DB_AUTH_REQUIRED:
+      'MongoDB này bật xác thực: cần user và mật khẩu của MongoDB (khác tài khoản SSH).',
+    DB_AUTH_FAILED: 'MongoDB từ chối user hoặc mật khẩu này.',
     UPDATE_DOWNLOAD_FAILED:
       'Không tải được bản cập nhật: GitHub không trả lời hoặc mạng chập chờn. Thử lại sau ít phút, hoặc tải thủ công từ trang phát hành.',
     GIT_UNSAFE_OWNER:

@@ -1,5 +1,5 @@
-// Package database lists, creates and drops MariaDB/MySQL and PostgreSQL
-// databases through their command line clients on the server. Statements
+// Package database lists, creates and drops MariaDB/MySQL, PostgreSQL and
+// MongoDB databases through their command line clients on the server. Statements
 // that carry a password go on stdin, so they are neither in the audit log
 // nor in a shell history.
 package database
@@ -40,17 +40,22 @@ type Service struct {
 	mu  sync.Mutex
 	// access is the prefix that worked last, per server and engine.
 	access map[string][]string
+	// mongo is each server's MongoDB connection string, when it needs a
+	// login.
+	mongo map[string]string
 }
 
 // New creates the service.
 func New(run Runner) *Service {
-	return &Service{run: run, access: map[string][]string{}}
+	return &Service{run: run, access: map[string][]string{}, mongo: map[string]string{}}
 }
 
 // DB is one database.
 type DB struct {
 	Name string `json:"name"`
 	Size int64  `json:"size"`
+	// Collections is MongoDB's count of collections.
+	Collections int `json:"collections,omitempty"`
 }
 
 // Engine is what one database server holds.
@@ -59,10 +64,14 @@ type Engine struct {
 	Installed bool   `json:"installed"`
 	// NeedsRoot is set when only root may connect and sudo asks for a
 	// password; Terminal then opens the client.
-	NeedsRoot bool   `json:"needsRoot"`
-	Client    string `json:"client"`
-	DBs       []DB   `json:"dbs"`
-	Error     string `json:"error,omitempty"`
+	NeedsRoot bool `json:"needsRoot"`
+	// NeedsAuth is set when MongoDB wants a login Davish does not have.
+	NeedsAuth bool `json:"needsAuth,omitempty"`
+	// Login is the connection string in use, its password masked.
+	Login  string `json:"login,omitempty"`
+	Client string `json:"client"`
+	DBs    []DB   `json:"dbs"`
+	Error  string `json:"error,omitempty"`
 }
 
 // How each engine's client is reached: as the user, then through sudo
@@ -174,7 +183,11 @@ func (s *Service) List(ctx context.Context, serverID string) ([]Engine, error) {
 		}
 		out = append(out, e)
 	}
-	return out, nil
+	m := s.listMongo(ctx, serverID)
+	if ctx.Err() != nil {
+		return nil, ctx.Err()
+	}
+	return append(out, m), nil
 }
 
 func codeOf(err error) apperr.Code {
@@ -208,6 +221,10 @@ func parseList(out string) []DB {
 		n, _ := strconv.ParseInt(strings.TrimSpace(size), 10, 64)
 		dbs = append(dbs, DB{Name: name, Size: n})
 	}
+	return sortDBs(dbs)
+}
+
+func sortDBs(dbs []DB) []DB {
 	sort.Slice(dbs, func(i, j int) bool { return dbs[i].Name < dbs[j].Name })
 	return dbs
 }
@@ -242,6 +259,8 @@ func createSQL(kind, db, user, pw string) (string, error) {
 	case Postgres:
 		return `CREATE USER "` + user + `" WITH PASSWORD '` + pw + "';\n" +
 			`CREATE DATABASE "` + db + `" OWNER "` + user + "\";\n", nil
+	case Mongo:
+		return mongoCreate(db, user, pw), nil
 	}
 	return "", apperr.New(apperr.InvalidInput, "unknown engine")
 }
@@ -270,6 +289,13 @@ func (s *Service) Create(ctx context.Context, serverID, kind, db, user string) (
 	if err != nil {
 		return CreateResult{}, err
 	}
+	if kind == Mongo {
+		_, err = s.runMongo(ctx, serverID, s.mongoURI(serverID), mongoCreateJS(db, user, pw))
+		if err != nil {
+			return CreateResult{}, err
+		}
+		return CreateResult{Database: db, User: user, Password: pw}, nil
+	}
 	if _, err := s.exec(ctx, serverID, kind, sql); err != nil {
 		return CreateResult{}, err
 	}
@@ -290,6 +316,8 @@ func DropSQL(kind, db string) (string, error) {
 		return "DROP DATABASE `" + db + "`;", nil
 	case Postgres:
 		return `DROP DATABASE "` + db + `";`, nil
+	case Mongo:
+		return mongoDrop(db), nil
 	}
 	return "", apperr.New(apperr.InvalidInput, "unknown engine")
 }
@@ -302,6 +330,10 @@ func (s *Service) Drop(ctx context.Context, serverID, kind, db, sql string) erro
 	}
 	if want != sql {
 		return apperr.New(apperr.FSStale, "the statement changed since it was confirmed")
+	}
+	if kind == Mongo {
+		_, err = s.runMongo(ctx, serverID, s.mongoURI(serverID), mongoDropJS(db))
+		return err
 	}
 	_, err = s.exec(ctx, serverID, kind, sql)
 	return err

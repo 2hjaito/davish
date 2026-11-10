@@ -2687,6 +2687,8 @@ const zh = {
     UPDATE_BROKEN:
       'Davish 运行期间，这台电脑上的文件被替换或删除了（重新构建、重新安装）。请退出 Davish 后重新打开，或从发布页面下载新版本。',
     UPDATE_DEV_BUILD: '开发版不会自动更新。请从发布页面下载新版本。',
+    DB_AUTH_REQUIRED: '此 MongoDB 已启用身份验证：需要 MongoDB 的用户和密码（不是 SSH 账户）。',
+    DB_AUTH_FAILED: 'MongoDB 拒绝了此用户或密码。',
     UPDATE_DOWNLOAD_FAILED:
       '无法下载更新：GitHub 没有响应或网络中断。请几分钟后重试，或从发布页面下载。',
     GIT_UNSAFE_OWNER:

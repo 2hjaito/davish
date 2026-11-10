@@ -2771,6 +2771,9 @@ const en = {
       "Davish's files on this computer were replaced or removed while it ran (a rebuild, a reinstall). Quit Davish and open it again, or download the new version from the release page.",
     UPDATE_DEV_BUILD:
       'A development build does not update itself. Download the new version from the release page.',
+    DB_AUTH_REQUIRED:
+      'This MongoDB has authentication on: it needs a MongoDB user and password (not your SSH login).',
+    DB_AUTH_FAILED: 'MongoDB refused this user or password.',
     UPDATE_DOWNLOAD_FAILED:
       'Could not download the update: GitHub did not answer or the network dropped. Try again in a few minutes, or download it from the release page.',
     GIT_UNSAFE_OWNER:

@@ -51,6 +51,8 @@ const (
 	UpdateBroken         Code = "UPDATE_BROKEN"
 	UpdateDevBuild       Code = "UPDATE_DEV_BUILD"
 	UpdateDownloadFailed Code = "UPDATE_DOWNLOAD_FAILED"
+	DBAuthRequired       Code = "DB_AUTH_REQUIRED"
+	DBAuthFailed         Code = "DB_AUTH_FAILED"
 )
 
 // Error is the only error type allowed to cross into the frontend.

@@ -357,6 +357,7 @@ export namespace database {
 	export class DB {
 	    name: string;
 	    size: number;
+	    collections?: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new DB(source);
@@ -366,12 +367,15 @@ export namespace database {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.name = source["name"];
 	        this.size = source["size"];
+	        this.collections = source["collections"];
 	    }
 	}
 	export class Engine {
 	    kind: string;
 	    installed: boolean;
 	    needsRoot: boolean;
+	    needsAuth?: boolean;
+	    login?: string;
 	    client: string;
 	    dbs: DB[];
 	    error?: string;
@@ -385,6 +389,8 @@ export namespace database {
 	        this.kind = source["kind"];
 	        this.installed = source["installed"];
 	        this.needsRoot = source["needsRoot"];
+	        this.needsAuth = source["needsAuth"];
+	        this.login = source["login"];
 	        this.client = source["client"];
 	        this.dbs = this.convertValues(source["dbs"], DB);
 	        this.error = source["error"];

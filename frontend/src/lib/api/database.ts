@@ -26,8 +26,12 @@ export interface DBLogin {
   password: string
 }
 
-export const databaseList = (serverID: string): Promise<DBEngine[]> =>
-  App.DatabaseList(serverID) as Promise<DBEngine[]>
+// The backend also lists MongoDB (ADR 0017); the app shows it once its
+// section is built (M42).
+export const databaseList = async (serverID: string): Promise<DBEngine[]> =>
+  ((await App.DatabaseList(serverID)) as { kind: string }[]).filter(
+    (e): e is DBEngine => e.kind === 'mysql' || e.kind === 'postgres',
+  )
 
 export const databaseCreateSQL = (kind: DBKind, db: string, user: string): Promise<string> =>
   App.DatabaseCreateSQL(kind, db, user)
