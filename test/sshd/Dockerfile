@@ -56,6 +56,38 @@ COPY units/ /etc/systemd/system/
 COPY polkit-tester.rules /etc/polkit-1/rules.d/50-davish-tester.rules
 RUN systemctl enable davish-ok.service davish-crash.service davish-containers.service docker.service cron.service
 
+# MongoDB on the host, as most servers run it: systemd, /etc/mongod.conf,
+# authorization on, so Database tests cover the login (ADR 0017). The
+# admin password is a throwaway for this container only.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends gnupg ca-certificates sqlite3 \
+ && curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc \
+      | gpg --dearmor -o /usr/share/keyrings/mongodb-server-8.0.gpg \
+ && echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/8.0 multiverse" \
+      > /etc/apt/sources.list.d/mongodb-org-8.0.list \
+ && apt-get update \
+ && apt-get install -y --no-install-recommends mongodb-org-server mongodb-mongosh mongodb-database-tools \
+ && rm -rf /var/lib/apt/lists/*
+RUN mongod --fork --dbpath /var/lib/mongodb --logpath /tmp/mongod-setup.log --bind_ip 127.0.0.1 \
+ && mongosh --quiet --eval 'db.getSiblingDB("admin").createUser({user: "davish-admin", pwd: "davish-test-only", roles: ["root"]})' \
+ && mongosh --quiet -u davish-admin -p davish-test-only --authenticationDatabase admin \
+      --eval 'db.getSiblingDB("shop").orders.insertMany([{n: 1}, {n: 2}, {n: 3}])' \
+ && mongod --shutdown --dbpath /var/lib/mongodb \
+ && rm -f /tmp/mongod-setup.log \
+ && chown -R mongodb:mongodb /var/lib/mongodb \
+ && printf 'security:\n  authorization: enabled\n' >> /etc/mongod.conf \
+ && systemctl enable mongod.service
+
+# SQLite files for Database's Find: one tester can read, one only root
+# can, and a .db file that is not SQLite at all.
+RUN mkdir -p /srv/davish-app /var/lib/davish-private \
+ && sqlite3 /srv/davish-app/app.db \
+      "CREATE TABLE users(id INTEGER PRIMARY KEY, name TEXT); INSERT INTO users(name) VALUES ('a'), ('b');" \
+ && sqlite3 /var/lib/davish-private/private.sqlite "CREATE TABLE t(x); INSERT INTO t VALUES (1);" \
+ && echo 'not a database' > /srv/davish-app/notes.db \
+ && chown -R tester:tester /srv/davish-app \
+ && chmod 700 /var/lib/davish-private
+
 EXPOSE 22
 STOPSIGNAL SIGRTMIN+3
 CMD ["/sbin/init"]
