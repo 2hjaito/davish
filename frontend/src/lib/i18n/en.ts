@@ -128,6 +128,25 @@ const en = {
       title: (n: number) => `Failed logins (7 days): ${n}`,
       none: 'No failed logins.',
     },
+    stats: {
+      failed: 'Failed logins',
+      invalid: 'Unknown users',
+      ips: 'Addresses',
+      banned: 'Banned',
+      accepted: 'Successful logins',
+    },
+    hourly: 'Failed logins per hour',
+    hourTip: (hour: string, n: number) => `${hour}: ${n} ${n === 1 ? 'try' : 'tries'}`,
+    peak: (n: number) => `peak ${n}/h`,
+    topIPs: 'Most active addresses',
+    topUsers: 'Users targeted',
+    sessions: 'Open sessions',
+    noSessions: 'No one is logged in.',
+    tty: 'Terminal',
+    from: 'From',
+    since: 'Since',
+    local: 'local',
+    allAttempts: 'Every address',
     accepted: 'Recent successful logins',
     noAccepted: 'No logins in the last 7 days.',
     noLogs:
@@ -970,7 +989,7 @@ const en = {
         runs: ['direct-tcpip over SSH, no commands'],
       },
       security: {
-        does: 'Who logs in to the server over SSH and who is probing it: failed attempts grouped by IP, recent logins, ufw, fail2ban.',
+        does: 'Who logs in to the server over SSH and who is probing it: failed attempts per hour, the addresses and user names tried most, open sessions, recent logins, ufw, fail2ban.',
         actions: [
           'Turn off password login (sudo command typed in, with sshd -t)',
           'Block an IP with ufw or fail2ban through Terminal',
@@ -978,7 +997,7 @@ const en = {
         keys: [],
         runs: [
           'journalctl -u ssh (or reads /var/log/auth.log)',
-          'last, lastb',
+          'who, last, lastb',
           'ufw status, fail2ban-client status sshd',
         ],
       },

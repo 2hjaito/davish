@@ -134,6 +134,25 @@ const zh = {
       title: (n: number) => `失败登录（7 天）：${n}`,
       none: '没有失败登录。',
     },
+    stats: {
+      failed: '失败登录',
+      invalid: '不存在的用户',
+      ips: '地址',
+      banned: '已封禁',
+      accepted: '成功登录',
+    },
+    hourly: '每小时失败登录',
+    hourTip: (hour: string, n: number) => `${hour}：${n} 次`,
+    peak: (n: number) => `峰值 ${n}/小时`,
+    topIPs: '最活跃的地址',
+    topUsers: '被尝试的用户',
+    sessions: '当前会话',
+    noSessions: '当前没有人登录。',
+    tty: '终端',
+    from: '来源',
+    since: '登录时间',
+    local: '本地',
+    allAttempts: '所有地址',
     accepted: '最近成功登录',
     noAccepted: '最近 7 天没有登录。',
     noLogs:
@@ -942,7 +961,7 @@ const zh = {
         runs: ['经 SSH 的 direct-tcpip，不运行命令'],
       },
       security: {
-        does: '谁在通过 SSH 登录服务器、谁在探测它：按 IP 分组的失败尝试、最近的登录、ufw、fail2ban。',
+        does: '谁在通过 SSH 登录服务器、谁在探测它：每小时失败尝试、尝试最多的地址和用户名、当前会话、最近的登录、ufw、fail2ban。',
         actions: [
           '关闭密码登录（输入 sudo 命令，带 sshd -t 检查）',
           '通过终端用 ufw 或 fail2ban 封禁 IP',
@@ -950,7 +969,7 @@ const zh = {
         keys: [],
         runs: [
           'journalctl -u ssh（或读取 /var/log/auth.log）',
-          'last、lastb',
+          'who、last、lastb',
           'ufw status、fail2ban-client status sshd',
         ],
       },

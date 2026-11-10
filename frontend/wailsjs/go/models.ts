@@ -2566,6 +2566,20 @@ export namespace security {
 	        this.banned = source["banned"];
 	    }
 	}
+	export class HourCount {
+	    hour: string;
+	    count: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new HourCount(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.hour = source["hour"];
+	        this.count = source["count"];
+	    }
+	}
 	export class Login {
 	    time: string;
 	    user: string;
@@ -2584,12 +2598,50 @@ export namespace security {
 	        this.method = source["method"];
 	    }
 	}
+	export class Session {
+	    user: string;
+	    tty: string;
+	    since: string;
+	    from: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Session(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.user = source["user"];
+	        this.tty = source["tty"];
+	        this.since = source["since"];
+	        this.from = source["from"];
+	    }
+	}
+	export class UserCount {
+	    user: string;
+	    count: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new UserCount(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.user = source["user"];
+	        this.count = source["count"];
+	    }
+	}
 	export class Report {
 	    root: boolean;
 	    source: string;
 	    accepted: Login[];
 	    failed: Attempts[];
 	    failedTotal: number;
+	    invalidTotal: number;
+	    failedIPs: number;
+	    acceptedTotal: number;
+	    targets: UserCount[];
+	    hourly: HourCount[];
+	    sessions: Session[];
 	    last: string[];
 	    lastb: string[];
 	    lastbDenied: boolean;
@@ -2609,6 +2661,12 @@ export namespace security {
 	        this.accepted = this.convertValues(source["accepted"], Login);
 	        this.failed = this.convertValues(source["failed"], Attempts);
 	        this.failedTotal = source["failedTotal"];
+	        this.invalidTotal = source["invalidTotal"];
+	        this.failedIPs = source["failedIPs"];
+	        this.acceptedTotal = source["acceptedTotal"];
+	        this.targets = this.convertValues(source["targets"], UserCount);
+	        this.hourly = this.convertValues(source["hourly"], HourCount);
+	        this.sessions = this.convertValues(source["sessions"], Session);
 	        this.last = source["last"];
 	        this.lastb = source["lastb"];
 	        this.lastbDenied = source["lastbDenied"];
@@ -2636,6 +2694,7 @@ export namespace security {
 		    return a;
 		}
 	}
+	
 
 }
 

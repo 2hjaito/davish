@@ -60,7 +60,7 @@ Không cài gì lên server.
 - [Cổng và tunnel](FEATURES.vi.md#cổng-và-tunnel): cổng đang nghe, tunnel về `127.0.0.1`
 - [Trình duyệt](FEATURES.vi.md#trình-duyệt): mở `localhost:3000` của server ngay trong Davish
 - [Ổ đĩa](FEATURES.vi.md#ổ-đĩa): nặng ở đâu dạng cây, phần chưa đo được và lý do, xóa và dọn dẹp
-- [An ninh](FEATURES.vi.md#an-ninh): đăng nhập sai theo IP, ufw, fail2ban
+- [An ninh](FEATURES.vi.md#an-ninh): đăng nhập sai theo giờ và theo IP, user bị nhắm, phiên đang mở, ufw, fail2ban
 - [Khóa SSH](FEATURES.vi.md#khóa-ssh): authorized_keys, deploy key, key trên máy
 - [~/.ssh/config và ProxyJump](FEATURES.vi.md#sshconfig-và-proxyjump): nhập host, kết nối qua bastion
 

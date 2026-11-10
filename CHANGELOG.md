@@ -5,6 +5,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Thêm
+- An ninh: tổng quan 7 ngày ở đầu app: số lần đăng nhập sai, user không tồn tại, số địa chỉ, đã ban, đăng nhập thành công; biểu đồ lần sai theo giờ (rê chuột hoặc dùng phím ←/→ để xem từng giờ); địa chỉ và user bị thử nhiều nhất; các phiên đang mở (`who`).
 - Cửa sổ Tất cả server (menu server → Tất cả server…, Launchpad, Spotlight): mỗi server một thẻ với trạng thái kết nối, CPU, RAM, ổ `/`, load, thời gian chạy, mạng, số cảnh báo và cảnh báo mới nhất; kết nối hoặc chuyển sang server ngay trên thẻ. Chỉ thu số liệu khi cửa sổ mở.
 - Launchpad chia app theo nhóm (Tệp & terminal, Giám sát, Web & container, Bảo mật & truy cập, Phát triển, Hệ thống) với tab cho từng nhóm; phím mũi tên đi qua các nhóm; app đã ghim luôn có dấu trên icon; nút "Khôi phục Dock mặc định" (bấm hai lần).
 

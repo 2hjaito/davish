@@ -141,6 +141,25 @@ const vi = {
       title: (n: number) => `Thử đăng nhập sai (7 ngày): ${n}`,
       none: 'Không có lần thử sai nào.',
     },
+    stats: {
+      failed: 'Lần sai',
+      invalid: 'User không tồn tại',
+      ips: 'Địa chỉ',
+      banned: 'Đã ban',
+      accepted: 'Đăng nhập thành công',
+    },
+    hourly: 'Lần đăng nhập sai theo giờ',
+    hourTip: (hour: string, n: number) => `${hour}: ${n} lần`,
+    peak: (n: number) => `cao nhất ${n}/giờ`,
+    topIPs: 'Địa chỉ thử nhiều nhất',
+    topUsers: 'User bị nhắm',
+    sessions: 'Phiên đang mở',
+    noSessions: 'Không ai đang đăng nhập.',
+    tty: 'Terminal',
+    from: 'Từ',
+    since: 'Từ lúc',
+    local: 'tại máy',
+    allAttempts: 'Mọi địa chỉ',
     accepted: 'Đăng nhập thành công gần đây',
     noAccepted: 'Không có đăng nhập nào trong 7 ngày.',
     noLogs:
@@ -955,7 +974,7 @@ const vi = {
         runs: ['direct-tcpip qua SSH, không chạy lệnh'],
       },
       security: {
-        does: 'Ai đăng nhập server qua SSH và ai đang dò: lần thử sai gom theo IP, đăng nhập gần đây, ufw, fail2ban.',
+        does: 'Ai đăng nhập server qua SSH và ai đang dò: lần thử sai theo giờ, địa chỉ và user bị thử nhiều nhất, phiên đang mở, đăng nhập gần đây, ufw, fail2ban.',
         actions: [
           'Tắt đăng nhập mật khẩu (lệnh sudo gõ sẵn, có sshd -t)',
           'Chặn một IP bằng ufw hoặc fail2ban qua Terminal',
@@ -963,7 +982,7 @@ const vi = {
         keys: [],
         runs: [
           'journalctl -u ssh (hoặc đọc /var/log/auth.log)',
-          'last, lastb',
+          'who, last, lastb',
           'ufw status, fail2ban-client status sshd',
         ],
       },
