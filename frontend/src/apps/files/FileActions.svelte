@@ -16,7 +16,7 @@
   import { portal } from '../../lib/ui/portal'
   import { hitTest, type Hit, NO_HIT } from '../../lib/ui/radial/radial'
   import RadialMenu, { type RadialItem } from '../../lib/ui/radial/RadialMenu.svelte'
-  import { openFileInEditor, openTerminalAt } from '../../lib/wm/intents.svelte'
+  import { openFileInEditor, openSQLite, openTerminalAt } from '../../lib/wm/intents.svelte'
   import {
     ACTIONS,
     type ActionId,
@@ -129,6 +129,8 @@
   function menuAction(id: MenuId, entry: Entry): Action {
     if (id === 'open') return { label: t.files.open, run: () => onopen(entry) }
     if (id === 'download') return { label: t.files.download, run: ondownload }
+    if (id === 'database')
+      return { label: t.files.openInDatabase, run: () => openSQLite(serverID, entry.path) }
     if (id === 'newFile' || id === 'newFolder' || id === 'refresh') return blankAction(id)
     return {
       label: t.files.actions[id],
@@ -141,7 +143,7 @@
     if (!context) return []
     const { entry } = context
     return entry
-      ? menuFor().map((id) => (id === null ? null : menuAction(id, entry)))
+      ? menuFor(entry).map((id) => (id === null ? null : menuAction(id, entry)))
       : blankMenu().map((id) => (id === null ? null : blankAction(id)))
   })
 

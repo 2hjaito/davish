@@ -1,4 +1,5 @@
 // What can be done to a file or folder, from the drag menu or the keyboard.
+import { looksLikeSQLite } from '../../lib/api/database'
 import type { ArchiveFormat, Entry } from '../../lib/api/files'
 import type { IconName } from '../../lib/ui/icons'
 
@@ -31,11 +32,14 @@ export function petalsFor(e: Pick<Entry, 'dir'>): ActionId[] {
 }
 
 /** What the right-click menu offers; null is a divider. */
-export type MenuId = ActionId | 'open' | 'download' | 'newFile' | 'newFolder' | 'refresh'
+export type MenuId =
+  ActionId | 'open' | 'database' | 'download' | 'newFile' | 'newFolder' | 'refresh'
 
-export function menuFor(): (MenuId | null)[] {
+/** A file named like a SQLite database also opens in Database. */
+export function menuFor(e?: Pick<Entry, 'dir' | 'name'>): (MenuId | null)[] {
   return [
     'open',
+    ...(e && !e.dir && looksLikeSQLite(e.name) ? (['database'] as const) : []),
     'terminal',
     null,
     'desktop',

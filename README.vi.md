@@ -53,6 +53,7 @@ Không cài gì lên server.
 - [Cron](FEATURES.vi.md#cron): lịch nói bằng lời
 - [Nginx](FEATURES.vi.md#nginx): site, `nginx -t` trước khi reload, hạn TLS
 - [Gói](FEATURES.vi.md#gói): bản cập nhật, bản vá bảo mật lên đầu, runtime; thiếu Docker, nginx, git hay database thì gõ sẵn lệnh cài
+- [Database](FEATURES.vi.md#database): MariaDB/MySQL, PostgreSQL, MongoDB và SQLite; dò, tạo, dump và khôi phục, đăng nhập MongoDB lưu trong keychain
 - [Git](FEATURES.vi.md#git): trạng thái, diff, biểu đồ commit, fetch và pull
 - [Lối tắt](FEATURES.vi.md#lối-tắt-trên-màn-hình-chính): kéo `deploy.sh` ra màn hình, double-click là chạy, có nút dừng
 

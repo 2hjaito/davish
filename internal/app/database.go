@@ -2,7 +2,7 @@ package app
 
 import "davish/internal/database"
 
-// DatabaseList returns the MariaDB/MySQL and PostgreSQL databases.
+// DatabaseList returns the MariaDB/MySQL, PostgreSQL and MongoDB databases.
 func (a *App) DatabaseList(serverID string) ([]database.Engine, error) {
 	return a.databases.List(a.ctx, serverID)
 }
@@ -44,8 +44,8 @@ func (a *App) DatabaseDump(serverID, kind, db string) (string, error) {
 }
 
 // DatabaseDumps lists a database's dumps in ~/db-backups, newest first.
-func (a *App) DatabaseDumps(serverID, db string) ([]string, error) {
-	return a.databases.Dumps(a.ctx, serverID, db)
+func (a *App) DatabaseDumps(serverID, kind, db string) ([]string, error) {
+	return a.databases.Dumps(a.ctx, serverID, kind, db)
 }
 
 // DatabaseRestoreCommand is the line that loads a dump into a database.
@@ -59,4 +59,43 @@ func (a *App) DatabaseRestore(serverID, kind, db, file, command string) error {
 		return err
 	}
 	return a.databases.Restore(a.ctx, serverID, kind, db, file, command)
+}
+
+// DatabaseMongoConnect logs in to the server's MongoDB with a connection
+// string and keeps it in the keychain once it works.
+func (a *App) DatabaseMongoConnect(serverID, uri string) error {
+	if err := a.lock.Check(); err != nil {
+		return err
+	}
+	return a.databases.ConnectMongo(a.ctx, serverID, uri)
+}
+
+// DatabaseMongoForget removes the server's MongoDB login from the keychain.
+func (a *App) DatabaseMongoForget(serverID string) error {
+	return a.databases.ForgetMongo(serverID)
+}
+
+// DatabaseFind looks for database servers and SQLite files on the server,
+// changing nothing.
+func (a *App) DatabaseFind(serverID string) (database.Found, error) {
+	return a.databases.Find(a.ctx, serverID)
+}
+
+// DatabaseSQLite reads the tables of a SQLite file on the server.
+func (a *App) DatabaseSQLite(serverID, file string) (database.SQLiteInfo, error) {
+	return a.databases.InspectSQLite(a.ctx, serverID, file)
+}
+
+// DatabaseSQLiteBackup copies a SQLite file to ~/db-backups.
+func (a *App) DatabaseSQLiteBackup(serverID, file string) (string, error) {
+	if err := a.lock.Check(); err != nil {
+		return "", err
+	}
+	return a.databases.BackupSQLite(a.ctx, serverID, file)
+}
+
+// DatabaseSQLiteRestoreLine is the line that puts a backup back, for a
+// terminal.
+func (a *App) DatabaseSQLiteRestoreLine(file, backup string) (string, error) {
+	return database.SQLiteRestoreLine(file, backup)
 }

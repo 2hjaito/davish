@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Database: MongoDB (cài trên server). Liệt kê database kèm số collection và dung lượng, tạo database kèm user có mật khẩu ngẫu nhiên, xóa, dump và khôi phục (`mongodump`/`mongorestore`), mở tunnel cho Compass. MongoDB bật xác thực thì đăng nhập một lần bằng từng trường hoặc connection string; Davish thử trước, được mới lưu vào keychain của máy (như mật khẩu SSH), có nút "Quên thông tin đăng nhập". Connection string chỉ đi qua stdin, không nằm trên dòng lệnh hay nhật ký lệnh.
+- Database: SQLite. Thêm file bằng đường dẫn, bằng nút Dò, hoặc chuột phải file `.db`/`.sqlite`/`.sqlite3` trong Files → "Mở bằng Database". Xem bảng và số dòng (mở chỉ đọc), backup an toàn khi app đang ghi, khôi phục bằng lệnh gõ sẵn vào Terminal.
+- Database: nút Dò (chỉ đọc) tìm database server đang chạy và file SQLite trên server.
+- Database: khối "Davish kết nối thế nào?" giải thích lệnh chạy ở đâu và mật khẩu được giữ thế nào.
+
 ### Sửa
 - Nginx: đăng nhập bằng user thường thì bật, tắt, xóa, tạo, sửa site, test và reload không còn chỉ lùi về Terminal: Davish chạy lại đúng lệnh đã xác nhận qua `sudo`, hỏi mật khẩu sudo một lần mỗi phiên như Dịch vụ (#117). `certbot` vẫn chạy trong Terminal vì có thể hỏi thêm.
 

@@ -56,6 +56,9 @@ func (s *Service) Dump(ctx context.Context, serverID, kind, db string) (string, 
 	if !safeName.MatchString(db) {
 		return "", apperr.New(apperr.InvalidInput, "not a database name")
 	}
+	if kind == Mongo {
+		return s.dumpMongo(ctx, serverID, db)
+	}
 	if _, ok := dumpTools[kind]; !ok {
 		return "", apperr.New(apperr.InvalidInput, "unknown engine")
 	}
@@ -74,12 +77,19 @@ func (s *Service) Dump(ctx context.Context, serverID, kind, db string) (string, 
 	return strings.TrimSpace(string(res.Stdout)), nil
 }
 
-// Dumps lists the dumps of db in ~/db-backups, newest first.
-func (s *Service) Dumps(ctx context.Context, serverID, db string) ([]string, error) {
+// Dumps lists the dumps of kind's db in ~/db-backups, newest first.
+func (s *Service) Dumps(ctx context.Context, serverID, kind, db string) ([]string, error) {
 	if !safeName.MatchString(db) {
 		return nil, apperr.New(apperr.InvalidInput, "not a database name")
 	}
-	line := `ls -1t "$HOME/db-backups"/` + shellx.Quote(db) + `-*.sql.gz 2>/dev/null; true`
+	ext := ".sql.gz"
+	switch kind {
+	case Mongo:
+		ext = mongoDumpExt
+	case SQLite:
+		ext = sqliteDumpExt
+	}
+	line := `ls -1t "$HOME/db-backups"/` + shellx.Quote(db) + `-*` + ext + ` 2>/dev/null; true`
 	res, err := s.run.RunInput(ctx, serverID, app, line, nil)
 	if err != nil {
 		return nil, err
@@ -105,6 +115,9 @@ var restoreTools = map[string][]string{
 func (s *Service) RestoreCommand(ctx context.Context, serverID, kind, db, file string) (string, error) {
 	if !safeName.MatchString(db) {
 		return "", apperr.New(apperr.InvalidInput, "not a database name")
+	}
+	if kind == Mongo {
+		return mongoRestoreLine(db, file)
 	}
 	if !dumpFile.MatchString(file) || path.Clean(file) != file {
 		return "", apperr.New(apperr.InvalidInput, "a dump is a .sql or .sql.gz file")
@@ -137,6 +150,10 @@ func (s *Service) Restore(ctx context.Context, serverID, kind, db, file, command
 	}
 	if want != command {
 		return apperr.New(apperr.FSStale, "the command changed since it was confirmed")
+	}
+	if kind == Mongo {
+		_, err := s.runMongoTool(ctx, serverID, command)
+		return err
 	}
 	res, err := s.run.RunInput(ctx, serverID, app, command, nil)
 	if err != nil {

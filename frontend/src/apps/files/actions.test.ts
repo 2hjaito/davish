@@ -19,6 +19,15 @@ describe('menuFor', () => {
   })
 })
 
+describe('menuFor a SQLite file', () => {
+  it('opens it in Database, and only a file named like one', () => {
+    expect(menuFor({ dir: false, name: 'app.sqlite3' })).toContain('database')
+    expect(menuFor({ dir: false, name: 'App.DB' })).toContain('database')
+    expect(menuFor({ dir: true, name: 'data.db' })).not.toContain('database')
+    expect(menuFor({ dir: false, name: 'notes.txt' })).not.toContain('database')
+  })
+})
+
 describe('blankMenu', () => {
   it('creates, and offers nothing that removes the folder', () => {
     const menu = blankMenu()

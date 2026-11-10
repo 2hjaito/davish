@@ -16,9 +16,12 @@ type SecretKind string
 const (
 	SecretPassword   SecretKind = "password"
 	SecretPassphrase SecretKind = "passphrase"
+	// SecretMongo is the connection string of the server's MongoDB, when it
+	// needs a login (ADR 0017).
+	SecretMongo SecretKind = "mongo"
 )
 
-var secretKinds = []SecretKind{SecretPassword, SecretPassphrase}
+var secretKinds = []SecretKind{SecretPassword, SecretPassphrase, SecretMongo}
 
 // keychainService groups every Davish entry in the OS keychain.
 const keychainService = "davish"
@@ -121,6 +124,18 @@ func (s *Secrets) Has(serverID string, kind SecretKind) (bool, error) {
 		return false, nil
 	}
 	return err == nil, err
+}
+
+// Delete removes one kind of secret; a missing one is not an error.
+func (s *Secrets) Delete(serverID string, kind SecretKind) error {
+	if err := checkKind(kind); err != nil {
+		return err
+	}
+	err := s.kr.Delete(keychainService, account(serverID, kind))
+	if err != nil && !errors.Is(err, ErrNoSecret) {
+		return apperr.Wrap(apperr.KeychainUnavailable, "cannot remove the secret from the keychain", err)
+	}
+	return nil
 }
 
 // DeleteAll removes every kind of secret stored for the server.
