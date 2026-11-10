@@ -13,6 +13,7 @@
   import NotInstalled from '../../lib/ui/NotInstalled.svelte'
   import { getWindowContext } from '../../lib/wm/context'
   import { openFilesAt, openTerminalAt } from '../../lib/wm/intents.svelte'
+  import TitleBar from '../../lib/wm/TitleBar.svelte'
   import type { AppProps } from '../types'
   import { backend } from './backend'
 
@@ -192,19 +193,25 @@
   }
 </script>
 
+<TitleBar>
+  <span class="title">{d.title}</span>
+  <button
+    class="tool"
+    aria-label={d.refresh}
+    class:spin={loading}
+    disabled={!connected || loading}
+    onclick={() => void refresh()}
+  >
+    <Icon name="refresh" size={14} strokeWidth={2.2} />
+  </button>
+</TitleBar>
+
 {#if !connected}
   <Empty icon="server" title={d.offline} />
 {:else if engines === null}
   <Empty icon="disk" title={error || d.loading} />
 {:else}
   <div class="db">
-    <header>
-      <h3>{d.title}</h3>
-      <span class="spacer"></span>
-      <button class="tool" aria-label={d.refresh} disabled={loading} onclick={() => void refresh()}>
-        <Icon name="refresh" size={15} />
-      </button>
-    </header>
     {#if flash}
       <p class="flash" role="status">
         {flash}
@@ -458,21 +465,44 @@
 </Dialog>
 
 <style>
+  .title {
+    flex: 1;
+    text-align: center;
+    font-weight: 600;
+  }
+
+  .tool {
+    border: 0;
+    background: none;
+    padding: 3px;
+    display: flex;
+    color: var(--fg-muted);
+  }
+
+  .tool.spin :global(svg) {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      rotate: 360deg;
+    }
+  }
+
   .db {
-    height: 100%;
+    flex: 1;
+    min-height: 0;
     padding: 12px 16px;
     overflow: auto;
     box-sizing: border-box;
   }
 
-  header,
   .head {
     display: flex;
     gap: 8px;
     align-items: center;
   }
 
-  h3,
   h4 {
     margin: 0;
   }
