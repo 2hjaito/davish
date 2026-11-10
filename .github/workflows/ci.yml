@@ -112,6 +112,9 @@ jobs:
 
       - name: Start test sshd
         run: make sshd-up
+        env:
+          # The runners sit in Azure; Ubuntu's own mirrors are slow from there.
+          UBUNTU_MIRROR: http://azure.archive.ubuntu.com/ubuntu
 
       - name: Integration tests
         run: make test-integration
