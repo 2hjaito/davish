@@ -44,6 +44,8 @@ export interface Firewall {
 
 export interface SecurityReport {
   root: boolean
+  /** sudo runs without asking for a password. */
+  sudo: boolean
   /** 'journal', 'auth.log', or '' when neither was readable. */
   source: string
   accepted: Login[]
@@ -68,5 +70,28 @@ export interface SecurityReport {
   disablePassword: string
 }
 
+/** What the Security app can do to one address (internal/security/actions.go). */
+export type SecurityAction = 'block' | 'unblock' | 'ban' | 'unban'
+
+export interface SecurityPlan {
+  /** What Davish runs once confirmed: as root, or with sudo -n. */
+  command: string
+  /** The same with plain sudo, for Terminal. */
+  terminal: string
+}
+
 export const securityReport = (serverID: string): Promise<SecurityReport> =>
   App.SecurityReport(serverID)
+
+export const securityPlan = (
+  action: SecurityAction,
+  ip: string,
+  root: boolean,
+): Promise<SecurityPlan> => App.SecurityPlan(action, ip, root)
+
+export const securityApply = (
+  serverID: string,
+  action: SecurityAction,
+  ip: string,
+  command: string,
+): Promise<void> => App.SecurityApply(serverID, action, ip, command)

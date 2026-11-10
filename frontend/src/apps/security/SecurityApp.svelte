@@ -1,19 +1,23 @@
 <script lang="ts">
-  import { blockCommand, deniedIPs } from './ufw'
+  import { blockedIPs, deniedIPs } from './ufw'
   import { untrack } from 'svelte'
 
+  import { copyText } from '../../lib/api/clipboard'
   import { toUserError } from '../../lib/api/errors'
-  import type { SecurityReport } from '../../lib/api/security'
+  import type { SecurityAction, SecurityPlan, SecurityReport } from '../../lib/api/security'
   import { t } from '../../lib/i18n'
   import { useAppMenu } from '../../lib/shell/menus.svelte'
   import { servers } from '../../lib/stores/servers.svelte'
-  import Empty from '../../lib/ui/Empty.svelte'
-  import LoadState from '../../lib/ui/LoadState.svelte'
   import { supersedes } from '../../lib/stores/latest'
+  import ConfirmCommand from '../../lib/ui/ConfirmCommand.svelte'
+  import Empty from '../../lib/ui/Empty.svelte'
+  import FilterShell, { type FilterItem } from '../../lib/ui/FilterShell.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
+  import type { IconName } from '../../lib/ui/icons'
+  import LoadState from '../../lib/ui/LoadState.svelte'
+  import StatusList, { type StatusItem } from '../../lib/ui/StatusList.svelte'
   import { getWindowContext } from '../../lib/wm/context'
   import { openTerminalAt } from '../../lib/wm/intents.svelte'
-  import TitleBar from '../../lib/wm/TitleBar.svelte'
   import type { AppProps } from '../types'
   import { backend } from './backend'
   import BarList from './BarList.svelte'
@@ -24,6 +28,23 @@
   const ctx = getWindowContext()
   const s = t.security
 
+  type View =
+    'overview' | 'failed' | 'blocked' | 'users' | 'accepted' | 'sessions' | 'firewall' | 'password'
+  const icons: Record<View, IconName> = {
+    overview: 'shield',
+    failed: 'warning',
+    blocked: 'lock',
+    users: 'help',
+    accepted: 'check',
+    sessions: 'terminal',
+    firewall: 'globe2',
+    password: 'key',
+  }
+
+  let view = $state<View>('overview')
+  let query = $state('')
+  let selected = $state<string | null>(null)
+
   let report = $state.raw<SecurityReport | null>(null)
   let error = $state('')
   let loading = $state(false)
@@ -32,35 +53,130 @@
   const connected = $derived(server?.state === 'connected')
   const banned = $derived(new Set(report?.fail2ban.banned ?? []))
   const denied = $derived(deniedIPs(report?.ufw.lines ?? []))
+  const blocked = $derived(blockedIPs(denied, banned))
+  const attempts = $derived(new Map((report?.failed ?? []).map((a) => [a.ip, a])))
+  const isBlocked = (ip: string) => denied.has(ip) || banned.has(ip)
+
+  const filters = $derived.by((): FilterItem[] => {
+    const r = report
+    const n = (v: View): number | undefined => {
+      if (!r) return undefined
+      return {
+        overview: undefined,
+        failed: r.failedIPs,
+        blocked: blocked.length,
+        users: r.targets.length,
+        accepted: r.acceptedTotal,
+        sessions: r.sessions?.length ?? 0,
+        firewall: undefined,
+        password: undefined,
+      }[v]
+    }
+    const item = (v: View, section?: string): FilterItem => ({
+      id: v,
+      label: s.views[v],
+      icon: icons[v],
+      count: n(v),
+      section,
+    })
+    return [
+      item('overview'),
+      item('failed'),
+      item('blocked'),
+      item('users'),
+      item('accepted'),
+      item('sessions'),
+      item('firewall', s.settings),
+      item('password'),
+    ]
+  })
+
+  const q = $derived(query.trim().toLowerCase())
+  const has = (...fields: string[]) => !q || fields.some((f) => f.toLowerCase().includes(q))
+
+  // The two lists of addresses, with an address picked to see and act on.
+  const failedShown = $derived((report?.failed ?? []).filter((a) => has(a.ip, ...a.users)))
+  const blockedShown = $derived(blocked.filter((b) => has(b.ip)))
+  const ipItems = $derived.by((): StatusItem[] => {
+    if (view === 'failed')
+      return failedShown.map((a) => ({
+        key: a.ip,
+        name: a.ip,
+        health: isBlocked(a.ip) ? 'off' : 'failed',
+        note: s.tries(a.count),
+      }))
+    if (view === 'blocked')
+      return blockedShown.map((b) => ({
+        key: b.ip,
+        name: b.ip,
+        health: 'off',
+        note: b.via.join(' · '),
+      }))
+    return []
+  })
+  const ipView = $derived(view === 'failed' || view === 'blocked')
+  const current = $derived(
+    ipView && selected && ipItems.some((i) => i.key === selected) ? selected : null,
+  )
+
+  const footer = $derived.by(() => {
+    const r = report
+    if (!r) return ''
+    switch (view) {
+      case 'failed':
+        return failedShown.length < r.failedIPs && !q
+          ? s.ipsOf(failedShown.length, r.failedIPs)
+          : s.ips(failedShown.length)
+      case 'blocked':
+        return s.ips(blockedShown.length)
+      case 'users':
+        return s.items(usersShown.length)
+      case 'accepted':
+        return s.items(acceptedShown.length)
+      case 'sessions':
+        return s.items(sessionsShown.length)
+    }
+    return ''
+  })
   const stats = $derived(
     report
       ? ([
-          { icon: 'warning', label: s.stats.failed, value: report.failedTotal },
-          { icon: 'help', label: s.stats.invalid, value: report.invalidTotal },
-          { icon: 'globe', label: s.stats.ips, value: report.failedIPs },
-          { icon: 'lock', label: s.stats.banned, value: report.fail2ban.banned?.length ?? 0 },
-          { icon: 'check', label: s.stats.accepted, value: report.acceptedTotal },
+          { icon: 'warning', label: s.stats.failed, value: report.failedTotal, to: 'failed' },
+          { icon: 'help', label: s.stats.invalid, value: report.invalidTotal, to: 'users' },
+          { icon: 'globe', label: s.stats.ips, value: report.failedIPs, to: 'failed' },
+          { icon: 'lock', label: s.stats.banned, value: blocked.length, to: 'blocked' },
+          { icon: 'check', label: s.stats.accepted, value: report.acceptedTotal, to: 'accepted' },
         ] as const)
       : [],
   )
+  const usersShown = $derived((report?.targets ?? []).filter((u) => has(u.user)))
+  const acceptedShown = $derived((report?.accepted ?? []).filter((l) => has(l.ip, l.user)))
+  const sessionsShown = $derived((report?.sessions ?? []).filter((x) => has(x.user, x.from)))
+
+  /** Opens a section, with an address in it picked. */
+  function open(v: View, ip: string | null = null) {
+    view = v
+    query = ''
+    selected = ip
+  }
 
   const attempt = supersedes()
 
   async function refresh() {
     // A retry replaces a load still waiting on the server.
-    const current = attempt()
+    const latest = attempt()
     loading = true
     try {
       report = await backend.report(win.serverID)
       error = ''
     } catch (e) {
-      if (current()) error = toUserError(e).message
+      if (latest()) error = toUserError(e).message
     } finally {
-      if (current()) loading = false
+      if (latest()) loading = false
     }
   }
 
-  // Root commands are only ever typed into a terminal (docs/SECURITY.md).
+  // What needs a password is typed into a terminal, for the user to run.
   const sudo = (cmd: string) => openTerminalAt(win.serverID, undefined, cmd)
 
   $effect(() => {
@@ -77,263 +193,505 @@
     () => [],
     () => void refresh(),
   )
+
+  let copied = $state('')
+  async function copy(ip: string) {
+    if (await copyText(ip)) {
+      copied = ip
+      setTimeout(() => copied === ip && (copied = ''), 1500)
+    }
+  }
+
+  // An action shows its exact command, then runs once confirmed: with
+  // sudo -n when sudo needs no password, in Terminal otherwise (ADR 0016).
+  let confirm = $state.raw<{ action: SecurityAction; ip: string; plan: SecurityPlan } | null>(null)
+  let running = $state(false)
+  let flash = $state('')
+  let actionError = $state.raw<{ message: string; terminal: string } | null>(null)
+  const canRun = $derived(!!report && (report.root || report.sudo))
+
+  async function ask(action: SecurityAction, ip: string) {
+    actionError = null
+    flash = ''
+    try {
+      confirm = { action, ip, plan: await backend.plan(action, ip, report?.root ?? false) }
+    } catch (e) {
+      actionError = { message: toUserError(e).message, terminal: '' }
+    }
+  }
+
+  function toTerminal() {
+    if (confirm) sudo(confirm.plan.terminal)
+    confirm = null
+  }
+
+  async function run() {
+    const c = confirm
+    if (!c) return
+    if (!canRun) return toTerminal()
+    running = true
+    try {
+      await backend.apply(win.serverID, c.action, c.ip, c.plan.command)
+      flash = s.done[c.action](c.ip)
+      confirm = null
+      await refresh()
+    } catch (e) {
+      const u = toUserError(e)
+      confirm = null
+      actionError = {
+        message:
+          u.code === 'CMD_NEEDS_ROOT'
+            ? s.needsPassword
+            : u.code === 'CMD_FAILED'
+              ? `${u.message} ${u.detail}`
+              : u.message,
+        terminal: c.plan.terminal,
+      }
+    } finally {
+      running = false
+    }
+  }
+
+  const confirmNote = $derived.by(() => {
+    const c = confirm
+    if (!c || !report) return ''
+    if (
+      (c.action === 'block' || c.action === 'ban') &&
+      report.sessions?.some((x) => x.from === c.ip)
+    )
+      return s.confirm.ownSession
+    if (c.action === 'block' && !report.ufw.active && !report.ufw.needsRoot)
+      return s.confirm.ufwInactive
+    return ''
+  })
 </script>
 
-<TitleBar>
-  <span class="title">{win.title}</span>
-  <button
-    class="tool"
-    aria-label={t.common.refresh}
-    class:spin={loading}
-    disabled={!connected}
-    onclick={() => void refresh()}
-  >
-    <Icon name="refresh" size={14} strokeWidth={2.2} />
-  </button>
-</TitleBar>
+<FilterShell
+  group={server?.name ?? ''}
+  {filters}
+  bind:filter={() => view, (f) => open(f as View)}
+  sidebarLabel={s.sections}
+  searchLabel={s.search}
+  bind:query
+  refreshing={!connected || loading}
+  ready={connected && report !== null}
+  {footer}
+  {error}
+  listWidth="40%"
+  onrefresh={() => void refresh()}
+  detail={ipView ? ipDetail : undefined}
+>
+  {#snippet placeholder()}
+    {#if !connected}
+      <Empty icon="server" title={s.offline} hint={s.offlineHint} />
+    {:else}
+      <LoadState
+        serverID={win.serverID}
+        {error}
+        icon="shield"
+        loading={s.loading}
+        onretry={() => void refresh()}
+      />
+    {/if}
+  {/snippet}
 
-<div class="body">
-  {#if !connected}
-    <Empty icon="server" title={s.offline} hint={s.offlineHint} />
-  {:else if !report}
-    <LoadState
-      serverID={win.serverID}
-      {error}
-      icon="shield"
-      loading={s.loading}
-      onretry={() => void refresh()}
-    />
-  {:else}
-    {@const r = report}
-    {#if error}<p class="error">{error}</p>{/if}
-
-    {#if r.source}
-      <div class="stats">
-        {#each stats as st (st.label)}
-          <div class="tile">
-            <span class="tile-label"><Icon name={st.icon} size={13} />{st.label}</span>
-            <span class="hero">{st.value.toLocaleString()}</span>
-          </div>
-        {/each}
-      </div>
-      {#if r.hourly?.length}
-        <section class="tile">
-          <HourBars hours={r.hourly} />
-        </section>
-      {/if}
-      {#if r.failed.length}
-        <div class="pair">
-          <section class="tile">
-            <BarList
-              title={s.topIPs}
-              rows={r.failed.slice(0, 8).map((a) => ({ key: a.ip, count: a.count }))}
-            >
-              {#snippet label(row)}
-                <span class="mono">{row.key}</span>
-                {#if banned.has(row.key)}<span class="tag bad">{s.banned}</span>{/if}
-                {#if denied.has(row.key)}<span class="tag bad">{s.blocked}</span>{/if}
-              {/snippet}
-            </BarList>
-          </section>
-          <section class="tile">
-            <BarList
-              title={s.topUsers}
-              rows={r.targets.slice(0, 8).map((u) => ({ key: u.user, count: u.count }))}
-            >
-              {#snippet label(row)}<span class="mono">{row.key}</span>{/snippet}
-            </BarList>
-          </section>
+  {#snippet list()}
+    {@const r = report!}
+    {#if ipView}
+      {#if view === 'blocked' && r.ufw.installed && r.ufw.needsRoot}
+        <div class="note">
+          <p class="hint">{s.ufwHidden}</p>
+          <button class="btn" onclick={() => sudo('sudo ufw status numbered')}>{s.ufwShow}</button>
         </div>
       {/if}
+      <StatusList
+        items={ipItems}
+        selected={current}
+        label={s.views[view]}
+        empty={q
+          ? s.noMatch
+          : view === 'blocked'
+            ? s.noBlocked
+            : r.source
+              ? s.failed.none
+              : s.noLogs}
+        onselect={(k) => {
+          selected = k
+          flash = ''
+          actionError = null
+        }}
+      />
+    {:else}
+      <div class="page">
+        {#if view === 'overview'}
+          {@render overview(r)}
+        {:else if view === 'users'}
+          {#if usersShown.length === 0}
+            <p class="hint">{q ? s.noMatch : r.source ? s.failed.none : s.noLogs}</p>
+          {:else}
+            <table>
+              <thead><tr><th>{s.user}</th><th class="num">{s.count}</th></tr></thead>
+              <tbody>
+                {#each usersShown as u (u.user)}
+                  <tr>
+                    <td class="mono selectable">{u.user}</td>
+                    <td class="num">{u.count.toLocaleString()}</td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          {/if}
+        {:else if view === 'accepted'}
+          {@render accepted(r)}
+        {:else if view === 'sessions'}
+          {#if sessionsShown.length === 0}
+            <p class="hint">{q ? s.noMatch : s.noSessions}</p>
+          {:else}
+            <table>
+              <thead>
+                <tr><th>{s.user}</th><th>{s.tty}</th><th>{s.from}</th><th>{s.since}</th></tr>
+              </thead>
+              <tbody>
+                {#each sessionsShown as x, i (i)}
+                  <tr>
+                    <td>{x.user}</td>
+                    <td class="mono muted">{x.tty}</td>
+                    <td class="mono"
+                      >{#if x.from}{@render ipCell(x.from)}{:else}{s.local}{/if}</td
+                    >
+                    <td class="muted">{x.since}</td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          {/if}
+        {:else if view === 'firewall'}
+          {@render firewall(r)}
+        {:else if view === 'password'}
+          {@render password(r)}
+        {/if}
+      </div>
     {/if}
+  {/snippet}
+</FilterShell>
 
-    <section class="card" class:warn={r.passwordAuth !== 'no'}>
-      <h3>{s.password.title}</h3>
-      {#if r.passwordAuth === 'no'}
-        <p>{s.password.off}</p>
-      {:else}
-        <p>{r.passwordAuth === 'yes' ? s.password.on : s.password.unknown}</p>
-        {#if server?.auth === 'password'}
-          <p class="hint">{s.password.useKeyFirst}</p>
-        {:else}
-          <p class="hint">{s.password.how}</p>
-          <pre class="command">{r.disablePassword}</pre>
-          <p class="hint strong">{s.password.keepOpen}</p>
-          <button class="btn btn-primary" onclick={() => sudo(r.disablePassword)}
+{#snippet ipDetail()}
+  {#if flash || actionError}
+    <div class="banner">
+      {#if flash}<p class="ok" role="status"><Icon name="check" size={13} /> {flash}</p>{/if}
+      {#if actionError}
+        <p class="error" role="alert">{actionError.message}</p>
+        {#if actionError.terminal}
+          <button class="btn" onclick={() => actionError && sudo(actionError.terminal)}
             >{t.common.runInTerminal}</button
           >
         {/if}
       {/if}
-    </section>
-
-    <section>
-      <h3>{s.sessions}</h3>
-      {#if !r.sessions?.length}
-        <p class="hint">{s.noSessions}</p>
-      {:else}
-        <table>
-          <thead>
-            <tr><th>{s.user}</th><th>{s.tty}</th><th>{s.from}</th><th>{s.since}</th></tr>
-          </thead>
-          <tbody>
-            {#each r.sessions as x, i (i)}
-              <tr>
-                <td>{x.user}</td>
-                <td class="mono muted">{x.tty}</td>
-                <td class="mono">{x.from || s.local}</td>
-                <td class="muted">{x.since}</td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      {/if}
-    </section>
-
-    <section>
-      <h3>{s.failed.title(r.failedTotal)}</h3>
-      {#if !r.source}
-        <p class="hint">{s.noLogs}</p>
-      {:else if r.failed.length === 0}
-        <p class="hint">{s.failed.none}</p>
-      {:else}
-        <table>
-          <thead>
-            <tr
-              ><th>{s.ip}</th><th class="num">{s.count}</th><th>{s.users}</th><th>{s.last}</th><th
-              ></th></tr
-            >
-          </thead>
-          <tbody>
-            {#each r.failed as a (a.ip)}
-              <tr>
-                <td class="mono"
-                  >{a.ip}{#if banned.has(a.ip)}<span class="tag">{s.banned}</span
-                    >{/if}{#if denied.has(a.ip)}<span class="tag">{s.blocked}</span>{/if}</td
-                >
-                <td class="num">{a.count}</td>
-                <td class="mono muted">{a.users.join(', ')}</td>
-                <td class="muted">{a.last}</td>
-                <td class="act">
-                  {#if r.ufw.installed && !denied.has(a.ip)}
-                    <button class="link" onclick={() => sudo(blockCommand(a.ip))}>{s.block}</button>
-                  {:else if r.fail2ban.installed && !banned.has(a.ip)}
-                    <button
-                      class="link"
-                      onclick={() => sudo(`sudo fail2ban-client set sshd banip ${a.ip}`)}
-                      >{s.ban}</button
-                    >
-                  {/if}
-                </td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-        <p class="hint">{s.source(r.source)}</p>
-      {/if}
-    </section>
-
-    <section>
-      <h3>{s.accepted}</h3>
-      {#if r.accepted.length === 0}
-        <p class="hint">{r.source ? s.noAccepted : s.noLogs}</p>
-      {:else}
-        <table>
-          <thead
-            ><tr><th>{s.time}</th><th>{s.user}</th><th>{s.ip}</th><th>{s.method}</th></tr></thead
-          >
-          <tbody>
-            {#each r.accepted as l, i (i)}
-              <tr>
-                <td class="muted">{l.time}</td>
-                <td>{l.user}</td>
-                <td class="mono">{l.ip}</td>
-                <td class:warn-text={l.method === 'password'}>{l.method}</td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      {/if}
-      {#if r.last.length}
-        <details>
-          <summary>{s.lastTitle}</summary>
-          <pre class="raw">{r.last.join('\n')}</pre>
-        </details>
-      {/if}
-      {#if r.lastbDenied}
-        <p class="hint">{s.lastbRoot}</p>
-        <button class="btn" onclick={() => sudo('sudo lastb -n 50 -i -w')}>{s.lastbRun}</button>
-      {:else if r.lastb.length}
-        <details>
-          <summary>{s.lastbTitle}</summary>
-          <pre class="raw">{r.lastb.join('\n')}</pre>
-        </details>
-      {/if}
-    </section>
-
-    <section>
-      <h3>{s.firewall}</h3>
-      <div class="fw">
-        <div>
-          <strong>ufw</strong>
-          {#if !r.ufw.installed}
-            <p class="hint">{s.notInstalled}</p>
-          {:else if r.ufw.needsRoot}
-            <p class="hint">{s.needsRoot}</p>
-            <button class="btn" onclick={() => sudo('sudo ufw status verbose')}
-              >{t.common.runInTerminal}</button
-            >
-          {:else}
-            <p class:ok={r.ufw.active} class:warn-text={!r.ufw.active}>
-              {r.ufw.active ? s.active : s.inactive}
-            </p>
-            {#if r.ufw.lines.length}<pre class="raw">{r.ufw.lines.join('\n')}</pre>{/if}
-          {/if}
-        </div>
-        <div>
-          <strong>fail2ban</strong>
-          {#if !r.fail2ban.installed}
-            <p class="hint">{s.notInstalled}</p>
-          {:else if r.fail2ban.needsRoot}
-            <p class="hint">{s.needsRoot}</p>
-            <button class="btn" onclick={() => sudo('sudo fail2ban-client status sshd')}
-              >{t.common.runInTerminal}</button
-            >
-          {:else}
-            <p class:ok={r.fail2ban.active}>
-              {r.fail2ban.active ? s.jailActive(r.fail2ban.banned?.length ?? 0) : s.inactive}
-            </p>
-          {/if}
-        </div>
-      </div>
-      <p class="hint">{s.firewallHint}</p>
-    </section>
+    </div>
   {/if}
-</div>
+  {#if current && report}
+    {@const r = report}
+    {@const a = attempts.get(current)}
+    {@const logins = r.accepted.filter((l) => l.ip === current).length}
+    <div class="detail">
+      <header>
+        <h3 class="mono selectable">{current}</h3>
+        <button class="btn small" onclick={() => void copy(current)}>
+          <Icon name={copied === current ? 'check' : 'copy'} size={13} />
+          {copied === current ? s.copied : s.copyIP}
+        </button>
+      </header>
+      <p class="tags">
+        {#if denied.has(current)}<span class="tag bad">{s.blockedBy('ufw')}</span>{/if}
+        {#if banned.has(current)}<span class="tag bad">{s.blockedBy('fail2ban')}</span>{/if}
+        {#if !isBlocked(current)}<span class="tag">{s.notBlocked}</span>{/if}
+      </p>
+
+      {#if a}
+        <dl>
+          <dt>{s.count}</dt>
+          <dd>{a.count.toLocaleString()}</dd>
+          <dt>{s.tried}</dt>
+          <dd class="mono selectable">{a.users.join(', ')}</dd>
+          <dt>{s.lastTry}</dt>
+          <dd class="selectable">{a.last}</dd>
+        </dl>
+      {/if}
+      {#if logins > 0}<p class="warn-text">{s.acceptedFrom(logins)}</p>{/if}
+
+      <div class="row">
+        {#if r.ufw.installed}
+          {#if denied.has(current)}
+            <button class="btn" onclick={() => void ask('unblock', current)}
+              >{s.action.unblock}</button
+            >
+          {:else}
+            <button class="btn btn-danger" onclick={() => void ask('block', current)}
+              >{s.action.block}</button
+            >
+          {/if}
+        {/if}
+        {#if r.fail2ban.installed}
+          {#if banned.has(current)}
+            <button class="btn" onclick={() => void ask('unban', current)}>{s.action.unban}</button>
+          {:else}
+            <button
+              class="btn"
+              class:btn-danger={!r.ufw.installed}
+              onclick={() => void ask('ban', current)}>{s.action.ban}</button
+            >
+          {/if}
+        {/if}
+      </div>
+      {#if !r.ufw.installed && !r.fail2ban.installed}
+        <p class="hint">ufw, fail2ban: {s.notInstalled}</p>
+      {/if}
+    </div>
+  {:else if !flash && !actionError}
+    <Empty icon="shield" title={s.noSelection} />
+  {/if}
+{/snippet}
+
+{#snippet ipCell(ip: string)}
+  <span class="selectable">{ip}</span>
+  <button
+    class="copy"
+    aria-label={s.copyIP}
+    title={copied === ip ? s.copied : s.copyIP}
+    onclick={() => void copy(ip)}
+  >
+    <Icon name={copied === ip ? 'check' : 'copy'} size={12} />
+  </button>
+{/snippet}
+
+{#snippet overview(r: SecurityReport)}
+  {#if r.source}
+    <div class="stats">
+      {#each stats as st (st.label)}
+        <button class="tile stat" onclick={() => open(st.to)}>
+          <span class="tile-label"><Icon name={st.icon} size={13} />{st.label}</span>
+          <span class="hero">{st.value.toLocaleString()}</span>
+        </button>
+      {/each}
+    </div>
+    {#if r.hourly?.length}
+      <section class="tile">
+        <HourBars hours={r.hourly} />
+      </section>
+    {/if}
+    {#if r.failed.length}
+      <div class="pair">
+        <section class="tile">
+          <BarList
+            title={s.topIPs}
+            rows={r.failed.slice(0, 8).map((a) => ({ key: a.ip, count: a.count }))}
+          >
+            {#snippet label(row)}
+              <button class="iplink mono" onclick={() => open('failed', row.key)}>{row.key}</button>
+              {#if denied.has(row.key)}<span class="tag bad">{s.blocked}</span>{/if}
+              {#if banned.has(row.key)}<span class="tag bad">{s.banned}</span>{/if}
+            {/snippet}
+          </BarList>
+        </section>
+        <section class="tile">
+          <BarList
+            title={s.topUsers}
+            rows={r.targets.slice(0, 8).map((u) => ({ key: u.user, count: u.count }))}
+          >
+            {#snippet label(row)}<span class="mono">{row.key}</span>{/snippet}
+          </BarList>
+        </section>
+      </div>
+    {/if}
+  {:else}
+    <p class="hint">{s.noLogs}</p>
+  {/if}
+  {#if r.passwordAuth !== 'no'}
+    <button class="card warn" onclick={() => open('password')}>
+      <strong>{s.password.title}</strong>
+      <span>{r.passwordAuth === 'yes' ? s.password.on : s.password.unknown}</span>
+    </button>
+  {/if}
+{/snippet}
+
+{#snippet accepted(r: SecurityReport)}
+  {#if acceptedShown.length === 0}
+    <p class="hint">{q ? s.noMatch : r.source ? s.noAccepted : s.noLogs}</p>
+  {:else}
+    <table>
+      <thead><tr><th>{s.time}</th><th>{s.user}</th><th>{s.ip}</th><th>{s.method}</th></tr></thead>
+      <tbody>
+        {#each acceptedShown as l, i (i)}
+          <tr>
+            <td class="muted">{l.time}</td>
+            <td>{l.user}</td>
+            <td class="mono">{@render ipCell(l.ip)}</td>
+            <td class:warn-text={l.method === 'password'}>{l.method}</td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+    {#if r.source}<p class="hint">{s.source(r.source)}</p>{/if}
+  {/if}
+  {#if r.last.length}
+    <details>
+      <summary>{s.lastTitle}</summary>
+      <pre class="raw selectable">{r.last.join('\n')}</pre>
+    </details>
+  {/if}
+  {#if r.lastbDenied}
+    <p class="hint">{s.lastbRoot}</p>
+    <button class="btn" onclick={() => sudo('sudo lastb -n 50 -i -w')}>{s.lastbRun}</button>
+  {:else if r.lastb.length}
+    <details>
+      <summary>{s.lastbTitle}</summary>
+      <pre class="raw selectable">{r.lastb.join('\n')}</pre>
+    </details>
+  {/if}
+{/snippet}
+
+{#snippet firewall(r: SecurityReport)}
+  <div class="fw">
+    <section class="tile">
+      <h3>ufw</h3>
+      {#if !r.ufw.installed}
+        <p class="hint">{s.notInstalled}</p>
+      {:else if r.ufw.needsRoot}
+        <p class="hint">{s.needsRoot}</p>
+        <button class="btn" onclick={() => sudo('sudo ufw status verbose')}
+          >{t.common.runInTerminal}</button
+        >
+      {:else}
+        <p class:ok={r.ufw.active} class:warn-text={!r.ufw.active}>
+          {r.ufw.active ? s.active : s.inactive}
+        </p>
+        {#if denied.size}
+          <button class="link" onclick={() => open('blocked')}
+            >{s.views.blocked}: {denied.size}</button
+          >
+        {/if}
+      {/if}
+    </section>
+    <section class="tile">
+      <h3>fail2ban</h3>
+      {#if !r.fail2ban.installed}
+        <p class="hint">{s.notInstalled}</p>
+      {:else if r.fail2ban.needsRoot}
+        <p class="hint">{s.needsRoot}</p>
+        <button class="btn" onclick={() => sudo('sudo fail2ban-client status sshd')}
+          >{t.common.runInTerminal}</button
+        >
+      {:else}
+        <p class:ok={r.fail2ban.active}>
+          {r.fail2ban.active ? s.jailActive(banned.size) : s.inactive}
+        </p>
+        {#if banned.size}
+          <button class="link" onclick={() => open('blocked')}
+            >{s.views.blocked}: {banned.size}</button
+          >
+        {/if}
+      {/if}
+    </section>
+  </div>
+  {#if r.ufw.lines.length}
+    <h3>{s.ufwRules}</h3>
+    <pre class="raw selectable">{r.ufw.lines.join('\n')}</pre>
+  {/if}
+  <p class="hint">{s.firewallHint}</p>
+{/snippet}
+
+{#snippet password(r: SecurityReport)}
+  <section class="card" class:warn={r.passwordAuth !== 'no'}>
+    <h3>{s.password.title}</h3>
+    {#if r.passwordAuth === 'no'}
+      <p>{s.password.off}</p>
+    {:else}
+      <p>{r.passwordAuth === 'yes' ? s.password.on : s.password.unknown}</p>
+      {#if server?.auth === 'password'}
+        <p class="hint">{s.password.useKeyFirst}</p>
+      {:else}
+        <p class="hint">{s.password.how}</p>
+        <pre class="raw selectable">{r.disablePassword}</pre>
+        <p class="hint strong">{s.password.keepOpen}</p>
+        <button class="btn btn-primary" onclick={() => sudo(r.disablePassword)}
+          >{t.common.runInTerminal}</button
+        >
+      {/if}
+    {/if}
+  </section>
+{/snippet}
+
+<ConfirmCommand
+  command={confirm ? (canRun ? confirm.plan.command : confirm.plan.terminal) : null}
+  title={confirm ? s.confirm.title[confirm.action](confirm.ip) : ''}
+  body={confirm ? (canRun ? s.confirm.body[confirm.action] : s.confirm.needsPassword) : ''}
+  action={!confirm
+    ? ''
+    : !canRun
+      ? s.confirm.openTerminal
+      : running
+        ? s.working
+        : s.action[confirm.action]}
+  tone={confirm?.action === 'block' || confirm?.action === 'ban' ? 'danger' : 'primary'}
+  note={confirmNote}
+  onterminal={canRun ? toTerminal : undefined}
+  terminalLabel={s.confirm.inTerminal}
+  busy={running}
+  onclose={() => !running && (confirm = null)}
+  onconfirm={() => void run()}
+/>
 
 <style>
-  .title {
-    flex: 1;
-    text-align: center;
-    font-weight: 600;
-  }
-
-  .tool {
-    border: 0;
-    background: none;
-    padding: 3px;
-    display: flex;
-    color: var(--fg-muted);
-  }
-
-  .body {
+  .page {
     flex: 1;
     min-height: 0;
     overflow: auto;
-    padding: 14px 18px 18px;
-    background: var(--content-bg);
+    padding: 14px 16px 18px;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 14px;
+  }
+
+  .detail {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .detail header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .detail h3 {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+    font-size: var(--text-lg);
+    font-weight: 600;
+    text-transform: none;
+    color: var(--fg);
+    overflow-wrap: anywhere;
+  }
+
+  .note,
+  .banner {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--divider-soft);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .note p,
+  .banner p {
+    margin: 0;
   }
 
   h3 {
@@ -349,6 +707,36 @@
     font-size: var(--text-sm);
   }
 
+  dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 14px;
+    margin: 0;
+    font-size: var(--text-sm);
+  }
+
+  dt {
+    color: var(--fg-muted);
+  }
+
+  dd {
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .btn.small {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
   .stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -361,6 +749,17 @@
     background: var(--card-bg);
     border: 1px solid var(--divider-soft);
     min-width: 0;
+  }
+
+  .stat {
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    transition: border-color var(--dur-fast) var(--ease-out);
+  }
+
+  .stat:hover {
+    border-color: var(--accent);
   }
 
   .tile-label {
@@ -384,18 +783,47 @@
 
   .pair {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 10px;
   }
 
   .card {
     padding: 12px 14px;
+    border: 0;
     border-radius: 10px;
     background: var(--fill-soft);
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: var(--text-sm);
   }
 
   .card.warn {
     box-shadow: inset 3px 0 0 var(--warn);
+  }
+
+  .iplink {
+    border: 0;
+    background: none;
+    padding: 0;
+    color: var(--accent);
+    font-size: inherit;
+  }
+
+  .copy {
+    border: 0;
+    background: none;
+    padding: 2px;
+    margin-left: 4px;
+    vertical-align: middle;
+    color: var(--fg-muted);
+    opacity: 0;
+  }
+
+  tr:hover .copy,
+  .copy:focus-visible {
+    opacity: 1;
   }
 
   .hint {
@@ -408,7 +836,6 @@
     font-weight: 600;
   }
 
-  .command,
   .raw {
     margin: 0 0 8px;
     padding: 8px 10px;
@@ -424,7 +851,6 @@
     width: 100%;
     border-collapse: collapse;
     font-size: var(--text-sm);
-    margin-bottom: 6px;
   }
 
   th {
@@ -446,14 +872,24 @@
     font-variant-numeric: tabular-nums;
   }
 
+  .mono {
+    font-family: var(--font-mono);
+  }
+
   .muted {
     color: var(--fg-muted);
   }
 
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+  }
+
   .tag {
-    margin-left: 6px;
     font-size: var(--text-xxs);
-    padding: 0 5px;
+    padding: 1px 6px;
     border-radius: 4px;
     background: var(--fill-soft);
     color: var(--fg-muted);
@@ -462,10 +898,6 @@
   .tag.bad {
     background: color-mix(in srgb, var(--danger) 14%, transparent);
     color: var(--danger);
-  }
-
-  .act {
-    text-align: right;
   }
 
   .link {
@@ -478,11 +910,14 @@
 
   .fw {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
   }
 
   .ok {
+    display: flex;
+    align-items: center;
+    gap: 5px;
     color: var(--ok);
   }
 
@@ -498,15 +933,5 @@
     font-size: var(--text-sm);
     cursor: default;
     margin: 6px 0;
-  }
-
-  .tool.spin :global(svg) {
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    to {
-      rotate: 360deg;
-    }
   }
 </style>
