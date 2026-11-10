@@ -93,6 +93,8 @@
     white-space: pre-wrap;
     word-break: break-all;
     user-select: text;
+    max-height: 40vh;
+    overflow: auto;
   }
 
   .term {

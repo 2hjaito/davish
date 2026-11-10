@@ -151,7 +151,7 @@ Xóa thư mục hoặc file, hoặc làm rỗng file như log để chương tr�
 
 ## An ninh
 
-Ai đăng nhập qua SSH và ai đang dò. Phía trên là số liệu 7 ngày (lần sai, user không tồn tại, số địa chỉ, đã ban, đăng nhập thành công), biểu đồ lần sai theo giờ, địa chỉ và user bị thử nhiều nhất, đánh dấu địa chỉ fail2ban đã ban hoặc ufw đã chặn. Bên dưới là ai đang đăng nhập lúc này, mọi địa chỉ kèm tên user đã thử, đăng nhập gần đây, ufw và fail2ban. Chặn một IP hoặc tắt đăng nhập mật khẩu bằng lệnh `sudo` gõ sẵn vào Terminal, có `sshd -t` trước khi reload.
+Ai đăng nhập qua SSH và ai đang dò. Phía trên là số liệu 7 ngày (lần sai, user không tồn tại, số địa chỉ, đã ban, đăng nhập thành công), biểu đồ lần sai theo giờ, địa chỉ và user bị thử nhiều nhất, đánh dấu địa chỉ fail2ban đã ban hoặc ufw đã chặn. Bên dưới là ai đang đăng nhập lúc này, mọi địa chỉ kèm tên user đã thử, đăng nhập gần đây, ufw và fail2ban. Đăng nhập sai và Đã chặn là bảng bôi đen, copy được: mỗi địa chỉ kèm số lần, user đã thử, lần thử cuối, đã chặn hay chưa, nút Chặn hoặc Bỏ chặn ngay trên dòng; tick nhiều dòng để chặn một lần. Mọi lần chặn, bỏ chặn, ban, bỏ ban đều hiện đúng lệnh trước, xác nhận là chạy (`sudo -n`), hoặc gõ sẵn vào Terminal khi sudo cần mật khẩu. Tắt đăng nhập mật khẩu qua Terminal, có `sshd -t` trước khi reload.
 
 <img src="assets/screenshots/security.jpg" alt="Lần đăng nhập sai theo giờ, địa chỉ và user bị thử nhiều nhất" width="100%">
 
