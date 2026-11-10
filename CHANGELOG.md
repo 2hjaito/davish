@@ -10,6 +10,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 - Database: nút Dò (chỉ đọc) tìm database server đang chạy và file SQLite trên server.
 - Database: khối "Davish kết nối thế nào?" giải thích lệnh chạy ở đâu và mật khẩu được giữ thế nào.
 
+### Sửa
+- Nginx: đăng nhập bằng user thường thì bật, tắt, xóa, tạo, sửa site, test và reload không còn chỉ lùi về Terminal: Davish chạy lại đúng lệnh đã xác nhận qua `sudo`, hỏi mật khẩu sudo một lần mỗi phiên như Dịch vụ (#117). `certbot` vẫn chạy trong Terminal vì có thể hỏi thêm.
+
 ## [1.12.3] - 2026-11-10
 
 ### Sửa

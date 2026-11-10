@@ -1054,6 +1054,7 @@ const en = {
           'systemctl reload nginx (with confirmation)',
           'New site: printf | tee, ln -s, nginx -t, reload; turned off again if the test fails (with confirmation)',
           'openssl x509 to read certificate expiry',
+          'When the server refuses for lack of root (enable, disable, remove, create or edit a site, test, reload): the same command again through sudo, asking for the sudo password once per session if needed. certbot stays in Terminal',
         ],
       },
       keys: {

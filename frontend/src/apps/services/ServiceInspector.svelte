@@ -17,7 +17,7 @@
   import { openFileInEditor, openLogs } from '../../lib/wm/intents.svelte'
   import { backend } from './backend'
   import { lineLevel } from '../../lib/logLevel'
-  import { sudoPrompt } from '../../lib/stores/sudoPrompt.svelte'
+  import { sudoPrompt, withSudo } from '../../lib/stores/sudoPrompt.svelte'
   import ConfirmCommand from '../../lib/ui/ConfirmCommand.svelte'
   import NeedsRoot from '../../lib/ui/NeedsRoot.svelte'
   import { canDo, health, shortName } from './units'
@@ -112,30 +112,17 @@
     }
   }
 
-  /**
-   * Runs act, and again once the user gives the sudo password when the
-   * server asks for it (ADR 0018). Resolves false when they cancel.
-   */
-  async function withSudo(sudo: string, act: () => Promise<void>): Promise<boolean> {
-    try {
-      await act()
-      return true
-    } catch (e) {
-      const code = toUserError(e).code
-      if (code !== 'SUDO_PASSWORD_REQUIRED' && code !== 'SUDO_PASSWORD_WRONG') throw e
-      if (!(await sudoPrompt.ask(serverID, sudo))) return false
-      await act()
-      return true
-    }
-  }
-
   async function remove(plan: RemovePlan) {
     removing = null
     removeBusy = true
     needsRoot = ''
     flash = null
     try {
-      if (!(await withSudo(plan.sudo, () => backend.remove(serverID, plan.unit, plan.command))))
+      if (
+        !(await withSudo(serverID, plan.sudo, () =>
+          backend.remove(serverID, plan.unit, plan.command),
+        ))
+      )
         return
       flash = { text: t.services.removed[plan.mode](shortName(plan.unit)), ok: true }
     } catch (e) {
@@ -155,7 +142,8 @@
     flash = null
     const name = plan.unit
     try {
-      if (!(await withSudo(plan.sudo, () => backend.act(serverID, name, plan.action)))) return
+      if (!(await withSudo(serverID, plan.sudo, () => backend.act(serverID, name, plan.action))))
+        return
       if (unit.name === name)
         flash = { text: t.services.done[plan.action](shortName(name)), ok: true }
     } catch (e) {

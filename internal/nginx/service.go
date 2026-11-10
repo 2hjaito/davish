@@ -69,6 +69,7 @@ type Service struct {
 	run   Runner
 	conns Conns
 	certs *certWatch
+	root  Root
 }
 
 // New creates the service.

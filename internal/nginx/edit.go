@@ -211,5 +211,5 @@ func (s *Service) Edit(ctx context.Context, serverID, sitePath string, e SiteEdi
 	if err != nil {
 		return CreateResult{}, err
 	}
-	return createResult(string(res.Stderr), res.Exit, plan.Sudo)
+	return s.created(ctx, serverID, command, res, plan.Sudo)
 }

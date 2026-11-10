@@ -10,6 +10,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 - Database: Find (read-only) looks for the database servers running and the SQLite files on the server.
 - Database: "How does Davish connect?" explains where commands run and how passwords are kept.
 
+### Fixed
+- Nginx: logged in as a user who is not root, enabling, disabling, removing, creating and editing a site, testing and reloading no longer only fall back to Terminal: Davish runs the confirmed command again through `sudo`, asking for the sudo password once per session as Services does (#117). `certbot` stays in Terminal, since it may ask questions.
+
 ## [1.12.3] - 2026-11-10
 
 ### Fixed

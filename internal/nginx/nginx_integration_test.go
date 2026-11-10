@@ -12,6 +12,7 @@ import (
 	"davish/internal/audit"
 	"davish/internal/conn"
 	"davish/internal/nginx"
+	"davish/internal/sudo"
 	"davish/internal/testsshd"
 )
 
@@ -174,4 +175,43 @@ func TestPlanRemove(t *testing.T) {
 	if err := s.Remove(ctx, id, "/etc/nginx/sites-available/davish-site", false, "rm -- /etc/nginx/sites-available/davish-site"); err == nil {
 		t.Error("a command other than the plan's was run")
 	}
+}
+
+// An admin whose sudo asks for a password (#117): sites-enabled and the
+// reload are root's, so both go through sudo once the password is given.
+func TestSudoerTogglesAndReloadsThroughSudo(t *testing.T) {
+	ctx := context.Background()
+	_, m, id := setup(t)
+	am, aid := testsshd.ConnectAs(t, testsshd.Sudoer)
+	run := audit.NewRunner(am, audit.New(discard{}))
+	k := sudo.New(run)
+	as := nginx.New(run, am, discard{})
+	as.UseRoot(k)
+
+	plan, err := as.PlanToggle(ctx, aid, "davish-site", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := as.Toggle(ctx, aid, "davish-site", false, plan.Command); codeOf(err) != apperr.SudoPasswordRequired {
+		t.Fatalf("before the password: %v", err)
+	}
+	if err := k.SetPassword(ctx, aid, []byte(testsshd.SudoPassword)); err != nil {
+		t.Fatal(err)
+	}
+	if err := as.Toggle(ctx, aid, "davish-site", false, plan.Command); err != nil {
+		t.Fatalf("disable through sudo: %v", err)
+	}
+	r, err := as.Reload(ctx, aid)
+	if err != nil || !r.Reloaded || r.NeedsRoot {
+		t.Fatalf("reload through sudo = %+v, %v", r, err)
+	}
+	eventually(t, m, id, "404")
+}
+
+func codeOf(err error) apperr.Code {
+	var e *apperr.Error
+	if errors.As(err, &e) {
+		return e.Code
+	}
+	return ""
 }

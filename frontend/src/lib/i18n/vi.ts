@@ -1032,6 +1032,7 @@ const vi = {
           'systemctl reload nginx (có xác nhận)',
           'Site mới: printf | tee, ln -s, nginx -t, reload; kiểm tra lỗi thì tắt lại (có xác nhận)',
           'openssl x509 để đọc hạn chứng chỉ',
+          'Server từ chối vì thiếu quyền (bật/tắt, xóa, tạo, sửa site, test, reload): chạy lại đúng lệnh đó qua sudo, hỏi mật khẩu sudo một lần mỗi phiên nếu cần. certbot vẫn qua Terminal',
         ],
       },
       keys: {

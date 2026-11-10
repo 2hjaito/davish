@@ -1,5 +1,6 @@
 <script lang="ts">
   import { toUserError } from '../../lib/api/errors'
+  import { withSudo } from '../../lib/stores/sudoPrompt.svelte'
   import type { CreateResult, EditPlan, NginxSite, SiteEdit } from '../../lib/api/nginx'
   import { t } from '../../lib/i18n'
   import Dialog from '../../lib/ui/Dialog.svelte'
@@ -73,8 +74,16 @@
     busy = true
     error = ''
     try {
-      result = await backend.edit(serverID, edit, plan)
-      if (result.created) {
+      const p = plan
+      if (
+        !(await withSudo(
+          serverID,
+          p.sudo,
+          async () => (result = await backend.edit(serverID, edit, p)),
+        ))
+      )
+        return
+      if (result?.created) {
         ondone(site.name)
         onclose()
       } else step = 'result'

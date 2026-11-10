@@ -1024,6 +1024,7 @@ const zh = {
           'systemctl reload nginx（需确认）',
           '新建站点：printf | tee、ln -s、nginx -t、reload；测试失败则重新停用（需确认）',
           '用 openssl x509 读取证书到期时间',
+          '服务器因权限不足拒绝时（启用、停用、删除、新建或编辑站点、测试、重载）：通过 sudo 再次运行同一命令，必要时每个会话询问一次 sudo 密码。certbot 仍在终端中运行',
         ],
       },
       keys: {
