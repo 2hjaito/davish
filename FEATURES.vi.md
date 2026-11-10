@@ -155,7 +155,7 @@ Nhập server từ `~/.ssh/config` một lần, kèm key và `ProxyJump`; Davish
 
 ## Spotlight & Launchpad
 
-`⌘K` (hoặc kính lúp trên menu bar) để mở app, dịch vụ, container, thư mục, một `/đường/dẫn`, hoặc `> một lệnh` gõ sẵn vào Terminal. Launchpad (`⌘⇧A`) hiện mọi app và cho ghim vào Dock.
+`⌘K` (hoặc kính lúp trên menu bar) để mở app, dịch vụ, container, thư mục, một `/đường/dẫn`, hoặc `> một lệnh` gõ sẵn vào Terminal. Launchpad (`⌘⇧A`) hiện mọi app chia theo nhóm (tệp & terminal, giám sát, web & container, bảo mật & truy cập, phát triển, hệ thống), mỗi nhóm một tab, ô tìm kiếm tìm trên mọi nhóm; `+` ghim app vào Dock, `−` bỏ ra, và một nút đưa Dock về như lúc mới cài.
 
 <table><tr>
   <td><img src="assets/screenshots/spotlight.jpg" alt="Spotlight"></td>

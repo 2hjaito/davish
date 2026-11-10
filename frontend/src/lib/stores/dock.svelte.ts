@@ -14,6 +14,16 @@ class DockPins {
     this.ids = togglePin(this.ids, id)
     save('dock:pinned', this.ids)
   }
+
+  /** True while the dock holds the first-run pins, in their order. */
+  get isDefault(): boolean {
+    return this.ids.join() === DEFAULT_PINS.join()
+  }
+
+  reset() {
+    this.ids = [...DEFAULT_PINS]
+    save('dock:pinned', this.ids)
+  }
 }
 
 export const dockPins = new DockPins()

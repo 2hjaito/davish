@@ -6,6 +6,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ### Thêm
 - An ninh: tổng quan 7 ngày ở đầu app: số lần đăng nhập sai, user không tồn tại, số địa chỉ, đã ban, đăng nhập thành công; biểu đồ lần sai theo giờ (rê chuột hoặc dùng phím ←/→ để xem từng giờ); địa chỉ và user bị thử nhiều nhất; các phiên đang mở (`who`).
+- Launchpad chia app theo nhóm (Tệp & terminal, Giám sát, Web & container, Bảo mật & truy cập, Phát triển, Hệ thống) với tab cho từng nhóm; phím mũi tên đi qua các nhóm; app đã ghim luôn có dấu trên icon; nút "Khôi phục Dock mặc định" (bấm hai lần).
 
 ## [1.10.1] - 2026-11-09
 

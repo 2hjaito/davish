@@ -6,6 +6,7 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ### Added
 - Security: a 7-day overview at the top of the app: failed logins, unknown users, addresses, banned, successful logins; failed logins per hour (hover or use ←/→ to read each hour); the addresses and user names tried most; open sessions (`who`).
+- Launchpad groups apps (Files & terminal, Monitoring, Web & containers, Security & access, Development, System) with a tab per group; the arrow keys move across groups; pinned apps always show their mark; a "Restore the default Dock" button (click twice).
 
 ## [1.10.1] - 2026-11-09
 
