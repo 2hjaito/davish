@@ -253,7 +253,7 @@ const vi = {
       liftMany: (n: number) => `Bỏ chặn ${n} địa chỉ?`,
       bodyMany: 'Davish sẽ chạy lần lượt từng lệnh dưới đây, mỗi dòng một địa chỉ:',
       openTerminal: 'Mở Terminal',
-      inTerminal: 'Mở trong Terminal thay vì chạy',
+      inTerminal: 'Chạy trong Terminal',
     },
     done: {
       block: (ip: string) => `Đã chặn ${ip}.`,

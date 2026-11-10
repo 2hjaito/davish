@@ -42,23 +42,16 @@
 <!-- A destructive action shows the exact command first (docs/SECURITY.md). -->
 <Dialog open={command !== null} {title} width={480} {onclose}>
   <p>{body}</p>
-  <div class="cmd">
-    <pre class="command">{command}</pre>
-    {#if onterminal}
-      <button
-        type="button"
-        class="term"
-        aria-label={terminalLabel}
-        title={terminalLabel}
-        onclick={onterminal}
-      >
-        <Icon name="terminal" size={14} />
-      </button>
-    {/if}
-  </div>
+  <pre class="command">{command}</pre>
   {#if note}<p class="note">{note}</p>{/if}
 
   {#snippet footer()}
+    {#if onterminal}
+      <button type="button" class="btn" disabled={busy} onclick={onterminal}>
+        <Icon name="terminal" size={13} />
+        {terminalLabel}
+      </button>
+    {/if}
     <span class="spacer"></span>
     <!-- Cancelling is the safe choice, so it has the focus. -->
     <!-- svelte-ignore a11y_autofocus -->
@@ -75,15 +68,7 @@
     line-height: 1.45;
   }
 
-  .cmd {
-    display: flex;
-    align-items: flex-start;
-    gap: 6px;
-  }
-
   .command {
-    flex: 1;
-    min-width: 0;
     margin: 0;
     padding: 8px 10px;
     border-radius: var(--control-radius);
@@ -91,24 +76,11 @@
     font-family: var(--font-mono);
     font-size: var(--text-sm);
     white-space: pre-wrap;
-    word-break: break-all;
+    /* Wrap at spaces, so an address or a path is cut only when it must. */
+    overflow-wrap: anywhere;
     user-select: text;
     max-height: 40vh;
     overflow: auto;
-  }
-
-  .term {
-    flex-shrink: 0;
-    display: flex;
-    padding: 7px;
-    border: 0;
-    border-radius: var(--control-radius);
-    background: var(--fill-soft);
-    color: var(--fg-muted);
-  }
-
-  .term:hover {
-    color: var(--fg);
   }
 
   .note {
