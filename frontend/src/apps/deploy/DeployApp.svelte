@@ -9,6 +9,7 @@
   import Empty from '../../lib/ui/Empty.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import { openTerminalAt } from '../../lib/wm/intents.svelte'
+  import TitleBar from '../../lib/wm/TitleBar.svelte'
   import { backend as nginx } from '../nginx/backend'
   import type { AppProps } from '../types'
   import { mockPlan } from './mock'
@@ -126,6 +127,10 @@
     if (plan) openTerminalAt(win.serverID, undefined, plan.uninstall)
   }
 </script>
+
+<TitleBar>
+  <span class="title">{win.title}</span>
+</TitleBar>
 
 {#if !connected}
   <Empty icon="server" title={w.offline} />
@@ -329,11 +334,18 @@
 {/if}
 
 <style>
+  .title {
+    flex: 1;
+    text-align: center;
+    font-weight: 600;
+  }
+
   .wizard {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    flex: 1;
     min-height: 0;
+    background: var(--content-bg);
   }
 
   .steps {
