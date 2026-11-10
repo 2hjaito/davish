@@ -4,6 +4,19 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.12.0] - 2026-11-10
+
+### Thêm
+- An ninh: chặn, bỏ chặn một IP bằng ufw, ban, bỏ ban bằng fail2ban ngay trong app. Hộp thoại hiện đúng lệnh sẽ chạy, bấm xác nhận là chạy luôn (`sudo -n`, khi sudo không cần mật khẩu); nút Terminal nhỏ cạnh lệnh để gõ sẵn vào Terminal thay vì chạy. Sudo cần mật khẩu thì mở Terminal như cũ. Cảnh báo khi IP đang có phiên đăng nhập mở (có thể là chính bạn) hoặc khi ufw đang tắt.
+- An ninh: copy IP từ khung chi tiết hoặc từ các bảng; IP trong bảng bôi đen được.
+
+### Đổi
+- An ninh: bố cục mục bên trái, dữ liệu bên phải (Tổng quan, Đăng nhập sai, Đã chặn, User bị thử, Đăng nhập thành công, Phiên đang mở, Tường lửa, Đăng nhập mật khẩu), có ô lọc theo IP hoặc user. Bấm vào ô thống kê thì mở danh sách tương ứng, như "Đã chặn" mở mọi địa chỉ bị chặn kèm chặn bằng ufw hay fail2ban.
+- An ninh: đọc trạng thái ufw và fail2ban bằng `sudo -n` khi được, nên danh sách đã chặn hiện cả khi không đăng nhập bằng root.
+
+### Sửa
+- Cửa sổ Database và Triển khai app thiếu thanh tiêu đề (không có nút đóng, thu nhỏ, phóng to, không kéo được), nền trong suốt; các nút Dump, Restore, Delete của Database hiện như nút trình duyệt mặc định.
+
 ## [1.11.0] - 2026-11-10
 
 ### Thêm

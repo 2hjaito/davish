@@ -4,6 +4,19 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.12.0] - 2026-11-10
+
+### Added
+- Security: block or unblock an IP with ufw, ban or unban it with fail2ban, right in the app. The dialog shows the exact command and runs it once you confirm (`sudo -n`, when sudo needs no password); a small Terminal button beside the command types it into Terminal instead. When sudo needs a password, Terminal opens as before. A warning when the address has an open login session (it may be you) or ufw is off.
+- Security: copy an IP from its detail pane or from the tables; IPs in tables can be selected.
+
+### Changed
+- Security: sections on the left, data on the right (Overview, Failed logins, Blocked, Users tried, Successful logins, Open sessions, Firewall, Password login), with a filter by IP or user. Clicking an overview tile opens its section, such as Blocked listing every blocked address and whether ufw or fail2ban blocks it.
+- Security: ufw and fail2ban status is read through `sudo -n` when it can be, so blocked addresses show without logging in as root.
+
+### Fixed
+- The Database and Deploy windows had no title bar (no close, minimize or maximize buttons, nothing to drag them by) and a see-through background; Database's Dump, Restore and Delete looked like plain browser buttons.
+
 ## [1.11.0] - 2026-11-10
 
 ### Added
