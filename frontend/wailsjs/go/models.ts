@@ -414,6 +414,75 @@ export namespace database {
 		    return a;
 		}
 	}
+	export class SQLiteFile {
+	    path: string;
+	    size: number;
+	    root: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SQLiteFile(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.size = source["size"];
+	        this.root = source["root"];
+	    }
+	}
+	export class Running {
+	    kind: string;
+	    port: number;
+	    bind?: string;
+	    auth?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Running(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.port = source["port"];
+	        this.bind = source["bind"];
+	        this.auth = source["auth"];
+	    }
+	}
+	export class Found {
+	    running: Running[];
+	    sqlite: SQLiteFile[];
+	    sqlite3: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Found(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.running = this.convertValues(source["running"], Running);
+	        this.sqlite = this.convertValues(source["sqlite"], SQLiteFile);
+	        this.sqlite3 = source["sqlite3"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
 
 }
 

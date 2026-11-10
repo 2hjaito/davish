@@ -131,3 +131,20 @@ func TestMongoDumpRestore(t *testing.T) {
 		t.Fatalf("wrong password: %v", err)
 	}
 }
+
+func TestFind(t *testing.T) {
+	m, id := testsshd.Connect(t)
+	s := database.New(audit.NewRunner(m, audit.New(discard{})))
+	f, err := s.Find(context.Background(), id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !f.SQLite3 || len(f.Running) != 1 || f.Running[0] != (database.Running{Kind: database.Mongo, Port: 27017, Bind: "127.0.0.1", Auth: "on"}) {
+		t.Fatalf("found %+v", f)
+	}
+	// tester cannot read /var/lib/davish-private and has no sudo; notes.db
+	// is not SQLite.
+	if len(f.SQLite) != 1 || f.SQLite[0].Path != "/srv/davish-app/app.db" || f.SQLite[0].Root || f.SQLite[0].Size == 0 {
+		t.Fatalf("sqlite %+v", f.SQLite)
+	}
+}

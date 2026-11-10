@@ -56,6 +56,8 @@ export function DatabaseDump(arg1:string,arg2:string,arg3:string):Promise<string
 
 export function DatabaseDumps(arg1:string,arg2:string,arg3:string):Promise<Array<string>>;
 
+export function DatabaseFind(arg1:string):Promise<database.Found>;
+
 export function DatabaseList(arg1:string):Promise<Array<database.Engine>>;
 
 export function DatabaseMongoConnect(arg1:string,arg2:string):Promise<void>;

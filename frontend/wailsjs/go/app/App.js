@@ -66,6 +66,10 @@ export function DatabaseDumps(arg1, arg2, arg3) {
   return window['go']['app']['App']['DatabaseDumps'](arg1, arg2, arg3);
 }
 
+export function DatabaseFind(arg1) {
+  return window['go']['app']['App']['DatabaseFind'](arg1);
+}
+
 export function DatabaseList(arg1) {
   return window['go']['app']['App']['DatabaseList'](arg1);
 }

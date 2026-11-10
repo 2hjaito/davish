@@ -74,3 +74,9 @@ func (a *App) DatabaseMongoConnect(serverID, uri string) error {
 func (a *App) DatabaseMongoForget(serverID string) error {
 	return a.databases.ForgetMongo(serverID)
 }
+
+// DatabaseFind looks for database servers and SQLite files on the server,
+// changing nothing.
+func (a *App) DatabaseFind(serverID string) (database.Found, error) {
+	return a.databases.Find(a.ctx, serverID)
+}
