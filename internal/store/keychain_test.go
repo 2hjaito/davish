@@ -57,3 +57,20 @@ func TestKeychainErrorsHideSecret(t *testing.T) {
 		t.Errorf("Has err = %v; want KEYCHAIN_UNAVAILABLE", err)
 	}
 }
+
+// Removing a server, or the app lock's reset, also removes its MongoDB login.
+func TestDeleteAllRemovesDatabaseLogin(t *testing.T) {
+	s := NewSecrets(newFakeKeyring())
+	if err := s.Set("srv", SecretMongo, "mongodb://u:p@127.0.0.1/admin"); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Delete("other", SecretMongo); err != nil {
+		t.Fatalf("missing secret: %v", err)
+	}
+	if err := s.DeleteAll("srv"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.Get("srv", SecretMongo); !errors.Is(err, ErrNoSecret) {
+		t.Fatalf("after DeleteAll: %v", err)
+	}
+}

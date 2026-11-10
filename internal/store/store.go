@@ -174,8 +174,8 @@ func (s *Store) Delete(ctx context.Context, id string) error {
 	return s.secrets.DeleteAll(id)
 }
 
-// ForgetSecrets removes the passwords and passphrases of every saved
-// server but keeps the servers: the app lock's reset (ADR 0007).
+// ForgetSecrets removes the passwords, passphrases and database logins of
+// every saved server but keeps the servers: the app lock's reset (ADR 0007).
 func (s *Store) ForgetSecrets(ctx context.Context) error {
 	servers, err := s.Servers(ctx)
 	if err != nil {

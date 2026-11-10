@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"davish/internal/apperr"
+	"davish/internal/store"
 )
 
 // Mongo is MongoDB, reached with mongosh on the server (ADR 0017).
@@ -25,26 +26,71 @@ const mongoLine = "mongosh --quiet --nodb --file /dev/stdin"
 // mongoSystem are MongoDB's own databases, left out as MySQL's are.
 var mongoSystem = map[string]bool{"admin": true, "config": true, "local": true}
 
-// SetMongoURI sets the connection string for the server's MongoDB; an
-// empty uri goes back to connecting without a login. It is kept in memory
-// only; the keychain holds it between runs.
+// SetMongoURI sets the connection string for the server's MongoDB in
+// memory; an empty uri goes back to connecting without a login.
 func (s *Service) SetMongoURI(serverID, uri string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if uri == "" {
-		delete(s.mongo, serverID)
-		return
-	}
 	s.mongo[serverID] = uri
 }
 
+// mongoURI is the connection string to use, read from the keychain once.
 func (s *Service) mongoURI(serverID string) string {
 	s.mu.Lock()
-	defer s.mu.Unlock()
-	if u, ok := s.mongo[serverID]; ok {
-		return u
+	u, ok := s.mongo[serverID]
+	l := s.logins
+	s.mu.Unlock()
+	if !ok && l != nil {
+		// A keychain that cannot be read counts as no login: MongoDB then
+		// asks for one again.
+		u, _ = l.Get(serverID, store.SecretMongo)
+		s.SetMongoURI(serverID, u)
 	}
-	return defaultMongoURI
+	if u == "" {
+		return defaultMongoURI
+	}
+	return u
+}
+
+// ConnectMongo logs in with uri and, once it works, keeps it in the
+// keychain for the next runs.
+func (s *Service) ConnectMongo(ctx context.Context, serverID, uri string) error {
+	if err := s.TryMongo(ctx, serverID, uri); err != nil {
+		return err
+	}
+	s.mu.Lock()
+	l := s.logins
+	s.mu.Unlock()
+	if l != nil {
+		if err := l.Set(serverID, store.SecretMongo, uri); err != nil {
+			return err
+		}
+	}
+	s.SetMongoURI(serverID, uri)
+	return nil
+}
+
+// ForgetMongo removes the server's MongoDB login from the keychain and
+// from memory.
+func (s *Service) ForgetMongo(serverID string) error {
+	s.mu.Lock()
+	l := s.logins
+	s.mu.Unlock()
+	if l != nil {
+		if err := l.Delete(serverID, store.SecretMongo); err != nil {
+			return err
+		}
+	}
+	s.SetMongoURI(serverID, "")
+	return nil
+}
+
+// ForgetLogins drops every login kept in memory, after the keychain was
+// cleared (the app lock's reset).
+func (s *Service) ForgetLogins() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.mongo = map[string]string{}
 }
 
 var mongoScheme = regexp.MustCompile(`^mongodb(\+srv)?://[^\s]+$`)

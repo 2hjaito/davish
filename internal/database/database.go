@@ -18,6 +18,7 @@ import (
 	"davish/internal/apperr"
 	"davish/internal/audit"
 	"davish/internal/shellx"
+	"davish/internal/store"
 )
 
 // app is the name commands are recorded under in the audit log.
@@ -40,9 +41,25 @@ type Service struct {
 	mu  sync.Mutex
 	// access is the prefix that worked last, per server and engine.
 	access map[string][]string
-	// mongo is each server's MongoDB connection string, when it needs a
-	// login.
-	mongo map[string]string
+	// mongo is each server's MongoDB connection string as read from
+	// logins; "" when it has none.
+	mongo  map[string]string
+	logins Logins
+}
+
+// Logins keeps MongoDB connection strings between runs: the OS keychain
+// (store.Secrets).
+type Logins interface {
+	Get(serverID string, kind store.SecretKind) (string, error)
+	Set(serverID string, kind store.SecretKind, value string) error
+	Delete(serverID string, kind store.SecretKind) error
+}
+
+// UseLogins keeps connection strings in l.
+func (s *Service) UseLogins(l Logins) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.logins = l
 }
 
 // New creates the service.

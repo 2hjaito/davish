@@ -2,7 +2,7 @@ package app
 
 import "davish/internal/database"
 
-// DatabaseList returns the MariaDB/MySQL and PostgreSQL databases.
+// DatabaseList returns the MariaDB/MySQL, PostgreSQL and MongoDB databases.
 func (a *App) DatabaseList(serverID string) ([]database.Engine, error) {
 	return a.databases.List(a.ctx, serverID)
 }
@@ -59,4 +59,18 @@ func (a *App) DatabaseRestore(serverID, kind, db, file, command string) error {
 		return err
 	}
 	return a.databases.Restore(a.ctx, serverID, kind, db, file, command)
+}
+
+// DatabaseMongoConnect logs in to the server's MongoDB with a connection
+// string and keeps it in the keychain once it works.
+func (a *App) DatabaseMongoConnect(serverID, uri string) error {
+	if err := a.lock.Check(); err != nil {
+		return err
+	}
+	return a.databases.ConnectMongo(a.ctx, serverID, uri)
+}
+
+// DatabaseMongoForget removes the server's MongoDB login from the keychain.
+func (a *App) DatabaseMongoForget(serverID string) error {
+	return a.databases.ForgetMongo(serverID)
 }

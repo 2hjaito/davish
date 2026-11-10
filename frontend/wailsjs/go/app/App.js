@@ -70,6 +70,14 @@ export function DatabaseList(arg1) {
   return window['go']['app']['App']['DatabaseList'](arg1);
 }
 
+export function DatabaseMongoConnect(arg1, arg2) {
+  return window['go']['app']['App']['DatabaseMongoConnect'](arg1, arg2);
+}
+
+export function DatabaseMongoForget(arg1) {
+  return window['go']['app']['App']['DatabaseMongoForget'](arg1);
+}
+
 export function DatabaseRestore(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['app']['App']['DatabaseRestore'](arg1, arg2, arg3, arg4, arg5);
 }

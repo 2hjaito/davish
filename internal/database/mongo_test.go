@@ -7,6 +7,7 @@ import (
 
 	"davish/internal/apperr"
 	"davish/internal/audit"
+	"davish/internal/store"
 )
 
 func TestMaskMongoURI(t *testing.T) {
@@ -113,5 +114,77 @@ func TestMongoStatements(t *testing.T) {
 	}
 	if _, err := DropSQL(Mongo, `x"); db.shutdownServer(); ("`); err == nil {
 		t.Error("unsafe name accepted")
+	}
+}
+
+type fakeLogins struct {
+	m     map[string]string
+	reads int
+}
+
+func (f *fakeLogins) Get(id string, kind store.SecretKind) (string, error) {
+	f.reads++
+	v, ok := f.m[id+":"+string(kind)]
+	if !ok {
+		return "", store.ErrNoSecret
+	}
+	return v, nil
+}
+
+func (f *fakeLogins) Set(id string, kind store.SecretKind, v string) error {
+	f.m[id+":"+string(kind)] = v
+	return nil
+}
+
+func (f *fakeLogins) Delete(id string, kind store.SecretKind) error {
+	delete(f.m, id+":"+string(kind))
+	return nil
+}
+
+func TestMongoLoginKeptOnlyOnceItWorks(t *testing.T) {
+	ok := false
+	f := &fakeRun{reply: func(string) audit.Result {
+		if ok {
+			return audit.Result{}
+		}
+		return audit.Result{Exit: 1, Stderr: []byte("MongoServerError: Authentication failed.")}
+	}}
+	l := &fakeLogins{m: map[string]string{}}
+	s := New(f)
+	s.UseLogins(l)
+	ctx := context.Background()
+	const uri = "mongodb://admin:pw@127.0.0.1/admin" //nolint:gosec // a made-up login
+
+	if err := s.ConnectMongo(ctx, "srv", uri); codeOf(err) != apperr.DBAuthFailed {
+		t.Fatalf("wrong login: %v", err)
+	}
+	if len(l.m) != 0 {
+		t.Fatalf("kept a login that failed: %v", l.m)
+	}
+	ok = true
+	if err := s.ConnectMongo(ctx, "srv", uri); err != nil {
+		t.Fatal(err)
+	}
+	if l.m["srv:mongo"] != uri {
+		t.Fatalf("keychain = %v", l.m)
+	}
+
+	// A new run reads the keychain once.
+	s2 := New(f)
+	s2.UseLogins(l)
+	for range 3 {
+		if got := s2.mongoURI("srv"); got != uri {
+			t.Fatalf("uri = %q", got)
+		}
+	}
+	if l.reads != 1 {
+		t.Errorf("keychain read %d times", l.reads)
+	}
+
+	if err := s2.ForgetMongo("srv"); err != nil {
+		t.Fatal(err)
+	}
+	if len(l.m) != 0 || s2.mongoURI("srv") != defaultMongoURI {
+		t.Errorf("after forget: keychain %v, uri %q", l.m, s2.mongoURI("srv"))
 	}
 }

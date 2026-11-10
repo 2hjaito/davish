@@ -98,7 +98,10 @@ func New(version string) (*App, error) {
 	a.secrets = store.NewSecrets(store.OSKeyring{})
 	a.store = store.New(dir, a.secrets)
 	a.lock = lock.New(store.OSKeyring{}, lock.NewBiometric(), emitter{a}, log,
-		func() error { return a.store.ForgetSecrets(context.Background()) }, lock.Options{})
+		func() error {
+			a.databases.ForgetLogins()
+			return a.store.ForgetSecrets(context.Background())
+		}, lock.Options{})
 	a.settings = store.NewSettings(dir, log)
 	hostKeys := conn.NewHostKeys(filepath.Join(dir, "known_hosts"))
 	a.conns = conn.NewManager(a.store, a.secrets, hostKeys, emitter{a}, log, conn.Options{})
@@ -117,6 +120,7 @@ func New(version string) (*App, error) {
 	a.git = git.New(runner)
 	a.shortcuts = shortcut.New(a.files, a.audit)
 	a.databases = database.New(runner)
+	a.databases.UseLogins(a.secrets)
 	// The app replaced by the last update is no longer needed.
 	update.Cleanup(goruntime.GOOS, os.Executable)
 	a.updates = update.New(version, emitter{a}, log, update.Options{})
