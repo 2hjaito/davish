@@ -4,6 +4,14 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.12.1] - 2026-11-10
+
+### Thêm
+- An ninh: tick nhiều địa chỉ để chặn (hoặc bỏ chặn) một lần. Một hộp thoại liệt kê đúng lệnh cho từng địa chỉ; chạy lần lượt, địa chỉ nào lỗi hoặc cần mật khẩu sudo thì gõ sẵn vào Terminal.
+
+### Đổi
+- An ninh: Đăng nhập sai và Đã chặn thành bảng full chiều ngang (IP, số lần, user đã thử, lần thử cuối, trạng thái, Chặn/Bỏ chặn ngay trên dòng), chữ bôi đen copy được. Bấm một dòng thì chi tiết mở bên dưới thay vì khung bên phải.
+
 ## [1.12.0] - 2026-11-10
 
 ### Thêm
