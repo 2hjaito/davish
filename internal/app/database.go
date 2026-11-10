@@ -80,3 +80,22 @@ func (a *App) DatabaseMongoForget(serverID string) error {
 func (a *App) DatabaseFind(serverID string) (database.Found, error) {
 	return a.databases.Find(a.ctx, serverID)
 }
+
+// DatabaseSQLite reads the tables of a SQLite file on the server.
+func (a *App) DatabaseSQLite(serverID, file string) (database.SQLiteInfo, error) {
+	return a.databases.InspectSQLite(a.ctx, serverID, file)
+}
+
+// DatabaseSQLiteBackup copies a SQLite file to ~/db-backups.
+func (a *App) DatabaseSQLiteBackup(serverID, file string) (string, error) {
+	if err := a.lock.Check(); err != nil {
+		return "", err
+	}
+	return a.databases.BackupSQLite(a.ctx, serverID, file)
+}
+
+// DatabaseSQLiteRestoreLine is the line that puts a backup back, for a
+// terminal.
+func (a *App) DatabaseSQLiteRestoreLine(file, backup string) (string, error) {
+	return database.SQLiteRestoreLine(file, backup)
+}

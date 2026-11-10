@@ -83,8 +83,11 @@ func (s *Service) Dumps(ctx context.Context, serverID, kind, db string) ([]strin
 		return nil, apperr.New(apperr.InvalidInput, "not a database name")
 	}
 	ext := ".sql.gz"
-	if kind == Mongo {
+	switch kind {
+	case Mongo:
 		ext = mongoDumpExt
+	case SQLite:
+		ext = sqliteDumpExt
 	}
 	line := `ls -1t "$HOME/db-backups"/` + shellx.Quote(db) + `-*` + ext + ` 2>/dev/null; true`
 	res, err := s.run.RunInput(ctx, serverID, app, line, nil)

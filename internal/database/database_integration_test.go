@@ -148,3 +148,41 @@ func TestFind(t *testing.T) {
 		t.Fatalf("sqlite %+v", f.SQLite)
 	}
 }
+
+func TestSQLite(t *testing.T) {
+	ctx := context.Background()
+	m, id := testsshd.Connect(t)
+	s := database.New(audit.NewRunner(m, audit.New(discard{})))
+
+	info, err := s.InspectSQLite(ctx, id, "/srv/davish-app/app.db")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Root || info.Journal != "delete" || info.Size == 0 || len(info.Tables) != 1 ||
+		info.Tables[0] != (database.SQLiteTable{Name: "users", Rows: 2}) {
+		t.Fatalf("info = %+v", info)
+	}
+	var ae *apperr.Error
+	for file, code := range map[string]apperr.Code{
+		"/srv/davish-app/notes.db":               apperr.InvalidInput,
+		"/var/lib/davish-private/private.sqlite": apperr.CmdNeedsRoot,
+	} {
+		if _, err := s.InspectSQLite(ctx, id, file); !errors.As(err, &ae) || ae.Code != code {
+			t.Errorf("%s: %v, want %s", file, err, code)
+		}
+	}
+
+	file, err := s.BackupSQLite(ctx, id, "/srv/davish-app/app.db")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dumps, err := s.Dumps(ctx, id, database.SQLite, info.Backup)
+	if err != nil || len(dumps) == 0 || dumps[0] != file {
+		t.Fatalf("dumps = %v, %v (want %s first)", dumps, err, file)
+	}
+	res, err := audit.NewRunner(m, audit.New(discard{})).RunInput(ctx, id, "test",
+		"gzip -dc -- "+file+" | head -c 15", nil)
+	if err != nil || string(res.Stdout) != "SQLite format 3" {
+		t.Fatalf("backup starts with %q, %v", res.Stdout, err)
+	}
+}

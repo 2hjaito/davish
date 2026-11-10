@@ -68,6 +68,12 @@ export function DatabaseRestore(arg1:string,arg2:string,arg3:string,arg4:string,
 
 export function DatabaseRestoreCommand(arg1:string,arg2:string,arg3:string,arg4:string):Promise<string>;
 
+export function DatabaseSQLite(arg1:string,arg2:string):Promise<database.SQLiteInfo>;
+
+export function DatabaseSQLiteBackup(arg1:string,arg2:string):Promise<string>;
+
+export function DatabaseSQLiteRestoreLine(arg1:string,arg2:string):Promise<string>;
+
 export function DeleteServer(arg1:string):Promise<void>;
 
 export function DeployPlan(arg1:deploy.Spec):Promise<deploy.Plan>;

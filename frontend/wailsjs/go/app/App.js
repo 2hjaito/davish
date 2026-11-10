@@ -90,6 +90,18 @@ export function DatabaseRestoreCommand(arg1, arg2, arg3, arg4) {
   return window['go']['app']['App']['DatabaseRestoreCommand'](arg1, arg2, arg3, arg4);
 }
 
+export function DatabaseSQLite(arg1, arg2) {
+  return window['go']['app']['App']['DatabaseSQLite'](arg1, arg2);
+}
+
+export function DatabaseSQLiteBackup(arg1, arg2) {
+  return window['go']['app']['App']['DatabaseSQLiteBackup'](arg1, arg2);
+}
+
+export function DatabaseSQLiteRestoreLine(arg1, arg2) {
+  return window['go']['app']['App']['DatabaseSQLiteRestoreLine'](arg1, arg2);
+}
+
 export function DeleteServer(arg1) {
   return window['go']['app']['App']['DeleteServer'](arg1);
 }
