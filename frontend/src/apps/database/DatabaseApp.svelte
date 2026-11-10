@@ -142,7 +142,7 @@
     restoreCmd = ''
     restoreTyped = ''
     try {
-      const dumps = await backend.dumps(win.serverID, name)
+      const dumps = await backend.dumps(win.serverID, kind, name)
       restoring = { kind, name, dumps }
       restoreFile = dumps[0] ?? ''
       if (restoreFile) await planRestore()

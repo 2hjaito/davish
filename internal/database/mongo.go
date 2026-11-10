@@ -136,6 +136,10 @@ func (s *Service) runMongo(ctx context.Context, serverID, uri, body string) (str
 // the script can echo the line that holds the connection string.
 func mongoError(out string) error {
 	msg := MaskMongoURI(strings.TrimSpace(out))
+	// The tools log a line per step: the error is the one that says Failed.
+	if i := strings.Index(msg, "Failed: "); i >= 0 {
+		msg = msg[i:]
+	}
 	if i := strings.IndexByte(msg, '\n'); i > 0 {
 		msg = msg[:i]
 	}

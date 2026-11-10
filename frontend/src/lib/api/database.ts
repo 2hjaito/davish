@@ -57,8 +57,8 @@ export const databaseDrop = (
 export const databaseDump = (serverID: string, kind: DBKind, db: string): Promise<string> =>
   App.DatabaseDump(serverID, kind, db)
 
-export const databaseDumps = (serverID: string, db: string): Promise<string[]> =>
-  App.DatabaseDumps(serverID, db)
+export const databaseDumps = (serverID: string, kind: DBKind, db: string): Promise<string[]> =>
+  App.DatabaseDumps(serverID, kind, db)
 
 export const databaseRestoreCommand = (
   serverID: string,

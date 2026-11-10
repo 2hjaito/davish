@@ -44,8 +44,8 @@ func (a *App) DatabaseDump(serverID, kind, db string) (string, error) {
 }
 
 // DatabaseDumps lists a database's dumps in ~/db-backups, newest first.
-func (a *App) DatabaseDumps(serverID, db string) ([]string, error) {
-	return a.databases.Dumps(a.ctx, serverID, db)
+func (a *App) DatabaseDumps(serverID, kind, db string) ([]string, error) {
+	return a.databases.Dumps(a.ctx, serverID, kind, db)
 }
 
 // DatabaseRestoreCommand is the line that loads a dump into a database.

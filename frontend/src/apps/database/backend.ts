@@ -66,7 +66,7 @@ export const backend = hasRuntime
         Promise.resolve({ localPort: port + 10000, moved: true }),
       dump: (_serverID: string, _kind: DBKind, db: string) =>
         Promise.resolve(`/root/db-backups/${db}-20261029T080000Z.sql.gz`),
-      dumps: (_serverID: string, db: string) =>
+      dumps: (_serverID: string, _kind: DBKind, db: string) =>
         Promise.resolve([`/root/db-backups/${db}-20261029T080000Z.sql.gz`]),
       restoreCommand: (_serverID: string, _kind: DBKind, db: string, file: string) =>
         Promise.resolve(`gzip -t -- ${file} && gzip -dc -- ${file} | mysql --batch ${db}`),

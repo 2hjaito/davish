@@ -5,6 +5,7 @@ package database_test
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 
 	"davish/internal/apperr"
@@ -88,5 +89,45 @@ func TestMongoLoginCreateDrop(t *testing.T) {
 		if db.Name == "davish_it" {
 			t.Fatal("dropped database still listed")
 		}
+	}
+}
+
+func TestMongoDumpRestore(t *testing.T) {
+	ctx := context.Background()
+	m, id := testsshd.Connect(t)
+	s := database.New(audit.NewRunner(m, audit.New(discard{})))
+	s.SetMongoURI(id, mongoAdmin)
+
+	file, err := s.Dump(ctx, id, database.Mongo, "shop")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dumps, err := s.Dumps(ctx, id, database.Mongo, "shop")
+	if err != nil || len(dumps) == 0 || dumps[0] != file {
+		t.Fatalf("dumps = %v, %v (want %s first)", dumps, err, file)
+	}
+	if sql, _ := s.Dumps(ctx, id, database.MySQL, "shop"); len(sql) != 0 {
+		t.Errorf("MySQL dumps list a MongoDB archive: %v", sql)
+	}
+	cmd, err := s.RestoreCommand(ctx, id, database.Mongo, "shop", file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Restore(ctx, id, database.Mongo, "shop", file, cmd); err != nil {
+		t.Fatal(err)
+	}
+	if e := mongoEngine(t, s, id); len(e.DBs) == 0 || e.DBs[0].Name != "shop" || e.DBs[0].Collections != 1 {
+		t.Fatalf("after restore: %+v", e)
+	}
+	// No login file stays behind, whatever happened.
+	res, err := audit.NewRunner(m, audit.New(discard{})).RunInput(ctx, id, "test", `ls -A "$HOME/.cache/davish"`, nil)
+	if err != nil || strings.TrimSpace(string(res.Stdout)) != "" {
+		t.Fatalf("left in ~/.cache/davish: %q, %v", res.Stdout, err)
+	}
+
+	s.SetMongoURI(id, "mongodb://davish-admin:wrong@127.0.0.1:27017/admin")
+	var ae *apperr.Error
+	if _, err := s.Dump(ctx, id, database.Mongo, "shop"); !errors.As(err, &ae) || ae.Code != apperr.DBAuthFailed {
+		t.Fatalf("wrong password: %v", err)
 	}
 }

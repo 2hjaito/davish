@@ -62,8 +62,8 @@ export function DatabaseDump(arg1, arg2, arg3) {
   return window['go']['app']['App']['DatabaseDump'](arg1, arg2, arg3);
 }
 
-export function DatabaseDumps(arg1, arg2) {
-  return window['go']['app']['App']['DatabaseDumps'](arg1, arg2);
+export function DatabaseDumps(arg1, arg2, arg3) {
+  return window['go']['app']['App']['DatabaseDumps'](arg1, arg2, arg3);
 }
 
 export function DatabaseList(arg1) {

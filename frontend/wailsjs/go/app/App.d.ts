@@ -54,7 +54,7 @@ export function DatabaseDropSQL(arg1:string,arg2:string):Promise<string>;
 
 export function DatabaseDump(arg1:string,arg2:string,arg3:string):Promise<string>;
 
-export function DatabaseDumps(arg1:string,arg2:string):Promise<Array<string>>;
+export function DatabaseDumps(arg1:string,arg2:string,arg3:string):Promise<Array<string>>;
 
 export function DatabaseList(arg1:string):Promise<Array<database.Engine>>;
 
