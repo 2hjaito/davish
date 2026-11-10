@@ -139,9 +139,9 @@ Delete a folder or file, or empty a file such as a log so the program writing it
 
 ## Security
 
-Who logs in over SSH and who keeps trying: failed attempts grouped by address with the names they tried, recent logins, ufw and fail2ban. Block an address or turn password logins off with a `sudo` command typed into a terminal, checked by `sshd -t` before the reload.
+Who logs in over SSH and who keeps trying. At the top, the week in numbers (failed logins, unknown users, addresses, banned, successful logins), failed logins hour by hour, and the addresses and user names tried most, with those fail2ban banned or ufw blocks marked. Below, who is logged in right now, every address with the names it tried, recent logins, ufw and fail2ban. Block an address or turn password logins off with a `sudo` command typed into a terminal, checked by `sshd -t` before the reload.
 
-<img src="assets/screenshots/en/security.jpg" alt="Failed logins grouped by address" width="100%">
+<img src="assets/screenshots/en/security.jpg" alt="Failed logins per hour, the addresses and users tried most" width="100%">
 
 ## SSH keys
 
