@@ -4,6 +4,8 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.12.2] - 2026-11-10
+
 ### Fixed
 - Services: logged in as a user who is not root, start, stop, restart, removing a service and its journal are no longer refused (#76, #113). Davish runs them again through `sudo`: right away when sudo needs no password, else after asking for the sudo password once per session. The password is kept in memory only, never on disk, in the keychain or in a log, reaches sudo on stdin, and is wiped when you disconnect, lock the app or choose File → Forget sudo password. The prompt shows the exact `sudo …` command and can run it in Terminal instead.
 
