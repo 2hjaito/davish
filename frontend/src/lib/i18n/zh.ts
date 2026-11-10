@@ -243,7 +243,7 @@ const zh = {
       liftMany: (n: number) => `解除拦截 ${n} 个地址？`,
       bodyMany: 'Davish 将依次运行下面的每条命令，每行一个地址：',
       openTerminal: '打开终端',
-      inTerminal: '在终端中打开，而不是直接运行',
+      inTerminal: '在终端中运行',
     },
     done: {
       block: (ip: string) => `已拦截 ${ip}。`,

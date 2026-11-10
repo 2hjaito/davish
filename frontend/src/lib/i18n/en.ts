@@ -241,7 +241,7 @@ const en = {
       liftMany: (n: number) => `Unblock ${n} addresses?`,
       bodyMany: 'Davish will run each command below in turn, one line per address:',
       openTerminal: 'Open Terminal',
-      inTerminal: 'Open in Terminal instead of running',
+      inTerminal: 'Run in Terminal',
     },
     done: {
       block: (ip: string) => `Blocked ${ip}.`,

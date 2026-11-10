@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Sửa
+- Hộp xác nhận lệnh: nút chạy trong Terminal nằm ở hàng nút dưới cùng, có chữ, thay vì một icon nhỏ cạnh lệnh; lệnh dài xuống dòng ở khoảng trắng nên địa chỉ IP hay đường dẫn không bị cắt đôi.
+
 ## [1.13.0] - 2026-11-10
 
 ### Thêm
