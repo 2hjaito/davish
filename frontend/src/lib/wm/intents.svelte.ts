@@ -3,6 +3,7 @@
 import type { LogSource } from '../api/logs'
 import { t } from '../i18n'
 import { servers } from '../stores/servers.svelte'
+import { sqliteFiles } from '../stores/sqliteFiles.svelte'
 import { wm } from './windowManager.svelte'
 
 /** Default window sizes the registry shares, for apps opened from here. */
@@ -17,6 +18,7 @@ export const DISK_SIZE = { w: 900, h: 580 }
 export const SERVICES_SIZE = { w: 900, h: 580 }
 export const SERVERS_SIZE = { w: 980, h: 620 }
 export const SNIPPETS_SIZE = { w: 640, h: 520 }
+export const DATABASE_SIZE = { w: 640, h: 560 }
 
 /** Shows the Transfers window in serverID's workspace. */
 export function openTransfers(serverID: string) {
@@ -31,6 +33,12 @@ export function openServers(serverID: string) {
 /** Shows the saved commands in serverID's workspace. */
 export function openSnippets(serverID: string) {
   wm.openOrFocus('snippets', serverID, { title: t.apps.snippets, size: SNIPPETS_SIZE })
+}
+
+/** Adds a SQLite file to Database and shows it, in serverID's workspace. */
+export function openSQLite(serverID: string, path: string) {
+  sqliteFiles.add(serverID, path)
+  wm.openOrFocus('database', serverID, { title: t.apps.database, size: DATABASE_SIZE })
 }
 
 /** Shows the command log, in the active workspace. */

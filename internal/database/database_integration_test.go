@@ -1,0 +1,206 @@
+//go:build integration
+
+package database_test
+
+import (
+	"context"
+	"errors"
+	"strings"
+	"testing"
+
+	"davish/internal/apperr"
+	"davish/internal/audit"
+	"davish/internal/conn"
+	"davish/internal/database"
+	"davish/internal/testsshd"
+)
+
+type discard struct{}
+
+func (discard) Emit(string, any) {}
+
+// The test sshd's MongoDB has authorization on and a throwaway admin
+// (test/sshd/Dockerfile).
+const mongoAdmin = "mongodb://davish-admin:davish-test-only@127.0.0.1:27017/admin"
+
+// waitMongo waits for mongod, which may still be starting after the
+// containers restarted, and shows why when it never comes up.
+func waitMongo(t *testing.T, m *conn.Manager, id string) {
+	t.Helper()
+	ok := testsshd.Run(t, m, id, "for i in $(seq 1 60); do "+
+		"(echo > /dev/tcp/127.0.0.1/27017) 2>/dev/null && { echo up; exit 0; }; sleep 1; done; "+
+		"systemctl status mongod --no-pager 2>&1 | tail -20; journalctl -u mongod -n 30 --no-pager 2>&1; "+
+		"tail -20 /var/log/mongodb/mongod.log 2>&1; true")
+	if ok != "up" {
+		t.Fatalf("mongod is not listening:\n%s", ok)
+	}
+}
+
+func mongoEngine(t *testing.T, s *database.Service, id string) database.Engine {
+	t.Helper()
+	es, err := s.List(context.Background(), id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, e := range es {
+		if e.Kind == database.Mongo {
+			return e
+		}
+	}
+	t.Fatal("no MongoDB in the list")
+	return database.Engine{}
+}
+
+func TestMongoLoginCreateDrop(t *testing.T) {
+	ctx := context.Background()
+	m, id := testsshd.Connect(t)
+	waitMongo(t, m, id)
+	s := database.New(audit.NewRunner(m, audit.New(discard{})))
+
+	if e := mongoEngine(t, s, id); !e.Installed || !e.NeedsAuth {
+		t.Fatalf("without a login: %+v", e)
+	}
+	var ae *apperr.Error
+	err := s.TryMongo(ctx, id, "mongodb://davish-admin:wrong@127.0.0.1:27017/admin")
+	if !errors.As(err, &ae) || ae.Code != apperr.DBAuthFailed {
+		t.Fatalf("wrong password: %v", err)
+	}
+	if err := s.TryMongo(ctx, id, mongoAdmin); err != nil {
+		t.Fatal(err)
+	}
+	s.SetMongoURI(id, mongoAdmin)
+
+	e := mongoEngine(t, s, id)
+	if e.NeedsAuth || len(e.DBs) == 0 || e.DBs[0].Name != "shop" || e.DBs[0].Collections != 1 {
+		t.Fatalf("logged in: %+v", e)
+	}
+
+	r, err := s.Create(ctx, id, database.Mongo, "davish_it", "davish_it")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		sql, _ := database.DropSQL(database.Mongo, "davish_it")
+		_ = s.Drop(context.Background(), id, database.Mongo, "davish_it", sql)
+	})
+	// The new user logs in to its own database.
+	own := "mongodb://davish_it:" + r.Password + "@127.0.0.1:27017/davish_it"
+	if err := s.TryMongo(ctx, id, own); err != nil {
+		t.Fatalf("new user: %v", err)
+	}
+	found := false
+	for _, db := range mongoEngine(t, s, id).DBs {
+		found = found || db.Name == "davish_it"
+	}
+	if !found {
+		t.Fatal("created database not listed")
+	}
+
+	sql, _ := database.DropSQL(database.Mongo, "davish_it")
+	if err := s.Drop(ctx, id, database.Mongo, "davish_it", sql); err != nil {
+		t.Fatal(err)
+	}
+	for _, db := range mongoEngine(t, s, id).DBs {
+		if db.Name == "davish_it" {
+			t.Fatal("dropped database still listed")
+		}
+	}
+}
+
+func TestMongoDumpRestore(t *testing.T) {
+	ctx := context.Background()
+	m, id := testsshd.Connect(t)
+	waitMongo(t, m, id)
+	s := database.New(audit.NewRunner(m, audit.New(discard{})))
+	s.SetMongoURI(id, mongoAdmin)
+
+	file, err := s.Dump(ctx, id, database.Mongo, "shop")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dumps, err := s.Dumps(ctx, id, database.Mongo, "shop")
+	if err != nil || len(dumps) == 0 || dumps[0] != file {
+		t.Fatalf("dumps = %v, %v (want %s first)", dumps, err, file)
+	}
+	if sql, _ := s.Dumps(ctx, id, database.MySQL, "shop"); len(sql) != 0 {
+		t.Errorf("MySQL dumps list a MongoDB archive: %v", sql)
+	}
+	cmd, err := s.RestoreCommand(ctx, id, database.Mongo, "shop", file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Restore(ctx, id, database.Mongo, "shop", file, cmd); err != nil {
+		t.Fatal(err)
+	}
+	if e := mongoEngine(t, s, id); len(e.DBs) == 0 || e.DBs[0].Name != "shop" || e.DBs[0].Collections != 1 {
+		t.Fatalf("after restore: %+v", e)
+	}
+	// No login file stays behind, whatever happened.
+	res, err := audit.NewRunner(m, audit.New(discard{})).RunInput(ctx, id, "test", `ls -A "$HOME/.cache/davish"`, nil)
+	if err != nil || strings.TrimSpace(string(res.Stdout)) != "" {
+		t.Fatalf("left in ~/.cache/davish: %q, %v", res.Stdout, err)
+	}
+
+	s.SetMongoURI(id, "mongodb://davish-admin:wrong@127.0.0.1:27017/admin")
+	var ae *apperr.Error
+	if _, err := s.Dump(ctx, id, database.Mongo, "shop"); !errors.As(err, &ae) || ae.Code != apperr.DBAuthFailed {
+		t.Fatalf("wrong password: %v", err)
+	}
+}
+
+func TestFind(t *testing.T) {
+	m, id := testsshd.Connect(t)
+	waitMongo(t, m, id)
+	s := database.New(audit.NewRunner(m, audit.New(discard{})))
+	f, err := s.Find(context.Background(), id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !f.SQLite3 || len(f.Running) != 1 || f.Running[0] != (database.Running{Kind: database.Mongo, Port: 27017, Bind: "127.0.0.1", Auth: "on"}) {
+		t.Fatalf("found %+v", f)
+	}
+	// tester cannot read /var/lib/davish-private and has no sudo; notes.db
+	// is not SQLite.
+	if len(f.SQLite) != 1 || f.SQLite[0].Path != "/srv/davish-app/app.db" || f.SQLite[0].Root || f.SQLite[0].Size == 0 {
+		t.Fatalf("sqlite %+v", f.SQLite)
+	}
+}
+
+func TestSQLite(t *testing.T) {
+	ctx := context.Background()
+	m, id := testsshd.Connect(t)
+	waitMongo(t, m, id)
+	s := database.New(audit.NewRunner(m, audit.New(discard{})))
+
+	info, err := s.InspectSQLite(ctx, id, "/srv/davish-app/app.db")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Root || info.Journal != "delete" || info.Size == 0 || len(info.Tables) != 1 ||
+		info.Tables[0] != (database.SQLiteTable{Name: "users", Rows: 2}) {
+		t.Fatalf("info = %+v", info)
+	}
+	var ae *apperr.Error
+	for file, code := range map[string]apperr.Code{
+		"/srv/davish-app/notes.db":               apperr.InvalidInput,
+		"/var/lib/davish-private/private.sqlite": apperr.CmdNeedsRoot,
+	} {
+		if _, err := s.InspectSQLite(ctx, id, file); !errors.As(err, &ae) || ae.Code != code {
+			t.Errorf("%s: %v, want %s", file, err, code)
+		}
+	}
+
+	file, err := s.BackupSQLite(ctx, id, "/srv/davish-app/app.db")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dumps, err := s.Dumps(ctx, id, database.SQLite, info.Backup)
+	if err != nil || len(dumps) == 0 || dumps[0] != file {
+		t.Fatalf("dumps = %v, %v (want %s first)", dumps, err, file)
+	}
+	res, err := audit.NewRunner(m, audit.New(discard{})).RunInput(ctx, id, "test",
+		"gzip -dc -- "+file+" | head -c 15", nil)
+	if err != nil || string(res.Stdout) != "SQLite format 3" {
+		t.Fatalf("backup starts with %q, %v", res.Stdout, err)
+	}
+}

@@ -62,12 +62,24 @@ export function DatabaseDump(arg1, arg2, arg3) {
   return window['go']['app']['App']['DatabaseDump'](arg1, arg2, arg3);
 }
 
-export function DatabaseDumps(arg1, arg2) {
-  return window['go']['app']['App']['DatabaseDumps'](arg1, arg2);
+export function DatabaseDumps(arg1, arg2, arg3) {
+  return window['go']['app']['App']['DatabaseDumps'](arg1, arg2, arg3);
+}
+
+export function DatabaseFind(arg1) {
+  return window['go']['app']['App']['DatabaseFind'](arg1);
 }
 
 export function DatabaseList(arg1) {
   return window['go']['app']['App']['DatabaseList'](arg1);
+}
+
+export function DatabaseMongoConnect(arg1, arg2) {
+  return window['go']['app']['App']['DatabaseMongoConnect'](arg1, arg2);
+}
+
+export function DatabaseMongoForget(arg1) {
+  return window['go']['app']['App']['DatabaseMongoForget'](arg1);
 }
 
 export function DatabaseRestore(arg1, arg2, arg3, arg4, arg5) {
@@ -76,6 +88,18 @@ export function DatabaseRestore(arg1, arg2, arg3, arg4, arg5) {
 
 export function DatabaseRestoreCommand(arg1, arg2, arg3, arg4) {
   return window['go']['app']['App']['DatabaseRestoreCommand'](arg1, arg2, arg3, arg4);
+}
+
+export function DatabaseSQLite(arg1, arg2) {
+  return window['go']['app']['App']['DatabaseSQLite'](arg1, arg2);
+}
+
+export function DatabaseSQLiteBackup(arg1, arg2) {
+  return window['go']['app']['App']['DatabaseSQLiteBackup'](arg1, arg2);
+}
+
+export function DatabaseSQLiteRestoreLine(arg1, arg2) {
+  return window['go']['app']['App']['DatabaseSQLiteRestoreLine'](arg1, arg2);
 }
 
 export function DeleteServer(arg1) {

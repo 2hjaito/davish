@@ -357,6 +357,7 @@ export namespace database {
 	export class DB {
 	    name: string;
 	    size: number;
+	    collections?: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new DB(source);
@@ -366,12 +367,15 @@ export namespace database {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.name = source["name"];
 	        this.size = source["size"];
+	        this.collections = source["collections"];
 	    }
 	}
 	export class Engine {
 	    kind: string;
 	    installed: boolean;
 	    needsRoot: boolean;
+	    needsAuth?: boolean;
+	    login?: string;
 	    client: string;
 	    dbs: DB[];
 	    error?: string;
@@ -385,9 +389,135 @@ export namespace database {
 	        this.kind = source["kind"];
 	        this.installed = source["installed"];
 	        this.needsRoot = source["needsRoot"];
+	        this.needsAuth = source["needsAuth"];
+	        this.login = source["login"];
 	        this.client = source["client"];
 	        this.dbs = this.convertValues(source["dbs"], DB);
 	        this.error = source["error"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class SQLiteFile {
+	    path: string;
+	    size: number;
+	    root: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SQLiteFile(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.size = source["size"];
+	        this.root = source["root"];
+	    }
+	}
+	export class Running {
+	    kind: string;
+	    port: number;
+	    bind?: string;
+	    auth?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Running(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.port = source["port"];
+	        this.bind = source["bind"];
+	        this.auth = source["auth"];
+	    }
+	}
+	export class Found {
+	    running: Running[];
+	    sqlite: SQLiteFile[];
+	    sqlite3: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Found(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.running = this.convertValues(source["running"], Running);
+	        this.sqlite = this.convertValues(source["sqlite"], SQLiteFile);
+	        this.sqlite3 = source["sqlite3"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
+	export class SQLiteTable {
+	    name: string;
+	    rows: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SQLiteTable(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.rows = source["rows"];
+	    }
+	}
+	export class SQLiteInfo {
+	    path: string;
+	    size: number;
+	    journal: string;
+	    tables: SQLiteTable[];
+	    root: boolean;
+	    backup: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SQLiteInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.size = source["size"];
+	        this.journal = source["journal"];
+	        this.tables = this.convertValues(source["tables"], SQLiteTable);
+	        this.root = source["root"];
+	        this.backup = source["backup"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

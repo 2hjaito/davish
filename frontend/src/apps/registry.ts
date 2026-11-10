@@ -11,6 +11,7 @@ import {
   SERVERS_SIZE,
   SERVICES_SIZE,
   SNIPPETS_SIZE,
+  DATABASE_SIZE,
   TERMINAL_SIZE,
   TRANSFERS_SIZE,
 } from '../lib/wm/intents.svelte'
@@ -198,7 +199,7 @@ export const apps: AppDef[] = [
     label: t.apps.database,
     icon: 'disk',
     theme: 'light',
-    size: { w: 640, h: 560 },
+    size: DATABASE_SIZE,
     load: () => import('./database/DatabaseApp.svelte'),
     dock: false,
   },
