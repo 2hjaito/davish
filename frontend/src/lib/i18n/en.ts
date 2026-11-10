@@ -1311,6 +1311,8 @@ const en = {
     terminal: 'Run in Terminal',
     run: 'Run',
     checking: 'Checking…',
+    unlikely:
+      'This user is in none of the sudo, wheel or admin groups, so it most likely may not use sudo. You can still try the password, or run the command in Terminal with another account.',
     noSudo:
       'This user may not use sudo on the server. Run the command in Terminal with an account that can, or ask the server’s admin.',
     forget: 'Forget sudo password',

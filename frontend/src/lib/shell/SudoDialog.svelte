@@ -1,6 +1,6 @@
 <script lang="ts">
   import { toUserError } from '../api/errors'
-  import { sudoSetPassword } from '../api/sudo'
+  import { sudoSetPassword, sudoState } from '../api/sudo'
   import { t } from '../i18n'
   import { servers } from '../stores/servers.svelte'
   import { sudoPrompt } from '../stores/sudoPrompt.svelte'
@@ -15,11 +15,19 @@
   let password = $state('')
   let busy = $state(false)
   let error = $state('')
+  // The user is in no group that usually may use sudo: warn first.
+  let unlikely = $state(false)
 
   $effect(() => {
     if (req) {
       password = ''
       error = ''
+      unlikely = false
+      const id = req.serverID
+      void sudoState(id).then(
+        (st) => (unlikely = st === 'unlikely' && req?.serverID === id),
+        () => {},
+      )
     }
   })
 
@@ -56,6 +64,10 @@
 
 <Dialog open={req !== null} title={s.title(server?.name ?? '')} width={500} onclose={cancel}>
   {#if req}
+    {#if unlikely}<p class="warn" role="status">
+        <Icon name="warning" size={14} />
+        {s.unlikely}
+      </p>{/if}
     <p>{s.body}</p>
     <pre class="code">{req.command}</pre>
     <form
@@ -74,7 +86,7 @@
     {#if error}<p class="error" role="alert">{error}</p>{/if}
   {/if}
   {#snippet footer()}
-    <button type="button" class="btn" onclick={toTerminal}>
+    <button type="button" class="btn" class:btn-primary={unlikely} onclick={toTerminal}>
       <Icon name="terminal" size={13} />
       {s.terminal}
     </button>
@@ -82,7 +94,8 @@
     <button type="button" class="btn" onclick={cancel}>{t.common.cancel}</button>
     <button
       type="button"
-      class="btn btn-primary"
+      class="btn"
+      class:btn-primary={!unlikely}
       disabled={!password || busy}
       onclick={() => void submit()}>{busy ? s.checking : s.run}</button
     >
@@ -128,6 +141,17 @@
 
   .error {
     color: var(--danger);
+  }
+
+  .warn {
+    display: flex;
+    gap: 6px;
+    color: var(--warn);
+  }
+
+  .warn :global(svg) {
+    flex-shrink: 0;
+    margin-top: 3px;
   }
 
   .spacer {

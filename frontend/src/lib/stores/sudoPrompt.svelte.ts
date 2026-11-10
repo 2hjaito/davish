@@ -10,23 +10,44 @@ export interface SudoRequest {
   done: (ok: boolean) => void
 }
 
+interface Waiting {
+  serverID: string
+  command: string
+  terminal: string
+  resolve: (ok: boolean) => void
+}
+
 class SudoPrompt {
   request = $state.raw<SudoRequest | null>(null)
+  // Asks for a server already prompting wait for its answer; asks for
+  // another server wait their turn. None is dropped.
+  #waiting: Waiting[] = []
 
   /** Resolves true once the password is kept, false when the user cancels. */
   ask(serverID: string, command: string, terminal = command): Promise<boolean> {
-    this.request?.done(false)
     return new Promise((resolve) => {
-      this.request = {
-        serverID,
-        command,
-        terminal,
-        done: (ok) => {
-          this.request = null
-          resolve(ok)
-        },
-      }
+      this.#waiting.push({ serverID, command, terminal, resolve })
+      if (!this.request) this.#next()
     })
+  }
+
+  #next() {
+    const first = this.#waiting[0]
+    if (!first) {
+      this.request = null
+      return
+    }
+    this.request = {
+      serverID: first.serverID,
+      command: first.command,
+      terminal: first.terminal,
+      done: (ok) => {
+        const answered = this.#waiting.filter((w) => w.serverID === first.serverID)
+        this.#waiting = this.#waiting.filter((w) => w.serverID !== first.serverID)
+        for (const w of answered) w.resolve(ok)
+        this.#next()
+      },
+    }
   }
 }
 

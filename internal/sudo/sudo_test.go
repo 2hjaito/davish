@@ -19,7 +19,8 @@ const secret = "hunter2-sudo"
 // fakeSudo plays a server whose sudo asks for secret.
 type fakeSudo struct {
 	uid    string
-	policy string // "password", "nopassword", "none", "missing"
+	policy string // "password", "nopassword", "none", "missing", "tty"
+	groups string
 	lines  []string
 	inputs [][]byte
 }
@@ -27,10 +28,11 @@ type fakeSudo struct {
 func (f *fakeSudo) RunInput(_ context.Context, _, _, line string, stdin []byte) (audit.Result, error) {
 	f.lines = append(f.lines, line)
 	f.inputs = append(f.inputs, append([]byte(nil), stdin...))
-	if line == "id -u" {
-		return audit.Result{Stdout: []byte(f.uid + "\n")}, nil
+	if line == "id -u; id -Gn" {
+		return audit.Result{Stdout: []byte(f.uid + "\n" + f.groups + "\n")}, nil
 	}
-	if !strings.HasPrefix(line, "sudo") {
+	line, ok := strings.CutPrefix(line, "LC_ALL=C ")
+	if !ok {
 		return audit.Result{Stdout: []byte("ran as root: " + line)}, nil
 	}
 	switch f.policy {
@@ -38,6 +40,8 @@ func (f *fakeSudo) RunInput(_ context.Context, _, _, line string, stdin []byte) 
 		return audit.Result{Exit: 127, Stderr: []byte("sh: 1: sudo: not found")}, nil
 	case "none":
 		return audit.Result{Exit: 1, Stderr: []byte("Sorry, user u may not run sudo on host.")}, nil
+	case "tty":
+		return audit.Result{Exit: 1, Stderr: []byte("sudo: sorry, you must have a tty to run sudo")}, nil
 	case "nopassword":
 		return audit.Result{Stdout: stdin}, nil
 	}
@@ -61,7 +65,7 @@ func code(err error) apperr.Code {
 
 func TestRunAsks(t *testing.T) {
 	ctx := context.Background()
-	f := &fakeSudo{uid: "1000", policy: "password"}
+	f := &fakeSudo{uid: "1000", policy: "password", groups: "u sudo"}
 	k := New(f)
 
 	if st, _ := k.State(ctx, "srv"); st != Password {
@@ -92,7 +96,7 @@ func TestRunAsks(t *testing.T) {
 			t.Fatalf("password on a command line: %s", l)
 		}
 	}
-	if last := f.lines[len(f.lines)-1]; last != `sudo -S -k -p '' -- sh -c 'crontab -'` {
+	if last := f.lines[len(f.lines)-1]; last != `LC_ALL=C sudo -S -k -p '' -- sh -c 'crontab -'` {
 		t.Errorf("line = %s", last)
 	}
 
@@ -122,7 +126,7 @@ func TestPasswordThatStopsWorkingIsForgotten(t *testing.T) {
 
 func TestRunWithoutPassword(t *testing.T) {
 	ctx := context.Background()
-	for policy, want := range map[string]string{"nopassword": NoPassword, "none": None, "missing": None} {
+	for policy, want := range map[string]string{"nopassword": NoPassword, "none": None, "missing": None, "tty": None} {
 		f := &fakeSudo{uid: "1000", policy: policy}
 		k := New(f)
 		if st, _ := k.State(ctx, "srv"); st != want {
@@ -168,6 +172,18 @@ func TestSetPasswordRejectsLines(t *testing.T) {
 	for _, pw := range []string{"", "a\nrm -rf /"} {
 		if err := k.SetPassword(context.Background(), "srv", []byte(pw)); code(err) != apperr.InvalidInput {
 			t.Errorf("%q: %v", pw, err)
+		}
+	}
+}
+
+// sudo asks a user outside sudo, wheel and admin for a password all the
+// same; the state warns before the prompt.
+func TestStateWarnsOutsideAdminGroups(t *testing.T) {
+	ctx := context.Background()
+	for groups, want := range map[string]string{"u docker": Unlikely, "u wheel": Password, "u admin users": Password} {
+		k := New(&fakeSudo{uid: "1000", policy: "password", groups: groups})
+		if st, _ := k.State(ctx, "srv"); st != want {
+			t.Errorf("%s: state %s, want %s", groups, st, want)
 		}
 	}
 }

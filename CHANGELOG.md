@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Sửa
+- Sudo: nhận đúng "cần mật khẩu" trên server không dùng tiếng Anh (sudo chạy với `LC_ALL=C`); hai thao tác cùng cần mật khẩu giờ chờ chung một hộp hỏi thay vì thao tác trước biến mất; server bật `requiretty` (CentOS/RHEL cũ) thì lùi về Terminal thay vì báo lỗi; user không thuộc nhóm sudo, wheel hay admin được cảnh báo trước khi nhập mật khẩu, nút Terminal được đưa lên trước.
+
 ## [1.12.2] - 2026-11-10
 
 ### Sửa

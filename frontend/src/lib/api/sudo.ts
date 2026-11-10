@@ -3,7 +3,7 @@ import * as App from '../../../wailsjs/go/app/App'
 import { hasRuntime } from './runtime'
 
 /** How a server's user reaches root. */
-export type SudoState = 'root' | 'nopassword' | 'password' | 'ready' | 'none'
+export type SudoState = 'root' | 'nopassword' | 'password' | 'ready' | 'unlikely' | 'none'
 
 export const sudoState = (serverID: string): Promise<SudoState> =>
   hasRuntime ? (App.SudoState(serverID) as Promise<SudoState>) : Promise.resolve('password')

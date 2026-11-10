@@ -1292,6 +1292,8 @@ const vi = {
     terminal: 'Chạy trong Terminal',
     run: 'Chạy',
     checking: 'Đang kiểm tra…',
+    unlikely:
+      'User này không thuộc nhóm sudo, wheel hay admin, nên nhiều khả năng không được dùng sudo. Bạn vẫn có thể thử mật khẩu, hoặc chạy lệnh trong Terminal bằng tài khoản khác.',
     noSudo:
       'User này không được dùng sudo trên server. Hãy chạy lệnh trong Terminal bằng tài khoản có quyền, hoặc nhờ người quản trị.',
     forget: 'Quên mật khẩu sudo',
