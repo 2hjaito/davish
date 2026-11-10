@@ -4,7 +4,7 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
-## [1.13.0] - 2026-11-10
+## [1.12.1] - 2026-11-10
 
 ### Added
 - Security: tick several addresses to block (or unblock) them at once. One dialog lists the exact command for each; they run in turn, and any that fail or need a sudo password are typed into Terminal.

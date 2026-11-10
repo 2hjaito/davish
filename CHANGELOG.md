@@ -4,7 +4,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
-## [1.13.0] - 2026-11-10
+## [1.12.1] - 2026-11-10
 
 ### Thêm
 - An ninh: tick nhiều địa chỉ để chặn (hoặc bỏ chặn) một lần. Một hộp thoại liệt kê đúng lệnh cho từng địa chỉ; chạy lần lượt, địa chỉ nào lỗi hoặc cần mật khẩu sudo thì gõ sẵn vào Terminal.
