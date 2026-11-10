@@ -4,6 +4,14 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.13.0] - 2026-11-10
+
+### Added
+- Security: tick several addresses to block (or unblock) them at once. One dialog lists the exact command for each; they run in turn, and any that fail or need a sudo password are typed into Terminal.
+
+### Changed
+- Security: Failed logins and Blocked are full-width tables (IP, tries, users tried, last try, status, Block/Unblock on the row) with selectable text. Clicking a row opens its detail below instead of in a pane on the right.
+
 ## [1.12.0] - 2026-11-10
 
 ### Added
