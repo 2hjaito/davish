@@ -15,6 +15,7 @@ Only the latest release is supported.
 - **`sudo` passwords** are never stored or typed by Davish. When root is needed, it opens a terminal with the command typed in and you press Enter.
 - **The lock password** is hashed with argon2id; only the hash is kept, in the keychain.
 - Removing a server also removes its secrets from the keychain.
+- **Saved commands** are kept in plain text in Davish's settings on your computer. When one looks like it holds a password, token or key, Davish warns you before you save it; leave the secret out and type it when you run the command.
 
 ## What Davish runs on your server
 
@@ -23,6 +24,7 @@ Only the latest release is supported.
 - Every argument in a command is shell-quoted; user input is never pasted into a command line.
 - Destructive actions (removing files, stopping services, removing containers, replacing a crontab…) show the exact command and wait for your confirmation.
 - The command log records everything Davish ran on your behalf.
+- Saved commands, Spotlight's `> command` and the command log's "Type into Terminal again" type a command at the prompt; you press Enter.
 - Host keys are checked on every connection. A changed host key refuses the connection; there is no "ignore" button.
 
 ## Network and telemetry

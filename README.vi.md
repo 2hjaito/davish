@@ -39,6 +39,7 @@ Không cài gì lên server.
 **Trên server**
 
 - [Terminal](FEATURES.vi.md#terminal): nhiều tab, vẽ bằng GPU, prompt powerline tùy chọn
+- [Lệnh hay dùng](FEATURES.vi.md#lệnh-hay-dùng): lệnh hay gõ, một cú bấm là gõ sẵn vào Terminal
 - [Files](FEATURES.vi.md#files): SFTP kiểu Finder, kéo thả, copy giữa server
 - [Editor](FEATURES.vi.md#editor): CodeMirror, lưu atomic, có sao lưu
 - [Logs](FEATURES.vi.md#logs): journal, file, container, theo dõi trực tiếp

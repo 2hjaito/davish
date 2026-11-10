@@ -6,10 +6,12 @@
   import { backend as dockerBackend } from '../../apps/docker/backend'
   import { backend as packagesBackend } from '../../apps/packages/backend'
   import { backend as servicesBackend } from '../../apps/services/backend'
+  import { visibleOn } from '../../apps/snippets/snippets'
   import { filesStat } from '../api/files'
   import { hasRuntime } from '../api/runtime'
   import { t } from '../i18n'
   import { servers } from '../stores/servers.svelte'
+  import { snippets } from '../stores/snippets.svelte'
   import { ui } from '../stores/ui.svelte'
   import AppIcon from '../ui/AppIcon.svelte'
   import Icon from '../ui/Icon.svelte'
@@ -121,6 +123,17 @@
         icon: 'terminal',
         run: () => openTerminalAt(serverID, undefined, want.command),
       })
+    // Saved commands are typed at the prompt, never run (docs/SECURITY.md).
+    if (connected)
+      for (const s of visibleOn(snippets.list, serverID))
+        all.push({
+          kind: 'snippet',
+          id: s.id,
+          label: s.name,
+          detail: s.command,
+          icon: 'terminal',
+          run: () => openTerminalAt(serverID, undefined, s.command),
+        })
     for (const u of units)
       all.push({
         kind: 'service',
@@ -366,7 +379,10 @@
     color: var(--fg-on-accent);
   }
 
+  /* The name keeps its width; a long description gives way first. */
   .label {
+    flex-shrink: 0;
+    max-width: 65%;
     font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
@@ -374,6 +390,7 @@
   }
 
   .detail {
+    min-width: 0;
     margin-left: auto;
     padding-left: 12px;
     font-size: var(--text-xs);

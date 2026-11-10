@@ -48,6 +48,7 @@ const en = {
       program: 'Server program',
       folder: 'Folder',
       help: 'Help',
+      snippet: 'Saved command',
     },
   },
   common: {
@@ -96,6 +97,7 @@ const en = {
     security: 'Security',
     browser: 'Browser',
     servers: 'All servers',
+    snippets: 'Saved commands',
   },
   browser: {
     back: 'Back',
@@ -889,6 +891,16 @@ const en = {
         runs: [
           'The same /proc reading as Monitor, for each connected server, while the window is open',
         ],
+      },
+      snippets: {
+        does: 'Commands you type often, saved on this computer for one server or every server.',
+        actions: [
+          'Type a command into Terminal without running it',
+          'Find saved commands in Spotlight (⌘K)',
+          'Save a command from the Command log',
+        ],
+        keys: [],
+        runs: [],
       },
       settings: {
         does: 'Language, light or dark theme, appearance, fonts, alert thresholds, app lock, Terminal prompt.',
@@ -2304,6 +2316,33 @@ const en = {
       'This command removes all of it, the folder included. It is typed into a terminal for you to read before pressing Enter.',
     uninstall: 'Remove everything…',
   },
+  snippets: {
+    search: 'Search saved commands',
+    add: 'New command',
+    empty: 'No saved commands yet',
+    emptyHint:
+      'Keep the commands you type often here, for this server or every server. They are stored on this computer only.',
+    noMatch: 'No commands match.',
+    name: 'Name',
+    namePlaceholder: 'Tail the nginx errors',
+    command: 'Command',
+    scope: 'Show on',
+    thisServer: (name: string) => `${name} only`,
+    everyServer: 'Every server',
+    shared: 'every server',
+    save: 'Save',
+    cancel: 'Cancel',
+    edit: 'Edit',
+    remove: 'Delete',
+    removeConfirm: 'Click again to delete',
+    type: 'Type into Terminal',
+    typeHint: 'Typed at the prompt, not run: check it and press Enter.',
+    copy: 'Copy',
+    copied: 'Copied',
+    secret:
+      'This looks like it holds a password, token or key. Saved commands are kept in plain text in Davish’s settings; leave the secret out and type it when you run the command.',
+    offline: 'Connect the server to type a command into its Terminal.',
+  },
   audit: {
     search: 'Search commands',
     onlyThis: 'Selected server only',
@@ -2316,6 +2355,8 @@ const en = {
     stream: 'streaming',
     copy: 'Copy command',
     copied: 'Copied',
+    rerun: 'Type into Terminal again',
+    save: 'Save as a command',
     footer: (n: number) =>
       `Latest ${n} ${n === 1 ? 'command' : 'commands'} · at most 1000, cleared when the app quits`,
     apps: {

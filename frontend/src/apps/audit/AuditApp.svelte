@@ -4,8 +4,10 @@
   import { t } from '../../lib/i18n'
   import { audit } from '../../lib/stores/audit.svelte'
   import { servers } from '../../lib/stores/servers.svelte'
+  import { snippets } from '../../lib/stores/snippets.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
+  import { openSnippets, openTerminalAt } from '../../lib/wm/intents.svelte'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import type { AppProps } from '../types'
 
@@ -40,6 +42,17 @@
   function duration(e: AuditEntry) {
     if (e.exit === -1 && e.app === 'logs') return t.audit.stream
     return e.durMs < 1000 ? `${e.durMs} ms` : `${(e.durMs / 1000).toFixed(1).replace('.', ',')} s`
+  }
+
+  // Typed at the prompt of the server it ran on, never run (docs/SECURITY.md).
+  function rerun(e: AuditEntry) {
+    if (e.serverID !== servers.activeId) servers.select(e.serverID)
+    openTerminalAt(e.serverID, undefined, e.command)
+  }
+
+  function keep(e: AuditEntry) {
+    snippets.draft = { command: e.command, serverID: e.serverID }
+    openSnippets(servers.activeId || e.serverID)
   }
 
   async function copy(e: AuditEntry) {
@@ -99,6 +112,23 @@
               )}
             </span>
           </div>
+          <button
+            class="copy"
+            aria-label={t.audit.rerun}
+            title={t.audit.rerun}
+            disabled={servers.list.find((s) => s.id === e.serverID)?.state !== 'connected'}
+            onclick={() => rerun(e)}
+          >
+            <Icon name="terminal" size={13} strokeWidth={2.2} />
+          </button>
+          <button
+            class="copy"
+            aria-label={t.audit.save}
+            title={t.audit.save}
+            onclick={() => keep(e)}
+          >
+            <Icon name="pin" size={13} strokeWidth={2.2} />
+          </button>
           <button
             class="copy"
             class:done={copied === e.id}
@@ -250,6 +280,10 @@
     color: var(--fg-muted);
     opacity: 0;
     transition: opacity var(--dur-fast) var(--ease-out);
+  }
+
+  .row:hover .copy:disabled {
+    opacity: 0.35;
   }
 
   .row:hover .copy,

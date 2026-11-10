@@ -26,7 +26,7 @@ export function score(query: string, text: string): number {
 }
 
 export type Kind =
-  'app' | 'path' | 'command' | 'service' | 'container' | 'program' | 'folder' | 'help'
+  'app' | 'path' | 'command' | 'snippet' | 'service' | 'container' | 'program' | 'folder' | 'help'
 
 export interface Candidate {
   kind: Kind
@@ -42,6 +42,7 @@ export const GROUPS: { kind: Kind; max: number }[] = [
   { kind: 'path', max: 1 },
   { kind: 'command', max: 1 },
   { kind: 'app', max: 4 },
+  { kind: 'snippet', max: 4 },
   { kind: 'service', max: 5 },
   { kind: 'container', max: 5 },
   { kind: 'program', max: 4 },

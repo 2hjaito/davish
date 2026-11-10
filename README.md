@@ -39,6 +39,7 @@ Nothing to install on the server.
 **On the server**
 
 - [Terminal](FEATURES.md#terminal): tabs, GPU rendering, an optional powerline prompt
+- [Saved commands](FEATURES.md#saved-commands): your frequent commands, typed into Terminal in one click
 - [Files](FEATURES.md#files): Finder-style SFTP, drag and drop, copy between servers
 - [Editor](FEATURES.md#editor): CodeMirror with atomic saves and backups
 - [Logs](FEATURES.md#logs): journal, files and containers, live

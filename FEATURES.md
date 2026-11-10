@@ -10,6 +10,12 @@ xterm.js with tabs, copy/paste, GPU rendering, and an optional powerline prompt 
 
 <img src="assets/screenshots/en/desktop.jpg" alt="Terminal, Monitor and Files" width="100%">
 
+## Saved commands
+
+Keep the commands you type often, each with a name, for one server or every server. One click types a command into the server's Terminal for you to check and press Enter; nothing runs on its own. Spotlight (`⌘K`) finds them by name or command, and every line of the Command log can be typed into Terminal again or saved as a command. They are stored on your computer, in plain text: when a command looks like it holds a password, token or key, Davish warns you before you save it.
+
+<img src="assets/screenshots/en/snippets.jpg" alt="Saved commands" width="100%">
+
 ## Files
 
 Finder-style browser over SFTP: upload, download, drag and drop from your OS, rename, delete, compress, and copy between servers through your machine. Right-click empty space to create a file or folder in the folder on screen; Davish never overwrites an existing file.
