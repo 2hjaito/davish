@@ -379,7 +379,10 @@
     color: var(--fg-on-accent);
   }
 
+  /* The name keeps its width; a long description gives way first. */
   .label {
+    flex-shrink: 0;
+    max-width: 65%;
     font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
@@ -387,6 +390,7 @@
   }
 
   .detail {
+    min-width: 0;
     margin-left: auto;
     padding-left: 12px;
     font-size: var(--text-xs);
