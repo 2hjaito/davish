@@ -974,17 +974,24 @@ const vi = {
         runs: [],
       },
       database: {
-        does: 'Database MariaDB/MySQL và PostgreSQL kèm dung lượng.',
+        does: 'Database MariaDB/MySQL, PostgreSQL và MongoDB kèm dung lượng, và các file SQLite bạn thêm.',
         actions: [
           'Chưa cài MariaDB hoặc PostgreSQL: gõ sẵn lệnh cài theo bản Linux vào Terminal',
           'Tạo database và user với mật khẩu ngẫu nhiên, chỉ hiện một lần',
           'Xóa database sau khi gõ đúng tên',
           'Dump ra ~/db-backups, khôi phục từ bản dump sau khi gõ đúng tên',
           'Mở database server qua tunnel cho công cụ trên máy này',
+          'Dò: tìm database đang chạy và file SQLite trên server (chỉ đọc)',
+          'MongoDB bật xác thực: đăng nhập một lần, lưu trong keychain của máy này; Quên thông tin đăng nhập để xóa',
+          'SQLite: xem bảng và số dòng, backup ra ~/db-backups, khôi phục bằng lệnh gõ sẵn vào Terminal',
         ],
         keys: [],
         runs: [
           'mysql hoặc psql, bằng user của bạn, qua sudo -n, hoặc user postgres; câu lệnh qua stdin',
+          'mongosh --quiet --nodb --file /dev/stdin; connection string và câu lệnh qua stdin',
+          'mongodump, mongorestore với --config là file quyền 600 trong ~/.cache/davish, tạo từ stdin và xóa ngay khi xong',
+          'sqlite3 -readonly (rồi sudo -n nếu cần) để đọc; sqlite3 .backup để backup',
+          'Dò: ps, cat /etc/mongod.conf, command -v sqlite3, find *.db *.sqlite *.sqlite3 trong /var/lib /opt /srv /home /root (timeout 20s)',
         ],
       },
       deploy: {

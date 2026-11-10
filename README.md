@@ -53,6 +53,7 @@ Nothing to install on the server.
 - [Cron](FEATURES.md#cron): schedules in plain words
 - [Nginx](FEATURES.md#nginx): sites, `nginx -t` before reload, TLS expiry
 - [Packages](FEATURES.md#packages): updates with security fixes first, runtimes; one-click install command when Docker, nginx, git or a database is missing
+- [Database](FEATURES.md#database): MariaDB/MySQL, PostgreSQL, MongoDB and SQLite; find, create, dump and restore, MongoDB login kept in the keychain
 - [Git](FEATURES.md#git): status, diffs, commit graph, fetch and pull
 - [Shortcuts](FEATURES.md#desktop-shortcuts): drag `deploy.sh` onto the desktop, double-click to run, with a stop button
 

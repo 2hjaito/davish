@@ -996,16 +996,25 @@ const en = {
         runs: [],
       },
       database: {
-        does: 'MariaDB/MySQL and PostgreSQL databases with their size.',
+        does: 'MariaDB/MySQL, PostgreSQL and MongoDB databases with their size, and the SQLite files you add.',
         actions: [
           'No MariaDB or PostgreSQL: types the install command for its Linux into a terminal',
           'Create a database and its user with a random password, shown once',
           'Delete a database after typing its name',
           'Dump to ~/db-backups, restore from a dump after typing the name',
           'Open the database server through a tunnel for tools on this computer',
+          'Find: the databases running and the SQLite files on the server (read-only)',
+          'MongoDB with authentication: log in once, kept in this computer’s keychain; Forget login removes it',
+          'SQLite: tables and rows, back up to ~/db-backups, restore with a line typed into Terminal',
         ],
         keys: [],
-        runs: ['mysql or psql, as you, through sudo -n, or as postgres; statements on stdin'],
+        runs: [
+          'mysql or psql, as you, through sudo -n, or as postgres; statements on stdin',
+          'mongosh --quiet --nodb --file /dev/stdin; the connection string and statements on stdin',
+          'mongodump, mongorestore with --config, a mode 600 file in ~/.cache/davish made from stdin and removed when done',
+          'sqlite3 -readonly (then sudo -n when needed) to read; sqlite3 .backup to back up',
+          'Find: ps, cat /etc/mongod.conf, command -v sqlite3, find *.db *.sqlite *.sqlite3 in /var/lib /opt /srv /home /root (20s timeout)',
+        ],
       },
       deploy: {
         does: 'A wizard from a git repository, an image or a folder to a site on your domain with HTTPS.',

@@ -966,16 +966,25 @@ const zh = {
         runs: [],
       },
       database: {
-        does: 'MariaDB/MySQL 和 PostgreSQL 数据库及其大小。',
+        does: 'MariaDB/MySQL、PostgreSQL 和 MongoDB 数据库及其大小，以及你添加的 SQLite 文件。',
         actions: [
           '没有 MariaDB 或 PostgreSQL：把适合其 Linux 的安装命令输入到终端',
           '创建数据库及其用户，随机密码只显示一次',
           '输入名称确认后删除数据库',
           '导出到 ~/db-backups，输入名称确认后从备份恢复',
           '通过隧道打开数据库服务器，供这台电脑上的工具使用',
+          '查找：服务器上正在运行的数据库和 SQLite 文件（只读）',
+          '启用身份验证的 MongoDB：登录一次，保存在本机钥匙串；“忘记登录信息”可删除',
+          'SQLite：表和行数，备份到 ~/db-backups，通过输入到终端的命令恢复',
         ],
         keys: [],
-        runs: ['mysql 或 psql，以你的身份、通过 sudo -n 或以 postgres 运行；语句经 stdin 传入'],
+        runs: [
+          'mysql 或 psql，以你的身份、通过 sudo -n 或以 postgres 运行；语句经 stdin 传入',
+          'mongosh --quiet --nodb --file /dev/stdin；连接字符串和语句经 stdin 传入',
+          'mongodump、mongorestore 使用 --config：~/.cache/davish 中权限 600 的文件，由 stdin 生成，完成后立即删除',
+          'sqlite3 -readonly（必要时再用 sudo -n）读取；sqlite3 .backup 备份',
+          '查找：ps、cat /etc/mongod.conf、command -v sqlite3、在 /var/lib /opt /srv /home /root 中 find *.db *.sqlite *.sqlite3（20 秒超时）',
+        ],
       },
       deploy: {
         does: '向导：从 git 仓库、镜像或文件夹，部署成你域名下带 HTTPS 的站点。',
