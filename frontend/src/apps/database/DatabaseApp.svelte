@@ -495,6 +495,23 @@
     padding: 12px 16px;
     overflow: auto;
     box-sizing: border-box;
+    background: var(--content-bg);
+  }
+
+  .link {
+    border: 0;
+    background: none;
+    padding: 0 4px;
+    color: var(--accent);
+    font-size: var(--text-sm);
+  }
+
+  .link:disabled {
+    opacity: 0.5;
+  }
+
+  .link.danger {
+    color: var(--danger);
   }
 
   .head {

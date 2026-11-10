@@ -345,6 +345,7 @@
     flex-direction: column;
     flex: 1;
     min-height: 0;
+    background: var(--content-bg);
   }
 
   .steps {
