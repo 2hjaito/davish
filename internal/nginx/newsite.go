@@ -11,6 +11,7 @@ import (
 	"text/template"
 
 	"davish/internal/apperr"
+	"davish/internal/audit"
 	"davish/internal/shellx"
 )
 
@@ -237,7 +238,22 @@ func (s *Service) Create(ctx context.Context, serverID string, n NewSite, config
 	if err != nil {
 		return CreateResult{}, err
 	}
-	return createResult(string(res.Stderr), res.Exit, plan.Sudo)
+	return s.created(ctx, serverID, command, res, plan.Sudo)
+}
+
+// created reads what a create or edit line did, and runs it again as root
+// when the server refused the writes.
+func (s *Service) created(ctx context.Context, serverID, command string, res audit.Result, sudo string) (CreateResult, error) {
+	r, err := createResult(string(res.Stderr), res.Exit, sudo)
+	if err != nil || !r.NeedsRoot {
+		return r, err
+	}
+	if res, ok, err := s.asRoot(ctx, serverID, command); err != nil {
+		return r, err
+	} else if ok {
+		return createResult(string(res.Stderr), res.Exit, sudo)
+	}
+	return r, nil
 }
 
 func createResult(out string, exit int, sudo string) (CreateResult, error) {

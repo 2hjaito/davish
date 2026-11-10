@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"davish/internal/apperr"
+	"davish/internal/audit"
 	"davish/internal/shellx"
 )
 
@@ -129,6 +130,19 @@ func (s *Service) Remove(ctx context.Context, serverID, sitePath string, withCer
 	if err != nil {
 		return err
 	}
+	err = removeExit(res)
+	if codeOf(err) != apperr.CmdNeedsRoot {
+		return err
+	}
+	if res, ok, rerr := s.asRoot(ctx, serverID, command); rerr != nil {
+		return rerr
+	} else if ok {
+		return removeExit(res)
+	}
+	return err
+}
+
+func removeExit(res audit.Result) error {
 	if res.Exit == 0 {
 		return nil
 	}

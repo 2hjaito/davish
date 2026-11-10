@@ -13,6 +13,7 @@
   import { t } from '../../lib/i18n'
   import { load, save } from '../../lib/stores/persist'
   import { servers } from '../../lib/stores/servers.svelte'
+  import { withSudo } from '../../lib/stores/sudoPrompt.svelte'
   import ConfirmCommand from '../../lib/ui/ConfirmCommand.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
   import LoadState from '../../lib/ui/LoadState.svelte'
@@ -134,7 +135,8 @@
     toggling = null
     busy = true
     try {
-      await backend.toggle(win.serverID, plan)
+      if (!(await withSudo(win.serverID, plan.sudo, () => backend.toggle(win.serverID, plan))))
+        return
       flash = t.nginx.toggled[plan.enable ? 'enable' : 'disable'](plan.name)
     } catch (e) {
       const ue = toUserError(e)
@@ -160,7 +162,8 @@
     removing = null
     busy = true
     try {
-      await backend.remove(win.serverID, plan)
+      if (!(await withSudo(win.serverID, plan.sudo, () => backend.remove(win.serverID, plan))))
+        return
       // A site nginx was serving keeps being served until a reload.
       flash = plan.enabled ? t.nginx.removedEnabled(plan.name) : ''
     } catch (e) {
@@ -176,7 +179,9 @@
   async function test() {
     busy = true
     try {
-      result = { kind: 'test', test: await backend.test(win.serverID) }
+      await withSudo(win.serverID, 'sudo nginx -t', async () => {
+        result = { kind: 'test', test: await backend.test(win.serverID) }
+      })
     } catch (e) {
       flash = toUserError(e).message
     } finally {
@@ -188,13 +193,23 @@
     reloadCommand = await backend.reloadCommand()
   }
 
+  /** cmd as it runs with sudo: each step as root. */
+  const asSudo = (cmd: string) =>
+    cmd
+      .split(' && ')
+      .map((c) => `sudo ${c}`)
+      .join(' && ')
+
   async function reload() {
+    const cmd = reloadCommand ?? ''
     reloadCommand = null
     busy = true
     try {
-      const r = await backend.reload(win.serverID)
-      result = { kind: 'reload', reload: r }
-      if (r.reloaded) flash = ''
+      await withSudo(win.serverID, asSudo(cmd), async () => {
+        const r = await backend.reload(win.serverID)
+        result = { kind: 'reload', reload: r }
+        if (r.reloaded) flash = ''
+      })
     } catch (e) {
       flash = toUserError(e).message
     } finally {

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"davish/internal/apperr"
+	"davish/internal/audit"
 	"davish/internal/shellx"
 )
 
@@ -71,13 +72,26 @@ func (s *Service) Toggle(ctx context.Context, serverID, name string, enable bool
 	if err != nil {
 		return err
 	}
-	if res.Exit != 0 {
-		if strings.Contains(string(res.Stderr), "Permission denied") || strings.Contains(string(res.Stderr), "Operation not permitted") {
-			return apperr.New(apperr.CmdNeedsRoot, "sites-enabled is root's")
-		}
-		return apperr.New(apperr.CmdFailed, "command failed")
+	err = toggleExit(res)
+	if codeOf(err) != apperr.CmdNeedsRoot {
+		return err
 	}
-	return nil
+	if res, ok, rerr := s.asRoot(ctx, serverID, command); rerr != nil {
+		return rerr
+	} else if ok {
+		return toggleExit(res)
+	}
+	return err
+}
+
+func toggleExit(res audit.Result) error {
+	if res.Exit == 0 {
+		return nil
+	}
+	if strings.Contains(string(res.Stderr), "Permission denied") || strings.Contains(string(res.Stderr), "Operation not permitted") {
+		return apperr.New(apperr.CmdNeedsRoot, "sites-enabled is root's")
+	}
+	return apperr.New(apperr.CmdFailed, "command failed")
 }
 
 var testCmd = shellx.Cmd("nginx", "-t")
@@ -91,7 +105,16 @@ func (s *Service) Test(ctx context.Context, serverID string) (TestResult, error)
 	if res.Exit == 127 {
 		return TestResult{}, apperr.New(apperr.CmdMissing, "nginx is not installed on the server")
 	}
-	return parseTest(string(res.Stderr), res.Exit), nil
+	t := parseTest(string(res.Stderr), res.Exit)
+	if !t.NeedsRoot {
+		return t, nil
+	}
+	if res, ok, err := s.asRoot(ctx, serverID, testCmd.String()); err != nil {
+		return t, err
+	} else if ok {
+		return parseTest(string(res.Stderr), res.Exit), nil
+	}
+	return t, nil
 }
 
 // ReloadResult is what reloading did. Reload runs nginx -t first and
@@ -117,6 +140,19 @@ func (s *Service) Reload(ctx context.Context, serverID string) (ReloadResult, er
 	if err != nil {
 		return ReloadResult{}, err
 	}
+	r, err := readReload(res)
+	if err != nil || !r.NeedsRoot {
+		return r, err
+	}
+	if res, ok, err := s.asRoot(ctx, serverID, ReloadCommand); err != nil {
+		return r, err
+	} else if ok {
+		return readReload(res)
+	}
+	return r, nil
+}
+
+func readReload(res audit.Result) (ReloadResult, error) {
 	out := string(res.Stderr)
 	r := ReloadResult{Sudo: reloadSudo}
 	if res.Exit == 0 {
