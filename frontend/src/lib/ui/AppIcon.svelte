@@ -304,6 +304,28 @@
     <path d="M32 9c8 6 12 15 11 26l5 7-7 1-3 6h-12l-3-6-7-1 5-7c-1-11 3-20 11-26z" fill="#fff" />
     <circle cx="32" cy="27" r="5" fill="#1f9d55" />
     <path d="M27 52c1 3 3 5 5 5s4-2 5-5" fill="#ffd166" />
+  {:else if id === 'servers'}
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#7c8cff" />
+        <stop offset="1" stop-color="#3a3fc4" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    {#each [[10, 11, '#34c77b', 16], [34, 11, '#34c77b', 11], [10, 35, '#ffb020', 13], [34, 35, '#c3c8d4', 0]] as const as [x, y, dot, bar] (`${x}-${y}`)}
+      <rect {x} y={y + 1.5} width="20" height="18" rx="4.5" fill="#1d1f8a" opacity="0.3" />
+      <rect {x} {y} width="20" height="18" rx="4.5" fill="#fff" />
+      <circle cx={x + 5.5} cy={y + 5.5} r="2.6" fill={dot} />
+      <rect x={x + 4} y={y + 11} width="12" height="3" rx="1.5" fill="#e3e6f2" />
+      {#if bar}<rect
+          x={x + 4}
+          y={y + 11}
+          width={bar * 0.75}
+          height="3"
+          rx="1.5"
+          fill="#5a63e8"
+        />{/if}
+    {/each}
   {:else if id === 'audit'}
     <defs>
       <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">

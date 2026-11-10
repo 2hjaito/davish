@@ -108,6 +108,7 @@ const vi = {
     disk: 'Ổ đĩa',
     security: 'An ninh',
     browser: 'Trình duyệt',
+    servers: 'Tất cả server',
   },
   browser: {
     back: 'Lùi',
@@ -863,6 +864,12 @@ const vi = {
         keys: ['⌘S: lưu', '⌘F: tìm'],
         runs: ['SFTP để đọc, ghi file tạm rồi đổi tên'],
       },
+      servers: {
+        does: 'Mọi server trong một màn hình: đã kết nối chưa, CPU, RAM, ổ /, load, thời gian chạy, mạng và cảnh báo mới nhất.',
+        actions: ['Kết nối một server', 'Chuyển sang một server'],
+        keys: [],
+        runs: ['Cùng cách đọc /proc như Monitor, cho từng server đã kết nối, khi cửa sổ đang mở'],
+      },
       settings: {
         does: 'Ngôn ngữ, chế độ sáng tối, giao diện, phông, ngưỡng cảnh báo, khóa app, prompt Terminal.',
         actions: [],
@@ -1205,6 +1212,21 @@ const vi = {
       reconnecting: 'mất kết nối, đang thử lại…',
       disconnected: 'chưa kết nối',
       failed: 'kết nối thất bại',
+    },
+    overview: {
+      open: 'Tất cả server…',
+      connected: (up: number, all: number) => `${up}/${all} đã kết nối`,
+      emptyHint: 'Thêm server từ menu server để thấy ở đây.',
+      cpu: 'CPU',
+      ram: 'RAM',
+      disk: 'Ổ /',
+      load: 'Load',
+      uptime: 'Chạy',
+      waiting: 'Đang chờ số liệu đầu tiên…',
+      connect: 'Kết nối',
+      switch: 'Chuyển sang',
+      here: 'Server đang xem',
+      hint: 'Số liệu chỉ được thu khi cửa sổ này mở. Cảnh báo lấy từ thông báo.',
     },
   },
   importDialog: {

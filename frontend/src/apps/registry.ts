@@ -8,6 +8,7 @@ import {
   EDITOR_SIZE,
   FILES_SIZE,
   LOGS_SIZE,
+  SERVERS_SIZE,
   SERVICES_SIZE,
   TERMINAL_SIZE,
   TRANSFERS_SIZE,
@@ -162,6 +163,15 @@ export const apps: AppDef[] = [
     size: TRANSFERS_SIZE,
     load: () => import('./transfers/TransfersApp.svelte'),
     dock: false,
+    layout: false,
+  },
+  {
+    id: 'servers',
+    label: t.apps.servers,
+    icon: 'server',
+    theme: 'light',
+    size: SERVERS_SIZE,
+    load: () => import('./servers/ServersApp.svelte'),
     layout: false,
   },
   {

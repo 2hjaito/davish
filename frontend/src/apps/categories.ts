@@ -23,6 +23,7 @@ export const CATEGORY: Record<AppId, Category> = {
   logs: 'monitor',
   disk: 'monitor',
   audit: 'monitor',
+  servers: 'monitor',
   docker: 'web',
   nginx: 'web',
   browser: 'web',

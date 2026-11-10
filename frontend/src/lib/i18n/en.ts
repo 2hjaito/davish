@@ -95,6 +95,7 @@ const en = {
     disk: 'Disk',
     security: 'Security',
     browser: 'Browser',
+    servers: 'All servers',
   },
   browser: {
     back: 'Back',
@@ -881,6 +882,14 @@ const en = {
         keys: ['⌘S: save', '⌘F: find'],
         runs: ['SFTP to read, write a temporary file, then rename it'],
       },
+      servers: {
+        does: 'Every server at a glance: connected or not, CPU, RAM, disk /, load, uptime, network and its latest alert.',
+        actions: ['Connect a server', 'Switch to a server'],
+        keys: [],
+        runs: [
+          'The same /proc reading as Monitor, for each connected server, while the window is open',
+        ],
+      },
       settings: {
         does: 'Language, light or dark theme, appearance, fonts, alert thresholds, app lock, Terminal prompt.',
         actions: [],
@@ -1220,6 +1229,21 @@ const en = {
       reconnecting: 'connection lost, retrying…',
       disconnected: 'not connected',
       failed: 'connection failed',
+    },
+    overview: {
+      open: 'All servers…',
+      connected: (up: number, all: number) => `${up} of ${all} connected`,
+      emptyHint: 'Add a server from the server menu to see it here.',
+      cpu: 'CPU',
+      ram: 'RAM',
+      disk: 'Disk /',
+      load: 'Load',
+      uptime: 'Up',
+      waiting: 'Waiting for the first readings…',
+      connect: 'Connect',
+      switch: 'Switch to it',
+      here: 'This server',
+      hint: 'Readings are collected only while this window is open. Alerts come from the notifications.',
     },
   },
   importDialog: {
