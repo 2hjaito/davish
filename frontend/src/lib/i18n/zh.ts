@@ -904,6 +904,7 @@ const zh = {
           'systemctl list-units、status',
           'journalctl -u',
           'systemctl start/stop/restart（需确认）',
+          '服务器因权限不足拒绝时：通过 sudo -n 重试，或使用 sudo -S -k 加上每个会话输入一次的 sudo 密码（只保存在内存中，经 stdin 传入）',
         ],
       },
       docker: {
@@ -1272,6 +1273,22 @@ const zh = {
     sleep: '关闭显示',
     quit: '退出 Davish',
     wakeHint: '点击或按任意键继续',
+  },
+  sudo: {
+    title: (server: string) => `${server} 的 sudo 密码`,
+    body: '此操作需要 root 权限。Davish 将运行：',
+    password: (user: string) => `${user} 的 sudo 密码`,
+    kept: '密码只在本次会话中保存在 Davish 的内存里，避免重复询问。不会写入磁盘、钥匙串或任何日志，只通过 stdin 交给 sudo（不会出现在命令行上）。断开连接、锁定应用或选择“忘记 sudo 密码”时会被清除。',
+    terminal: '在终端中运行',
+    run: '运行',
+    checking: '正在检查…',
+    unlikely:
+      '此用户不属于 sudo、wheel 或 admin 组，很可能无法使用 sudo。你仍可尝试输入密码，或用其他账户在终端中运行该命令。',
+    noSudo:
+      '此用户不能在服务器上使用 sudo。请用有权限的账户在终端中运行该命令，或联系服务器管理员。',
+    forget: '忘记 sudo 密码',
+    forgotten: '已从内存中清除 sudo 密码。',
+    journal: '用 sudo 查看…',
   },
   servers: {
     picker: '选择服务器',
@@ -2768,6 +2785,8 @@ const zh = {
     UPDATE_DEV_BUILD: '开发版不会自动更新。请从发布页面下载新版本。',
     DB_AUTH_REQUIRED: '此 MongoDB 已启用身份验证：需要 MongoDB 的用户和密码（不是 SSH 账户）。',
     DB_AUTH_FAILED: 'MongoDB 拒绝了此用户或密码。',
+    SUDO_PASSWORD_REQUIRED: '服务器需要 sudo 密码才能执行此操作。',
+    SUDO_PASSWORD_WRONG: 'sudo 不接受此密码。',
     UPDATE_DOWNLOAD_FAILED:
       '无法下载更新：GitHub 没有响应或网络中断。请几分钟后重试，或从发布页面下载。',
     GIT_UNSAFE_OWNER:

@@ -53,6 +53,8 @@ const (
 	UpdateDownloadFailed Code = "UPDATE_DOWNLOAD_FAILED"
 	DBAuthRequired       Code = "DB_AUTH_REQUIRED"
 	DBAuthFailed         Code = "DB_AUTH_FAILED"
+	SudoPasswordRequired Code = "SUDO_PASSWORD_REQUIRED"
+	SudoPasswordWrong    Code = "SUDO_PASSWORD_WRONG"
 )
 
 // Error is the only error type allowed to cross into the frontend.

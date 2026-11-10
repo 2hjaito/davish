@@ -926,6 +926,7 @@ const en = {
           'systemctl list-units, status',
           'journalctl -u',
           'systemctl start/stop/restart (with confirmation)',
+          'When the server refuses for lack of root: again through sudo -n, or sudo -S -k with the sudo password you type once per session (kept in memory only, on stdin)',
         ],
       },
       docker: {
@@ -1310,6 +1311,22 @@ const en = {
     sleep: 'Sleep display',
     quit: 'Quit Davish',
     wakeHint: 'Click or press any key to continue',
+  },
+  sudo: {
+    title: (server: string) => `sudo password for ${server}`,
+    body: 'This needs root. Davish will run:',
+    password: (user: string) => `sudo password of ${user}`,
+    kept: 'The password is kept in Davish’s memory for this session only, so you are not asked again. It is not saved to disk, the keychain or any log, and only reaches sudo on stdin (never on a command line). It is wiped when you disconnect, lock the app, or choose Forget sudo password.',
+    terminal: 'Run in Terminal',
+    run: 'Run',
+    checking: 'Checking…',
+    unlikely:
+      'This user is in none of the sudo, wheel or admin groups, so it most likely may not use sudo. You can still try the password, or run the command in Terminal with another account.',
+    noSudo:
+      'This user may not use sudo on the server. Run the command in Terminal with an account that can, or ask the server’s admin.',
+    forget: 'Forget sudo password',
+    forgotten: 'The sudo password was wiped from memory.',
+    journal: 'View with sudo…',
   },
   servers: {
     picker: 'Choose server',
@@ -2855,6 +2872,8 @@ const en = {
     DB_AUTH_REQUIRED:
       'This MongoDB has authentication on: it needs a MongoDB user and password (not your SSH login).',
     DB_AUTH_FAILED: 'MongoDB refused this user or password.',
+    SUDO_PASSWORD_REQUIRED: 'The server needs the sudo password for this.',
+    SUDO_PASSWORD_WRONG: 'sudo did not accept this password.',
     UPDATE_DOWNLOAD_FAILED:
       'Could not download the update: GitHub did not answer or the network dropped. Try again in a few minutes, or download it from the release page.',
     GIT_UNSAFE_OWNER:

@@ -33,6 +33,7 @@ import (
 	"davish/internal/shortcut"
 	"davish/internal/sshkeys"
 	"davish/internal/store"
+	"davish/internal/sudo"
 	"davish/internal/svc"
 	"davish/internal/sysmon"
 	"davish/internal/term"
@@ -58,6 +59,7 @@ type App struct {
 	audit     *audit.Log
 	shortcuts *shortcut.Service
 	services  *svc.Service
+	sudo      *sudo.Keeper
 	docker    *docker.Service
 	logs      *logs.Service
 	cron      *cron.Service
@@ -111,7 +113,11 @@ func New(version string) (*App, error) {
 	runner := audit.NewRunner(a.conns, a.audit)
 	runner.LogTo(log)
 	a.files = fs.New(a.conns, runner, log)
+	// The emitter passes it every event, so it forgets a password when the
+	// session ends.
+	a.sudo = sudo.New(runner)
 	a.services = svc.New(runner)
+	a.services.UseRoot(a.sudo)
 	a.docker = docker.New(runner)
 	a.cron = cron.New(runner, a.conns)
 	a.nginx = nginx.New(runner, a.conns, emitter{a})
@@ -176,6 +182,10 @@ func ErrorFormatter(a *App) func(error) any {
 type emitter struct{ a *App }
 
 func (e emitter) Emit(name string, payload any) {
+	// A dropped connection or a locked app wipes sudo passwords.
+	if e.a.sudo != nil {
+		e.a.sudo.Observe(name, payload)
+	}
 	if ctx := e.a.wails.Load(); ctx != nil {
 		runtime.EventsEmit(*ctx, name, payload)
 	}

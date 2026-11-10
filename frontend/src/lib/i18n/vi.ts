@@ -912,6 +912,7 @@ const vi = {
           'systemctl list-units, status',
           'journalctl -u',
           'systemctl start/stop/restart (có xác nhận)',
+          'Server từ chối vì thiếu quyền: chạy lại qua sudo -n, hoặc sudo -S -k với mật khẩu sudo bạn nhập một lần mỗi phiên (chỉ giữ trong bộ nhớ, qua stdin)',
         ],
       },
       docker: {
@@ -1289,6 +1290,22 @@ const vi = {
     sleep: 'Ngủ màn hình',
     quit: 'Thoát Davish',
     wakeHint: 'Bấm chuột hoặc nhấn phím bất kỳ để tiếp tục',
+  },
+  sudo: {
+    title: (server: string) => `Mật khẩu sudo cho ${server}`,
+    body: 'Lệnh này cần quyền root. Davish sẽ chạy:',
+    password: (user: string) => `Mật khẩu sudo của ${user}`,
+    kept: 'Mật khẩu chỉ được giữ trong bộ nhớ của Davish trong phiên này, để không phải hỏi lại. Không lưu vào ổ đĩa, keychain hay nhật ký, chỉ đưa cho sudo qua stdin (không nằm trên dòng lệnh). Bị xóa khi ngắt kết nối, khóa app, hoặc bấm Quên mật khẩu sudo.',
+    terminal: 'Chạy trong Terminal',
+    run: 'Chạy',
+    checking: 'Đang kiểm tra…',
+    unlikely:
+      'User này không thuộc nhóm sudo, wheel hay admin, nên nhiều khả năng không được dùng sudo. Bạn vẫn có thể thử mật khẩu, hoặc chạy lệnh trong Terminal bằng tài khoản khác.',
+    noSudo:
+      'User này không được dùng sudo trên server. Hãy chạy lệnh trong Terminal bằng tài khoản có quyền, hoặc nhờ người quản trị.',
+    forget: 'Quên mật khẩu sudo',
+    forgotten: 'Đã xóa mật khẩu sudo khỏi bộ nhớ.',
+    journal: 'Xem bằng sudo…',
   },
   servers: {
     picker: 'Chọn server',
@@ -2821,6 +2838,8 @@ const vi = {
     DB_AUTH_REQUIRED:
       'MongoDB này bật xác thực: cần user và mật khẩu của MongoDB (khác tài khoản SSH).',
     DB_AUTH_FAILED: 'MongoDB từ chối user hoặc mật khẩu này.',
+    SUDO_PASSWORD_REQUIRED: 'Server cần mật khẩu sudo cho lệnh này.',
+    SUDO_PASSWORD_WRONG: 'sudo không nhận mật khẩu này.',
     UPDATE_DOWNLOAD_FAILED:
       'Không tải được bản cập nhật: GitHub không trả lời hoặc mạng chập chờn. Thử lại sau ít phút, hoặc tải thủ công từ trang phát hành.',
     GIT_UNSAFE_OWNER:

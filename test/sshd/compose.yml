@@ -2,7 +2,10 @@
 # and inner, reachable only from inside the compose network (through A),
 # for ProxyJump. Bound to localhost; test only.
 x-sshd: &sshd
-  build: .
+  build:
+    context: .
+    args:
+      UBUNTU_MIRROR: ${UBUNTU_MIRROR:-}
   # systemd as PID 1 needs the host's cgroup tree and a writable /run;
   # dockerd inside needs privileged mode.
   privileged: true

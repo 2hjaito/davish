@@ -10,6 +10,16 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 - Database: nút Dò (chỉ đọc) tìm database server đang chạy và file SQLite trên server.
 - Database: khối "Davish kết nối thế nào?" giải thích lệnh chạy ở đâu và mật khẩu được giữ thế nào.
 
+## [1.12.3] - 2026-11-10
+
+### Sửa
+- Sudo: nhận đúng "cần mật khẩu" trên server không dùng tiếng Anh (sudo chạy với `LC_ALL=C`); hai thao tác cùng cần mật khẩu giờ chờ chung một hộp hỏi thay vì thao tác trước biến mất; server bật `requiretty` (CentOS/RHEL cũ) thì lùi về Terminal thay vì báo lỗi; user không thuộc nhóm sudo, wheel hay admin được cảnh báo trước khi nhập mật khẩu, nút Terminal được đưa lên trước.
+
+## [1.12.2] - 2026-11-10
+
+### Sửa
+- Dịch vụ: đăng nhập bằng user thường (không phải root) thì start, stop, restart, xóa service và xem journal không còn bị từ chối (#76, #113). Davish chạy lại qua `sudo`: không cần mật khẩu thì chạy luôn, cần thì hỏi mật khẩu sudo một lần mỗi phiên. Mật khẩu chỉ giữ trong bộ nhớ, không lưu ổ đĩa, keychain hay nhật ký, đưa cho sudo qua stdin, bị xóa khi ngắt kết nối, khóa app hoặc chọn Tệp → Quên mật khẩu sudo. Hộp hỏi hiện đúng lệnh `sudo …` và có nút chạy trong Terminal thay vì nhập.
+
 ## [1.12.1] - 2026-11-10
 
 ### Thêm

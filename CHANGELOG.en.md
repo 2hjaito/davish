@@ -10,6 +10,16 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 - Database: Find (read-only) looks for the database servers running and the SQLite files on the server.
 - Database: "How does Davish connect?" explains where commands run and how passwords are kept.
 
+## [1.12.3] - 2026-11-10
+
+### Fixed
+- Sudo: "a password is required" is recognized on servers not set to English (sudo runs with `LC_ALL=C`); two actions needing the password at once now share one prompt instead of the first one vanishing; servers with `requiretty` (older CentOS/RHEL) fall back to Terminal instead of failing; a user in none of the sudo, wheel or admin groups is warned before typing the password, with Terminal offered first.
+
+## [1.12.2] - 2026-11-10
+
+### Fixed
+- Services: logged in as a user who is not root, start, stop, restart, removing a service and its journal are no longer refused (#76, #113). Davish runs them again through `sudo`: right away when sudo needs no password, else after asking for the sudo password once per session. The password is kept in memory only, never on disk, in the keychain or in a log, reaches sudo on stdin, and is wiped when you disconnect, lock the app or choose File → Forget sudo password. The prompt shows the exact `sudo …` command and can run it in Terminal instead.
+
 ## [1.12.1] - 2026-11-10
 
 ### Added

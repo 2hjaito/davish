@@ -35,12 +35,35 @@ type Unit struct {
 
 // Service talks to systemd on each server.
 type Service struct {
-	run Runner
+	run  Runner
+	root Root
 }
 
 // New creates the service.
 func New(run Runner) *Service {
 	return &Service{run: run}
+}
+
+// Root runs a command as root for a user who is not (sudo.Keeper).
+type Root interface {
+	Run(ctx context.Context, serverID, app, line string, stdin []byte) (audit.Result, error)
+}
+
+// UseRoot lets actions the server refuses for lack of root run again as
+// root through r (ADR 0018).
+func (s *Service) UseRoot(r Root) { s.root = r }
+
+// asRoot runs line again as root after the server refused it. Without a
+// way to root it keeps CMD_NEEDS_ROOT, and the UI offers a terminal.
+func (s *Service) asRoot(ctx context.Context, serverID, line string, refused error) error {
+	if s.root == nil {
+		return refused
+	}
+	res, err := s.root.Run(ctx, serverID, app, line, nil)
+	if err != nil {
+		return err
+	}
+	return checkExit(res)
 }
 
 // List returns the server's service units sorted by name. It asks for JSON

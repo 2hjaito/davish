@@ -9,9 +9,31 @@ FROM ubuntu:24.04
 
 ENV container=docker
 
+# Ubuntu's mirrors drop connections and serve 404s mid-sync now and then;
+# apt tries each download again, with growing delays, instead of failing
+# the build and the CI run with it.
+RUN printf 'Acquire::Retries "8";\nAcquire::Retries::Delay "true";\nAcquire::http::Timeout "30";\n' \
+      > /etc/apt/apt.conf.d/80-davish-retries
+
+# A closer mirror, when given: CI passes Azure's, next to GitHub's runners,
+# where archive.ubuntu.com can take a minute per index.
+ARG UBUNTU_MIRROR=
+RUN if [ -n "$UBUNTU_MIRROR" ]; then \
+      sed -i "s|http://archive.ubuntu.com/ubuntu|$UBUNTU_MIRROR|g; s|http://security.ubuntu.com/ubuntu|$UBUNTU_MIRROR|g" \
+        /etc/apt/sources.list.d/ubuntu.sources; \
+    fi
+
+# Temporary (2026-11-10): Ubuntu lists perl 5.38.2-3.2ubuntu0.7 in
+# noble-security but its .debs 404 on every mirror, so installing git, which
+# needs perl, failed every CI run. Keep perl at the version the base image
+# ships, still in noble-updates. Remove once the 0.7 files are served.
+RUN v=$(dpkg-query -W -f '${Version}' perl-base) \
+ && printf 'Package: perl perl-base perl-modules-5.38 libperl5.38t64\nPin: version %s\nPin-Priority: 1001\n' "$v" \
+      > /etc/apt/preferences.d/80-davish-perl
+
 RUN apt-get update \
  && apt-get install -y --no-install-recommends systemd systemd-sysv dbus polkitd \
-      openssh-server procps zip nginx docker.io cron curl git \
+      openssh-server procps zip nginx docker.io cron curl git sudo \
  && rm -rf /var/lib/apt/lists/* \
  && useradd -m -s /bin/bash -G systemd-journal tester \
  && rm -f /etc/ssh/ssh_host_*
@@ -87,6 +109,17 @@ RUN mkdir -p /srv/davish-app /var/lib/davish-private \
  && echo 'not a database' > /srv/davish-app/notes.db \
  && chown -R tester:tester /srv/davish-app \
  && chmod 700 /var/lib/davish-private
+
+# sudoer is an admin as most servers have one: in the sudo group, and sudo
+# asks for a password (ADR 0018). tester stays without sudo. The password
+# is a throwaway for this container only.
+RUN useradd -m -s /bin/bash -G sudo,systemd-journal sudoer \
+ && echo 'sudoer:davish-sudo-test-only' | chpasswd \
+ && mkdir -p /home/sudoer/.ssh \
+ && cp /home/tester/.ssh/authorized_keys /home/sudoer/.ssh/authorized_keys \
+ && chown -R sudoer:sudoer /home/sudoer/.ssh \
+ && chmod 700 /home/sudoer/.ssh \
+ && chmod 600 /home/sudoer/.ssh/authorized_keys
 
 EXPOSE 22
 STOPSIGNAL SIGRTMIN+3

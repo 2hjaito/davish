@@ -41,6 +41,8 @@ export interface Journal {
   restricted: boolean
   /** The same read as root, to prefill in a terminal. */
   sudo: string
+  /** sudo could read it once given the password (ADR 0018). */
+  askSudo?: boolean
 }
 
 export interface ActionPlan {

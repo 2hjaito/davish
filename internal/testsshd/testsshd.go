@@ -21,6 +21,9 @@ const (
 	Port  = 2222
 	PortB = 2223
 	User  = "tester"
+	// Sudoer is in the sudo group, and sudo asks it for SudoPassword.
+	Sudoer       = "sudoer"
+	SudoPassword = "davish-sudo-test-only" //nolint:gosec // the test container's throwaway
 	// InnerHost is the server only reachable through the one at Port.
 	InnerHost = "sshd-inner"
 )

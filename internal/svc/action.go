@@ -49,16 +49,24 @@ func PlanAction(unit, action string) (Plan, error) {
 	}, nil
 }
 
-// Act runs action on unit. Without root, the server usually refuses with
-// CMD_NEEDS_ROOT; the UI then offers Plan.Sudo in a terminal. A unit that
+// Act runs action on unit. When the server refuses it for lack of root,
+// it runs again through sudo (ADR 0018), which may ask the UI for the
+// password (SUDO_PASSWORD_REQUIRED); a user without sudo gets
+// CMD_NEEDS_ROOT and the UI offers Plan.Sudo in a terminal. A unit that
 // fails to start gives CMD_FAILED, and its log tells why.
 func (s *Service) Act(ctx context.Context, serverID, unit, action string) error {
 	if _, err := PlanAction(unit, action); err != nil {
 		return err
 	}
-	res, err := s.run.Run(ctx, serverID, app, shellx.Cmd("systemctl", action, unit))
+	cmd := shellx.Cmd("systemctl", action, unit)
+	res, err := s.run.Run(ctx, serverID, app, cmd)
 	if err != nil {
 		return err
 	}
-	return checkExit(res)
+	if err := checkExit(res); codeOf(err) == apperr.CmdNeedsRoot {
+		return s.asRoot(ctx, serverID, cmd.String(), err)
+	} else if err != nil {
+		return err
+	}
+	return nil
 }

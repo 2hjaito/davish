@@ -40,7 +40,14 @@ func Quiet() *slog.Logger { return slog.New(slog.NewTextHandler(io.Discard, nil)
 // key pinned, and the server's ID. It is closed when the test ends.
 func Connect(t *testing.T) (*conn.Manager, string) {
 	t.Helper()
-	m, ids := connect(t, Port)
+	m, ids := connect(t, User, Port)
+	return m, ids[0]
+}
+
+// ConnectAs is Connect logged in as user, such as Sudoer.
+func ConnectAs(t *testing.T, user string) (*conn.Manager, string) {
+	t.Helper()
+	m, ids := connect(t, user, Port)
 	return m, ids[0]
 }
 
@@ -48,11 +55,11 @@ func Connect(t *testing.T) (*conn.Manager, string) {
 // tests that move files between servers.
 func ConnectBoth(t *testing.T) (m *conn.Manager, a, b string) {
 	t.Helper()
-	m, ids := connect(t, Port, PortB)
+	m, ids := connect(t, User, Port, PortB)
 	return m, ids[0], ids[1]
 }
 
-func connect(t *testing.T, ports ...int) (*conn.Manager, []string) {
+func connect(t *testing.T, user string, ports ...int) (*conn.Manager, []string) {
 	t.Helper()
 	dir := t.TempDir()
 	secrets := store.NewSecrets(keyring{})
@@ -61,7 +68,7 @@ func connect(t *testing.T, ports ...int) (*conn.Manager, []string) {
 	var ids []string
 	for i, port := range ports {
 		srv, err := st.Save(context.Background(), store.Server{
-			Name: "test-" + strconv.Itoa(i), Host: Host, Port: port, User: User,
+			Name: "test-" + strconv.Itoa(i), Host: Host, Port: port, User: user,
 			Auth: store.AuthKey, KeyPath: KeyPath(),
 		})
 		if err != nil {

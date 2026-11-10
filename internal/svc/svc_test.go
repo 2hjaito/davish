@@ -1,6 +1,7 @@
 package svc
 
 import (
+	"context"
 	"errors"
 	"os"
 	"reflect"
@@ -8,6 +9,7 @@ import (
 
 	"davish/internal/apperr"
 	"davish/internal/audit"
+	"davish/internal/shellx"
 )
 
 func TestParseListFixtures(t *testing.T) {
@@ -281,5 +283,71 @@ func TestPlanRemove(t *testing.T) {
 		if tt.sudo != "" && got.Sudo != tt.sudo {
 			t.Errorf("%s: sudo = %s", tt.name, got.Sudo)
 		}
+	}
+}
+
+type script struct {
+	results map[string]audit.Result
+	lines   []string
+}
+
+func (f *script) Run(ctx context.Context, id, app string, cmd shellx.Command) (audit.Result, error) {
+	return f.RunLine(ctx, id, app, cmd.String())
+}
+
+func (f *script) RunLine(_ context.Context, _, _, line string) (audit.Result, error) {
+	f.lines = append(f.lines, line)
+	return f.results[line], nil
+}
+
+type rootFunc func(line string) (audit.Result, error)
+
+func (r rootFunc) Run(_ context.Context, _, _, line string, _ []byte) (audit.Result, error) {
+	return r(line)
+}
+
+func TestActFallsBackToRoot(t *testing.T) {
+	refused := audit.Result{Exit: 1, Stderr: []byte("Failed to stop nginx.service: Interactive authentication required.")}
+	f := &script{results: map[string]audit.Result{"systemctl stop nginx.service": refused}}
+	s := New(f)
+	if err := s.Act(context.Background(), "srv", "nginx.service", ActionStop); codeOf(err) != apperr.CmdNeedsRoot {
+		t.Fatalf("without a root runner: %v", err)
+	}
+	var asRoot []string
+	s.UseRoot(rootFunc(func(line string) (audit.Result, error) {
+		asRoot = append(asRoot, line)
+		return audit.Result{}, nil
+	}))
+	if err := s.Act(context.Background(), "srv", "nginx.service", ActionStop); err != nil {
+		t.Fatal(err)
+	}
+	if len(asRoot) != 1 || asRoot[0] != "systemctl stop nginx.service" {
+		t.Errorf("as root: %v", asRoot)
+	}
+	// What the server allows never goes through sudo.
+	asRoot = nil
+	if err := s.Act(context.Background(), "srv", "davish-ok.service", ActionRestart); err != nil || asRoot != nil {
+		t.Errorf("allowed: %v, as root %v", err, asRoot)
+	}
+}
+
+func TestJournalOffersSudo(t *testing.T) {
+	f := &script{results: map[string]audit.Result{
+		journalCommand("nginx.service").String(): {Exit: 1, Stderr: []byte("No journal files were opened due to insufficient permissions.")},
+	}}
+	s := New(f)
+	s.UseRoot(rootFunc(func(string) (audit.Result, error) {
+		return audit.Result{}, apperr.New(apperr.SudoPasswordRequired, "sudo asks for a password")
+	}))
+	j, err := s.Journal(context.Background(), "srv", "nginx.service")
+	if err != nil || !j.Restricted || !j.AskSudo {
+		t.Fatalf("journal = %+v, %v", j, err)
+	}
+	s.UseRoot(rootFunc(func(string) (audit.Result, error) {
+		return audit.Result{Stdout: []byte("2026-11-10T10:00:00+0700 host nginx[1]: started\n")}, nil
+	}))
+	j, err = s.Journal(context.Background(), "srv", "nginx.service")
+	if err != nil || j.Restricted || len(j.Lines) != 1 {
+		t.Fatalf("as root = %+v, %v", j, err)
 	}
 }

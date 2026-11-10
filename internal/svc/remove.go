@@ -119,5 +119,10 @@ func (s *Service) Remove(ctx context.Context, serverID, unit, command string) er
 	if err != nil {
 		return err
 	}
-	return checkExit(res)
+	if err := checkExit(res); codeOf(err) == apperr.CmdNeedsRoot {
+		return s.asRoot(ctx, serverID, command, err)
+	} else if err != nil {
+		return err
+	}
+	return nil
 }
