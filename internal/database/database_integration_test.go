@@ -10,6 +10,7 @@ import (
 
 	"davish/internal/apperr"
 	"davish/internal/audit"
+	"davish/internal/conn"
 	"davish/internal/database"
 	"davish/internal/testsshd"
 )
@@ -21,6 +22,19 @@ func (discard) Emit(string, any) {}
 // The test sshd's MongoDB has authorization on and a throwaway admin
 // (test/sshd/Dockerfile).
 const mongoAdmin = "mongodb://davish-admin:davish-test-only@127.0.0.1:27017/admin"
+
+// waitMongo waits for mongod, which may still be starting after the
+// containers restarted, and shows why when it never comes up.
+func waitMongo(t *testing.T, m *conn.Manager, id string) {
+	t.Helper()
+	ok := testsshd.Run(t, m, id, "for i in $(seq 1 60); do "+
+		"(echo > /dev/tcp/127.0.0.1/27017) 2>/dev/null && { echo up; exit 0; }; sleep 1; done; "+
+		"systemctl status mongod --no-pager 2>&1 | tail -20; journalctl -u mongod -n 30 --no-pager 2>&1; "+
+		"tail -20 /var/log/mongodb/mongod.log 2>&1; true")
+	if ok != "up" {
+		t.Fatalf("mongod is not listening:\n%s", ok)
+	}
+}
 
 func mongoEngine(t *testing.T, s *database.Service, id string) database.Engine {
 	t.Helper()
@@ -40,6 +54,7 @@ func mongoEngine(t *testing.T, s *database.Service, id string) database.Engine {
 func TestMongoLoginCreateDrop(t *testing.T) {
 	ctx := context.Background()
 	m, id := testsshd.Connect(t)
+	waitMongo(t, m, id)
 	s := database.New(audit.NewRunner(m, audit.New(discard{})))
 
 	if e := mongoEngine(t, s, id); !e.Installed || !e.NeedsAuth {
@@ -95,6 +110,7 @@ func TestMongoLoginCreateDrop(t *testing.T) {
 func TestMongoDumpRestore(t *testing.T) {
 	ctx := context.Background()
 	m, id := testsshd.Connect(t)
+	waitMongo(t, m, id)
 	s := database.New(audit.NewRunner(m, audit.New(discard{})))
 	s.SetMongoURI(id, mongoAdmin)
 
@@ -134,6 +150,7 @@ func TestMongoDumpRestore(t *testing.T) {
 
 func TestFind(t *testing.T) {
 	m, id := testsshd.Connect(t)
+	waitMongo(t, m, id)
 	s := database.New(audit.NewRunner(m, audit.New(discard{})))
 	f, err := s.Find(context.Background(), id)
 	if err != nil {
@@ -152,6 +169,7 @@ func TestFind(t *testing.T) {
 func TestSQLite(t *testing.T) {
 	ctx := context.Background()
 	m, id := testsshd.Connect(t)
+	waitMongo(t, m, id)
 	s := database.New(audit.NewRunner(m, audit.New(discard{})))
 
 	info, err := s.InspectSQLite(ctx, id, "/srv/davish-app/app.db")

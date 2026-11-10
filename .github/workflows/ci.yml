@@ -119,6 +119,12 @@ jobs:
       - name: Integration tests
         run: make test-integration
 
+      - name: Test sshd state on failure
+        if: failure()
+        run: |
+          docker compose -f test/sshd/compose.yml exec -T sshd sh -c \
+            'systemctl --failed --no-pager; systemctl status mongod --no-pager; journalctl -u mongod -n 50 --no-pager; tail -50 /var/log/mongodb/mongod.log' || true
+
       - name: Stop test sshd
         if: always()
         run: make sshd-down
