@@ -9,6 +9,12 @@ FROM ubuntu:24.04
 
 ENV container=docker
 
+# Ubuntu's mirrors drop connections and serve 404s mid-sync now and then;
+# apt tries each download again, with growing delays, instead of failing
+# the build and the CI run with it.
+RUN printf 'Acquire::Retries "8";\nAcquire::Retries::Delay "true";\nAcquire::http::Timeout "30";\n' \
+      > /etc/apt/apt.conf.d/80-davish-retries
+
 RUN apt-get update \
  && apt-get install -y --no-install-recommends systemd systemd-sysv dbus polkitd \
       openssh-server procps zip nginx docker.io cron curl git \
