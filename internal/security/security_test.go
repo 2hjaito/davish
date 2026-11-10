@@ -1,11 +1,14 @@
 package security
 
 import (
+	"slices"
 	"strings"
 	"testing"
 )
 
 const sample = `1000
+--now--
+2026-10-28T12:30:00+0000
 --journal--
 2026-10-28T10:00:00+0000 vps sshd[1]: Invalid user admin from 203.0.113.9 port 4000
 2026-10-28T10:00:01+0000 vps sshd[1]: Failed password for invalid user admin from 203.0.113.9 port 4000 ssh2
@@ -18,6 +21,9 @@ const sample = `1000
 --authlog--
 --last--
 dangth   pts/0        192.0.2.1        Wed Oct 28 11:00   still logged in
+--who--
+dangth   pts/0        2026-10-28 11:00 (192.0.2.1)
+root     tty1         2026-10-27 08:00
 --lastb--
 lastb: cannot open /var/log/btmp: Permission denied
 --ufw--
@@ -81,5 +87,55 @@ func TestParseAuthLogFallback(t *testing.T) {
 	}
 	if parse([]byte("0\n")).Source != "" {
 		t.Error("source set without logs")
+	}
+}
+
+func TestParseOverview(t *testing.T) {
+	r := parse([]byte(sample))
+	if r.InvalidTotal != 2 || r.FailedIPs != 3 || r.AcceptedTotal != 2 {
+		t.Errorf("invalid/ips/accepted = %d %d %d", r.InvalidTotal, r.FailedIPs, r.AcceptedTotal)
+	}
+	want := []UserCount{{"root", 3}, {"admin", 1}, {"oracle", 1}}
+	if !slices.Equal(r.Targets, want) {
+		t.Errorf("targets = %+v", r.Targets)
+	}
+	// Five failures at 10:00, none at 11:00, the hour now is 12:00.
+	hours := []HourCount{{"2026-10-28T10", 5}, {"2026-10-28T11", 0}, {"2026-10-28T12", 0}}
+	if !slices.Equal(r.Hourly, hours) {
+		t.Errorf("hourly = %+v", r.Hourly)
+	}
+	sessions := []Session{
+		{User: "dangth", TTY: "pts/0", Since: "2026-10-28 11:00", From: "192.0.2.1"},
+		{User: "root", TTY: "tty1", Since: "2026-10-27 08:00"},
+	}
+	if !slices.Equal(r.Sessions, sessions) {
+		t.Errorf("sessions = %+v", r.Sessions)
+	}
+}
+
+func TestHourlyInServerZone(t *testing.T) {
+	now, _ := parseTime("2026-01-02T01:10:00+0530")
+	got := hourly([]string{
+		"2026-01-01T19:20:00+0000", // 00:50 on the 2nd in +0530
+		"Jan 2 01:05:00",           // syslog, server time
+		"Dec 31 23:00:00",          // last year, not next
+		"garbage",
+	}, now)
+	if len(got) != 27 || got[0] != (HourCount{"2025-12-31T23", 1}) {
+		t.Fatalf("hourly = %d %+v", len(got), got[:min(2, len(got))])
+	}
+	if got[25] != (HourCount{"2026-01-02T00", 1}) || got[26] != (HourCount{"2026-01-02T01", 1}) {
+		t.Errorf("tail = %+v", got[24:])
+	}
+}
+
+func TestHourlyKeepsAWeek(t *testing.T) {
+	now, _ := parseTime("2026-10-28T12:00:00+0000")
+	got := hourly([]string{"2026-10-01T10:00:00+0000", "2026-10-28T11:00:00+0000"}, now)
+	if len(got) != maxHours || got[len(got)-2].Count != 1 || got[len(got)-1].Hour != "2026-10-28T12" {
+		t.Errorf("hourly = %d %+v", len(got), got[len(got)-2:])
+	}
+	if hourly(nil, now) != nil {
+		t.Error("hours without failures")
 	}
 }

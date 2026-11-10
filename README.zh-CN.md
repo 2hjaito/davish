@@ -61,7 +61,7 @@
 - [端口与隧道](FEATURES.md#ports--tunnels)：监听中的端口，隧道到 `127.0.0.1`
 - [浏览器](FEATURES.md#browser)：在 Davish 里直接打开服务器上的 `localhost:3000`
 - [磁盘](FEATURES.md#disk)：用目录树查看空间去向，说明哪些没能统计及原因，可删除和清理
-- [安全](FEATURES.md#security)：按 IP 统计的失败登录、ufw、fail2ban
+- [安全](FEATURES.md#security)：按小时和按 IP 统计的失败登录、被尝试的用户、当前会话、ufw、fail2ban
 - [SSH 密钥](FEATURES.md#ssh-keys)：authorized_keys、部署密钥、本机密钥
 - [~/.ssh/config 与 ProxyJump](FEATURES.md#sshconfig-and-proxyjump)：导入主机，经由堡垒机连接
 
