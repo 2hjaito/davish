@@ -11,6 +11,7 @@ import (
 
 	"davish/internal/apperr"
 	"davish/internal/audit"
+	"davish/internal/sudo"
 	"davish/internal/svc"
 	"davish/internal/testsshd"
 )
@@ -171,5 +172,35 @@ func TestPlanRemove(t *testing.T) {
 	// The command must be the one confirmed.
 	if err := s.Remove(ctx, id, "davish-crash.service", "systemctl reset-failed davish-crash.service"); err == nil {
 		t.Error("a command other than the plan's was run")
+	}
+}
+
+// An admin whose sudo asks for a password (#76): Davish asks once, then
+// restarts what systemd refused, and reads the journal as root.
+func TestSudoerRestartsThroughSudo(t *testing.T) {
+	ctx := context.Background()
+	m, id := testsshd.ConnectAs(t, testsshd.Sudoer)
+	log := audit.New(discard{})
+	run := audit.NewRunner(m, log)
+	k := sudo.New(run)
+	s := svc.New(run)
+	s.UseRoot(k)
+
+	if err := s.Act(ctx, id, "nginx.service", svc.ActionRestart); code(err) != apperr.SudoPasswordRequired {
+		t.Fatalf("before the password: %v", err)
+	}
+	if err := k.SetPassword(ctx, id, []byte(testsshd.SudoPassword)); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Act(ctx, id, "nginx.service", svc.ActionRestart); err != nil {
+		t.Fatalf("restart through sudo: %v", err)
+	}
+	if u := find(t, s, id, "nginx.service"); u.Active != "active" {
+		t.Errorf("nginx after restart: %+v", u)
+	}
+	for _, e := range log.Entries() {
+		if strings.Contains(e.Command, testsshd.SudoPassword) {
+			t.Fatalf("password in the audit log: %s", e.Command)
+		}
 	}
 }

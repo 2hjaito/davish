@@ -2,9 +2,11 @@ package svc
 
 import (
 	"context"
+	"errors"
 	"strconv"
 	"strings"
 
+	"davish/internal/apperr"
 	"davish/internal/shellx"
 )
 
@@ -20,6 +22,9 @@ type Journal struct {
 	Restricted bool `json:"restricted"`
 	// Sudo reads the same lines as root, for the user to run in a terminal.
 	Sudo string `json:"sudo"`
+	// AskSudo is set when sudo could read them once given the password:
+	// the UI offers to ask for it.
+	AskSudo bool `json:"askSudo"`
 }
 
 // Journal returns the last JournalLines log lines of unit, oldest first.
@@ -33,10 +38,33 @@ func (s *Service) Journal(ctx context.Context, serverID, unit string) (Journal, 
 		return Journal{}, err
 	}
 	j := parseJournal(res.Stdout, res.Stderr, shellx.Cmd("sudo", cmd.Args()...).String())
-	if j.Restricted {
+	if !j.Restricted {
+		return j, checkExit(res)
+	}
+	if s.root == nil {
 		return j, nil
 	}
-	return j, checkExit(res)
+	// Read as root when sudo lets the user without asking, or the
+	// session has the password; never asks by itself.
+	res, err = s.root.Run(ctx, serverID, app, cmd.String(), nil)
+	switch code := codeOf(err); {
+	case err == nil && res.Exit == 0:
+		return parseJournal(res.Stdout, res.Stderr, j.Sudo), nil
+	case code == apperr.SudoPasswordRequired:
+		j.AskSudo = true
+	case err != nil && code == "":
+		// The connection failed, not sudo.
+		return j, err
+	}
+	return j, nil
+}
+
+func codeOf(err error) apperr.Code {
+	var e *apperr.Error
+	if errors.As(err, &e) {
+		return e.Code
+	}
+	return ""
 }
 
 func journalCommand(unit string) shellx.Command {
