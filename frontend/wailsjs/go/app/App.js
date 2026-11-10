@@ -606,6 +606,18 @@ export function ShortcutRun(arg1, arg2, arg3) {
   return window['go']['app']['App']['ShortcutRun'](arg1, arg2, arg3);
 }
 
+export function SudoForget(arg1) {
+  return window['go']['app']['App']['SudoForget'](arg1);
+}
+
+export function SudoSetPassword(arg1, arg2) {
+  return window['go']['app']['App']['SudoSetPassword'](arg1, arg2);
+}
+
+export function SudoState(arg1) {
+  return window['go']['app']['App']['SudoState'](arg1);
+}
+
 export function TermClose(arg1) {
   return window['go']['app']['App']['TermClose'](arg1);
 }

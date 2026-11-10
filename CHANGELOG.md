@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Sửa
+- Dịch vụ: đăng nhập bằng user thường (không phải root) thì start, stop, restart, xóa service và xem journal không còn bị từ chối (#76, #113). Davish chạy lại qua `sudo`: không cần mật khẩu thì chạy luôn, cần thì hỏi mật khẩu sudo một lần mỗi phiên. Mật khẩu chỉ giữ trong bộ nhớ, không lưu ổ đĩa, keychain hay nhật ký, đưa cho sudo qua stdin, bị xóa khi ngắt kết nối, khóa app hoặc chọn Tệp → Quên mật khẩu sudo. Hộp hỏi hiện đúng lệnh `sudo …` và có nút chạy trong Terminal thay vì nhập.
+
 ## [1.12.1] - 2026-11-10
 
 ### Thêm
