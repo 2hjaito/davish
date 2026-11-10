@@ -18,6 +18,7 @@ export const CATEGORY: Record<AppId, Category> = {
   files: 'files',
   editor: 'files',
   transfers: 'files',
+  snippets: 'files',
   monitor: 'monitor',
   services: 'monitor',
   logs: 'monitor',

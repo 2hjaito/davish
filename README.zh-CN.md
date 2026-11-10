@@ -39,6 +39,7 @@
 **服务器上**
 
 - [终端](FEATURES.md#terminal)：多标签、GPU 渲染、可选的 powerline 提示符
+- [常用命令](FEATURES.md#saved-commands)：保存常用命令，一键输入到终端
 - [文件](FEATURES.md#files)：Finder 风格的 SFTP，拖放上传下载，跨服务器复制
 - [编辑器](FEATURES.md#editor)：基于 CodeMirror，原子保存并自动备份
 - [日志](FEATURES.md#logs)：journal、日志文件和容器日志，实时查看

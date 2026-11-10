@@ -10,6 +10,7 @@ import {
   LOGS_SIZE,
   SERVERS_SIZE,
   SERVICES_SIZE,
+  SNIPPETS_SIZE,
   TERMINAL_SIZE,
   TRANSFERS_SIZE,
 } from '../lib/wm/intents.svelte'
@@ -173,6 +174,14 @@ export const apps: AppDef[] = [
     size: SERVERS_SIZE,
     load: () => import('./servers/ServersApp.svelte'),
     layout: false,
+  },
+  {
+    id: 'snippets',
+    label: t.apps.snippets,
+    icon: 'terminal',
+    theme: 'light',
+    size: SNIPPETS_SIZE,
+    load: () => import('./snippets/SnippetsApp.svelte'),
   },
   {
     id: 'audit',

@@ -61,6 +61,7 @@ const vi = {
       program: 'Ứng dụng trên server',
       folder: 'Thư mục',
       help: 'Trợ giúp',
+      snippet: 'Lệnh đã lưu',
     },
   },
   common: {
@@ -109,6 +110,7 @@ const vi = {
     security: 'An ninh',
     browser: 'Trình duyệt',
     servers: 'Tất cả server',
+    snippets: 'Lệnh hay dùng',
   },
   browser: {
     back: 'Lùi',
@@ -850,6 +852,16 @@ const vi = {
         actions: ['Kết nối một server', 'Chuyển sang một server'],
         keys: [],
         runs: ['Cùng cách đọc /proc như Monitor, cho từng server đã kết nối, khi cửa sổ đang mở'],
+      },
+      snippets: {
+        does: 'Các lệnh hay gõ, lưu trên máy này cho một server hoặc mọi server.',
+        actions: [
+          'Gõ sẵn lệnh vào Terminal, không tự chạy',
+          'Tìm lệnh đã lưu trong Spotlight (⌘K)',
+          'Lưu một lệnh từ Nhật ký lệnh',
+        ],
+        keys: [],
+        runs: [],
       },
       settings: {
         does: 'Ngôn ngữ, chế độ sáng tối, giao diện, phông, ngưỡng cảnh báo, khóa app, prompt Terminal.',
@@ -2258,6 +2270,33 @@ const vi = {
       'Lệnh này gỡ toàn bộ, kể cả thư mục. Lệnh được gõ sẵn vào Terminal để bạn đọc trước khi nhấn Enter.',
     uninstall: 'Gỡ toàn bộ…',
   },
+  snippets: {
+    search: 'Tìm lệnh đã lưu',
+    add: 'Lệnh mới',
+    empty: 'Chưa có lệnh nào',
+    emptyHint:
+      'Lưu các lệnh hay gõ ở đây, cho server này hoặc mọi server. Lệnh chỉ lưu trên máy này.',
+    noMatch: 'Không có lệnh nào khớp.',
+    name: 'Tên',
+    namePlaceholder: 'Xem lỗi nginx',
+    command: 'Lệnh',
+    scope: 'Hiện ở',
+    thisServer: (name: string) => `Chỉ ${name}`,
+    everyServer: 'Mọi server',
+    shared: 'mọi server',
+    save: 'Lưu',
+    cancel: 'Hủy',
+    edit: 'Sửa',
+    remove: 'Xóa',
+    removeConfirm: 'Bấm lần nữa để xóa',
+    type: 'Gõ vào Terminal',
+    typeHint: 'Lệnh được gõ sẵn, chưa chạy: kiểm tra rồi bấm Enter.',
+    copy: 'Sao chép',
+    copied: 'Đã sao chép',
+    secret:
+      'Lệnh này có vẻ chứa mật khẩu, token hoặc key. Lệnh hay dùng được lưu dạng chữ thường trong cài đặt của Davish; hãy bỏ phần bí mật ra và gõ khi chạy.',
+    offline: 'Kết nối server để gõ lệnh vào Terminal của nó.',
+  },
   audit: {
     search: 'Tìm lệnh',
     onlyThis: 'Chỉ server đang chọn',
@@ -2270,6 +2309,8 @@ const vi = {
     stream: 'theo dõi liên tục',
     copy: 'Sao chép lệnh',
     copied: 'Đã sao chép',
+    rerun: 'Gõ lại vào Terminal',
+    save: 'Lưu thành lệnh hay dùng',
     footer: (n: number) => `${n} lệnh gần nhất · tối đa 1000, mất khi thoát app`,
     apps: {
       services: 'Dịch vụ',

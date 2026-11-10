@@ -16,6 +16,7 @@ export const BROWSER_SIZE = { w: 1100, h: 720 }
 export const DISK_SIZE = { w: 900, h: 580 }
 export const SERVICES_SIZE = { w: 900, h: 580 }
 export const SERVERS_SIZE = { w: 980, h: 620 }
+export const SNIPPETS_SIZE = { w: 640, h: 520 }
 
 /** Shows the Transfers window in serverID's workspace. */
 export function openTransfers(serverID: string) {
@@ -25,6 +26,11 @@ export function openTransfers(serverID: string) {
 /** Shows every server at a glance, in serverID's workspace. */
 export function openServers(serverID: string) {
   wm.openOrFocus('servers', serverID, { title: t.apps.servers, size: SERVERS_SIZE })
+}
+
+/** Shows the saved commands in serverID's workspace. */
+export function openSnippets(serverID: string) {
+  wm.openOrFocus('snippets', serverID, { title: t.apps.snippets, size: SNIPPETS_SIZE })
 }
 
 /** Shows the command log, in the active workspace. */

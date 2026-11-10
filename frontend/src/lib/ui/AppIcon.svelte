@@ -326,6 +326,26 @@
           fill="#5a63e8"
         />{/if}
     {/each}
+  {:else if id === 'snippets'}
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#2c3140" />
+        <stop offset="1" stop-color="#0f1116" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    {#each [[13, '#5ef0a0', 26], [27, '#ffd166', 20], [41, '#7cc4ff', 23]] as const as [y, color, w] (y)}
+      <rect x="10" {y} width="44" height="10" rx="5" fill="#ffffff12" />
+      <path
+        d="M15 {y + 2.5}l3 2.5-3 2.5"
+        fill="none"
+        stroke={color}
+        stroke-width="2.4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <rect x="22" y={y + 3.5} width={w} height="3" rx="1.5" fill="#fff" opacity="0.85" />
+    {/each}
   {:else if id === 'audit'}
     <defs>
       <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">

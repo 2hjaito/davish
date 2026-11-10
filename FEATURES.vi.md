@@ -10,6 +10,12 @@ xterm.js nhiều tab, copy/paste, vẽ bằng GPU, và prompt powerline tùy ch�
 
 <img src="assets/screenshots/desktop.jpg" alt="Terminal, Monitor và Files" width="100%">
 
+## Lệnh hay dùng
+
+Lưu các lệnh hay gõ kèm tên, cho một server hoặc mọi server. Một cú bấm gõ sẵn lệnh vào Terminal của server để bạn kiểm tra rồi bấm Enter; không có gì tự chạy. Spotlight (`⌘K`) tìm được theo tên hoặc nội dung lệnh, và mỗi dòng trong Nhật ký lệnh có thể gõ lại vào Terminal hoặc lưu thành lệnh hay dùng. Lệnh được lưu trên máy bạn, dạng chữ thường: lệnh nào có vẻ chứa mật khẩu, token hay key thì Davish cảnh báo trước khi lưu.
+
+<img src="assets/screenshots/snippets.jpg" alt="Lệnh hay dùng" width="100%">
+
 ## Files
 
 Trình duyệt kiểu Finder qua SFTP: tải lên, tải xuống, kéo thả từ hệ điều hành, đổi tên, xóa, nén, và copy giữa các server qua máy bạn. Chuột phải trên file để thấy mọi thao tác. Chuột phải vào khoảng trống để tạo tệp hoặc thư mục ngay trong thư mục đang xem; Davish không bao giờ ghi đè file đã có.

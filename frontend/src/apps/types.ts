@@ -26,6 +26,7 @@ export type AppId =
   | 'deploy'
   | 'database'
   | 'servers'
+  | 'snippets'
 
 export interface AppProps {
   win: WindowState
