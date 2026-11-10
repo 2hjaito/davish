@@ -16,6 +16,8 @@
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import type { AppProps } from '../types'
   import { backend } from './backend'
+  import BarList from './BarList.svelte'
+  import HourBars from './HourBars.svelte'
 
   let { win }: AppProps = $props()
 
@@ -30,6 +32,17 @@
   const connected = $derived(server?.state === 'connected')
   const banned = $derived(new Set(report?.fail2ban.banned ?? []))
   const denied = $derived(deniedIPs(report?.ufw.lines ?? []))
+  const stats = $derived(
+    report
+      ? ([
+          { icon: 'warning', label: s.stats.failed, value: report.failedTotal },
+          { icon: 'help', label: s.stats.invalid, value: report.invalidTotal },
+          { icon: 'globe', label: s.stats.ips, value: report.failedIPs },
+          { icon: 'lock', label: s.stats.banned, value: report.fail2ban.banned?.length ?? 0 },
+          { icon: 'check', label: s.stats.accepted, value: report.acceptedTotal },
+        ] as const)
+      : [],
+  )
 
   const attempt = supersedes()
 
@@ -94,6 +107,46 @@
     {@const r = report}
     {#if error}<p class="error">{error}</p>{/if}
 
+    {#if r.source}
+      <div class="stats">
+        {#each stats as st (st.label)}
+          <div class="tile">
+            <span class="tile-label"><Icon name={st.icon} size={13} />{st.label}</span>
+            <span class="hero">{st.value.toLocaleString()}</span>
+          </div>
+        {/each}
+      </div>
+      {#if r.hourly?.length}
+        <section class="tile">
+          <HourBars hours={r.hourly} />
+        </section>
+      {/if}
+      {#if r.failed.length}
+        <div class="pair">
+          <section class="tile">
+            <BarList
+              title={s.topIPs}
+              rows={r.failed.slice(0, 8).map((a) => ({ key: a.ip, count: a.count }))}
+            >
+              {#snippet label(row)}
+                <span class="mono">{row.key}</span>
+                {#if banned.has(row.key)}<span class="tag bad">{s.banned}</span>{/if}
+                {#if denied.has(row.key)}<span class="tag bad">{s.blocked}</span>{/if}
+              {/snippet}
+            </BarList>
+          </section>
+          <section class="tile">
+            <BarList
+              title={s.topUsers}
+              rows={r.targets.slice(0, 8).map((u) => ({ key: u.user, count: u.count }))}
+            >
+              {#snippet label(row)}<span class="mono">{row.key}</span>{/snippet}
+            </BarList>
+          </section>
+        </div>
+      {/if}
+    {/if}
+
     <section class="card" class:warn={r.passwordAuth !== 'no'}>
       <h3>{s.password.title}</h3>
       {#if r.passwordAuth === 'no'}
@@ -110,6 +163,29 @@
             >{t.common.runInTerminal}</button
           >
         {/if}
+      {/if}
+    </section>
+
+    <section>
+      <h3>{s.sessions}</h3>
+      {#if !r.sessions?.length}
+        <p class="hint">{s.noSessions}</p>
+      {:else}
+        <table>
+          <thead>
+            <tr><th>{s.user}</th><th>{s.tty}</th><th>{s.from}</th><th>{s.since}</th></tr>
+          </thead>
+          <tbody>
+            {#each r.sessions as x, i (i)}
+              <tr>
+                <td>{x.user}</td>
+                <td class="mono muted">{x.tty}</td>
+                <td class="mono">{x.from || s.local}</td>
+                <td class="muted">{x.since}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
       {/if}
     </section>
 
@@ -273,6 +349,45 @@
     font-size: var(--text-sm);
   }
 
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+  }
+
+  .tile {
+    padding: 12px 14px;
+    border-radius: var(--card-radius);
+    background: var(--card-bg);
+    border: 1px solid var(--divider-soft);
+    min-width: 0;
+  }
+
+  .tile-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--text-xs);
+    color: var(--fg-muted);
+  }
+
+  .tile-label :global(svg) {
+    color: var(--accent);
+  }
+
+  .hero {
+    display: block;
+    margin-top: 6px;
+    font-size: 26px;
+    font-weight: 700;
+  }
+
+  .pair {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 10px;
+  }
+
   .card {
     padding: 12px 14px;
     border-radius: 10px;
@@ -342,6 +457,11 @@
     border-radius: 4px;
     background: var(--fill-soft);
     color: var(--fg-muted);
+  }
+
+  .tag.bad {
+    background: color-mix(in srgb, var(--danger) 14%, transparent);
+    color: var(--danger);
   }
 
   .act {

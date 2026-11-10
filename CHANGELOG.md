@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- An ninh: tổng quan 7 ngày ở đầu app: số lần đăng nhập sai, user không tồn tại, số địa chỉ, đã ban, đăng nhập thành công; biểu đồ lần sai theo giờ (rê chuột hoặc dùng phím ←/→ để xem từng giờ); địa chỉ và user bị thử nhiều nhất; các phiên đang mở (`who`).
+
 ## [1.10.1] - 2026-11-09
 
 ### Đổi
