@@ -5,11 +5,8 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Added
-<<<<<<< HEAD
-- Saved commands: keep commands with a name for one server or every server, type one into Terminal in a click (it does not run on its own), find them in Spotlight; a warning when a command looks like it holds a password, token or key. Command log: every line can be typed into Terminal again or saved as a command.
-=======
 - Security: a 7-day overview at the top of the app: failed logins, unknown users, addresses, banned, successful logins; failed logins per hour (hover or use ←/→ to read each hour); the addresses and user names tried most; open sessions (`who`).
->>>>>>> feat/m40-servers-overview
+- Saved commands: keep commands with a name for one server or every server, type one into Terminal in a click (it does not run on its own), find them in Spotlight; a warning when a command looks like it holds a password, token or key. Command log: every line can be typed into Terminal again or saved as a command.
 - All servers window (server menu → All servers…, Launchpad, Spotlight): a card per server with its connection, CPU, memory, `/` disk, load, uptime, network, alert count and latest alert; connect or switch to a server from its card. Readings are collected only while the window is open.
 - Launchpad groups apps (Files & terminal, Monitoring, Web & containers, Security & access, Development, System) with a tab per group; the arrow keys move across groups; pinned apps always show their mark; a "Restore the default Dock" button (click twice).
 
