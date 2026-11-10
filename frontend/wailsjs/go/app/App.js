@@ -550,6 +550,14 @@ export function SaveServer(arg1) {
   return window['go']['app']['App']['SaveServer'](arg1);
 }
 
+export function SecurityApply(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['SecurityApply'](arg1, arg2, arg3, arg4);
+}
+
+export function SecurityPlan(arg1, arg2, arg3) {
+  return window['go']['app']['App']['SecurityPlan'](arg1, arg2, arg3);
+}
+
 export function SecurityReport(arg1) {
   return window['go']['app']['App']['SecurityReport'](arg1);
 }
