@@ -5,6 +5,12 @@
 # pull when tests run (docs/adr/0006-docker-in-test-sshd.md).
 FROM busybox:1.37 AS busybox
 
+# MongoDB 8.0 and newer refuse to start on Linux 6.19 and newer
+# (SERVER-121912), which GitHub's runners now use; containers share the
+# host's kernel. The server comes from 7.0, which runs there; the shell
+# and the dump tools stay current.
+FROM mongo:7.0 AS mongo7
+
 FROM ubuntu:24.04
 
 ENV container=docker
@@ -90,6 +96,7 @@ RUN apt-get update \
  && apt-get update \
  && apt-get install -y --no-install-recommends mongodb-org-server mongodb-mongosh mongodb-database-tools \
  && rm -rf /var/lib/apt/lists/*
+COPY --from=mongo7 /usr/bin/mongod /usr/bin/mongod
 RUN mongod --fork --dbpath /var/lib/mongodb --logpath /tmp/mongod-setup.log --bind_ip 127.0.0.1 \
  && mongosh --quiet --eval 'db.getSiblingDB("admin").createUser({user: "davish-admin", pwd: "davish-test-only", roles: ["root"]})' \
  && mongosh --quiet -u davish-admin -p davish-test-only --authenticationDatabase admin \
