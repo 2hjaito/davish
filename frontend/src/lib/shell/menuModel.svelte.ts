@@ -2,6 +2,7 @@
 import { dockApps, getApp } from '../../apps/registry'
 import { copyText } from '../api/clipboard'
 import { diagSupportInfo } from '../api/diag'
+import { sudoForget } from '../api/sudo'
 import { hasRuntime } from '../api/runtime'
 import { t } from '../i18n'
 import { notifications } from '../stores/notifications.svelte'
@@ -82,6 +83,22 @@ export function buildMenus(): Menu[] {
               disabled: !server,
               run: () => server && void servers.reconnect(server.id),
             },
+        {
+          label: t.sudo.forget,
+          disabled: !server || !online,
+          run: () =>
+            server &&
+            void sudoForget(server.id).then(() =>
+              notifications.add({
+                id: `sudo-forgotten-${server.id}`,
+                level: 'info',
+                title: t.sudo.forgotten,
+                body: '',
+                serverID: server.id,
+                at: Date.now(),
+              }),
+            ),
+        },
         null,
         { label: m.newTerminal, disabled: !server, run: () => openTerminalAt(id, undefined) },
         {

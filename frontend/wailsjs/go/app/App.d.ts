@@ -326,6 +326,12 @@ export function ShortcutInspect(arg1:string,arg2:string):Promise<shortcut.Target
 
 export function ShortcutRun(arg1:string,arg2:string,arg3:string):Promise<shortcut.Run>;
 
+export function SudoForget(arg1:string):Promise<void>;
+
+export function SudoSetPassword(arg1:string,arg2:string):Promise<void>;
+
+export function SudoState(arg1:string):Promise<string>;
+
 export function TermClose(arg1:string):Promise<void>;
 
 export function TermResize(arg1:string,arg2:number,arg3:number):Promise<void>;

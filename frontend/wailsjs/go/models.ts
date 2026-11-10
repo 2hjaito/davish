@@ -2962,6 +2962,7 @@ export namespace svc {
 	    lines: string[];
 	    restricted: boolean;
 	    sudo: string;
+	    askSudo: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Journal(source);
@@ -2972,6 +2973,7 @@ export namespace svc {
 	        this.lines = source["lines"];
 	        this.restricted = source["restricted"];
 	        this.sudo = source["sudo"];
+	        this.askSudo = source["askSudo"];
 	    }
 	}
 	export class Plan {

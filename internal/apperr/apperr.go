@@ -51,6 +51,8 @@ const (
 	UpdateBroken         Code = "UPDATE_BROKEN"
 	UpdateDevBuild       Code = "UPDATE_DEV_BUILD"
 	UpdateDownloadFailed Code = "UPDATE_DOWNLOAD_FAILED"
+	SudoPasswordRequired Code = "SUDO_PASSWORD_REQUIRED"
+	SudoPasswordWrong    Code = "SUDO_PASSWORD_WRONG"
 )
 
 // Error is the only error type allowed to cross into the frontend.

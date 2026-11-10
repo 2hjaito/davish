@@ -56,6 +56,20 @@ COPY units/ /etc/systemd/system/
 COPY polkit-tester.rules /etc/polkit-1/rules.d/50-davish-tester.rules
 RUN systemctl enable davish-ok.service davish-crash.service davish-containers.service docker.service cron.service
 
+# sudoer is an admin as most servers have one: in the sudo group, and sudo
+# asks for a password (ADR 0018). tester stays without sudo. The password
+# is a throwaway for this container only.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends sudo \
+ && rm -rf /var/lib/apt/lists/* \
+ && useradd -m -s /bin/bash -G sudo,systemd-journal sudoer \
+ && echo 'sudoer:davish-sudo-test-only' | chpasswd \
+ && mkdir -p /home/sudoer/.ssh \
+ && cp /home/tester/.ssh/authorized_keys /home/sudoer/.ssh/authorized_keys \
+ && chown -R sudoer:sudoer /home/sudoer/.ssh \
+ && chmod 700 /home/sudoer/.ssh \
+ && chmod 600 /home/sudoer/.ssh/authorized_keys
+
 EXPOSE 22
 STOPSIGNAL SIGRTMIN+3
 CMD ["/sbin/init"]
