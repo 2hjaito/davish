@@ -4,6 +4,8 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.13.0] - 2026-11-10
+
 ### Added
 - Database: MongoDB (installed on the server). Lists databases with their collections and size, creates a database with a user and a random password, deletes, dumps and restores (`mongodump`/`mongorestore`), and opens a tunnel for Compass. With authentication on, log in once with fields or a connection string; Davish tries it first and only then keeps it in this computer's keychain (like the SSH password), with "Forget login". The connection string only travels on stdin, never on a command line or in the command log.
 - Database: SQLite. Add a file by path, with Find, or by right-clicking a `.db`/`.sqlite`/`.sqlite3` file in Files → "Open in Database". Shows tables and rows (opened read-only), backs up safely while an app writes, and restores with a line typed into Terminal.

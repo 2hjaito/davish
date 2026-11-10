@@ -4,6 +4,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.13.0] - 2026-11-10
+
 ### Thêm
 - Database: MongoDB (cài trên server). Liệt kê database kèm số collection và dung lượng, tạo database kèm user có mật khẩu ngẫu nhiên, xóa, dump và khôi phục (`mongodump`/`mongorestore`), mở tunnel cho Compass. MongoDB bật xác thực thì đăng nhập một lần bằng từng trường hoặc connection string; Davish thử trước, được mới lưu vào keychain của máy (như mật khẩu SSH), có nút "Quên thông tin đăng nhập". Connection string chỉ đi qua stdin, không nằm trên dòng lệnh hay nhật ký lệnh.
 - Database: SQLite. Thêm file bằng đường dẫn, bằng nút Dò, hoặc chuột phải file `.db`/`.sqlite`/`.sqlite3` trong Files → "Mở bằng Database". Xem bảng và số dòng (mở chỉ đọc), backup an toàn khi app đang ghi, khôi phục bằng lệnh gõ sẵn vào Terminal.
