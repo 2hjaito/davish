@@ -2598,6 +2598,20 @@ export namespace security {
 	        this.method = source["method"];
 	    }
 	}
+	export class Plan {
+	    command: string;
+	    terminal: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Plan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.command = source["command"];
+	        this.terminal = source["terminal"];
+	    }
+	}
 	export class Session {
 	    user: string;
 	    tty: string;
@@ -2632,6 +2646,7 @@ export namespace security {
 	}
 	export class Report {
 	    root: boolean;
+	    sudo: boolean;
 	    source: string;
 	    accepted: Login[];
 	    failed: Attempts[];
@@ -2657,6 +2672,7 @@ export namespace security {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.root = source["root"];
+	        this.sudo = source["sudo"];
 	        this.source = source["source"];
 	        this.accepted = this.convertValues(source["accepted"], Login);
 	        this.failed = this.convertValues(source["failed"], Attempts);

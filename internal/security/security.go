@@ -1,7 +1,7 @@
 // Package security reads who logs in to a server over SSH and who tries:
 // accepted logins, failed attempts grouped by address, and the state of
-// ufw and fail2ban. It only reads; every change is a sudo command the user
-// runs in a terminal.
+// ufw and fail2ban, and blocks or bans an address once the user confirms
+// the exact command (actions.go).
 package security
 
 import (
@@ -86,6 +86,9 @@ type Firewall struct {
 // Report is everything the Security app shows.
 type Report struct {
 	Root bool `json:"root"`
+	// Sudo is set when sudo runs without asking for a password, so a
+	// confirmed action can run without a terminal.
+	Sudo bool `json:"sudo"`
 	// Source is where logins were read: "journal", "auth.log" or "" when
 	// neither was readable.
 	Source      string     `json:"source"`
@@ -132,8 +135,9 @@ const reportLine = `id -u` +
 	`; echo --last--; last -n 20 -i -w 2>/dev/null | grep -v '^$' | grep -v '^wtmp begins'` +
 	`; echo --who--; who 2>/dev/null` +
 	`; echo --lastb--; lastb -n 20 -i -w 2>&1 | grep -v '^$' | grep -v '^btmp begins'` +
-	`; echo --ufw--; command -v ufw >/dev/null && { echo INSTALLED; ufw status 2>&1 | head -n 60; }` +
-	`; echo --f2b--; command -v fail2ban-client >/dev/null && { echo INSTALLED; fail2ban-client status sshd 2>&1 | head -n 30; }` +
+	`; echo --sudo--; sudo -n true 2>/dev/null && echo yes` +
+	`; echo --ufw--; command -v ufw >/dev/null && { echo INSTALLED; { sudo -n ufw status 2>/dev/null || ufw status 2>&1; } | head -n 1000; }` +
+	`; echo --f2b--; command -v fail2ban-client >/dev/null && { echo INSTALLED; { sudo -n fail2ban-client status sshd 2>/dev/null || fail2ban-client status sshd 2>&1; } | head -n 30; }` +
 	`; echo --sshd--; { sshd -T 2>/dev/null || cat /etc/ssh/sshd_config.d/*.conf /etc/ssh/sshd_config 2>/dev/null; } | grep -iE '^[[:space:]]*passwordauthentication[[:space:]]' | head -n 1` +
 	`; true`
 
@@ -168,7 +172,7 @@ func sections(out []byte) map[string][]string {
 
 func parse(out []byte) Report {
 	sec := sections(out)
-	r := Report{Root: first(sec["uid"]) == "0"}
+	r := Report{Root: first(sec["uid"]) == "0", Sudo: first(sec["sudo"]) == "yes"}
 
 	logs := sec["journal"]
 	r.Source = "journal"

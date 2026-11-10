@@ -298,6 +298,10 @@ export function SSHConfigHosts():Promise<Array<sshconfig.Candidate>>;
 
 export function SaveServer(arg1:app.ServerInput):Promise<app.ServerView>;
 
+export function SecurityApply(arg1:string,arg2:string,arg3:string,arg4:string):Promise<void>;
+
+export function SecurityPlan(arg1:string,arg2:string,arg3:boolean):Promise<security.Plan>;
+
 export function SecurityReport(arg1:string):Promise<security.Report>;
 
 export function ServicesAct(arg1:string,arg2:string,arg3:string):Promise<void>;

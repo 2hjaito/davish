@@ -18,8 +18,15 @@ export function deniedIPs(lines: readonly string[]): Set<string> {
   return out
 }
 
-/** Blocks ip before any other rule. An older deny of the same address,
- *  maybe listed after an ALLOW where it does nothing, is removed first;
- *  ufw only says so when there is none. */
-export const blockCommand = (ip: string) =>
-  `sudo ufw delete deny from ${ip} ; sudo ufw insert 1 deny from ${ip}`
+/** Every blocked address, by ufw, fail2ban or both, in address order. */
+export function blockedIPs(
+  denied: ReadonlySet<string>,
+  banned: ReadonlySet<string>,
+): { ip: string; via: string[] }[] {
+  return [...new Set([...denied, ...banned])]
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+    .map((ip) => ({
+      ip,
+      via: [denied.has(ip) && 'ufw', banned.has(ip) && 'fail2ban'].filter((v) => v !== false),
+    }))
+}

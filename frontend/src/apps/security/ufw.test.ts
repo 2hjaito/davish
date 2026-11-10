@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { blockCommand, deniedIPs } from './ufw'
+import { blockedIPs, deniedIPs } from './ufw'
 
 describe('deniedIPs', () => {
   it('reads the addresses of deny and reject rules above every allow', () => {
@@ -16,10 +16,13 @@ describe('deniedIPs', () => {
   })
 })
 
-describe('blockCommand', () => {
-  it('replaces an older rule with one at the top', () => {
-    expect(blockCommand('1.2.3.4')).toBe(
-      'sudo ufw delete deny from 1.2.3.4 ; sudo ufw insert 1 deny from 1.2.3.4',
-    )
+describe('blockedIPs', () => {
+  it('joins ufw and fail2ban, saying which blocks each address', () => {
+    const got = blockedIPs(new Set(['10.0.0.9', '10.0.0.10']), new Set(['10.0.0.10', '2.2.2.2']))
+    expect(got).toEqual([
+      { ip: '2.2.2.2', via: ['fail2ban'] },
+      { ip: '10.0.0.9', via: ['ufw'] },
+      { ip: '10.0.0.10', via: ['ufw', 'fail2ban'] },
+    ])
   })
 })

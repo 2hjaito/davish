@@ -26,6 +26,7 @@ dangth   pts/0        2026-10-28 11:00 (192.0.2.1)
 root     tty1         2026-10-27 08:00
 --lastb--
 lastb: cannot open /var/log/btmp: Permission denied
+--sudo--
 --ufw--
 INSTALLED
 ERROR: You need to be root to run this script
@@ -40,7 +41,7 @@ PasswordAuthentication yes
 
 func TestParse(t *testing.T) {
 	r := parse([]byte(sample))
-	if r.Root || r.Source != "journal" {
+	if r.Root || r.Sudo || r.Source != "journal" {
 		t.Errorf("root/source = %v %q", r.Root, r.Source)
 	}
 	if len(r.Accepted) != 2 || r.Accepted[0].Method != "password" || r.Accepted[0].IP != "192.0.2.2" {
@@ -81,8 +82,8 @@ func TestForgedUserCannotInjectAnAddress(t *testing.T) {
 }
 
 func TestParseAuthLogFallback(t *testing.T) {
-	r := parse([]byte("0\n--journal--\n--authlog--\nOct 28 10:00:00 vps sshd[1]: Failed password for root from 203.0.113.9 port 1 ssh2\n"))
-	if !r.Root || r.Source != "auth.log" || r.Failed[0].Last != "Oct 28 10:00:00" {
+	r := parse([]byte("0\n--sudo--\nyes\n--journal--\n--authlog--\nOct 28 10:00:00 vps sshd[1]: Failed password for root from 203.0.113.9 port 1 ssh2\n"))
+	if !r.Root || !r.Sudo || r.Source != "auth.log" || r.Failed[0].Last != "Oct 28 10:00:00" {
 		t.Errorf("report = %+v", r)
 	}
 	if parse([]byte("0\n")).Source != "" {
