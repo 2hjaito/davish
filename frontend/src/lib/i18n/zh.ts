@@ -1273,6 +1273,8 @@ const zh = {
     terminal: '在终端中运行',
     run: '运行',
     checking: '正在检查…',
+    unlikely:
+      '此用户不属于 sudo、wheel 或 admin 组，很可能无法使用 sudo。你仍可尝试输入密码，或用其他账户在终端中运行该命令。',
     noSudo:
       '此用户不能在服务器上使用 sudo。请用有权限的账户在终端中运行该命令，或联系服务器管理员。',
     forget: '忘记 sudo 密码',

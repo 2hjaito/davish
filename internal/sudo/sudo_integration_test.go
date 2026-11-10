@@ -71,6 +71,9 @@ func TestUserWithoutSudo(t *testing.T) {
 	ctx := context.Background()
 	m, id := testsshd.Connect(t)
 	k := sudo.New(audit.NewRunner(m, audit.New(discard{})))
+	if st, err := k.State(ctx, id); err != nil || st != sudo.Unlikely {
+		t.Fatalf("state = %s, %v", st, err)
+	}
 	if _, err := k.Run(ctx, id, "test", "true", nil); code(err) != apperr.SudoPasswordRequired {
 		t.Fatalf("run: %v", err)
 	}

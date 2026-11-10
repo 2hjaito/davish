@@ -35,6 +35,10 @@ const (
 	Password = "password"
 	// Ready: sudo asks, and Davish has the password for this session.
 	Ready = "ready"
+	// Unlikely: sudo asks, but the user is in no group that usually may
+	// use it (sudo, wheel, admin). sudo only tells once given a password,
+	// so the UI may still try, and warns first.
+	Unlikely = "unlikely"
 	// None: no sudo, or the user may not use it; root's commands go to a
 	// terminal.
 	None = "none"
@@ -45,13 +49,17 @@ type Keeper struct {
 	run Runner
 	mu  sync.Mutex
 	pw  map[string][]byte
-	// root caches whether a server's user is root.
-	root map[string]bool
+	// who caches each server's user: root, and in an admin group.
+	who map[string]user
+}
+
+type user struct {
+	root, admin bool
 }
 
 // New creates a keeper that runs through run.
 func New(run Runner) *Keeper {
-	return &Keeper{run: run, pw: map[string][]byte{}, root: map[string]bool{}}
+	return &Keeper{run: run, pw: map[string][]byte{}, who: map[string]user{}}
 }
 
 func wipe(b []byte) {
@@ -68,7 +76,7 @@ func (k *Keeper) Forget(serverID string) {
 		wipe(p)
 		delete(k.pw, serverID)
 	}
-	delete(k.root, serverID)
+	delete(k.who, serverID)
 }
 
 // ForgetAll wipes every password.
@@ -79,7 +87,7 @@ func (k *Keeper) ForgetAll() {
 		wipe(p)
 		delete(k.pw, id)
 	}
-	k.root = map[string]bool{}
+	k.who = map[string]user{}
 }
 
 // Observe forgets passwords on the events that end a session: a server
@@ -108,35 +116,50 @@ func (k *Keeper) password(serverID string) []byte {
 	return append([]byte(nil), p...)
 }
 
-// isRoot tells whether the server's user is root, asking once.
-func (k *Keeper) isRoot(ctx context.Context, serverID, app string) (bool, error) {
+// adminGroups are the groups distributions give sudo to.
+var adminGroups = map[string]bool{"sudo": true, "wheel": true, "admin": true}
+
+// whoami tells whether the server's user is root and in an admin group,
+// asking once.
+func (k *Keeper) whoami(ctx context.Context, serverID, app string) (user, error) {
 	k.mu.Lock()
-	r, ok := k.root[serverID]
+	u, ok := k.who[serverID]
 	k.mu.Unlock()
 	if ok {
-		return r, nil
+		return u, nil
 	}
-	res, err := k.run.RunInput(ctx, serverID, app, "id -u", nil)
+	res, err := k.run.RunInput(ctx, serverID, app, "id -u; id -Gn", nil)
 	if err != nil {
-		return false, err
+		return user{}, err
 	}
-	r = strings.TrimSpace(string(res.Stdout)) == "0"
+	uid, groups, _ := strings.Cut(string(res.Stdout), "\n")
+	u.root = strings.TrimSpace(uid) == "0"
+	for _, g := range strings.Fields(groups) {
+		u.admin = u.admin || adminGroups[g]
+	}
 	k.mu.Lock()
-	k.root[serverID] = r
+	k.who[serverID] = u
 	k.mu.Unlock()
-	return r, nil
+	return u, nil
 }
 
 // Lines that run line through sudo: without a password, and with the
 // password as the first line of stdin. -k makes sudo read the password
 // every time, so it never reaches the command's stdin when sudo still
 // remembers an earlier one; -p ” keeps the prompt out of the output.
+//
+// sudo runs under the C locale: Davish reads its messages, which a German
+// or French server would otherwise translate.
+func sudoLine(args ...string) string {
+	return "LC_ALL=C " + shellx.Cmd("sudo", args...).String()
+}
+
 func noPasswordLine(line string) string {
-	return shellx.Cmd("sudo", "-n", "--", "sh", "-c", line).String()
+	return sudoLine("-n", "--", "sh", "-c", line)
 }
 
 func passwordLine(line string) string {
-	return shellx.Cmd("sudo", "-S", "-k", "-p", "", "--", "sh", "-c", line).String()
+	return sudoLine("-S", "-k", "-p", "", "--", "sh", "-c", line)
 }
 
 // withPassword is pw's line then stdin, in a buffer of its own so wiping
@@ -157,7 +180,10 @@ func noSudo(res audit.Result) bool {
 	return (res.Exit == 127 && strings.Contains(e, "sudo")) ||
 		strings.Contains(e, "is not in the sudoers file") ||
 		strings.Contains(e, "may not run sudo") ||
-		strings.Contains(e, "is not allowed to execute")
+		strings.Contains(e, "is not allowed to execute") ||
+		// requiretty, the default on older CentOS and RHEL: sudo only
+		// runs from a terminal, so the command goes to one.
+		strings.Contains(e, "must have a tty")
 }
 
 func wrongPassword(stderr []byte) bool {
@@ -174,11 +200,11 @@ func wrongPassword(stderr []byte) bool {
 // password no longer works (it is forgotten); CMD_NEEDS_ROOT when the user
 // cannot use sudo at all (the UI offers a terminal).
 func (k *Keeper) Run(ctx context.Context, serverID, app, line string, stdin []byte) (audit.Result, error) {
-	root, err := k.isRoot(ctx, serverID, app)
+	u, err := k.whoami(ctx, serverID, app)
 	if err != nil {
 		return audit.Result{}, err
 	}
-	if root {
+	if u.root {
 		return k.run.RunInput(ctx, serverID, app, line, stdin)
 	}
 	res, err := k.run.RunInput(ctx, serverID, app, noPasswordLine(line), stdin)
@@ -212,14 +238,14 @@ func (k *Keeper) Run(ctx context.Context, serverID, app, line string, stdin []by
 // State tells how the server's user reaches root, asking sudo without a
 // password; it never prompts.
 func (k *Keeper) State(ctx context.Context, serverID string) (string, error) {
-	root, err := k.isRoot(ctx, serverID, "sudo")
+	u, err := k.whoami(ctx, serverID, "sudo")
 	if err != nil {
 		return "", err
 	}
-	if root {
+	if u.root {
 		return Root, nil
 	}
-	res, err := k.run.RunInput(ctx, serverID, "sudo", "sudo -n true", nil)
+	res, err := k.run.RunInput(ctx, serverID, "sudo", sudoLine("-n", "true"), nil)
 	if err != nil {
 		return "", err
 	}
@@ -230,6 +256,8 @@ func (k *Keeper) State(ctx context.Context, serverID string) (string, error) {
 		return None, nil
 	case k.password(serverID) != nil:
 		return Ready, nil
+	case !u.admin:
+		return Unlikely, nil
 	}
 	return Password, nil
 }
@@ -242,7 +270,7 @@ func (k *Keeper) SetPassword(ctx context.Context, serverID string, pw []byte) er
 	}
 	in := withPassword(pw, nil)
 	defer wipe(in)
-	res, err := k.run.RunInput(ctx, serverID, "sudo", shellx.Cmd("sudo", "-S", "-k", "-p", "", "-v").String(), in)
+	res, err := k.run.RunInput(ctx, serverID, "sudo", sudoLine("-S", "-k", "-p", "", "-v"), in)
 	if err != nil {
 		return err
 	}

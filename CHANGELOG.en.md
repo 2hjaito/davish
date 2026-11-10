@@ -4,6 +4,11 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.12.3] - 2026-11-10
+
+### Fixed
+- Sudo: "a password is required" is recognized on servers not set to English (sudo runs with `LC_ALL=C`); two actions needing the password at once now share one prompt instead of the first one vanishing; servers with `requiretty` (older CentOS/RHEL) fall back to Terminal instead of failing; a user in none of the sudo, wheel or admin groups is warned before typing the password, with Terminal offered first.
+
 ## [1.12.2] - 2026-11-10
 
 ### Fixed
