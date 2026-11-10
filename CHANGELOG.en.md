@@ -4,6 +4,8 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.11.0] - 2026-11-10
+
 ### Added
 - Security: a 7-day overview at the top of the app: failed logins, unknown users, addresses, banned, successful logins; failed logins per hour (hover or use ←/→ to read each hour); the addresses and user names tried most; open sessions (`who`).
 - Saved commands: keep commands with a name for one server or every server, type one into Terminal in a click (it does not run on its own), find them in Spotlight; a warning when a command looks like it holds a password, token or key. Command log: every line can be typed into Terminal again or saved as a command.

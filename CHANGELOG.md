@@ -4,6 +4,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.11.0] - 2026-11-10
+
 ### Thêm
 - An ninh: tổng quan 7 ngày ở đầu app: số lần đăng nhập sai, user không tồn tại, số địa chỉ, đã ban, đăng nhập thành công; biểu đồ lần sai theo giờ (rê chuột hoặc dùng phím ←/→ để xem từng giờ); địa chỉ và user bị thử nhiều nhất; các phiên đang mở (`who`).
 - Lệnh hay dùng: lưu lệnh kèm tên cho một server hoặc mọi server, một cú bấm gõ sẵn vào Terminal (không tự chạy), tìm được trong Spotlight; cảnh báo khi lệnh có vẻ chứa mật khẩu, token hay key. Nhật ký lệnh: mỗi dòng có "Gõ lại vào Terminal" và "Lưu thành lệnh hay dùng".
