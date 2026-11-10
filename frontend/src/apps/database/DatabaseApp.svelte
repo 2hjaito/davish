@@ -2,11 +2,12 @@
   import { untrack } from 'svelte'
 
   import { copyText } from '../../lib/api/clipboard'
-  import type { DBEngine, DBKind, DBLogin } from '../../lib/api/database'
+  import type { DBEngine, DBKind, DBLogin, Found, SQLiteInfo } from '../../lib/api/database'
   import { toUserError } from '../../lib/api/errors'
   import { formatBytes } from '../../lib/format'
   import { t } from '../../lib/i18n'
   import { servers } from '../../lib/stores/servers.svelte'
+  import { sqliteFiles } from '../../lib/stores/sqliteFiles.svelte'
   import Dialog from '../../lib/ui/Dialog.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
@@ -41,10 +42,13 @@
   let dropping = $state.raw<{ kind: DBKind; name: string; sql: string } | null>(null)
   let typed = $state('')
 
-  const ports: Record<DBKind, number> = { mysql: 3306, postgres: 5432 }
+  const ports: Record<DBKind, number> = { mysql: 3306, postgres: 5432, mongo: 27017 }
+  // MongoDB only shows where it is installed: most servers have none.
+  const shown = $derived((engines ?? []).filter((e) => e.kind !== 'mongo' || e.installed))
 
   async function refresh() {
     loading = true
+    for (const p of sqliteFiles.of(win.serverID)) void loadSQLite(p)
     try {
       engines = await backend.list(win.serverID)
       error = ''
@@ -183,6 +187,158 @@
     void refresh()
   }
 
+  // MongoDB login: a connection string, or one built from its fields.
+  let mongoOpen = $state(false)
+  let mongoMode = $state<'fields' | 'uri'>('fields')
+  let mUri = $state('')
+  let mHost = $state('127.0.0.1')
+  let mPort = $state('27017')
+  let mUser = $state('')
+  let mPass = $state('')
+  let mAuth = $state('admin')
+  let mongoBusy = $state(false)
+  let mongoError = $state('')
+  const mongoURI = $derived(
+    mongoMode === 'uri'
+      ? mUri.trim()
+      : `mongodb://${encodeURIComponent(mUser.trim())}:${encodeURIComponent(mPass)}@${mHost.trim()}:${mPort.trim()}/?authSource=${encodeURIComponent(mAuth.trim() || 'admin')}`,
+  )
+  const mongoReady = $derived(
+    mongoMode === 'uri'
+      ? mUri.trim() !== ''
+      : mUser.trim() !== '' && mPass !== '' && mHost.trim() !== '',
+  )
+
+  function askMongo(port?: number) {
+    findOpen = false
+    mongoOpen = true
+    mongoError = ''
+    mPass = ''
+    mUri = ''
+    if (port) mPort = String(port)
+  }
+
+  function closeMongo() {
+    mongoOpen = false
+    mPass = ''
+    mUri = ''
+  }
+
+  async function connectMongo() {
+    mongoBusy = true
+    mongoError = ''
+    try {
+      await backend.mongoConnect(win.serverID, mongoURI)
+      closeMongo()
+      flash = d.mongo.connected
+      await refresh()
+    } catch (e) {
+      mongoError = toUserError(e).message
+    } finally {
+      mongoBusy = false
+    }
+  }
+
+  async function forgetMongo() {
+    try {
+      await backend.mongoForget(win.serverID)
+      flash = d.mongo.forgotten
+      await refresh()
+    } catch (e) {
+      flash = toUserError(e).message
+    }
+  }
+
+  // Find: read-only, shown in a dialog to pick from.
+  let findOpen = $state(false)
+  let finding = $state(false)
+  let found = $state.raw<Found | null>(null)
+  let findError = $state('')
+
+  async function find() {
+    findOpen = true
+    finding = true
+    found = null
+    findError = ''
+    try {
+      found = await backend.find(win.serverID)
+    } catch (e) {
+      findError = toUserError(e).message
+    } finally {
+      finding = false
+    }
+  }
+
+  // SQLite files, kept per server on this computer.
+  const files = $derived(sqliteFiles.of(win.serverID))
+  /** Each file's tables, or why it could not be read. */
+  let infos = $state.raw<Record<string, SQLiteInfo | string>>({})
+
+  async function loadSQLite(path: string) {
+    try {
+      const info = await backend.sqlite(win.serverID, path)
+      infos = { ...infos, [path]: info }
+    } catch (e) {
+      infos = { ...infos, [path]: toUserError(e).message }
+    }
+  }
+
+  $effect(() => {
+    if (!connected) return
+    for (const p of files) if (!(p in untrack(() => infos))) untrack(() => void loadSQLite(p))
+  })
+
+  function addSQLite(path: string) {
+    sqliteFiles.add(win.serverID, path)
+    void loadSQLite(path)
+  }
+
+  let addOpen = $state(false)
+  let addPath = $state('')
+
+  async function backupSQLite(path: string) {
+    busy = path
+    flash = ''
+    try {
+      lastDump = await backend.sqliteBackup(win.serverID, path)
+      flash = d.sqlite.backedUp(lastDump)
+    } catch (e) {
+      flash = toUserError(e).message
+    } finally {
+      busy = ''
+    }
+  }
+
+  // Restoring SQLite only types its line into a terminal.
+  let sqlRestore = $state.raw<{ path: string; backups: string[] } | null>(null)
+  let sqlBackup = $state('')
+  let sqlLine = $state('')
+
+  async function askSQLiteRestore(info: SQLiteInfo) {
+    sqlLine = ''
+    try {
+      const backups = await backend.dumps(win.serverID, 'sqlite', info.backup)
+      sqlRestore = { path: info.path, backups }
+      sqlBackup = backups[0] ?? ''
+      if (sqlBackup) await planSQLiteRestore()
+    } catch (e) {
+      flash = toUserError(e).message
+    }
+  }
+
+  async function planSQLiteRestore() {
+    if (!sqlRestore) return
+    try {
+      sqlLine = await backend.sqliteRestoreLine(sqlRestore.path, sqlBackup)
+    } catch (e) {
+      sqlLine = ''
+      flash = toUserError(e).message
+    }
+  }
+
+  const baseName = (p: string) => p.replace(/^.*\//, '')
+  const dir = (p: string) => p.replace(/\/[^/]*$/, '') || '/'
+
   async function tunnel(kind: DBKind) {
     try {
       const tn = await backend.tunnel(win.serverID, ports[kind])
@@ -195,6 +351,15 @@
 
 <TitleBar>
   <span class="title">{d.title}</span>
+  <button
+    class="tool find"
+    disabled={!connected || finding}
+    title={d.found.title}
+    onclick={() => void find()}
+  >
+    <Icon name="search" size={13} strokeWidth={2.2} />
+    {d.find}
+  </button>
   <button
     class="tool"
     aria-label={d.refresh}
@@ -215,10 +380,8 @@
     {#if flash}
       <p class="flash" role="status">
         {flash}
-        {#if lastDump && flash === d.dumped(lastDump)}
-          <button
-            class="link"
-            onclick={() => openFilesAt(win.serverID, lastDump.replace(/\/[^/]*$/, ''))}
+        {#if lastDump && flash.includes(lastDump)}
+          <button class="link" onclick={() => openFilesAt(win.serverID, dir(lastDump))}
             >{d.showInFiles}</button
           >
         {/if}
@@ -226,11 +389,18 @@
     {/if}
     {#if error}<p class="error" role="alert">{error}</p>{/if}
 
-    {#each engines as e (e.kind)}
+    <details class="how">
+      <summary><Icon name="info" size={13} /> {d.how.title}</summary>
+      <ul>
+        {#each d.how.items as item (item)}<li>{item}</li>{/each}
+      </ul>
+    </details>
+
+    {#each shown as e (e.kind)}
       <section>
         <div class="head">
           <h4>{d.engines[e.kind]}</h4>
-          {#if e.installed && !e.needsRoot && !e.error}
+          {#if e.installed && !e.needsRoot && !e.needsAuth && !e.error}
             <button type="button" class="btn" onclick={() => void tunnel(e.kind)}>
               <Icon name="link" size={13} />
               {d.tunnel}
@@ -270,6 +440,13 @@
             <Icon name="terminal" size={13} />
             {d.openClient(e.client)}
           </button>
+        {:else if e.needsAuth}
+          <p class="muted">{d.mongo.needsAuth}</p>
+          {#if e.error}<p class="error">{e.error}</p>{/if}
+          <button type="button" class="btn btn-primary" onclick={() => askMongo()}>
+            <Icon name="key" size={13} />
+            {d.mongo.login}
+          </button>
         {:else if e.error}
           <p class="error">{e.error}</p>
         {:else if e.dbs.length === 0}
@@ -280,6 +457,9 @@
               {#each e.dbs as db (db.name)}
                 <tr>
                   <td class="mono">{db.name}</td>
+                  {#if e.kind === 'mongo'}
+                    <td class="num muted">{d.collections(db.collections ?? 0)}</td>
+                  {/if}
                   <td class="num muted">{formatBytes(db.size)}</td>
                   <td class="act">
                     <button
@@ -302,10 +482,304 @@
             </tbody>
           </table>
         {/if}
+        {#if e.login}
+          <p class="muted small">
+            {d.mongo.loggedIn(e.login)}
+            <button class="link" onclick={() => void forgetMongo()}>{d.mongo.forget}</button>
+          </p>
+        {/if}
       </section>
     {/each}
+
+    <section>
+      <div class="head">
+        <h4>{d.sqlite.title}</h4>
+        <button
+          type="button"
+          class="btn"
+          onclick={() => {
+            addOpen = true
+            addPath = ''
+          }}
+        >
+          <Icon name="plus" size={13} />
+          {d.sqlite.add}
+        </button>
+      </div>
+      {#if files.length === 0}
+        <p class="muted">{d.sqlite.none}</p>
+      {:else}
+        <table>
+          <tbody>
+            {#each files as path (path)}
+              {@const info = infos[path]}
+              <tr>
+                <td class="file">
+                  <span class="mono" title={path}>{baseName(path)}</span>
+                  <small class="mono">{dir(path)}</small>
+                  {#if typeof info === 'string'}
+                    <small class="error">{info}</small>
+                  {:else if info}
+                    <details class="tables">
+                      <summary>
+                        {d.sqlite.tables(info.tables.length)} · {formatBytes(info.size)} · {info.journal}
+                        {#if info.root}· {d.sqlite.rootOnly}{/if}
+                      </summary>
+                      <ul>
+                        {#each info.tables as tb (tb.name)}
+                          <li>
+                            <span class="mono">{tb.name}</span>
+                            <small>{d.sqlite.rows(tb.rows)}</small>
+                          </li>
+                        {/each}
+                      </ul>
+                    </details>
+                  {:else}
+                    <small>{d.loading}</small>
+                  {/if}
+                </td>
+                <td class="act">
+                  {#if info && typeof info !== 'string'}
+                    <button
+                      class="link"
+                      disabled={busy === path}
+                      onclick={() => void backupSQLite(path)}
+                      >{busy === path ? d.working : d.sqlite.backup}</button
+                    >
+                    <button class="link" onclick={() => void askSQLiteRestore(info)}
+                      >{d.restore}</button
+                    >
+                  {/if}
+                  <button
+                    class="link"
+                    title={d.showInFiles}
+                    aria-label={d.showInFiles}
+                    onclick={() => openFilesAt(win.serverID, dir(path))}
+                  >
+                    <Icon name="folder" size={13} />
+                  </button>
+                  <button
+                    class="link"
+                    title={d.sqlite.remove}
+                    aria-label={d.sqlite.remove}
+                    onclick={() => sqliteFiles.remove(win.serverID, path)}
+                  >
+                    <Icon name="close" size={13} />
+                  </button>
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      {/if}
+    </section>
   </div>
 {/if}
+
+<Dialog open={mongoOpen} title={d.mongo.title} width={500} onclose={closeMongo}>
+  <div class="tabs" role="tablist">
+    <button
+      type="button"
+      role="tab"
+      aria-selected={mongoMode === 'fields'}
+      class:on={mongoMode === 'fields'}
+      onclick={() => (mongoMode = 'fields')}>{d.mongo.byFields}</button
+    >
+    <button
+      type="button"
+      role="tab"
+      aria-selected={mongoMode === 'uri'}
+      class:on={mongoMode === 'uri'}
+      onclick={() => (mongoMode = 'uri')}>{d.mongo.byUri}</button
+    >
+  </div>
+  {#if mongoMode === 'uri'}
+    <label class="field">
+      <span>{d.mongo.uri}</span>
+      <input
+        class="input mono"
+        type="password"
+        bind:value={mUri}
+        placeholder="mongodb://user:password@127.0.0.1:27017/?authSource=admin"
+        spellcheck="false"
+        autocomplete="off"
+      />
+    </label>
+  {:else}
+    <div class="row">
+      <label class="field grow">
+        <span>{d.mongo.host}</span>
+        <input class="input" bind:value={mHost} spellcheck="false" />
+      </label>
+      <label class="field port">
+        <span>{d.mongo.port}</span>
+        <input class="input" bind:value={mPort} inputmode="numeric" />
+      </label>
+    </div>
+    <div class="row">
+      <label class="field">
+        <span>{d.mongo.user}</span>
+        <input class="input" bind:value={mUser} spellcheck="false" autocomplete="off" />
+      </label>
+      <label class="field">
+        <span>{d.mongo.password}</span>
+        <input class="input" type="password" bind:value={mPass} autocomplete="off" />
+      </label>
+    </div>
+    <label class="field">
+      <span>{d.mongo.authSource}</span>
+      <input class="input" bind:value={mAuth} spellcheck="false" />
+    </label>
+  {/if}
+  <p class="note"><Icon name="lock" size={13} /> {d.mongo.keep}</p>
+  <details class="how">
+    <summary>{d.how.title}</summary>
+    <ul>
+      {#each d.how.items.slice(0, 3) as item (item)}<li>{item}</li>{/each}
+    </ul>
+  </details>
+  {#if mongoError}<p class="error" role="alert">{mongoError}</p>{/if}
+  {#snippet footer()}
+    <span class="spacer"></span>
+    <button type="button" class="btn" onclick={closeMongo}>{t.common.cancel}</button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      disabled={!mongoReady || mongoBusy}
+      onclick={() => void connectMongo()}>{mongoBusy ? d.mongo.connecting : d.mongo.connect}</button
+    >
+  {/snippet}
+</Dialog>
+
+<Dialog open={findOpen} title={d.found.title} width={560} onclose={() => (findOpen = false)}>
+  <p class="muted small">{d.found.hint}</p>
+  {#if finding}
+    <p class="muted">{d.found.scanning}</p>
+  {:else if findError}
+    <p class="error">{findError}</p>
+  {:else if found}
+    <h5>{d.found.running}</h5>
+    {#if found.running.length === 0}
+      <p class="muted">{d.found.noRunning}</p>
+    {:else}
+      <ul class="found">
+        {#each found.running as r (r.kind)}
+          {@const e = engines?.find((x) => x.kind === r.kind)}
+          <li>
+            <span>
+              <strong>{d.engines[r.kind]}</strong>
+              <small>
+                {#if r.port}{d.found.port(r.port)}{/if}
+                {#if r.bind}· {r.bind}{/if}
+                {#if r.auth}· {r.auth === 'on' ? d.found.authOn : d.found.authOff}{/if}
+              </small>
+            </span>
+            {#if r.kind === 'mongo' && e?.needsAuth}
+              <button class="btn" onclick={() => askMongo(r.port)}>{d.mongo.login}</button>
+            {/if}
+          </li>
+        {/each}
+      </ul>
+    {/if}
+    <h5>{d.found.files}</h5>
+    {#if !found.sqlite3}<p class="warn">{d.found.noSqlite3}</p>{/if}
+    {#if found.sqlite.length === 0}
+      <p class="muted">{d.found.noFiles}</p>
+    {:else}
+      <ul class="found">
+        {#each found.sqlite as f (f.path)}
+          <li>
+            <span>
+              <span class="mono">{f.path}</span>
+              <small
+                >{f.root
+                  ? `${formatBytes(f.size)} · ${d.found.rootOnly}`
+                  : formatBytes(f.size)}</small
+              >
+            </span>
+            {#if files.includes(f.path)}
+              <small class="muted">{d.found.added}</small>
+            {:else}
+              <button class="btn" disabled={!found.sqlite3} onclick={() => addSQLite(f.path)}
+                >{d.found.add}</button
+              >
+            {/if}
+          </li>
+        {/each}
+      </ul>
+    {/if}
+  {/if}
+  {#snippet footer()}
+    <span class="spacer"></span>
+    <button type="button" class="btn" onclick={() => (findOpen = false)}>{d.done}</button>
+  {/snippet}
+</Dialog>
+
+<Dialog open={addOpen} title={d.sqlite.addTitle} width={480} onclose={() => (addOpen = false)}>
+  <label class="field">
+    <span>{d.sqlite.path}</span>
+    <!-- svelte-ignore a11y_autofocus -->
+    <input
+      class="input mono"
+      bind:value={addPath}
+      placeholder="/var/lib/app/data.db"
+      spellcheck="false"
+      autofocus
+    />
+  </label>
+  <small>{d.sqlite.pathHint}</small>
+  {#snippet footer()}
+    <span class="spacer"></span>
+    <button type="button" class="btn" onclick={() => (addOpen = false)}>{t.common.cancel}</button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      disabled={!addPath.trim().startsWith('/')}
+      onclick={() => {
+        addSQLite(addPath.trim())
+        addOpen = false
+      }}>{d.found.add}</button
+    >
+  {/snippet}
+</Dialog>
+
+<Dialog
+  open={sqlRestore !== null}
+  title={sqlRestore ? d.sqlite.restoreTitle(baseName(sqlRestore.path)) : ''}
+  width={540}
+  onclose={() => (sqlRestore = null)}
+>
+  {#if sqlRestore}
+    {#if sqlRestore.backups.length === 0}
+      <p class="muted">{d.sqlite.noBackups}</p>
+    {:else}
+      <label class="field">
+        <span>{d.restoreFile}</span>
+        <select class="input" bind:value={sqlBackup} onchange={() => void planSQLiteRestore()}>
+          {#each sqlRestore.backups as f (f)}<option value={f}>{f}</option>{/each}
+        </select>
+      </label>
+      <p class="warn"><Icon name="warning" size={14} /> {d.sqlite.restoreBody}</p>
+      {#if sqlLine}<pre class="code">{sqlLine}</pre>{/if}
+    {/if}
+  {/if}
+  {#snippet footer()}
+    <span class="spacer"></span>
+    <button type="button" class="btn" onclick={() => (sqlRestore = null)}>{t.common.cancel}</button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      disabled={!sqlLine}
+      onclick={() => {
+        openTerminalAt(win.serverID, undefined, sqlLine)
+        sqlRestore = null
+      }}
+    >
+      <Icon name="terminal" size={13} />
+      {d.sqlite.toTerminal}
+    </button>
+  {/snippet}
+</Dialog>
 
 <Dialog
   open={creating !== null}
@@ -409,10 +883,12 @@
           class="input"
           bind:value={restoreFile}
           onchange={() => void planRestore()}
-          placeholder="/root/db-backups/{restoring.name}.sql.gz"
+          placeholder="/root/db-backups/{restoring.name}{restoring.kind === 'mongo'
+            ? '.archive.gz'
+            : '.sql.gz'}"
           spellcheck="false"
         />
-        <small>{d.noDumps}</small>
+        <small>{restoring.kind === 'mongo' ? d.noDumpsMongo : d.noDumps}</small>
       {/if}
     </label>
     {#if restoreCmd}
@@ -623,5 +1099,135 @@
 
   dd {
     margin: 0;
+  }
+
+  .tool.find {
+    gap: 4px;
+    align-items: center;
+    font-size: var(--text-sm);
+    padding: 3px 6px;
+  }
+
+  .how {
+    margin-top: 10px;
+    font-size: var(--text-sm);
+    color: var(--fg-muted);
+  }
+
+  .how summary {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    cursor: default;
+    color: var(--accent);
+  }
+
+  .how ul {
+    margin: 6px 0 0;
+    padding-left: 18px;
+    line-height: 1.5;
+  }
+
+  .how li + li {
+    margin-top: 4px;
+  }
+
+  .small {
+    font-size: var(--text-sm);
+  }
+
+  .file {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .file small.mono {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tables summary {
+    cursor: default;
+    color: var(--fg-muted);
+    font-size: var(--text-sm);
+  }
+
+  .tables ul {
+    margin: 4px 0 2px;
+    padding-left: 16px;
+    font-size: var(--text-sm);
+  }
+
+  .act {
+    vertical-align: top;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+
+  .tabs button {
+    border: 0;
+    padding: 4px 10px;
+    border-radius: var(--control-radius);
+    background: none;
+    color: var(--fg-muted);
+    font-size: var(--text-sm);
+  }
+
+  .tabs button.on {
+    background: var(--fill-soft);
+    color: var(--fg);
+  }
+
+  .grow {
+    flex: 2;
+  }
+
+  .port {
+    flex: 0 0 90px;
+  }
+
+  .note {
+    display: flex;
+    gap: 6px;
+    font-size: var(--text-sm);
+    color: var(--fg-muted);
+  }
+
+  h5 {
+    margin: 12px 0 6px;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--fg-label);
+  }
+
+  .found {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .found li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .found li > span {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow-wrap: anywhere;
   }
 </style>
