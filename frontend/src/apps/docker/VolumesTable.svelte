@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Volume, VolumePlan } from '../../lib/api/docker'
   import { toUserError } from '../../lib/api/errors'
+  import { withSudo } from '../../lib/stores/sudoPrompt.svelte'
   import { formatBytes } from '../../lib/format'
   import { locale, t } from '../../lib/i18n'
   import ActionMenu from '../../lib/ui/ActionMenu.svelte'
@@ -47,7 +48,12 @@
     removing = null
     if (!p) return
     try {
-      await backend.removeVolume(serverID, p.name, p.command)
+      if (
+        !(await withSudo(serverID, `sudo ${p.command}`, () =>
+          backend.removeVolume(serverID, p.name, p.command),
+        ))
+      )
+        return
       onchanged()
     } catch (e) {
       error = toUserError(e).message

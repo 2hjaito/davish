@@ -4,11 +4,16 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Sửa
+- Docker: đăng nhập bằng user không thuộc nhóm `docker` thì danh sách container, image, volume và các thao tác start, stop, restart, xóa, tạo network/volume không còn chỉ báo "cần root": Davish chạy lại đúng lệnh đó qua `sudo`. Không cần mật khẩu thì chạy luôn; cần mật khẩu thì app hiện nút "Xem bằng sudo…" và hỏi một lần mỗi phiên, như Dịch vụ và Nginx (#117). Lệnh gõ sẵn vào Terminal (run, pull, exec, compose) giữ nguyên.
+- Cron: đăng nhập bằng user có quyền sudo thì Cron hiện thêm crontab của root, thêm, sửa, xóa, bật, tắt job trong đó qua `sudo crontab -u root -`. Crontab cũ được backup vào `/root` trước, hộp xác nhận hiện đúng lệnh và cảnh báo job sẽ chạy với quyền root. File trong `/etc/crontab`, `/etc/cron.d` không đọc được và nhật ký chạy job cũng đọc qua sudo. Cần mật khẩu thì có nút "Xem bằng sudo…", hỏi một lần mỗi phiên (#117). User không có sudo không thấy crontab của root. File trong `/etc/cron.d` vẫn sửa bằng Editor.
+
+## [1.13.3] - 2026-11-11
+
 ### Thêm
 - Monitor trên server Windows: CPU từng nhân, bộ nhớ và swap, ổ đĩa, mạng, I/O đĩa, GPU, tiến trình, thông tin hệ thống và cảnh báo service/container, đọc qua Windows PowerShell 5.1 và CIM trên SSH. Không cài gì lên server. Load average, I/O wait và steal không có trên Windows nên được ẩn. Chạy được dù shell SSH của server là cmd.exe hay PowerShell.
 
 ### Sửa
-- Cron: đăng nhập bằng user có quyền sudo thì Cron hiện thêm crontab của root, thêm, sửa, xóa, bật, tắt job trong đó qua `sudo crontab -u root -`. Crontab cũ được backup vào `/root` trước, hộp xác nhận hiện đúng lệnh và cảnh báo job sẽ chạy với quyền root. File trong `/etc/crontab`, `/etc/cron.d` không đọc được và nhật ký chạy job cũng đọc qua sudo. Cần mật khẩu thì có nút "Xem bằng sudo…", hỏi một lần mỗi phiên (#117). User không có sudo không thấy crontab của root. File trong `/etc/cron.d` vẫn sửa bằng Editor.
 - Monitor trên server Windows hoặc macOS không còn chờ "số liệu đầu tiên" mãi mãi. Davish nhận biết hệ điều hành của server ngay sau khi kết nối, chạy nền nên không làm chậm việc kết nối; Monitor báo chưa hỗ trợ hệ điều hành đó (hoặc server không trả số liệu nào) thay vì thử lại trong im lặng. Server Linux không đổi.
 - Terminal trên server Windows mở shell đăng nhập thường thay vì gửi dòng lệnh khởi động chỉ dành cho Linux.
 

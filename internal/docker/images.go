@@ -254,7 +254,7 @@ func (s *Service) RemoveImage(ctx context.Context, serverID, ref, command string
 	if command != p.Command {
 		return apperr.New(apperr.InvalidInput, "command does not match what was confirmed")
 	}
-	res, err := s.run.Run(ctx, serverID, app, shellx.Cmd("docker", "rmi", ref))
+	res, err := s.exec(ctx, serverID, shellx.Cmd("docker", "rmi", ref))
 	if err != nil {
 		return err
 	}
