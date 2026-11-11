@@ -140,6 +140,7 @@ func New(version string) (*App, error) {
 	a.tunnels = ports.NewTunnels(a.conns, emitter{a}, log)
 	a.browser = ports.NewBrowser(a.conns, log)
 	a.logs = logs.New(a.conns, a.audit, emitter{a}, log)
+	a.logs.UseRoot(a.sudo)
 	if a.transfers, err = transfer.New(a.conns, emitter{a}, log, transfer.Options{}); err != nil {
 		return nil, err
 	}

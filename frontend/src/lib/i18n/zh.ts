@@ -928,7 +928,12 @@ const zh = {
         does: '实时查看单元的 journal、日志文件或容器日志。筛选、暂停、高亮错误。',
         actions: ['点击日志中的文件路径，在编辑器中打开并跳到那一行', '暂停以便阅读'],
         keys: [],
-        runs: ['journalctl -f', 'tail -F', 'docker logs -f'],
+        runs: [
+          'journalctl -f',
+          'tail -F',
+          'docker logs -f',
+          '无权读取的日志（系统 journal、root 的文件、不在 docker 组时的 docker）：通过 sudo 重新跟踪，如有需要每个会话只询问一次 sudo 密码',
+        ],
       },
       editor: {
         does: '带语法高亮编辑服务器上的文件；原子保存并保留权限和属主，/etc 中的文件会自动备份。',

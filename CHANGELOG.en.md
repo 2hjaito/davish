@@ -7,6 +7,7 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 ### Fixed
 - Docker: logged in as a user outside the `docker` group, the container, image and volume lists and start, stop, restart, remove and new network/volume no longer stop at "needs root": Davish runs the same command again through `sudo`. With no password needed it just runs; otherwise the app offers "View with sudo…" and asks once per session, as Services and Nginx do (#117). Lines typed into Terminal (run, pull, exec, compose) are unchanged.
 - Cron: logged in as a user who may use sudo, Cron also shows root's crontab, and adds, edits, removes, enables and disables its jobs through `sudo crontab -u root -`. The old crontab is backed up in `/root` first, and the confirmation shows the exact command and warns that the job runs as root. Unreadable files in `/etc/crontab` and `/etc/cron.d`, and a job's recent runs, are read through sudo too. When a password is needed, "View with sudo…" asks once per session (#117). A user without sudo does not see root's crontab. Files in `/etc/cron.d` are still edited in Editor.
+- Logs: a log you may not read (the system journal outside the `adm`/`systemd-journal` groups, root's files, docker outside the `docker` group) is followed again through `sudo`: right away when no password is needed, else "View with sudo…" asks once per session (#117). The password only goes on the stream's stdin, never on a command line or in the audit log; when sudo turns it down it is forgotten and asked again.
 
 ## [1.13.3] - 2026-11-11
 

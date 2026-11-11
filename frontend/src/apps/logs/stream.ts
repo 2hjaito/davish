@@ -1,7 +1,13 @@
 // Following one log source, through the Go streams or a demo in the plain
 // browser preview.
 import { onLogsEnd, onLogsLine, type LogsEnd } from '../../lib/api/events'
-import { type LogSource, type LogsStarted, logsStart, logsStop } from '../../lib/api/logs'
+import {
+  type LogSource,
+  type LogsStarted,
+  logsStart,
+  logsStartAsRoot,
+  logsStop,
+} from '../../lib/api/logs'
 import { hasRuntime } from '../../lib/api/runtime'
 
 export interface Handlers {
@@ -15,9 +21,14 @@ export interface Following {
   sudo: string
 }
 
-/** Starts following src; resolves to how to stop it. */
-export async function follow(serverID: string, src: LogSource, h: Handlers): Promise<Following> {
-  if (!hasRuntime) return demo(src, h)
+/** Starts following src, as root through sudo when asRoot; resolves to how to stop it. */
+export async function follow(
+  serverID: string,
+  src: LogSource,
+  h: Handlers,
+  asRoot = false,
+): Promise<Following> {
+  if (!hasRuntime) return demo(src, h, asRoot)
   // Lines can arrive before logsStart answers, so events are collected
   // from the start and sorted out once the stream's ID is known.
   let id: string | null = null
@@ -40,7 +51,7 @@ export async function follow(serverID: string, src: LogSource, h: Handlers): Pro
   }
   let started: LogsStarted
   try {
-    started = await logsStart(serverID, src)
+    started = await (asRoot ? logsStartAsRoot : logsStart)(serverID, src)
   } catch (e) {
     offLine()
     offEnd()
@@ -61,7 +72,7 @@ export async function follow(serverID: string, src: LogSource, h: Handlers): Pro
   }
 }
 
-function demo(src: LogSource, h: Handlers): Following {
+function demo(src: LogSource, h: Handlers, asRoot: boolean): Following {
   const at = () => new Date().toISOString().slice(0, 19)
   const sample = [
     () => `${at()} vps app[812]: GET /api/orders 200 12ms`,
@@ -70,7 +81,7 @@ function demo(src: LogSource, h: Handlers): Following {
     () => `${at()} vps app[812]: Error: cannot open /etc/nginx/nginx.conf: no such file`,
     () => `${at()} vps app[812]:   File "/srv/app/worker.py", line 42, in run`,
   ]
-  if (src.target === '/etc/shadow') {
+  if (src.target === '/etc/shadow' && !asRoot) {
     setTimeout(
       () =>
         h.end({

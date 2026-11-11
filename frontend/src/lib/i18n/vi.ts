@@ -936,7 +936,12 @@ const vi = {
         does: 'Theo dõi journal của unit, một file log hoặc log container. Lọc, tạm dừng, tô lỗi.',
         actions: ['Nhấp đường dẫn file trong log để mở ở Editor đúng dòng', 'Tạm dừng để đọc'],
         keys: [],
-        runs: ['journalctl -f', 'tail -F', 'docker logs -f'],
+        runs: [
+          'journalctl -f',
+          'tail -F',
+          'docker logs -f',
+          'Log không đọc được (journal hệ thống, file của root, docker khi không thuộc nhóm docker): theo dõi lại qua sudo, hỏi mật khẩu sudo một lần mỗi phiên nếu cần',
+        ],
       },
       editor: {
         does: 'Sửa file trên server với tô màu cú pháp; lưu atomic, giữ quyền và chủ, sao lưu file trong /etc.',

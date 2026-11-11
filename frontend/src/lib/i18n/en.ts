@@ -953,7 +953,12 @@ const en = {
           'Pause to read',
         ],
         keys: [],
-        runs: ['journalctl -f', 'tail -F', 'docker logs -f'],
+        runs: [
+          'journalctl -f',
+          'tail -F',
+          'docker logs -f',
+          "A log you may not read (system journal, root's files, docker outside the docker group): followed again through sudo, asking for the sudo password once per session if needed",
+        ],
       },
       editor: {
         does: 'Edit files on the server with syntax highlighting; atomic saves that keep permissions and owner, backups of files in /etc.',
