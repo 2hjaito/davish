@@ -50,10 +50,11 @@ func untrusted() error {
 // checkTruncateAsRoot refuses to empty p as root unless no one but root
 // and the login user could swap it for a link: p is a plain file and not
 // a link, it really is at p, and every folder on its way belongs to root
-// or the login user, its own folder not writable by everyone (as /tmp is;
-// a system group such as syslog's on /var/log is the admin's). truncate
-// follows links, so a link planted at /tmp/big.log, pointing at
-// /etc/shadow, would otherwise empty that.
+// or the login user and cannot be written by others: not by everyone, not
+// by a group other than root's, unless sticky as /tmp is. Whoever may
+// write a folder may rename what is in it. truncate follows links, so a
+// link planted at /tmp/big.log, pointing at /etc/shadow, would otherwise
+// empty that. A refused file can still be emptied with sudo in Terminal.
 func (s *Service) checkTruncateAsRoot(ctx context.Context, serverID, p string) error {
 	var dirs []string
 	for d := path.Dir(p); ; d = path.Dir(d) {
@@ -63,7 +64,7 @@ func (s *Service) checkTruncateAsRoot(ctx context.Context, serverID, p string) e
 		}
 	}
 	line := "id -u; readlink -f -- " + shellx.Quote(p) + "; " +
-		shellx.Cmd("stat", append([]string{"-c", "%u %a %F", "--", p}, dirs...)...).String()
+		shellx.Cmd("stat", append([]string{"-c", "%u %g %a %F", "--", p}, dirs...)...).String()
 	res, err := s.run.RunLine(ctx, serverID, app, line)
 	if err != nil {
 		return err
@@ -72,21 +73,27 @@ func (s *Service) checkTruncateAsRoot(ctx context.Context, serverID, p string) e
 	if res.Exit != 0 || len(out) != 3+len(dirs) {
 		return untrusted()
 	}
-	login, resolved, file := out[0], out[1], strings.SplitN(out[2], " ", 3)
-	if resolved != p || len(file) != 3 || !strings.HasPrefix(file[2], "regular") || protectedFile(resolved) {
+	login, resolved, file := out[0], out[1], strings.SplitN(out[2], " ", 4)
+	if resolved != p || len(file) != 4 || !strings.HasPrefix(file[3], "regular") || protectedFile(resolved) {
 		return untrusted()
 	}
-	for i, l := range out[3:] {
-		f := strings.SplitN(l, " ", 3)
-		if len(f) != 3 || (f[0] != "0" && f[0] != login) {
+	for _, l := range out[3:] {
+		f := strings.SplitN(l, " ", 4)
+		if len(f) != 4 || (f[0] != "0" && f[0] != login) {
 			return untrusted()
 		}
-		mode, err := strconv.ParseUint(f[1], 8, 32)
-		if err != nil || (i == 0 && mode&0o002 != 0) {
+		mode, err := strconv.ParseUint(f[2], 8, 32)
+		if err != nil || sharedDir(uint32(mode), f[1] == "0") {
 			return untrusted()
 		}
 	}
 	return nil
+}
+
+// sharedDir tells a folder others may write: writable by everyone, or by
+// a group other than root's, and not sticky.
+func sharedDir(mode uint32, rootGroup bool) bool {
+	return mode&0o1000 == 0 && (mode&0o002 != 0 || (mode&0o020 != 0 && !rootGroup))
 }
 
 func codeOf(err error) apperr.Code {

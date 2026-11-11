@@ -323,7 +323,7 @@ const vi = {
     protected:
       'Ổ đĩa không xóa thư mục hệ thống, dữ liệu database hay thư mục home. Dùng mục Dọn dẹp hoặc app tương ứng.',
     rootUntrusted:
-      'Disk không làm rỗng file này bằng quyền root: đây là link, hoặc nằm trong thư mục mà user khác hay mọi người đều ghi được, nên file bị làm rỗng có thể là một file khác.',
+      'Disk không làm rỗng file này bằng quyền root: đây là link, hoặc nằm trong thư mục mà user khác sở hữu hay người khác ghi được (như thư mục dùng chung của một nhóm), nên file bị làm rỗng có thể là một file khác. Nếu chắc chắn, hãy dùng sudo trong Terminal.',
     ov: {
       asRoot: 'đo bằng root (sudo -n)',
       barLabel: 'Dung lượng ổ đĩa theo phần',

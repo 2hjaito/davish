@@ -75,18 +75,20 @@ func TestTruncateAsRootAfterRefusal(t *testing.T) {
 	ctx := context.Background()
 	p := "/var/log/app/big.log"
 	plan, _ := PlanTruncate(p)
-	dirs := "0 755 directory\n0 755 directory\n0 755 directory\n0 755 directory\n"
+	dirs := "0 0 755 directory\n0 0 755 directory\n0 0 755 directory\n0 0 755 directory\n"
 	cases := map[string]struct {
 		check string
 		ok    bool
 	}{
-		"root's file":                {"1000\n" + p + "\n33 640 regular file\n" + dirs, true},
-		"a link":                     {"1000\n/etc/shadow\n1001 777 symbolic link\n" + dirs, false},
-		"really elsewhere":           {"1000\n/etc/x/big.log\n0 640 regular file\n" + dirs, false},
-		"another user's folder":      {"1000\n" + p + "\n0 640 regular file\n1001 755 directory\n0 755 directory\n0 755 directory\n0 755 directory\n", false},
-		"a log folder syslog writes": {"1000\n" + p + "\n104 640 regular file\n0 775 directory\n0 755 directory\n0 755 directory\n0 755 directory\n", true},
-		"a shared folder":            {"1000\n" + p + "\n0 640 regular file\n0 1777 directory\n0 755 directory\n0 755 directory\n0 755 directory\n", false},
-		"check failed":               {"1000\n", false},
+		"root's file":                    {"1000\n" + p + "\n33 4 640 regular file\n" + dirs, true},
+		"a link":                         {"1000\n/etc/shadow\n1001 1001 777 symbolic link\n" + dirs, false},
+		"really elsewhere":               {"1000\n/etc/x/big.log\n0 0 640 regular file\n" + dirs, false},
+		"another user's folder":          {"1000\n" + p + "\n0 0 640 regular file\n1001 1001 755 directory\n" + dirs[18:], false},
+		"a log folder syslog writes":     {"1000\n" + p + "\n104 4 640 regular file\n0 104 775 directory\n" + dirs[18:], false},
+		"a folder root's group writes":   {"1000\n" + p + "\n0 0 640 regular file\n0 0 775 directory\n" + dirs[18:], true},
+		"www-data writes a folder above": {"1000\n/var/log/app/big.log\n0 0 640 regular file\n0 0 755 directory\n0 33 2775 directory\n0 0 755 directory\n0 0 755 directory\n", false},
+		"a shared folder":                {"1000\n" + p + "\n0 0 640 regular file\n0 0 777 directory\n" + dirs[18:], false},
+		"check failed":                   {"1000\n", false},
 	}
 	for name, c := range cases {
 		root := &fakeRoot{}

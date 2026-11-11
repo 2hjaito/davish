@@ -313,7 +313,7 @@ const en = {
     protected:
       'Disk does not delete system folders, database data or home folders. Use Clean up or the app that owns them.',
     rootUntrusted:
-      'Disk does not empty this file as root: it is a link, or lies in a folder another user or everyone may write, so the file emptied could be another one.',
+      "Disk does not empty this file as root: it is a link, or lies in a folder another user owns or others may write (such as a group's shared folder), so the file emptied could be another one. Use sudo in Terminal if you are sure.",
     ov: {
       asRoot: 'measured as root (sudo -n)',
       barLabel: 'Disk space by part',

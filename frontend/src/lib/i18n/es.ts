@@ -328,7 +328,7 @@ const es = {
     protected:
       'Disco no borra carpetas del sistema, datos de bases de datos ni carpetas personales. Usa Limpiar o la app a la que pertenecen.',
     rootUntrusted:
-      'Disk no vacía este archivo como root: es un enlace, o está en una carpeta en la que otro usuario o cualquiera puede escribir, así que el archivo vaciado podría ser otro.',
+      'Disk no vacía este archivo como root: es un enlace, o está en una carpeta que otro usuario posee o en la que otros pueden escribir (como la carpeta compartida de un grupo), así que el archivo vaciado podría ser otro. Si estás seguro, usa sudo en la Terminal.',
     ov: {
       asRoot: 'medido como root (sudo -n)',
       barLabel: 'Espacio del disco por partes',
