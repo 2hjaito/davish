@@ -30,11 +30,11 @@ Lần đầu chạy một script, Davish hiện tên server và đúng lệnh. C
 
 ## Editor
 
-CodeMirror 6, tô màu cho nginx, YAML, JSON, shell, env và file cấu hình. Lưu atomic giữ nguyên mode và chủ file, sao lưu file trong `/etc`, cảnh báo khi file đã đổi trên server.
+CodeMirror 6, tô màu cho nginx, YAML, JSON, shell, env và file cấu hình. Lưu atomic giữ nguyên mode và chủ file, sao lưu file trong `/etc`, cảnh báo khi file đã đổi trên server. File bạn không ghi được mở ở chế độ chỉ đọc, có **Sửa bằng sudo…**: khi lưu, Davish hiện đúng lệnh rồi ghi file bằng root, hoặc dùng `sudoedit` trong Terminal.
 
 ## Logs
 
-Theo dõi journal của dịch vụ, một file hoặc một container. Lọc, tạm dừng, tô dòng lỗi, bấm đường dẫn file để mở trong Editor đúng dòng.
+Theo dõi journal của dịch vụ, một file hoặc một container. Lọc, tạm dừng, tô dòng lỗi, bấm đường dẫn file để mở trong Editor đúng dòng. Log không đọc được thì được theo dõi lại bằng root qua `sudo`.
 
 <img src="assets/screenshots/logs.jpg" alt="Logs với đường dẫn file bấm được" width="100%">
 
@@ -56,6 +56,10 @@ Dịch vụ systemd theo trạng thái, chi tiết và journal; khởi động, 
 
 <img src="assets/screenshots/services.jpg" alt="Services" width="100%">
 
+## Không phải root?
+
+Đăng nhập bằng user có quyền `sudo` thì các app chạy bằng root những gì server từ chối: Services, Docker (khi không thuộc nhóm `docker`), Cron, Logs, Files và Editor, Disk, Nginx, An ninh và Database. Davish hiện đúng lệnh và hỏi mật khẩu sudo một lần cho mỗi server trong mỗi phiên: các app của server đó dùng chung cho tới khi bạn ngắt kết nối, mất kết nối hoặc khóa app, phiên sau sẽ hỏi lại. Mật khẩu chỉ giữ trong bộ nhớ (không ghi ra đĩa, keychain hay log) và đưa cho sudo qua stdin, không bao giờ trên dòng lệnh. **Quên mật khẩu sudo** trong menu server xóa nó ngay. Sudo không cần mật khẩu thì không hỏi gì. User không có quyền sudo thì không được hỏi. Những gì có thể khóa bạn khỏi server (bật ufw, tắt đăng nhập mật khẩu) và đường dẫn mà user khác có thể tráo vẫn chỉ qua Terminal.
+
 ## Docker
 
 Bố cục như Docker Desktop. Container dạng bảng (ID, image, cổng, CPU, RAM, trạng thái), gom theo project compose, phía trên là CPU và RAM chúng dùng chung; khởi động, dừng, menu ⋮ (log, shell trong container, khởi động lại, chi tiết) và xóa ngay trên dòng, mọi thao tác phá hủy đều hiện đúng lệnh trước. Cổng publish bấm là mở trong Trình duyệt của Davish. Image kèm dung lượng image đang được dùng, các layer và cấu hình; chạy image trong Terminal hoặc xóa image không dùng. Volume kèm dung lượng và còn container nào dùng không. Vẫn cảnh báo container khởi động lại liên tục.
@@ -71,7 +75,7 @@ Bố cục như Docker Desktop. Container dạng bảng (ID, image, cổng, CPU,
 
 ## Cron
 
-Crontab của bạn và của hệ thống, lịch nói bằng lời, lần chạy kế tiếp theo giờ server, sửa an toàn có sao lưu.
+Crontab của bạn và của hệ thống, lịch nói bằng lời, lần chạy kế tiếp theo giờ server, sửa an toàn có sao lưu. Có quyền sudo thì crontab của root cũng hiện và sửa được, các file cron hệ thống không đọc được thì đọc bằng root.
 
 Mỗi tác vụ liệt kê các file và thư mục trong lệnh của nó (script, log, thư mục `cd`), bấm là mở trong Editor hoặc Files. Tác vụ hệ thống mở được file cron và thư mục chứa nó.
 
@@ -107,7 +111,7 @@ Server chưa có Docker, nginx, git, MariaDB hay PostgreSQL thì app tương ứ
 
 ## Database
 
-Database MariaDB/MySQL, PostgreSQL và MongoDB kèm dung lượng, cùng các file SQLite, mở từ Launchpad hoặc Spotlight. Tạo database và user sở hữu nó với mật khẩu ngẫu nhiên, chỉ hiện một lần và không lưu ở đâu; câu lệnh gửi qua stdin nên mật khẩu không nằm trong nhật ký lệnh hay lịch sử shell. Xóa database sau khi gõ đúng tên. Dump ra `~/db-backups` (`mysqldump` / `pg_dump`, nén gzip) rồi tải về từ Files, hoặc khôi phục từ bản dump sau khi xem lệnh chính xác và gõ đúng tên. Mở database server qua tunnel để dùng công cụ của bạn. Davish kết nối bằng user của bạn, qua `sudo -n` hoặc user `postgres`; khi chỉ root vào được thì mở client trong Terminal.
+Database MariaDB/MySQL, PostgreSQL và MongoDB kèm dung lượng, cùng các file SQLite, mở từ Launchpad hoặc Spotlight. Tạo database và user sở hữu nó với mật khẩu ngẫu nhiên, chỉ hiện một lần và không lưu ở đâu; câu lệnh gửi qua stdin nên mật khẩu không nằm trong nhật ký lệnh hay lịch sử shell. Xóa database sau khi gõ đúng tên. Dump ra `~/db-backups` (`mysqldump` / `pg_dump`, nén gzip) rồi tải về từ Files, hoặc khôi phục từ bản dump sau khi xem lệnh chính xác và gõ đúng tên. Mở database server qua tunnel để dùng công cụ của bạn. Davish kết nối bằng user của bạn hoặc user `postgres`; khi chỉ root vào được thì đi qua `sudo`, hỏi mật khẩu sudo một lần mỗi phiên, file dump vẫn nằm trong `~/db-backups` của bạn.
 
 **MongoDB** hiện từng database kèm số collection. Khi bật xác thực, đăng nhập một lần bằng host, cổng, user, mật khẩu hoặc connection string: Davish thử trước, được mới lưu vào keychain của máy này như mật khẩu SSH, không bao giờ vào file; **Quên thông tin đăng nhập** để xóa. Connection string đi vào `mongosh` qua stdin nên không nằm trên dòng lệnh, trong `ps` hay nhật ký lệnh; `mongodump` và `mongorestore` đọc nó từ một file chỉ bạn đọc được, bị xóa ngay khi chạy xong.
 
@@ -146,9 +150,9 @@ Gõ `localhost:3000` để xem web app đang chạy trên server, ngay trong m�
 
 ## Ổ đĩa
 
-Ổ đĩa nặng ở đâu, từ một lần quét cả ổ (bằng root qua `sudo -n` nếu sudo không cần mật khẩu). Trang tổng quan chia ổ thành thư mục đo được, file đã xóa mà tiến trình còn giữ, phần chưa đo được và chỗ trống, rồi giải thích phần hụt: các thư mục user này không đọc được, kèm lệnh `sudo du` để chạy trong Terminal, và tiến trình nào giữ file đã xóa nào. Thư mục mở tại chỗ dạng cây, tầng sâu hơn được đo khi mở; tab File lớn liệt kê mọi file từ 50 MB.
+Ổ đĩa nặng ở đâu, từ một lần quét cả ổ (bằng root qua `sudo` nếu sudo không cần mật khẩu hoặc phiên đã có mật khẩu; nếu chưa thì có **Đo bằng sudo…**). Trang tổng quan chia ổ thành thư mục đo được, file đã xóa mà tiến trình còn giữ, phần chưa đo được và chỗ trống, rồi giải thích phần hụt: các thư mục user này không đọc được, kèm lệnh `sudo du` để chạy trong Terminal, và tiến trình nào giữ file đã xóa nào. Thư mục mở tại chỗ dạng cây, tầng sâu hơn được đo khi mở; tab File lớn liệt kê mọi file từ 50 MB.
 
-Xóa thư mục hoặc file, hoặc làm rỗng file như log để chương trình đang ghi vẫn ghi tiếp, sau khi xem đúng lệnh; từ 1 GB hoặc thư mục có nội dung thì phải gõ tên. Thư mục hệ thống, cơ sở dữ liệu gói, dữ liệu của Docker và database, thư mục home đều bị từ chối; file của root thì chuyển sang Terminal với `sudo`. Mục Dọn dẹp kèm dung lượng lấy lại: image, container dừng, cache build, volume (đánh dấu là dữ liệu) và log container của Docker, journal, log xoay vòng, cache gói, dump lỗi, file tạm cũ, bản snap cũ, `~/.cache` và cache npm, mỗi mục hiện đúng lệnh. Thông báo ổ đầy mở thẳng đúng mount.
+Xóa thư mục hoặc file, hoặc làm rỗng file như log để chương trình đang ghi vẫn ghi tiếp, sau khi xem đúng lệnh; từ 1 GB hoặc thư mục có nội dung thì phải gõ tên. Thư mục hệ thống, cơ sở dữ liệu gói, dữ liệu của Docker và database, thư mục home đều bị từ chối; file của root được xóa hoặc làm rỗng qua `sudo` sau khi xác nhận. Đường dẫn đi qua link hay thư mục mà user khác có thể đổi thì Davish gõ sẵn lệnh vào Terminal thay vì chạy. Cleanup cần root cũng chạy qua `sudo`; cache của bạn luôn chạy bằng chính bạn. Mục Dọn dẹp kèm dung lượng lấy lại: image, container dừng, cache build, volume (đánh dấu là dữ liệu) và log container của Docker, journal, log xoay vòng, cache gói, dump lỗi, file tạm cũ, bản snap cũ, `~/.cache` và cache npm, mỗi mục hiện đúng lệnh. Thông báo ổ đầy mở thẳng đúng mount.
 
 <p><img src="assets/screenshots/disk.jpg" alt="Tổng quan ổ đĩa: phần đo được, phần chưa đo được và lý do, file đã xóa còn mở"></p>
 
@@ -159,7 +163,7 @@ Xóa thư mục hoặc file, hoặc làm rỗng file như log để chương tr�
 
 ## An ninh
 
-Ai đăng nhập qua SSH và ai đang dò. Phía trên là số liệu 7 ngày (lần sai, user không tồn tại, số địa chỉ, đã ban, đăng nhập thành công), biểu đồ lần sai theo giờ, địa chỉ và user bị thử nhiều nhất, đánh dấu địa chỉ fail2ban đã ban hoặc ufw đã chặn. Bên dưới là ai đang đăng nhập lúc này, mọi địa chỉ kèm tên user đã thử, đăng nhập gần đây, ufw và fail2ban. Đăng nhập sai và Đã chặn là bảng bôi đen, copy được: mỗi địa chỉ kèm số lần, user đã thử, lần thử cuối, đã chặn hay chưa, nút Chặn hoặc Bỏ chặn ngay trên dòng; tick nhiều dòng để chặn một lần. Mọi lần chặn, bỏ chặn, ban, bỏ ban đều hiện đúng lệnh trước, xác nhận là chạy (`sudo -n`), hoặc gõ sẵn vào Terminal khi sudo cần mật khẩu. Tắt đăng nhập mật khẩu qua Terminal, có `sshd -t` trước khi reload.
+Ai đăng nhập qua SSH và ai đang dò. Phía trên là số liệu 7 ngày (lần sai, user không tồn tại, số địa chỉ, đã ban, đăng nhập thành công), biểu đồ lần sai theo giờ, địa chỉ và user bị thử nhiều nhất, đánh dấu địa chỉ fail2ban đã ban hoặc ufw đã chặn. Bên dưới là ai đang đăng nhập lúc này, mọi địa chỉ kèm tên user đã thử, đăng nhập gần đây, ufw và fail2ban. Đăng nhập sai và Đã chặn là bảng bôi đen, copy được: mỗi địa chỉ kèm số lần, user đã thử, lần thử cuối, đã chặn hay chưa, nút Chặn hoặc Bỏ chặn ngay trên dòng; tick nhiều dòng để chặn một lần. Mọi lần chặn, bỏ chặn, ban, bỏ ban đều hiện đúng lệnh trước, xác nhận là chạy qua `sudo`, hỏi mật khẩu sudo một lần mỗi phiên; những gì cần root để đọc (`lastb`, ufw, fail2ban) cũng được đọc bằng root. Tắt đăng nhập mật khẩu qua Terminal, có `sshd -t` trước khi reload.
 
 <img src="assets/screenshots/security.jpg" alt="Lần đăng nhập sai theo giờ, địa chỉ và user bị thử nhiều nhất" width="100%">
 

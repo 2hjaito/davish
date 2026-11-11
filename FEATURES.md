@@ -30,11 +30,11 @@ The first time a script runs, Davish shows the server name and the exact command
 
 ## Editor
 
-CodeMirror 6 with highlighting for nginx, YAML, JSON, shell, env and config files. Atomic saves that keep mode and owner, backups under `/etc`, and a warning if the file changed on the server.
+CodeMirror 6 with highlighting for nginx, YAML, JSON, shell, env and config files. Atomic saves that keep mode and owner, backups under `/etc`, and a warning if the file changed on the server. A file you cannot write opens read-only, with **Edit with sudo…**: saving then shows the exact command and writes the file as root, or use `sudoedit` in a terminal.
 
 ## Logs
 
-Follow a unit's journal, a file or a container. Filter, pause, highlight errors, and click a file path to open it in the Editor at that line.
+Follow a unit's journal, a file or a container. Filter, pause, highlight errors, and click a file path to open it in the Editor at that line. A log you may not read is followed again as root through `sudo`.
 
 <img src="assets/screenshots/logs.jpg" alt="Logs with clickable file paths" width="100%">
 
@@ -56,6 +56,10 @@ systemd units by state, their status and journal; start, stop and restart. Remov
 
 <img src="assets/screenshots/services.jpg" alt="Services" width="100%">
 
+## Not root?
+
+Logged in as a user who may use `sudo`, the apps run what the server refuses as root: Services, Docker (outside the `docker` group), Cron, Logs, Files and Editor, Disk, Nginx, Security and Database. Davish shows the exact command and asks for the sudo password once per server and session: the apps of that server then share it until you disconnect, the connection drops or you lock the app, and the next session asks again. It is kept in memory only (never on disk, in the keychain or in a log) and hands it to sudo on stdin, never on a command line. **Forget sudo password** in the server menu wipes it. When sudo needs no password nothing is asked. A user who may not use sudo is not asked at all. What could lock you out of the server (turning ufw on, password logins off) and paths other users could swap stay in the terminal.
+
 ## Docker
 
 Laid out like Docker Desktop. Containers in a table (ID, image, ports, CPU, memory, status), grouped by compose project, with the CPU and memory they use together on top; start, stop, a ⋮ menu (logs, a shell in the container, restart, details) and delete right on the row, every destructive one showing its exact command first. A published port opens in Davish's own browser. Images with how much space the used ones take, their layers and config; run one in a terminal or remove the unused. Volumes with their size and whether a container still uses them. Restart-loop alerts stay.
@@ -71,7 +75,7 @@ Laid out like Docker Desktop. Containers in a table (ID, image, ports, CPU, memo
 
 ## Cron
 
-Your crontab and the system ones, schedules in plain words, next runs in the server's time zone, safe edits with a backup.
+Your crontab and the system ones, schedules in plain words, next runs in the server's time zone, safe edits with a backup. If you may use sudo, root's crontab is listed and edited too, and system cron files you cannot read are read as root.
 
 Each job lists the files and folders in its command (script, log, `cd` folder), one click from the Editor or Files. System jobs open their cron file and its folder.
 
@@ -107,7 +111,7 @@ When Docker, nginx, git, MariaDB or PostgreSQL is missing, their app says so and
 
 ## Database
 
-MariaDB/MySQL, PostgreSQL and MongoDB databases with their size, and SQLite files, from Launchpad or Spotlight. Create a database and a user that owns it with a random password, shown once and kept nowhere; the statement goes on stdin, so the password is neither in the command log nor in a shell history. Delete a database after typing its name. Dump one to `~/db-backups` (`mysqldump` / `pg_dump`, compressed) and download it from Files, or restore a dump after seeing the exact command and typing the name. Open the database server through a tunnel to use your own tools. Davish connects as you, through `sudo -n` or as `postgres`; when only root may connect it opens the client in a terminal.
+MariaDB/MySQL, PostgreSQL and MongoDB databases with their size, and SQLite files, from Launchpad or Spotlight. Create a database and a user that owns it with a random password, shown once and kept nowhere; the statement goes on stdin, so the password is neither in the command log nor in a shell history. Delete a database after typing its name. Dump one to `~/db-backups` (`mysqldump` / `pg_dump`, compressed) and download it from Files, or restore a dump after seeing the exact command and typing the name. Open the database server through a tunnel to use your own tools. Davish connects as you or as `postgres`; when only root may connect, it goes through `sudo`, asking for the sudo password once per session, and your dumps still land in your own `~/db-backups`.
 
 **MongoDB** shows each database with its collections. When authentication is on, log in once with host, port, user and password or a connection string: Davish tries it first and only then keeps it in this computer's keychain, like your SSH password, never in a file; **Forget login** removes it. The connection string reaches `mongosh` on stdin, so it is never on a command line, in `ps` or in the command log; `mongodump` and `mongorestore` read it from a file only you can read, removed the moment they finish.
 
@@ -146,9 +150,9 @@ Type `localhost:3000` and see the web app running on the server, inside a Davish
 
 ## Disk
 
-Where each disk's space goes, from one scan of the whole disk (as root through `sudo -n` when sudo needs no password). The overview splits the disk into measured folders, deleted files a process still holds open, what could not be measured and free space, and explains the gaps: the folders this user cannot read, with a `sudo du` to run in a terminal, and which process holds which deleted file. Folders open in place as a tree, deeper levels measured when opened; a Large files tab lists every file from 50 MB.
+Where each disk's space goes, from one scan of the whole disk (as root through `sudo` when sudo needs no password or the session has it; otherwise **Measure with sudo…**). The overview splits the disk into measured folders, deleted files a process still holds open, what could not be measured and free space, and explains the gaps: the folders this user cannot read, with a `sudo du` to run in a terminal, and which process holds which deleted file. Folders open in place as a tree, deeper levels measured when opened; a Large files tab lists every file from 50 MB.
 
-Delete a folder or file, or empty a file such as a log so the program writing it carries on, after seeing the exact command; anything from 1 GB, or a folder with content, asks for its name. System folders, package databases, Docker's and databases' data and home folders are refused, and root's files go to a terminal with `sudo`. Cleanups list the space they free: Docker images, stopped containers, build cache, volumes (flagged as data) and container logs, the journal, rotated logs, package caches, crash dumps, old temporary files, old snap revisions, `~/.cache` and the npm cache, each with its exact command. A full-disk alert opens it at the right mount.
+Delete a folder or file, or empty a file such as a log so the program writing it carries on, after seeing the exact command; anything from 1 GB, or a folder with content, asks for its name. System folders, package databases, Docker's and databases' data and home folders are refused, and root's files are deleted or emptied through `sudo` once you confirm. When a path goes through a link or a folder other users may change, Davish types the command into a terminal instead. Cleanups that need root run through `sudo` too; your own caches always run as you. Cleanups list the space they free: Docker images, stopped containers, build cache, volumes (flagged as data) and container logs, the journal, rotated logs, package caches, crash dumps, old temporary files, old snap revisions, `~/.cache` and the npm cache, each with its exact command. A full-disk alert opens it at the right mount.
 
 <p><img src="assets/screenshots/en/disk.jpg" alt="Disk overview: what is measured, what is not and why, deleted files still open"></p>
 
@@ -159,7 +163,7 @@ Delete a folder or file, or empty a file such as a log so the program writing it
 
 ## Security
 
-Who logs in over SSH and who keeps trying. At the top, the week in numbers (failed logins, unknown users, addresses, banned, successful logins), failed logins hour by hour, and the addresses and user names tried most, with those fail2ban banned or ufw blocks marked. Below, who is logged in right now, every address with the names it tried, recent logins, ufw and fail2ban. Failed logins and blocked addresses are tables you can select and copy from: each address with its tries, the names it tried, its last try and whether it is blocked, with Block or Unblock on the row; tick several to block them at once. Every block, unblock, ban or unban shows the exact commands first and runs once you confirm (`sudo -n`), or types them into a terminal when sudo needs a password. Password logins are turned off from a terminal, checked by `sshd -t` before the reload.
+Who logs in over SSH and who keeps trying. At the top, the week in numbers (failed logins, unknown users, addresses, banned, successful logins), failed logins hour by hour, and the addresses and user names tried most, with those fail2ban banned or ufw blocks marked. Below, who is logged in right now, every address with the names it tried, recent logins, ufw and fail2ban. Failed logins and blocked addresses are tables you can select and copy from: each address with its tries, the names it tried, its last try and whether it is blocked, with Block or Unblock on the row; tick several to block them at once. Every block, unblock, ban or unban shows the exact commands first and runs once you confirm, through `sudo` with the sudo password asked once per session; what needs root to read (`lastb`, ufw, fail2ban) is read as root too. Password logins are turned off from a terminal, checked by `sshd -t` before the reload.
 
 <img src="assets/screenshots/en/security.jpg" alt="Failed logins per hour, the addresses and users tried most" width="100%">
 
