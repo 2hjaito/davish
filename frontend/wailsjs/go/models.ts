@@ -1509,6 +1509,24 @@ export namespace fs {
 	        this.sudo = source["sudo"];
 	    }
 	}
+	export class RootSavePlan {
+	    command: string;
+	    sudo: string;
+	    target: string;
+	    backup?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RootSavePlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.command = source["command"];
+	        this.sudo = source["sudo"];
+	        this.target = source["target"];
+	        this.backup = source["backup"];
+	    }
+	}
 	export class SaveOptions {
 	    backup: boolean;
 	    expect?: Expect;

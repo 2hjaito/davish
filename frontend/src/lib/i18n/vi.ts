@@ -883,6 +883,7 @@ const vi = {
           'Chuột phải vào icon trên màn hình chính, hoặc nhấn F2, để đổi tên, icon, màu hoặc ảnh',
           'Chuột phải khoảng trống để tạo tệp hoặc thư mục',
           'Nhấp đúp file để mở trong Editor',
+          'Xóa file của root qua sudo khi server từ chối; thư mục hệ thống và các file cần để đăng nhập không bao giờ bị xóa bằng root',
         ],
         keys: [
           'Enter: mở',
@@ -945,7 +946,10 @@ const vi = {
       },
       editor: {
         does: 'Sửa file trên server với tô màu cú pháp; lưu atomic, giữ quyền và chủ, sao lưu file trong /etc.',
-        actions: ['Báo khi file bị đổi trên server', 'Lưu bằng sudo qua Terminal khi cần root'],
+        actions: [
+          'Báo khi file bị đổi trên server',
+          'Lưu bằng quyền root qua sudo sau khi hiện đúng lệnh (giữ owner, quyền và bản sao lưu), hoặc bằng sudoedit trong Terminal',
+        ],
         keys: ['⌘S: lưu', '⌘F: tìm'],
         runs: ['SFTP để đọc, ghi file tạm rồi đổi tên'],
       },
@@ -1703,6 +1707,14 @@ const vi = {
     overwrite: 'Ghi đè',
     readOnly: 'Chỉ đọc',
     readOnlyBody: 'Bạn không có quyền ghi file này nên nó được mở ở chế độ chỉ đọc.',
+    editAsRoot: 'Sửa bằng sudo…',
+    asRootBody:
+      'Đang sửa bằng sudo: khi lưu, Davish hiện đúng lệnh rồi ghi file bằng quyền root, giữ nguyên owner và quyền của file.',
+    rootSaveTitle: (name: string) => `Lưu “${name}” bằng quyền root?`,
+    rootSaveBody: 'Davish sẽ ghi file qua sudo bằng lệnh này; nội dung mới đi qua stdin:',
+    rootSaveAction: 'Lưu bằng root',
+    rootSaveBackup: (path: string) => `File hiện tại được sao lưu vào ${path} trước.`,
+    rootSaveNoBackup: 'Không tạo bản sao lưu (bật sao lưu trong Cài đặt → Editor).',
     sudo: 'Mở trong Terminal với sudo',
     sudoHint: 'Lệnh sudoedit được điền sẵn; xem lại, nhấn Enter và nhập mật khẩu trong Terminal.',
     reload: 'Tải lại bản trên server',
@@ -2834,6 +2846,8 @@ const vi = {
     FS_TOO_LARGE: 'File quá lớn để mở trực tiếp. Hãy tải về.',
     FS_STALE: 'File hoặc thư mục đã thay đổi từ lúc bạn xác nhận. Hãy thử lại.',
     FS_CHANGED: 'File đã bị thay đổi trên server từ lúc bạn mở.',
+    FS_PROTECTED:
+      'Davish không làm việc này bằng quyền root: đường dẫn là phần sống còn của hệ thống, hoặc đi qua link hay thư mục mà user khác sở hữu hoặc ghi được, người đó có thể đổi hướng root sang chỗ khác. Nếu chắc chắn, hãy dùng sudoedit hoặc sudo trong Terminal.',
     CMD_NEEDS_ROOT: 'Lệnh này cần quyền root.',
     CMD_MISSING: 'Server chưa cài chương trình cần cho thao tác này (ví dụ zip).',
     CMD_FAILED: 'Lệnh chạy trên server bị lỗi.',

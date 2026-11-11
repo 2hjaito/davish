@@ -132,6 +132,42 @@ export const filesSave = (
     opts as Parameters<typeof App.FilesSave>[3],
   ) as Promise<SaveResult>
 
+export type SaveOpts = Parameters<typeof filesSave>[3]
+
+/** How the Editor would save a file as root through sudo (ADR 0018). */
+export interface RootSavePlan {
+  /** Exactly what runs as root; the text goes in on stdin. */
+  command: string
+  /** command as it runs through sudo, for the confirmation. */
+  sudo: string
+  /** The file written: the path, or what it links to. */
+  target: string
+  backup?: string
+}
+
+export const filesPlanSaveAsRoot = (
+  serverID: string,
+  path: string,
+  opts: SaveOpts,
+): Promise<RootSavePlan> =>
+  App.FilesPlanSaveAsRoot(serverID, path, opts as Parameters<typeof App.FilesPlanSaveAsRoot>[2])
+
+/** Saves exactly as plan was confirmed; FS_STALE if the file changed meanwhile. */
+export const filesSaveAsRoot = (
+  serverID: string,
+  path: string,
+  data: Uint8Array,
+  opts: SaveOpts,
+  plan: RootSavePlan,
+): Promise<SaveResult> =>
+  App.FilesSaveAsRoot(
+    serverID,
+    path,
+    encodeBase64(data) as unknown as number[],
+    opts as Parameters<typeof App.FilesSaveAsRoot>[3],
+    plan as Parameters<typeof App.FilesSaveAsRoot>[4],
+  ) as Promise<SaveResult>
+
 export interface Access {
   /** Saving would work: file and folder writable, owner kept. */
   writable: boolean
