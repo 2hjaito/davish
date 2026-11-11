@@ -29,14 +29,6 @@ RUN if [ -n "$UBUNTU_MIRROR" ]; then \
         /etc/apt/sources.list.d/ubuntu.sources; \
     fi
 
-# Temporary (2026-11-10): Ubuntu lists perl 5.38.2-3.2ubuntu0.7 in
-# noble-security but its .debs 404 on every mirror, so installing git, which
-# needs perl, failed every CI run. Keep perl at the version the base image
-# ships, still in noble-updates. Remove once the 0.7 files are served.
-RUN v=$(dpkg-query -W -f '${Version}' perl-base) \
- && printf 'Package: perl perl-base perl-modules-5.38 libperl5.38t64\nPin: version %s\nPin-Priority: 1001\n' "$v" \
-      > /etc/apt/preferences.d/80-davish-perl
-
 RUN apt-get update \
  && apt-get install -y --no-install-recommends systemd systemd-sysv dbus polkitd \
       openssh-server procps zip nginx docker.io cron curl git sudo \
