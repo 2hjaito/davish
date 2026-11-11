@@ -1011,6 +1011,7 @@ const vi = {
           'mongodump, mongorestore với --config là file quyền 600 trong ~/.cache/davish, tạo từ stdin và xóa ngay khi xong',
           'sqlite3 -readonly (rồi sudo -n nếu cần) để đọc; sqlite3 .backup để backup',
           'Dò: ps, cat /etc/mongod.conf, command -v sqlite3, find *.db *.sqlite *.sqlite3 trong /var/lib /opt /srv /home /root (timeout 20s)',
+          'MariaDB và PostgreSQL khi chỉ root được kết nối: qua sudo, hỏi mật khẩu sudo một lần mỗi phiên nếu cần, cho liệt kê, tạo, xóa, dump và restore',
         ],
       },
       deploy: {

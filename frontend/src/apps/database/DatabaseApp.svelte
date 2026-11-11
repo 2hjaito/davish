@@ -4,6 +4,7 @@
   import { copyText } from '../../lib/api/clipboard'
   import type { DBEngine, DBKind, DBLogin, Found, SQLiteInfo } from '../../lib/api/database'
   import { toUserError } from '../../lib/api/errors'
+  import { sudoPrompt, withSudo } from '../../lib/stores/sudoPrompt.svelte'
   import { formatBytes } from '../../lib/format'
   import { t } from '../../lib/i18n'
   import { servers } from '../../lib/stores/servers.svelte'
@@ -82,15 +83,30 @@
     }
   }
 
+  /** The admin client as root, for the sudo prompt: "sudo mysql", "sudo -u postgres psql". */
+  const clientOf = (kind: DBKind) => engines?.find((e) => e.kind === kind)?.client ?? 'sudo'
+
+  // Through sudo with the session's password when only root may connect;
+  // a cancelled prompt is no error.
+  const asRoot = (kind: DBKind, act: () => Promise<unknown>) =>
+    withSudo(win.serverID, clientOf(kind), act)
+
+  async function unlock(kind: DBKind) {
+    if (await sudoPrompt.ask(win.serverID, clientOf(kind))) void refresh()
+  }
+
   async function create() {
-    if (!creating) return
+    const kind = creating
+    if (!kind) return
     try {
-      login = await backend.create(
-        win.serverID,
-        creating,
-        dbName.trim(),
-        userName.trim() || dbName.trim(),
-      )
+      const make = async () =>
+        void (login = await backend.create(
+          win.serverID,
+          kind,
+          dbName.trim(),
+          userName.trim() || dbName.trim(),
+        ))
+      if (!(await asRoot(kind, make))) return
       creating = null
       void refresh()
     } catch (e) {
@@ -112,7 +128,7 @@
     if (!p || typed !== p.name) return
     dropping = null
     try {
-      await backend.drop(win.serverID, p.kind, p.name, p.sql)
+      if (!(await asRoot(p.kind, () => backend.drop(win.serverID, p.kind, p.name, p.sql)))) return
       flash = d.dropped(p.name)
     } catch (e) {
       flash = toUserError(e).message
@@ -127,7 +143,8 @@
     busy = name
     flash = ''
     try {
-      lastDump = await backend.dump(win.serverID, kind, name)
+      const run = async () => void (lastDump = await backend.dump(win.serverID, kind, name))
+      if (!(await asRoot(kind, run))) return
       flash = d.dumped(lastDump)
     } catch (e) {
       flash = toUserError(e).message
@@ -156,14 +173,17 @@
   }
 
   async function planRestore() {
-    if (!restoring) return
+    const r = restoring
+    if (!r) return
     try {
-      restoreCmd = await backend.restoreCommand(
-        win.serverID,
-        restoring.kind,
-        restoring.name,
-        restoreFile.trim(),
-      )
+      const plan = async () =>
+        void (restoreCmd = await backend.restoreCommand(
+          win.serverID,
+          r.kind,
+          r.name,
+          restoreFile.trim(),
+        ))
+      if (!(await asRoot(r.kind, plan))) return
       error = ''
     } catch (e) {
       restoreCmd = ''
@@ -177,7 +197,10 @@
     restoring = null
     busy = r.name
     try {
-      await backend.restore(win.serverID, r.kind, r.name, restoreFile.trim(), restoreCmd)
+      const file = restoreFile.trim()
+      const cmd = restoreCmd
+      const run = () => backend.restore(win.serverID, r.kind, r.name, file, cmd)
+      if (!(await asRoot(r.kind, run))) return
       flash = d.restored(r.name)
     } catch (e) {
       flash = toUserError(e).message
@@ -432,6 +455,12 @@
           />
         {:else if e.needsRoot}
           <p class="muted">{d.needsRoot}</p>
+          {#if e.askSudo}
+            <button type="button" class="btn btn-primary" onclick={() => void unlock(e.kind)}>
+              <Icon name="key" size={13} />
+              {t.sudo.journal}
+            </button>
+          {/if}
           <button
             type="button"
             class="btn"

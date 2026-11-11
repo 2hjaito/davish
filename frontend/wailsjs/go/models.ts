@@ -386,6 +386,7 @@ export namespace database {
 	    kind: string;
 	    installed: boolean;
 	    needsRoot: boolean;
+	    askSudo?: boolean;
 	    needsAuth?: boolean;
 	    login?: string;
 	    client: string;
@@ -401,6 +402,7 @@ export namespace database {
 	        this.kind = source["kind"];
 	        this.installed = source["installed"];
 	        this.needsRoot = source["needsRoot"];
+	        this.askSudo = source["askSudo"];
 	        this.needsAuth = source["needsAuth"];
 	        this.login = source["login"];
 	        this.client = source["client"];

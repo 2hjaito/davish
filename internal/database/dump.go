@@ -45,9 +45,14 @@ func withPrefix(prefix []string, args ...string) string {
 // prints the file's path. The dump goes to a file before gzip, since sh
 // has no pipefail and a failed dump must not leave a good-looking file.
 func dumpLine(prefix []string, kind, db, stamp string) string {
-	f := `"$HOME/db-backups/` + db + "-" + stamp + `.sql"`
 	args := append(append([]string{}, dumpTools[kind]...), db)
-	return "mkdir -p " + dumpDir + " && " + withPrefix(prefix, args...) + " > " + f +
+	return dumpLineWith(withPrefix(prefix, args...), db, stamp)
+}
+
+// dumpLineWith is dumpLine with the dump tool's own line.
+func dumpLineWith(tool, db, stamp string) string {
+	f := `"$HOME/db-backups/` + db + "-" + stamp + `.sql"`
+	return "mkdir -p " + dumpDir + " && " + tool + " > " + f +
 		" && gzip -- " + f + ` && echo "$HOME/db-backups/` + db + "-" + stamp + `.sql.gz"`
 }
 
@@ -67,7 +72,18 @@ func (s *Service) Dump(ctx context.Context, serverID, kind, db string) (string, 
 		return "", err
 	}
 	stamp := time.Now().UTC().Format("20060102T150405Z")
-	res, err := s.run.RunInput(ctx, serverID, app, dumpLine(prefix, kind, db, stamp), nil)
+	line, in := dumpLine(prefix, kind, db, stamp), []byte(nil)
+	if isRoot(prefix) {
+		// The dump tool runs as root; the file is the user's, in their
+		// home, written by their own shell.
+		root, pw, err := s.rootLine(ctx, serverID, kind, append(append([]string{}, dumpTools[kind]...), db)...)
+		if err != nil {
+			return "", err
+		}
+		defer wipe(pw)
+		line, in = dumpLineWith(root, db, stamp), pw
+	}
+	res, err := s.run.RunInput(ctx, serverID, app, line, in)
 	if err != nil {
 		return "", err
 	}
@@ -126,11 +142,44 @@ func (s *Service) RestoreCommand(ctx context.Context, serverID, kind, db, file s
 	if !ok {
 		return "", apperr.New(apperr.InvalidInput, "unknown engine")
 	}
+	line, pw, err := s.restore(ctx, serverID, kind, tool, db, file)
+	wipe(pw)
+	return line, err
+}
+
+// restore gives the line that loads file into db and what to write on
+// its stdin first: sudo's password line when the client is reached as
+// root with one, nil otherwise. The caller wipes it.
+func (s *Service) restore(ctx context.Context, serverID, kind string, tool []string, db, file string) (string, []byte, error) {
 	prefix, err := s.way(ctx, serverID, kind)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
-	return restoreLine(prefix, tool, db, file), nil
+	if !isRoot(prefix) {
+		return restoreLine(prefix, tool, db, file), nil, nil
+	}
+	client, pw, err := s.rootLine(ctx, serverID, kind, append(append([]string{}, tool...), db)...)
+	if err != nil {
+		return "", nil, err
+	}
+	return rootRestoreLine(client, file, pw != nil), pw, nil
+}
+
+// rootRestoreLine feeds file to client, which runs through sudo. With a
+// password, sudo reads it as the first line of its stdin, so head passes
+// the session's stdin (the password line, nothing else) on before the
+// dump: the password is never on a command line.
+func rootRestoreLine(client, file string, password bool) string {
+	read := shellx.Cmd("cat", "--", file).String()
+	test := ""
+	if strings.HasSuffix(file, ".gz") {
+		read = shellx.Cmd("gzip", "-dc", "--", file).String()
+		test = shellx.Cmd("gzip", "-t", "--", file).String() + " && "
+	}
+	if password {
+		return test + "{ head -n 1; " + read + "; } | " + client
+	}
+	return test + read + " | " + client
 }
 
 func restoreLine(prefix, tool []string, db, file string) string {
@@ -155,7 +204,14 @@ func (s *Service) Restore(ctx context.Context, serverID, kind, db, file, command
 		_, err := s.runMongoTool(ctx, serverID, command)
 		return err
 	}
-	res, err := s.run.RunInput(ctx, serverID, app, command, nil)
+	// Prepared again, for the password line to write; RestoreCommand
+	// above already checked the line is the confirmed one.
+	_, pw, err := s.restore(ctx, serverID, kind, restoreTools[kind], db, file)
+	if err != nil {
+		return err
+	}
+	defer wipe(pw)
+	res, err := s.run.RunInput(ctx, serverID, app, command, pw)
 	if err != nil {
 		return err
 	}

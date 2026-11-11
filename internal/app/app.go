@@ -130,6 +130,7 @@ func New(version string) (*App, error) {
 	a.git = git.New(runner)
 	a.shortcuts = shortcut.New(a.files, a.audit)
 	a.databases = database.New(runner)
+	a.databases.UseRoot(a.sudo)
 	a.databases.UseLogins(a.secrets)
 	// The app replaced by the last update is no longer needed.
 	update.Cleanup(goruntime.GOOS, os.Executable)
