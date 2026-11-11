@@ -941,7 +941,11 @@ const en = {
           'New network or volume; copy a container as a docker run command',
         ],
         keys: [],
-        runs: ['docker ps, stats, inspect, logs', 'docker start/stop/restart (with confirmation)'],
+        runs: [
+          'docker ps, stats, inspect, logs',
+          'docker start/stop/restart (with confirmation)',
+          'When the docker socket refuses a user outside the docker group: the same command again through sudo, asking for the sudo password once per session if needed. Commands typed into a terminal stay as they are',
+        ],
       },
       logs: {
         does: 'Follow a unit’s journal, a log file or a container’s logs. Filter, pause, highlight errors.',
@@ -950,7 +954,12 @@ const en = {
           'Pause to read',
         ],
         keys: [],
-        runs: ['journalctl -f', 'tail -F', 'docker logs -f'],
+        runs: [
+          'journalctl -f',
+          'tail -F',
+          'docker logs -f',
+          "A log you may not read (system journal, root's files, docker outside the docker group): followed again through sudo, asking for the sudo password once per session if needed",
+        ],
       },
       editor: {
         does: 'Edit files on the server with syntax highlighting; atomic saves that keep permissions and owner, backups of files in /etc.',
@@ -1036,7 +1045,11 @@ const en = {
           'Open the scripts and folders in a job’s command',
         ],
         keys: [],
-        runs: ['crontab -l, crontab - (with confirmation)', 'reads /etc/cron.d'],
+        runs: [
+          'crontab -l, crontab - (with confirmation)',
+          'reads /etc/cron.d',
+          'root’s crontab (crontab -u root) and unreadable /etc/cron.d files through sudo, asking for the sudo password once per session if needed',
+        ],
       },
       nginx: {
         does: 'Sites, server blocks, upstreams; enable/disable sites, test the config before reload, TLS certificate expiry.',
@@ -2258,6 +2271,8 @@ const en = {
     loading: 'Reading the container list…',
     offline: 'Server not connected',
     offlineHint: 'Connect the server to see its Docker containers.',
+    needsSudo:
+      'This user is not in the docker group, so Docker answers only root. Davish can run docker through sudo for this session, or you can run it in Terminal.',
     noMatch: 'No containers match.',
     noContainers: 'The server has no containers.',
     noSelection: 'Select a container to see its details',
@@ -2595,6 +2610,12 @@ const en = {
     never: 'Never',
     source: 'Source',
     mine: 'Your crontab',
+    rootSource: 'Root’s crontab',
+    target: 'Crontab',
+    rootWarn:
+      'Jobs in root’s crontab run as root on the server. Davish writes it through sudo, after you confirm the exact command.',
+    rootLocked:
+      'With the sudo password, Davish can also show root’s crontab and the system files you cannot read.',
     asUser: (user: string) => `runs as ${user}`,
     command: 'Command',
     nextRuns: 'Next runs',

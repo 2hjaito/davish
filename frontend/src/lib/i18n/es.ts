@@ -967,7 +967,11 @@ const es = {
           'Nueva red o volumen; copia un contenedor como comando docker run',
         ],
         keys: [],
-        runs: ['docker ps, stats, inspect, logs', 'docker start/stop/restart (con confirmación)'],
+        runs: [
+          'docker ps, stats, inspect, logs',
+          'docker start/stop/restart (con confirmación)',
+          'Cuando el socket de docker rechaza a un usuario fuera del grupo docker: el mismo comando otra vez con sudo, pidiendo la contraseña de sudo una vez por sesión si hace falta. Los comandos escritos en un terminal no cambian',
+        ],
       },
       logs: {
         does: 'Sigue el journal de una unidad, un archivo de registro o los registros de un contenedor. Filtra, pausa, resalta errores.',
@@ -976,7 +980,12 @@ const es = {
           'Pausa para leer',
         ],
         keys: [],
-        runs: ['journalctl -f', 'tail -F', 'docker logs -f'],
+        runs: [
+          'journalctl -f',
+          'tail -F',
+          'docker logs -f',
+          'Un registro que no puedes leer (journal del sistema, archivos de root, docker fuera del grupo docker): se sigue de nuevo con sudo, pidiendo la contraseña de sudo una vez por sesión si hace falta',
+        ],
       },
       editor: {
         does: 'Edita archivos en el servidor con resaltado de sintaxis; guardado atómico que conserva permisos y propietario, copias de los archivos de /etc.',
@@ -1062,7 +1071,11 @@ const es = {
           'Abrir los scripts y carpetas del comando de una tarea',
         ],
         keys: [],
-        runs: ['crontab -l, crontab - (con confirmación)', 'lee /etc/cron.d'],
+        runs: [
+          'crontab -l, crontab - (con confirmación)',
+          'lee /etc/cron.d',
+          'el crontab de root (crontab -u root) y los archivos de /etc/cron.d ilegibles con sudo, pidiendo la contraseña de sudo una vez por sesión si hace falta',
+        ],
       },
       nginx: {
         does: 'Sitios, bloques server, upstreams; activar/desactivar sitios, probar la configuración antes de recargar, caducidad de los certificados TLS.',
@@ -2306,6 +2319,8 @@ const es = {
     loading: 'Leyendo la lista de contenedores…',
     offline: 'Servidor no conectado',
     offlineHint: 'Conecta el servidor para ver sus contenedores Docker.',
+    needsSudo:
+      'Este usuario no está en el grupo docker, así que Docker solo responde a root. Davish puede ejecutar docker con sudo durante esta sesión, o puedes ejecutarlo en la Terminal.',
     noMatch: 'Ningún contenedor coincide.',
     noContainers: 'El servidor no tiene contenedores.',
     noSelection: 'Elige un contenedor para ver sus detalles',
@@ -2654,6 +2669,12 @@ const es = {
     never: 'Nunca',
     source: 'Origen',
     mine: 'Tu crontab',
+    rootSource: 'Crontab de root',
+    target: 'Crontab',
+    rootWarn:
+      'Las tareas del crontab de root se ejecutan como root en el servidor. Davish lo escribe con sudo, después de que confirmes el comando exacto.',
+    rootLocked:
+      'Con la contraseña de sudo, Davish también puede mostrar el crontab de root y los archivos del sistema que no puedes leer.',
     asUser: (user: string) => `se ejecuta como ${user}`,
     command: 'Comando',
     nextRuns: 'Próximas ejecuciones',

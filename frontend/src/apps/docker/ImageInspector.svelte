@@ -3,6 +3,7 @@
 
   import { type Image, type ImageDetail, type ImagePlan, imageRef } from '../../lib/api/docker'
   import { toUserError } from '../../lib/api/errors'
+  import { withSudo } from '../../lib/stores/sudoPrompt.svelte'
   import { formatBytes } from '../../lib/format'
   import { t } from '../../lib/i18n'
   import ConfirmCommand from '../../lib/ui/ConfirmCommand.svelte'
@@ -63,7 +64,12 @@
     removing = null
     busy = true
     try {
-      await backend.removeImage(serverID, p.ref, p.command)
+      if (
+        !(await withSudo(serverID, `sudo ${p.command}`, () =>
+          backend.removeImage(serverID, p.ref, p.command),
+        ))
+      )
+        return
       onchanged()
     } catch (e) {
       error = toUserError(e).message

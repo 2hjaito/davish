@@ -1,6 +1,7 @@
 <script lang="ts">
   import { type Image, type ImagePlan, imageRef } from '../../lib/api/docker'
   import { toUserError } from '../../lib/api/errors'
+  import { withSudo } from '../../lib/stores/sudoPrompt.svelte'
   import { formatBytes } from '../../lib/format'
   import { t } from '../../lib/i18n'
   import ActionMenu from '../../lib/ui/ActionMenu.svelte'
@@ -54,7 +55,13 @@
     removing = null
     if (!r) return
     try {
-      await backend.removeImage(serverID, r.plan.ref, r.plan.command)
+      const p = r.plan
+      if (
+        !(await withSudo(serverID, `sudo ${p.command}`, () =>
+          backend.removeImage(serverID, p.ref, p.command),
+        ))
+      )
+        return
       onchanged()
     } catch (e) {
       error = toUserError(e).message

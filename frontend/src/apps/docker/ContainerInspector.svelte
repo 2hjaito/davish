@@ -11,6 +11,7 @@
     LogLine,
   } from '../../lib/api/docker'
   import { toUserError } from '../../lib/api/errors'
+  import { withSudo } from '../../lib/stores/sudoPrompt.svelte'
   import { formatBytes, formatDuration, formatPct } from '../../lib/format'
   import { t } from '../../lib/i18n'
   import { lineLevel } from '../../lib/logLevel'
@@ -107,7 +108,8 @@
     flash = null
     const n = plan.name
     try {
-      await backend.act(serverID, n, plan.action)
+      if (!(await withSudo(serverID, plan.sudo, () => backend.act(serverID, n, plan.action))))
+        return
       if (name === n) flash = { text: t.docker.done[plan.action](n), ok: true }
     } catch (e) {
       const ue = toUserError(e)

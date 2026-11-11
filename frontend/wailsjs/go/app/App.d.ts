@@ -244,6 +244,8 @@ export function LockState():Promise<lock.State>;
 
 export function LogsStart(arg1:string,arg2:logs.Source):Promise<logs.Started>;
 
+export function LogsStartAsRoot(arg1:string,arg2:logs.Source):Promise<logs.Started>;
+
 export function LogsStop(arg1:string):Promise<void>;
 
 export function MonitorProcesses(arg1:string,arg2:string):Promise<sysmon.ProcessList>;

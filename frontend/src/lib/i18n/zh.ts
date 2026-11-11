@@ -919,13 +919,22 @@ const zh = {
           '新建网络或数据卷；把容器复制为 docker run 命令',
         ],
         keys: [],
-        runs: ['docker ps、stats、inspect、logs', 'docker start/stop/restart（需确认）'],
+        runs: [
+          'docker ps、stats、inspect、logs',
+          'docker start/stop/restart（需确认）',
+          '当 docker socket 拒绝不在 docker 组中的用户时：通过 sudo 再次运行同一条命令，如有需要每个会话只询问一次 sudo 密码。输入到终端的命令保持不变',
+        ],
       },
       logs: {
         does: '实时查看单元的 journal、日志文件或容器日志。筛选、暂停、高亮错误。',
         actions: ['点击日志中的文件路径，在编辑器中打开并跳到那一行', '暂停以便阅读'],
         keys: [],
-        runs: ['journalctl -f', 'tail -F', 'docker logs -f'],
+        runs: [
+          'journalctl -f',
+          'tail -F',
+          'docker logs -f',
+          '无权读取的日志（系统 journal、root 的文件、不在 docker 组时的 docker）：通过 sudo 重新跟踪，如有需要每个会话只询问一次 sudo 密码',
+        ],
       },
       editor: {
         does: '带语法高亮编辑服务器上的文件；原子保存并保留权限和属主，/etc 中的文件会自动备份。',
@@ -1009,7 +1018,11 @@ const zh = {
           '打开任务命令中的脚本和文件夹',
         ],
         keys: [],
-        runs: ['crontab -l、crontab -（需确认）', '读取 /etc/cron.d'],
+        runs: [
+          'crontab -l、crontab -（需确认）',
+          '读取 /etc/cron.d',
+          '通过 sudo 读取 root 的 crontab（crontab -u root）和无法读取的 /etc/cron.d 文件，如有需要每个会话只询问一次 sudo 密码',
+        ],
       },
       nginx: {
         does: '站点、server 块、upstream；启用/停用站点，重载前测试配置，TLS 证书到期时间。',
@@ -2192,6 +2205,8 @@ const zh = {
     loading: '正在读取容器列表…',
     offline: '服务器未连接',
     offlineHint: '连接服务器后即可查看其 Docker 容器。',
+    needsSudo:
+      '该用户不在 docker 组中，因此 Docker 只响应 root。Davish 可以在本次会话中通过 sudo 运行 docker，你也可以在终端中运行。',
     noMatch: '没有匹配的容器。',
     noContainers: '服务器上没有容器。',
     noSelection: '选择一个容器查看详情',
@@ -2521,6 +2536,11 @@ const zh = {
     never: '从不',
     source: '来源',
     mine: '你的 crontab',
+    rootSource: 'root 的 crontab',
+    target: 'Crontab',
+    rootWarn:
+      'root 的 crontab 中的任务在服务器上以 root 身份运行。Davish 会在你确认确切命令后通过 sudo 写入。',
+    rootLocked: '提供 sudo 密码后，Davish 还能显示 root 的 crontab 以及你无法读取的系统文件。',
     asUser: (user: string) => `以 ${user} 运行`,
     command: '命令',
     nextRuns: '接下来的运行',
