@@ -281,6 +281,7 @@ const zh = {
     files: (n: number) => `${n} 个文件`,
     needsRoot: '需要 root 权限：Davish 会把带 sudo 的命令输入到终端；检查后按回车。',
     toTerminal: '在终端中打开命令',
+    rootRuns: '需要 root：你确认后 Davish 通过 sudo 运行，如有需要每个会话只询问一次 sudo 密码。',
     dangerous: '这可能会删除真实数据，而不只是缓存。清理前请先检查。',
     tabs: { dirs: '文件夹', files: '大文件' },
     scan: '重新扫描',
@@ -307,6 +308,8 @@ const zh = {
     truncateBody:
       '文件内容会被清除，但文件保留，正在写入它的程序（例如日志）可以继续。将运行的命令：',
     protected: '磁盘应用不删除系统文件夹、数据库数据或用户主目录。请使用清理功能或对应的应用。',
+    rootUntrusted:
+      'Disk 不会以 root 身份清空此文件：它是一个链接，或位于其他用户拥有或他人可写入的文件夹中（例如某个组的共享文件夹），被清空的可能是另一个文件。如果确定，请在终端中使用 sudo。',
     ov: {
       asRoot: '以 root 统计（sudo -n）',
       barLabel: '磁盘空间分布',
@@ -320,6 +323,7 @@ const zh = {
         '这个 SSH 用户无法读取下面的文件夹，du 跳过了它们，而磁盘满往往就出在这些地方（Docker、数据库、/root）。只有 sudo 不需要密码时 Davish 才会统计它们；你也可以在终端中用 sudo 统计。',
       more: (n: number) => `还有 ${n} 个`,
       measureSudo: '在终端中用 sudo 统计',
+      measureAsRoot: '用 sudo 测量…',
       unmeasuredOther:
         '这部分不在任何已统计的文件夹中：可能是扫描超时、文件正在写入，或文件系统保留的空间。',
       heldTitle: (size: string) => `${size} 被已删除的文件占用`,
@@ -1099,6 +1103,7 @@ const zh = {
           '展开更深的文件夹时运行 du -x -d 1',
           'docker system df、journalctl --disk-usage、find',
           'rm、truncate、清理命令（需确认；需要 root 时通过终端）',
+          '测量和需要 root 的清理通过 sudo 运行（sudo 无需密码时不询问；否则每个会话只询问一次 sudo 密码）；用户自己的缓存仍以该用户身份清理',
         ],
       },
       ports: {

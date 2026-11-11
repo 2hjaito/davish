@@ -297,6 +297,8 @@ const es = {
     needsRoot:
       'Necesita root: Davish escribe el comando en Terminal con sudo; revísalo y pulsa Intro.',
     toTerminal: 'Abrir Terminal con el comando',
+    rootRuns:
+      'Necesita root: Davish lo ejecuta con sudo cuando confirmas, pidiendo la contraseña de sudo una vez por sesión si hace falta.',
     dangerous: 'Esto puede borrar datos reales, no solo cachés. Revísalo antes de limpiar.',
     tabs: { dirs: 'Carpetas', files: 'Archivos grandes' },
     scan: 'Volver a analizar',
@@ -325,6 +327,8 @@ const es = {
       'Se borra el contenido del archivo pero el archivo se queda, así que el programa que escribe en él (como un registro) sigue funcionando. Comando que se ejecutará:',
     protected:
       'Disco no borra carpetas del sistema, datos de bases de datos ni carpetas personales. Usa Limpiar o la app a la que pertenecen.',
+    rootUntrusted:
+      'Disk no vacía este archivo como root: es un enlace, o está en una carpeta que otro usuario posee o en la que otros pueden escribir (como la carpeta compartida de un grupo), así que el archivo vaciado podría ser otro. Si estás seguro, usa sudo en la Terminal.',
     ov: {
       asRoot: 'medido como root (sudo -n)',
       barLabel: 'Espacio del disco por partes',
@@ -338,6 +342,7 @@ const es = {
         'Este usuario SSH no puede leer las carpetas de abajo, así que du se las saltó, y ahí suele estar un disco lleno (Docker, bases de datos, /root). Davish solo las mide si sudo no pide contraseña; puedes medirlas con sudo en un terminal.',
       more: (n: number) => `y ${n} más`,
       measureSudo: 'Medir con sudo en Terminal',
+      measureAsRoot: 'Medir con sudo…',
       unmeasuredOther:
         'Esto no está en ninguna carpeta medida: puede que el análisis se quedara sin tiempo, que haya archivos a medio escribir o que el sistema de archivos lo reserve.',
       heldTitle: (size: string) => `${size} ocupados por archivos borrados`,
@@ -1155,6 +1160,7 @@ const es = {
           'du -x -d 1 al abrir una carpeta más profunda',
           'docker system df, journalctl --disk-usage, find',
           'rm, truncate, comandos de limpieza (con confirmación; por Terminal si hace falta root)',
+          'La medición y las limpiezas que necesitan root se ejecutan con sudo (sin preguntar si sudo no pide contraseña; si no, la contraseña de sudo una vez por sesión); las cachés del usuario siguen siendo del usuario',
         ],
       },
       ports: {

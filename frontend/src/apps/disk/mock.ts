@@ -182,6 +182,7 @@ export async function mockOverview(mount: string, token: string): Promise<Overvi
     root: false,
     partial: false,
     sudoMeasure: `sudo du -xh -d 2 -- ${mount} 2>/dev/null | sort -h | tail -n 25`,
+    askSudo: false,
   }
 }
 

@@ -37,6 +37,11 @@ type Overview struct {
 	Root bool `json:"root"`
 	// Partial is set when the measurement ran out of time.
 	Partial bool `json:"partial"`
+	// AskSudo is set when sudo could measure it all once given the
+	// session's password: the UI offers to ask, then measures again.
+	AskSudo bool `json:"askSudo"`
+	// SudoScan is exactly what measuring as root runs, for the prompt.
+	SudoScan string `json:"sudoScan,omitempty"`
 	// SudoMeasure is a read-only command for the user to run in a terminal
 	// with their password, measuring what the user could not read.
 	SudoMeasure string `json:"sudoMeasure"`
@@ -86,6 +91,12 @@ func overviewLine(mount string) string {
 		`; else echo as:user; sh -c ` + script + ` sh ` + m + `; fi`
 }
 
+// rootOverviewLine is overviewLine's root branch, for sudo.Keeper, which
+// runs it as root itself.
+func rootOverviewLine(mount string) string {
+	return `echo as:root; sh -c ` + shellx.Quote(overviewScript) + ` sh ` + shellx.Quote(mount)
+}
+
 // Overview measures the filesystem mounted at mount. token names the scan
 // for Cancel.
 func (s *Service) Overview(ctx context.Context, serverID, mount, token string) (Overview, error) {
@@ -96,11 +107,22 @@ func (s *Service) Overview(ctx context.Context, serverID, mount, token string) (
 	ctx, cancel := context.WithTimeout(ctx, 3*overviewTimeout)
 	defer cancel()
 	defer s.track(token, cancel)()
-	res, err := s.run.RunLine(ctx, serverID, app, overviewLine(mount))
+	// As root when sudo needs no password or the session has it, so that
+	// root's folders count; as the user otherwise.
+	res, ok, locked, err := s.measureAsRoot(ctx, serverID, rootOverviewLine(mount))
 	if err != nil {
 		return Overview{}, err
 	}
+	if !ok {
+		if res, err = s.run.RunLine(ctx, serverID, app, overviewLine(mount)); err != nil {
+			return Overview{}, err
+		}
+	}
 	o := parseOverview(res.Stdout, mount)
+	o.AskSudo = locked && !o.Root
+	if o.AskSudo {
+		o.SudoScan = shellx.Cmd("sudo", "sh", "-c", rootOverviewLine(mount)).String()
+	}
 	o.SudoMeasure = shellx.Cmd("sudo", "du", "-xh", "-d", "2", "--", mount).String() + ` 2>/dev/null | sort -h | tail -n 25`
 	return o, nil
 }
