@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Sửa
+- Database: khi chỉ root được kết nối MariaDB hoặc PostgreSQL, Davish không còn đòi sudo không mật khẩu: liệt kê, tạo, xóa, dump và restore chạy qua `sudo`, hỏi mật khẩu sudo một lần mỗi phiên (#117); có nút "Xem bằng sudo…". Mật khẩu không bao giờ nằm trên dòng lệnh: lệnh SQL đi sau mật khẩu trên stdin, file dump vẫn do chính user ghi vào `~/db-backups`, restore chuyển đúng dòng mật khẩu cho sudo rồi mới tới nội dung dump. User không có quyền sudo không được mời nhập mật khẩu.
+
 ## [1.13.3] - 2026-11-11
 
 ### Thêm

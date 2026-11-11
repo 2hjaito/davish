@@ -1015,6 +1015,7 @@ const en = {
           'mongodump, mongorestore with --config, a mode 600 file in ~/.cache/davish made from stdin and removed when done',
           'sqlite3 -readonly (then sudo -n when needed) to read; sqlite3 .backup to back up',
           'Find: ps, cat /etc/mongod.conf, command -v sqlite3, find *.db *.sqlite *.sqlite3 in /var/lib /opt /srv /home /root (20s timeout)',
+          'MariaDB and PostgreSQL when only root may connect: through sudo, with the sudo password once per session if needed, for listing, creating, dropping, dumps and restores',
         ],
       },
       deploy: {

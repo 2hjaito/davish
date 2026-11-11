@@ -16,6 +16,8 @@ export interface DBEngine {
   installed: boolean
   /** Only root may connect; client opens it in a terminal. */
   needsRoot: boolean
+  /** sudo would let the user in once given the session's password (ADR 0018). */
+  askSudo?: boolean
   /** MongoDB wants a login Davish does not have. */
   needsAuth?: boolean
   /** The connection string in use, its password masked. */

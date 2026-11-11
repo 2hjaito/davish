@@ -19,6 +19,7 @@ import (
 	"davish/internal/audit"
 	"davish/internal/shellx"
 	"davish/internal/store"
+	"davish/internal/sudo"
 )
 
 // app is the name commands are recorded under in the audit log.
@@ -37,8 +38,9 @@ type Runner interface {
 
 // Service talks to the database servers of each server.
 type Service struct {
-	run Runner
-	mu  sync.Mutex
+	run  Runner
+	root Root
+	mu   sync.Mutex
 	// access is the prefix that worked last, per server and engine.
 	access map[string][]string
 	// mongo is each server's MongoDB connection string as read from
@@ -82,6 +84,9 @@ type Engine struct {
 	// NeedsRoot is set when only root may connect and sudo asks for a
 	// password; Terminal then opens the client.
 	NeedsRoot bool `json:"needsRoot"`
+	// AskSudo is set with NeedsRoot when sudo would let the user in once
+	// given the session's password: the UI offers to ask (ADR 0018).
+	AskSudo bool `json:"askSudo,omitempty"`
 	// NeedsAuth is set when MongoDB wants a login Davish does not have.
 	NeedsAuth bool `json:"needsAuth,omitempty"`
 	// Login is the connection string in use, its password masked.
@@ -123,14 +128,24 @@ func (s *Service) exec(ctx context.Context, serverID, kind, sql string) (audit.R
 	s.mu.Lock()
 	known := s.access[key]
 	s.mu.Unlock()
-	tries := prefixes[kind]
+	tries := s.tries(kind)
 	if known != nil {
 		tries = [][]string{known}
 	}
 	var last audit.Result
 	missing := true
 	for _, p := range tries {
-		res, err := s.run.RunInput(ctx, serverID, app, line(p, kind), []byte(sql))
+		var res audit.Result
+		var err error
+		if isRoot(p) {
+			// The SQL goes in on stdin after sudo's password line, if any.
+			res, err = s.root.Run(ctx, serverID, app, line(rootPrefixes[kind], kind), []byte(sql))
+			if codeOf(err) == apperr.CmdNeedsRoot {
+				continue
+			}
+		} else {
+			res, err = s.run.RunInput(ctx, serverID, app, line(p, kind), []byte(sql))
+		}
 		if err != nil {
 			return res, err
 		}
@@ -192,6 +207,12 @@ func (s *Service) List(ctx context.Context, serverID string) ([]Engine, error) {
 		case codeOf(err) == apperr.CmdMissing:
 		case codeOf(err) == apperr.CmdNeedsRoot:
 			e.Installed, e.NeedsRoot = true, true
+		case codeOf(err) == apperr.SudoPasswordRequired || codeOf(err) == apperr.SudoPasswordWrong:
+			// Only offered to who may well use sudo.
+			e.Installed, e.NeedsRoot = true, true
+			if st, err := s.root.State(ctx, serverID); err == nil && st == sudo.Password {
+				e.AskSudo = true
+			}
 		default:
 			if ctx.Err() != nil {
 				return nil, err

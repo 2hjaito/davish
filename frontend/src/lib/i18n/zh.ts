@@ -985,6 +985,7 @@ const zh = {
           'mongodump、mongorestore 使用 --config：~/.cache/davish 中权限 600 的文件，由 stdin 生成，完成后立即删除',
           'sqlite3 -readonly（必要时再用 sudo -n）读取；sqlite3 .backup 备份',
           '查找：ps、cat /etc/mongod.conf、command -v sqlite3、在 /var/lib /opt /srv /home /root 中 find *.db *.sqlite *.sqlite3（20 秒超时）',
+          '仅 root 可连接时的 MariaDB 和 PostgreSQL：通过 sudo 列出、创建、删除、转储和恢复，如有需要每个会话只询问一次 sudo 密码',
         ],
       },
       deploy: {

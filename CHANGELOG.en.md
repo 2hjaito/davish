@@ -4,6 +4,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Fixed
+- Database: when only root may connect to MariaDB or PostgreSQL, Davish no longer needs passwordless sudo: listing, creating, dropping, dumps and restores run through `sudo`, asking for the sudo password once per session (#117), with "View with sudo…". The password is never on a command line: SQL follows it on stdin, dumps are still written by the user into `~/db-backups`, and a restore hands sudo the password line before the dump. Users who may not use sudo are not offered the prompt.
+
 ## [1.13.3] - 2026-11-11
 
 ### Added
