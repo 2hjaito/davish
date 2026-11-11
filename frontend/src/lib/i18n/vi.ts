@@ -926,7 +926,11 @@ const vi = {
           'Tạo network, volume; sao chép container thành lệnh docker run',
         ],
         keys: [],
-        runs: ['docker ps, stats, inspect, logs', 'docker start/stop/restart (có xác nhận)'],
+        runs: [
+          'docker ps, stats, inspect, logs',
+          'docker start/stop/restart (có xác nhận)',
+          'Khi docker socket từ chối user không thuộc nhóm docker: chạy lại đúng lệnh đó qua sudo, hỏi mật khẩu sudo một lần mỗi phiên nếu cần. Lệnh gõ sẵn vào Terminal giữ nguyên',
+        ],
       },
       logs: {
         does: 'Theo dõi journal của unit, một file log hoặc log container. Lọc, tạm dừng, tô lỗi.',
@@ -2213,6 +2217,8 @@ const vi = {
     loading: 'Đang đọc danh sách container…',
     offline: 'Server chưa kết nối',
     offlineHint: 'Kết nối server để xem các container Docker.',
+    needsSudo:
+      'User này không thuộc nhóm docker nên Docker chỉ trả lời root. Davish có thể chạy docker qua sudo trong phiên này, hoặc bạn chạy trong Terminal.',
     noMatch: 'Không có container nào khớp.',
     noContainers: 'Server chưa có container nào.',
     noSelection: 'Chọn một container để xem chi tiết',

@@ -110,7 +110,7 @@ func (s *Service) RemoveVolume(ctx context.Context, serverID, name, command stri
 	if command != p.Command {
 		return apperr.New(apperr.InvalidInput, "command does not match what was confirmed")
 	}
-	res, err := s.run.Run(ctx, serverID, app, shellx.Cmd("docker", "volume", "rm", name))
+	res, err := s.exec(ctx, serverID, shellx.Cmd("docker", "volume", "rm", name))
 	if err != nil {
 		return err
 	}

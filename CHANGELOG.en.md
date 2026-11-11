@@ -8,6 +8,7 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 - Monitor on Windows servers: CPU per core, memory and swap, drives, network, disk throughput, GPUs, processes, system info and service/container alerts, read through Windows PowerShell 5.1 and CIM over SSH. Nothing is installed on the server. Load average, I/O wait and steal time do not exist on Windows and are hidden. Works whether the server's SSH shell is cmd.exe or PowerShell.
 
 ### Fixed
+- Docker: logged in as a user outside the `docker` group, the container, image and volume lists and start, stop, restart, remove and new network/volume no longer stop at "needs root": Davish runs the same command again through `sudo`. With no password needed it just runs; otherwise the app offers "View with sudo…" and asks once per session, as Services and Nginx do (#117). Lines typed into Terminal (run, pull, exec, compose) are unchanged.
 - Monitor on a Windows or macOS server no longer waits for the first reading for ever. Davish now detects the server's operating system right after it connects, in the background, so connecting is never held up by it; Monitor says it does not support that system yet (or that the server returned no readings) instead of retrying in silence. Linux servers are unchanged.
 - Terminal on a Windows server opens the plain login shell instead of sending it a Linux-only start line.
 

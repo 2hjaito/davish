@@ -10,6 +10,7 @@
   } from '../../lib/api/docker'
   import { copyText } from '../../lib/api/clipboard'
   import { toUserError } from '../../lib/api/errors'
+  import { withSudo } from '../../lib/stores/sudoPrompt.svelte'
   import { formatBytes, formatPct } from '../../lib/format'
   import { t } from '../../lib/i18n'
   import ActionMenu from '../../lib/ui/ActionMenu.svelte'
@@ -83,7 +84,10 @@
     confirming = null
     busy = plan.name
     try {
-      await backend.act(serverID, plan.name, plan.action)
+      if (
+        !(await withSudo(serverID, plan.sudo, () => backend.act(serverID, plan.name, plan.action)))
+      )
+        return
       onchanged()
     } catch (e) {
       const ue = toUserError(e)
