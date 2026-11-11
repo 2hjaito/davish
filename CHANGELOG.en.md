@@ -4,6 +4,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Added
+- Spanish (Spain) interface: pick Español in Settings → Appearance → Language; the first time, Davish follows a system set to Spanish. The translation is a first draft, to be reviewed by a native speaker (#124).
+
 ## [1.13.1] - 2026-11-11
 
 ### Fixed

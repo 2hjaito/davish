@@ -218,4 +218,4 @@ Davish có giao diện sáng và tối. Mặc định theo máy và tự đổi 
 
 ## Ngôn ngữ
 
-Toàn bộ giao diện có tiếng Việt, tiếng Anh và tiếng Trung giản thể: menu, hộp thoại, trợ giúp, thông báo lỗi, ngày tháng và số. Lần đầu Davish theo ngôn ngữ của máy; sau đó chọn trong Cài đặt → Giao diện → Ngôn ngữ. Davish khởi động lại để đổi, server tự kết nối lại.
+Toàn bộ giao diện có tiếng Việt, tiếng Anh, tiếng Trung giản thể và tiếng Tây Ban Nha (Tây Ban Nha): menu, hộp thoại, trợ giúp, thông báo lỗi, ngày tháng và số. Lần đầu Davish theo ngôn ngữ của máy; sau đó chọn trong Cài đặt → Giao diện → Ngôn ngữ. Davish khởi động lại để đổi, server tự kết nối lại.
