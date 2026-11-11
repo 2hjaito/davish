@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Giao diện tiếng Tây Ban Nha (Tây Ban Nha): chọn Español trong Cài đặt → Giao diện → Ngôn ngữ; lần đầu Davish theo máy đặt tiếng Tây Ban Nha. Bản dịch là bản nháp đầu, chờ người bản xứ đọc lại (#124).
+
 ## [1.13.1] - 2026-11-11
 
 ### Sửa

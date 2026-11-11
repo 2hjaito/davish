@@ -1738,7 +1738,7 @@ const zh = {
     themes: { system: '自动', light: '浅色', dark: '深色' },
     language: '语言',
     languageHint: '界面的语言。',
-    langs: { vi: 'Tiếng Việt', en: 'English', zh: '简体中文' },
+    langs: { vi: 'Tiếng Việt', en: 'English', zh: '简体中文', es: 'Español' },
     langRestart: 'Davish 会重启：正在运行的终端和传输会停止，服务器会自动重新连接。',
     langApply: '重启',
     reduceGlass: '减弱玻璃效果',
