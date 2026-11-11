@@ -1017,7 +1017,11 @@ const vi = {
           'Mở script và thư mục trong lệnh của tác vụ',
         ],
         keys: [],
-        runs: ['crontab -l, crontab - (có xác nhận)', 'đọc /etc/cron.d'],
+        runs: [
+          'crontab -l, crontab - (có xác nhận)',
+          'đọc /etc/cron.d',
+          'crontab của root (crontab -u root) và file /etc/cron.d không đọc được qua sudo, hỏi mật khẩu sudo một lần mỗi phiên nếu cần',
+        ],
       },
       nginx: {
         does: 'Site, server block, upstream; bật/tắt site, kiểm tra cấu hình trước khi reload, hạn chứng chỉ TLS.',
@@ -2559,6 +2563,12 @@ const vi = {
     never: 'Không bao giờ',
     source: 'Nguồn',
     mine: 'Crontab của bạn',
+    rootSource: 'Crontab của root',
+    target: 'Crontab',
+    rootWarn:
+      'Job trong crontab của root chạy với quyền root trên server. Davish ghi qua sudo, sau khi bạn xác nhận đúng lệnh.',
+    rootLocked:
+      'Có mật khẩu sudo, Davish hiện thêm crontab của root và các file hệ thống bạn không đọc được.',
     asUser: (user: string) => `chạy bằng ${user}`,
     command: 'Lệnh',
     nextRuns: 'Lần chạy kế tiếp',

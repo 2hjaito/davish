@@ -56,12 +56,15 @@ export const sudoPrompt = new SudoPrompt()
 /**
  * Runs act, and again once the user gives the sudo password when the
  * server asks for it (ADR 0018). command is what the prompt shows: the
- * action as it runs with sudo. Resolves false when the user cancels.
+ * action as it runs with sudo; terminal is what "Run in Terminal" types
+ * instead, when command itself cannot run there (it reads stdin, say).
+ * Resolves false when the user cancels.
  */
 export async function withSudo(
   serverID: string,
   command: string,
   act: () => Promise<unknown>,
+  terminal = command,
 ): Promise<boolean> {
   try {
     await act()
@@ -69,7 +72,7 @@ export async function withSudo(
   } catch (e) {
     const code = (e as { code?: string } | null)?.code
     if (code !== 'SUDO_PASSWORD_REQUIRED' && code !== 'SUDO_PASSWORD_WRONG') throw e
-    if (!(await sudoPrompt.ask(serverID, command))) return false
+    if (!(await sudoPrompt.ask(serverID, command, terminal))) return false
     await act()
     return true
   }

@@ -1039,7 +1039,11 @@ const en = {
           'Open the scripts and folders in a job’s command',
         ],
         keys: [],
-        runs: ['crontab -l, crontab - (with confirmation)', 'reads /etc/cron.d'],
+        runs: [
+          'crontab -l, crontab - (with confirmation)',
+          'reads /etc/cron.d',
+          'root’s crontab (crontab -u root) and unreadable /etc/cron.d files through sudo, asking for the sudo password once per session if needed',
+        ],
       },
       nginx: {
         does: 'Sites, server blocks, upstreams; enable/disable sites, test the config before reload, TLS certificate expiry.',
@@ -2591,6 +2595,12 @@ const en = {
     never: 'Never',
     source: 'Source',
     mine: 'Your crontab',
+    rootSource: 'Root’s crontab',
+    target: 'Crontab',
+    rootWarn:
+      'Jobs in root’s crontab run as root on the server. Davish writes it through sudo, after you confirm the exact command.',
+    rootLocked:
+      'With the sudo password, Davish can also show root’s crontab and the system files you cannot read.',
     asUser: (user: string) => `runs as ${user}`,
     command: 'Command',
     nextRuns: 'Next runs',

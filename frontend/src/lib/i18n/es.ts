@@ -1065,7 +1065,11 @@ const es = {
           'Abrir los scripts y carpetas del comando de una tarea',
         ],
         keys: [],
-        runs: ['crontab -l, crontab - (con confirmación)', 'lee /etc/cron.d'],
+        runs: [
+          'crontab -l, crontab - (con confirmación)',
+          'lee /etc/cron.d',
+          'el crontab de root (crontab -u root) y los archivos de /etc/cron.d ilegibles con sudo, pidiendo la contraseña de sudo una vez por sesión si hace falta',
+        ],
       },
       nginx: {
         does: 'Sitios, bloques server, upstreams; activar/desactivar sitios, probar la configuración antes de recargar, caducidad de los certificados TLS.',
@@ -2650,6 +2654,12 @@ const es = {
     never: 'Nunca',
     source: 'Origen',
     mine: 'Tu crontab',
+    rootSource: 'Crontab de root',
+    target: 'Crontab',
+    rootWarn:
+      'Las tareas del crontab de root se ejecutan como root en el servidor. Davish lo escribe con sudo, después de que confirmes el comando exacto.',
+    rootLocked:
+      'Con la contraseña de sudo, Davish también puede mostrar el crontab de root y los archivos del sistema que no puedes leer.',
     asUser: (user: string) => `se ejecuta como ${user}`,
     command: 'Comando',
     nextRuns: 'Próximas ejecuciones',

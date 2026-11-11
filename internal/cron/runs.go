@@ -18,6 +18,9 @@ type Runs struct {
 	Restricted bool `json:"restricted"`
 	// Sudo reads the same log as root, for a terminal.
 	Sudo string `json:"sudo"`
+	// AskSudo is set when sudo could read it once given the password:
+	// the UI offers to ask.
+	AskSudo bool `json:"askSudo"`
 }
 
 // runsCommand reads cron's own lines from the journal: CRON on Debian and
@@ -33,6 +36,22 @@ func (s *Service) Runs(ctx context.Context, serverID, command string) (Runs, err
 	}
 	r := parseRuns(string(res.Stdout), string(res.Stderr), command)
 	r.Sudo = shellx.Cmd("sudo", runsCommand.Args()...).String()
+	if !r.Restricted {
+		return r, nil
+	}
+	// Read as root when sudo lets the user without asking, or the session
+	// has the password; never asks by itself.
+	res, access, err := s.asRoot(ctx, serverID, runsCommand.String(), nil)
+	switch {
+	case err != nil:
+		return r, err
+	case access == rootLocked:
+		r.AskSudo = true
+	case access == rootOpen && res.Exit == 0:
+		sudo := r.Sudo
+		r = parseRuns(string(res.Stdout), string(res.Stderr), command)
+		r.Sudo = sudo
+	}
 	return r, nil
 }
 

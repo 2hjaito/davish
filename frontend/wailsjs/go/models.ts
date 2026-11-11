@@ -119,6 +119,7 @@ export namespace audit {
 export namespace cron {
 	
 	export class Change {
+	    source: string;
 	    op: string;
 	    id: string;
 	    schedule: string;
@@ -130,6 +131,7 @@ export namespace cron {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.source = source["source"];
 	        this.op = source["op"];
 	        this.id = source["id"];
 	        this.schedule = source["schedule"];
@@ -228,6 +230,7 @@ export namespace cron {
 	}
 	export class Plan {
 	    command: string;
+	    sudo: string;
 	    before: string;
 	    after: string;
 	    backup: string;
@@ -240,6 +243,7 @@ export namespace cron {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.command = source["command"];
+	        this.sudo = source["sudo"];
 	        this.before = source["before"];
 	        this.after = source["after"];
 	        this.backup = source["backup"];
@@ -282,6 +286,7 @@ export namespace cron {
 	    lines: string[];
 	    restricted: boolean;
 	    sudo: string;
+	    askSudo: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Runs(source);
@@ -292,6 +297,7 @@ export namespace cron {
 	        this.lines = source["lines"];
 	        this.restricted = source["restricted"];
 	        this.sudo = source["sudo"];
+	        this.askSudo = source["askSudo"];
 	    }
 	}
 	
@@ -301,6 +307,9 @@ export namespace cron {
 	    zone: string;
 	    unreadable: string[];
 	    version: string;
+	    root: boolean;
+	    rootVersion: string;
+	    rootLocked: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Table(source);
@@ -313,6 +322,9 @@ export namespace cron {
 	        this.zone = source["zone"];
 	        this.unreadable = source["unreadable"];
 	        this.version = source["version"];
+	        this.root = source["root"];
+	        this.rootVersion = source["rootVersion"];
+	        this.rootLocked = source["rootLocked"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
