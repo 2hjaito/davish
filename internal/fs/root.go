@@ -67,12 +67,17 @@ func RootWriteRefused(p string) bool {
 	return within(path.Clean(p), rootTrees)
 }
 
-// trusted checks p before Davish acts on it as root. The folders on its
-// way, and p itself when it is a link, must belong to root or to the
-// login user: anyone else could swap one for a link between the
-// confirmation and the command, and send root elsewhere. refused is then
-// asked of p as written and of where it really is, so a link such as
-// /var/run -> /run cannot slip past it.
+// trusted checks p before Davish acts on it as root, so that no one else
+// can swap a folder or file on its way for a link between the check and
+// the command and send root elsewhere:
+//   - the folders on its way, as written and as they really are, and p
+//     itself when it is a link, belong to root or to the login user;
+//   - none of those folders can be written by others (see sharedDir):
+//     whoever may write a folder may rename what is in it, whoever owns
+//     that.
+//
+// refused is then asked of p as written and of where it really is, so a
+// link such as /var/run -> /run cannot slip past it.
 func trusted(sc *sftp.Client, p string, refused func(string) bool) error {
 	p = path.Clean(p)
 	login, err := loginUID(sc)
@@ -91,29 +96,50 @@ func trusted(sc *sftp.Client, p string, refused func(string) bool) error {
 		if st.UID != 0 && st.UID != login {
 			return apperr.New(apperr.FSProtected, "a folder on the way belongs to another user")
 		}
+		if fi.IsDir() && sharedDir(st.Mode, st.GID) {
+			return apperr.New(apperr.FSProtected, "a folder on the way can be changed by other users")
+		}
 		return nil
+	}
+	ancestors := func(q string) error {
+		for d := path.Dir(q); ; d = path.Dir(d) {
+			if err := owned(d); err != nil {
+				return err
+			}
+			if d == "/" {
+				return nil
+			}
+		}
 	}
 	if fi, err := sc.Lstat(p); err == nil && fi.Mode()&os.ModeSymlink != 0 {
 		if err := owned(p); err != nil {
 			return err
 		}
 	}
-	for d := path.Dir(p); ; d = path.Dir(d) {
-		if err := owned(d); err != nil {
-			return err
-		}
-		if d == "/" {
-			break
-		}
+	if err := ancestors(p); err != nil {
+		return err
 	}
 	dir, err := sc.RealPath(path.Dir(p))
 	if err != nil {
 		return mapErr("check", err)
 	}
-	if refused(p) || refused(path.Join(dir, path.Base(p))) {
+	resolved := path.Join(dir, path.Base(p))
+	if resolved != p {
+		if err := ancestors(resolved); err != nil {
+			return err
+		}
+	}
+	if refused(p) || refused(resolved) {
 		return protected()
 	}
 	return nil
+}
+
+// sharedDir tells a folder others may write: writable by everyone, or by
+// a group other than root's, and not sticky. In a sticky folder only an
+// entry's owner may rename it, and the owners are checked.
+func sharedDir(mode, gid uint32) bool {
+	return mode&sISVTX == 0 && (mode&0o002 != 0 || (mode&0o020 != 0 && gid != 0))
 }
 
 // loginUID is the login user's uid: the owner of their home folder.
@@ -234,7 +260,9 @@ func rootSaveCommand(target, backup string, uid, gid, mode uint32) string {
 	}
 	b.WriteString(`t=$(mktemp ` + q(dir+"/."+base+".davish-XXXXXX") + `); trap 'rm -f -- "$t"' EXIT; `)
 	b.WriteString(`cat > "$t"; `)
-	b.WriteString(`chown ` + strconv.FormatUint(uint64(uid), 10) + ":" + strconv.FormatUint(uint64(gid), 10) + ` -- "$t"; `)
+	// -h: never through a link, should one be there after all.
+	b.WriteString(`chown -h ` + strconv.FormatUint(uint64(uid), 10) + ":" + strconv.FormatUint(uint64(gid), 10) + ` -- "$t"; `)
+	b.WriteString(`test -f "$t"; test ! -h "$t"; `)
 	b.WriteString(`chmod ` + strconv.FormatUint(uint64(mode&0o7777), 8) + ` -- "$t"; `)
 	b.WriteString(`mv -f -- "$t" ` + q(target))
 	return b.String()

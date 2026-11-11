@@ -2776,7 +2776,7 @@ const zh = {
     FS_STALE: '自你确认后文件或文件夹已发生变化。请再试一次。',
     FS_CHANGED: '自你打开后，文件在服务器上已被修改。',
     FS_PROTECTED:
-      'Davish 不会以 root 身份执行此操作：该路径是系统的关键部分，或经过其他用户的文件夹或链接，对方可能把 root 引到别处。',
+      'Davish 不会以 root 身份执行此操作：该路径是系统的关键部分，或经过其他用户拥有或可写入的链接或文件夹，对方可能把 root 引到别处。如果确定，请在终端中使用 sudoedit 或 sudo。',
     CMD_NEEDS_ROOT: '这条命令需要 root 权限。',
     CMD_MISSING: '服务器缺少此操作需要的程序（例如 zip）。',
     CMD_FAILED: '命令在服务器上执行失败。',

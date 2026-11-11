@@ -680,3 +680,34 @@ func TestRootRefusesAnotherUsersLinkOnTheWay(t *testing.T) {
 		t.Fatalf("victim changed: %q", out)
 	}
 }
+
+// A folder others may write lets them rename what is in it between the
+// check and root's command, so nothing in it is deleted or saved as root.
+func TestRootRefusesAFolderOthersMayWrite(t *testing.T) {
+	ctx := context.Background()
+	s, k, id := asSudoer(t)
+	if err := k.SetPassword(ctx, id, []byte(testsshd.SudoPassword)); err != nil {
+		t.Fatal(err)
+	}
+	dir := "/srv/davish-shared"
+	f := dir + "/root.conf"
+	rootRun(t, k, id, "mkdir -p "+dir+" && chmod 0777 "+dir+" && echo keep > "+f+" && chmod 644 "+f)
+	t.Cleanup(func() { _, _ = k.Run(ctx, id, "test", "rm -rf "+dir, nil) })
+
+	plan, err := s.PlanRemove(ctx, id, f)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// The user may delete in a folder everyone may write, so this goes
+	// through as the user; make the file undeletable for them first.
+	rootRun(t, k, id, "chmod 0775 "+dir+" && chgrp 1001 "+dir+" 2>/dev/null || chgrp nogroup "+dir)
+	if err := s.Remove(ctx, id, f, plan.Command); errCode(err) != apperr.FSProtected {
+		t.Errorf("remove in a shared folder: %v", err)
+	}
+	if _, err := s.PlanSaveAsRoot(ctx, id, f, fs.SaveOptions{}); errCode(err) != apperr.FSProtected {
+		t.Errorf("save in a shared folder: %v", err)
+	}
+	if out := rootRun(t, k, id, "cat "+f); out != "keep\n" {
+		t.Fatalf("file changed: %q", out)
+	}
+}

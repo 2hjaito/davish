@@ -50,12 +50,31 @@ func TestRootSaveCommand(t *testing.T) {
 	want := `set -e; if test -e '/etc/it'\''s here.conf.bak-20261111T120000Z'; then exit 73; fi; ` +
 		`cp -p -- '/etc/it'\''s here.conf' '/etc/it'\''s here.conf.bak-20261111T120000Z'; ` +
 		`t=$(mktemp '/etc/.it'\''s here.conf.davish-XXXXXX'); trap 'rm -f -- "$t"' EXIT; ` +
-		`cat > "$t"; chown 0:4 -- "$t"; chmod 2640 -- "$t"; mv -f -- "$t" '/etc/it'\''s here.conf'`
+		`cat > "$t"; chown -h 0:4 -- "$t"; test -f "$t"; test ! -h "$t"; chmod 2640 -- "$t"; mv -f -- "$t" '/etc/it'\''s here.conf'`
 	if got != want {
 		t.Errorf("got\n%s\nwant\n%s", got, want)
 	}
 	// File type bits never reach chmod.
 	if c := rootSaveCommand("/etc/x", "", 0, 0, 0o100644); !strings.Contains(c, "chmod 644 ") || strings.Contains(c, "cp -p") {
 		t.Errorf("plain file: %s", c)
+	}
+}
+
+func TestSharedDir(t *testing.T) {
+	for _, c := range []struct {
+		mode, gid uint32
+		shared    bool
+	}{
+		{0o755, 0, false},
+		{0o775, 0, false},     // root's own group
+		{0o2775, 33, true},    // root:www-data, as /var/www often is
+		{0o775, 104, true},    // root:syslog, as /var/log is on Ubuntu
+		{0o777, 0, true},      // everyone
+		{0o1777, 0, false},    // /tmp: sticky
+		{0o3775, 1001, false}, // sticky and setgid
+	} {
+		if got := sharedDir(c.mode, c.gid); got != c.shared {
+			t.Errorf("%o gid %d: shared %v", c.mode, c.gid, got)
+		}
 	}
 }

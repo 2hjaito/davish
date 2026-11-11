@@ -2826,7 +2826,7 @@ const vi = {
     FS_STALE: 'File hoặc thư mục đã thay đổi từ lúc bạn xác nhận. Hãy thử lại.',
     FS_CHANGED: 'File đã bị thay đổi trên server từ lúc bạn mở.',
     FS_PROTECTED:
-      'Davish không làm việc này bằng quyền root: đường dẫn là phần sống còn của hệ thống, hoặc đi qua thư mục hay link của user khác, người có thể đổi hướng root sang chỗ khác.',
+      'Davish không làm việc này bằng quyền root: đường dẫn là phần sống còn của hệ thống, hoặc đi qua link hay thư mục mà user khác sở hữu hoặc ghi được, người đó có thể đổi hướng root sang chỗ khác. Nếu chắc chắn, hãy dùng sudoedit hoặc sudo trong Terminal.',
     CMD_NEEDS_ROOT: 'Lệnh này cần quyền root.',
     CMD_MISSING: 'Server chưa cài chương trình cần cho thao tác này (ví dụ zip).',
     CMD_FAILED: 'Lệnh chạy trên server bị lỗi.',

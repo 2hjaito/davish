@@ -2856,7 +2856,7 @@ const en = {
     FS_STALE: 'The file or folder changed since you confirmed. Please try again.',
     FS_CHANGED: 'The file changed on the server since you opened it.',
     FS_PROTECTED:
-      'Davish does not do this as root: the path is a vital part of the system, or goes through a folder or link of another user, who could send root elsewhere.',
+      'Davish does not do this as root: the path is a vital part of the system, or goes through a link or folder another user owns or may write, who could send root elsewhere. Use sudoedit or sudo in Terminal if you are sure.',
     CMD_NEEDS_ROOT: 'This command needs root.',
     CMD_MISSING: 'The server lacks a program this action needs (for example zip).',
     CMD_FAILED: 'The command failed on the server.',
