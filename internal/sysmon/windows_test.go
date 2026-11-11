@@ -1,6 +1,7 @@
 package sysmon
 
 import (
+	"math"
 	"os"
 	"regexp"
 	"strings"
@@ -9,10 +10,10 @@ import (
 	"davish/internal/platform"
 )
 
-// testdata/windows-*.txt are what collect.ps1, procs.ps1 and info.ps1 are
-// written to print, built by hand: the scripts print the shapes of /proc so
-// that the Linux parsers read them. They are checked against a real server
-// by running the scripts there (see the pull request).
+// testdata/windows-procs.txt is real output of procs.ps1. windows-collect.txt
+// and windows-info.txt are built by hand to match what collect.ps1 and
+// info.ps1 are written to print: the scripts print the shapes of /proc so that
+// the Linux parsers read them. Replace them with real output when available.
 
 func TestWindowsCollectorReadsLikeLinux(t *testing.T) {
 	f, err := os.Open("testdata/windows-collect.txt")
@@ -81,35 +82,57 @@ func TestWindowsCollectorReadsLikeLinux(t *testing.T) {
 	}
 }
 
+// testdata/windows-procs.txt is procs.ps1 on a real Windows machine (OpenSSH,
+// cmd.exe as the SSH shell), cut to a dozen system processes.
 func TestWindowsProcesses(t *testing.T) {
 	snap, err := parseProcs(readSections(t, "windows-procs.txt"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	list := snap.top(procSample{}, SortMem, TopProcesses)
-	if list.Total != 3 {
-		t.Fatalf("total = %d", list.Total)
+	if snap.memTotal != 33376128*1024 || snap.clk != 1e7 || snap.page != 1 {
+		t.Fatalf("snapshot = mem %d, clk %v, page %d", snap.memTotal, snap.clk, snap.page)
 	}
-	nginx := list.Procs[0]
-	if nginx.PID != 2210 || nginx.Name != "nginx.exe" || nginx.Mem != 64<<20 || nginx.Threads != 4 || nginx.PPID != 1 {
-		t.Errorf("nginx = %+v", nginx)
+	byCPU := snap.top(procSample{}, SortCPU, TopProcesses)
+	if byCPU.Total != 12 {
+		t.Fatalf("total = %d; want 12", byCPU.Total)
 	}
-	if want := `"C:\Program Files\nginx\nginx.exe" -c conf\nginx.conf`; nginx.Command != want {
-		t.Errorf("command = %q", nginx.Command)
+	// The first call has no earlier sample, so CPU is the average over each
+	// process's life: System has used 12967 of the 185614 seconds since it started.
+	if top := byCPU.Procs[0]; top.PID != 4 || top.CPU != 7.0 || byCPU.Procs[1].PID != 3032 || byCPU.Procs[1].CPU != 3.3 {
+		t.Errorf("busiest = %+v then %+v", top, byCPU.Procs[1])
 	}
-	// Started 900s after boot, 102s ago; 10s of CPU over that life.
-	if nginx.Age != 102 || nginx.CPU != 9.8 {
-		t.Errorf("age %v, cpu %v", nginx.Age, nginx.CPU)
+
+	byPID := map[int]Process{}
+	for _, p := range byCPU.Procs {
+		byPID[p.PID] = p
 	}
-	// The System process has no command line: shown in brackets like a kernel thread.
-	var system Process
-	for _, p := range list.Procs {
-		if p.PID == 4 {
-			system = p
-		}
+	system := byPID[4]
+	if system.Name != "System" || system.PPID != 0 || system.Threads != 246 || system.Mem != 24592384 {
+		t.Errorf("System = %+v", system)
 	}
-	if system.Command != "[System]" {
-		t.Errorf("System command = %q", system.Command)
+	// Protected processes have no command line: shown in brackets like a kernel thread.
+	if system.Command != "[System]" || byPID[2524].Command != "[Memory Compression]" {
+		t.Errorf("commands = %q, %q", system.Command, byPID[2524].Command)
+	}
+	if math.Abs(system.Age-185613.71) > 0.01 {
+		t.Errorf("System age = %v", system.Age)
+	}
+	// Windows has no uid table here; the user column shows the placeholder.
+	if system.User != "-" {
+		t.Errorf("user = %q", system.User)
+	}
+
+	sftp := byPID[4044]
+	if want := `"c:\windows\system32\cmd.exe" /c "sftp-server.exe "`; sftp.Command != want || sftp.Name != "cmd.exe" || sftp.PPID != 2704 {
+		t.Errorf("sftp shell = %+v", sftp)
+	}
+	if math.Abs(sftp.Age-2333.4) > 0.1 {
+		t.Errorf("sftp age = %v", sftp.Age)
+	}
+
+	byMem := snap.top(procSample{}, SortMem, TopProcesses)
+	if byMem.Procs[0].PID != 9128 || byMem.Procs[0].MemPct != 0.7 {
+		t.Errorf("biggest = %+v", byMem.Procs[0])
 	}
 }
 

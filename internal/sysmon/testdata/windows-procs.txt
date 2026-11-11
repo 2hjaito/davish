@@ -1,18 +1,36 @@
 @@uptime
-1002.00 0.00
+185627.06 0.00
 @@clk
 10000000
 @@pagesize
 1
 @@meminfo
-MemTotal: 8388608 kB
+MemTotal: 33376128 kB
 @@passwd
 @@ps
-4 - 
-648 - C:\Windows\system32\svchost.exe -k DcomLaunch -p
-2210 - "C:\Program Files\nginx\nginx.exe" -c conf\nginx.conf
+4 -
+148 -
+2524 -
+636 -
+844 - winlogon.exe
+996 -
+1036 -
+1168 - C:\WINDOWS\system32\svchost.exe -k DcomLaunch -p
+3032 - C:\WINDOWS\system32\svchost.exe -k NetworkService -p
+3996 - C:\WINDOWS\System32\OpenSSH\sshd.exe
+4044 - "c:\windows\system32\cmd.exe" /c "sftp-server.exe "
+9128 - C:\WINDOWS\Explorer.EXE
 @@stat
-4 (System) S 0 0 0 0 0 0 0 0 0 0 5000000 0 0 0 0 0 190 0 0 0 147456
-648 (svchost.exe) S 540 0 0 0 0 0 0 0 0 0 20000000 0 0 0 0 0 12 0 150000000 0 33554432
-2210 (nginx.exe) S 1 0 0 0 0 0 0 0 0 0 100000000 0 0 0 0 0 4 0 9000000000 0 67108864
+4 (System) S 0 0 0 0 0 0 0 0 0 0 129669218750 0 0 0 0 0 246 0 133465590 0 24592384
+148 (Registry) S 4 0 0 0 0 0 0 0 0 0 47031250 0 0 0 0 0 4 0 282420 0 19136512
+2524 (Memory Compression) S 4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 42 0 357176080 0 0
+636 (smss.exe) S 4 0 0 0 0 0 0 0 0 0 2812500 0 0 0 0 0 2 0 133493060 0 1679360
+844 (winlogon.exe) S 984 0 0 0 0 0 0 0 0 0 937500 0 0 0 0 0 3 0 341186790 0 15941632
+996 (services.exe) S 1016 0 0 0 0 0 0 0 0 0 1200781250 0 0 0 0 0 9 0 341838400 0 13012992
+1036 (lsass.exe) S 1016 0 0 0 0 0 0 0 0 0 349218750 0 0 0 0 0 11 0 342301690 0 31068160
+1168 (svchost.exe) S 996 0 0 0 0 0 0 0 0 0 250937500 0 0 0 0 0 22 0 345441040 0 42127360
+3032 (svchost.exe) S 996 0 0 0 0 0 0 0 0 0 60913750000 0 0 0 0 0 11 0 358859210 0 13144064
+3996 (sshd.exe) S 996 0 0 0 0 0 0 0 0 0 625000 0 0 0 0 0 2 0 373458250 0 10014720
+4044 (cmd.exe) S 2704 0 0 0 0 0 0 0 0 0 156250 0 0 0 0 0 1 0 1832936269610 0 7331840
+9128 (explorer.exe) S 9104 0 0 0 0 0 0 0 0 0 1035468750 0 0 0 0 0 41 0 840985180 0 226770944
 @@end
