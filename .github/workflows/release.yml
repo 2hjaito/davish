@@ -15,7 +15,7 @@ jobs:
   # CHANGELOG.md, both at the tagged commit. A tag put on a commit without
   # them ships an app that keeps asking to update (v1.4.0, v1.5.1).
   check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -33,7 +33,7 @@ jobs:
             target: macos-universal
           - os: windows-latest
             target: windows-amd64
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             target: linux-amd64
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
@@ -112,7 +112,7 @@ jobs:
 
   release:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
       contents: write
