@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { sudoPrompt } from './sudoPrompt.svelte'
+import { sudoPrompt, withSudo } from './sudoPrompt.svelte'
 
 describe('sudoPrompt', () => {
   it('answers every action waiting on the same server with one password', async () => {
@@ -22,5 +22,22 @@ describe('sudoPrompt', () => {
     expect(sudoPrompt.request?.serverID).toBe('two')
     sudoPrompt.request?.done(true)
     expect(await b).toBe(true)
+  })
+
+  it('offers Terminal a different line when the command reads stdin', async () => {
+    let calls = 0
+    const act = () => {
+      calls++
+      if (calls === 1) return Promise.reject({ code: 'SUDO_PASSWORD_REQUIRED' })
+      return Promise.resolve()
+    }
+    const run = withSudo('srv', "sudo sh -c 'crontab -u root -'", act, 'sudo crontab -u root -e')
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(sudoPrompt.request?.command).toBe("sudo sh -c 'crontab -u root -'")
+    expect(sudoPrompt.request?.terminal).toBe('sudo crontab -u root -e')
+    sudoPrompt.request?.done(true)
+    expect(await run).toBe(true)
+    expect(calls).toBe(2)
   })
 })

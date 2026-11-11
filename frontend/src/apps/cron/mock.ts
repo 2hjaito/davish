@@ -103,6 +103,9 @@ export function mockList(): Promise<CronTable> {
     zone: 'Asia/Ho_Chi_Minh',
     unreadable: [],
     version: 'demo',
+    root: false,
+    rootVersion: '',
+    rootLocked: false,
   })
 }
 
@@ -128,6 +131,7 @@ export function mockPlan(c: CronChange): Promise<CronPlan> {
         : `${c.op === 'disable' ? '#' : ''}${lines[index(c.id)]![0]} ${lines[index(c.id)]![1]}`
   return delay({
     command: 'crontab -l > /home/dangth/.crontab.bak-20261027T081005Z && crontab -',
+    sudo: '',
     before: c.op === 'add' ? '' : render(index(c.id)),
     after,
     backup: '/home/dangth/.crontab.bak-20261027T081005Z',
@@ -159,5 +163,6 @@ export const mockRuns = (command: string): Promise<CronRuns> =>
       (d) => `2026-10-${27 - d}T03:00:01+07:00 vps CRON[${900 + d}]: (dangth) CMD (${command})`,
     ),
     restricted: false,
+    askSudo: false,
     sudo: 'sudo journalctl -t CRON -t CROND -n 5000 --no-pager -o short-iso',
   })

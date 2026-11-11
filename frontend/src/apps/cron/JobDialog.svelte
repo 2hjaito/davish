@@ -11,6 +11,8 @@
   interface Props {
     /** Open for a new job ('new'), an existing one, or closed (null). */
     job: CronJob | 'new' | null
+    /** A new job may go in root's crontab, through sudo. */
+    canRoot: boolean
     zone: string
     busy: boolean
     /** Why the last plan failed. */
@@ -19,7 +21,10 @@
     onsubmit: (c: CronChange) => void
   }
 
-  let { job, zone, busy, error, onclose, onsubmit }: Props = $props()
+  let { job, canRoot, zone, busy, error, onclose, onsubmit }: Props = $props()
+
+  /** Whose crontab a new job goes in; an edit keeps the job's own. */
+  let target = $state<'user' | 'root'>('user')
 
   let schedule = $state('')
   let command = $state('')
@@ -32,6 +37,7 @@
     untrack(() => {
       schedule = j && j !== 'new' ? j.schedule.raw : '0 3 * * *'
       command = j && j !== 'new' ? j.command : ''
+      target = 'user'
     })
   })
 
@@ -64,6 +70,7 @@
     e.preventDefault()
     if (!ready || !job) return
     onsubmit({
+      source: job === 'new' ? target : job.source === 'root' ? 'root' : 'user',
       op: job === 'new' ? 'add' : 'edit',
       id: job === 'new' ? '' : job.id,
       schedule: schedule.trim(),
@@ -79,6 +86,18 @@
   {onclose}
 >
   <form id="{listId}-form" onsubmit={submit}>
+    {#if job === 'new' && canRoot}
+      <label class="field">
+        <span>{t.cron.target}</span>
+        <select class="input" bind:value={target}>
+          <option value="user">{t.cron.mine}</option>
+          <option value="root">{t.cron.rootSource}</option>
+        </select>
+      </label>
+    {/if}
+    {#if (job === 'new' && target === 'root') || (job && job !== 'new' && job.source === 'root')}
+      <p class="warn">{t.cron.rootWarn}</p>
+    {/if}
     <label class="field">
       <span>{t.cron.schedule}</span>
       <input
