@@ -646,6 +646,10 @@ export function SudoForget(arg1) {
   return window['go']['app']['App']['SudoForget'](arg1);
 }
 
+export function SudoForgetAfter(arg1) {
+  return window['go']['app']['App']['SudoForgetAfter'](arg1);
+}
+
 export function SudoSetPassword(arg1, arg2) {
   return window['go']['app']['App']['SudoSetPassword'](arg1, arg2);
 }

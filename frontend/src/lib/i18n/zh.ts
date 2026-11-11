@@ -967,7 +967,7 @@ const zh = {
       },
       settings: {
         does: '语言、浅色或深色主题、外观、字体、警报阈值、应用锁、终端提示符。',
-        actions: [],
+        actions: ['应用锁：选择未使用的 sudo 密码保留多久（默认 15 分钟，每台服务器分别计时）'],
         keys: [],
         runs: [],
       },
@@ -1303,7 +1303,7 @@ const zh = {
     title: (server: string) => `${server} 的 sudo 密码`,
     body: '此操作需要 root 权限。Davish 将运行：',
     password: (user: string) => `${user} 的 sudo 密码`,
-    kept: '密码只在本次会话中保存在 Davish 的内存里，避免重复询问。不会写入磁盘、钥匙串或任何日志，只通过 stdin 交给 sudo（不会出现在命令行上）。断开连接、锁定应用或选择“忘记 sudo 密码”时会被清除。',
+    kept: '密码只在本次会话中保存在 Davish 的内存里，避免重复询问。不会写入磁盘、钥匙串或任何日志，只通过 stdin 交给 sudo（不会出现在命令行上）。在设置中设定的时间内未使用（默认 15 分钟）、断开连接或锁定应用，或选择“忘记 sudo 密码”时会被清除。',
     terminal: '在终端中运行',
     run: '运行',
     checking: '正在检查…',
@@ -1834,6 +1834,13 @@ const zh = {
     version: (v: string) => `Davish ${v}`,
     checkNow: '立即检查',
     lockAfters: { 0: '从不', 5: '5 分钟', 15: '15 分钟', 30: '30 分钟', 60: '1 小时' },
+    sudoForget: '忘记 sudo 密码',
+    sudoForgetHint:
+      '闲置这么久后忘记，每台服务器分别计时，与 sudo 自身相同。断开连接或锁定应用时总会忘记。',
+    sudoForgets: { 5: '5 分钟', 15: '15 分钟', 60: '1 小时', 0: '会话结束时' } as Record<
+      number,
+      string
+    >,
     lockChange: '修改密码',
     lockSave: '保存新密码',
     lockDisable: '关闭锁定',

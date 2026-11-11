@@ -11,6 +11,7 @@ import (
 	"context"
 	"strings"
 	"sync"
+	"time"
 
 	"davish/internal/apperr"
 	"davish/internal/audit"
@@ -51,7 +52,18 @@ type Keeper struct {
 	pw  map[string][]byte
 	// who caches each server's user: root, and in an admin group.
 	who map[string]user
+	// idle is how long an unused password is kept, as sudo's own
+	// timestamp_timeout does; 0 keeps it for the whole session. Each
+	// server's timer restarts whenever its password is used, and gen
+	// tells a timer that fires late from the current one.
+	idle   time.Duration
+	timers map[string]*time.Timer
+	gen    map[string]uint64
 }
+
+// DefaultForgetAfter is how long an unused password is kept until the
+// user picks otherwise: sudo's own default.
+const DefaultForgetAfter = 15 * time.Minute
 
 type user struct {
 	root, admin bool
@@ -59,7 +71,56 @@ type user struct {
 
 // New creates a keeper that runs through run.
 func New(run Runner) *Keeper {
-	return &Keeper{run: run, pw: map[string][]byte{}, who: map[string]user{}}
+	return &Keeper{
+		run: run, pw: map[string][]byte{}, who: map[string]user{},
+		idle: DefaultForgetAfter, timers: map[string]*time.Timer{}, gen: map[string]uint64{},
+	}
+}
+
+// SetForgetAfter sets how long a password nobody uses is kept; 0 keeps
+// it until the session ends. The passwords kept now count from now.
+func (k *Keeper) SetForgetAfter(d time.Duration) {
+	k.mu.Lock()
+	defer k.mu.Unlock()
+	k.idle = max(d, 0)
+	for id := range k.pw {
+		k.touch(id)
+	}
+}
+
+// touch restarts the server's timer; k.mu is held.
+func (k *Keeper) touch(serverID string) {
+	k.stop(serverID)
+	if k.idle == 0 {
+		return
+	}
+	k.gen[serverID]++
+	g := k.gen[serverID]
+	k.timers[serverID] = time.AfterFunc(k.idle, func() { k.expire(serverID, g) })
+}
+
+// stop drops the server's timer, and any that already fired; k.mu is held.
+func (k *Keeper) stop(serverID string) {
+	if t, ok := k.timers[serverID]; ok {
+		t.Stop()
+		delete(k.timers, serverID)
+	}
+	k.gen[serverID]++
+}
+
+// expire wipes the password once its timer fires, unless it was used or
+// set again since.
+func (k *Keeper) expire(serverID string, g uint64) {
+	k.mu.Lock()
+	defer k.mu.Unlock()
+	if k.gen[serverID] != g {
+		return
+	}
+	delete(k.timers, serverID)
+	if p, ok := k.pw[serverID]; ok {
+		wipe(p)
+		delete(k.pw, serverID)
+	}
 }
 
 func wipe(b []byte) {
@@ -72,6 +133,7 @@ func wipe(b []byte) {
 func (k *Keeper) Forget(serverID string) {
 	k.mu.Lock()
 	defer k.mu.Unlock()
+	k.stop(serverID)
 	if p, ok := k.pw[serverID]; ok {
 		wipe(p)
 		delete(k.pw, serverID)
@@ -84,6 +146,7 @@ func (k *Keeper) ForgetAll() {
 	k.mu.Lock()
 	defer k.mu.Unlock()
 	for id, p := range k.pw {
+		k.stop(id)
 		wipe(p)
 		delete(k.pw, id)
 	}
@@ -106,6 +169,16 @@ func (k *Keeper) Observe(name string, payload any) {
 	}
 }
 
+// has tells whether a password is kept, without counting as a use.
+func (k *Keeper) has(serverID string) bool {
+	k.mu.Lock()
+	defer k.mu.Unlock()
+	_, ok := k.pw[serverID]
+	return ok
+}
+
+// password is a copy of the server's password, for one use: it restarts
+// the timer that forgets it.
 func (k *Keeper) password(serverID string) []byte {
 	k.mu.Lock()
 	defer k.mu.Unlock()
@@ -113,6 +186,8 @@ func (k *Keeper) password(serverID string) []byte {
 	if !ok {
 		return nil
 	}
+	// Being used keeps it: the timer starts over.
+	k.touch(serverID)
 	return append([]byte(nil), p...)
 }
 
@@ -294,7 +369,7 @@ func (k *Keeper) State(ctx context.Context, serverID string) (string, error) {
 		return NoPassword, nil
 	case noSudo(res):
 		return None, nil
-	case k.password(serverID) != nil:
+	case k.has(serverID):
 		return Ready, nil
 	case !u.admin:
 		return Unlikely, nil
@@ -325,6 +400,7 @@ func (k *Keeper) SetPassword(ctx context.Context, serverID string, pw []byte) er
 		wipe(old)
 	}
 	k.pw[serverID] = append([]byte(nil), pw...)
+	k.touch(serverID)
 	k.mu.Unlock()
 	return nil
 }

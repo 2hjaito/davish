@@ -13,6 +13,7 @@
   import { notifications } from '../stores/notifications.svelte'
   import { servers } from '../stores/servers.svelte'
   import { settings } from '../stores/settings.svelte'
+  import { sudoForgetAfter } from '../api/sudo'
   import { sleep } from '../stores/sleep.svelte'
   import { toUserError } from '../api/errors'
   import { transferReveal } from '../api/transfer'
@@ -221,6 +222,10 @@
     shown.add(id)
     untrack(() => showWorkspace(id))
   })
+
+  // Go forgets an unused sudo password after the minutes chosen in
+  // Settings (ADR 0018); it starts at 15 until told.
+  $effect(() => void sudoForgetAfter(settings.sudoForgetAfter).catch(() => {}))
 
   // Locks after settings.lockAfter idle minutes. Activity is any key or
   // pointer use; checked every 15s, which is precise enough for minutes.

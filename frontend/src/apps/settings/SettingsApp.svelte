@@ -10,6 +10,7 @@
     MONO_FAMILIES,
     type MonoFont,
     settings,
+    SUDO_FORGET_AFTER,
     TERMINAL_FONT,
     THEMES,
     WALLPAPER_ACCENTS,
@@ -427,6 +428,22 @@
       </div>
     {/if}
   {/if}
+
+  <div class="row">
+    <span>
+      <strong>{t.settings.sudoForget}</strong>
+      <small>{t.settings.sudoForgetHint}</small>
+    </span>
+    <div class="segmented" role="radiogroup" aria-label={t.settings.sudoForget}>
+      {#each SUDO_FORGET_AFTER as m (m)}
+        <button
+          role="radio"
+          aria-checked={settings.sudoForgetAfter === m}
+          onclick={() => settings.set('sudoForgetAfter', m)}>{t.settings.sudoForgets[m]}</button
+        >
+      {/each}
+    </div>
+  </div>
 
   <h2 class="section">{t.settings.editor}</h2>
 
