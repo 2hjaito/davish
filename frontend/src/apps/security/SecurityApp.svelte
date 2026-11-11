@@ -785,7 +785,9 @@
 <ConfirmCommand
   command={confirm
     ? canRun
-      ? joined(confirm, 'command', '\n')
+      ? // What runs: as it is for root, else through sudo (ADR 0018), which
+        // the plain sudo form shows; never the sudo -n form.
+        joined(confirm, report?.root ? 'command' : 'terminal', '\n')
       : joined(confirm, 'terminal', ' && ')
     : null}
   title={confirmTitle}
