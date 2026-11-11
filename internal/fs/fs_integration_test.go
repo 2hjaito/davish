@@ -646,3 +646,37 @@ func TestSudoerSavesRootFileThroughSudo(t *testing.T) {
 		t.Errorf("save /usr/bin/sudo: %v", err)
 	}
 }
+
+// Another user's link on the way must not send root elsewhere: tester
+// links /tmp/davish-link to /etc, and sudoer acting on a file "in /tmp"
+// would act on /etc as root.
+func TestRootRefusesAnotherUsersLinkOnTheWay(t *testing.T) {
+	ctx := context.Background()
+	tm, tid := testsshd.Connect(t)
+	link := "/tmp/davish-link"
+	testsshd.Run(t, tm, tid, "rm -f "+link+" && ln -s /etc "+link)
+	t.Cleanup(func() { testsshd.Run(t, tm, tid, "rm -f "+link) })
+
+	s, k, id := asSudoer(t)
+	if err := k.SetPassword(ctx, id, []byte(testsshd.SudoPassword)); err != nil {
+		t.Fatal(err)
+	}
+	victim := "/etc/davish-victim.conf"
+	rootRun(t, k, id, "echo keep > "+victim+" && chmod 644 "+victim)
+	t.Cleanup(func() { _, _ = k.Run(ctx, id, "test", "rm -f "+victim, nil) })
+
+	p := link + "/davish-victim.conf"
+	plan, err := s.PlanRemove(ctx, id, p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Remove(ctx, id, p, plan.Command); errCode(err) != apperr.FSProtected {
+		t.Errorf("remove through tester's link: %v", err)
+	}
+	if _, err := s.PlanSaveAsRoot(ctx, id, p, fs.SaveOptions{}); errCode(err) != apperr.FSProtected {
+		t.Errorf("save through tester's link: %v", err)
+	}
+	if out := rootRun(t, k, id, "cat "+victim); out != "keep\n" {
+		t.Fatalf("victim changed: %q", out)
+	}
+}

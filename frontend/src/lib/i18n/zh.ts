@@ -1620,7 +1620,6 @@ const zh = {
     dragHint: '拖到某一块上选择它；拖回中间或按 Esc 取消',
     cancel: '取消',
     deleteTitle: (name: string) => `删除“${name}”？`,
-    rootProtected: 'Davish 不会以 root 身份删除它：这是系统文件夹，或服务器登录所需的文件。',
     deleteFile: '文件将从服务器上永久删除，没有回收站。',
     deleteDir: '这个空文件夹将从服务器上永久删除。',
     deleteNonEmpty:
@@ -1681,7 +1680,6 @@ const zh = {
     rootSaveAction: '以 root 保存',
     rootSaveBackup: (path: string) => `会先把当前文件复制到 ${path}。`,
     rootSaveNoBackup: '不会创建备份（可在 设置 → 编辑器 中开启备份）。',
-    rootProtected: 'Davish 不会以 root 身份写入此路径。',
     sudo: '在终端中用 sudo 打开',
     sudoHint: '会输入一条 sudoedit 命令；检查后按回车，并在终端中输入密码。',
     reload: '从服务器重新加载',
@@ -2777,7 +2775,8 @@ const zh = {
     FS_TOO_LARGE: '文件太大，无法直接打开。请下载后查看。',
     FS_STALE: '自你确认后文件或文件夹已发生变化。请再试一次。',
     FS_CHANGED: '自你打开后，文件在服务器上已被修改。',
-    FS_PROTECTED: '为保证服务器正常运行，Davish 不会以 root 身份修改此路径。',
+    FS_PROTECTED:
+      'Davish 不会以 root 身份执行此操作：该路径是系统的关键部分，或经过其他用户的文件夹或链接，对方可能把 root 引到别处。',
     CMD_NEEDS_ROOT: '这条命令需要 root 权限。',
     CMD_MISSING: '服务器缺少此操作需要的程序（例如 zip）。',
     CMD_FAILED: '命令在服务器上执行失败。',

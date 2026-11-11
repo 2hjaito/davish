@@ -3,11 +3,14 @@ package fs
 import (
 	"context"
 	"errors"
+	"os"
 	"path"
 	"slices"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/pkg/sftp"
 
 	"davish/internal/apperr"
 	"davish/internal/audit"
@@ -64,6 +67,72 @@ func RootWriteRefused(p string) bool {
 	return within(path.Clean(p), rootTrees)
 }
 
+// trusted checks p before Davish acts on it as root. The folders on its
+// way, and p itself when it is a link, must belong to root or to the
+// login user: anyone else could swap one for a link between the
+// confirmation and the command, and send root elsewhere. refused is then
+// asked of p as written and of where it really is, so a link such as
+// /var/run -> /run cannot slip past it.
+func trusted(sc *sftp.Client, p string, refused func(string) bool) error {
+	p = path.Clean(p)
+	login, err := loginUID(sc)
+	if err != nil {
+		return err
+	}
+	owned := func(q string) error {
+		fi, err := sc.Lstat(q)
+		if err != nil {
+			return mapErr("check", err)
+		}
+		st, ok := fileStat(fi)
+		if !ok {
+			return apperr.New(apperr.Internal, "server sent no file attributes")
+		}
+		if st.UID != 0 && st.UID != login {
+			return apperr.New(apperr.FSProtected, "a folder on the way belongs to another user")
+		}
+		return nil
+	}
+	if fi, err := sc.Lstat(p); err == nil && fi.Mode()&os.ModeSymlink != 0 {
+		if err := owned(p); err != nil {
+			return err
+		}
+	}
+	for d := path.Dir(p); ; d = path.Dir(d) {
+		if err := owned(d); err != nil {
+			return err
+		}
+		if d == "/" {
+			break
+		}
+	}
+	real, err := sc.RealPath(path.Dir(p))
+	if err != nil {
+		return mapErr("check", err)
+	}
+	if refused(p) || refused(path.Join(real, path.Base(p))) {
+		return protected()
+	}
+	return nil
+}
+
+// loginUID is the login user's uid: the owner of their home folder.
+func loginUID(sc *sftp.Client) (uint32, error) {
+	home, err := sc.Getwd()
+	if err != nil {
+		return 0, apperr.Wrap(apperr.Internal, "cannot find the home folder", err)
+	}
+	fi, err := sc.Stat(home)
+	if err != nil {
+		return 0, mapErr("check", err)
+	}
+	st, ok := fileStat(fi)
+	if !ok {
+		return 0, apperr.New(apperr.Internal, "server sent no file attributes")
+	}
+	return st.UID, nil
+}
+
 func protected() error {
 	return apperr.New(apperr.FSProtected, "Davish does not change this path as root")
 }
@@ -74,8 +143,12 @@ func (s *Service) removeAsRoot(ctx context.Context, serverID, p, command string)
 	if s.root == nil {
 		return apperr.New(apperr.FSPermissionDenied, "permission denied")
 	}
-	if RootRemoveRefused(p) {
-		return protected()
+	sc, err := s.conns.SFTP(serverID)
+	if err != nil {
+		return err
+	}
+	if err := trusted(sc, p, RootRemoveRefused); err != nil {
+		return err
 	}
 	res, err := s.root.Run(ctx, serverID, "files", command, nil)
 	if err != nil {
@@ -122,8 +195,12 @@ func (s *Service) planSaveAsRoot(serverID, p string, opts SaveOptions, at time.T
 	if orig == nil {
 		return RootSavePlan{}, apperr.New(apperr.NotFound, "no such file")
 	}
-	if RootWriteRefused(target) {
-		return RootSavePlan{}, protected()
+	// Both the path as opened and the file it leads to.
+	if err := trusted(sc, p, RootWriteRefused); err != nil {
+		return RootSavePlan{}, err
+	}
+	if err := trusted(sc, target, RootWriteRefused); err != nil {
+		return RootSavePlan{}, err
 	}
 	if e := opts.Expect; e != nil && (int64(orig.Mtime) != e.ModTime || int64(orig.Size) != e.Size) { //nolint:gosec // sizes and times fit int64
 		return RootSavePlan{}, apperr.New(apperr.FSChanged, "the file changed on the server since it was opened")

@@ -1642,8 +1642,6 @@ const vi = {
     dropDesktopHere: 'Thả để thêm vào màn hình chính',
     cancel: 'Hủy',
     deleteTitle: (name: string) => `Xóa “${name}”?`,
-    rootProtected:
-      'Davish không xóa mục này bằng quyền root: đây là thư mục hệ thống hoặc file server cần để đăng nhập.',
     deleteFile: 'File sẽ bị xóa vĩnh viễn trên server, không có thùng rác.',
     deleteDir: 'Thư mục trống sẽ bị xóa vĩnh viễn trên server.',
     deleteNonEmpty:
@@ -1704,7 +1702,6 @@ const vi = {
     rootSaveAction: 'Lưu bằng root',
     rootSaveBackup: (path: string) => `File hiện tại được sao lưu vào ${path} trước.`,
     rootSaveNoBackup: 'Không tạo bản sao lưu (bật sao lưu trong Cài đặt → Editor).',
-    rootProtected: 'Davish không ghi đường dẫn này bằng quyền root.',
     sudo: 'Mở trong Terminal với sudo',
     sudoHint: 'Lệnh sudoedit được điền sẵn; xem lại, nhấn Enter và nhập mật khẩu trong Terminal.',
     reload: 'Tải lại bản trên server',
@@ -2828,7 +2825,8 @@ const vi = {
     FS_TOO_LARGE: 'File quá lớn để mở trực tiếp. Hãy tải về.',
     FS_STALE: 'File hoặc thư mục đã thay đổi từ lúc bạn xác nhận. Hãy thử lại.',
     FS_CHANGED: 'File đã bị thay đổi trên server từ lúc bạn mở.',
-    FS_PROTECTED: 'Davish không thay đổi đường dẫn này bằng quyền root, để server vẫn chạy được.',
+    FS_PROTECTED:
+      'Davish không làm việc này bằng quyền root: đường dẫn là phần sống còn của hệ thống, hoặc đi qua thư mục hay link của user khác, người có thể đổi hướng root sang chỗ khác.',
     CMD_NEEDS_ROOT: 'Lệnh này cần quyền root.',
     CMD_MISSING: 'Server chưa cài chương trình cần cho thao tác này (ví dụ zip).',
     CMD_FAILED: 'Lệnh chạy trên server bị lỗi.',

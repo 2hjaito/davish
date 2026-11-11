@@ -200,7 +200,6 @@
       // No sudo after all, or a path Davish never writes as root.
       if (ue.code === 'CMD_NEEDS_ROOT' || ue.code === 'FS_PROTECTED') {
         tab.asRoot = false
-        if (ue.code === 'FS_PROTECTED') tab.notice = { text: t.editor.rootProtected, error: true }
       }
       return false
     } finally {

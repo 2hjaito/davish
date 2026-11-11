@@ -1667,8 +1667,6 @@ const en = {
     dragHint: 'Drop on a slice to pick it; drop in the middle or press Esc to cancel',
     cancel: 'Cancel',
     deleteTitle: (name: string) => `Delete “${name}”?`,
-    rootProtected:
-      'Davish does not delete this as root: it is a system folder or a file the server needs to let anyone log in.',
     deleteFile: 'The file will be deleted from the server for good; there is no trash.',
     deleteDir: 'The empty folder will be deleted from the server for good.',
     deleteNonEmpty:
@@ -1731,7 +1729,6 @@ const en = {
     rootSaveAction: 'Save as root',
     rootSaveBackup: (path: string) => `The current file is copied to ${path} first.`,
     rootSaveNoBackup: 'No backup is made (turn backups on in Settings → Editor).',
-    rootProtected: 'Davish does not write this path as root.',
     sudo: 'Open in Terminal with sudo',
     sudoHint:
       'A sudoedit command is typed in; review it, press Enter and enter your password in Terminal.',
@@ -2858,7 +2855,8 @@ const en = {
     FS_TOO_LARGE: 'The file is too large to open directly. Download it instead.',
     FS_STALE: 'The file or folder changed since you confirmed. Please try again.',
     FS_CHANGED: 'The file changed on the server since you opened it.',
-    FS_PROTECTED: 'Davish does not change this path as root, to keep the server working.',
+    FS_PROTECTED:
+      'Davish does not do this as root: the path is a vital part of the system, or goes through a folder or link of another user, who could send root elsewhere.',
     CMD_NEEDS_ROOT: 'This command needs root.',
     CMD_MISSING: 'The server lacks a program this action needs (for example zip).',
     CMD_FAILED: 'The command failed on the server.',
