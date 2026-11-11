@@ -292,6 +292,8 @@ const vi = {
     files: (n: number) => `${n} file`,
     needsRoot: 'Lệnh cần root: Davish gõ sẵn vào Terminal với sudo, bạn xem rồi tự nhấn Enter.',
     toTerminal: 'Mở Terminal với lệnh',
+    rootRuns:
+      'Cần root: Davish chạy qua sudo sau khi bạn xác nhận, hỏi mật khẩu sudo một lần mỗi phiên nếu cần.',
     dangerous: 'Mục này có thể xóa dữ liệu thật, không chỉ cache. Kiểm tra kỹ trước khi dọn.',
     tabs: { dirs: 'Thư mục', files: 'File lớn' },
     scan: 'Quét lại',
@@ -333,6 +335,7 @@ const vi = {
         'User SSH này không đọc được các thư mục dưới đây nên du bỏ qua, mà chỗ ổ đầy thường nằm ở đây (Docker, database, /root). Davish chỉ đo đủ khi sudo không cần mật khẩu; bạn có thể tự đo bằng sudo trong Terminal.',
       more: (n: number) => `và ${n} thư mục khác`,
       measureSudo: 'Đo bằng sudo trong Terminal',
+      measureAsRoot: 'Đo bằng sudo…',
       unmeasuredOther:
         'Phần này không nằm trong thư mục nào đo được: có thể do quét hết giờ, file đang ghi dở hoặc dung lượng dành riêng của hệ thống file.',
       heldTitle: (size: string) => `${size} bị giữ bởi file đã xóa`,
@@ -1096,6 +1099,7 @@ const vi = {
           'du -x -d 1 khi mở thư mục sâu hơn',
           'docker system df, journalctl --disk-usage, find',
           'rm, truncate, lệnh dọn dẹp (có xác nhận, cần root thì qua Terminal)',
+          'Đo dung lượng và các cleanup cần root chạy qua sudo (không hỏi nếu sudo không cần mật khẩu; nếu cần thì hỏi mật khẩu sudo một lần mỗi phiên); cache của user vẫn chạy bằng user',
         ],
       },
       ports: {

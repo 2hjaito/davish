@@ -4,6 +4,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Fixed
+- Disk: logged in as a user who is not root, the cleanups that need root (the journal, old logs in `/var/log`, apt, dnf, crash dumps, `/tmp`, snap, container logs) run through `sudo` once confirmed instead of only being typed into Terminal (#117); the Terminal button stays. With the session's sudo password, Davish measures the disk and what can be cleaned as root; without it, "Measure with sudo…" shows the exact command first. Emptying a root's file runs again through `sudo` too, within Disk's refusals. The user's own caches (`~/.cache`, npm) always run as the user.
+
 ## [1.13.3] - 2026-11-11
 
 ### Added

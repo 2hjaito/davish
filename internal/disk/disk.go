@@ -30,6 +30,7 @@ type Runner interface {
 type Service struct {
 	run   Runner
 	files Remover
+	root  Root
 
 	mu sync.Mutex
 	// scans holds the cancel of each running measurement, by the token

@@ -282,6 +282,8 @@ const en = {
     needsRoot:
       'Needs root: Davish types the command into Terminal with sudo; check it, then press Enter.',
     toTerminal: 'Open Terminal with the command',
+    rootRuns:
+      'Needs root: Davish runs it through sudo once you confirm, asking for the sudo password once per session if needed.',
     dangerous: 'This may delete real data, not only caches. Check before you clean it.',
     tabs: { dirs: 'Folders', files: 'Large files' },
     scan: 'Scan again',
@@ -323,6 +325,7 @@ const en = {
         'This SSH user cannot read the folders below, so du skipped them, and that is often where a full disk is (Docker, databases, /root). Davish measures them only when sudo needs no password; you can measure them with sudo in a terminal.',
       more: (n: number) => `and ${n} more`,
       measureSudo: 'Measure with sudo in Terminal',
+      measureAsRoot: 'Measure with sudo…',
       unmeasuredOther:
         'This is in no measured folder: the scan may have run out of time, files may be half written, or the filesystem reserves it.',
       heldTitle: (size: string) => `${size} held by deleted files`,
@@ -1115,6 +1118,7 @@ const en = {
           'du -x -d 1 when opening a deeper folder',
           'docker system df, journalctl --disk-usage, find',
           'rm, truncate, cleanup commands (with confirmation; through Terminal when root is needed)',
+          "Measuring and the cleanups that need root run through sudo (no prompt when sudo needs no password; otherwise the sudo password once per session); the user's own caches stay the user's",
         ],
       },
       ports: {

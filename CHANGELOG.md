@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Sửa
+- Disk: đăng nhập bằng user thường thì các cleanup cần root (journal, log cũ trong `/var/log`, apt, dnf, crash dump, `/tmp`, snap, log container) chạy qua `sudo` sau khi xác nhận, thay vì chỉ gõ sẵn vào Terminal (#117); vẫn có nút Terminal. Có mật khẩu sudo trong phiên thì Davish đo cả ổ đĩa và dung lượng dọn được bằng root; chưa có thì nút "Đo bằng sudo…" hiện đúng lệnh sẽ chạy. Làm rỗng file của root cũng chạy lại qua `sudo`, vẫn theo danh sách cấm của Disk. Cache trong home của user (`~/.cache`, npm) luôn chạy bằng chính user.
+
 ## [1.13.3] - 2026-11-11
 
 ### Thêm

@@ -838,6 +838,8 @@ export namespace disk {
 	    unmeasured: number;
 	    root: boolean;
 	    partial: boolean;
+	    askSudo: boolean;
+	    sudoScan?: string;
 	    sudoMeasure: string;
 	
 	    static createFrom(source: any = {}) {
@@ -855,6 +857,8 @@ export namespace disk {
 	        this.unmeasured = source["unmeasured"];
 	        this.root = source["root"];
 	        this.partial = source["partial"];
+	        this.askSudo = source["askSudo"];
+	        this.sudoScan = source["sudoScan"];
 	        this.sudoMeasure = source["sudoMeasure"];
 	    }
 	

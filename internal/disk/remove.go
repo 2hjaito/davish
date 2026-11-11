@@ -83,6 +83,10 @@ func (s *Service) checkRemove(p string) error {
 	return nil
 }
 
+func denied(stderr string) bool {
+	return strings.Contains(stderr, "Permission denied") || strings.Contains(stderr, "Operation not permitted")
+}
+
 // TruncatePlan is what the confirmation shows before emptying a file.
 type TruncatePlan struct {
 	Command string `json:"command"`
@@ -116,11 +120,20 @@ func (s *Service) Truncate(ctx context.Context, serverID, p, command string) err
 	if err != nil {
 		return err
 	}
+	if res.Exit != 0 && s.root != nil && denied(string(res.Stderr)) {
+		// The same confirmed command again, as root (ADR 0018).
+		if res, err = s.root.Run(ctx, serverID, app, plan.Command, nil); err != nil {
+			if codeOf(err) == apperr.CmdNeedsRoot {
+				return apperr.New(apperr.FSPermissionDenied, "permission denied")
+			}
+			return err
+		}
+	}
 	msg := string(res.Stderr)
 	switch {
 	case res.Exit == 0:
 		return nil
-	case strings.Contains(msg, "Permission denied"), strings.Contains(msg, "Operation not permitted"):
+	case denied(msg):
 		return apperr.New(apperr.FSPermissionDenied, "permission denied")
 	case strings.Contains(msg, "No such file"):
 		return apperr.New(apperr.NotFound, "no such file")
