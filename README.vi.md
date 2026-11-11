@@ -8,6 +8,10 @@
 Terminal, file, dịch vụ, Docker, log, cron, nginx, cổng, trình duyệt, ổ đĩa, an ninh đăng nhập, khóa SSH, gói phần mềm và git qua SSH thuần, gom trong một giao diện như một hệ điều hành.<br>
 Không cài gì lên server.
 
+<p align="center">
+  <img src="assets/demo.gif" alt="Demo davish: vòng thao tác trên file, Terminal, Docker, cổng, an ninh đăng nhập và graph git qua SSH" width="800">
+</p>
+
 [![Stars](https://img.shields.io/github/stars/2hjaito/davish?color=f6cf8f)](https://github.com/2hjaito/davish/stargazers)
 [![Downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2F2hjaito%2Fdavish%2Fstats%2Fdownloads.json)](https://github.com/2hjaito/davish/releases)
 [![Release](https://img.shields.io/github/v/release/2hjaito/davish?color=0a64d8)](https://github.com/2hjaito/davish/releases/latest)
@@ -40,7 +44,7 @@ Không cài gì lên server.
 
 - [Terminal](FEATURES.vi.md#terminal): nhiều tab, vẽ bằng GPU, prompt powerline tùy chọn
 - [Lệnh hay dùng](FEATURES.vi.md#lệnh-hay-dùng): lệnh hay gõ, một cú bấm là gõ sẵn vào Terminal
-- [Files](FEATURES.vi.md#files): SFTP kiểu Finder, kéo thả, copy giữa server
+- [Files](FEATURES.vi.md#files): SFTP kiểu Finder, kéo thả, copy giữa server, giữ chuột trên file để mở vòng thao tác
 - [Editor](FEATURES.vi.md#editor): CodeMirror, lưu atomic, có sao lưu
 - [Logs](FEATURES.vi.md#logs): journal, file, container, theo dõi trực tiếp
 - [Monitor](FEATURES.vi.md#monitor): CPU, RAM, ổ đĩa, mạng, GPU, tiến trình
@@ -171,3 +175,5 @@ Davish là phần mềm tự do theo [GNU General Public License v3.0](LICENSE).
 ## Chính sách ký số
 
 Free code signing for the Windows builds is provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org). Vai trò trong nhóm, những file được ký và những gì Davish gửi ra mạng: [CODE_SIGNING.md](CODE_SIGNING.md) (tiếng Anh).
+
+Nếu davish giúp bạn tiết kiệm thời gian, một ⭐ trên GitHub sẽ giúp rất nhiều!

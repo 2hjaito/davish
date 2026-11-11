@@ -8,6 +8,10 @@
 终端、文件、服务、Docker、日志、cron、nginx、端口、浏览器、磁盘、登录安全、SSH 密钥、软件包和 git，全部走普通 SSH，集中在一个像操作系统一样的界面里。<br>
 服务器上什么都不用装。
 
+<p align="center">
+  <img src="assets/demo.gif" alt="davish 演示：文件操作环、终端、Docker、端口、登录安全和 git 提交图，全部走 SSH" width="800">
+</p>
+
 [![Stars](https://img.shields.io/github/stars/2hjaito/davish?color=f6cf8f)](https://github.com/2hjaito/davish/stargazers)
 [![Downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2F2hjaito%2Fdavish%2Fstats%2Fdownloads.json)](https://github.com/2hjaito/davish/releases)
 [![Release](https://img.shields.io/github/v/release/2hjaito/davish?color=0a64d8)](https://github.com/2hjaito/davish/releases/latest)
@@ -40,7 +44,7 @@
 
 - [终端](FEATURES.md#terminal)：多标签、GPU 渲染、可选的 powerline 提示符
 - [常用命令](FEATURES.md#saved-commands)：保存常用命令，一键输入到终端
-- [文件](FEATURES.md#files)：Finder 风格的 SFTP，拖放上传下载，跨服务器复制
+- [文件](FEATURES.md#files)：Finder 风格的 SFTP，拖放上传下载，跨服务器复制，按住文件拖动即弹出环形操作菜单
 - [编辑器](FEATURES.md#editor)：基于 CodeMirror，原子保存并自动备份
 - [日志](FEATURES.md#logs)：journal、日志文件和容器日志，实时查看
 - [监控](FEATURES.md#monitor)：CPU、内存、磁盘、网络、GPU、进程
@@ -171,3 +175,5 @@ Davish 是基于 [GNU 通用公共许可证 v3.0](LICENSE) 的自由软件。贡
 ## 代码签名政策
 
 Windows 版本的免费代码签名由 [SignPath.io](https://about.signpath.io) 提供，证书由 [SignPath Foundation](https://signpath.org) 颁发。团队角色、签名范围以及 Davish 会通过网络发送哪些内容：见 [CODE_SIGNING.md](CODE_SIGNING.md)。
+
+如果 davish 帮你节省了时间，在 GitHub 上点个 ⭐ 会很有帮助！
