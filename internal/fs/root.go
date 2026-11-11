@@ -106,11 +106,11 @@ func trusted(sc *sftp.Client, p string, refused func(string) bool) error {
 			break
 		}
 	}
-	real, err := sc.RealPath(path.Dir(p))
+	dir, err := sc.RealPath(path.Dir(p))
 	if err != nil {
 		return mapErr("check", err)
 	}
-	if refused(p) || refused(path.Join(real, path.Base(p))) {
+	if refused(p) || refused(path.Join(dir, path.Base(p))) {
 		return protected()
 	}
 	return nil
