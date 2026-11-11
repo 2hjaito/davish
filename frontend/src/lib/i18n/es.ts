@@ -327,6 +327,8 @@ const es = {
       'Se borra el contenido del archivo pero el archivo se queda, así que el programa que escribe en él (como un registro) sigue funcionando. Comando que se ejecutará:',
     protected:
       'Disco no borra carpetas del sistema, datos de bases de datos ni carpetas personales. Usa Limpiar o la app a la que pertenecen.',
+    rootUntrusted:
+      'Disk no vacía este archivo como root: es un enlace, o está en una carpeta en la que otro usuario o cualquiera puede escribir, así que el archivo vaciado podría ser otro.',
     ov: {
       asRoot: 'medido como root (sudo -n)',
       barLabel: 'Espacio del disco por partes',

@@ -312,6 +312,8 @@ const en = {
       'The file’s content is removed but the file stays, so a program writing it (such as a log) carries on. Command to run:',
     protected:
       'Disk does not delete system folders, database data or home folders. Use Clean up or the app that owns them.',
+    rootUntrusted:
+      'Disk does not empty this file as root: it is a link, or lies in a folder another user or everyone may write, so the file emptied could be another one.',
     ov: {
       asRoot: 'measured as root (sudo -n)',
       barLabel: 'Disk space by part',

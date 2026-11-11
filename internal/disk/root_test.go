@@ -2,6 +2,7 @@ package disk
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"davish/internal/apperr"
@@ -60,21 +61,50 @@ func TestCleanPassesSudoErrorsOn(t *testing.T) {
 	}
 }
 
+// checkRunner refuses the truncate and answers the check with check.
+type checkRunner struct{ check string }
+
+func (r checkRunner) RunLine(_ context.Context, _, _, line string) (audit.Result, error) {
+	if strings.HasPrefix(line, "id -u; readlink") {
+		return audit.Result{Stdout: []byte(r.check)}, nil
+	}
+	return audit.Result{Exit: 1, Stderr: []byte("truncate: cannot open for writing: Permission denied")}, nil
+}
+
 func TestTruncateAsRootAfterRefusal(t *testing.T) {
 	ctx := context.Background()
 	p := "/var/log/app/big.log"
 	plan, _ := PlanTruncate(p)
-	root := &fakeRoot{}
-	s := New(&lineRunner{res: audit.Result{Exit: 1, Stderr: []byte("truncate: cannot open '" + p + "' for writing: Permission denied")}}, nil)
-	s.UseRoot(root)
-	if err := s.Truncate(ctx, "srv", p, plan.Command); err != nil {
-		t.Fatal(err)
+	dirs := "0 755 directory\n0 755 directory\n0 755 directory\n0 755 directory\n"
+	cases := map[string]struct {
+		check string
+		ok    bool
+	}{
+		"root's file":                {"1000\n" + p + "\n33 640 regular file\n" + dirs, true},
+		"a link":                     {"1000\n/etc/shadow\n1001 777 symbolic link\n" + dirs, false},
+		"really elsewhere":           {"1000\n/etc/x/big.log\n0 640 regular file\n" + dirs, false},
+		"another user's folder":      {"1000\n" + p + "\n0 640 regular file\n1001 755 directory\n0 755 directory\n0 755 directory\n0 755 directory\n", false},
+		"a log folder syslog writes": {"1000\n" + p + "\n104 640 regular file\n0 775 directory\n0 755 directory\n0 755 directory\n0 755 directory\n", true},
+		"a shared folder":            {"1000\n" + p + "\n0 640 regular file\n0 1777 directory\n0 755 directory\n0 755 directory\n0 755 directory\n", false},
+		"check failed":               {"1000\n", false},
 	}
-	if len(root.ran) != 1 || root.ran[0] != plan.Command {
-		t.Errorf("root ran %q", root.ran)
+	for name, c := range cases {
+		root := &fakeRoot{}
+		s := New(checkRunner{c.check}, nil)
+		s.UseRoot(root)
+		err := s.Truncate(ctx, "srv", p, plan.Command)
+		if c.ok && (err != nil || len(root.ran) != 1 || root.ran[0] != plan.Command) {
+			t.Errorf("%s: %v, root ran %q", name, err, root.ran)
+		}
+		if !c.ok && (codeOf(err) != apperr.InvalidInput || len(root.ran) != 0) {
+			t.Errorf("%s: %v, root ran %q", name, err, root.ran)
+		}
 	}
 	// Disk's refusals come first: a system file is never emptied as root.
-	if err := s.Truncate(ctx, "srv", "/etc/passwd", "truncate -s 0 -- /etc/passwd"); err == nil || len(root.ran) != 1 {
+	root := &fakeRoot{}
+	s := New(checkRunner{}, nil)
+	s.UseRoot(root)
+	if err := s.Truncate(ctx, "srv", "/etc/passwd", "truncate -s 0 -- /etc/passwd"); err == nil || len(root.ran) != 0 {
 		t.Errorf("/etc/passwd: %v, root ran %q", err, root.ran)
 	}
 }

@@ -121,6 +121,9 @@ func (s *Service) Truncate(ctx context.Context, serverID, p, command string) err
 		return err
 	}
 	if res.Exit != 0 && s.root != nil && denied(string(res.Stderr)) {
+		if err := s.checkTruncateAsRoot(ctx, serverID, path.Clean(p)); err != nil {
+			return err
+		}
 		// The same confirmed command again, as root (ADR 0018).
 		if res, err = s.root.Run(ctx, serverID, app, plan.Command, nil); err != nil {
 			if codeOf(err) == apperr.CmdNeedsRoot {

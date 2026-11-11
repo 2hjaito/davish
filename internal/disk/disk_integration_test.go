@@ -252,3 +252,41 @@ func errCode(err error) apperr.Code {
 	}
 	return ""
 }
+
+// tester plants /tmp/davish-big.log, a link to a root-only file; sudoer
+// emptying "a big log in /tmp" as root would empty that file.
+func TestRootTruncateRefusesAPlantedLink(t *testing.T) {
+	ctx := context.Background()
+	tm, tid := testsshd.Connect(t)
+	link := "/tmp/davish-big.log"
+	victim := "/etc/davish-truncate-victim"
+
+	m, id := testsshd.ConnectAs(t, testsshd.Sudoer)
+	run := audit.NewRunner(m, audit.New(discard{}))
+	k := sudo.New(run)
+	if err := k.SetPassword(ctx, id, []byte(testsshd.SudoPassword)); err != nil {
+		t.Fatal(err)
+	}
+	if res, err := k.Run(ctx, id, "test", "echo keep > "+victim+" && chmod 600 "+victim, nil); err != nil || res.Exit != 0 {
+		t.Fatalf("setup: %v %s", err, res.Stderr)
+	}
+	testsshd.Run(t, tm, tid, "rm -f "+link+" && ln -s "+victim+" "+link)
+	t.Cleanup(func() {
+		testsshd.Run(t, tm, tid, "rm -f "+link)
+		_, _ = k.Run(ctx, id, "test", "rm -f "+victim, nil)
+	})
+
+	s := disk.New(run, fs.New(m, run, testsshd.Quiet()))
+	s.UseRoot(k)
+	plan, err := disk.PlanTruncate(link)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Truncate(ctx, id, link, plan.Command); errCode(err) != apperr.InvalidInput {
+		t.Errorf("truncate through tester's link: %v", err)
+	}
+	res, err := k.Run(ctx, id, "test", "cat "+victim, nil)
+	if err != nil || string(res.Stdout) != "keep\n" {
+		t.Fatalf("victim emptied: %q %v", res.Stdout, err)
+	}
+}
