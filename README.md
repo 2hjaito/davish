@@ -18,7 +18,7 @@ Nothing to install on the server.
 
 **English** · [Tiếng Việt](README.vi.md) · [简体中文](README.zh-CN.md)
 
-<img src="assets/screenshots/en/desktop.jpg" alt="Davish desktop with Terminal, Monitor and Files" width="100%">
+<img src="assets/screenshots/en/desktop.png" alt="Davish desktop with Terminal, Git, Monitor and Files" width="100%">
 
 </div>
 

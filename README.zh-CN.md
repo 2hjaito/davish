@@ -18,7 +18,7 @@
 
 [English](README.md) · [Tiếng Việt](README.vi.md) · **简体中文**
 
-<img src="assets/screenshots/zh/desktop.png" alt="Davish 桌面：终端、监控和文件" width="100%">
+<img src="assets/screenshots/zh/desktop.png" alt="Davish 桌面：终端、Git、监控和文件" width="100%">
 
 </div>
 
