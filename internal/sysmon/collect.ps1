@@ -16,6 +16,9 @@ if (-not $sysDrive) { $sysDrive = 'C:' }
 # N is a counter as a number; a missing property reads as 0.
 function N($v) { if ($null -eq $v) { return [int64]0 } else { return [int64]$v } }
 
+# The first reading of each core's counters, set by the first snapshot.
+$script:base = @{}
+
 function L($s) { [void]$script:o.Append("$s`n") }
 
 function Snapshot($health) {
@@ -30,15 +33,23 @@ function Snapshot($health) {
 	# CPU: per core, user / system / idle in 100 ns, summed for the total line.
 	# System is everything busy that is not user time (kernel, interrupts, DPCs);
 	# the wall clock of the core is Timestamp_Sys100NS, so the three add up to it.
+	# That clock counts from the year 1601 and the others from boot, so each
+	# counter is shown relative to its first reading: the numbers stay small
+	# (a few hundred cores would overflow 64 bits otherwise), and only the
+	# differences between snapshots are ever used.
 	$cores = @(Get-CimInstance Win32_PerfRawData_PerfOS_Processor | Where-Object { $_.Name -ne '_Total' } |
 		Sort-Object { [int]($_.Name -replace '\D', '') })
 	$tu = [int64]0; $ts = [int64]0; $ti = [int64]0
 	$lines = @()
 	$i = 0
 	foreach ($c in $cores) {
-		$wall = N $c.Timestamp_Sys100NS
-		$idle = [Math]::Min((N $c.PercentIdleTime), $wall)
-		$user = [Math]::Min((N $c.PercentUserTime), $wall - $idle)
+		if (-not $script:base.ContainsKey($c.Name)) {
+			$script:base[$c.Name] = @((N $c.Timestamp_Sys100NS), (N $c.PercentIdleTime), (N $c.PercentUserTime))
+		}
+		$b = $script:base[$c.Name]
+		$wall = [Math]::Max([int64]0, (N $c.Timestamp_Sys100NS) - $b[0])
+		$idle = [Math]::Max([int64]0, [Math]::Min((N $c.PercentIdleTime) - $b[1], $wall))
+		$user = [Math]::Max([int64]0, [Math]::Min((N $c.PercentUserTime) - $b[2], $wall - $idle))
 		$kern = $wall - $idle - $user
 		$tu += $user; $ts += $kern; $ti += $idle
 		$lines += "cpu$i  $user 0 $kern $idle 0 0 0 0"

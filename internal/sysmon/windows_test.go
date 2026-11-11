@@ -4,14 +4,16 @@ import (
 	"math"
 	"os"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 
 	"davish/internal/platform"
 )
 
-// testdata/windows-procs.txt is real output of procs.ps1. windows-collect.txt
-// and windows-info.txt are built by hand to match what collect.ps1 and
+// testdata/windows-procs.txt and windows-collect-real.txt are real output.
+// windows-collect.txt (which has a failed service, containers and a second
+// drive) and windows-info.txt are built by hand to match what collect.ps1 and
 // info.ps1 are written to print: the scripts print the shapes of /proc so that
 // the Linux parsers read them. Replace them with real output when available.
 
@@ -79,6 +81,59 @@ func TestWindowsCollectorReadsLikeLinux(t *testing.T) {
 	}
 	if tick.WriteBps != 4000*512/2 {
 		t.Errorf("write = %v", tick.WriteBps)
+	}
+}
+
+// testdata/windows-collect-real.txt is collect.ps1 on a real Windows machine
+// (six cores, three network adapters, two disks), as the first version of the
+// script printed it: the CPU "system" column held the 1601-based wall clock, so
+// the counters are 18 digits long. Only differences are used, so it still reads.
+// The expected figures were worked out from the raw numbers separately.
+func TestWindowsCollectorOnRealOutput(t *testing.T) {
+	f, err := os.Open("testdata/windows-collect-real.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = f.Close() }()
+	r := NewReader(f)
+	first, err := r.Next()
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := r.Next()
+	if err != nil {
+		t.Fatal(err)
+	}
+	tick := Rate("win", first, second)
+
+	if tick.CPU != 38.7 || tick.CPUSplit.User != 8.2 || tick.CPUSplit.System != 30.4 {
+		t.Errorf("cpu = %v %+v; want 38.7 {User:8.2 System:30.4}", tick.CPU, tick.CPUSplit)
+	}
+	if want := []float64{30.9, 27.0, 60.3, 59.2, 30.9, 23.9}; !slices.Equal(tick.Cores, want) {
+		t.Errorf("cores = %v; want %v", tick.Cores, want)
+	}
+	if tick.MemTotal != 33376128*1024 || tick.MemUsed != 8058912768 || tick.SwapTotal != 2<<30 || tick.SwapUsed != 0 {
+		t.Errorf("memory = %d of %d, swap %d of %d", tick.MemUsed, tick.MemTotal, tick.SwapUsed, tick.SwapTotal)
+	}
+	if tick.Uptime != 185780.67 || tick.Procs != 187 {
+		t.Errorf("uptime %v, procs %d", tick.Uptime, tick.Procs)
+	}
+	if len(tick.Mounts) != 1 || tick.Mounts[0].Path != `C:\` || tick.DiskPct != 8 {
+		t.Errorf("mounts = %+v, pct %v", tick.Mounts, tick.DiskPct)
+	}
+	// The idle wireless adapter is left out; the three busy ones are summed.
+	if len(tick.Ifaces) != 3 || tick.Ifaces[1].Name != "ASIX AX88179 USB 3.0 to Gigabit Ethernet Adapter" {
+		t.Errorf("ifaces = %+v", tick.Ifaces)
+	}
+	if math.Abs(tick.RxBps-3463029.5) > 0.1 || math.Abs(tick.TxBps-6775650) > 0.1 {
+		t.Errorf("network = %v rx, %v tx bytes/s", tick.RxBps, tick.TxBps)
+	}
+	if len(tick.Disks) != 2 || math.Abs(tick.ReadBps-23272.7) > 0.1 || math.Abs(tick.WriteBps-498036.4) > 0.1 {
+		t.Errorf("disks = %+v, read %v, write %v", tick.Disks, tick.ReadBps, tick.WriteBps)
+	}
+	// No failed service, no container and no GPU on this machine.
+	if first.Health == nil || len(first.Health.Failed) != 0 || len(first.Health.Containers) != 0 || len(tick.GPUs) != 0 {
+		t.Errorf("health = %+v, gpus = %v", first.Health, tick.GPUs)
 	}
 }
 

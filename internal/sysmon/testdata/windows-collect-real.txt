@@ -1,0 +1,80 @@
+@@stat
+cpu  235292187500 0 806322491163351637 8552750827791 0 0 0 0
+cpu0  36917343750 0 134387010641395588 1498975655150 0 0 0 0
+cpu1  47115781250 0 134386938549588369 1560869024869 0 0 0 0
+cpu2  38735468750 0 134387359605101171 1148193824567 0 0 0 0
+cpu3  37190312500 0 134387425664157193 1083679924795 0 0 0 0
+cpu4  28015781250 0 134386926591802355 1591926810883 0 0 0 0
+cpu5  47317500000 0 134386830111306961 1669105587527 0 0 0 0
+@@meminfo
+MemTotal: 33376128 kB
+MemFree: 9131264 kB
+MemAvailable: 25524896 kB
+Buffers: 0 kB
+Cached: 16695972 kB
+SwapTotal: 2097152 kB
+SwapFree: 2097152 kB
+@@loadavg
+0.00 0.00 0.00 1/186 0
+@@uptime
+185778.91 0.00
+@@netdev
+Inter-|   Receive |  Transmit
+ face |bytes packets errs drop fifo frame compressed multicast|bytes packets errs drop fifo colls carrier compressed
+Realtek PCIe GbE Family Controller: 2321243973 0 0 0 0 0 0 0 33303987901 0 0 0 0 0 0 0
+ASIX AX88179 USB 3.0 to Gigabit Ethernet Adapter: 177268805657 0 0 0 0 0 0 0 259485659576 0 0 0 0 0 0 0
+ASIX AX88179 USB 3.0 to Gigabit Ethernet Adapter _2: 346766661232 0 0 0 0 0 0 0 659292757130 0 0 0 0 0 0 0
+Qualcomm QCA9565 802.11b_g_n Wireless Adapter: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+@@df
+Filesystem 1024-blocks Used Available Capacity Mounted on
+/dev/C: 975867900 69707028 906160872 8% C:\
+@@diskstats
+0 0 disk0 0 0 43705773 0 0 0 124119802
+0 0 disk1 0 0 32519 0 0 0 1266
+@@block
+disk0
+disk1
+@@gpu
+@@failed
+@@containers
+@@end
+@@stat
+cpu  235300781250 0 806322491195092246 8552814762086 0 0 0 0
+cpu0  36919531250 0 134387010644574210 1498987667137 0 0 0 0
+cpu1  47116718750 0 134386938553340602 1560881713245 0 0 0 0
+cpu2  38736718750 0 134387359614321506 1148200732341 0 0 0 0
+cpu3  37192031250 0 134387425672722189 1083687019158 0 0 0 0
+cpu4  28017031250 0 134386926595930668 1591938810679 0 0 0 0
+cpu5  47318750000 0 134386830114203071 1669118819526 0 0 0 0
+@@meminfo
+MemTotal: 33376128 kB
+MemFree: 9112364 kB
+MemAvailable: 25506096 kB
+Buffers: 0 kB
+Cached: 16694736 kB
+SwapTotal: 2097152 kB
+SwapFree: 2097152 kB
+@@loadavg
+0.00 0.00 0.00 1/187 0
+@@uptime
+185780.67 0.00
+@@netdev
+Inter-|   Receive |  Transmit
+ face |bytes packets errs drop fifo frame compressed multicast|bytes packets errs drop fifo colls carrier compressed
+Realtek PCIe GbE Family Controller: 2321268348 0 0 0 0 0 0 0 33304164878 0 0 0 0 0 0 0
+ASIX AX88179 USB 3.0 to Gigabit Ethernet Adapter: 177270518231 0 0 0 0 0 0 0 259487516039 0 0 0 0 0 0 0
+ASIX AX88179 USB 3.0 to Gigabit Ethernet Adapter _2: 346771019215 0 0 0 0 0 0 0 659302648834 0 0 0 0 0 0 0
+Qualcomm QCA9565 802.11b_g_n Wireless Adapter: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+@@df
+Filesystem 1024-blocks Used Available Capacity Mounted on
+/dev/C: 975867900 69707028 906160872 8% C:\
+@@diskstats
+0 0 disk0 0 0 43705853 0 0 0 124121514
+0 0 disk1 0 0 32519 0 0 0 1266
+@@block
+disk0
+disk1
+@@gpu
+@@failed
+@@containers
+@@end
