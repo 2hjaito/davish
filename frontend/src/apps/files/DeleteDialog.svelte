@@ -70,7 +70,12 @@
       const ue = toUserError(err)
       // Without the rights, the way out is the same command with sudo.
       if (ue.code === 'FS_PERMISSION_DENIED') sudo = p.sudo
-      else error = ue.message
+      // Refused as root here, but whoever may use sudo can still do it in
+      // Terminal, where the command is typed, not run.
+      else if (ue.code === 'FS_PROTECTED') {
+        error = ue.message
+        sudo = p.sudo
+      } else error = ue.message
       // It changed since the user looked: show what would run now.
       if (ue.code === 'FS_STALE') void loadPlan(entry)
     } finally {
