@@ -134,6 +134,7 @@ func New(version string) (*App, error) {
 	a.ports = ports.NewLister(runner)
 	a.disk = disk.New(runner, a.files)
 	a.security = security.New(runner)
+	a.security.UseRoot(a.sudo)
 	a.diag = diag.New(runner, a.conns)
 	a.tunnels = ports.NewTunnels(a.conns, emitter{a}, log)
 	a.browser = ports.NewBrowser(a.conns, log)

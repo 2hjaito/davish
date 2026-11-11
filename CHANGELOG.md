@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Sửa
+- An ninh: chặn, bỏ chặn bằng ufw và ban, unban bằng fail2ban không còn đòi sudo không mật khẩu: Davish chạy qua `sudo` và hỏi mật khẩu sudo một lần mỗi phiên, như các app khác (#117). Những gì cần root để đọc (`lastb`, trạng thái ufw và fail2ban, đăng nhập trong journal) cũng được đọc bằng root khi có thể; cần mật khẩu thì có nút "Xem bằng sudo…" hiện đúng lệnh. Bật ufw và tắt đăng nhập bằng mật khẩu, vốn có thể khóa bạn khỏi server, vẫn chỉ qua Terminal. User không có quyền sudo không được mời nhập mật khẩu.
+
 ## [1.13.3] - 2026-11-11
 
 ### Thêm

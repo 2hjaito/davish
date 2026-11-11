@@ -2777,6 +2777,10 @@ export namespace security {
 	export class Report {
 	    root: boolean;
 	    sudo: boolean;
+	    canSudo: boolean;
+	    asRoot: boolean;
+	    askSudo: boolean;
+	    sudoRead?: string;
 	    source: string;
 	    accepted: Login[];
 	    failed: Attempts[];
@@ -2803,6 +2807,10 @@ export namespace security {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.root = source["root"];
 	        this.sudo = source["sudo"];
+	        this.canSudo = source["canSudo"];
+	        this.asRoot = source["asRoot"];
+	        this.askSudo = source["askSudo"];
+	        this.sudoRead = source["sudoRead"];
 	        this.source = source["source"];
 	        this.accepted = this.convertValues(source["accepted"], Login);
 	        this.failed = this.convertValues(source["failed"], Attempts);

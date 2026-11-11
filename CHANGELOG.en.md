@@ -4,6 +4,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Fixed
+- Security: blocking and unblocking with ufw, and banning and unbanning with fail2ban, no longer need passwordless sudo: Davish runs them through `sudo`, asking for the sudo password once per session as the other apps do (#117). What needs root to read (`lastb`, the ufw and fail2ban status, logins in the journal) is read as root when it can be; when a password is needed, "View with sudo…" shows the exact command. Turning ufw on and password logins off, which could lock you out, stay in Terminal only. Users who may not use sudo are not offered the prompt.
+
 ## [1.13.3] - 2026-11-11
 
 ### Added

@@ -1079,6 +1079,7 @@ const vi = {
           'journalctl -u ssh (hoặc đọc /var/log/auth.log)',
           'who, last, lastb',
           'ufw status, fail2ban-client status sshd',
+          'Chặn, bỏ chặn, ban, unban và đọc những gì cần root (lastb, ufw, fail2ban, đăng nhập) qua sudo, hỏi mật khẩu sudo một lần mỗi phiên nếu cần; bật ufw và tắt đăng nhập bằng mật khẩu vẫn qua Terminal',
         ],
       },
       disk: {

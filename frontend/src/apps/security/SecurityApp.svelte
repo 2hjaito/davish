@@ -10,6 +10,7 @@
   import { useAppMenu } from '../../lib/shell/menus.svelte'
   import { servers } from '../../lib/stores/servers.svelte'
   import { supersedes } from '../../lib/stores/latest'
+  import { sudoPrompt, withSudo } from '../../lib/stores/sudoPrompt.svelte'
   import ConfirmCommand from '../../lib/ui/ConfirmCommand.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
   import FilterShell, { type FilterItem } from '../../lib/ui/FilterShell.svelte'
@@ -226,7 +227,13 @@
   let running = $state(false)
   let flash = $state('')
   let actionError = $state.raw<{ message: string; terminal: string } | null>(null)
-  const canRun = $derived(!!report && (report.root || report.sudo))
+  const canRun = $derived(!!report && (report.root || report.sudo || report.canSudo))
+
+  /** Reads what needs root once the user gives the sudo password. */
+  async function unlock() {
+    const read = report?.sudoRead
+    if (read && (await sudoPrompt.ask(win.serverID, read))) await refresh()
+  }
 
   /** What a row's action does to an address: ufw first, fail2ban otherwise. */
   function rowAction(r: SecurityReport, ip: string): SecurityAction | null {
@@ -281,7 +288,13 @@
     let rest: Step[] = []
     for (const [i, x] of c.entries()) {
       try {
-        await backend.apply(win.serverID, x.action, x.ip, x.plan.command)
+        // Through sudo with the session's password when sudo asks for one;
+        // the prompt shows the command with sudo.
+        const apply = () => backend.apply(win.serverID, x.action, x.ip, x.plan.command)
+        if (!(await withSudo(win.serverID, x.plan.terminal, apply))) {
+          rest = [...rest, ...c.slice(i)]
+          break
+        }
         done.push(x.ip)
       } catch (e) {
         const u = toUserError(e)
@@ -366,6 +379,7 @@
       {#if view === 'blocked' && r.ufw.installed && r.ufw.needsRoot}
         <div class="note">
           <p class="hint">{s.ufwHidden}</p>
+          {#if r.askSudo}{@render unlockButton()}{/if}
           <button class="btn" onclick={() => sudo('sudo ufw status numbered')}>{s.ufwShow}</button>
         </div>
       {/if}
@@ -688,6 +702,13 @@
   {/if}
 {/snippet}
 
+{#snippet unlockButton()}
+  <button class="btn btn-primary" onclick={() => void unlock()}>
+    <Icon name="key" size={13} />
+    {t.sudo.journal}
+  </button>
+{/snippet}
+
 {#snippet firewall(r: SecurityReport)}
   <div class="fw">
     <section class="tile">
@@ -696,6 +717,7 @@
         <p class="hint">{s.notInstalled}</p>
       {:else if r.ufw.needsRoot}
         <p class="hint">{s.needsRoot}</p>
+        {#if r.askSudo}{@render unlockButton()}{/if}
         <button class="btn" onclick={() => sudo('sudo ufw status verbose')}
           >{t.common.runInTerminal}</button
         >
@@ -716,6 +738,7 @@
         <p class="hint">{s.notInstalled}</p>
       {:else if r.fail2ban.needsRoot}
         <p class="hint">{s.needsRoot}</p>
+        {#if r.askSudo}{@render unlockButton()}{/if}
         <button class="btn" onclick={() => sudo('sudo fail2ban-client status sshd')}
           >{t.common.runInTerminal}</button
         >

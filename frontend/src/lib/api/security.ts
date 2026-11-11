@@ -46,6 +46,13 @@ export interface SecurityReport {
   root: boolean
   /** sudo runs without asking for a password. */
   sudo: boolean
+  /** Actions can run through sudo, with the session's password asked once (ADR 0018). */
+  canSudo: boolean
+  /** What needs root was read as root. */
+  asRoot: boolean
+  /** Root would show more once given the password; sudoRead is what then runs. */
+  askSudo: boolean
+  sudoRead?: string
   /** 'journal', 'auth.log', or '' when neither was readable. */
   source: string
   accepted: Login[]

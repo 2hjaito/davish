@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"davish/internal/apperr"
+	"davish/internal/audit"
 	"davish/internal/shellx"
 )
 
@@ -56,9 +57,9 @@ func script(action, ip string) (string, error) {
 	return "", apperr.New(apperr.InvalidInput, "unknown action")
 }
 
-// sudo runs line as root through prefix: one command directly, several
+// sudoForm runs line as root through prefix: one command directly, several
 // under sh -c so every part of it gets root.
-func sudo(prefix, line string) string {
+func sudoForm(prefix, line string) string {
 	if strings.ContainsAny(line, ";|&") {
 		return prefix + "sh -c " + shellx.Quote(line)
 	}
@@ -76,7 +77,7 @@ func PlanAction(action, ip string, root bool) (Plan, error) {
 	if err != nil {
 		return Plan{}, err
 	}
-	p := Plan{Command: sudo("sudo -n ", line), Terminal: sudo("sudo ", line)}
+	p := Plan{Command: sudoForm("sudo -n ", line), Terminal: sudoForm("sudo ", line)}
 	if root {
 		p.Command = line
 	}
@@ -95,7 +96,15 @@ func (s *Service) Apply(ctx context.Context, serverID, action, ip, command strin
 	if command != asRoot.Command && command != withSudo.Command {
 		return apperr.New(apperr.FSStale, "the command changed since it was confirmed")
 	}
-	res, err := s.run.RunLine(ctx, serverID, app, command)
+	var res audit.Result
+	if command == withSudo.Command && s.root != nil {
+		// Through sudo.Keeper: without a password when sudo allows, else
+		// with the session's (SUDO_PASSWORD_REQUIRED asks for it). The
+		// line is the same, only how it reaches root differs.
+		res, err = s.root.Run(ctx, serverID, app, asRoot.Command, nil)
+	} else {
+		res, err = s.run.RunLine(ctx, serverID, app, command)
+	}
 	if err != nil {
 		return err
 	}
