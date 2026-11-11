@@ -2,6 +2,8 @@ module davish
 
 go 1.27
 
+toolchain go1.27.4
+
 require (
 	github.com/pkg/sftp v1.13.12
 	github.com/wailsapp/wails/v2 v2.17.0

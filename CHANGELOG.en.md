@@ -9,6 +9,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 ### Added
 - Spanish (Spain) interface: pick Español in Settings → Appearance → Language; the first time, Davish follows a system set to Spanish. The translation is a first draft, to be reviewed by a native speaker (#124).
 
+### Security
+- Built with Go 1.27.4, which fixes an HTTP/1 server crash in net/http (GO-2026-6859).
+
 ## [1.13.1] - 2026-11-11
 
 ### Fixed

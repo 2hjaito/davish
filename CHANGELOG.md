@@ -9,6 +9,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ### Thêm
 - Giao diện tiếng Tây Ban Nha (Tây Ban Nha): chọn Español trong Cài đặt → Giao diện → Ngôn ngữ; lần đầu Davish theo máy đặt tiếng Tây Ban Nha. Bản dịch là bản nháp đầu, chờ người bản xứ đọc lại (#124).
 
+### Bảo mật
+- Build bằng Go 1.27.4, bản sửa lỗi server HTTP/1 bị sập trong net/http (GO-2026-6859).
+
 ## [1.13.1] - 2026-11-11
 
 ### Sửa
