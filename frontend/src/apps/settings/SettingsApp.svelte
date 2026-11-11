@@ -113,13 +113,12 @@
       <strong>{t.settings.language}</strong>
       <small>{t.settings.languageHint}</small>
     </span>
-    <div class="segmented" role="radiogroup" aria-label={t.settings.language}>
+    <!-- A list rather than a segmented control: languages keep being added. -->
+    <select class="input pick" aria-label={t.settings.language} bind:value={pickedLang}>
       {#each LANGS as l (l)}
-        <button role="radio" aria-checked={pickedLang === l} onclick={() => (pickedLang = l)}
-          >{t.settings.langs[l]}</button
-        >
+        <option value={l}>{t.settings.langs[l]}</option>
       {/each}
-    </div>
+    </select>
   </div>
   {#if pickedLang !== lang}
     <div class="row">
@@ -542,6 +541,12 @@
   small {
     color: var(--fg-muted);
     font-size: var(--text-xs);
+  }
+
+  .pick {
+    flex: none;
+    width: auto;
+    min-width: 160px;
   }
 
   /* A choice of a few, like macOS segmented controls. */
