@@ -1,0 +1,12 @@
+@@os
+PRETTY_NAME="Windows Server 2022 Datacenter"
+@@uname
+10.0.20348
+x86_64
+@@hostname
+WIN-SRV01
+@@cpu
+Intel(R) Xeon(R) Platinum 8272CL CPU @ 2.60GHz
+@@virt
+microsoft
+@@end

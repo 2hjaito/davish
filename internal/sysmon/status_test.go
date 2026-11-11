@@ -60,7 +60,7 @@ func waitStatus(t *testing.T, rec *recorder, n int) []Status {
 }
 
 func TestUnsupportedServerReportsInsteadOfWaiting(t *testing.T) {
-	for _, os := range []platform.OS{platform.Darwin, platform.Windows} {
+	for _, os := range []platform.OS{platform.Darwin} {
 		t.Run(string(os), func(t *testing.T) {
 			rec := &recorder{}
 			s := newTestService(os, rec)
@@ -90,12 +90,12 @@ func TestWatchReplaysStatusToALaterWindow(t *testing.T) {
 }
 
 func TestUnsupportedServerHasNoScripts(t *testing.T) {
-	for _, os := range []platform.OS{platform.Darwin, platform.Windows} {
+	for _, os := range []platform.OS{platform.Darwin} {
 		if _, ok := targetFor(os); ok {
 			t.Errorf("targetFor(%s) should be unsupported", os)
 		}
 	}
-	for _, os := range []platform.OS{platform.Linux, platform.Unknown, ""} {
+	for _, os := range []platform.OS{platform.Linux, platform.Windows, platform.Unknown, ""} {
 		tg, ok := targetFor(os)
 		if !ok || tg.collect == "" || tg.procs == "" || tg.info == "" {
 			t.Errorf("targetFor(%q) = %+v, %v", os, tg, ok)

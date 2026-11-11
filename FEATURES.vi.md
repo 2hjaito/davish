@@ -42,6 +42,8 @@ Theo dõi journal của dịch vụ, một file hoặc một container. Lọc, t
 
 CPU từng nhân, bộ nhớ và swap, ổ đĩa, mạng theo interface, GPU NVIDIA, tiến trình. Cảnh báo RAM và ổ đĩa chỉnh được ngưỡng.
 
+Trên server Windows (OpenSSH, Windows PowerShell 5.1, không cài thêm gì) Monitor đọc cùng các số liệu qua PowerShell và CIM: CPU, bộ nhớ, ổ đĩa, mạng, I/O đĩa và tiến trình. Windows không có load average, I/O wait hay steal nên các mục đó được ẩn. Các app cần Linux (Services, Docker, Logs, Cron, Nginx…) chưa dùng được trên server Windows; Launchpad hiện chúng mờ.
+
 ## Tất cả server
 
 Mọi server trong một cửa sổ, mở từ menu server, Launchpad hoặc Spotlight: đã kết nối chưa, CPU, RAM, ổ `/`, load, thời gian chạy và mạng, kèm số cảnh báo (service lỗi, container khởi động lại liên tục, ổ đầy…) và cảnh báo mới nhất. Kết nối hoặc chuyển sang server ngay trên thẻ của nó. Số liệu chỉ được thu khi cửa sổ đang mở, qua cùng phiên mà Monitor dùng.

@@ -46,6 +46,7 @@
   const m = $derived(data?.latest)
   /** Why there are no readings, when the server cannot give any. */
   const status = $derived(metrics.statusOf(win.serverID))
+  const windows = $derived(servers.platformOf(win.serverID) === 'windows')
   const charts = $derived(section !== 'processes' && section !== 'info')
 
   function togglePause() {
@@ -158,7 +159,12 @@
       {:else if section === 'info'}
         <InfoView serverID={win.serverID} latest={data.latest} />
       {:else}
-        {@const props = { data, range: RANGES[range], rangeLabel: t.monitor.ranges[range] }}
+        {@const props = {
+          data,
+          range: RANGES[range],
+          rangeLabel: t.monitor.ranges[range],
+          windows,
+        }}
         {#if section === 'overview'}
           <OverviewView {...props} open={(s) => (section = s)} />
         {:else if section === 'cpu'}

@@ -17,6 +17,8 @@ export interface ViewProps {
   data: Series
   range: number
   rangeLabel: string
+  /** A Windows server has no load average, I/O wait or steal time; those are left out. */
+  windows?: boolean
 }
 
 export const chartColors = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)'] as const

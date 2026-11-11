@@ -1,0 +1,18 @@
+@@uptime
+1002.00 0.00
+@@clk
+10000000
+@@pagesize
+1
+@@meminfo
+MemTotal: 8388608 kB
+@@passwd
+@@ps
+4 - 
+648 - C:\Windows\system32\svchost.exe -k DcomLaunch -p
+2210 - "C:\Program Files\nginx\nginx.exe" -c conf\nginx.conf
+@@stat
+4 (System) S 0 0 0 0 0 0 0 0 0 0 5000000 0 0 0 0 0 190 0 0 0 147456
+648 (svchost.exe) S 540 0 0 0 0 0 0 0 0 0 20000000 0 0 0 0 0 12 0 150000000 0 33554432
+2210 (nginx.exe) S 1 0 0 0 0 0 0 0 0 0 100000000 0 0 0 0 0 4 0 9000000000 0 67108864
+@@end

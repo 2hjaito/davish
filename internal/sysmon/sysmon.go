@@ -23,6 +23,15 @@ import (
 //go:embed collect.sh
 var collectScript string
 
+//go:embed collect.ps1
+var collectWinScript string
+
+//go:embed procs.ps1
+var procsWinScript string
+
+//go:embed info.ps1
+var infoWinScript string
+
 // ClientSource hands out the live SSH client of a server and tells what OS
 // it runs.
 type ClientSource interface {
@@ -134,7 +143,7 @@ func (s *Service) script(tg target) (command, stdin string, repace <-chan struct
 	s.paceMu.Lock()
 	ch := s.paced
 	s.paceMu.Unlock()
-	command, stdin = tg.launch(fmt.Sprintf("every=%d\nhealthEvery=%d\n", every, max(1, healthSecs/every)) + tg.collect)
+	command, stdin = tg.launch(tg.vars(every, max(1, healthSecs/every)) + tg.collect)
 	return command, stdin, ch
 }
 

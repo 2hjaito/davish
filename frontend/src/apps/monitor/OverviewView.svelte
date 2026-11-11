@@ -12,7 +12,7 @@
     open: (s: Section) => void
   }
 
-  let { data, range, rangeLabel, open }: Props = $props()
+  let { data, range, rangeLabel, windows = false, open }: Props = $props()
 
   const m = $derived(data.latest)
   const mem = $derived(memPct(m.memUsed, m.memTotal))
@@ -97,10 +97,12 @@
 </div>
 
 <div class="facts">
-  <Stat
-    label={t.monitor.load}
-    value="{m.load1.toFixed(2)} · {m.load5.toFixed(2)} · {m.load15.toFixed(2)}"
-  />
+  {#if !windows}
+    <Stat
+      label={t.monitor.load}
+      value="{m.load1.toFixed(2)} · {m.load5.toFixed(2)} · {m.load15.toFixed(2)}"
+    />
+  {/if}
   <Stat label={t.monitor.uptime} value={formatDuration(m.uptime, t.units)} />
   <Stat
     label={t.monitor.swap}

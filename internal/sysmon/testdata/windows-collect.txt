@@ -1,0 +1,67 @@
+@@stat
+cpu  4000000000 0 2000000000 14000000000 0 0 0 0
+cpu0  2000000000 0 1000000000 7000000000 0 0 0 0
+cpu1  2000000000 0 1000000000 7000000000 0 0 0 0
+@@meminfo
+MemTotal: 8388608 kB
+MemFree: 1048576 kB
+MemAvailable: 4194304 kB
+Buffers: 0 kB
+Cached: 2097152 kB
+SwapTotal: 2097152 kB
+SwapFree: 1572864 kB
+@@loadavg
+0.00 0.00 0.00 1/87 0
+@@uptime
+1000.00 0.00
+@@netdev
+Inter-|   Receive |  Transmit
+ face |bytes packets errs drop fifo frame compressed multicast|bytes packets errs drop fifo colls carrier compressed
+Intel[R] 82574L Gigabit Network Connection: 1000000 0 0 0 0 0 0 0 500000 0 0 0 0 0 0 0
+isatap.{1234}: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+@@df
+Filesystem 1024-blocks Used Available Capacity Mounted on
+/dev/C: 104857600 52428800 52428800 50% C:\
+/dev/D: 209715200 20971520 188743680 10% D:\
+@@diskstats
+0 0 disk0 0 0 2000000 0 0 0 1000000
+@@block
+disk0
+@@gpu
+@@failed
+Spooler.service
+@@containers
+/web 0 running
+/db 7 restarting
+@@end
+@@stat
+cpu  4006000000 0 2002000000 14032000000 0 0 0 0
+cpu0  2003000000 0 1001000000 7016000000 0 0 0 0
+cpu1  2003000000 0 1001000000 7016000000 0 0 0 0
+@@meminfo
+MemTotal: 8388608 kB
+MemFree: 1000000 kB
+MemAvailable: 4000000 kB
+Buffers: 0 kB
+Cached: 2097152 kB
+SwapTotal: 2097152 kB
+SwapFree: 1572864 kB
+@@loadavg
+0.00 0.00 0.00 1/88 0
+@@uptime
+1002.00 0.00
+@@netdev
+Inter-|   Receive |  Transmit
+ face |bytes packets errs drop fifo frame compressed multicast|bytes packets errs drop fifo colls carrier compressed
+Intel[R] 82574L Gigabit Network Connection: 1200000 0 0 0 0 0 0 0 600000 0 0 0 0 0 0 0
+isatap.{1234}: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+@@df
+Filesystem 1024-blocks Used Available Capacity Mounted on
+/dev/C: 104857600 52428800 52428800 50% C:\
+/dev/D: 209715200 20971520 188743680 10% D:\
+@@diskstats
+0 0 disk0 0 0 2008000 0 0 0 1004000
+@@block
+disk0
+@@gpu
+@@end
