@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Sửa
+- Logs: log không đọc được vì thiếu quyền (journal hệ thống khi không thuộc nhóm `adm`/`systemd-journal`, file của root, docker khi không thuộc nhóm `docker`) được theo dõi lại qua `sudo`: không cần mật khẩu thì chạy luôn, cần thì có nút "Xem bằng sudo…" và hỏi một lần mỗi phiên (#117). Mật khẩu chỉ đi qua stdin của phiên, không nằm trên dòng lệnh hay trong audit log; sudo từ chối thì mật khẩu bị quên và hỏi lại.
+
 ## [1.13.3] - 2026-11-11
 
 ### Thêm

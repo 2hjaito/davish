@@ -434,6 +434,10 @@ export function LogsStart(arg1, arg2) {
   return window['go']['app']['App']['LogsStart'](arg1, arg2);
 }
 
+export function LogsStartAsRoot(arg1, arg2) {
+  return window['go']['app']['App']['LogsStartAsRoot'](arg1, arg2);
+}
+
 export function LogsStop(arg1) {
   return window['go']['app']['App']['LogsStop'](arg1);
 }

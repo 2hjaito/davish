@@ -16,6 +16,7 @@ import (
 	"davish/internal/audit"
 	"davish/internal/events"
 	"davish/internal/shellx"
+	"davish/internal/sudo"
 )
 
 // ClientSource hands out a server's live SSH client.
@@ -62,6 +63,7 @@ type Service struct {
 	audit   *audit.Log
 	emit    Emitter
 	log     *slog.Logger
+	root    Root
 
 	// mu guards streams.
 	mu      sync.Mutex
@@ -75,7 +77,19 @@ type stream struct {
 	stopped bool
 	// denied holds the sudo command once stderr showed a lack of rights.
 	denied string
+	// refused is set when sudo turned the session's password down.
+	refused bool
 }
+
+// Root starts a command as root for a user who is not (sudo.Keeper).
+type Root interface {
+	Prepare(ctx context.Context, serverID, app, line string) (string, []byte, error)
+	Forget(serverID string)
+}
+
+// UseRoot lets a log the user may not read be followed as root through r
+// (ADR 0018), with StartAsRoot.
+func (s *Service) UseRoot(r Root) { s.root = r }
 
 // New creates the service; call Close on shutdown.
 func New(clients ClientSource, auditLog *audit.Log, emit Emitter, log *slog.Logger) *Service {
@@ -84,10 +98,34 @@ func New(clients ClientSource, auditLog *audit.Log, emit Emitter, log *slog.Logg
 
 // Start follows src on serverID and returns the stream's ID with its sudo
 // form. Lines arrive as logs:line, and logs:end tells when it is over.
-func (s *Service) Start(_ context.Context, serverID string, src Source) (Started, error) {
+func (s *Service) Start(ctx context.Context, serverID string, src Source) (Started, error) {
+	return s.start(ctx, serverID, src, false)
+}
+
+// StartAsRoot follows src as root, through sudo: when sudo needs no
+// password, or with the session's one written once on stdin. It never
+// asks: SUDO_PASSWORD_REQUIRED tells the UI to, CMD_NEEDS_ROOT that the
+// user cannot use sudo. A password sudo turns down ends the stream with
+// SUDO_PASSWORD_WRONG and is forgotten.
+func (s *Service) StartAsRoot(ctx context.Context, serverID string, src Source) (Started, error) {
+	if s.root == nil {
+		return Started{}, apperr.New(apperr.CmdNeedsRoot, "no way to root")
+	}
+	return s.start(ctx, serverID, src, true)
+}
+
+func (s *Service) start(ctx context.Context, serverID string, src Source, asRoot bool) (Started, error) {
 	cmd, err := Command(src)
 	if err != nil {
 		return Started{}, err
+	}
+	line := cmd.String()
+	var stdin []byte
+	if asRoot {
+		if line, stdin, err = s.root.Prepare(ctx, serverID, "logs", line); err != nil {
+			return Started{}, err
+		}
+		defer wipe(stdin)
 	}
 	client, err := s.clients.Client(serverID)
 	if err != nil {
@@ -107,10 +145,26 @@ func (s *Service) Start(_ context.Context, serverID string, src Source) (Started
 		sess.Close() //nolint:errcheck,gosec // failed to start
 		return Started{}, apperr.Wrap(apperr.Internal, "stderr pipe", err)
 	}
-	line := cmd.String()
+	var in io.WriteCloser
+	if asRoot {
+		if in, err = sess.StdinPipe(); err != nil {
+			sess.Close() //nolint:errcheck,gosec // failed to start
+			return Started{}, apperr.Wrap(apperr.Internal, "stdin pipe", err)
+		}
+	}
 	if err := sess.Start(line); err != nil {
 		sess.Close() //nolint:errcheck,gosec // failed to start
 		return Started{}, apperr.Wrap(apperr.ConnNotConnected, "cannot start the command", err)
+	}
+	if in != nil {
+		// The password line, if any, then nothing: no log command reads
+		// stdin, and closing it leaves nothing for sudo to read again.
+		_, werr := in.Write(stdin)
+		cerr := in.Close()
+		if werr != nil || cerr != nil {
+			sess.Close() //nolint:errcheck,gosec // failed to start
+			return Started{}, apperr.New(apperr.ConnNotConnected, "cannot start the command")
+		}
 	}
 	// A stream has no exit status until the user stops it, so it is
 	// recorded when it starts, with -1.
@@ -122,16 +176,19 @@ func (s *Service) Start(_ context.Context, serverID string, src Source) (Started
 	s.streams[id] = st
 	s.mu.Unlock()
 
-	sudo := shellx.Cmd("sudo", cmd.Args()...).String()
+	sudoLine := shellx.Cmd("sudo", cmd.Args()...).String()
 	s.wg.Add(1)
 	go func() {
 		defer s.wg.Done()
-		s.pump(id, src.Kind, st, stdout, stderr, sudo)
+		s.pump(id, src.Kind, st, stdout, stderr, sudoLine, asRoot)
 		exit := sess.Wait()
 		s.mu.Lock()
 		delete(s.streams, id)
 		end := End{StreamID: id}
 		switch {
+		case st.refused:
+			s.root.Forget(serverID)
+			end.Error = apperr.New(apperr.SudoPasswordWrong, "sudo did not accept the password")
 		case st.denied != "":
 			end.Error = apperr.New(apperr.CmdNeedsRoot, "the server requires root to read this log")
 			end.Sudo = st.denied
@@ -143,7 +200,7 @@ func (s *Service) Start(_ context.Context, serverID string, src Source) (Started
 		s.emit.Emit(events.LogsEnd, end)
 		s.log.Info("log stream ended", "server", serverID, "app", "logs")
 	}()
-	return Started{StreamID: id, Sudo: sudo}, nil
+	return Started{StreamID: id, Sudo: sudoLine}, nil
 }
 
 func endError(err error) *apperr.Error {
@@ -160,7 +217,7 @@ func endError(err error) *apperr.Error {
 // pump reads both outputs into batches until the command ends. A stderr
 // line that shows a lack of rights stops the stream: following it would
 // only ever print that.
-func (s *Service) pump(id, kind string, st *stream, stdout, stderr io.Reader, sudo string) {
+func (s *Service) pump(id, kind string, st *stream, stdout, stderr io.Reader, sudoLine string, asRoot bool) {
 	var (
 		mu      sync.Mutex
 		pending []string
@@ -193,10 +250,17 @@ func (s *Service) pump(id, kind string, st *stream, stdout, stderr io.Reader, su
 	go func() {
 		defer readers.Done()
 		_ = readLines(stderr, func(line string) {
+			if asRoot && sudo.RefusedPassword(line) {
+				s.mu.Lock()
+				st.refused = true
+				st.sess.Close() //nolint:errcheck,gosec // ends the stream
+				s.mu.Unlock()
+				return
+			}
 			if needsRoot(kind, line) {
 				s.mu.Lock()
 				if st.denied == "" {
-					st.denied = sudo
+					st.denied = sudoLine
 					st.sess.Close() //nolint:errcheck,gosec // ends the stream
 				}
 				s.mu.Unlock()
@@ -250,6 +314,12 @@ func (s *Service) Close() {
 	}
 	s.mu.Unlock()
 	s.wg.Wait()
+}
+
+func wipe(b []byte) {
+	for i := range b {
+		b[i] = 0
+	}
 }
 
 func newID() string {

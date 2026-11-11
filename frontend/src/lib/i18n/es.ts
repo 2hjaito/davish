@@ -975,7 +975,12 @@ const es = {
           'Pausa para leer',
         ],
         keys: [],
-        runs: ['journalctl -f', 'tail -F', 'docker logs -f'],
+        runs: [
+          'journalctl -f',
+          'tail -F',
+          'docker logs -f',
+          'Un registro que no puedes leer (journal del sistema, archivos de root, docker fuera del grupo docker): se sigue de nuevo con sudo, pidiendo la contraseña de sudo una vez por sesión si hace falta',
+        ],
       },
       editor: {
         does: 'Edita archivos en el servidor con resaltado de sintaxis; guardado atómico que conserva permisos y propietario, copias de los archivos de /etc.',

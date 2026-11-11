@@ -235,6 +235,46 @@ func (k *Keeper) Run(ctx context.Context, serverID, app, line string, stdin []by
 	return res, nil
 }
 
+// Prepare gives line as it runs as root for a command that cannot go
+// through Run because it keeps running, such as a followed log: the line
+// to start, and what to write on its stdin first. That is the password
+// line when sudo needs it, nil otherwise; the caller writes it once and
+// wipes it. Errors are Run's, without starting anything.
+//
+// When sudo turns the password down, the command's stderr says so (see
+// RefusedPassword), and the caller forgets it with Forget.
+func (k *Keeper) Prepare(ctx context.Context, serverID, app, line string) (string, []byte, error) {
+	u, err := k.whoami(ctx, serverID, app)
+	if err != nil {
+		return "", nil, err
+	}
+	if u.root {
+		return line, nil, nil
+	}
+	res, err := k.run.RunInput(ctx, serverID, app, sudoLine("-n", "true"), nil)
+	if err != nil {
+		return "", nil, err
+	}
+	switch {
+	case res.Exit == 0:
+		return noPasswordLine(line), nil, nil
+	case noSudo(res):
+		return "", nil, apperr.New(apperr.CmdNeedsRoot, "this user cannot use sudo")
+	}
+	pw := k.password(serverID)
+	if pw == nil {
+		return "", nil, apperr.New(apperr.SudoPasswordRequired, "sudo asks for a password")
+	}
+	defer wipe(pw)
+	return passwordLine(line), withPassword(pw, nil), nil
+}
+
+// RefusedPassword tells whether a stderr line is sudo turning down the
+// password a Prepare'd command was given.
+func RefusedPassword(line string) bool {
+	return wrongPassword([]byte(line))
+}
+
 // State tells how the server's user reaches root, asking sudo without a
 // password; it never prompts.
 func (k *Keeper) State(ctx context.Context, serverID string) (string, error) {

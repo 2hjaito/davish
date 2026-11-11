@@ -4,6 +4,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Fixed
+- Logs: a log you may not read (the system journal outside the `adm`/`systemd-journal` groups, root's files, docker outside the `docker` group) is followed again through `sudo`: right away when no password is needed, else "View with sudo…" asks once per session (#117). The password only goes on the stream's stdin, never on a command line or in the audit log; when sudo turns it down it is forgotten and asked again.
+
 ## [1.13.3] - 2026-11-11
 
 ### Added
