@@ -1456,6 +1456,7 @@ const en = {
     none: 'No apps match.',
     pin: (app: string) => `Pin ${app} to the Dock`,
     unpin: (app: string) => `Remove ${app} from the Dock`,
+    unavailable: (os: string) => `Not available on ${os} servers yet`,
     hint: '←→↑↓ select · Enter open · Esc close',
     all: 'All',
     groups: 'App groups',
@@ -1898,6 +1899,12 @@ const en = {
     now: 'now',
     offline: 'Server not connected',
     offlineHint: 'Monitor will show readings once the server reconnects.',
+    unsupported: (os: string) => `Monitor does not support ${os} servers yet`,
+    unsupportedHint:
+      'Terminal, Files and the other apps that do not depend on the server’s OS keep working.',
+    noReadings: 'Monitor cannot read this server',
+    noReadingsHint:
+      'The collector started but no reading came back. Open Terminal to see what the server answers, then reconnect.',
     waiting: 'Waiting for the first reading…',
     chartHint: 'Use the left/right arrow keys to step through points in time.',
     usage: 'Usage',
@@ -2853,6 +2860,7 @@ const en = {
     LOCK_TOO_MANY_ATTEMPTS: 'Too many wrong attempts. Wait, then try again.',
     LOCK_BIOMETRIC_FAILED: 'Touch ID did not succeed.',
     GIT_DIRTY: 'The repo has uncommitted changes, so this action is blocked.',
+    PLATFORM_UNSUPPORTED: "This server's operating system is not supported by this app yet.",
     GIT_AUTH_FAILED: 'The remote refused authentication (or its host key is not trusted yet).',
     GIT_NOT_FAST_FORWARD:
       'Cannot fast-forward: the branch on the server and the remote have diverged. Merge or rebase in Terminal.',

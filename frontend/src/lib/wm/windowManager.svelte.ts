@@ -75,6 +75,16 @@ export class WindowManager {
     this.#layouts = layouts
   }
 
+  #allowed: (appId: string, serverID: string) => boolean = () => true
+
+  /**
+   * Tells which apps may open on which server (a Windows server has no
+   * Docker app). A blocked app never opens, whoever asks.
+   */
+  allowApp(pred: (appId: string, serverID: string) => boolean) {
+    this.#allowed = pred
+  }
+
   /** Tells which apps a server's layout keeps (see restoreLayout). */
   keepInLayout(pred: (appId: string) => boolean) {
     this.#inLayout = pred
@@ -142,6 +152,7 @@ export class WindowManager {
       this.focus(existing.id)
       return false
     }
+    if (!this.#allowed(appId, serverID)) return false
     this.open(appId, serverID, opts)
     return true
   }

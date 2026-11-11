@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -137,7 +138,8 @@ func (r *Reader) sections() (map[string][]string, error) {
 	sections := map[string][]string{}
 	current := ""
 	for r.sc.Scan() {
-		line := r.sc.Text()
+		// Windows scripts end lines with CRLF; "@@end\r" must still end.
+		line := strings.TrimSuffix(r.sc.Text(), "\r")
 		if name, ok := strings.CutPrefix(line, "@@"); ok {
 			if name == "end" {
 				return sections, nil
@@ -360,6 +362,9 @@ func hasAnyPrefix(s string, prefixes []string) bool {
 	return false
 }
 
+// driveRoot is the path of a Windows drive in the collector's df output.
+var driveRoot = regexp.MustCompile(`^[A-Za-z]:\\$`)
+
 // parseDf reads `df -kP`. -P keeps long device names from wrapping, but a
 // device name may still hold spaces, so fields are taken from the right.
 // Kept are / and the filesystems on real block devices, once each.
@@ -375,7 +380,8 @@ func parseDf(lines []string) ([]Mount, error) {
 		if err != nil {
 			return nil, err
 		}
-		if m.Path == "/" {
+		// A Windows server lists its system drive first, as C:\.
+		if m.Path == "/" || (root == nil && driveRoot.MatchString(m.Path)) {
 			root = &m
 			continue
 		}

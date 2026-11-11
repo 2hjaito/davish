@@ -18,6 +18,7 @@ import (
 
 	"davish/internal/apperr"
 	"davish/internal/events"
+	"davish/internal/platform"
 	"davish/internal/store"
 )
 
@@ -38,6 +39,9 @@ type Status struct {
 	ServerID string        `json:"serverID"`
 	State    State         `json:"state"`
 	Error    *apperr.Error `json:"error,omitempty"`
+	// Platform is the server's OS once it is known; the UI greys out the
+	// apps that do not run there.
+	Platform platform.OS `json:"platform,omitempty"`
 }
 
 // HostKeyPrompt is the conn:hostkey-prompt payload: the UI shows it and
@@ -71,6 +75,9 @@ type Options struct {
 	KeepaliveMisses   int           // default 3
 	BackoffMin        time.Duration // default 1s
 	BackoffMax        time.Duration // default 30s
+	// DetectPlatform asks a connected server what it runs; nil takes the
+	// real probe. Tests set it to make detection slow or instant.
+	DetectPlatform func(ctx context.Context, client *ssh.Client) platform.OS
 }
 
 func (o Options) withDefaults() Options {
@@ -115,6 +122,10 @@ type link struct {
 	cancel context.CancelFunc
 	// sftp is opened on first use over client and dropped with it.
 	sftp *sftp.Client
+	// plat holds the server's OS. Detection runs in the background after
+	// the connection is reported up, and the answer survives reconnects,
+	// since the server stays the same machine.
+	plat *platform.Cell
 }
 
 // pendingKey is a host key shown to the user and not yet accepted.
@@ -126,7 +137,7 @@ type pendingKey struct {
 // NewManager wires the manager; call Close on shutdown.
 func NewManager(servers ServerSource, secrets SecretSource, hostKeys *HostKeys, emit Emitter, log *slog.Logger, opts Options) *Manager {
 	root, stop := context.WithCancel(context.Background())
-	return &Manager{
+	m := &Manager{
 		servers:  servers,
 		secrets:  secrets,
 		hostKeys: hostKeys,
@@ -138,6 +149,10 @@ func NewManager(servers ServerSource, secrets SecretSource, hostKeys *HostKeys, 
 		conns:    map[string]*link{},
 		pending:  map[string]pendingKey{},
 	}
+	if m.opts.DetectPlatform == nil {
+		m.opts.DetectPlatform = m.detectPlatform
+	}
+	return m
 }
 
 // Connect opens the connection if it is not already up. It returns once
@@ -151,7 +166,7 @@ func (m *Manager) Connect(ctx context.Context, id string) error { //nolint:conte
 		return nil
 	}
 	lctx, cancel := context.WithCancel(m.root)
-	l := &link{state: StateConnecting, cancel: cancel}
+	l := &link{state: StateConnecting, cancel: cancel, plat: platform.NewCell()}
 	m.conns[id] = l
 	m.mu.Unlock()
 	m.publish(id, StateConnecting, nil)
@@ -170,11 +185,15 @@ func (m *Manager) Connect(ctx context.Context, id string) error { //nolint:conte
 		return apperr.New(apperr.ConnNotConnected, "disconnected while connecting")
 	}
 	l.state, l.client = StateConnected, client
+	cell := l.plat
 	m.mu.Unlock()
+	// Connected first: a probe that hangs on a slow login shell must not
+	// hold up every connect. The OS follows in a second conn:status.
 	m.publish(id, StateConnected, nil)
 	m.log.Info("connected", "server", id)
 
-	m.wg.Add(1)
+	m.wg.Add(2)
+	go m.detect(lctx, id, l, client, cell) //nolint:contextcheck // the link's context, not the caller's, which ends when Connect returns
 	go func() {
 		defer m.wg.Done()
 		m.supervise(lctx, id, l, client)
@@ -291,6 +310,94 @@ func openSFTP(client *ssh.Client, limit time.Duration) (*sftp.Client, error) {
 	}
 }
 
+// Platform reports the server's OS without waiting: Unknown until detection
+// has finished (or when it learned nothing).
+func (m *Manager) Platform(id string) platform.OS {
+	m.mu.Lock()
+	l, ok := m.conns[id]
+	var cell *platform.Cell
+	if ok {
+		cell = l.plat
+	}
+	m.mu.Unlock()
+	if cell == nil {
+		return platform.Unknown
+	}
+	return cell.Get()
+}
+
+// WaitPlatform is Platform for callers that must choose commands by OS: it
+// waits for a detection still under way, at most as long as detection can
+// take. A server that is not connected, or whose OS stays unknown, gives
+// Unknown.
+func (m *Manager) WaitPlatform(ctx context.Context, id string) platform.OS {
+	m.mu.Lock()
+	l, ok := m.conns[id]
+	var cell *platform.Cell
+	if ok {
+		cell = l.plat
+	}
+	m.mu.Unlock()
+	if cell == nil {
+		return platform.Unknown
+	}
+	ctx, cancel := context.WithTimeout(ctx, platform.DetectTimeout+time.Second)
+	defer cancel()
+	return cell.Wait(ctx)
+}
+
+// detect runs in the background after a connection is reported up. It
+// always answers the cell, so no waiter is left hanging, and announces the
+// OS in a second conn:status when the connection it asked about is still
+// the current one.
+func (m *Manager) detect(ctx context.Context, id string, l *link, client *ssh.Client, cell *platform.Cell) {
+	defer m.wg.Done()
+	os := m.opts.DetectPlatform(ctx, client)
+	cell.Set(os)
+
+	m.mu.Lock()
+	current := m.conns[id] == l && l.client == client && l.plat == cell
+	m.mu.Unlock()
+	if !current || os == platform.Unknown {
+		return
+	}
+	m.log.Info("platform detected", "server", id, "platform", os)
+	m.publish(id, StateConnected, nil)
+}
+
+// detectPlatform asks the server what it runs. It never fails: a server
+// that does not answer in time is Unknown, and still usable.
+func (m *Manager) detectPlatform(ctx context.Context, client *ssh.Client) platform.OS {
+	return platform.Detect(ctx, platform.Probe{
+		Uname: func(ctx context.Context) (string, error) { return execOutput(ctx, client, "uname -s") },
+		Home: func(context.Context) (string, error) {
+			sc, err := openSFTP(client, platform.DetectTimeout)
+			if err != nil {
+				return "", err
+			}
+			defer sc.Close() //nolint:errcheck // probe only
+			return sc.RealPath(".")
+		},
+	})
+}
+
+// execOutput runs one command and returns its stdout, giving up when ctx
+// ends: closing the session unblocks a shell that never answers.
+func execOutput(ctx context.Context, client *ssh.Client, cmd string) (string, error) {
+	sess, err := client.NewSession()
+	if err != nil {
+		return "", err
+	}
+	defer sess.Close()                                      //nolint:errcheck // probe only
+	stop := context.AfterFunc(ctx, func() { sess.Close() }) //nolint:errcheck,gosec // unblocks Output
+	defer stop()
+	out, err := sess.Output(cmd)
+	if ctx.Err() != nil {
+		return "", ctx.Err()
+	}
+	return string(out), err
+}
+
 // State reports a server's connection state.
 func (m *Manager) State(id string) State {
 	m.mu.Lock()
@@ -362,8 +469,18 @@ func (m *Manager) supervise(ctx context.Context, id string, l *link, client *ssh
 			return
 		}
 		l.state, l.client = StateConnected, client
+		// A known OS carries over; an unknown one is asked again.
+		var cell *platform.Cell
+		if l.plat.Get() == platform.Unknown {
+			cell = platform.NewCell()
+			l.plat = cell
+		}
 		m.mu.Unlock()
 		m.publish(id, StateConnected, nil)
+		if cell != nil {
+			m.wg.Add(1)
+			go m.detect(ctx, id, l, client, cell)
+		}
 		m.log.Info("reconnected", "server", id)
 	}
 }
@@ -557,6 +674,11 @@ func (m *Manager) setFailed(id string, l *link, err error) {
 
 func (m *Manager) publish(id string, state State, err error) {
 	st := Status{ServerID: id, State: state}
+	if state == StateConnected {
+		if os := m.Platform(id); os != platform.Unknown {
+			st.Platform = os
+		}
+	}
 	if err != nil {
 		if f, ok := apperr.Format(err).(*apperr.Error); ok {
 			st.Error = f

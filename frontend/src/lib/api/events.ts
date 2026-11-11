@@ -1,7 +1,7 @@
 import { EventsOn } from '../../../wailsjs/runtime/runtime'
 import type { LockState } from './lock'
 import type { Tunnel } from './ports'
-import type { ConnState } from './servers'
+import type { ConnState, Platform } from './servers'
 
 // Event names emitted by Go. Keep in sync with internal/events/events.go.
 export const Events = {
@@ -10,6 +10,7 @@ export const Events = {
   TermData: 'term:data',
   TermExit: 'term:exit',
   SysmonTick: 'sysmon:tick',
+  SysmonStatus: 'sysmon:status',
   LogsLine: 'logs:line',
   LogsEnd: 'logs:end',
   TransferProgress: 'transfer:progress',
@@ -28,6 +29,8 @@ export interface ConnStatus {
   serverID: string
   state: ConnState
   error?: { code: string; message: string }
+  /** Set once the server is connected. */
+  platform?: Platform
 }
 
 export interface HostKeyPrompt {
@@ -45,6 +48,18 @@ export interface TermData {
 export interface TermExit {
   id: string
   code: number
+}
+
+/**
+ * Why a server has no readings (internal/sysmon/status.go). The first
+ * sysmon:tick that follows clears it.
+ */
+export interface SysmonStatus {
+  serverID: string
+  /** 'unsupported': no collector for this OS. 'error': it runs but nothing comes back. */
+  state: 'unsupported' | 'error'
+  os: Platform
+  message?: string
 }
 
 /** Percent for cpu, disk and GPU load; bytes for memory; bytes per second for rates. */
@@ -186,6 +201,7 @@ export const onHostKeyPrompt = (h: (p: HostKeyPrompt) => void) => on(Events.Conn
 export const onTermData = (h: (p: TermData) => void) => on(Events.TermData, h)
 export const onTermExit = (h: (p: TermExit) => void) => on(Events.TermExit, h)
 export const onSysmonTick = (h: (p: SysmonTick) => void) => on(Events.SysmonTick, h)
+export const onSysmonStatus = (h: (p: SysmonStatus) => void) => on(Events.SysmonStatus, h)
 export const onNotifyNew = (h: (p: NotifyNew) => void) => on(Events.NotifyNew, h)
 export const onTransferProgress = (h: (p: TransferProgress) => void) =>
   on(Events.TransferProgress, h)

@@ -69,11 +69,16 @@ func (s *Service) Processes(ctx context.Context, serverID, sortBy string) (Proce
 	if sortBy != SortCPU && sortBy != SortMem {
 		return ProcessList{}, apperr.New(apperr.InvalidInput, "unknown sort key")
 	}
+	os := s.clients.WaitPlatform(ctx, serverID)
 	client, err := s.clients.Client(serverID)
 	if err != nil {
 		return ProcessList{}, err
 	}
-	sections, err := runScript(ctx, client, procsScript)
+	tg, ok := targetFor(os)
+	if !ok {
+		return ProcessList{}, apperr.New(apperr.PlatformUnsupported, "processes are not available for this OS")
+	}
+	sections, err := runScript(ctx, client, tg, tg.procs)
 	if err != nil {
 		return ProcessList{}, apperr.Wrap(apperr.Internal, "could not read processes", err)
 	}

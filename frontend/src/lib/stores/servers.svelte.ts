@@ -3,15 +3,17 @@ import { type ErrorCode, toUserError } from '../api/errors'
 import { hasRuntime } from '../api/runtime'
 import * as api from '../api/servers'
 import { t } from '../i18n'
-import type { ConnState, ServerDraft, ServerInfo } from '../api/servers'
+import type { ConnState, Platform, ServerDraft, ServerInfo } from '../api/servers'
 import { load, save } from './persist'
 import { shortcuts } from './shortcuts.svelte'
 
-export type { ConnState }
+export type { ConnState, Platform }
 
 export interface Server extends ServerInfo {
   /** Why the last attempt failed, when state is 'failed'. */
   error?: ErrorCode
+  /** The server's OS, known once it has connected; kept across reconnects. */
+  platform?: Platform
 }
 
 // Shown in a plain browser (vite dev, previews), where there is no Go side.
@@ -55,6 +57,11 @@ class Servers {
 
   active = $derived(this.list.find((s) => s.id === this.activeId))
 
+  /** The server's OS; 'unknown' until it has connected. */
+  platformOf(id: string): Platform {
+    return this.list.find((s) => s.id === id)?.platform ?? 'unknown'
+  }
+
   /** Loads the saved servers and starts listening to connection events. */
   async init(): Promise<() => void> {
     if (!hasRuntime) return () => {}
@@ -62,6 +69,7 @@ class Servers {
       const s = this.list.find((x) => x.id === st.serverID)
       if (!s) return
       s.state = st.state
+      if (st.platform) s.platform = st.platform
       s.error = st.error ? toUserError(st.error).code : undefined
     })
     const offPrompt = onHostKeyPrompt((p) => (this.hostKeyPrompt = p))

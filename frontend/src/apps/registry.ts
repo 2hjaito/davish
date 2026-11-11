@@ -15,11 +15,23 @@ import {
   TERMINAL_SIZE,
   TRANSFERS_SIZE,
 } from '../lib/wm/intents.svelte'
+import type { Platform } from '../lib/api/servers'
 import type { AppDef, AppId, AppProps } from './types'
+
+/** Apps that only need SSH and SFTP, so any server will do. */
+const EVERYWHERE: Platform[] = ['linux', 'windows', 'darwin']
+
+/**
+ * What an app without `platforms` runs on: servers with POSIX tools. A macOS
+ * server keeps every app it had before Windows support; only a Windows
+ * server, which has no sh, is held to an explicit list.
+ */
+const POSIX: Platform[] = ['linux', 'darwin']
 
 export const apps: AppDef[] = [
   {
     id: 'terminal',
+    platforms: EVERYWHERE,
     label: t.apps.terminal,
     icon: 'terminal',
     theme: 'dark',
@@ -28,6 +40,7 @@ export const apps: AppDef[] = [
   },
   {
     id: 'files',
+    platforms: EVERYWHERE,
     label: t.apps.files,
     icon: 'files',
     theme: 'light',
@@ -35,7 +48,9 @@ export const apps: AppDef[] = [
     load: () => import('./files/FilesApp.svelte'),
   },
   {
+    // On macOS it opens and says it does not support that OS yet, rather than waiting for ever.
     id: 'monitor',
+    platforms: EVERYWHERE,
     label: t.apps.monitor,
     icon: 'monitor',
     theme: 'light',
@@ -116,6 +131,7 @@ export const apps: AppDef[] = [
   },
   {
     id: 'browser',
+    platforms: EVERYWHERE,
     label: t.apps.browser,
     icon: 'globe2',
     theme: 'light',
@@ -141,6 +157,7 @@ export const apps: AppDef[] = [
   },
   {
     id: 'editor',
+    platforms: EVERYWHERE,
     label: t.apps.editor,
     icon: 'editor',
     theme: 'light',
@@ -150,6 +167,7 @@ export const apps: AppDef[] = [
   },
   {
     id: 'settings',
+    platforms: EVERYWHERE,
     label: t.apps.settings,
     icon: 'settings',
     theme: 'light',
@@ -159,6 +177,7 @@ export const apps: AppDef[] = [
   },
   {
     id: 'transfers',
+    platforms: EVERYWHERE,
     label: t.apps.transfers,
     icon: 'download',
     theme: 'light',
@@ -169,6 +188,7 @@ export const apps: AppDef[] = [
   },
   {
     id: 'servers',
+    platforms: EVERYWHERE,
     label: t.apps.servers,
     icon: 'server',
     theme: 'light',
@@ -178,6 +198,7 @@ export const apps: AppDef[] = [
   },
   {
     id: 'snippets',
+    platforms: EVERYWHERE,
     label: t.apps.snippets,
     icon: 'terminal',
     theme: 'light',
@@ -186,6 +207,7 @@ export const apps: AppDef[] = [
   },
   {
     id: 'audit',
+    platforms: EVERYWHERE,
     label: t.apps.audit,
     icon: 'list',
     theme: 'light',
@@ -239,3 +261,27 @@ export function loadApp(app: AppDef): Promise<Component<AppProps>> {
 }
 
 export type { AppId }
+
+/**
+ * Whether the app works on a server running os. An OS that is not known
+ * (not connected yet, detection timed out) allows everything: better to try
+ * than to block an app that would have worked. Windows is the only OS that
+ * blocks apps for now.
+ */
+export function isAvailable(app: AppDef | undefined, os: Platform | undefined): boolean {
+  if (!app) return false
+  if (!os || os === 'unknown') return true
+  return (app.platforms ?? POSIX).includes(os)
+}
+
+/** The apps that work on a server running os. */
+export const availableOn = <T extends AppDef>(list: readonly T[], os: Platform | undefined): T[] =>
+  list.filter((a) => isAvailable(a, os))
+
+/** OS names for messages; they are the same in every language. */
+export const platformName: Record<Platform, string> = {
+  linux: 'Linux',
+  windows: 'Windows',
+  darwin: 'macOS',
+  unknown: '',
+}

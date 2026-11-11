@@ -2,7 +2,8 @@
   import { tick, untrack } from 'svelte'
 
   import { CATEGORY, CATEGORIES, gridMove, grouped, type Category } from '../../apps/categories'
-  import { apps } from '../../apps/registry'
+  import { apps, isAvailable, platformName } from '../../apps/registry'
+  import type { Platform } from '../api/servers'
   import type { AppDef } from '../../apps/types'
   import { t } from '../i18n'
   import { score } from '../spotlight/search'
@@ -13,11 +14,13 @@
 
   interface Props {
     open: boolean
+    /** The active server's OS; apps that do not run there are shown disabled. */
+    platform?: Platform
     onclose: () => void
     onlaunch: (app: AppDef) => void
   }
 
-  let { open, onclose, onlaunch }: Props = $props()
+  let { open, platform, onclose, onlaunch }: Props = $props()
 
   /** Tiles per row; arrow keys move by this much up and down. */
   const COLS = 5
@@ -91,7 +94,7 @@
   }
 
   function choose(app: AppDef | undefined) {
-    if (!app) return
+    if (!app || !isAvailable(app, platform)) return
     onclose()
     onlaunch(app)
   }
@@ -171,9 +174,15 @@
               {#each sec.apps as app, j (app.id)}
                 {@const i = (starts[k] ?? 0) + j}
                 {@const pinned = dockPins.has(app.id)}
+                {@const usable = isAvailable(app, platform)}
                 <li class="cell" class:active={i === index}>
                   <button
                     class="app"
+                    class:unavailable={!usable}
+                    aria-disabled={!usable}
+                    title={usable
+                      ? undefined
+                      : t.launchpad.unavailable(platformName[platform ?? 'unknown'])}
                     data-launchpad-app={app.id}
                     onclick={() => choose(app)}
                     onpointerenter={() => (index = i)}
@@ -210,6 +219,12 @@
 {/if}
 
 <style>
+  .app.unavailable {
+    opacity: 0.38;
+    filter: grayscale(1);
+    cursor: not-allowed;
+  }
+
   .backdrop {
     position: fixed;
     inset: 0;

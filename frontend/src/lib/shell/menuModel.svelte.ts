@@ -1,5 +1,5 @@
 // What the menu bar holds, built from the current state each time it is read.
-import { dockApps, getApp } from '../../apps/registry'
+import { availableOn, dockApps, getApp } from '../../apps/registry'
 import { copyText } from '../api/clipboard'
 import { diagSupportInfo } from '../api/diag'
 import { sudoForget } from '../api/sudo'
@@ -147,7 +147,7 @@ export function buildMenus(): Menu[] {
       label: t.menubar.menus.go,
       items: [
         // Settings closes the menu on its own line, with ⌘,.
-        ...dockApps
+        ...availableOn(dockApps, servers.platformOf(id))
           .filter((a) => a.id !== 'settings')
           .map((a) => ({
             label: a.label,

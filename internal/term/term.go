@@ -21,6 +21,7 @@ import (
 
 	"davish/internal/apperr"
 	"davish/internal/events"
+	"davish/internal/platform"
 	"davish/internal/shellx"
 )
 
@@ -33,9 +34,12 @@ var promptScript string
 // which is why it is only used when that shell is bash.
 var promptCommand = "exec bash --rcfile <(printf '%s\\n' " + shellx.Quote(promptScript) + ") -i"
 
-// ClientSource hands out the live SSH client of a server.
+// ClientSource hands out the live SSH client of a server and tells what OS
+// it runs. WaitPlatform waits (a few seconds at most) for the detection that
+// follows a connect.
 type ClientSource interface {
 	Client(serverID string) (*ssh.Client, error)
+	WaitPlatform(ctx context.Context, serverID string) platform.OS
 }
 
 // Emitter pushes events to the frontend.
@@ -100,7 +104,14 @@ func (s *Service) Start(ctx context.Context, serverID string, cols, rows int, pr
 	if err != nil {
 		return "", err
 	}
-	command := shellCommand(prompt && loginShellIsBash(client), dir)
+	// The prompt and start directory are POSIX shell lines; a Windows
+	// server gets its plain login shell (cmd.exe or PowerShell). A terminal
+	// opened right after connecting waits for the OS to be known, or it would
+	// choose before detection has finished.
+	command := ""
+	if s.clients.WaitPlatform(ctx, serverID) != platform.Windows {
+		command = shellCommand(prompt && loginShellIsBash(client), dir)
+	}
 	sess, err := client.NewSession()
 	if err != nil {
 		return "", apperr.Wrap(apperr.ConnNotConnected, "cannot open a session", err)

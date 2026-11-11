@@ -9,7 +9,7 @@
   import Stat from './Stat.svelte'
   import { chartColors, type ViewProps } from './types'
 
-  let { data, range, rangeLabel }: ViewProps = $props()
+  let { data, range, rangeLabel, windows = false }: ViewProps = $props()
 
   const m = $derived(data.latest)
   const loadFormat = (v: number) => v.toFixed(v < 10 ? 2 : 1)
@@ -26,8 +26,10 @@
       <div class="split">
         <Stat label={t.monitor.splitUser} value={formatPct(m.cpuSplit.user)} />
         <Stat label={t.monitor.splitKernel} value={formatPct(m.cpuSplit.system)} />
-        <Stat label={t.monitor.splitIowait} value={formatPct(m.cpuSplit.iowait)} />
-        <Stat label={t.monitor.splitSteal} value={formatPct(m.cpuSplit.steal)} />
+        {#if !windows}
+          <Stat label={t.monitor.splitIowait} value={formatPct(m.cpuSplit.iowait)} />
+          <Stat label={t.monitor.splitSteal} value={formatPct(m.cpuSplit.steal)} />
+        {/if}
       </div>
     </div>
     <TimeChart
@@ -57,24 +59,26 @@
     </Card>
   {/if}
 
-  <Card title={t.monitor.load} icon="monitor">
-    <div class="split">
-      <Stat label={t.monitor.load1} value={loadFormat(m.load1)} color={chartColors[0]} />
-      <Stat label={t.monitor.load5} value={loadFormat(m.load5)} />
-      <Stat label={t.monitor.load15} value={loadFormat(m.load15)} />
-    </div>
-    <TimeChart
-      samples={data.history}
-      {range}
-      end={m.at}
-      {rangeLabel}
-      label="{t.monitor.load} {t.monitor.load1}"
-      series={[{ label: t.monitor.load1, color: chartColors[0], value: (s) => s.load1 }]}
-      floor={Math.max(1, m.cores.length)}
-      format={loadFormat}
-      height={110}
-    />
-  </Card>
+  {#if !windows}
+    <Card title={t.monitor.load} icon="monitor">
+      <div class="split">
+        <Stat label={t.monitor.load1} value={loadFormat(m.load1)} color={chartColors[0]} />
+        <Stat label={t.monitor.load5} value={loadFormat(m.load5)} />
+        <Stat label={t.monitor.load15} value={loadFormat(m.load15)} />
+      </div>
+      <TimeChart
+        samples={data.history}
+        {range}
+        end={m.at}
+        {rangeLabel}
+        label="{t.monitor.load} {t.monitor.load1}"
+        series={[{ label: t.monitor.load1, color: chartColors[0], value: (s) => s.load1 }]}
+        floor={Math.max(1, m.cores.length)}
+        format={loadFormat}
+        height={110}
+      />
+    </Card>
+  {/if}
 </div>
 
 <style>

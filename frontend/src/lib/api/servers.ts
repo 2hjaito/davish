@@ -5,6 +5,9 @@ import { app } from '../../../wailsjs/go/models'
 export type AuthMethod = 'agent' | 'key' | 'password'
 export type ConnState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting' | 'failed'
 
+/** The operating system of a server; 'unknown' until it has answered. */
+export type Platform = 'linux' | 'windows' | 'darwin' | 'unknown'
+
 /** A saved server as Go reports it: never a secret, only whether one is stored. */
 export interface ServerInfo {
   id: string
