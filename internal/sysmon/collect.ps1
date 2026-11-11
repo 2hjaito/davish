@@ -150,8 +150,13 @@ function Snapshot($health) {
 	return $script:o.ToString()
 }
 
-# The loop ends with the session: when stdout is closed the write throws, and
-# a server never gets a collector left running behind a closed Davish.
+# Nothing in here ends the loop when Davish goes away. Tried on Windows 11 with
+# OpenSSH, none of the signals a script could wait for arrives: stdin never
+# ends and nothing written to it after the script is delivered (so no heartbeat
+# can work), and a write to a closed stdout may not throw, as .NET's console
+# streams ignore a broken pipe. The catch below is kept for the servers where
+# it does. Whether sshd itself ends the process when the channel closes is what
+# keeps this from leaving one behind.
 $n = 0
 while ($true) {
 	$text = Snapshot (($n % $healthEvery) -eq 0)
