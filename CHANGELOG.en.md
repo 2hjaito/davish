@@ -4,8 +4,11 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.13.1] - 2026-11-11
+
 ### Fixed
 - Command confirmation: the Run in Terminal button sits in the bottom row with a label instead of a small icon beside the command; long commands wrap at spaces, so an IP address or a path is not cut in two.
+- Settings: the language is picked from a list instead of a row of buttons, so more languages fit.
 
 ## [1.13.0] - 2026-11-10
 
