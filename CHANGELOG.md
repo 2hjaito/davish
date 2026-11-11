@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Sửa
+- Files và Editor: đăng nhập bằng user thường thì xóa file của root và sửa file chỉ đọc không còn chỉ lùi về Terminal (#117). Xóa: server từ chối thì Davish chạy lại đúng lệnh `rm` đã xác nhận qua `sudo`. Davish không bao giờ xóa bằng root `/`, các thư mục hệ thống (`/usr`, `/boot`, `/proc`…), thư mục home, hay các file cần để đăng nhập (`/etc/passwd`, `/etc/shadow`, `/etc/sudoers`, `/etc/ssh`…). Editor: nút "Sửa bằng sudo…"; khi lưu, Davish hiện đúng lệnh rồi ghi qua `sudo` (file tạm do `mktemp` tạo, giữ owner và quyền, có bản sao lưu), từ chối nếu file đã đổi kể từ lúc mở. Hỏi mật khẩu sudo một lần mỗi phiên; nút Terminal trong hộp hỏi mật khẩu gõ `sudoedit`. Xóa trong Disk cũng chạy qua `sudo`, vẫn theo danh sách cấm của Disk.
+
 ## [1.13.3] - 2026-11-11
 
 ### Thêm

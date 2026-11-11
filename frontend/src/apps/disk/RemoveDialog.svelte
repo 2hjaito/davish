@@ -9,6 +9,7 @@
 
 <script lang="ts">
   import { toUserError } from '../../lib/api/errors'
+  import { withSudo } from '../../lib/stores/sudoPrompt.svelte'
   import { formatBytes } from '../../lib/format'
   import { t } from '../../lib/i18n'
   import Dialog from '../../lib/ui/Dialog.svelte'
@@ -82,8 +83,11 @@
     busy = true
     error = ''
     try {
-      if (tg.op === 'remove') await backend.remove(serverID, tg.path, command)
-      else await backend.truncate(serverID, tg.path, command)
+      if (tg.op === 'remove') {
+        // As root through sudo when the server refuses (ADR 0018).
+        const run = () => backend.remove(serverID, tg.path, command)
+        if (!(await withSudo(serverID, sudo, run))) return
+      } else await backend.truncate(serverID, tg.path, command)
       ondone(tg)
     } catch (e) {
       const ue = toUserError(e)

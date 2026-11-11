@@ -116,6 +116,7 @@ func New(version string) (*App, error) {
 	// The emitter passes it every event, so it forgets a password when the
 	// session ends.
 	a.sudo = sudo.New(runner)
+	a.files.UseRoot(a.sudo)
 	a.services = svc.New(runner)
 	a.services.UseRoot(a.sudo)
 	a.docker = docker.New(runner)

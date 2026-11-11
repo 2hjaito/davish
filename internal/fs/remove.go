@@ -2,9 +2,12 @@ package fs
 
 import (
 	"context"
+	"errors"
+	"os"
 	"strings"
 
 	"davish/internal/apperr"
+	"davish/internal/audit"
 	"davish/internal/shellx"
 )
 
@@ -42,10 +45,16 @@ func (s *Service) PlanRemove(_ context.Context, serverID, p string) (RemovePlan,
 	if e.Kind == KindDir {
 		// A link is removed itself, never what it points to.
 		children, err := sc.ReadDir(p)
-		if err != nil {
+		switch {
+		case errors.Is(err, os.ErrPermission):
+			// Unreadable, so maybe full: removed with -r, after the user
+			// typed its name, as root if the server refuses.
+			plan.NonEmpty = true
+		case err != nil:
 			return RemovePlan{}, mapErr("remove", err)
+		default:
+			plan.NonEmpty = len(children) > 0
 		}
-		plan.NonEmpty = len(children) > 0
 	}
 	cmd := removeCommand(e.Kind, plan.NonEmpty, p)
 	plan.Command = cmd.String()
@@ -76,7 +85,12 @@ func (s *Service) Remove(ctx context.Context, serverID, p, command string) error
 		return apperr.New(apperr.FSStale, "path changed since the delete was confirmed")
 	}
 	s.log.Info("remove", "server", serverID, "app", "files", "op", "remove")
-	return s.shell(ctx, serverID, command)
+	err = s.shell(ctx, serverID, command)
+	if codeOf(err) == apperr.FSPermissionDenied && s.root != nil {
+		// The same confirmed command again, as root (ADR 0018).
+		return s.removeAsRoot(ctx, serverID, p, command)
+	}
+	return err
 }
 
 // shell runs command through the audit runner and maps a failure to an
@@ -86,6 +100,11 @@ func (s *Service) shell(ctx context.Context, serverID, command string) error {
 	if err != nil {
 		return err
 	}
+	return exitError(res)
+}
+
+// exitError maps a failed file command to an error code from its stderr.
+func exitError(res audit.Result) error {
 	if res.Exit == 0 {
 		return nil
 	}

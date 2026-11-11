@@ -897,6 +897,7 @@ const en = {
           'Right-click a desktop icon, or press F2, to change its name, icon, color or image',
           'Right-click empty space to create a file or folder',
           'Double-click a file to open it in Editor',
+          "Delete a root's file through sudo when the server refuses; system folders and the files needed to log in are never deleted as root",
         ],
         keys: [
           'Enter: open',
@@ -955,7 +956,7 @@ const en = {
         does: 'Edit files on the server with syntax highlighting; atomic saves that keep permissions and owner, backups of files in /etc.',
         actions: [
           'Warns when the file changed on the server',
-          'Saves with sudo through Terminal when root is needed',
+          'Saves as root through sudo after showing the exact command (owner, permissions and backup kept), or with sudoedit in Terminal',
         ],
         keys: ['⌘S: save', '⌘F: find'],
         runs: ['SFTP to read, write a temporary file, then rename it'],
@@ -1666,6 +1667,8 @@ const en = {
     dragHint: 'Drop on a slice to pick it; drop in the middle or press Esc to cancel',
     cancel: 'Cancel',
     deleteTitle: (name: string) => `Delete “${name}”?`,
+    rootProtected:
+      'Davish does not delete this as root: it is a system folder or a file the server needs to let anyone log in.',
     deleteFile: 'The file will be deleted from the server for good; there is no trash.',
     deleteDir: 'The empty folder will be deleted from the server for good.',
     deleteNonEmpty:
@@ -1719,6 +1722,16 @@ const en = {
     overwrite: 'Overwrite',
     readOnly: 'Read only',
     readOnlyBody: 'You cannot write this file, so it is open read-only.',
+    editAsRoot: 'Edit with sudo…',
+    asRootBody:
+      'Editing with sudo: saving shows the exact command, then writes the file as root, keeping its owner and permissions.',
+    rootSaveTitle: (name: string) => `Save “${name}” as root?`,
+    rootSaveBody:
+      'Davish will write the file through sudo with this command; the new text goes in on stdin:',
+    rootSaveAction: 'Save as root',
+    rootSaveBackup: (path: string) => `The current file is copied to ${path} first.`,
+    rootSaveNoBackup: 'No backup is made (turn backups on in Settings → Editor).',
+    rootProtected: 'Davish does not write this path as root.',
     sudo: 'Open in Terminal with sudo',
     sudoHint:
       'A sudoedit command is typed in; review it, press Enter and enter your password in Terminal.',
@@ -2845,6 +2858,7 @@ const en = {
     FS_TOO_LARGE: 'The file is too large to open directly. Download it instead.',
     FS_STALE: 'The file or folder changed since you confirmed. Please try again.',
     FS_CHANGED: 'The file changed on the server since you opened it.',
+    FS_PROTECTED: 'Davish does not change this path as root, to keep the server working.',
     CMD_NEEDS_ROOT: 'This command needs root.',
     CMD_MISSING: 'The server lacks a program this action needs (for example zip).',
     CMD_FAILED: 'The command failed on the server.',

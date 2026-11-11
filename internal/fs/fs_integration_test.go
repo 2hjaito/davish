@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"golang.org/x/crypto/ssh/knownhosts"
 
@@ -24,6 +25,7 @@ import (
 	"davish/internal/fs"
 	"davish/internal/shellx"
 	"davish/internal/store"
+	"davish/internal/sudo"
 	"davish/internal/testsshd"
 )
 
@@ -507,5 +509,140 @@ func TestWritable(t *testing.T) {
 	a, _ := e.svc.Access(ctx, e.id, "/etc/my site.conf")
 	if a.SudoEdit != "sudoedit -- '/etc/my site.conf'" {
 		t.Errorf("SudoEdit = %q", a.SudoEdit)
+	}
+}
+
+// asSudoer connects as sudoer, who is not root and whose sudo asks for a
+// password, with Files using sudo (ADR 0018).
+func asSudoer(t *testing.T) (*fs.Service, *sudo.Keeper, string) {
+	t.Helper()
+	m, id := testsshd.ConnectAs(t, testsshd.Sudoer)
+	run := audit.NewRunner(m, audit.New(discard{}))
+	k := sudo.New(run)
+	s := fs.New(m, run, quiet())
+	s.UseRoot(k)
+	return s, k, id
+}
+
+func rootRun(t *testing.T, k *sudo.Keeper, id, line string) string {
+	t.Helper()
+	res, err := k.Run(context.Background(), id, "test", line, nil)
+	if err != nil || res.Exit != 0 {
+		t.Fatalf("%s: %v %s", line, err, res.Stderr)
+	}
+	return string(res.Stdout)
+}
+
+func errCode(err error) apperr.Code {
+	var e *apperr.Error
+	if errors.As(err, &e) {
+		return e.Code
+	}
+	return ""
+}
+
+func TestSudoerRemovesRootFileThroughSudo(t *testing.T) {
+	ctx := context.Background()
+	s, k, id := asSudoer(t)
+	p := "/etc/davish-sudo-remove.conf"
+
+	// The file is made by a keeper of its own, so s's has no password yet.
+	_, setup, sid := asSudoer(t)
+	if err := setup.SetPassword(ctx, sid, []byte(testsshd.SudoPassword)); err != nil {
+		t.Fatal(err)
+	}
+	rootRun(t, setup, sid, "echo x > "+p+" && chmod 644 "+p)
+	t.Cleanup(func() { _, _ = setup.Run(ctx, sid, "test", "rm -f "+p, nil) })
+
+	plan, err := s.PlanRemove(ctx, id, p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Remove(ctx, id, p, plan.Command); errCode(err) != apperr.SudoPasswordRequired {
+		t.Fatalf("before the password: %v", err)
+	}
+	if err := k.SetPassword(ctx, id, []byte(testsshd.SudoPassword)); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Remove(ctx, id, p, plan.Command); err != nil {
+		t.Fatalf("remove through sudo: %v", err)
+	}
+	if out := rootRun(t, k, id, "test -e "+p+" && echo there || echo gone"); out != "gone\n" {
+		t.Errorf("after remove: %s", out)
+	}
+
+	// Never as root, whatever was confirmed.
+	for _, vital := range []string{"/etc/passwd", "/etc/ssh"} {
+		plan, err := s.PlanRemove(ctx, id, vital)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := s.Remove(ctx, id, vital, plan.Command); errCode(err) != apperr.FSProtected {
+			t.Errorf("remove %s: %v", vital, err)
+		}
+		if out := rootRun(t, k, id, "test -e "+vital+" && echo there"); out != "there\n" {
+			t.Fatalf("%s is gone", vital)
+		}
+	}
+}
+
+func TestSudoerSavesRootFileThroughSudo(t *testing.T) {
+	ctx := context.Background()
+	s, k, id := asSudoer(t)
+	if err := k.SetPassword(ctx, id, []byte(testsshd.SudoPassword)); err != nil {
+		t.Fatal(err)
+	}
+	p := "/etc/davish it's.conf"
+	q := shellx.Quote(p)
+	rootRun(t, k, id, "printf 'old\\n' > "+q+" && chown root:adm "+q+" && chmod 2644 "+q)
+	t.Cleanup(func() { _, _ = k.Run(ctx, id, "test", "rm -f "+q+" "+q+".bak-* /etc/.davish*", nil) })
+
+	st, err := s.Stat(ctx, id, p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	opts := fs.SaveOptions{Backup: true, Expect: &fs.Expect{ModTime: st.ModTime, Size: st.Size}}
+	plan, err := s.PlanSaveAsRoot(ctx, id, p, opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasPrefix(plan.Sudo, "sudo sh -c ") || plan.Target != p || plan.Backup == "" {
+		t.Fatalf("plan = %+v", plan)
+	}
+	// The user cannot write it: the plain save is refused.
+	if _, err := s.Save(ctx, id, p, []byte("new\n"), fs.SaveOptions{}); err == nil {
+		t.Fatal("sudoer saved a root file without sudo")
+	}
+	time.Sleep(1100 * time.Millisecond) // the confirmed backup name is kept
+	res, err := s.SaveAsRoot(ctx, id, p, []byte("new\nline with 'quotes' and $HOME\n"), opts, plan)
+	if err != nil {
+		t.Fatalf("save as root: %v", err)
+	}
+	if res.Backup != plan.Backup {
+		t.Errorf("backup %q, planned %q", res.Backup, plan.Backup)
+	}
+	got := rootRun(t, k, id, "cat "+q+"; stat -c '%U:%G %a' "+q+"; cat "+shellx.Quote(plan.Backup)+"; ls -a /etc | grep -c davish- || true")
+	want := "new\nline with 'quotes' and $HOME\nroot:adm 2644\nold\n0\n"
+	if got != want {
+		t.Errorf("after save:\n%s\nwant\n%s", got, want)
+	}
+
+	// The file changed since it was opened: nothing is written.
+	if _, err := s.PlanSaveAsRoot(ctx, id, p, opts); errCode(err) != apperr.FSChanged {
+		t.Errorf("stale expect: %v", err)
+	}
+	// A confirmed command that is not the plan's is refused.
+	opts.Expect = nil
+	plan, err = s.PlanSaveAsRoot(ctx, id, p, opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	forged := plan
+	forged.Command = "cat > /etc/shadow"
+	if _, err := s.SaveAsRoot(ctx, id, p, []byte("x"), opts, forged); errCode(err) != apperr.FSStale {
+		t.Errorf("forged command: %v", err)
+	}
+	if _, err := s.PlanSaveAsRoot(ctx, id, "/usr/bin/sudo", fs.SaveOptions{}); errCode(err) != apperr.FSProtected {
+		t.Errorf("save /usr/bin/sudo: %v", err)
 	}
 }

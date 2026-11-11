@@ -1,5 +1,6 @@
 <script lang="ts">
   import { toUserError } from '../../lib/api/errors'
+  import { withSudo } from '../../lib/stores/sudoPrompt.svelte'
   import { type Entry, filesPlanRemove, filesRemove, type RemovePlan } from '../../lib/api/files'
   import { t } from '../../lib/i18n'
   import Dialog from '../../lib/ui/Dialog.svelte'
@@ -56,16 +57,20 @@
   const ready = $derived(!!plan && !busy && (!plan.nonEmpty || typed === plan.name))
 
   async function confirm() {
-    if (!plan || !entry || !ready) return
+    const p = plan
+    if (!p || !entry || !ready) return
     busy = true
     error = ''
     try {
-      await filesRemove(serverID, plan)
+      // Refused for lack of rights, the same command runs again as root
+      // through sudo (ADR 0018); the prompt shows it with sudo.
+      if (!(await withSudo(serverID, p.sudo, () => filesRemove(serverID, p)))) return
       ondone(entry)
     } catch (err) {
       const ue = toUserError(err)
       // Without the rights, the way out is the same command with sudo.
-      if (ue.code === 'FS_PERMISSION_DENIED') sudo = plan.sudo
+      if (ue.code === 'FS_PERMISSION_DENIED') sudo = p.sudo
+      else if (ue.code === 'FS_PROTECTED') error = t.files.rootProtected
       else error = ue.message
       // It changed since the user looked: show what would run now.
       if (ue.code === 'FS_STALE') void loadPlan(entry)

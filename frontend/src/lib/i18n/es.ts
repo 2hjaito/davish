@@ -920,6 +920,7 @@ const es = {
           'Clic derecho en un icono del escritorio, o F2, para cambiar su nombre, icono, color o imagen',
           'Clic derecho en un espacio vacío para crear un archivo o carpeta',
           'Doble clic en un archivo para abrirlo en Editor',
+          'Elimina un archivo de root con sudo cuando el servidor lo rechaza; las carpetas del sistema y los archivos para iniciar sesión nunca se eliminan como root',
         ],
         keys: [
           'Intro: abrir',
@@ -981,7 +982,7 @@ const es = {
         does: 'Edita archivos en el servidor con resaltado de sintaxis; guardado atómico que conserva permisos y propietario, copias de los archivos de /etc.',
         actions: [
           'Avisa cuando el archivo cambió en el servidor',
-          'Guarda con sudo a través de Terminal cuando hace falta root',
+          'Guarda como root con sudo tras mostrar el comando exacto (conserva propietario, permisos y copia), o con sudoedit en la Terminal',
         ],
         keys: ['⌘S: guardar', '⌘F: buscar'],
         runs: ['SFTP para leer, escribir un archivo temporal y luego renombrarlo'],
@@ -1701,6 +1702,8 @@ const es = {
       'Suelta sobre una porción para elegirla; suelta en el centro o pulsa Esc para cancelar',
     cancel: 'Cancelar',
     deleteTitle: (name: string) => `¿Eliminar «${name}»?`,
+    rootProtected:
+      'Davish no elimina esto como root: es una carpeta del sistema o un archivo que el servidor necesita para iniciar sesión.',
     deleteFile: 'El archivo se borrará del servidor para siempre; no hay papelera.',
     deleteDir: 'La carpeta vacía se borrará del servidor para siempre.',
     deleteNonEmpty:
@@ -1756,6 +1759,16 @@ const es = {
     overwrite: 'Sobrescribir',
     readOnly: 'Solo lectura',
     readOnlyBody: 'No puedes escribir en este archivo, así que está abierto en solo lectura.',
+    editAsRoot: 'Editar con sudo…',
+    asRootBody:
+      'Editando con sudo: al guardar se muestra el comando exacto y luego se escribe el archivo como root, conservando su propietario y permisos.',
+    rootSaveTitle: (name: string) => `¿Guardar «${name}» como root?`,
+    rootSaveBody:
+      'Davish escribirá el archivo con sudo usando este comando; el texto nuevo entra por stdin:',
+    rootSaveAction: 'Guardar como root',
+    rootSaveBackup: (path: string) => `Primero se copia el archivo actual en ${path}.`,
+    rootSaveNoBackup: 'No se hace copia de seguridad (actívala en Ajustes → Editor).',
+    rootProtected: 'Davish no escribe esta ruta como root.',
     sudo: 'Abrir en Terminal con sudo',
     sudoHint:
       'Se escribe un comando sudoedit; revísalo, pulsa Intro e introduce tu contraseña en Terminal.',
@@ -2916,6 +2929,7 @@ const es = {
     FS_TOO_LARGE: 'El archivo es demasiado grande para abrirlo directamente. Descárgalo.',
     FS_STALE: 'El archivo o la carpeta ha cambiado desde que confirmaste. Inténtalo de nuevo.',
     FS_CHANGED: 'El archivo ha cambiado en el servidor desde que lo abriste.',
+    FS_PROTECTED: 'Davish no cambia esta ruta como root, para que el servidor siga funcionando.',
     CMD_NEEDS_ROOT: 'Este comando necesita root.',
     CMD_MISSING: 'Al servidor le falta un programa que esta acción necesita (por ejemplo zip).',
     CMD_FAILED: 'El comando ha fallado en el servidor.',

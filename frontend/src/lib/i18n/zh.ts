@@ -875,6 +875,7 @@ const zh = {
           '右键桌面图标或按 F2，修改名称、图标、颜色或图片',
           '右键空白处新建文件或文件夹',
           '双击文件在编辑器中打开',
+          '服务器拒绝时通过 sudo 删除 root 的文件；系统文件夹和登录所需的文件绝不会以 root 身份删除',
         ],
         keys: [
           '回车：打开',
@@ -928,7 +929,10 @@ const zh = {
       },
       editor: {
         does: '带语法高亮编辑服务器上的文件；原子保存并保留权限和属主，/etc 中的文件会自动备份。',
-        actions: ['文件在服务器上被修改时发出警告', '需要 root 时通过终端用 sudo 保存'],
+        actions: [
+          '文件在服务器上被修改时发出警告',
+          '显示确切命令后通过 sudo 以 root 身份保存（保留所有者、权限和备份），或在终端中用 sudoedit',
+        ],
         keys: ['⌘S：保存', '⌘F：查找'],
         runs: ['用 SFTP 读取，写入临时文件后再重命名'],
       },
@@ -1616,6 +1620,7 @@ const zh = {
     dragHint: '拖到某一块上选择它；拖回中间或按 Esc 取消',
     cancel: '取消',
     deleteTitle: (name: string) => `删除“${name}”？`,
+    rootProtected: 'Davish 不会以 root 身份删除它：这是系统文件夹，或服务器登录所需的文件。',
     deleteFile: '文件将从服务器上永久删除，没有回收站。',
     deleteDir: '这个空文件夹将从服务器上永久删除。',
     deleteNonEmpty:
@@ -1668,6 +1673,15 @@ const zh = {
     overwrite: '覆盖',
     readOnly: '只读',
     readOnlyBody: '你没有写入这个文件的权限，所以以只读方式打开。',
+    editAsRoot: '用 sudo 编辑…',
+    asRootBody:
+      '正在用 sudo 编辑：保存时会显示确切的命令，然后以 root 身份写入文件，并保留其所有者和权限。',
+    rootSaveTitle: (name: string) => `以 root 身份保存“${name}”？`,
+    rootSaveBody: 'Davish 将通过 sudo 用以下命令写入文件；新内容通过 stdin 传入：',
+    rootSaveAction: '以 root 保存',
+    rootSaveBackup: (path: string) => `会先把当前文件复制到 ${path}。`,
+    rootSaveNoBackup: '不会创建备份（可在 设置 → 编辑器 中开启备份）。',
+    rootProtected: 'Davish 不会以 root 身份写入此路径。',
     sudo: '在终端中用 sudo 打开',
     sudoHint: '会输入一条 sudoedit 命令；检查后按回车，并在终端中输入密码。',
     reload: '从服务器重新加载',
@@ -2763,6 +2777,7 @@ const zh = {
     FS_TOO_LARGE: '文件太大，无法直接打开。请下载后查看。',
     FS_STALE: '自你确认后文件或文件夹已发生变化。请再试一次。',
     FS_CHANGED: '自你打开后，文件在服务器上已被修改。',
+    FS_PROTECTED: '为保证服务器正常运行，Davish 不会以 root 身份修改此路径。',
     CMD_NEEDS_ROOT: '这条命令需要 root 权限。',
     CMD_MISSING: '服务器缺少此操作需要的程序（例如 zip）。',
     CMD_FAILED: '命令在服务器上执行失败。',

@@ -72,6 +72,7 @@ type File struct {
 type Service struct {
 	conns Conns
 	run   Runner
+	root  Root
 	log   *slog.Logger
 }
 

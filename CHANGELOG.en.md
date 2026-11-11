@@ -4,6 +4,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Fixed
+- Files and Editor: logged in as a user who is not root, deleting root's files and editing read-only files no longer only fall back to Terminal (#117). Delete: when the server refuses, Davish runs the confirmed `rm` again through `sudo`. It never deletes as root `/`, the system folders (`/usr`, `/boot`, `/proc`…), home folders, or the files needed to log in (`/etc/passwd`, `/etc/shadow`, `/etc/sudoers`, `/etc/ssh`…). Editor: "Edit with sudo…"; saving shows the exact command, then writes through `sudo` (a temporary file `mktemp` creates, owner and permissions kept, a backup), and refuses if the file changed since it was opened. The sudo password is asked once per session; the prompt's Terminal button types `sudoedit`. Deleting in Disk also goes through `sudo`, within Disk's own refusals.
+
 ## [1.13.3] - 2026-11-11
 
 ### Added
