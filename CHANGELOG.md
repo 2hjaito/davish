@@ -8,7 +8,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 - Monitor trên server Windows: CPU từng nhân, bộ nhớ và swap, ổ đĩa, mạng, I/O đĩa, GPU, tiến trình, thông tin hệ thống và cảnh báo service/container, đọc qua Windows PowerShell 5.1 và CIM trên SSH. Không cài gì lên server. Load average, I/O wait và steal không có trên Windows nên được ẩn. Chạy được dù shell SSH của server là cmd.exe hay PowerShell.
 
 ### Sửa
-- Monitor trên server Windows hoặc macOS không còn chờ "số liệu đầu tiên" mãi mãi. Davish nhận biết hệ điều hành của server khi kết nối; Monitor báo chưa hỗ trợ hệ điều hành đó (hoặc server không trả số liệu nào) thay vì thử lại trong im lặng. Server Linux không đổi.
+- Monitor trên server Windows hoặc macOS không còn chờ "số liệu đầu tiên" mãi mãi. Davish nhận biết hệ điều hành của server ngay sau khi kết nối, chạy nền nên không làm chậm việc kết nối; Monitor báo chưa hỗ trợ hệ điều hành đó (hoặc server không trả số liệu nào) thay vì thử lại trong im lặng. Server Linux không đổi.
 - Terminal trên server Windows mở shell đăng nhập thường thay vì gửi dòng lệnh khởi động chỉ dành cho Linux.
 
 ### Thay đổi

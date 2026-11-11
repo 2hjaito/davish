@@ -35,10 +35,11 @@ var promptScript string
 var promptCommand = "exec bash --rcfile <(printf '%s\\n' " + shellx.Quote(promptScript) + ") -i"
 
 // ClientSource hands out the live SSH client of a server and tells what OS
-// it runs.
+// it runs. WaitPlatform waits (a few seconds at most) for the detection that
+// follows a connect.
 type ClientSource interface {
 	Client(serverID string) (*ssh.Client, error)
-	Platform(serverID string) platform.OS
+	WaitPlatform(ctx context.Context, serverID string) platform.OS
 }
 
 // Emitter pushes events to the frontend.
@@ -104,9 +105,11 @@ func (s *Service) Start(ctx context.Context, serverID string, cols, rows int, pr
 		return "", err
 	}
 	// The prompt and start directory are POSIX shell lines; a Windows
-	// server gets its plain login shell (cmd.exe or PowerShell).
+	// server gets its plain login shell (cmd.exe or PowerShell). A terminal
+	// opened right after connecting waits for the OS to be known, or it would
+	// choose before detection has finished.
 	command := ""
-	if s.clients.Platform(serverID) != platform.Windows {
+	if s.clients.WaitPlatform(ctx, serverID) != platform.Windows {
 		command = shellCommand(prompt && loginShellIsBash(client), dir)
 	}
 	sess, err := client.NewSession()

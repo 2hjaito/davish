@@ -24,11 +24,12 @@ type SystemInfo struct {
 
 // SystemInfo reads what the server is; it does not change while connected.
 func (s *Service) SystemInfo(ctx context.Context, serverID string) (SystemInfo, error) {
+	os := s.clients.WaitPlatform(ctx, serverID)
 	client, err := s.clients.Client(serverID)
 	if err != nil {
 		return SystemInfo{}, err
 	}
-	tg, ok := targetFor(s.clients.Platform(serverID))
+	tg, ok := targetFor(os)
 	if !ok {
 		return SystemInfo{}, apperr.New(apperr.PlatformUnsupported, "system info is not available for this OS")
 	}

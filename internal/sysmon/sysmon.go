@@ -33,10 +33,12 @@ var procsWinScript string
 var infoWinScript string
 
 // ClientSource hands out the live SSH client of a server and tells what OS
-// it runs.
+// it runs. WaitPlatform waits (a few seconds at most) for the detection that
+// follows a connect: starting a collector before the OS is known would pick
+// the Linux scripts for a Windows server.
 type ClientSource interface {
 	Client(serverID string) (*ssh.Client, error)
-	Platform(serverID string) platform.OS
+	WaitPlatform(ctx context.Context, serverID string) platform.OS
 }
 
 // Emitter pushes events to the frontend.
@@ -230,8 +232,10 @@ func (s *Service) run(ctx context.Context, serverID string) {
 	fails := 0
 	for {
 		wait := s.opts.RetryEvery
+		// The OS first, then the client: a reconnect during the wait must not
+		// leave a closed client in hand.
+		os := s.clients.WaitPlatform(ctx, serverID)
 		if client, err := s.clients.Client(serverID); err == nil {
-			os := s.clients.Platform(serverID)
 			if tg, ok := targetFor(os); !ok {
 				s.setStatus(serverID, &Status{ServerID: serverID, State: StateUnsupported, OS: os})
 				wait = 10 * s.opts.RetryEvery // nothing to try until the OS is known to be another

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"strings"
 	"testing"
+	"time"
 	"unicode/utf16"
 )
 
@@ -85,5 +86,49 @@ func TestPowerShell(t *testing.T) {
 	}
 	if got := string(utf16.Decode(u)); !strings.Contains(got, "[Console]::In.ReadToEnd()") {
 		t.Fatalf("bootstrap = %q", got)
+	}
+}
+
+func TestCellWaitsForTheFirstAnswer(t *testing.T) {
+	c := NewCell()
+	if got := c.Get(); got != Unknown {
+		t.Fatalf("Get before Set = %q", got)
+	}
+	got := make(chan OS, 1)
+	go func() { got <- c.Wait(context.Background()) }()
+	select {
+	case os := <-got:
+		t.Fatalf("Wait returned %q before Set", os)
+	case <-time.After(30 * time.Millisecond):
+	}
+
+	c.Set(Windows)
+	c.Set(Linux) // a later answer does not replace the first
+	select {
+	case os := <-got:
+		if os != Windows {
+			t.Fatalf("Wait = %q, want windows", os)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("Wait did not return after Set")
+	}
+	if c.Get() != Windows || c.Wait(context.Background()) != Windows {
+		t.Fatal("the answer changed")
+	}
+}
+
+func TestCellWaitStopsWithTheContext(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
+	defer cancel()
+	if got := NewCell().Wait(ctx); got != Unknown {
+		t.Fatalf("Wait = %q, want unknown", got)
+	}
+}
+
+func TestCellKeepsAnUnknownAnswer(t *testing.T) {
+	c := NewCell()
+	c.Set(Unknown)
+	if got := c.Wait(context.Background()); got != Unknown {
+		t.Fatalf("Wait = %q", got)
 	}
 }

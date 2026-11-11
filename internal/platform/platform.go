@@ -9,6 +9,7 @@ import (
 	"encoding/binary"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 	"unicode/utf16"
 )
@@ -23,6 +24,47 @@ const (
 	Darwin  OS = "darwin"
 	Unknown OS = "unknown"
 )
+
+// Cell holds a server's OS from the moment it is known. Detection runs in the
+// background after a server connects, so readers either take what is there
+// (Get) or wait for it (Wait).
+type Cell struct {
+	once sync.Once
+	done chan struct{}
+	os   OS
+}
+
+// NewCell creates an empty cell.
+func NewCell() *Cell { return &Cell{done: make(chan struct{})} }
+
+// Set records the OS and wakes every waiter. Only the first call counts;
+// Unknown is an answer too (the probe ran and learned nothing).
+func (c *Cell) Set(os OS) {
+	c.once.Do(func() {
+		c.os = os
+		close(c.done)
+	})
+}
+
+// Get returns the OS, or Unknown while detection has not finished.
+func (c *Cell) Get() OS {
+	select {
+	case <-c.done:
+		return c.os
+	default:
+		return Unknown
+	}
+}
+
+// Wait blocks until the OS is set or ctx ends, and returns what Get would.
+func (c *Cell) Wait(ctx context.Context) OS {
+	select {
+	case <-c.done:
+		return c.os
+	case <-ctx.Done():
+		return Unknown
+	}
+}
 
 // DetectTimeout bounds the whole detection: a login shell that never
 // returns must not keep the server from connecting.

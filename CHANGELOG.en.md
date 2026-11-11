@@ -8,7 +8,7 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 - Monitor on Windows servers: CPU per core, memory and swap, drives, network, disk throughput, GPUs, processes, system info and service/container alerts, read through Windows PowerShell 5.1 and CIM over SSH. Nothing is installed on the server. Load average, I/O wait and steal time do not exist on Windows and are hidden. Works whether the server's SSH shell is cmd.exe or PowerShell.
 
 ### Fixed
-- Monitor on a Windows or macOS server no longer waits for the first reading for ever. Davish now detects the server's operating system when it connects; Monitor says it does not support that system yet (or that the server returned no readings) instead of retrying in silence. Linux servers are unchanged.
+- Monitor on a Windows or macOS server no longer waits for the first reading for ever. Davish now detects the server's operating system right after it connects, in the background, so connecting is never held up by it; Monitor says it does not support that system yet (or that the server returned no readings) instead of retrying in silence. Linux servers are unchanged.
 - Terminal on a Windows server opens the plain login shell instead of sending it a Linux-only start line.
 
 ### Changed

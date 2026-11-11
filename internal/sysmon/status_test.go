@@ -1,6 +1,7 @@
 package sysmon
 
 import (
+	"context"
 	"io"
 	"log/slog"
 	"strings"
@@ -15,11 +16,25 @@ import (
 )
 
 // fakeClients answers with an empty client: the paths under test decide by
-// OS and never open a session.
-type fakeClients struct{ os platform.OS }
+// OS and never open a session. While gate is open (non-nil and not closed)
+// the OS is still being detected, as right after a connect.
+type fakeClients struct {
+	os   platform.OS
+	gate chan struct{}
+}
 
 func (f fakeClients) Client(string) (*ssh.Client, error) { return &ssh.Client{}, nil }
-func (f fakeClients) Platform(string) platform.OS        { return f.os }
+
+func (f fakeClients) WaitPlatform(ctx context.Context, _ string) platform.OS {
+	if f.gate != nil {
+		select {
+		case <-f.gate:
+		case <-ctx.Done():
+			return platform.Unknown
+		}
+	}
+	return f.os
+}
 
 type recorder struct {
 	mu     sync.Mutex
@@ -42,8 +57,12 @@ func (r *recorder) all() []Status {
 }
 
 func newTestService(os platform.OS, rec *recorder) *Service {
+	return newGatedService(fakeClients{os: os}, rec)
+}
+
+func newGatedService(c fakeClients, rec *recorder) *Service {
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
-	return New(fakeClients{os}, rec, log, Options{RetryEvery: time.Millisecond})
+	return New(c, rec, log, Options{RetryEvery: time.Millisecond})
 }
 
 func waitStatus(t *testing.T, rec *recorder, n int) []Status {
@@ -72,6 +91,27 @@ func TestUnsupportedServerReportsInsteadOfWaiting(t *testing.T) {
 				t.Fatalf("status = %+v, want %+v", got, want)
 			}
 		})
+	}
+}
+
+// Right after a connect the OS is still being detected. A collector started
+// then would take the Linux scripts for a Windows server, so nothing runs
+// and nothing is reported until the answer is in.
+func TestNothingStartsWhileTheOSIsBeingDetected(t *testing.T) {
+	rec := &recorder{}
+	gate := make(chan struct{})
+	s := newGatedService(fakeClients{os: platform.Darwin, gate: gate}, rec)
+	defer s.Close()
+	s.Watch("srv")
+
+	time.Sleep(100 * time.Millisecond)
+	if got := rec.all(); len(got) != 0 {
+		t.Fatalf("status before the OS was known: %v", got)
+	}
+	close(gate)
+	got := waitStatus(t, rec, 1)[0]
+	if got.State != StateUnsupported || got.OS != platform.Darwin {
+		t.Fatalf("status = %+v, want unsupported darwin", got)
 	}
 }
 

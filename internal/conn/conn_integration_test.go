@@ -23,6 +23,7 @@ import (
 	"davish/internal/apperr"
 	"davish/internal/conn"
 	"davish/internal/events"
+	"davish/internal/platform"
 	"davish/internal/store"
 	"davish/internal/testsshd"
 )
@@ -51,6 +52,19 @@ func (r *recorder) prompts() []conn.HostKeyPrompt {
 	for _, e := range r.events {
 		if p, ok := e.payload.(conn.HostKeyPrompt); ok {
 			out = append(out, p)
+		}
+	}
+	return out
+}
+
+// connected lists the conn:status events that reported the server connected.
+func (r *recorder) connected() []conn.Status {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	var out []conn.Status
+	for _, e := range r.events {
+		if s, ok := e.payload.(conn.Status); ok && e.name == events.ConnStatus && s.State == conn.StateConnected {
+			out = append(out, s)
 		}
 	}
 	return out
@@ -384,5 +398,69 @@ func TestProxyJumpLoopIsRefused(t *testing.T) {
 	}
 	if err := e.m.Connect(ctx, e.id); code(err) != apperr.InvalidInput {
 		t.Fatalf("err = %v; want INVALID_INPUT", err)
+	}
+}
+
+// A probe that hangs on a slow login shell must not hold up connecting: the
+// server is reported connected at once and the OS follows.
+func TestConnectDoesNotWaitForPlatformDetection(t *testing.T) {
+	release := make(chan struct{})
+	e := setup(t, testServer(), conn.Options{
+		DetectPlatform: func(ctx context.Context, _ *ssh.Client) platform.OS {
+			select {
+			case <-release:
+				return platform.Linux
+			case <-ctx.Done():
+				return platform.Unknown
+			}
+		},
+	})
+	pin(t, e.hostKeys, testsshd.HostKey(t))
+
+	start := time.Now()
+	if err := e.m.Connect(context.Background(), e.id); err != nil {
+		t.Fatal(err)
+	}
+	if d := time.Since(start); d > 3*time.Second {
+		t.Errorf("Connect took %v while detection was blocked", d)
+	}
+	first := e.rec.connected()
+	if len(first) != 1 || first[0].Platform != "" {
+		t.Fatalf("connected events before detection = %+v; want one without a platform", first)
+	}
+	if got := e.m.Platform(e.id); got != platform.Unknown {
+		t.Errorf("Platform while detecting = %q", got)
+	}
+
+	// Callers that must choose by OS wait; a short deadline shows it.
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+	defer cancel()
+	if got := e.m.WaitPlatform(ctx, e.id); got != platform.Unknown {
+		t.Errorf("WaitPlatform before the answer = %q", got)
+	}
+
+	close(release)
+	if got := e.m.WaitPlatform(context.Background(), e.id); got != platform.Linux {
+		t.Fatalf("WaitPlatform = %q; want linux", got)
+	}
+	deadline := time.Now().Add(3 * time.Second)
+	for len(e.rec.connected()) < 2 && time.Now().Before(deadline) {
+		time.Sleep(10 * time.Millisecond)
+	}
+	all := e.rec.connected()
+	if len(all) != 2 || all[1].Platform != platform.Linux {
+		t.Fatalf("connected events = %+v; want a second one carrying linux", all)
+	}
+}
+
+// The real probe, against the Linux test sshd.
+func TestPlatformIsDetectedAfterConnecting(t *testing.T) {
+	e := setup(t, testServer(), conn.Options{})
+	pin(t, e.hostKeys, testsshd.HostKey(t))
+	if err := e.m.Connect(context.Background(), e.id); err != nil {
+		t.Fatal(err)
+	}
+	if got := e.m.WaitPlatform(context.Background(), e.id); got != platform.Linux {
+		t.Fatalf("WaitPlatform = %q; want linux", got)
 	}
 }
