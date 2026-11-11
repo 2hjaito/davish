@@ -24,6 +24,7 @@ const (
 	FSTooLarge           Code = "FS_TOO_LARGE"
 	FSStale              Code = "FS_STALE"
 	FSChanged            Code = "FS_CHANGED"
+	FSProtected          Code = "FS_PROTECTED"
 	CmdNeedsRoot         Code = "CMD_NEEDS_ROOT"
 	CmdMissing           Code = "CMD_MISSING"
 	CmdFailed            Code = "CMD_FAILED"

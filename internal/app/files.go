@@ -95,6 +95,20 @@ func (a *App) FilesSave(serverID, path string, data []byte, opts fs.SaveOptions)
 	return a.files.Save(a.ctx, serverID, path, data, opts)
 }
 
+// FilesPlanSaveAsRoot works out the command that saves path as root
+// through sudo, for the confirmation; it saves nothing (ADR 0018).
+func (a *App) FilesPlanSaveAsRoot(serverID, path string, opts fs.SaveOptions) (fs.RootSavePlan, error) {
+	return a.files.PlanSaveAsRoot(a.ctx, serverID, path, opts)
+}
+
+// FilesSaveAsRoot saves path as root exactly as plan was confirmed.
+func (a *App) FilesSaveAsRoot(serverID, path string, data []byte, opts fs.SaveOptions, plan fs.RootSavePlan) (fs.SaveResult, error) {
+	if err := a.lock.Check(); err != nil {
+		return fs.SaveResult{}, err
+	}
+	return a.files.SaveAsRoot(a.ctx, serverID, path, data, opts, plan)
+}
+
 // FilesAccess reports whether the Editor can save over path; when not, it
 // opens the file read-only and offers the sudoedit command.
 func (a *App) FilesAccess(serverID, path string) (fs.Access, error) {

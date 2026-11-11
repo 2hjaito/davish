@@ -282,6 +282,8 @@ const en = {
     needsRoot:
       'Needs root: Davish types the command into Terminal with sudo; check it, then press Enter.',
     toTerminal: 'Open Terminal with the command',
+    rootRuns:
+      'Needs root: Davish runs it through sudo once you confirm, asking for the sudo password once per session if needed.',
     dangerous: 'This may delete real data, not only caches. Check before you clean it.',
     tabs: { dirs: 'Folders', files: 'Large files' },
     scan: 'Scan again',
@@ -310,6 +312,8 @@ const en = {
       'The file’s content is removed but the file stays, so a program writing it (such as a log) carries on. Command to run:',
     protected:
       'Disk does not delete system folders, database data or home folders. Use Clean up or the app that owns them.',
+    rootUntrusted:
+      "Disk does not empty this file as root: it is a link, or lies in a folder another user owns or others may write (such as a group's shared folder), so the file emptied could be another one. Use sudo in Terminal if you are sure.",
     ov: {
       asRoot: 'measured as root (sudo -n)',
       barLabel: 'Disk space by part',
@@ -323,6 +327,7 @@ const en = {
         'This SSH user cannot read the folders below, so du skipped them, and that is often where a full disk is (Docker, databases, /root). Davish measures them only when sudo needs no password; you can measure them with sudo in a terminal.',
       more: (n: number) => `and ${n} more`,
       measureSudo: 'Measure with sudo in Terminal',
+      measureAsRoot: 'Measure with sudo…',
       unmeasuredOther:
         'This is in no measured folder: the scan may have run out of time, files may be half written, or the filesystem reserves it.',
       heldTitle: (size: string) => `${size} held by deleted files`,
@@ -897,6 +902,7 @@ const en = {
           'Right-click a desktop icon, or press F2, to change its name, icon, color or image',
           'Right-click empty space to create a file or folder',
           'Double-click a file to open it in Editor',
+          "Delete a root's file through sudo when the server refuses; system folders and the files needed to log in are never deleted as root",
         ],
         keys: [
           'Enter: open',
@@ -940,7 +946,11 @@ const en = {
           'New network or volume; copy a container as a docker run command',
         ],
         keys: [],
-        runs: ['docker ps, stats, inspect, logs', 'docker start/stop/restart (with confirmation)'],
+        runs: [
+          'docker ps, stats, inspect, logs',
+          'docker start/stop/restart (with confirmation)',
+          'When the docker socket refuses a user outside the docker group: the same command again through sudo, asking for the sudo password once per session if needed. Commands typed into a terminal stay as they are',
+        ],
       },
       logs: {
         does: 'Follow a unit’s journal, a log file or a container’s logs. Filter, pause, highlight errors.',
@@ -949,13 +959,18 @@ const en = {
           'Pause to read',
         ],
         keys: [],
-        runs: ['journalctl -f', 'tail -F', 'docker logs -f'],
+        runs: [
+          'journalctl -f',
+          'tail -F',
+          'docker logs -f',
+          "A log you may not read (system journal, root's files, docker outside the docker group): followed again through sudo, asking for the sudo password once per session if needed",
+        ],
       },
       editor: {
         does: 'Edit files on the server with syntax highlighting; atomic saves that keep permissions and owner, backups of files in /etc.',
         actions: [
           'Warns when the file changed on the server',
-          'Saves with sudo through Terminal when root is needed',
+          'Saves as root through sudo after showing the exact command (owner, permissions and backup kept), or with sudoedit in Terminal',
         ],
         keys: ['⌘S: save', '⌘F: find'],
         runs: ['SFTP to read, write a temporary file, then rename it'],
@@ -1036,7 +1051,11 @@ const en = {
           'Open the scripts and folders in a job’s command',
         ],
         keys: [],
-        runs: ['crontab -l, crontab - (with confirmation)', 'reads /etc/cron.d'],
+        runs: [
+          'crontab -l, crontab - (with confirmation)',
+          'reads /etc/cron.d',
+          'root’s crontab (crontab -u root) and unreadable /etc/cron.d files through sudo, asking for the sudo password once per session if needed',
+        ],
       },
       nginx: {
         does: 'Sites, server blocks, upstreams; enable/disable sites, test the config before reload, TLS certificate expiry.',
@@ -1099,6 +1118,7 @@ const en = {
           'journalctl -u ssh (or reads /var/log/auth.log)',
           'who, last, lastb',
           'ufw status, fail2ban-client status sshd',
+          'Block, unblock, ban and unban, and reading what needs root (lastb, ufw, fail2ban, logins), through sudo with the sudo password once per session if needed; turning ufw on and password logins off stay in Terminal',
         ],
       },
       disk: {
@@ -1116,6 +1136,7 @@ const en = {
           'du -x -d 1 when opening a deeper folder',
           'docker system df, journalctl --disk-usage, find',
           'rm, truncate, cleanup commands (with confirmation; through Terminal when root is needed)',
+          "Measuring and the cleanups that need root run through sudo (no prompt when sudo needs no password; otherwise the sudo password once per session); the user's own caches stay the user's",
         ],
       },
       ports: {
@@ -1720,6 +1741,15 @@ const en = {
     overwrite: 'Overwrite',
     readOnly: 'Read only',
     readOnlyBody: 'You cannot write this file, so it is open read-only.',
+    editAsRoot: 'Edit with sudo…',
+    asRootBody:
+      'Editing with sudo: saving shows the exact command, then writes the file as root, keeping its owner and permissions.',
+    rootSaveTitle: (name: string) => `Save “${name}” as root?`,
+    rootSaveBody:
+      'Davish will write the file through sudo with this command; the new text goes in on stdin:',
+    rootSaveAction: 'Save as root',
+    rootSaveBackup: (path: string) => `The current file is copied to ${path} first.`,
+    rootSaveNoBackup: 'No backup is made (turn backups on in Settings → Editor).',
     sudo: 'Open in Terminal with sudo',
     sudoHint:
       'A sudoedit command is typed in; review it, press Enter and enter your password in Terminal.',
@@ -2249,6 +2279,8 @@ const en = {
     loading: 'Reading the container list…',
     offline: 'Server not connected',
     offlineHint: 'Connect the server to see its Docker containers.',
+    needsSudo:
+      'This user is not in the docker group, so Docker answers only root. Davish can run docker through sudo for this session, or you can run it in Terminal.',
     noMatch: 'No containers match.',
     noContainers: 'The server has no containers.',
     noSelection: 'Select a container to see its details',
@@ -2586,6 +2618,12 @@ const en = {
     never: 'Never',
     source: 'Source',
     mine: 'Your crontab',
+    rootSource: 'Root’s crontab',
+    target: 'Crontab',
+    rootWarn:
+      'Jobs in root’s crontab run as root on the server. Davish writes it through sudo, after you confirm the exact command.',
+    rootLocked:
+      'With the sudo password, Davish can also show root’s crontab and the system files you cannot read.',
     asUser: (user: string) => `runs as ${user}`,
     command: 'Command',
     nextRuns: 'Next runs',
@@ -2846,6 +2884,8 @@ const en = {
     FS_TOO_LARGE: 'The file is too large to open directly. Download it instead.',
     FS_STALE: 'The file or folder changed since you confirmed. Please try again.',
     FS_CHANGED: 'The file changed on the server since you opened it.',
+    FS_PROTECTED:
+      'Davish does not do this as root: the path is a vital part of the system, or goes through a link or folder another user owns or may write, who could send root elsewhere. Use sudoedit or sudo in Terminal if you are sure.',
     CMD_NEEDS_ROOT: 'This command needs root.',
     CMD_MISSING: 'The server lacks a program this action needs (for example zip).',
     CMD_FAILED: 'The command failed on the server.',

@@ -4,6 +4,7 @@
   import { t } from '../../lib/i18n'
   import Icon from '../../lib/ui/Icon.svelte'
   import { openTerminalAt } from '../../lib/wm/intents.svelte'
+  import { sudoPrompt } from '../../lib/stores/sudoPrompt.svelte'
   import { nameOf } from './tree'
 
   interface Props {
@@ -13,9 +14,15 @@
     cleanable: number
     onclean: () => void
     onfile: (path: string) => void
+    /** Measures again, after the sudo password was given. */
+    onrescan: () => void
   }
 
-  let { serverID, overview: o, cleanable, onclean, onfile }: Props = $props()
+  let { serverID, overview: o, cleanable, onclean, onfile, onrescan }: Props = $props()
+
+  async function unlock() {
+    if (o.sudoScan && (await sudoPrompt.ask(serverID, o.sudoScan))) onrescan()
+  }
 
   const d = t.disk.ov
   const SHOWN = 6
@@ -65,10 +72,18 @@
         {#if o.unreadable.length > SHOWN}
           <p class="muted">{d.more(o.unreadable.length - SHOWN)}</p>
         {/if}
-        <button class="btn" onclick={() => openTerminalAt(serverID, undefined, o.sudoMeasure)}>
-          <Icon name="terminal" size={13} />
-          {d.measureSudo}
-        </button>
+        <div class="actions">
+          {#if o.askSudo && o.sudoScan}
+            <button class="btn btn-primary" onclick={() => void unlock()}>
+              <Icon name="key" size={13} />
+              {d.measureAsRoot}
+            </button>
+          {/if}
+          <button class="btn" onclick={() => openTerminalAt(serverID, undefined, o.sudoMeasure)}>
+            <Icon name="terminal" size={13} />
+            {d.measureSudo}
+          </button>
+        </div>
       {:else}
         <p>{d.unmeasuredOther}</p>
       {/if}
@@ -116,6 +131,12 @@
 </div>
 
 <style>
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
   .ov {
     align-self: stretch;
     display: flex;

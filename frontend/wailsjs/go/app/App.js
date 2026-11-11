@@ -282,6 +282,10 @@ export function FilesPlanRemove(arg1, arg2) {
   return window['go']['app']['App']['FilesPlanRemove'](arg1, arg2);
 }
 
+export function FilesPlanSaveAsRoot(arg1, arg2, arg3) {
+  return window['go']['app']['App']['FilesPlanSaveAsRoot'](arg1, arg2, arg3);
+}
+
 export function FilesRead(arg1, arg2) {
   return window['go']['app']['App']['FilesRead'](arg1, arg2);
 }
@@ -296,6 +300,10 @@ export function FilesRename(arg1, arg2, arg3) {
 
 export function FilesSave(arg1, arg2, arg3, arg4) {
   return window['go']['app']['App']['FilesSave'](arg1, arg2, arg3, arg4);
+}
+
+export function FilesSaveAsRoot(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['app']['App']['FilesSaveAsRoot'](arg1, arg2, arg3, arg4, arg5);
 }
 
 export function FilesStat(arg1, arg2) {
@@ -432,6 +440,10 @@ export function LockState() {
 
 export function LogsStart(arg1, arg2) {
   return window['go']['app']['App']['LogsStart'](arg1, arg2);
+}
+
+export function LogsStartAsRoot(arg1, arg2) {
+  return window['go']['app']['App']['LogsStartAsRoot'](arg1, arg2);
 }
 
 export function LogsStop(arg1) {

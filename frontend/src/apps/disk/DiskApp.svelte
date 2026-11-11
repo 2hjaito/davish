@@ -4,6 +4,7 @@
 
   import type { Cleanup, Mount, Overview, Usage } from '../../lib/api/disk'
   import { toUserError } from '../../lib/api/errors'
+  import { withSudo } from '../../lib/stores/sudoPrompt.svelte'
   import { formatBytes } from '../../lib/format'
   import { t } from '../../lib/i18n'
   import { useAppMenu } from '../../lib/shell/menus.svelte'
@@ -185,7 +186,11 @@
     confirming = null
     note = ''
     try {
-      await backend.clean(win.serverID, c.id, c.command)
+      const run = () => backend.clean(win.serverID, c.id, c.command)
+      if (c.root && c.sudoCommand) {
+        // As root through sudo; the prompt shows the command with sudo.
+        if (!(await withSudo(win.serverID, c.sudoCommand, run))) return
+      } else await run()
       note = d.done
       void refresh()
     } catch (e) {
@@ -385,16 +390,17 @@
         </p>
         {#if c.danger}<p class="danger">{d.dangerous}</p>{/if}
         <pre class="command">{c.root ? c.sudoCommand : c.command}</pre>
-        {#if c.root}
-          <p class="hint">{d.needsRoot}</p>
-          <button
-            class="btn btn-primary"
-            onclick={() => openTerminalAt(win.serverID, undefined, c.sudoCommand)}
-            >{d.toTerminal}</button
-          >
-        {:else}
+        {#if c.root}<p class="hint">{d.rootRuns}</p>{/if}
+        <div class="actions">
           <button class="btn btn-danger" onclick={() => (confirming = c)}>{d.run}</button>
-        {/if}
+          {#if c.root}
+            <button
+              class="btn"
+              onclick={() => openTerminalAt(win.serverID, undefined, c.sudoCommand)}
+              >{d.toTerminal}</button
+            >
+          {/if}
+        </div>
       {:else if selDir && overview}
         {@const r = selDir}
         <h3 class="mono">{r.path}</h3>
@@ -443,6 +449,10 @@
           {cleanable}
           onclean={() => (filter = CLEAN)}
           onfile={showFile}
+          onrescan={() => {
+            void scan(filter)
+            void loadCleanups()
+          }}
         />
       {:else}
         <p class="muted">{isClean ? d.noSelection : d.scanning}</p>
@@ -453,10 +463,17 @@
 </FilterShell>
 
 <ConfirmCommand
-  command={confirming?.command ?? null}
+  command={(confirming?.root ? confirming.sudoCommand : confirming?.command) ?? null}
   title={confirming ? (d.cleanups[confirming.id]?.title ?? '') : ''}
   body={confirming ? (d.cleanups[confirming.id]?.body ?? '') : ''}
   action={d.run}
+  onterminal={confirming?.root
+    ? () => {
+        const c = confirming
+        confirming = null
+        if (c?.sudoCommand) openTerminalAt(win.serverID, undefined, c.sudoCommand)
+      }
+    : undefined}
   onclose={() => (confirming = null)}
   onconfirm={() => confirming && void clean(confirming)}
 />

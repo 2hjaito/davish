@@ -25,6 +25,9 @@ function demoHours(): HourCount[] {
 const demo: SecurityReport = {
   root: false,
   sudo: true,
+  canSudo: true,
+  asRoot: false,
+  askSudo: false,
   source: 'journal',
   accepted: [
     { time: '2026-10-28T09:12:40+0700', user: 'dangth', ip: '113.161.42.7', method: 'publickey' },

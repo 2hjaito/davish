@@ -292,6 +292,8 @@ const vi = {
     files: (n: number) => `${n} file`,
     needsRoot: 'Lệnh cần root: Davish gõ sẵn vào Terminal với sudo, bạn xem rồi tự nhấn Enter.',
     toTerminal: 'Mở Terminal với lệnh',
+    rootRuns:
+      'Cần root: Davish chạy qua sudo sau khi bạn xác nhận, hỏi mật khẩu sudo một lần mỗi phiên nếu cần.',
     dangerous: 'Mục này có thể xóa dữ liệu thật, không chỉ cache. Kiểm tra kỹ trước khi dọn.',
     tabs: { dirs: 'Thư mục', files: 'File lớn' },
     scan: 'Quét lại',
@@ -320,6 +322,8 @@ const vi = {
       'Nội dung file bị xóa, file vẫn còn nên chương trình đang ghi (như log) vẫn ghi tiếp. Lệnh sẽ chạy:',
     protected:
       'Ổ đĩa không xóa thư mục hệ thống, dữ liệu database hay thư mục home. Dùng mục Dọn dẹp hoặc app tương ứng.',
+    rootUntrusted:
+      'Disk không làm rỗng file này bằng quyền root: đây là link, hoặc nằm trong thư mục mà user khác sở hữu hay người khác ghi được (như thư mục dùng chung của một nhóm), nên file bị làm rỗng có thể là một file khác. Nếu chắc chắn, hãy dùng sudo trong Terminal.',
     ov: {
       asRoot: 'đo bằng root (sudo -n)',
       barLabel: 'Dung lượng ổ đĩa theo phần',
@@ -333,6 +337,7 @@ const vi = {
         'User SSH này không đọc được các thư mục dưới đây nên du bỏ qua, mà chỗ ổ đầy thường nằm ở đây (Docker, database, /root). Davish chỉ đo đủ khi sudo không cần mật khẩu; bạn có thể tự đo bằng sudo trong Terminal.',
       more: (n: number) => `và ${n} thư mục khác`,
       measureSudo: 'Đo bằng sudo trong Terminal',
+      measureAsRoot: 'Đo bằng sudo…',
       unmeasuredOther:
         'Phần này không nằm trong thư mục nào đo được: có thể do quét hết giờ, file đang ghi dở hoặc dung lượng dành riêng của hệ thống file.',
       heldTitle: (size: string) => `${size} bị giữ bởi file đã xóa`,
@@ -883,6 +888,7 @@ const vi = {
           'Chuột phải vào icon trên màn hình chính, hoặc nhấn F2, để đổi tên, icon, màu hoặc ảnh',
           'Chuột phải khoảng trống để tạo tệp hoặc thư mục',
           'Nhấp đúp file để mở trong Editor',
+          'Xóa file của root qua sudo khi server từ chối; thư mục hệ thống và các file cần để đăng nhập không bao giờ bị xóa bằng root',
         ],
         keys: [
           'Enter: mở',
@@ -926,17 +932,29 @@ const vi = {
           'Tạo network, volume; sao chép container thành lệnh docker run',
         ],
         keys: [],
-        runs: ['docker ps, stats, inspect, logs', 'docker start/stop/restart (có xác nhận)'],
+        runs: [
+          'docker ps, stats, inspect, logs',
+          'docker start/stop/restart (có xác nhận)',
+          'Khi docker socket từ chối user không thuộc nhóm docker: chạy lại đúng lệnh đó qua sudo, hỏi mật khẩu sudo một lần mỗi phiên nếu cần. Lệnh gõ sẵn vào Terminal giữ nguyên',
+        ],
       },
       logs: {
         does: 'Theo dõi journal của unit, một file log hoặc log container. Lọc, tạm dừng, tô lỗi.',
         actions: ['Nhấp đường dẫn file trong log để mở ở Editor đúng dòng', 'Tạm dừng để đọc'],
         keys: [],
-        runs: ['journalctl -f', 'tail -F', 'docker logs -f'],
+        runs: [
+          'journalctl -f',
+          'tail -F',
+          'docker logs -f',
+          'Log không đọc được (journal hệ thống, file của root, docker khi không thuộc nhóm docker): theo dõi lại qua sudo, hỏi mật khẩu sudo một lần mỗi phiên nếu cần',
+        ],
       },
       editor: {
         does: 'Sửa file trên server với tô màu cú pháp; lưu atomic, giữ quyền và chủ, sao lưu file trong /etc.',
-        actions: ['Báo khi file bị đổi trên server', 'Lưu bằng sudo qua Terminal khi cần root'],
+        actions: [
+          'Báo khi file bị đổi trên server',
+          'Lưu bằng quyền root qua sudo sau khi hiện đúng lệnh (giữ owner, quyền và bản sao lưu), hoặc bằng sudoedit trong Terminal',
+        ],
         keys: ['⌘S: lưu', '⌘F: tìm'],
         runs: ['SFTP để đọc, ghi file tạm rồi đổi tên'],
       },
@@ -1014,7 +1032,11 @@ const vi = {
           'Mở script và thư mục trong lệnh của tác vụ',
         ],
         keys: [],
-        runs: ['crontab -l, crontab - (có xác nhận)', 'đọc /etc/cron.d'],
+        runs: [
+          'crontab -l, crontab - (có xác nhận)',
+          'đọc /etc/cron.d',
+          'crontab của root (crontab -u root) và file /etc/cron.d không đọc được qua sudo, hỏi mật khẩu sudo một lần mỗi phiên nếu cần',
+        ],
       },
       nginx: {
         does: 'Site, server block, upstream; bật/tắt site, kiểm tra cấu hình trước khi reload, hạn chứng chỉ TLS.',
@@ -1080,6 +1102,7 @@ const vi = {
           'journalctl -u ssh (hoặc đọc /var/log/auth.log)',
           'who, last, lastb',
           'ufw status, fail2ban-client status sshd',
+          'Chặn, bỏ chặn, ban, unban và đọc những gì cần root (lastb, ufw, fail2ban, đăng nhập) qua sudo, hỏi mật khẩu sudo một lần mỗi phiên nếu cần; bật ufw và tắt đăng nhập bằng mật khẩu vẫn qua Terminal',
         ],
       },
       disk: {
@@ -1097,6 +1120,7 @@ const vi = {
           'du -x -d 1 khi mở thư mục sâu hơn',
           'docker system df, journalctl --disk-usage, find',
           'rm, truncate, lệnh dọn dẹp (có xác nhận, cần root thì qua Terminal)',
+          'Đo dung lượng và các cleanup cần root chạy qua sudo (không hỏi nếu sudo không cần mật khẩu; nếu cần thì hỏi mật khẩu sudo một lần mỗi phiên); cache của user vẫn chạy bằng user',
         ],
       },
       ports: {
@@ -1691,6 +1715,14 @@ const vi = {
     overwrite: 'Ghi đè',
     readOnly: 'Chỉ đọc',
     readOnlyBody: 'Bạn không có quyền ghi file này nên nó được mở ở chế độ chỉ đọc.',
+    editAsRoot: 'Sửa bằng sudo…',
+    asRootBody:
+      'Đang sửa bằng sudo: khi lưu, Davish hiện đúng lệnh rồi ghi file bằng quyền root, giữ nguyên owner và quyền của file.',
+    rootSaveTitle: (name: string) => `Lưu “${name}” bằng quyền root?`,
+    rootSaveBody: 'Davish sẽ ghi file qua sudo bằng lệnh này; nội dung mới đi qua stdin:',
+    rootSaveAction: 'Lưu bằng root',
+    rootSaveBackup: (path: string) => `File hiện tại được sao lưu vào ${path} trước.`,
+    rootSaveNoBackup: 'Không tạo bản sao lưu (bật sao lưu trong Cài đặt → Editor).',
     sudo: 'Mở trong Terminal với sudo',
     sudoHint: 'Lệnh sudoedit được điền sẵn; xem lại, nhấn Enter và nhập mật khẩu trong Terminal.',
     reload: 'Tải lại bản trên server',
@@ -2214,6 +2246,8 @@ const vi = {
     loading: 'Đang đọc danh sách container…',
     offline: 'Server chưa kết nối',
     offlineHint: 'Kết nối server để xem các container Docker.',
+    needsSudo:
+      'User này không thuộc nhóm docker nên Docker chỉ trả lời root. Davish có thể chạy docker qua sudo trong phiên này, hoặc bạn chạy trong Terminal.',
     noMatch: 'Không có container nào khớp.',
     noContainers: 'Server chưa có container nào.',
     noSelection: 'Chọn một container để xem chi tiết',
@@ -2554,6 +2588,12 @@ const vi = {
     never: 'Không bao giờ',
     source: 'Nguồn',
     mine: 'Crontab của bạn',
+    rootSource: 'Crontab của root',
+    target: 'Crontab',
+    rootWarn:
+      'Job trong crontab của root chạy với quyền root trên server. Davish ghi qua sudo, sau khi bạn xác nhận đúng lệnh.',
+    rootLocked:
+      'Có mật khẩu sudo, Davish hiện thêm crontab của root và các file hệ thống bạn không đọc được.',
     asUser: (user: string) => `chạy bằng ${user}`,
     command: 'Lệnh',
     nextRuns: 'Lần chạy kế tiếp',
@@ -2814,6 +2854,8 @@ const vi = {
     FS_TOO_LARGE: 'File quá lớn để mở trực tiếp. Hãy tải về.',
     FS_STALE: 'File hoặc thư mục đã thay đổi từ lúc bạn xác nhận. Hãy thử lại.',
     FS_CHANGED: 'File đã bị thay đổi trên server từ lúc bạn mở.',
+    FS_PROTECTED:
+      'Davish không làm việc này bằng quyền root: đường dẫn là phần sống còn của hệ thống, hoặc đi qua link hay thư mục mà user khác sở hữu hoặc ghi được, người đó có thể đổi hướng root sang chỗ khác. Nếu chắc chắn, hãy dùng sudoedit hoặc sudo trong Terminal.',
     CMD_NEEDS_ROOT: 'Lệnh này cần quyền root.',
     CMD_MISSING: 'Server chưa cài chương trình cần cho thao tác này (ví dụ zip).',
     CMD_FAILED: 'Lệnh chạy trên server bị lỗi.',

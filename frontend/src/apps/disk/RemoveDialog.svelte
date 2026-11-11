@@ -9,6 +9,7 @@
 
 <script lang="ts">
   import { toUserError } from '../../lib/api/errors'
+  import { withSudo } from '../../lib/stores/sudoPrompt.svelte'
   import { formatBytes } from '../../lib/format'
   import { t } from '../../lib/i18n'
   import Dialog from '../../lib/ui/Dialog.svelte'
@@ -82,14 +83,25 @@
     busy = true
     error = ''
     try {
-      if (tg.op === 'remove') await backend.remove(serverID, tg.path, command)
-      else await backend.truncate(serverID, tg.path, command)
+      // As root through sudo when the server refuses (ADR 0018).
+      const run =
+        tg.op === 'remove'
+          ? () => backend.remove(serverID, tg.path, command)
+          : () => backend.truncate(serverID, tg.path, command)
+      if (!(await withSudo(serverID, sudo, run))) return
       ondone(tg)
     } catch (e) {
       const ue = toUserError(e)
       // Without the rights, the way out is the same command with sudo.
       if (ue.code === 'FS_PERMISSION_DENIED') needsRoot = true
-      else error = ue.message
+      else if (ue.code === 'INVALID_INPUT' && tg.op === 'truncate') {
+        // Refused as root here; Terminal still gets the sudo command, typed.
+        error = d.rootUntrusted
+        needsRoot = true
+      } else if (ue.code === 'FS_PROTECTED') {
+        error = ue.message
+        needsRoot = true
+      } else error = ue.message
       if (ue.code === 'FS_STALE') void plan(tg)
     } finally {
       busy = false

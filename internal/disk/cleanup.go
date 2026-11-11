@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"davish/internal/apperr"
+	"davish/internal/audit"
 	"davish/internal/shellx"
 )
 
@@ -91,6 +92,17 @@ func withSudo(line string) string {
 // Cleanups lists what could be cleaned, largest first; those that would
 // free nothing are left out.
 func (s *Service) Cleanups(ctx context.Context, serverID string) ([]Cleanup, error) {
+	// The system part as root when that needs no prompt, so root's
+	// folders count (ADR 0018).
+	if sys, ok, _, err := s.measureAsRoot(ctx, serverID, systemProbe); err != nil {
+		return nil, err
+	} else if ok {
+		user, err := s.run.RunLine(ctx, serverID, app, userProbe+" true")
+		if err != nil {
+			return nil, err
+		}
+		return parseCleanups(append(append(user.Stdout, '\n'), sys.Stdout...)), nil
+	}
 	res, err := s.run.RunLine(ctx, serverID, app, probeLine)
 	if err != nil {
 		return nil, err
@@ -206,7 +218,15 @@ func (s *Service) Clean(ctx context.Context, serverID, id, command string) error
 	// A prune of years of images can outlast the default deadline.
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Minute)
 	defer cancel()
-	res, err := s.run.RunLine(ctx, serverID, app, want)
+	var res audit.Result
+	var err error
+	if s.root != nil && slices.Contains(rootCleanups, id) {
+		// The same fixed command, as root through sudo: SUDO_PASSWORD_REQUIRED
+		// for the UI to ask, CMD_NEEDS_ROOT for a terminal.
+		res, err = s.root.Run(ctx, serverID, app, want, nil)
+	} else {
+		res, err = s.run.RunLine(ctx, serverID, app, want)
+	}
 	if err != nil {
 		return err
 	}

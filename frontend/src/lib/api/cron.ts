@@ -18,7 +18,7 @@ export interface Schedule {
 export interface CronJob {
   /** Names the line and its content; an edit of a changed line is refused. */
   id: string
-  /** "user", "/etc/crontab" or "/etc/cron.d/<name>". */
+  /** "user", "root" (root's crontab, through sudo), "/etc/crontab" or "/etc/cron.d/<name>". */
   source: string
   line: number
   schedule: Schedule
@@ -28,7 +28,7 @@ export interface CronJob {
   enabled: boolean
   /** Unix seconds, up to three; empty for @reboot. */
   next: number[]
-  /** Only the user's own crontab. */
+  /** The user's own crontab, and root's through sudo. */
   editable: boolean
 }
 
@@ -40,11 +40,18 @@ export interface CronTable {
   unreadable: string[]
   /** The user's crontab as read. */
   version: string
+  /** Root's crontab is listed and editable through sudo. */
+  root: boolean
+  rootVersion: string
+  /** sudo could show root's crontab and the unreadable files once given the password. */
+  rootLocked: boolean
 }
 
 export type CronOp = 'add' | 'edit' | 'delete' | 'enable' | 'disable'
 
 export interface CronChange {
+  /** "root" for root's crontab; the user's own otherwise. */
+  source: 'user' | 'root'
   op: CronOp
   id: string
   schedule: string
@@ -54,6 +61,8 @@ export interface CronChange {
 export interface CronPlan {
   /** Exactly what runs; the new crontab goes in on stdin. */
   command: string
+  /** command as it runs through sudo, for root's crontab; empty otherwise. */
+  sudo: string
   before: string
   after: string
   /** Where the current crontab is saved first, if there is one. */
@@ -70,6 +79,7 @@ export interface CronRuns {
   lines: string[]
   restricted: boolean
   sudo: string
+  askSudo: boolean
 }
 
 export const cronList = (serverID: string): Promise<CronTable> =>

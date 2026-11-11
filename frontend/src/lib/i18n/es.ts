@@ -297,6 +297,8 @@ const es = {
     needsRoot:
       'Necesita root: Davish escribe el comando en Terminal con sudo; revísalo y pulsa Intro.',
     toTerminal: 'Abrir Terminal con el comando',
+    rootRuns:
+      'Necesita root: Davish lo ejecuta con sudo cuando confirmas, pidiendo la contraseña de sudo una vez por sesión si hace falta.',
     dangerous: 'Esto puede borrar datos reales, no solo cachés. Revísalo antes de limpiar.',
     tabs: { dirs: 'Carpetas', files: 'Archivos grandes' },
     scan: 'Volver a analizar',
@@ -325,6 +327,8 @@ const es = {
       'Se borra el contenido del archivo pero el archivo se queda, así que el programa que escribe en él (como un registro) sigue funcionando. Comando que se ejecutará:',
     protected:
       'Disco no borra carpetas del sistema, datos de bases de datos ni carpetas personales. Usa Limpiar o la app a la que pertenecen.',
+    rootUntrusted:
+      'Disk no vacía este archivo como root: es un enlace, o está en una carpeta que otro usuario posee o en la que otros pueden escribir (como la carpeta compartida de un grupo), así que el archivo vaciado podría ser otro. Si estás seguro, usa sudo en la Terminal.',
     ov: {
       asRoot: 'medido como root (sudo -n)',
       barLabel: 'Espacio del disco por partes',
@@ -338,6 +342,7 @@ const es = {
         'Este usuario SSH no puede leer las carpetas de abajo, así que du se las saltó, y ahí suele estar un disco lleno (Docker, bases de datos, /root). Davish solo las mide si sudo no pide contraseña; puedes medirlas con sudo en un terminal.',
       more: (n: number) => `y ${n} más`,
       measureSudo: 'Medir con sudo en Terminal',
+      measureAsRoot: 'Medir con sudo…',
       unmeasuredOther:
         'Esto no está en ninguna carpeta medida: puede que el análisis se quedara sin tiempo, que haya archivos a medio escribir o que el sistema de archivos lo reserve.',
       heldTitle: (size: string) => `${size} ocupados por archivos borrados`,
@@ -920,6 +925,7 @@ const es = {
           'Clic derecho en un icono del escritorio, o F2, para cambiar su nombre, icono, color o imagen',
           'Clic derecho en un espacio vacío para crear un archivo o carpeta',
           'Doble clic en un archivo para abrirlo en Editor',
+          'Elimina un archivo de root con sudo cuando el servidor lo rechaza; las carpetas del sistema y los archivos para iniciar sesión nunca se eliminan como root',
         ],
         keys: [
           'Intro: abrir',
@@ -966,7 +972,11 @@ const es = {
           'Nueva red o volumen; copia un contenedor como comando docker run',
         ],
         keys: [],
-        runs: ['docker ps, stats, inspect, logs', 'docker start/stop/restart (con confirmación)'],
+        runs: [
+          'docker ps, stats, inspect, logs',
+          'docker start/stop/restart (con confirmación)',
+          'Cuando el socket de docker rechaza a un usuario fuera del grupo docker: el mismo comando otra vez con sudo, pidiendo la contraseña de sudo una vez por sesión si hace falta. Los comandos escritos en un terminal no cambian',
+        ],
       },
       logs: {
         does: 'Sigue el journal de una unidad, un archivo de registro o los registros de un contenedor. Filtra, pausa, resalta errores.',
@@ -975,13 +985,18 @@ const es = {
           'Pausa para leer',
         ],
         keys: [],
-        runs: ['journalctl -f', 'tail -F', 'docker logs -f'],
+        runs: [
+          'journalctl -f',
+          'tail -F',
+          'docker logs -f',
+          'Un registro que no puedes leer (journal del sistema, archivos de root, docker fuera del grupo docker): se sigue de nuevo con sudo, pidiendo la contraseña de sudo una vez por sesión si hace falta',
+        ],
       },
       editor: {
         does: 'Edita archivos en el servidor con resaltado de sintaxis; guardado atómico que conserva permisos y propietario, copias de los archivos de /etc.',
         actions: [
           'Avisa cuando el archivo cambió en el servidor',
-          'Guarda con sudo a través de Terminal cuando hace falta root',
+          'Guarda como root con sudo tras mostrar el comando exacto (conserva propietario, permisos y copia), o con sudoedit en la Terminal',
         ],
         keys: ['⌘S: guardar', '⌘F: buscar'],
         runs: ['SFTP para leer, escribir un archivo temporal y luego renombrarlo'],
@@ -1062,7 +1077,11 @@ const es = {
           'Abrir los scripts y carpetas del comando de una tarea',
         ],
         keys: [],
-        runs: ['crontab -l, crontab - (con confirmación)', 'lee /etc/cron.d'],
+        runs: [
+          'crontab -l, crontab - (con confirmación)',
+          'lee /etc/cron.d',
+          'el crontab de root (crontab -u root) y los archivos de /etc/cron.d ilegibles con sudo, pidiendo la contraseña de sudo una vez por sesión si hace falta',
+        ],
       },
       nginx: {
         does: 'Sitios, bloques server, upstreams; activar/desactivar sitios, probar la configuración antes de recargar, caducidad de los certificados TLS.',
@@ -1125,6 +1144,7 @@ const es = {
           'journalctl -u ssh (o lee /var/log/auth.log)',
           'who, last, lastb',
           'ufw status, fail2ban-client status sshd',
+          'Bloquear, desbloquear, ban y unban, y leer lo que necesita root (lastb, ufw, fail2ban, inicios de sesión), con sudo pidiendo la contraseña una vez por sesión si hace falta; activar ufw y desactivar el acceso por contraseña siguen en la Terminal',
         ],
       },
       disk: {
@@ -1142,6 +1162,7 @@ const es = {
           'du -x -d 1 al abrir una carpeta más profunda',
           'docker system df, journalctl --disk-usage, find',
           'rm, truncate, comandos de limpieza (con confirmación; por Terminal si hace falta root)',
+          'La medición y las limpiezas que necesitan root se ejecutan con sudo (sin preguntar si sudo no pide contraseña; si no, la contraseña de sudo una vez por sesión); las cachés del usuario siguen siendo del usuario',
         ],
       },
       ports: {
@@ -1757,6 +1778,15 @@ const es = {
     overwrite: 'Sobrescribir',
     readOnly: 'Solo lectura',
     readOnlyBody: 'No puedes escribir en este archivo, así que está abierto en solo lectura.',
+    editAsRoot: 'Editar con sudo…',
+    asRootBody:
+      'Editando con sudo: al guardar se muestra el comando exacto y luego se escribe el archivo como root, conservando su propietario y permisos.',
+    rootSaveTitle: (name: string) => `¿Guardar «${name}» como root?`,
+    rootSaveBody:
+      'Davish escribirá el archivo con sudo usando este comando; el texto nuevo entra por stdin:',
+    rootSaveAction: 'Guardar como root',
+    rootSaveBackup: (path: string) => `Primero se copia el archivo actual en ${path}.`,
+    rootSaveNoBackup: 'No se hace copia de seguridad (actívala en Ajustes → Editor).',
     sudo: 'Abrir en Terminal con sudo',
     sudoHint:
       'Se escribe un comando sudoedit; revísalo, pulsa Intro e introduce tu contraseña en Terminal.',
@@ -2297,6 +2327,8 @@ const es = {
     loading: 'Leyendo la lista de contenedores…',
     offline: 'Servidor no conectado',
     offlineHint: 'Conecta el servidor para ver sus contenedores Docker.',
+    needsSudo:
+      'Este usuario no está en el grupo docker, así que Docker solo responde a root. Davish puede ejecutar docker con sudo durante esta sesión, o puedes ejecutarlo en la Terminal.',
     noMatch: 'Ningún contenedor coincide.',
     noContainers: 'El servidor no tiene contenedores.',
     noSelection: 'Elige un contenedor para ver sus detalles',
@@ -2645,6 +2677,12 @@ const es = {
     never: 'Nunca',
     source: 'Origen',
     mine: 'Tu crontab',
+    rootSource: 'Crontab de root',
+    target: 'Crontab',
+    rootWarn:
+      'Las tareas del crontab de root se ejecutan como root en el servidor. Davish lo escribe con sudo, después de que confirmes el comando exacto.',
+    rootLocked:
+      'Con la contraseña de sudo, Davish también puede mostrar el crontab de root y los archivos del sistema que no puedes leer.',
     asUser: (user: string) => `se ejecuta como ${user}`,
     command: 'Comando',
     nextRuns: 'Próximas ejecuciones',
@@ -2917,6 +2955,8 @@ const es = {
     FS_TOO_LARGE: 'El archivo es demasiado grande para abrirlo directamente. Descárgalo.',
     FS_STALE: 'El archivo o la carpeta ha cambiado desde que confirmaste. Inténtalo de nuevo.',
     FS_CHANGED: 'El archivo ha cambiado en el servidor desde que lo abriste.',
+    FS_PROTECTED:
+      'Davish no hace esto como root: la ruta es una parte vital del sistema, o pasa por un enlace o carpeta que otro usuario posee o puede escribir, y podría enviar a root a otro sitio. Si estás seguro, usa sudoedit o sudo en la Terminal.',
     CMD_NEEDS_ROOT: 'Este comando necesita root.',
     CMD_MISSING: 'Al servidor le falta un programa que esta acción necesita (por ejemplo zip).',
     CMD_FAILED: 'El comando ha fallado en el servidor.',

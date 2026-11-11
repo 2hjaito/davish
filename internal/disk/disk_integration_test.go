@@ -15,6 +15,7 @@ import (
 	"davish/internal/conn"
 	"davish/internal/disk"
 	"davish/internal/fs"
+	"davish/internal/sudo"
 	"davish/internal/testsshd"
 )
 
@@ -171,5 +172,121 @@ func TestRemoveAndTruncate(t *testing.T) {
 	}
 	if _, err := s.PlanRemove(ctx, id, "/home/tester"); err == nil {
 		t.Error("planned removing the home folder")
+	}
+}
+
+// sudoer measures, cleans and empties what needs root through sudo once
+// the password is given (ADR 0018).
+func TestSudoerCleansThroughSudo(t *testing.T) {
+	ctx := context.Background()
+	m, id := testsshd.ConnectAs(t, testsshd.Sudoer)
+	run := audit.NewRunner(m, audit.New(discard{}))
+	k := sudo.New(run)
+	s := disk.New(run, fs.New(m, run, testsshd.Quiet()))
+	s.UseRoot(k)
+
+	o, err := s.Overview(ctx, id, "/", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if o.Root || !o.AskSudo || !strings.HasPrefix(o.SudoScan, "sudo sh -c ") {
+		t.Fatalf("before the password: root %v, ask %v, scan %q", o.Root, o.AskSudo, o.SudoScan)
+	}
+	if err := s.Clean(ctx, id, "tmp", "find /tmp /var/tmp -xdev -type f -atime +7 -delete"); errCode(err) != apperr.SudoPasswordRequired {
+		t.Fatalf("clean before the password: %v", err)
+	}
+	if err := k.SetPassword(ctx, id, []byte(testsshd.SudoPassword)); err != nil {
+		t.Fatal(err)
+	}
+	root := func(line string) string {
+		res, err := k.Run(ctx, id, "test", line, nil)
+		if err != nil {
+			t.Fatalf("%s: %v", line, err)
+		}
+		return string(res.Stdout)
+	}
+	old, log := "/tmp/davish-sudo-old", "/var/log/davish-sudo.log"
+	root("printf x > " + old + " && chmod 600 " + old + " && touch -a -d '30 days ago' " + old +
+		" && head -c 4096 /dev/zero > " + log + " && chmod 600 " + log)
+	t.Cleanup(func() { root("rm -f " + old + " " + log) })
+
+	if o, err = s.Overview(ctx, id, "/", ""); err != nil || !o.Root || o.AskSudo {
+		t.Fatalf("after the password: root %v, ask %v, %v", o.Root, o.AskSudo, err)
+	}
+	cs, err := s.Cleanups(ctx, id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var tmp *disk.Cleanup
+	for i := range cs {
+		if cs[i].ID == "tmp" {
+			tmp = &cs[i]
+		}
+	}
+	if tmp == nil || !tmp.Root {
+		t.Fatalf("root's old /tmp file not measured: %+v", cs)
+	}
+	if err := s.Clean(ctx, id, tmp.ID, tmp.Command); err != nil {
+		t.Fatalf("clean through sudo: %v", err)
+	}
+	if out := root("test -e " + old + " && echo there || echo gone"); out != "gone\n" {
+		t.Errorf("old /tmp file: %s", out)
+	}
+
+	plan, err := disk.PlanTruncate(log)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Truncate(ctx, id, log, plan.Command); err != nil {
+		t.Fatalf("truncate through sudo: %v", err)
+	}
+	if out := root("stat -c %s " + log); out != "0\n" {
+		t.Errorf("size after truncate: %s", out)
+	}
+}
+
+func errCode(err error) apperr.Code {
+	var e *apperr.Error
+	if errors.As(err, &e) {
+		return e.Code
+	}
+	return ""
+}
+
+// tester plants /tmp/davish-big.log, a link to a root-only file; sudoer
+// emptying "a big log in /tmp" as root would empty that file.
+func TestRootTruncateRefusesAPlantedLink(t *testing.T) {
+	ctx := context.Background()
+	tm, tid := testsshd.Connect(t)
+	link := "/tmp/davish-big.log"
+	victim := "/etc/davish-truncate-victim"
+
+	m, id := testsshd.ConnectAs(t, testsshd.Sudoer)
+	run := audit.NewRunner(m, audit.New(discard{}))
+	k := sudo.New(run)
+	if err := k.SetPassword(ctx, id, []byte(testsshd.SudoPassword)); err != nil {
+		t.Fatal(err)
+	}
+	if res, err := k.Run(ctx, id, "test", "echo keep > "+victim+" && chmod 600 "+victim, nil); err != nil || res.Exit != 0 {
+		t.Fatalf("setup: %v %s", err, res.Stderr)
+	}
+	testsshd.Run(t, tm, tid, "rm -f "+link+" && ln -s "+victim+" "+link)
+	t.Cleanup(func() {
+		testsshd.Run(t, tm, tid, "rm -f "+link)
+		_, _ = k.Run(ctx, id, "test", "rm -f "+victim, nil)
+	})
+
+	s := disk.New(run, fs.New(m, run, testsshd.Quiet()))
+	s.UseRoot(k)
+	plan, err := disk.PlanTruncate(link)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Truncate(ctx, id, link, plan.Command); errCode(err) != apperr.InvalidInput {
+		t.Errorf("truncate through tester's link: %v", err)
+	}
+	res, err := k.Run(ctx, id, "test", "cat "+victim, nil)
+	if err != nil || string(res.Stdout) != "keep\n" {
+		t.Fatalf("victim emptied: %q %v", res.Stdout, err)
 	}
 }

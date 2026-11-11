@@ -34,7 +34,8 @@
       {/if}
     </div>
     <p>{t.cron.confirmBody}</p>
-    <pre class="command">{pending.plan.command}</pre>
+    <pre class="command">{pending.plan.sudo || pending.plan.command}</pre>
+    {#if pending.change.source === 'root'}<p class="note">{t.cron.rootWarn}</p>{/if}
     {#if pending.plan.backup}<p class="note">{t.cron.backupNote(pending.plan.backup)}</p>{/if}
     {#if error}<p class="error" role="alert">{error}</p>{/if}
   {/if}

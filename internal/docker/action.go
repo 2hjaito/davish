@@ -66,7 +66,7 @@ func (s *Service) Act(ctx context.Context, serverID, name, action string) error 
 	if _, err := PlanAction(name, action); err != nil {
 		return err
 	}
-	res, err := s.run.Run(ctx, serverID, app, shellx.Cmd("docker", action, name))
+	res, err := s.exec(ctx, serverID, shellx.Cmd("docker", action, name))
 	if err != nil {
 		return err
 	}
