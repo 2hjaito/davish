@@ -1086,6 +1086,7 @@ const zh = {
           'journalctl -u ssh（或读取 /var/log/auth.log）',
           'who、last、lastb',
           'ufw status、fail2ban-client status sshd',
+          '封禁、解封、ban、unban 以及读取需要 root 的内容（lastb、ufw、fail2ban、登录）通过 sudo 进行，如有需要每个会话只询问一次 sudo 密码；开启 ufw 和关闭密码登录仍在终端中进行',
         ],
       },
       disk: {

@@ -28,7 +28,8 @@ type Runner interface {
 
 // Service reads login security.
 type Service struct {
-	run Runner
+	run  Runner
+	root Root
 }
 
 // New creates the service.
@@ -89,6 +90,15 @@ type Report struct {
 	// Sudo is set when sudo runs without asking for a password, so a
 	// confirmed action can run without a terminal.
 	Sudo bool `json:"sudo"`
+	// CanSudo is set when an action can run through sudo with the
+	// session's password, asked once (ADR 0018).
+	CanSudo bool `json:"canSudo"`
+	// AsRoot is set when what needs root was read as root.
+	AsRoot bool `json:"asRoot"`
+	// AskSudo is set when root would show more once given the password;
+	// SudoRead is what then runs, for the prompt.
+	AskSudo  bool   `json:"askSudo"`
+	SudoRead string `json:"sudoRead,omitempty"`
 	// Source is where logins were read: "journal", "auth.log" or "" when
 	// neither was readable.
 	Source      string     `json:"source"`
@@ -147,7 +157,32 @@ func (s *Service) Report(ctx context.Context, serverID string) (Report, error) {
 	if err != nil {
 		return Report{}, err
 	}
-	r := parse(res.Stdout)
+	sec := sections(res.Stdout)
+	r := parseSections(sec)
+	if s.root != nil && !r.Root {
+		state, err := s.root.State(ctx, serverID)
+		if err != nil {
+			return Report{}, err
+		}
+		r.CanSudo = r.Sudo || canSudo(state)
+		if r.needsRoot() {
+			rootSec, ok, locked, err := s.readAsRoot(ctx, serverID, state)
+			if err != nil {
+				return Report{}, err
+			}
+			if ok {
+				for _, k := range rootSections {
+					sec[k] = rootSec[k]
+				}
+				noPassword := r.Sudo
+				r = parseSections(sec)
+				r.Sudo, r.CanSudo, r.AsRoot = noPassword, true, true
+			}
+			if locked {
+				r.CanSudo, r.AskSudo, r.SudoRead = true, true, SudoReadCommand
+			}
+		}
+	}
 	r.DisablePassword = DisablePasswordCommand
 	return r, nil
 }
@@ -170,8 +205,9 @@ func sections(out []byte) map[string][]string {
 	return m
 }
 
-func parse(out []byte) Report {
-	sec := sections(out)
+func parse(out []byte) Report { return parseSections(sections(out)) }
+
+func parseSections(sec map[string][]string) Report {
 	r := Report{Root: first(sec["uid"]) == "0", Sudo: first(sec["sudo"]) == "yes"}
 
 	logs := sec["journal"]

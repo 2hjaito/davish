@@ -1117,6 +1117,7 @@ const en = {
           'journalctl -u ssh (or reads /var/log/auth.log)',
           'who, last, lastb',
           'ufw status, fail2ban-client status sshd',
+          'Block, unblock, ban and unban, and reading what needs root (lastb, ufw, fail2ban, logins), through sudo with the sudo password once per session if needed; turning ufw on and password logins off stay in Terminal',
         ],
       },
       disk: {
