@@ -18,7 +18,7 @@ Keep the commands you type often, each with a name, for one server or every serv
 
 ## Files
 
-Finder-style browser over SFTP: upload, download, drag and drop from your OS, rename, delete, compress, and copy between servers through your machine. Right-click empty space to create a file or folder in the folder on screen; Davish never overwrites an existing file.
+Finder-style browser over SFTP: upload, download, drag and drop from your OS, rename, delete, compress, and copy between servers through your machine. Hold a file and drag a little: a ring of actions opens around the pointer (open in Editor or Terminal, rename, delete, compress, copy the path, add to desktop); drop on a slice to pick it, in the middle or with Esc to cancel. Right-click empty space to create a file or folder in the folder on screen; Davish never overwrites an existing file.
 
 ## Desktop shortcuts
 

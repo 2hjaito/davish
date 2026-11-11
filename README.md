@@ -8,6 +8,10 @@
 Terminal, files, services, Docker, logs, cron, nginx, ports, a browser, disk, login security, SSH keys, packages and git over plain SSH, in one place that feels like an operating system.<br>
 Nothing to install on the server.
 
+<p align="center">
+  <img src="assets/demo.gif" alt="davish demo: a file's action ring, Terminal, Docker, ports, login security and the git graph over SSH" width="800">
+</p>
+
 [![Stars](https://img.shields.io/github/stars/2hjaito/davish?color=f6cf8f)](https://github.com/2hjaito/davish/stargazers)
 [![Downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2F2hjaito%2Fdavish%2Fstats%2Fdownloads.json)](https://github.com/2hjaito/davish/releases)
 [![Release](https://img.shields.io/github/v/release/2hjaito/davish?color=0a64d8)](https://github.com/2hjaito/davish/releases/latest)
@@ -40,7 +44,7 @@ Nothing to install on the server.
 
 - [Terminal](FEATURES.md#terminal): tabs, GPU rendering, an optional powerline prompt
 - [Saved commands](FEATURES.md#saved-commands): your frequent commands, typed into Terminal in one click
-- [Files](FEATURES.md#files): Finder-style SFTP, drag and drop, copy between servers
+- [Files](FEATURES.md#files): Finder-style SFTP, drag and drop, copy between servers, hold a file for a ring of actions
 - [Editor](FEATURES.md#editor): CodeMirror with atomic saves and backups
 - [Logs](FEATURES.md#logs): journal, files and containers, live
 - [Monitor](FEATURES.md#monitor): CPU, memory, disks, network, GPUs, processes
@@ -171,3 +175,5 @@ Davish is free software under the [GNU General Public License v3.0](LICENSE). Co
 ## Code signing policy
 
 Free code signing for the Windows builds is provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org). Team roles, what is signed and what Davish sends over the network: [CODE_SIGNING.md](CODE_SIGNING.md).
+
+If davish saves you time, a ⭐ on GitHub helps a lot!
