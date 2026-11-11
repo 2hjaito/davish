@@ -85,6 +85,7 @@ describe('withoutPath', () => {
       root: false,
       partial: false,
       sudoMeasure: '',
+      askSudo: false,
     }
     const got = withoutPath(o, '/var/lib/docker', 60)
     expect(got.mount.used).toBe(90)

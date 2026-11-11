@@ -164,6 +164,8 @@ export function FilesPlanCompress(arg1:string,arg2:string,arg3:string):Promise<f
 
 export function FilesPlanRemove(arg1:string,arg2:string):Promise<fs.RemovePlan>;
 
+export function FilesPlanSaveAsRoot(arg1:string,arg2:string,arg3:fs.SaveOptions):Promise<fs.RootSavePlan>;
+
 export function FilesRead(arg1:string,arg2:string):Promise<fs.File>;
 
 export function FilesRemove(arg1:string,arg2:string,arg3:string):Promise<void>;
@@ -171,6 +173,8 @@ export function FilesRemove(arg1:string,arg2:string,arg3:string):Promise<void>;
 export function FilesRename(arg1:string,arg2:string,arg3:string):Promise<void>;
 
 export function FilesSave(arg1:string,arg2:string,arg3:Array<number>,arg4:fs.SaveOptions):Promise<fs.SaveResult>;
+
+export function FilesSaveAsRoot(arg1:string,arg2:string,arg3:Array<number>,arg4:fs.SaveOptions,arg5:fs.RootSavePlan):Promise<fs.SaveResult>;
 
 export function FilesStat(arg1:string,arg2:string):Promise<fs.Entry>;
 
@@ -239,6 +243,8 @@ export function LockSetPassword(arg1:string,arg2:string):Promise<void>;
 export function LockState():Promise<lock.State>;
 
 export function LogsStart(arg1:string,arg2:logs.Source):Promise<logs.Started>;
+
+export function LogsStartAsRoot(arg1:string,arg2:logs.Source):Promise<logs.Started>;
 
 export function LogsStop(arg1:string):Promise<void>;
 

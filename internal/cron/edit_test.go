@@ -27,11 +27,11 @@ func TestJobLine(t *testing.T) {
 func TestFindJob(t *testing.T) {
 	cur := "MAILTO=x\n0 3 * * * a\n#5 * * * * b\n"
 	id := lineID(SourceUser, 3, "#5 * * * * b")
-	if i, err := findJob(cur, id); err != nil || i != 2 {
+	if i, err := findJob(cur, SourceUser, id); err != nil || i != 2 {
 		t.Errorf("findJob = %d, %v", i, err)
 	}
 	// Same line number, other content: changed meanwhile.
-	if _, err := findJob("MAILTO=x\n0 3 * * * a\n#5 * * * * c\n", id); err == nil {
+	if _, err := findJob("MAILTO=x\n0 3 * * * a\n#5 * * * * c\n", SourceUser, id); err == nil {
 		t.Error("changed line found")
 	}
 }

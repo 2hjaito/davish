@@ -9,6 +9,7 @@
   import Empty from '../../lib/ui/Empty.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import NeedsRoot from '../../lib/ui/NeedsRoot.svelte'
+  import { sudoPrompt } from '../../lib/stores/sudoPrompt.svelte'
   import { getWindowContext } from '../../lib/wm/context'
   import { logsRequests, openFileInEditor } from '../../lib/wm/intents.svelte'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
@@ -43,6 +44,10 @@
   let status = $state<'idle' | 'live' | 'stopped' | 'lost' | 'failed'>('idle')
   let failure = $state('')
   let sudo = $state('')
+  /** The stream runs as root, through sudo. */
+  let rooted = $state(false)
+  /** sudo could read this once given the session's password (ADR 0018). */
+  let askSudo = $state(false)
   let suggestions = $state.raw<string[]>([])
   /** The sudo command to offer once a journal stays silent. */
   let quiet = $state('')
@@ -61,10 +66,16 @@
     return src.kind === 'journal' && !src.target ? t.logs.wholeJournal : src.target
   }
 
-  async function start(src: LogSource) {
+  /**
+   * Follows src, as root when asRoot. denied is the sudo line of the stream
+   * the server refused, kept for the terminal while sudo is tried.
+   */
+  async function start(src: LogSource, asRoot = false, denied = '') {
     stop?.()
     stop = null
     source = src
+    rooted = asRoot
+    askSudo = false
     lines = []
     held = []
     paused = false
@@ -75,25 +86,38 @@
     status = 'live'
     const mine = src
     try {
-      const s = await follow(win.serverID, src, {
-        lines: (batch) => {
-          if (source !== mine) return
-          quiet = ''
-          if (paused) held = append(held, batch)
-          else lines = append(lines, batch)
+      const s = await follow(
+        win.serverID,
+        src,
+        {
+          lines: (batch) => {
+            if (source !== mine) return
+            quiet = ''
+            if (paused) held = append(held, batch)
+            else lines = append(lines, batch)
+          },
+          end: (e) => {
+            if (source !== mine) return
+            stop = null
+            if (!e.error) status = 'stopped'
+            else if (e.error.code === 'CONN_NOT_CONNECTED') status = 'lost'
+            else if (e.error.code === 'CMD_NEEDS_ROOT' && !asRoot) {
+              // Try again as root: right away when sudo needs no password,
+              // else the user is offered the prompt.
+              void start(mine, true, e.sudo ?? '')
+            } else if (e.error.code === 'SUDO_PASSWORD_WRONG') {
+              status = 'failed'
+              sudo = denied
+              askSudo = true
+            } else {
+              status = 'failed'
+              failure = toUserError(e).message
+              sudo = e.error.code === 'CMD_NEEDS_ROOT' ? (e.sudo ?? denied) : ''
+            }
+          },
         },
-        end: (e) => {
-          if (source !== mine) return
-          stop = null
-          if (!e.error) status = 'stopped'
-          else if (e.error.code === 'CONN_NOT_CONNECTED') status = 'lost'
-          else {
-            status = 'failed'
-            failure = toUserError(e).message
-            sudo = e.error.code === 'CMD_NEEDS_ROOT' ? (e.sudo ?? '') : ''
-          }
-        },
-      })
+        asRoot,
+      )
       if (source === mine && status === 'live') {
         stop = s.stop
         // journalctl prints nothing, not an error, for an account that
@@ -109,7 +133,16 @@
       const ue = toUserError(e)
       status = ue.code === 'CONN_NOT_CONNECTED' ? 'lost' : 'failed'
       failure = ue.message
+      if (asRoot && (ue.code === 'SUDO_PASSWORD_REQUIRED' || ue.code === 'CMD_NEEDS_ROOT')) {
+        sudo = denied
+        askSudo = ue.code === 'SUDO_PASSWORD_REQUIRED'
+      }
     }
+  }
+
+  async function unlock(command: string) {
+    const src = source
+    if (src && (await sudoPrompt.ask(win.serverID, command))) void start(src, true, command)
   }
 
   function submit(e: SubmitEvent) {
@@ -176,6 +209,13 @@
 <TitleBar>
   <span class="title">{source ? label(source) : t.apps.logs}</span>
 </TitleBar>
+
+{#snippet sudoButton(run: () => void)}
+  <button type="button" class="btn sudo" onclick={run}>
+    <Icon name="key" size={13} />
+    {t.sudo.journal}
+  </button>
+{/snippet}
 
 <div class="logs" class:blurred={!ctx.focused}>
   <form class="toolbar" onsubmit={submit}>
@@ -263,10 +303,13 @@
   {:else if status === 'failed' && sudo}
     <div class="root">
       <NeedsRoot serverID={win.serverID} command={sudo} message={t.logs.needsRoot} />
+      {#if askSudo}{@render sudoButton(() => void unlock(sudo))}{/if}
     </div>
   {:else if quiet && status === 'live' && connected && lines.length === 0}
     <div class="root">
       <NeedsRoot serverID={win.serverID} command={quiet} message={t.logs.quiet} />
+      <!-- Tried as root first: the prompt only comes if sudo needs it. -->
+      {#if !rooted}{@render sudoButton(() => source && void start(source, true, quiet))}{/if}
     </div>
   {:else if lines.length === 0}
     <Empty
@@ -450,6 +493,10 @@
 
   /* Fills the body like the log view; the notice keeps its light-theme
      text, so it sits on a light card in this dark window. */
+  .sudo {
+    margin-top: 10px;
+  }
+
   .root {
     flex: 1;
     min-height: 0;

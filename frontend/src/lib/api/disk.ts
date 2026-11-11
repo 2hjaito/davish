@@ -27,7 +27,7 @@ export interface Cleanup {
   bytes: number
   count?: number
   command: string
-  /** Typed into a terminal as sudoCommand instead of run. */
+  /** Needs root: runs as sudoCommand through sudo (ADR 0018), or in a terminal. */
   root: boolean
   sudoCommand?: string
   /** May delete data, not only caches and leftovers. */
@@ -61,6 +61,10 @@ export interface Overview {
   partial: boolean
   /** Read-only, typed into a terminal: measures as root with the user's password. */
   sudoMeasure: string
+  /** sudo could measure it all once given the session's password. */
+  askSudo: boolean
+  /** Exactly what measuring as root runs, for the sudo prompt. */
+  sudoScan?: string
 }
 
 /** How a file would be emptied (internal/disk.TruncatePlan). */

@@ -4,6 +4,7 @@ package logs_test
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"sync"
 	"testing"
@@ -13,6 +14,7 @@ import (
 	"davish/internal/audit"
 	"davish/internal/events"
 	"davish/internal/logs"
+	"davish/internal/sudo"
 	"davish/internal/testsshd"
 )
 
@@ -144,4 +146,94 @@ func TestUnreadableFileNeedsRoot(t *testing.T) {
 	if end.Error == nil || end.Error.Code != apperr.CmdNeedsRoot || end.Sudo != "sudo tail -F -n 200 -- /etc/shadow" {
 		t.Errorf("end = %+v", end)
 	}
+}
+
+// sudoer follows a file only root may read through sudo once the password
+// is given, and the password never reaches the audit log (ADR 0018).
+func TestSudoerFollowsRootFileThroughSudo(t *testing.T) {
+	ctx := context.Background()
+	m, id := testsshd.ConnectAs(t, testsshd.Sudoer)
+	rec := &recorder{lines: map[string][]string{}, ends: map[string]logs.End{}}
+	log := audit.New(rec)
+	k := sudo.New(audit.NewRunner(m, log))
+	s := logs.New(m, log, rec, testsshd.Quiet())
+	s.UseRoot(k)
+	t.Cleanup(s.Close)
+
+	src := logs.Source{Kind: logs.KindFile, Target: "/root/davish-sudo.log"}
+	if _, err := s.StartAsRoot(ctx, id, src); codeOf(err) != apperr.SudoPasswordRequired {
+		t.Fatalf("before the password: %v", err)
+	}
+	if err := k.SetPassword(ctx, id, []byte(testsshd.SudoPassword)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := k.Run(ctx, id, "test", "printf 'davish-root-line\\n' > /root/davish-sudo.log && chmod 600 /root/davish-sudo.log", nil); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _, _ = k.Run(ctx, id, "test", "rm -f /root/davish-sudo.log", nil) })
+
+	plain, err := s.Start(ctx, id, src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rec.waitFor(t, "plain end", func() bool { _, ok := rec.ends[plain.StreamID]; return ok })
+	if e := rec.ends[plain.StreamID]; e.Error == nil || e.Error.Code != apperr.CmdNeedsRoot {
+		t.Fatalf("plain end = %+v", e)
+	}
+
+	st, err := s.StartAsRoot(ctx, id, src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rec.waitFor(t, "the root-only line", func() bool { return contains(rec.lines[st.StreamID], "davish-root-line") })
+	s.Stop(st.StreamID)
+	rec.waitFor(t, "end", func() bool { _, ok := rec.ends[st.StreamID]; return ok })
+	if e := rec.ends[st.StreamID]; e.Error != nil {
+		t.Errorf("end after stop = %+v", e)
+	}
+	for _, e := range log.Entries() {
+		if strings.Contains(e.Command, testsshd.SudoPassword) {
+			t.Fatalf("password in the audit log: %s", e.Command)
+		}
+	}
+	for _, l := range rec.lines[st.StreamID] {
+		if strings.Contains(l, testsshd.SudoPassword) {
+			t.Fatalf("password in the stream: %s", l)
+		}
+	}
+}
+
+// refusing plays sudo turning the password down on a stream: it says so
+// and exits 1, which alone would read as a failed command.
+type refusing struct{ forgot string }
+
+func (r *refusing) Prepare(context.Context, string, string, string) (string, []byte, error) {
+	return "echo 'sudo: 1 incorrect password attempt' >&2; exit 1", nil, nil
+}
+
+func (r *refusing) Forget(serverID string) { r.forgot = serverID }
+
+func TestRefusedPasswordEndsTheStreamAndIsForgotten(t *testing.T) {
+	s, rec, _, id := setup(t)
+	r := &refusing{}
+	s.UseRoot(r)
+	st, err := s.StartAsRoot(context.Background(), id, logs.Source{Kind: logs.KindJournal})
+	if err != nil {
+		t.Fatal(err)
+	}
+	rec.waitFor(t, "end", func() bool { _, ok := rec.ends[st.StreamID]; return ok })
+	if e := rec.ends[st.StreamID]; e.Error == nil || e.Error.Code != apperr.SudoPasswordWrong {
+		t.Fatalf("end = %+v", e)
+	}
+	if r.forgot != id {
+		t.Errorf("password not forgotten: %q", r.forgot)
+	}
+}
+
+func codeOf(err error) apperr.Code {
+	var e *apperr.Error
+	if errors.As(err, &e) {
+		return e.Code
+	}
+	return ""
 }
