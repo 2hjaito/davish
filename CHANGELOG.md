@@ -4,6 +4,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.13.4] - 2026-11-11
+
 ### Sửa
 - Docker: đăng nhập bằng user không thuộc nhóm `docker` thì danh sách container, image, volume và các thao tác start, stop, restart, xóa, tạo network/volume không còn chỉ báo "cần root": Davish chạy lại đúng lệnh đó qua `sudo`. Không cần mật khẩu thì chạy luôn; cần mật khẩu thì app hiện nút "Xem bằng sudo…" và hỏi một lần mỗi phiên, như Dịch vụ và Nginx (#117). Lệnh gõ sẵn vào Terminal (run, pull, exec, compose) giữ nguyên.
 - Cron: đăng nhập bằng user có quyền sudo thì Cron hiện thêm crontab của root, thêm, sửa, xóa, bật, tắt job trong đó qua `sudo crontab -u root -`. Crontab cũ được backup vào `/root` trước, hộp xác nhận hiện đúng lệnh và cảnh báo job sẽ chạy với quyền root. File trong `/etc/crontab`, `/etc/cron.d` không đọc được và nhật ký chạy job cũng đọc qua sudo. Cần mật khẩu thì có nút "Xem bằng sudo…", hỏi một lần mỗi phiên (#117). User không có sudo không thấy crontab của root. File trong `/etc/cron.d` vẫn sửa bằng Editor.

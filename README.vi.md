@@ -31,7 +31,7 @@ Không cài gì lên server.
 - **Mở là vào.** Không màn hình đăng nhập, không web panel: Davish tự kết nối server bạn dùng gần nhất bằng SSH key và đưa bạn vào thẳng desktop của nó. Không có gì mới lắng nghe trên server, nên không phải mở thêm cổng nào.
 - **Không cần agent.** Davish chỉ cần `sshd` và SFTP. Mọi thứ chạy từ máy bạn qua SSH; không chép, không cài, không để lại gì trên server.
 - **Thấy trước mọi lệnh.** Thao tác phá hủy (dừng dịch vụ, xóa file, khởi động lại container, thay crontab) hiện đúng lệnh sẽ chạy trước khi chạy. Nhật ký lệnh ghi lại mọi thứ Davish đã chạy thay bạn.
-- **Bí mật nằm trong keychain.** Mật khẩu và passphrase chỉ lưu trong keychain của hệ điều hành. Davish không bao giờ lưu hay tự gõ mật khẩu `sudo`: khi cần root, nó mở Terminal với lệnh gõ sẵn để bạn tự nhấn Enter.
+- **Bí mật nằm trong keychain.** Mật khẩu và passphrase chỉ lưu trong keychain của hệ điều hành. Mật khẩu `sudo` không bao giờ được lưu: khi cần root, Davish hỏi một lần mỗi phiên, chỉ giữ trong bộ nhớ và đưa cho sudo qua stdin, hoặc bạn tự chạy lệnh trong Terminal.
 - **Tự khóa khi bạn rời máy.** Mật khẩu khóa riêng, Touch ID trên macOS; khóa khi máy ngủ dậy, sau thời gian không dùng, hoặc `⌘L`. Phiên SSH vẫn chạy sau màn khóa, nhưng không thao tác nào tới được server cho tới khi mở khóa.
 - **Nhiều server, một desktop.** Mỗi server là một workspace (`⌘1`…`⌘9`) nhớ cửa sổ riêng của nó. Kéo file để copy giữa các server.
 - **Tự cập nhật.** Có bản mới thì hiện thay đổi kèm Cập nhật, Để sau, Bỏ qua bản này; Davish tự tải, kiểm chữ ký rồi khởi động lại vào bản mới. Không phải cài lại.
@@ -116,7 +116,7 @@ Bản build sẵn cho macOS (universal), Windows và Linux nằm trong từng [r
 | Cron | `crontab` |
 | Nginx | nginx với `sites-available` / `sites-enabled` hoặc `conf.d` |
 
-Thao tác cần root (dừng dịch vụ hệ thống, sửa file của root) được chuyển sang Terminal với `sudo` gõ sẵn, không bao giờ chạy ngầm.
+Thao tác cần root (dừng dịch vụ hệ thống, sửa file của root) hiện đúng lệnh trước, rồi chạy qua `sudo` với mật khẩu hỏi một lần mỗi phiên, hoặc chuyển sang Terminal với `sudo` gõ sẵn. Không có gì chạy ngầm bằng root, và những gì có thể khóa bạn khỏi server vẫn chỉ qua Terminal.
 
 ## Phím tắt
 

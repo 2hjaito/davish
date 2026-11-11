@@ -31,7 +31,7 @@ Nothing to install on the server.
 - **Open it and you're in.** No login screen, no web panel: Davish connects to the server you used last with your SSH key and puts you on its desktop. Nothing extra listens on the server, so there is no new port to open or protect.
 - **Agentless.** Davish only needs `sshd` and SFTP. Everything runs from your machine over SSH; nothing is copied to, installed on or left behind on the server.
 - **You see every command.** Anything destructive (stop a service, remove a file, restart a container, replace a crontab) shows the exact command before it runs. The command log records everything Davish ran on your behalf.
-- **Secrets stay in your keychain.** Passwords and passphrases live only in the OS keychain. Davish never stores or types a `sudo` password: when root is needed, it opens a terminal with the command typed in and lets you press Enter.
+- **Secrets stay in your keychain.** Passwords and passphrases live only in the OS keychain. A `sudo` password is never saved: when root is needed, Davish asks for it once per session, keeps it in memory only and hands it to sudo on stdin, or you run the command in a terminal yourself.
 - **Locks when you step away.** A lock password of its own, Touch ID on macOS; it locks when the machine wakes, after idle time or with `⌘L`. Sessions keep running behind the lock, but nothing reaches a server until you unlock.
 - **Many servers, one desktop.** Each server is a workspace (`⌘1`…`⌘9`) that remembers its own windows. Copy files between servers by dragging them.
 - **Updates itself.** A new version shows its changes with Update, Later and Skip this version; Davish downloads it, checks its signature and restarts into it. No reinstalling.
@@ -116,7 +116,7 @@ Prebuilt apps for macOS (universal), Windows and Linux are attached to each [rel
 | Cron | `crontab` |
 | Nginx | nginx with `sites-available` / `sites-enabled` or `conf.d` |
 
-Actions that need root (stopping a system service, editing a root-owned file) are handed to a terminal with `sudo` typed in, never run silently.
+Actions that need root (stopping a system service, editing a root-owned file) show the exact command first, then run through `sudo` with the password asked once per session, or go to a terminal with `sudo` typed in. Nothing runs as root silently, and what could lock you out of the server stays in the terminal.
 
 ## Keyboard shortcuts
 
