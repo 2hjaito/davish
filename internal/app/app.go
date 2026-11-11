@@ -120,6 +120,7 @@ func New(version string) (*App, error) {
 	a.services.UseRoot(a.sudo)
 	a.docker = docker.New(runner)
 	a.cron = cron.New(runner, a.conns)
+	a.cron.UseRoot(a.sudo)
 	a.nginx = nginx.New(runner, a.conns, emitter{a})
 	a.nginx.UseRoot(a.sudo)
 	a.keys = sshkeys.New(a.conns, runner)

@@ -49,7 +49,8 @@ type Job struct {
 	Enabled  bool     `json:"enabled"`
 	// Next runs as unix seconds, up to three; empty for @reboot.
 	Next []int64 `json:"next"`
-	// Editable is true for the user's crontab; system files need root.
+	// Editable is true for the user's crontab and root's; system files
+	// open in Editor.
 	Editable bool `json:"editable"`
 }
 
@@ -70,12 +71,20 @@ type Table struct {
 	Unreadable []string `json:"unreadable"`
 	// Version identifies the user's crontab as read, for Apply.
 	Version string `json:"version"`
+	// Root is set when root's crontab is listed (source "root") and can
+	// be edited through sudo; RootVersion identifies it as read.
+	Root        bool   `json:"root"`
+	RootVersion string `json:"rootVersion"`
+	// RootLocked is set when sudo could show root's crontab and the
+	// unreadable files once given the password: the UI offers to ask.
+	RootLocked bool `json:"rootLocked"`
 }
 
 // Service reads and edits crontabs on each server.
 type Service struct {
 	run   Runner
 	conns Conns
+	root  Root
 	now   func() time.Time
 }
 
@@ -99,8 +108,23 @@ func (s *Service) List(ctx context.Context, serverID string) (Table, error) {
 	t := Table{Jobs: []Job{}, Env: []Env{}, Unreadable: []string{}, Zone: loc.String(), Version: version(text)}
 	now := s.now().In(loc)
 	t.add(SourceUser, text, false, now)
+	rootText, _, access, err := s.rootCrontab(ctx, serverID)
+	if err != nil {
+		return Table{}, err
+	}
+	t.RootLocked = access == rootLocked
+	if access == rootOpen {
+		t.Root, t.RootVersion = true, version(rootText)
+		t.add(SourceRoot, rootText, false, now)
+	}
 	for _, p := range systemFiles(sc) {
 		data, err := readFile(sc, p)
+		if err != nil && access == rootOpen {
+			data, _, err = s.readAsRoot(ctx, serverID, p)
+			if err == nil && data == "" {
+				err = errUnread
+			}
+		}
 		if err != nil {
 			t.Unreadable = append(t.Unreadable, p)
 			continue
@@ -120,7 +144,7 @@ func (t *Table) add(source, text string, system bool, now time.Time) {
 			j := Job{
 				ID: lineID(source, e.Line, e.Text), Source: source, Line: e.Line,
 				Schedule: sched, User: e.User, Command: e.Command, Enabled: e.Enabled,
-				Next: []int64{}, Editable: source == SourceUser,
+				Next: []int64{}, Editable: source == SourceUser || source == SourceRoot,
 			}
 			for at := now; len(j.Next) < 3; {
 				at = sched.Next(at)

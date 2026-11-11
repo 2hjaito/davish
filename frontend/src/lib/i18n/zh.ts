@@ -1005,7 +1005,11 @@ const zh = {
           '打开任务命令中的脚本和文件夹',
         ],
         keys: [],
-        runs: ['crontab -l、crontab -（需确认）', '读取 /etc/cron.d'],
+        runs: [
+          'crontab -l、crontab -（需确认）',
+          '读取 /etc/cron.d',
+          '通过 sudo 读取 root 的 crontab（crontab -u root）和无法读取的 /etc/cron.d 文件，如有需要每个会话只询问一次 sudo 密码',
+        ],
       },
       nginx: {
         does: '站点、server 块、upstream；启用/停用站点，重载前测试配置，TLS 证书到期时间。',
@@ -2509,6 +2513,11 @@ const zh = {
     never: '从不',
     source: '来源',
     mine: '你的 crontab',
+    rootSource: 'root 的 crontab',
+    target: 'Crontab',
+    rootWarn:
+      'root 的 crontab 中的任务在服务器上以 root 身份运行。Davish 会在你确认确切命令后通过 sudo 写入。',
+    rootLocked: '提供 sudo 密码后，Davish 还能显示 root 的 crontab 以及你无法读取的系统文件。',
     asUser: (user: string) => `以 ${user} 运行`,
     command: '命令',
     nextRuns: '接下来的运行',

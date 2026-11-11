@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"davish/internal/apperr"
+	"davish/internal/audit"
 	"davish/internal/shellx"
 )
 
@@ -18,9 +19,11 @@ const (
 	OpDisable = "disable"
 )
 
-// Change is one edit of the user's crontab. ID names the job for every op
-// but add; Schedule and Command are the job's new content for add and edit.
+// Change is one edit of the user's crontab, or of root's when Source is
+// SourceRoot. ID names the job for every op but add; Schedule and Command
+// are the job's new content for add and edit.
 type Change struct {
+	Source   string `json:"source"`
 	Op       string `json:"op"`
 	ID       string `json:"id"`
 	Schedule string `json:"schedule"`
@@ -31,6 +34,9 @@ type Change struct {
 type Plan struct {
 	// Command is exactly what runs; the new crontab goes in on stdin.
 	Command string `json:"command"`
+	// Sudo is Command as it runs through sudo, for root's crontab; empty
+	// for the user's own.
+	Sudo string `json:"sudo"`
 	// Before and After are the line removed and the line written; one is
 	// empty for add and delete.
 	Before string `json:"before"`
@@ -73,7 +79,16 @@ func (s *Service) Apply(ctx context.Context, serverID string, c Change, confirme
 	if p.Version != confirmed.Version || p.Command != confirmed.Command {
 		return apperr.New(apperr.FSStale, "the crontab changed since the change was confirmed")
 	}
-	res, err := s.run.RunInput(ctx, serverID, app, p.Command, []byte(text))
+	var res audit.Result
+	if c.Source == SourceRoot {
+		var access rootAccess
+		res, access, err = s.asRoot(ctx, serverID, p.Command, []byte(text))
+		if err == nil && access != rootOpen {
+			err = rootError(access)
+		}
+	} else {
+		res, err = s.run.RunInput(ctx, serverID, app, p.Command, []byte(text))
+	}
 	if err != nil {
 		return err
 	}
@@ -88,7 +103,22 @@ func (s *Service) Apply(ctx context.Context, serverID string, c Change, confirme
 
 // plan returns the plan and the new crontab text.
 func (s *Service) plan(ctx context.Context, serverID string, c Change, stamp time.Time) (Plan, string, error) {
-	cur, exists, err := s.userCrontab(ctx, serverID)
+	root := c.Source == SourceRoot
+	if !root && c.Source != "" && c.Source != SourceUser {
+		return Plan{}, "", apperr.New(apperr.InvalidInput, "only the user's and root's crontabs are edited here")
+	}
+	var cur string
+	var exists bool
+	var err error
+	if root {
+		var access rootAccess
+		cur, exists, access, err = s.rootCrontab(ctx, serverID)
+		if err == nil && access != rootOpen {
+			err = rootError(access)
+		}
+	} else {
+		cur, exists, err = s.userCrontab(ctx, serverID)
+	}
 	if err != nil {
 		return Plan{}, "", err
 	}
@@ -108,7 +138,11 @@ func (s *Service) plan(ctx context.Context, serverID string, c Change, stamp tim
 		lines = append(lines, newLine)
 		p.After = newLine
 	} else {
-		i, err := findJob(cur, c.ID)
+		source := SourceUser
+		if root {
+			source = SourceRoot
+		}
+		i, err := findJob(cur, source, c.ID)
 		if err != nil {
 			return Plan{}, "", err
 		}
@@ -134,15 +168,23 @@ func (s *Service) plan(ctx context.Context, serverID string, c Change, stamp tim
 		text = ""
 	}
 
-	install := shellx.Cmd("crontab", "-").String()
-	p.Command = install
+	install, list := shellx.Cmd("crontab", "-"), shellx.Cmd("crontab", "-l")
+	if root {
+		install, list = shellx.Cmd("crontab", "-u", "root", "-"), rootCrontabCmd
+	}
+	p.Command = install.String()
 	if exists {
-		home, err := s.home(serverID)
-		if err != nil {
-			return Plan{}, "", err
+		home := rootHome
+		if !root {
+			if home, err = s.home(serverID); err != nil {
+				return Plan{}, "", err
+			}
 		}
 		p.Backup = home + "/.crontab.bak-" + stamp.UTC().Format(backupStamp)
-		p.Command = shellx.Cmd("crontab", "-l").String() + " > " + shellx.Quote(p.Backup) + " && " + install
+		p.Command = list.String() + " > " + shellx.Quote(p.Backup) + " && " + install.String()
+	}
+	if root {
+		p.Sudo = shellx.Cmd("sudo", "sh", "-c", p.Command).String()
 	}
 	return p, text, nil
 }
@@ -161,11 +203,11 @@ func jobLine(schedule, command string) (string, error) {
 	return strings.Join(strings.Fields(sched.Raw), " ") + " " + command, nil
 }
 
-// findJob returns the index of the user's job id names in cur, which must
-// still have the same content at the same line.
-func findJob(cur, id string) (int, error) {
+// findJob returns the index of the job id names in source's crontab cur,
+// which must still have the same content at the same line.
+func findJob(cur, source, id string) (int, error) {
 	for _, e := range ParseCrontab(cur, false) {
-		if e.Kind == KindJob && lineID(SourceUser, e.Line, e.Text) == id {
+		if e.Kind == KindJob && lineID(source, e.Line, e.Text) == id {
 			return e.Line - 1, nil
 		}
 	}

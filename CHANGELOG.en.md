@@ -8,6 +8,7 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 - Monitor on Windows servers: CPU per core, memory and swap, drives, network, disk throughput, GPUs, processes, system info and service/container alerts, read through Windows PowerShell 5.1 and CIM over SSH. Nothing is installed on the server. Load average, I/O wait and steal time do not exist on Windows and are hidden. Works whether the server's SSH shell is cmd.exe or PowerShell.
 
 ### Fixed
+- Cron: logged in as a user who may use sudo, Cron also shows root's crontab, and adds, edits, removes, enables and disables its jobs through `sudo crontab -u root -`. The old crontab is backed up in `/root` first, and the confirmation shows the exact command and warns that the job runs as root. Unreadable files in `/etc/crontab` and `/etc/cron.d`, and a job's recent runs, are read through sudo too. When a password is needed, "View with sudo…" asks once per session (#117). A user without sudo does not see root's crontab. Files in `/etc/cron.d` are still edited in Editor.
 - Monitor on a Windows or macOS server no longer waits for the first reading for ever. Davish now detects the server's operating system right after it connects, in the background, so connecting is never held up by it; Monitor says it does not support that system yet (or that the server returned no readings) instead of retrying in silence. Linux servers are unchanged.
 - Terminal on a Windows server opens the plain login shell instead of sending it a Linux-only start line.
 

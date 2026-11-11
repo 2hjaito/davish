@@ -6,6 +6,7 @@
   import { t } from '../../lib/i18n'
   import Icon from '../../lib/ui/Icon.svelte'
   import NeedsRoot from '../../lib/ui/NeedsRoot.svelte'
+  import { sudoPrompt } from '../../lib/stores/sudoPrompt.svelte'
   import { openFileInEditor, openFilesAt } from '../../lib/wm/intents.svelte'
   import { backend } from './backend'
   import { describe } from './describe'
@@ -27,7 +28,9 @@
   /** What the command mentions that exists on the server. */
   let paths = $state.raw<{ path: string; dir: boolean }[]>([])
   const id = $derived(job.id)
-  const sourceLabel = $derived(job.source === 'user' ? t.cron.mine : job.source)
+  const sourceLabel = $derived(
+    job.source === 'user' ? t.cron.mine : job.source === 'root' ? t.cron.rootSource : job.source,
+  )
 
   $effect(() => {
     void id
@@ -41,8 +44,9 @@
     const command = job.command
     paths = []
     try {
-      // Another user's job runs from that user's home, which is unknown here.
-      const home = job.user ? '' : await backend.home(serverID)
+      // Another user's job, or root's, runs from that user's home, which is
+      // unknown here.
+      const home = job.user || job.source === 'root' ? '' : await backend.home(serverID)
       const found = await Promise.all(
         commandPaths(command, home).map(async (path) => {
           try {
@@ -185,6 +189,18 @@
     <p class="muted small">{t.cron.runsLoading}</p>
   {:else if runs.restricted}
     <NeedsRoot {serverID} command={runs.sudo} message={t.cron.runsRestricted} />
+    {#if runs.askSudo}
+      <button
+        type="button"
+        class="btn sudo"
+        onclick={async () => {
+          if (runs && (await sudoPrompt.ask(serverID, runs.sudo))) void loadRuns()
+        }}
+      >
+        <Icon name="key" size={13} />
+        {t.sudo.journal}
+      </button>
+    {/if}
   {:else if runs.lines.length === 0}
     <p class="muted small">{t.cron.runsEmpty}</p>
   {:else}
@@ -194,6 +210,11 @@
 </section>
 
 <style>
+  .sudo {
+    align-self: flex-start;
+    margin-top: 6px;
+  }
+
   .paths {
     display: flex;
     flex-direction: column;
