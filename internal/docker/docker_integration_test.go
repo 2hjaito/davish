@@ -12,6 +12,7 @@ import (
 	"davish/internal/apperr"
 	"davish/internal/audit"
 	"davish/internal/docker"
+	"davish/internal/sudo"
 	"davish/internal/testsshd"
 )
 
@@ -185,4 +186,42 @@ func TestVolumes(t *testing.T) {
 	if !found {
 		t.Fatalf("davish-data not in %+v", vs)
 	}
+}
+
+// sudoer is outside the docker group: the socket refuses it, so docker
+// runs through sudo once the password is given (ADR 0018).
+func TestSudoerUsesDockerThroughSudo(t *testing.T) {
+	ctx := context.Background()
+	m, id := testsshd.ConnectAs(t, testsshd.Sudoer)
+	run := audit.NewRunner(m, audit.New(discard{}))
+	k := sudo.New(run)
+	s := docker.New(run)
+
+	if _, err := s.List(ctx, id); codeOfErr(err) != apperr.CmdNeedsRoot {
+		t.Fatalf("without root: %v", err)
+	}
+	s.UseRoot(k)
+	if _, err := s.List(ctx, id); codeOfErr(err) != apperr.SudoPasswordRequired {
+		t.Fatalf("before the password: %v", err)
+	}
+	if err := k.SetPassword(ctx, id, []byte(testsshd.SudoPassword)); err != nil {
+		t.Fatal(err)
+	}
+	if c := find(t, s, id, "davish-web"); c.State != "running" {
+		t.Errorf("web through sudo = %+v", c)
+	}
+	if err := s.Act(ctx, id, "davish-web", docker.ActionRestart); err != nil {
+		t.Fatalf("restart through sudo: %v", err)
+	}
+	if c := find(t, s, id, "davish-web"); c.State != "running" {
+		t.Errorf("web after restart = %+v", c)
+	}
+}
+
+func codeOfErr(err error) apperr.Code {
+	var e *apperr.Error
+	if errors.As(err, &e) {
+		return e.Code
+	}
+	return ""
 }

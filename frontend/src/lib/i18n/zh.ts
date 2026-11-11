@@ -918,7 +918,11 @@ const zh = {
           '新建网络或数据卷；把容器复制为 docker run 命令',
         ],
         keys: [],
-        runs: ['docker ps、stats、inspect、logs', 'docker start/stop/restart（需确认）'],
+        runs: [
+          'docker ps、stats、inspect、logs',
+          'docker start/stop/restart（需确认）',
+          '当 docker socket 拒绝不在 docker 组中的用户时：通过 sudo 再次运行同一条命令，如有需要每个会话只询问一次 sudo 密码。输入到终端的命令保持不变',
+        ],
       },
       logs: {
         does: '实时查看单元的 journal、日志文件或容器日志。筛选、暂停、高亮错误。',
@@ -2180,6 +2184,8 @@ const zh = {
     loading: '正在读取容器列表…',
     offline: '服务器未连接',
     offlineHint: '连接服务器后即可查看其 Docker 容器。',
+    needsSudo:
+      '该用户不在 docker 组中，因此 Docker 只响应 root。Davish 可以在本次会话中通过 sudo 运行 docker，你也可以在终端中运行。',
     noMatch: '没有匹配的容器。',
     noContainers: '服务器上没有容器。',
     noSelection: '选择一个容器查看详情',

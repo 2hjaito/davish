@@ -966,7 +966,11 @@ const es = {
           'Nueva red o volumen; copia un contenedor como comando docker run',
         ],
         keys: [],
-        runs: ['docker ps, stats, inspect, logs', 'docker start/stop/restart (con confirmación)'],
+        runs: [
+          'docker ps, stats, inspect, logs',
+          'docker start/stop/restart (con confirmación)',
+          'Cuando el socket de docker rechaza a un usuario fuera del grupo docker: el mismo comando otra vez con sudo, pidiendo la contraseña de sudo una vez por sesión si hace falta. Los comandos escritos en un terminal no cambian',
+        ],
       },
       logs: {
         does: 'Sigue el journal de una unidad, un archivo de registro o los registros de un contenedor. Filtra, pausa, resalta errores.',
@@ -2296,6 +2300,8 @@ const es = {
     loading: 'Leyendo la lista de contenedores…',
     offline: 'Servidor no conectado',
     offlineHint: 'Conecta el servidor para ver sus contenedores Docker.',
+    needsSudo:
+      'Este usuario no está en el grupo docker, así que Docker solo responde a root. Davish puede ejecutar docker con sudo durante esta sesión, o puedes ejecutarlo en la Terminal.',
     noMatch: 'Ningún contenedor coincide.',
     noContainers: 'El servidor no tiene contenedores.',
     noSelection: 'Elige un contenedor para ver sus detalles',

@@ -21,7 +21,7 @@ func (s *Service) CreateObject(ctx context.Context, serverID, kind, name string)
 	if !objectName.MatchString(name) {
 		return apperr.New(apperr.InvalidInput, "not a name")
 	}
-	res, err := s.run.Run(ctx, serverID, app, shellx.Cmd("docker", kind, "create", name))
+	res, err := s.exec(ctx, serverID, shellx.Cmd("docker", kind, "create", name))
 	if err != nil {
 		return err
 	}
