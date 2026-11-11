@@ -4,6 +4,13 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Fixed
+- Monitor on a Windows or macOS server no longer waits for the first reading for ever. Davish now detects the server's operating system when it connects; Monitor says it does not support that system yet (or that the server returned no readings) instead of retrying in silence. Linux servers are unchanged.
+- Terminal on a Windows server opens the plain login shell instead of sending it a Linux-only start line.
+
+### Changed
+- Apps that need Linux (Services, Docker, Logs, Cron, Nginx and the rest) are hidden from the Dock, Spotlight and the Go menu on a Windows or macOS server, and shown greyed out in Launchpad with the reason.
+
 ## [1.13.2] - 2026-11-11
 
 ### Added

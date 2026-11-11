@@ -73,7 +73,11 @@ func (s *Service) Processes(ctx context.Context, serverID, sortBy string) (Proce
 	if err != nil {
 		return ProcessList{}, err
 	}
-	sections, err := runScript(ctx, client, procsScript)
+	tg, ok := targetFor(s.clients.Platform(serverID))
+	if !ok {
+		return ProcessList{}, apperr.New(apperr.PlatformUnsupported, "processes are not available for this OS")
+	}
+	sections, err := runScript(ctx, client, tg, tg.procs)
 	if err != nil {
 		return ProcessList{}, apperr.Wrap(apperr.Internal, "could not read processes", err)
 	}

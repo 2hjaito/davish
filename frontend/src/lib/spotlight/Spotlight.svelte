@@ -2,7 +2,7 @@
   import { untrack } from 'svelte'
 
   import { lastDir } from '../../apps/files/memory'
-  import { dockApps, getApp } from '../../apps/registry'
+  import { availableOn, dockApps, getApp } from '../../apps/registry'
   import { backend as dockerBackend } from '../../apps/docker/backend'
   import { backend as packagesBackend } from '../../apps/packages/backend'
   import { backend as servicesBackend } from '../../apps/services/backend'
@@ -74,7 +74,7 @@
     const extra = ['deploy', 'database', 'audit', 'transfers']
       .map((id) => getApp(id))
       .filter((a) => a !== undefined)
-    return [...dockApps, ...extra].map((a) => ({
+    return availableOn([...dockApps, ...extra], servers.platformOf(serverID)).map((a) => ({
       kind: 'app',
       id: a.id,
       label: a.label,

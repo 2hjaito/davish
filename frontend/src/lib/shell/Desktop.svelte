@@ -1,7 +1,7 @@
 <script lang="ts">
   import { untrack } from 'svelte'
 
-  import { apps, getApp, loadApp } from '../../apps/registry'
+  import { apps, availableOn, getApp, isAvailable, loadApp } from '../../apps/registry'
   import type { AppDef } from '../../apps/types'
   import { monitorSetIdle, monitorSetThresholds } from '../api/monitor'
   import { nginxCheckCerts } from '../api/nginx'
@@ -82,7 +82,9 @@
 
   const dockTiles = $derived([
     { id: 'launchpad' as const, label: t.launchpad.label },
-    ...dockItems(apps, dockPins.ids, (id) => wm.isOpen(id, serverID)),
+    ...dockItems(availableOn(apps, servers.platformOf(serverID)), dockPins.ids, (id) =>
+      wm.isOpen(id, serverID),
+    ),
   ])
 
   function launchTile(id: AppDef['id'] | 'launchpad'): boolean {
@@ -178,6 +180,7 @@
 
   // Each server reopens the windows it had (docs/ARCHITECTURE.md §5.1).
   wm.keepInLayout((appId) => getApp(appId)?.layout !== false)
+  wm.allowApp((appId, id) => isAvailable(getApp(appId), servers.platformOf(id)))
   function openOptions(appId: string) {
     const app = getApp(appId)
     return app && { title: app.label, size: app.size }
@@ -190,7 +193,9 @@
    */
   function showWorkspace(id: string) {
     if (wm.hasLayout(id)) {
-      wm.restoreLayout(id, openOptions)
+      wm.restoreLayout(id, (appId) =>
+        isAvailable(getApp(appId), servers.platformOf(id)) ? openOptions(appId) : undefined,
+      )
       return
     }
     if (wm.visible(id).length > 0) return
@@ -276,7 +281,12 @@
 <div class="desktop">
   <MenuBar />
   <Spotlight open={ui.spotlight} onclose={() => (ui.spotlight = false)} />
-  <Launchpad open={ui.launchpad} onclose={() => (ui.launchpad = false)} onlaunch={launch} />
+  <Launchpad
+    open={ui.launchpad}
+    platform={servers.platformOf(serverID)}
+    onclose={() => (ui.launchpad = false)}
+    onlaunch={launch}
+  />
 
   {#if servers.ready && servers.list.length > 0}
     <DesktopIcons />

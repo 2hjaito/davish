@@ -1487,6 +1487,7 @@ const es = {
     none: 'Ninguna app coincide.',
     pin: (app: string) => `Fijar ${app} en el Dock`,
     unpin: (app: string) => `Quitar ${app} del Dock`,
+    unavailable: (os: string) => `Aún no disponible en servidores ${os}`,
     hint: '←→↑↓ elegir · Intro abrir · Esc cerrar',
     all: 'Todas',
     groups: 'Grupos de apps',
@@ -1937,6 +1938,12 @@ const es = {
     now: 'ahora',
     offline: 'Servidor no conectado',
     offlineHint: 'Monitor mostrará las lecturas cuando el servidor vuelva a conectarse.',
+    unsupported: (os: string) => `Monitor aún no admite servidores ${os}`,
+    unsupportedHint:
+      'Terminal, Archivos y las demás apps que no dependen del sistema operativo del servidor siguen funcionando.',
+    noReadings: 'Monitor no puede leer este servidor',
+    noReadingsHint:
+      'El recolector se inició pero no devolvió ninguna lectura. Abre Terminal para ver qué responde el servidor y vuelve a conectar.',
     waiting: 'Esperando la primera lectura…',
     chartHint: 'Usa las flechas izquierda/derecha para recorrer los puntos en el tiempo.',
     usage: 'Uso',
@@ -2924,6 +2931,7 @@ const es = {
     LOCK_TOO_MANY_ATTEMPTS: 'Demasiados intentos fallidos. Espera y vuelve a intentarlo.',
     LOCK_BIOMETRIC_FAILED: 'Touch ID no ha funcionado.',
     GIT_DIRTY: 'El repositorio tiene cambios sin commit, así que esta acción está bloqueada.',
+    PLATFORM_UNSUPPORTED: 'Esta aplicación aún no admite el sistema operativo de este servidor.',
     GIT_AUTH_FAILED:
       'El remoto ha rechazado la autenticación (o todavía no se confía en su clave de host).',
     GIT_NOT_FAST_FORWARD:

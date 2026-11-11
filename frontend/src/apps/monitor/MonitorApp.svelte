@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { platformName } from '../registry'
   import { formatPct, formatRate } from '../../lib/format'
   import { t } from '../../lib/i18n'
   import { metrics, type Series } from '../../lib/stores/metrics.svelte'
@@ -43,6 +44,8 @@
   const live = $derived(metrics.byServer[win.serverID])
   const data = $derived(frozen ?? live)
   const m = $derived(data?.latest)
+  /** Why there are no readings, when the server cannot give any. */
+  const status = $derived(metrics.statusOf(win.serverID))
   const charts = $derived(section !== 'processes' && section !== 'info')
 
   function togglePause() {
@@ -138,6 +141,16 @@
     <div class="content" class:fill={section === 'processes'}>
       {#if !connected && !frozen}
         <Empty icon="server" title={t.monitor.offline} hint={t.monitor.offlineHint} />
+      {:else if status && !data}
+        {#if status.state === 'unsupported'}
+          <Empty
+            icon="server"
+            title={t.monitor.unsupported(platformName[status.os])}
+            hint={t.monitor.unsupportedHint}
+          />
+        {:else}
+          <Empty icon="server" title={t.monitor.noReadings} hint={t.monitor.noReadingsHint} />
+        {/if}
       {:else if section === 'processes'}
         <ProcessesView serverID={win.serverID} paused={frozen !== null} />
       {:else if !data}

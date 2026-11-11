@@ -28,7 +28,11 @@ func (s *Service) SystemInfo(ctx context.Context, serverID string) (SystemInfo, 
 	if err != nil {
 		return SystemInfo{}, err
 	}
-	sections, err := runScript(ctx, client, infoScript)
+	tg, ok := targetFor(s.clients.Platform(serverID))
+	if !ok {
+		return SystemInfo{}, apperr.New(apperr.PlatformUnsupported, "system info is not available for this OS")
+	}
+	sections, err := runScript(ctx, client, tg, tg.info)
 	if err != nil {
 		return SystemInfo{}, apperr.Wrap(apperr.Internal, "could not read system info", err)
 	}

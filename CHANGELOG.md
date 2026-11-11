@@ -4,6 +4,13 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Sửa
+- Monitor trên server Windows hoặc macOS không còn chờ "số liệu đầu tiên" mãi mãi. Davish nhận biết hệ điều hành của server khi kết nối; Monitor báo chưa hỗ trợ hệ điều hành đó (hoặc server không trả số liệu nào) thay vì thử lại trong im lặng. Server Linux không đổi.
+- Terminal trên server Windows mở shell đăng nhập thường thay vì gửi dòng lệnh khởi động chỉ dành cho Linux.
+
+### Thay đổi
+- Các app cần Linux (Services, Docker, Logs, Cron, Nginx…) được ẩn khỏi Dock, Spotlight và menu Go trên server Windows hoặc macOS, và hiện mờ trong Launchpad kèm lý do.
+
 ## [1.13.2] - 2026-11-11
 
 ### Thêm

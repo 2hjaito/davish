@@ -1,5 +1,6 @@
 import type { Component } from 'svelte'
 
+import type { Platform } from '../lib/api/servers'
 import type { IconName } from '../lib/ui/icons'
 import type { WindowState } from '../lib/wm/windowManager.svelte'
 
@@ -47,4 +48,9 @@ export interface AppDef {
    * (the Editor's files) or do not belong to one server (Settings).
    */
   layout?: boolean
+  /**
+   * The server operating systems the app works on. Left out, it needs Linux
+   * (systemd, /proc, sh…); a server whose OS is not known yet gets every app.
+   */
+  platforms?: Platform[]
 }

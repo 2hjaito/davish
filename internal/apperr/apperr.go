@@ -39,6 +39,7 @@ const (
 	LockBiometricFailed  Code = "LOCK_BIOMETRIC_FAILED"
 	GitUnsafeOwner       Code = "GIT_UNSAFE_OWNER"
 	GitDirty             Code = "GIT_DIRTY"
+	PlatformUnsupported  Code = "PLATFORM_UNSUPPORTED"
 	GitAuthFailed        Code = "GIT_AUTH_FAILED"
 	GitNotFastForward    Code = "GIT_NOT_FAST_FORWARD"
 	GitNoUpstream        Code = "GIT_NO_UPSTREAM"

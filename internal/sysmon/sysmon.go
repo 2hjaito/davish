@@ -17,14 +17,17 @@ import (
 	"golang.org/x/crypto/ssh"
 
 	"davish/internal/events"
+	"davish/internal/platform"
 )
 
 //go:embed collect.sh
 var collectScript string
 
-// ClientSource hands out the live SSH client of a server.
+// ClientSource hands out the live SSH client of a server and tells what OS
+// it runs.
 type ClientSource interface {
 	Client(serverID string) (*ssh.Client, error)
+	Platform(serverID string) platform.OS
 }
 
 // Emitter pushes events to the frontend.
@@ -82,9 +85,16 @@ const (
 // errRepace ends a collector so it restarts at the new pace.
 var errRepace = errors.New("pace changed")
 
+// A collector that ends this many times in a row without one readable
+// snapshot is reported as an error instead of being retried in silence.
+const maxFailures = 3
+
 type watcher struct {
 	refs   int
 	cancel context.CancelFunc
+	// status is why the server has no readings, or nil. A Monitor window
+	// opened later asks for it again through Watch.
+	status *Status
 }
 
 // New creates the service; call Close on shutdown.
@@ -114,8 +124,9 @@ func (s *Service) SetIdle(idle bool) {
 	s.paceMu.Unlock()
 }
 
-// script is collect.sh at the current pace.
-func (s *Service) script() (string, <-chan struct{}) {
+// script is the collector at the current pace, as the command to start and
+// the stdin to give it.
+func (s *Service) script(tg target) (command, stdin string, repace <-chan struct{}) {
 	every := activeEvery
 	if s.idle.Load() {
 		every = idleEvery
@@ -123,7 +134,26 @@ func (s *Service) script() (string, <-chan struct{}) {
 	s.paceMu.Lock()
 	ch := s.paced
 	s.paceMu.Unlock()
-	return fmt.Sprintf("every=%d\nhealthEvery=%d\n", every, max(1, healthSecs/every)) + collectScript, ch
+	command, stdin = tg.launch(fmt.Sprintf("every=%d\nhealthEvery=%d\n", every, max(1, healthSecs/every)) + tg.collect)
+	return command, stdin, ch
+}
+
+// setStatus remembers and announces why a server has no readings; nil
+// clears it.
+func (s *Service) setStatus(serverID string, st *Status) {
+	s.mu.Lock()
+	w, ok := s.watchers[serverID]
+	if ok {
+		if st == nil && w.status == nil {
+			s.mu.Unlock()
+			return
+		}
+		w.status = st
+	}
+	s.mu.Unlock()
+	if st != nil {
+		s.emit.Emit(events.SysmonStatus, *st)
+	}
 }
 
 // SetThresholds changes when RAM and disk readings notify, for every
@@ -144,6 +174,11 @@ func (s *Service) Watch(serverID string) {
 	defer s.mu.Unlock()
 	if w, ok := s.watchers[serverID]; ok {
 		w.refs++
+		if w.status != nil {
+			// Events are not replayed: tell the new window what the others know.
+			st := *w.status
+			defer s.emit.Emit(events.SysmonStatus, st)
+		}
 		return
 	}
 	ctx, cancel := context.WithCancel(context.Background())
@@ -183,43 +218,66 @@ func (s *Service) Close() {
 // run keeps a collector going while ctx lives. The connection may be down
 // or come back later; retrying picks the new client up after a reconnect.
 func (s *Service) run(ctx context.Context, serverID string) {
+	fails := 0
 	for {
+		wait := s.opts.RetryEvery
 		if client, err := s.clients.Client(serverID); err == nil {
-			err := s.collect(ctx, serverID, client)
-			if errors.Is(err, errRepace) {
-				continue
-			}
-			if err != nil && ctx.Err() == nil {
-				s.log.Warn("sysmon collector ended", "server", serverID, "err", err)
+			os := s.clients.Platform(serverID)
+			if tg, ok := targetFor(os); !ok {
+				s.setStatus(serverID, &Status{ServerID: serverID, State: StateUnsupported, OS: os})
+				wait = 10 * s.opts.RetryEvery // nothing to try until the OS is known to be another
+			} else {
+				good, err := s.collect(ctx, serverID, client, tg)
+				if errors.Is(err, errRepace) {
+					continue
+				}
+				if good > 0 {
+					fails = 0
+				} else {
+					fails++
+				}
+				if err != nil && ctx.Err() == nil {
+					s.log.Warn("sysmon collector ended", "server", serverID, "err", err)
+				}
+				if fails >= maxFailures && ctx.Err() == nil {
+					msg := "collector produced no readings"
+					if err != nil {
+						msg = err.Error()
+					}
+					s.setStatus(serverID, &Status{ServerID: serverID, State: StateError, OS: os, Message: msg})
+					wait = 5 * s.opts.RetryEvery // do not start a shell every 3s for ever
+				}
 			}
 		}
 		select {
 		case <-ctx.Done():
 			return
-		case <-time.After(s.opts.RetryEvery):
+		case <-time.After(wait):
 		}
 	}
 }
 
-// collect runs collect.sh in one session and emits a tick per snapshot
-// after the first, until the session ends or ctx is cancelled.
-func (s *Service) collect(ctx context.Context, serverID string, client *ssh.Client) error {
+// collect runs the collector in one session and emits a tick per snapshot
+// after the first, until the session ends or ctx is cancelled. It returns
+// how many snapshots it could read, so the caller can tell a collector that
+// worked and dropped from one that never produced anything.
+func (s *Service) collect(ctx context.Context, serverID string, client *ssh.Client, tg target) (good int, _ error) {
 	sess, err := client.NewSession()
 	if err != nil {
-		return fmt.Errorf("open session: %w", err)
+		return 0, fmt.Errorf("open session: %w", err)
 	}
 	defer sess.Close() //nolint:errcheck // closed either way
 
-	// The script goes in on stdin, so no command line is built and the
-	// user's login shell (fish, csh…) does not matter.
-	script, repace := s.script()
-	sess.Stdin = strings.NewReader(script)
+	// The script goes in on stdin, so the user's login shell (fish, csh…)
+	// does not matter.
+	command, stdin, repace := s.script(tg)
+	sess.Stdin = strings.NewReader(stdin)
 	stdout, err := sess.StdoutPipe()
 	if err != nil {
-		return fmt.Errorf("stdout pipe: %w", err)
+		return 0, fmt.Errorf("stdout pipe: %w", err)
 	}
-	if err := sess.Start("sh -s"); err != nil {
-		return fmt.Errorf("start collector: %w", err)
+	if err := sess.Start(command); err != nil {
+		return 0, fmt.Errorf("start collector: %w", err)
 	}
 	// Reading goes through a pipe this side can close: closing the session
 	// alone waits for the server, which may be in a 30s sleep.
@@ -250,22 +308,30 @@ func (s *Service) collect(ctx context.Context, serverID string, client *ssh.Clie
 	s.resumeAlerts(serverID)
 	r := NewReader(pr)
 	var prev *Snapshot
+	bad := 0
 	for {
 		snap, err := r.Next()
 		if err != nil && repaced.Load() {
-			return errRepace
+			return good, errRepace
 		}
 		if errors.Is(err, io.EOF) {
-			return errors.New("collector output ended")
+			return good, errors.New("collector output ended")
 		}
 		if errors.Is(err, ErrMalformed) {
 			s.log.Warn("sysmon snapshot skipped", "server", serverID, "err", err)
 			prev = nil
+			// A server this collector cannot read (no /proc) prints empty
+			// snapshots for ever; give up rather than skip them in silence.
+			if bad++; good == 0 && bad >= maxFailures {
+				abort()
+				return good, fmt.Errorf("no readable snapshot: %w", err)
+			}
 			continue
 		}
 		if err != nil {
-			return err
+			return good, err
 		}
+		good++
 		if snap.Health != nil {
 			for _, a := range s.checkHealth(serverID, snap.Uptime, snap.Health) {
 				s.emit.Emit(events.NotifyNew, a)
@@ -273,6 +339,7 @@ func (s *Service) collect(ctx context.Context, serverID string, client *ssh.Clie
 		}
 		if prev != nil {
 			tick := Rate(serverID, *prev, snap)
+			s.setStatus(serverID, nil)
 			s.emit.Emit(events.SysmonTick, tick)
 			for _, a := range s.checkAlerts(tick) {
 				s.emit.Emit(events.NotifyNew, a)

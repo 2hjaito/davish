@@ -137,7 +137,8 @@ func (r *Reader) sections() (map[string][]string, error) {
 	sections := map[string][]string{}
 	current := ""
 	for r.sc.Scan() {
-		line := r.sc.Text()
+		// Windows scripts end lines with CRLF; "@@end\r" must still end.
+		line := strings.TrimSuffix(r.sc.Text(), "\r")
 		if name, ok := strings.CutPrefix(line, "@@"); ok {
 			if name == "end" {
 				return sections, nil

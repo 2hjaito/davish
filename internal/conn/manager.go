@@ -18,6 +18,7 @@ import (
 
 	"davish/internal/apperr"
 	"davish/internal/events"
+	"davish/internal/platform"
 	"davish/internal/store"
 )
 
@@ -38,6 +39,9 @@ type Status struct {
 	ServerID string        `json:"serverID"`
 	State    State         `json:"state"`
 	Error    *apperr.Error `json:"error,omitempty"`
+	// Platform is the server's OS once it is known; the UI greys out the
+	// apps that do not run there.
+	Platform platform.OS `json:"platform,omitempty"`
 }
 
 // HostKeyPrompt is the conn:hostkey-prompt payload: the UI shows it and
@@ -115,6 +119,9 @@ type link struct {
 	cancel context.CancelFunc
 	// sftp is opened on first use over client and dropped with it.
 	sftp *sftp.Client
+	// platform is detected when the connection comes up; it survives
+	// reconnects, since the server stays the same machine.
+	platform platform.OS
 }
 
 // pendingKey is a host key shown to the user and not yet accepted.
@@ -163,16 +170,18 @@ func (m *Manager) Connect(ctx context.Context, id string) error { //nolint:conte
 		return err
 	}
 
+	os := m.detectPlatform(ctx, client)
+
 	m.mu.Lock()
 	if m.conns[id] != l { // disconnected while dialing
 		m.mu.Unlock()
 		client.Close() //nolint:errcheck,gosec // unwanted connection
 		return apperr.New(apperr.ConnNotConnected, "disconnected while connecting")
 	}
-	l.state, l.client = StateConnected, client
+	l.state, l.client, l.platform = StateConnected, client, os
 	m.mu.Unlock()
 	m.publish(id, StateConnected, nil)
-	m.log.Info("connected", "server", id)
+	m.log.Info("connected", "server", id, "platform", os)
 
 	m.wg.Add(1)
 	go func() {
@@ -291,6 +300,49 @@ func openSFTP(client *ssh.Client, limit time.Duration) (*sftp.Client, error) {
 	}
 }
 
+// Platform reports the server's OS: Unknown until it has connected.
+func (m *Manager) Platform(id string) platform.OS {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if l, ok := m.conns[id]; ok && l.platform != "" {
+		return l.platform
+	}
+	return platform.Unknown
+}
+
+// detectPlatform asks the server what it runs. It never fails: a server
+// that does not answer in time is Unknown, and still usable.
+func (m *Manager) detectPlatform(ctx context.Context, client *ssh.Client) platform.OS {
+	return platform.Detect(ctx, platform.Probe{
+		Uname: func(ctx context.Context) (string, error) { return execOutput(ctx, client, "uname -s") },
+		Home: func(context.Context) (string, error) {
+			sc, err := openSFTP(client, platform.DetectTimeout)
+			if err != nil {
+				return "", err
+			}
+			defer sc.Close() //nolint:errcheck // probe only
+			return sc.RealPath(".")
+		},
+	})
+}
+
+// execOutput runs one command and returns its stdout, giving up when ctx
+// ends: closing the session unblocks a shell that never answers.
+func execOutput(ctx context.Context, client *ssh.Client, cmd string) (string, error) {
+	sess, err := client.NewSession()
+	if err != nil {
+		return "", err
+	}
+	defer sess.Close()                                      //nolint:errcheck // probe only
+	stop := context.AfterFunc(ctx, func() { sess.Close() }) //nolint:errcheck,gosec // unblocks Output
+	defer stop()
+	out, err := sess.Output(cmd)
+	if ctx.Err() != nil {
+		return "", ctx.Err()
+	}
+	return string(out), err
+}
+
 // State reports a server's connection state.
 func (m *Manager) State(id string) State {
 	m.mu.Lock()
@@ -356,12 +408,18 @@ func (m *Manager) supervise(ctx context.Context, id string, l *link, client *ssh
 			return
 		}
 		m.mu.Lock()
+		os := l.platform
+		m.mu.Unlock()
+		if os == "" || os == platform.Unknown {
+			os = m.detectPlatform(ctx, client)
+		}
+		m.mu.Lock()
 		if ctx.Err() != nil {
 			m.mu.Unlock()
 			client.Close() //nolint:errcheck,gosec // disconnected meanwhile
 			return
 		}
-		l.state, l.client = StateConnected, client
+		l.state, l.client, l.platform = StateConnected, client, os
 		m.mu.Unlock()
 		m.publish(id, StateConnected, nil)
 		m.log.Info("reconnected", "server", id)
@@ -557,6 +615,9 @@ func (m *Manager) setFailed(id string, l *link, err error) {
 
 func (m *Manager) publish(id string, state State, err error) {
 	st := Status{ServerID: id, State: state}
+	if state == StateConnected {
+		st.Platform = m.Platform(id)
+	}
 	if err != nil {
 		if f, ok := apperr.Format(err).(*apperr.Error); ok {
 			st.Error = f

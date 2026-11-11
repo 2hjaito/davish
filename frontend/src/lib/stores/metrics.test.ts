@@ -1,12 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { SysmonTick } from '../api/events'
+import type { SysmonStatus, SysmonTick } from '../api/events'
 
 const api = vi.hoisted(() => ({
   watch: vi.fn<(id: string) => Promise<void>>(() => Promise.resolve()),
   unwatch: vi.fn<(id: string) => Promise<void>>(() => Promise.resolve()),
   off: vi.fn(),
+  offStatus: vi.fn(),
   emit: undefined as ((t: SysmonTick) => void) | undefined,
+  emitStatus: undefined as ((s: SysmonStatus) => void) | undefined,
 }))
 
 vi.mock('../api/runtime', () => ({ hasRuntime: true }))
@@ -15,6 +17,10 @@ vi.mock('../api/events', () => ({
   onSysmonTick: (h: (t: SysmonTick) => void) => {
     api.emit = h
     return api.off
+  },
+  onSysmonStatus: (h: (s: SysmonStatus) => void) => {
+    api.emitStatus = h
+    return api.offStatus
   },
 }))
 
@@ -67,6 +73,21 @@ describe('metrics', () => {
     expect(metrics.latest('s2')?.cpu).toBe(7)
     s2()
     expect(api.off).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps why a server has no readings until a tick arrives', () => {
+    const stop = metrics.watch('s1')
+    api.emitStatus?.({ serverID: 's1', state: 'unsupported', os: 'darwin' })
+    api.emitStatus?.({ serverID: 's2', state: 'error', os: 'linux' }) // nobody watches s2
+    expect(metrics.statusOf('s1')?.state).toBe('unsupported')
+    expect(metrics.statusOf('s2')).toBeUndefined()
+
+    api.emit?.(tick('s1', 3))
+    expect(metrics.statusOf('s1')).toBeUndefined()
+
+    api.emitStatus?.({ serverID: 's1', state: 'error', os: 'linux' })
+    stop()
+    expect(metrics.statusOf('s1')).toBeUndefined()
   })
 
   it('keeps history for the longest chart range only', () => {

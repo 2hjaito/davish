@@ -1433,6 +1433,7 @@ const vi = {
     none: 'Không có app nào khớp.',
     pin: (app: string) => `Ghim ${app} vào Dock`,
     unpin: (app: string) => `Bỏ ${app} khỏi Dock`,
+    unavailable: (os: string) => `Chưa hỗ trợ cho server ${os}`,
     hint: '←→↑↓ chọn · Enter mở · Esc đóng',
     all: 'Tất cả',
     groups: 'Nhóm app',
@@ -1866,6 +1867,12 @@ const vi = {
     now: 'bây giờ',
     offline: 'Server chưa kết nối',
     offlineHint: 'Monitor sẽ hiện số liệu khi server kết nối lại.',
+    unsupported: (os: string) => `Monitor chưa hỗ trợ server ${os}`,
+    unsupportedHint:
+      'Terminal, Files và các app không phụ thuộc hệ điều hành của server vẫn dùng bình thường.',
+    noReadings: 'Monitor không đọc được server này',
+    noReadingsHint:
+      'Bộ thu đã chạy nhưng không có số liệu nào trả về. Mở Terminal để xem server phản hồi gì, rồi kết nối lại.',
     waiting: 'Đang chờ số liệu đầu tiên…',
     chartHint: 'Dùng phím mũi tên trái/phải để xem từng thời điểm.',
     usage: 'Đang dùng',
@@ -2821,6 +2828,7 @@ const vi = {
     LOCK_TOO_MANY_ATTEMPTS: 'Nhập sai quá nhiều lần. Hãy chờ rồi thử lại.',
     LOCK_BIOMETRIC_FAILED: 'Touch ID không thành công.',
     GIT_DIRTY: 'Repo có thay đổi chưa commit nên thao tác này bị chặn.',
+    PLATFORM_UNSUPPORTED: 'Hệ điều hành của server này chưa được ứng dụng này hỗ trợ.',
     GIT_AUTH_FAILED: 'Remote từ chối xác thực (hoặc host key của remote chưa được tin).',
     GIT_NOT_FAST_FORWARD:
       'Không pull thẳng được: nhánh trên server và remote đã rẽ nhánh. Cần merge hoặc rebase trong Terminal.',

@@ -9,6 +9,7 @@ const (
 	TermData          = "term:data"
 	TermExit          = "term:exit"
 	SysmonTick        = "sysmon:tick"
+	SysmonStatus      = "sysmon:status"
 	LogsLine          = "logs:line"
 	LogsEnd           = "logs:end"
 	TransferProgress  = "transfer:progress"

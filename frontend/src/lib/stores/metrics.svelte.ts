@@ -1,6 +1,12 @@
 import { untrack } from 'svelte'
 
-import { onSysmonTick, type SysmonTick, type Unsubscribe } from '../api/events'
+import {
+  onSysmonStatus,
+  onSysmonTick,
+  type SysmonStatus,
+  type SysmonTick,
+  type Unsubscribe,
+} from '../api/events'
 import { monitorUnwatch, monitorWatch } from '../api/monitor'
 import { hasRuntime } from '../api/runtime'
 import { firstMockTick, nextMockTick } from './mockMetrics'
@@ -32,12 +38,20 @@ class MetricsStore {
   // samples would cost more than they give.
   byServer = $state.raw<Record<string, Series>>({})
 
+  /** Why a watched server has no readings; a tick clears it. */
+  status = $state.raw<Record<string, SysmonStatus>>({})
+
   #refs = new Map<string, number>()
   #off: Unsubscribe | undefined
+  #offStatus: Unsubscribe | undefined
   #mocks = new Map<string, ReturnType<typeof setInterval>>()
 
   latest(serverID: string): Sample | undefined {
     return this.byServer[serverID]?.latest
+  }
+
+  statusOf(serverID: string): SysmonStatus | undefined {
+    return this.status[serverID]
   }
 
   history(serverID: string): Sample[] {
@@ -78,6 +92,17 @@ class MetricsStore {
     const keepFrom = old.findIndex((s) => s.at > at - HISTORY_MS)
     const history = keepFrom < 0 ? [sample] : [...old.slice(keepFrom), sample]
     this.byServer = { ...this.byServer, [serverID]: { latest: sample, history } }
+    if (serverID in this.status) this.#setStatus(serverID, undefined)
+  }
+
+  #setStatus(serverID: string, st: SysmonStatus | undefined) {
+    if (st) {
+      this.status = { ...this.status, [serverID]: st }
+      return
+    }
+    const rest = { ...this.status }
+    delete rest[serverID]
+    this.status = rest
   }
 
   #start(serverID: string) {
@@ -86,6 +111,9 @@ class MetricsStore {
       return
     }
     this.#off ??= onSysmonTick(({ serverID: id, ...m }) => this.push(id, m))
+    this.#offStatus ??= onSysmonStatus((st) => {
+      if (this.#refs.has(st.serverID)) this.#setStatus(st.serverID, st)
+    })
     void monitorWatch(serverID)
   }
 
@@ -94,6 +122,7 @@ class MetricsStore {
     const rest = { ...this.byServer }
     delete rest[serverID]
     this.byServer = rest
+    this.#setStatus(serverID, undefined)
     if (!hasRuntime) {
       clearInterval(this.#mocks.get(serverID))
       this.#mocks.delete(serverID)
@@ -103,6 +132,8 @@ class MetricsStore {
     if (this.#refs.size === 0) {
       this.#off?.()
       this.#off = undefined
+      this.#offStatus?.()
+      this.#offStatus = undefined
     }
   }
 
