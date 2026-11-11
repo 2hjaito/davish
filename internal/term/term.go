@@ -100,16 +100,19 @@ func (s *Service) Start(ctx context.Context, serverID string, cols, rows int, pr
 	if err := ctx.Err(); err != nil {
 		return "", err
 	}
+	// A terminal opened right after connecting waits for the OS to be known,
+	// or it would choose before detection has finished. The OS first, then
+	// the client: a reconnect during the wait must not leave a closed client
+	// in hand.
+	os := s.clients.WaitPlatform(ctx, serverID)
 	client, err := s.clients.Client(serverID)
 	if err != nil {
 		return "", err
 	}
 	// The prompt and start directory are POSIX shell lines; a Windows
-	// server gets its plain login shell (cmd.exe or PowerShell). A terminal
-	// opened right after connecting waits for the OS to be known, or it would
-	// choose before detection has finished.
+	// server gets its plain login shell (cmd.exe or PowerShell).
 	command := ""
-	if s.clients.WaitPlatform(ctx, serverID) != platform.Windows {
+	if os != platform.Windows {
 		command = shellCommand(prompt && loginShellIsBash(client), dir)
 	}
 	sess, err := client.NewSession()
