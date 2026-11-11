@@ -4,6 +4,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.13.3] - 2026-11-11
+
 ### Thêm
 - Monitor trên server Windows: CPU từng nhân, bộ nhớ và swap, ổ đĩa, mạng, I/O đĩa, GPU, tiến trình, thông tin hệ thống và cảnh báo service/container, đọc qua Windows PowerShell 5.1 và CIM trên SSH. Không cài gì lên server. Load average, I/O wait và steal không có trên Windows nên được ẩn. Chạy được dù shell SSH của server là cmd.exe hay PowerShell.
 

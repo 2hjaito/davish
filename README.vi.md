@@ -47,7 +47,7 @@ Không cài gì lên server.
 - [Files](FEATURES.vi.md#files): SFTP kiểu Finder, kéo thả, copy giữa server, giữ chuột trên file để mở vòng thao tác
 - [Editor](FEATURES.vi.md#editor): CodeMirror, lưu atomic, có sao lưu
 - [Logs](FEATURES.vi.md#logs): journal, file, container, theo dõi trực tiếp
-- [Monitor](FEATURES.vi.md#monitor): CPU, RAM, ổ đĩa, mạng, GPU, tiến trình
+- [Monitor](FEATURES.vi.md#monitor): CPU, RAM, ổ đĩa, mạng, GPU, tiến trình, trên server Linux và Windows
 - [Tất cả server](FEATURES.vi.md#tất-cả-server): tình trạng và cảnh báo của mọi server trong một cửa sổ
 
 **Dịch vụ và ứng dụng**
