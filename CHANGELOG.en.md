@@ -4,6 +4,8 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.13.3] - 2026-11-11
+
 ### Added
 - Monitor on Windows servers: CPU per core, memory and swap, drives, network, disk throughput, GPUs, processes, system info and service/container alerts, read through Windows PowerShell 5.1 and CIM over SSH. Nothing is installed on the server. Load average, I/O wait and steal time do not exist on Windows and are hidden. Works whether the server's SSH shell is cmd.exe or PowerShell.
 

@@ -47,7 +47,7 @@
 - [文件](FEATURES.md#files)：Finder 风格的 SFTP，拖放上传下载，跨服务器复制，按住文件拖动即弹出环形操作菜单
 - [编辑器](FEATURES.md#editor)：基于 CodeMirror，原子保存并自动备份
 - [日志](FEATURES.md#logs)：journal、日志文件和容器日志，实时查看
-- [监控](FEATURES.md#monitor)：CPU、内存、磁盘、网络、GPU、进程
+- [监控](FEATURES.md#monitor)：CPU、内存、磁盘、网络、GPU、进程，支持 Linux 和 Windows 服务器
 - [所有服务器](FEATURES.md#all-servers)：在一个窗口里查看所有服务器的状态和告警
 
 **服务与应用**
