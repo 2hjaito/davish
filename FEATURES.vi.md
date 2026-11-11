@@ -58,7 +58,7 @@ Dịch vụ systemd theo trạng thái, chi tiết và journal; khởi động, 
 
 ## Không phải root?
 
-Đăng nhập bằng user có quyền `sudo` thì các app chạy bằng root những gì server từ chối: Services, Docker (khi không thuộc nhóm `docker`), Cron, Logs, Files và Editor, Disk, Nginx, An ninh và Database. Davish hiện đúng lệnh, hỏi mật khẩu sudo một lần mỗi phiên, chỉ giữ trong bộ nhớ (không ghi ra đĩa, keychain hay log; mất khi ngắt kết nối hoặc khóa app) và đưa cho sudo qua stdin, không bao giờ trên dòng lệnh. **Quên mật khẩu sudo** trong menu server xóa nó ngay. Sudo không cần mật khẩu thì không hỏi gì. User không có quyền sudo thì không được hỏi. Những gì có thể khóa bạn khỏi server (bật ufw, tắt đăng nhập mật khẩu) và đường dẫn mà user khác có thể tráo vẫn chỉ qua Terminal.
+Đăng nhập bằng user có quyền `sudo` thì các app chạy bằng root những gì server từ chối: Services, Docker (khi không thuộc nhóm `docker`), Cron, Logs, Files và Editor, Disk, Nginx, An ninh và Database. Davish hiện đúng lệnh và hỏi mật khẩu sudo một lần cho mỗi server trong mỗi phiên: các app của server đó dùng chung cho tới khi bạn ngắt kết nối, mất kết nối hoặc khóa app, phiên sau sẽ hỏi lại. Mật khẩu chỉ giữ trong bộ nhớ (không ghi ra đĩa, keychain hay log) và đưa cho sudo qua stdin, không bao giờ trên dòng lệnh. **Quên mật khẩu sudo** trong menu server xóa nó ngay. Sudo không cần mật khẩu thì không hỏi gì. User không có quyền sudo thì không được hỏi. Những gì có thể khóa bạn khỏi server (bật ufw, tắt đăng nhập mật khẩu) và đường dẫn mà user khác có thể tráo vẫn chỉ qua Terminal.
 
 ## Docker
 
