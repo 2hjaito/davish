@@ -6,6 +6,7 @@ package platform
 import (
 	"context"
 	"encoding/base64"
+	"encoding/binary"
 	"regexp"
 	"strings"
 	"time"
@@ -95,7 +96,7 @@ func encodeCommand(s string) string {
 	u := utf16.Encode([]rune(s))
 	b := make([]byte, 0, len(u)*2)
 	for _, c := range u {
-		b = append(b, byte(c), byte(c>>8))
+		b = binary.LittleEndian.AppendUint16(b, c)
 	}
 	return base64.StdEncoding.EncodeToString(b)
 }
