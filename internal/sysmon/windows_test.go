@@ -11,11 +11,11 @@ import (
 	"davish/internal/platform"
 )
 
-// testdata/windows-procs.txt and windows-collect-real.txt are real output.
-// windows-collect.txt (which has a failed service, containers and a second
-// drive) and windows-info.txt are built by hand to match what collect.ps1 and
-// info.ps1 are written to print: the scripts print the shapes of /proc so that
-// the Linux parsers read them. Replace them with real output when available.
+// testdata/windows-procs.txt, windows-collect-real.txt and windows-info.txt are
+// real output of the scripts (the host name replaced). windows-collect.txt is
+// built by hand to cover what that machine lacked: a failed service,
+// containers and a second drive. The scripts print the shapes of /proc so that
+// the Linux parsers read them.
 
 func TestWindowsCollectorReadsLikeLinux(t *testing.T) {
 	f, err := os.Open("testdata/windows-collect.txt")
@@ -194,20 +194,18 @@ func TestWindowsProcesses(t *testing.T) {
 func TestWindowsInfo(t *testing.T) {
 	info := parseInfo(readSections(t, "windows-info.txt"))
 	want := SystemInfo{
-		Hostname: "WIN-SRV01",
-		OS:       "Windows Server 2022 Datacenter",
-		Kernel:   "10.0.20348",
+		Hostname: "WIN-HOST",
+		OS:       "Windows 11 Pro",
+		Kernel:   "10.0.26200",
 		Arch:     "x86_64",
-		CPUModel: "Intel(R) Xeon(R) Platinum 8272CL CPU @ 2.60GHz",
-		Virt:     "microsoft",
+		CPUModel: "Intel(R) Core(TM) i5-9400 CPU @ 2.90GHz",
+		Virt:     "", // "none": bare metal
 	}
 	if info != want {
 		t.Errorf("info = %+v; want %+v", info, want)
 	}
 }
 
-// PowerShell reads "$name:" as a variable in a drive-like scope and refuses
-// to parse the script. Only the real scopes may be followed by a colon.
 func TestWindowsScriptsHaveNoScopeLikeVariables(t *testing.T) {
 	tg, _ := targetFor(platform.Windows)
 	bad := regexp.MustCompile(`\$([A-Za-z_][A-Za-z0-9_]*):`)

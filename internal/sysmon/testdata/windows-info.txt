@@ -1,12 +1,12 @@
 @@os
-PRETTY_NAME="Windows Server 2022 Datacenter"
+PRETTY_NAME="Windows 11 Pro"
 @@uname
-10.0.20348
+10.0.26200
 x86_64
 @@hostname
-WIN-SRV01
+WIN-HOST
 @@cpu
-Intel(R) Xeon(R) Platinum 8272CL CPU @ 2.60GHz
+Intel(R) Core(TM) i5-9400 CPU @ 2.90GHz
 @@virt
-microsoft
+none
 @@end
