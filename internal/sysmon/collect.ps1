@@ -86,7 +86,7 @@ function Snapshot($health) {
 	foreach ($nic in @(Get-CimInstance Win32_PerfRawData_Tcpip_NetworkInterface)) {
 		$name = ($nic.Name -replace ':', ' ').Trim()
 		if ($name -match '^(isatap|Teredo|6to4|WAN Miniport|Loopback)') { continue }
-		L "$name: $(N $nic.BytesReceivedPersec) 0 0 0 0 0 0 0 $(N $nic.BytesSentPersec) 0 0 0 0 0 0 0"
+		L "${name}: $(N $nic.BytesReceivedPersec) 0 0 0 0 0 0 0 $(N $nic.BytesSentPersec) 0 0 0 0 0 0 0"
 	}
 
 	# Filesystems as df -kP prints them; the system drive comes first and is the "/".

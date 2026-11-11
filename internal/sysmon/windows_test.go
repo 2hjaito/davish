@@ -2,6 +2,7 @@ package sysmon
 
 import (
 	"os"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -124,6 +125,21 @@ func TestWindowsInfo(t *testing.T) {
 	}
 	if info != want {
 		t.Errorf("info = %+v; want %+v", info, want)
+	}
+}
+
+// PowerShell reads "$name:" as a variable in a drive-like scope and refuses
+// to parse the script. Only the real scopes may be followed by a colon.
+func TestWindowsScriptsHaveNoScopeLikeVariables(t *testing.T) {
+	tg, _ := targetFor(platform.Windows)
+	bad := regexp.MustCompile(`\$([A-Za-z_][A-Za-z0-9_]*):`)
+	scopes := map[string]bool{"env": true, "script": true, "global": true, "local": true, "private": true}
+	for name, s := range map[string]string{"collect": tg.collect, "procs": tg.procs, "info": tg.info} {
+		for _, m := range bad.FindAllStringSubmatch(s, -1) {
+			if !scopes[strings.ToLower(m[1])] {
+				t.Errorf("%s.ps1: %s: is read as a scope; write ${%s}:", name, m[0], m[1])
+			}
+		}
 	}
 }
 
