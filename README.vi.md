@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/social-preview.png" alt="Davish: một desktop cho các server Linux" width="100%">
+<img src="assets/social-preview-vi.png" alt="Davish: một desktop cho các server Linux" width="100%">
 
 # Davish
 
@@ -18,7 +18,7 @@ Không cài gì lên server.
 
 [English](README.md) · **Tiếng Việt** · [简体中文](README.zh-CN.md)
 
-<img src="assets/screenshots/desktop.jpg" alt="Desktop Davish với Terminal, Monitor và Files" width="100%">
+<img src="assets/screenshots/desktop.png" alt="Desktop Davish với Terminal, Git, Monitor và Files" width="100%">
 
 </div>
 

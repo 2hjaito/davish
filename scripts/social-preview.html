@@ -1,6 +1,6 @@
 <!doctype html><html><head><meta charset="utf-8"><style>
 html,body{margin:0;width:1280px;height:640px;overflow:hidden}
-body{background:linear-gradient(135deg,#1b2140,#2b3a6b 55%,#4a3f7a);font-family:-apple-system,"SF Pro Display",Helvetica,sans-serif;color:#fff;position:relative}
+body{background:linear-gradient(135deg,#1b2140,#2b3a6b 55%,#4a3f7a);font-family:-apple-system,"SF Pro Display",Helvetica,"PingFang SC",sans-serif;color:#fff;position:relative}
 .l{position:absolute;left:80px;top:150px;width:560px}
 img.i{width:120px;height:120px}
 h1{font-size:84px;margin:20px 0 8px;letter-spacing:-2px}
@@ -9,7 +9,19 @@ p{font-size:30px;line-height:1.35;margin:0;color:#d8def5}
 .s{position:absolute;right:-60px;top:110px;width:640px;border-radius:14px;box-shadow:0 30px 80px rgba(0,0,0,.5);transform:perspective(1400px) rotateY(-12deg)}
 </style></head><body>
 <div class="l"><img class="i" src="../assets/icon/png/davish-1024.png"><h1>Davish</h1>
-<p>A desktop for your Linux servers.<br>Open it and you're in, over SSH.</p>
-<div class="t">No web panel · No login · No agent</div></div>
-<img class="s" src="../assets/screenshots/en/desktop.jpg">
+<p id="lead"></p>
+<div class="t" id="tag"></div></div>
+<img class="s" id="shot">
+<script>
+// ?lang=en|vi|zh picks the text and the desktop screenshot of that README.
+const TEXT = {
+  en: ["A desktop for your Linux servers.<br>Open it and you're in, over SSH.", "No web panel · No login · No agent", "en/desktop.png"],
+  vi: ["Một desktop cho các server Linux.<br>Mở ra là vào, qua SSH.", "Không web panel · Không đăng nhập · Không agent", "desktop.png"],
+  zh: ["你的 Linux 服务器，就是一个桌面。<br>打开就能用，全部走 SSH。", "无 Web 面板 · 无需登录 · 无 Agent", "zh/desktop.png"],
+};
+const [lead, tag, shot] = TEXT[new URLSearchParams(location.search).get("lang")] ?? TEXT.en;
+document.getElementById("lead").innerHTML = lead;
+document.getElementById("tag").textContent = tag;
+document.getElementById("shot").src = "../assets/screenshots/" + shot;
+</script>
 </body></html>

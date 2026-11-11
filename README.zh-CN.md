@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/social-preview.png" alt="Davish：你的 Linux 服务器桌面" width="100%">
+<img src="assets/social-preview-zh.png" alt="Davish：你的 Linux 服务器桌面" width="100%">
 
 # Davish
 
@@ -18,7 +18,7 @@
 
 [English](README.md) · [Tiếng Việt](README.vi.md) · **简体中文**
 
-<img src="assets/screenshots/en/desktop.jpg" alt="Davish 桌面：终端、监控和文件" width="100%">
+<img src="assets/screenshots/zh/desktop.png" alt="Davish 桌面：终端、Git、监控和文件" width="100%">
 
 </div>
 

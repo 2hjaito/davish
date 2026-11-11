@@ -8,7 +8,7 @@ Every app in Davish, what it does and what it runs on the server. The interface 
 
 xterm.js with tabs, copy/paste, GPU rendering, and an optional powerline prompt injected into bash at login, with nothing written on the server.
 
-<img src="assets/screenshots/en/desktop.jpg" alt="Terminal, Monitor and Files" width="100%">
+<img src="assets/screenshots/en/desktop.png" alt="Terminal, Git, Monitor and Files" width="100%">
 
 ## Saved commands
 

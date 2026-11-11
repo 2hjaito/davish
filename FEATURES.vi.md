@@ -8,7 +8,7 @@ Mọi app trong Davish, làm được gì và chạy gì trên server. Ảnh ch�
 
 xterm.js nhiều tab, copy/paste, vẽ bằng GPU, và prompt powerline tùy chọn được nạp vào bash lúc đăng nhập, không ghi gì lên server.
 
-<img src="assets/screenshots/desktop.jpg" alt="Terminal, Monitor và Files" width="100%">
+<img src="assets/screenshots/desktop.png" alt="Terminal, Git, Monitor và Files" width="100%">
 
 ## Lệnh hay dùng
 
