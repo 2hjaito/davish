@@ -976,7 +976,9 @@ const vi = {
       },
       settings: {
         does: 'Ngôn ngữ, chế độ sáng tối, giao diện, phông, ngưỡng cảnh báo, khóa app, prompt Terminal.',
-        actions: [],
+        actions: [
+          'Khóa app: chọn thời gian giữ mật khẩu sudo khi không dùng (mặc định 15 phút, theo từng server)',
+        ],
         keys: [],
         runs: [],
       },
@@ -1321,7 +1323,7 @@ const vi = {
     title: (server: string) => `Mật khẩu sudo cho ${server}`,
     body: 'Lệnh này cần quyền root. Davish sẽ chạy:',
     password: (user: string) => `Mật khẩu sudo của ${user}`,
-    kept: 'Mật khẩu chỉ được giữ trong bộ nhớ của Davish trong phiên này, để không phải hỏi lại. Không lưu vào ổ đĩa, keychain hay nhật ký, chỉ đưa cho sudo qua stdin (không nằm trên dòng lệnh). Bị xóa khi ngắt kết nối, khóa app, hoặc bấm Quên mật khẩu sudo.',
+    kept: 'Mật khẩu chỉ được giữ trong bộ nhớ của Davish trong phiên này, để không phải hỏi lại. Không lưu vào ổ đĩa, keychain hay nhật ký, chỉ đưa cho sudo qua stdin (không nằm trên dòng lệnh). Bị xóa khi không dùng tới trong khoảng đặt ở Cài đặt (mặc định 15 phút), khi ngắt kết nối hoặc khóa app, hoặc khi bấm Quên mật khẩu sudo.',
     terminal: 'Chạy trong Terminal',
     run: 'Chạy',
     checking: 'Đang kiểm tra…',
@@ -1864,6 +1866,13 @@ const vi = {
     version: (v: string) => `Davish ${v}`,
     checkNow: 'Kiểm tra ngay',
     lockAfters: { 0: 'Không', 5: '5 phút', 15: '15 phút', 30: '30 phút', 60: '1 giờ' },
+    sudoForget: 'Quên mật khẩu sudo',
+    sudoForgetHint:
+      'Sau khoảng này mà không dùng tới, tính riêng từng server, giống chính sudo. Ngắt kết nối hoặc khóa app luôn xóa mật khẩu.',
+    sudoForgets: { 5: '5 phút', 15: '15 phút', 60: '1 giờ', 0: 'Hết phiên' } as Record<
+      number,
+      string
+    >,
     lockChange: 'Đổi mật khẩu',
     lockSave: 'Lưu mật khẩu mới',
     lockDisable: 'Tắt khóa',

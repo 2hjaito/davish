@@ -346,6 +346,8 @@ export function ShortcutRun(arg1:string,arg2:string,arg3:string):Promise<shortcu
 
 export function SudoForget(arg1:string):Promise<void>;
 
+export function SudoForgetAfter(arg1:number):Promise<void>;
+
 export function SudoSetPassword(arg1:string,arg2:string):Promise<void>;
 
 export function SudoState(arg1:string):Promise<string>;

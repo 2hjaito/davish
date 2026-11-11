@@ -6,6 +6,7 @@ import (
 	"errors"
 	"strings"
 	"testing"
+	"time"
 
 	"davish/internal/apperr"
 	"davish/internal/audit"
@@ -232,5 +233,61 @@ func TestPrepareForAStream(t *testing.T) {
 	}
 	if !RefusedPassword("sudo: 1 incorrect password attempt") || RefusedPassword("app: incorrect input") {
 		t.Error("RefusedPassword")
+	}
+}
+
+func TestForgetsAnUnusedPassword(t *testing.T) {
+	ctx := context.Background()
+	f := &fakeSudo{uid: "1000", policy: "password", groups: "u sudo"}
+	k := New(f)
+	k.SetForgetAfter(150 * time.Millisecond)
+	if err := k.SetPassword(ctx, "srv", []byte(secret)); err != nil {
+		t.Fatal(err)
+	}
+	// Used before it runs out: kept, and the time starts over.
+	for range 3 {
+		time.Sleep(80 * time.Millisecond)
+		if _, err := k.Run(ctx, "srv", "test", "true", nil); err != nil {
+			t.Fatalf("while in use: %v", err)
+		}
+	}
+	// Asking the state is not a use.
+	deadline := time.Now().Add(2 * time.Second)
+	for {
+		if st, _ := k.State(ctx, "srv"); st == Password {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("the unused password was kept")
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	if _, err := k.Run(ctx, "srv", "test", "true", nil); code(err) != apperr.SudoPasswordRequired {
+		t.Fatalf("after it ran out: %v", err)
+	}
+}
+
+func TestForgetAfterZeroKeepsItForTheSession(t *testing.T) {
+	ctx := context.Background()
+	k := New(&fakeSudo{uid: "1000", policy: "password", groups: "u sudo"})
+	k.SetForgetAfter(30 * time.Millisecond)
+	if err := k.SetPassword(ctx, "srv", []byte(secret)); err != nil {
+		t.Fatal(err)
+	}
+	k.SetForgetAfter(0)
+	time.Sleep(100 * time.Millisecond)
+	if st, _ := k.State(ctx, "srv"); st != Ready {
+		t.Fatalf("state = %s", st)
+	}
+	// Forgetting by hand still works, and a late timer does nothing.
+	k.SetForgetAfter(20 * time.Millisecond)
+	k.Forget("srv")
+	if err := k.SetPassword(ctx, "srv", []byte(secret)); err != nil {
+		t.Fatal(err)
+	}
+	k.SetForgetAfter(0)
+	time.Sleep(60 * time.Millisecond)
+	if st, _ := k.State(ctx, "srv"); st != Ready {
+		t.Fatalf("a stale timer wiped the new password: %s", st)
 	}
 }

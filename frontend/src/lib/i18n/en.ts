@@ -995,7 +995,9 @@ const en = {
       },
       settings: {
         does: 'Language, light or dark theme, appearance, fonts, alert thresholds, app lock, Terminal prompt.',
-        actions: [],
+        actions: [
+          'App lock: choose how long an unused sudo password is kept (15 minutes by default, per server)',
+        ],
         keys: [],
         runs: [],
       },
@@ -1339,7 +1341,7 @@ const en = {
     title: (server: string) => `sudo password for ${server}`,
     body: 'This needs root. Davish will run:',
     password: (user: string) => `sudo password of ${user}`,
-    kept: 'The password is kept in Davish’s memory for this session only, so you are not asked again. It is not saved to disk, the keychain or any log, and only reaches sudo on stdin (never on a command line). It is wiped when you disconnect, lock the app, or choose Forget sudo password.',
+    kept: 'The password is kept in Davish’s memory for this session only, so you are not asked again. It is not saved to disk, the keychain or any log, and only reaches sudo on stdin (never on a command line). It is wiped when it goes unused for the time set in Settings (15 minutes unless you change it), when you disconnect or lock the app, or when you choose Forget sudo password.',
     terminal: 'Run in Terminal',
     run: 'Run',
     checking: 'Checking…',
@@ -1893,6 +1895,13 @@ const en = {
     version: (v: string) => `Davish ${v}`,
     checkNow: 'Check now',
     lockAfters: { 0: 'Never', 5: '5 min', 15: '15 min', 30: '30 min', 60: '1 hour' },
+    sudoForget: 'Forget the sudo password',
+    sudoForgetHint:
+      'After this long without being used, per server; as sudo itself does. Disconnecting or locking the app always forgets it.',
+    sudoForgets: { 5: '5 min', 15: '15 min', 60: '1 hour', 0: 'End of session' } as Record<
+      number,
+      string
+    >,
     lockChange: 'Change password',
     lockSave: 'Save new password',
     lockDisable: 'Turn off lock',

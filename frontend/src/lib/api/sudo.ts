@@ -16,6 +16,10 @@ export const sudoSetPassword = (serverID: string, password: string): Promise<voi
       ? Promise.reject({ code: 'SUDO_PASSWORD_WRONG', message: 'sudo did not accept the password' })
       : Promise.resolve()
 
+/** Minutes an unused sudo password is kept; 0 keeps it until the session ends. */
+export const sudoForgetAfter = (minutes: number): Promise<void> =>
+  hasRuntime ? App.SudoForgetAfter(minutes) : Promise.resolve()
+
 /** Wipes the server's sudo password. */
 export const sudoForget = (serverID: string): Promise<void> =>
   hasRuntime ? App.SudoForget(serverID) : Promise.resolve()

@@ -1021,7 +1021,9 @@ const es = {
       },
       settings: {
         does: 'Idioma, tema claro u oscuro, apariencia, fuentes, umbrales de alerta, bloqueo de la app, prompt de Terminal.',
-        actions: [],
+        actions: [
+          'Bloqueo de la app: elige cuánto se guarda una contraseña de sudo sin usar (15 minutos por defecto, por servidor)',
+        ],
         keys: [],
         runs: [],
       },
@@ -1368,7 +1370,7 @@ const es = {
     title: (server: string) => `Contraseña de sudo para ${server}`,
     body: 'Esto necesita root. Davish ejecutará:',
     password: (user: string) => `Contraseña de sudo de ${user}`,
-    kept: 'La contraseña se guarda en la memoria de Davish solo durante esta sesión, para no volver a pedírtela. No se guarda en disco, ni en el llavero, ni en ningún registro, y solo llega a sudo por stdin (nunca en una línea de comandos). Se borra al desconectar, al bloquear la app o al elegir Olvidar la contraseña de sudo.',
+    kept: 'La contraseña se guarda en la memoria de Davish solo durante esta sesión, para no volver a pedírtela. No se guarda en disco, ni en el llavero, ni en ningún registro, y solo llega a sudo por stdin (nunca en una línea de comandos). Se borra cuando pasa sin usarse el tiempo fijado en Ajustes (15 minutos si no lo cambias), al desconectar o bloquear la app, o al elegir Olvidar la contraseña de sudo.',
     terminal: 'Ejecutar en Terminal',
     run: 'Ejecutar',
     checking: 'Comprobando…',
@@ -1932,6 +1934,13 @@ const es = {
     version: (v: string) => `Davish ${v}`,
     checkNow: 'Comprobar ahora',
     lockAfters: { 0: 'Nunca', 5: '5 min', 15: '15 min', 30: '30 min', 60: '1 hora' },
+    sudoForget: 'Olvidar la contraseña de sudo',
+    sudoForgetHint:
+      'Tras este tiempo sin usarse, por servidor, como hace el propio sudo. Desconectar o bloquear la app siempre la olvida.',
+    sudoForgets: { 5: '5 min', 15: '15 min', 60: '1 hora', 0: 'Fin de la sesión' } as Record<
+      number,
+      string
+    >,
     lockChange: 'Cambiar la contraseña',
     lockSave: 'Guardar la contraseña nueva',
     lockDisable: 'Desactivar el bloqueo',

@@ -73,8 +73,12 @@ interface SettingsData {
   alertHold: number
   editorBackup: BackupMode
   lockAfter: number
+  sudoForgetAfter: number
   autoUpdate: boolean
 }
+
+/** The choices for forgetting an unused sudo password, in minutes; 0 is never. */
+export const SUDO_FORGET_AFTER = [5, 15, 60, 0]
 
 const defaults: SettingsData = {
   theme: 'system',
@@ -93,6 +97,7 @@ const defaults: SettingsData = {
   alertHold: ALERTS.defaults.hold,
   editorBackup: 'etc',
   lockAfter: 15,
+  sudoForgetAfter: 15,
   autoUpdate: true,
 }
 
@@ -164,6 +169,11 @@ class Settings {
   /** Idle minutes before the app locks; 0 is never. */
   get lockAfter(): number {
     return [0, 5, 15, 30, 60].includes(this.#data.lockAfter) ? this.#data.lockAfter : 15
+  }
+
+  /** Minutes an unused sudo password is kept, as sudo itself does; 0 is the whole session. */
+  get sudoForgetAfter(): number {
+    return SUDO_FORGET_AFTER.includes(this.#data.sudoForgetAfter) ? this.#data.sudoForgetAfter : 15
   }
 
   set<K extends keyof SettingsData>(key: K, value: SettingsData[K]) {
