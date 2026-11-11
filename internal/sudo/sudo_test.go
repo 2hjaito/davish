@@ -187,3 +187,50 @@ func TestStateWarnsOutsideAdminGroups(t *testing.T) {
 		}
 	}
 }
+
+func TestPrepareForAStream(t *testing.T) {
+	ctx := context.Background()
+	follow := "journalctl -f"
+
+	root := New(&fakeSudo{uid: "0"})
+	if line, in, err := root.Prepare(ctx, "srv", "logs", follow); err != nil || line != follow || in != nil {
+		t.Fatalf("root: %q %q %v", line, in, err)
+	}
+
+	open := New(&fakeSudo{uid: "1000", policy: "nopassword", groups: "u sudo"})
+	if line, in, err := open.Prepare(ctx, "srv", "logs", follow); err != nil || line != `LC_ALL=C sudo -n -- sh -c 'journalctl -f'` || in != nil {
+		t.Fatalf("no password: %q %q %v", line, in, err)
+	}
+
+	none := New(&fakeSudo{uid: "1000", policy: "none"})
+	if _, _, err := none.Prepare(ctx, "srv", "logs", follow); code(err) != apperr.CmdNeedsRoot {
+		t.Fatalf("no sudo: %v", err)
+	}
+
+	f := &fakeSudo{uid: "1000", policy: "password", groups: "u sudo"}
+	k := New(f)
+	if _, _, err := k.Prepare(ctx, "srv", "logs", follow); code(err) != apperr.SudoPasswordRequired {
+		t.Fatalf("before the password: %v", err)
+	}
+	if err := k.SetPassword(ctx, "srv", []byte(secret)); err != nil {
+		t.Fatal(err)
+	}
+	line, in, err := k.Prepare(ctx, "srv", "logs", follow)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if line != `LC_ALL=C sudo -S -k -p '' -- sh -c 'journalctl -f'` || strings.Contains(line, secret) {
+		t.Errorf("line = %s", line)
+	}
+	if string(in) != secret+"\n" {
+		t.Errorf("stdin = %q", in)
+	}
+	// What the caller is handed is its own: wiping it keeps the session's.
+	wipe(in)
+	if _, in2, _ := k.Prepare(ctx, "srv", "logs", follow); string(in2) != secret+"\n" {
+		t.Errorf("after the caller wiped its copy: %q", in2)
+	}
+	if !RefusedPassword("sudo: 1 incorrect password attempt") || RefusedPassword("app: incorrect input") {
+		t.Error("RefusedPassword")
+	}
+}

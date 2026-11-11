@@ -6,6 +6,7 @@
   import { toUserError } from '../../lib/api/errors'
   import { t } from '../../lib/i18n'
   import { load, save } from '../../lib/stores/persist'
+  import { sudoPrompt, withSudo } from '../../lib/stores/sudoPrompt.svelte'
   import { servers } from '../../lib/stores/servers.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
   import LoadState from '../../lib/ui/LoadState.svelte'
@@ -49,8 +50,9 @@
   const zone = $derived(table?.zone ?? 'UTC')
 
   function matches(j: CronJob, f: Filter): boolean {
-    if (f === 'mine') return j.editable
-    if (f === 'system') return !j.editable
+    // Root's crontab is the system's, though Davish edits it through sudo.
+    if (f === 'mine') return j.source === 'user'
+    if (f === 'system') return j.source !== 'user'
     return !j.enabled
   }
 
@@ -91,6 +93,19 @@
     })),
   )
 
+  /** What the sudo prompt shows for reading root's crontab. */
+  const ROOT_READ = 'sudo crontab -u root -l'
+  // An edit sends the new crontab on stdin, which a terminal would wait
+  // for: an early Ctrl-D there would empty root's crontab. Terminal gets
+  // crontab's own editor instead.
+  const ROOT_EDIT = 'sudo crontab -u root -e'
+
+  const sourceOf = (j: CronJob) => (j.source === 'root' ? 'root' : 'user')
+
+  async function unlockRoot() {
+    if (await sudoPrompt.ask(win.serverID, ROOT_READ)) void refresh()
+  }
+
   const attempt = supersedes()
 
   async function refresh() {
@@ -111,7 +126,13 @@
     busy = true
     changeError = ''
     try {
-      pending = { change, plan: await backend.plan(win.serverID, change) }
+      let p: CronPlan | null = null
+      const read = async () => void (p = await backend.plan(win.serverID, change))
+      // Reading root's crontab may need the session's sudo password.
+      if (change.source === 'root' && !(await withSudo(win.serverID, ROOT_READ, read))) return
+      if (change.source !== 'root') await read()
+      if (!p) return
+      pending = { change, plan: p }
       editing = null
     } catch (e) {
       changeError = toUserError(e).message
@@ -124,16 +145,20 @@
 
   function start(op: Exclude<CronOp, 'add'>, job: CronJob) {
     if (op === 'edit') editing = job
-    else void plan({ op, id: job.id, schedule: '', command: '' })
+    else void plan({ source: sourceOf(job), op, id: job.id, schedule: '', command: '' })
   }
 
   async function confirm() {
     if (!pending) return
     busy = true
     changeError = ''
+    const { change, plan: p } = pending
     try {
-      await backend.apply(win.serverID, pending.change, pending.plan)
-      if (pending.change.op === 'delete') selected = null
+      const apply = () => backend.apply(win.serverID, change, p)
+      if (change.source === 'root') {
+        if (!(await withSudo(win.serverID, p.sudo, apply, ROOT_EDIT))) return
+      } else await apply()
+      if (change.op === 'delete') selected = null
       pending = null
       await refresh()
     } catch (e) {
@@ -206,6 +231,15 @@
     {/if}
   {/snippet}
   {#snippet list()}
+    {#if table?.rootLocked}
+      <div class="root-locked">
+        <p>{t.cron.rootLocked}</p>
+        <button type="button" class="btn" onclick={() => void unlockRoot()}>
+          <Icon name="key" size={13} />
+          {t.sudo.journal}
+        </button>
+      </div>
+    {/if}
     <StatusList
       {items}
       {selected}
@@ -225,6 +259,7 @@
 
 <JobDialog
   job={editing}
+  canRoot={table?.root ?? false}
   {zone}
   {busy}
   error={changeError}
@@ -238,3 +273,21 @@
   onclose={() => (pending = null)}
   onconfirm={() => void confirm()}
 />
+
+<style>
+  .root-locked {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--divider-soft);
+    font-size: var(--text-sm);
+    color: var(--fg-muted);
+  }
+
+  .root-locked p {
+    flex: 1;
+    margin: 0;
+    line-height: 1.4;
+  }
+</style>

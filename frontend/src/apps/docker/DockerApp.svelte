@@ -15,9 +15,11 @@
   import { t } from '../../lib/i18n'
   import { useAppMenu } from '../../lib/shell/menus.svelte'
   import { load, save } from '../../lib/stores/persist'
+  import { sudoPrompt } from '../../lib/stores/sudoPrompt.svelte'
   import { servers } from '../../lib/stores/servers.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
   import LoadState from '../../lib/ui/LoadState.svelte'
+  import NeedsRoot from '../../lib/ui/NeedsRoot.svelte'
   import NotInstalled from '../../lib/ui/NotInstalled.svelte'
   import { supersedes } from '../../lib/stores/latest'
   import FilterShell, { type FilterItem } from '../../lib/ui/FilterShell.svelte'
@@ -48,6 +50,9 @@
 
   let { win }: AppProps = $props()
 
+  /** What the sudo prompt shows for reading the lists as root. */
+  const LIST_SUDO = 'sudo docker ps -a'
+
   const ctx = getWindowContext()
   const d = t.docker
 
@@ -67,6 +72,9 @@
   let newStack = $state(false)
   let creating = $state<'network' | 'volume' | null>(null)
   let error = $state('')
+  // The docker socket refuses this user and sudo wants its password: the
+  // app asks only when the user chooses to (ADR 0018).
+  let askSudo = $state(false)
   /** The server has no docker: offer to install it. */
   let missing = $state(false)
   let loading = $state(false)
@@ -176,12 +184,15 @@
       if (kind === 'volumes') volumes = await backend.volumes(win.serverID)
       error = ''
       missing = false
+      askSudo = false
     } catch (e) {
       if (current()) {
         const u = toUserError(e)
         error = u.message
         missing = u.code === 'CMD_MISSING'
-        if (missing) containers = null
+        askSudo = u.code === 'SUDO_PASSWORD_REQUIRED' || u.code === 'SUDO_PASSWORD_WRONG'
+        if (askSudo) error = ''
+        if (missing || askSudo) containers = null
       }
     } finally {
       if (current()) loading = false
@@ -303,6 +314,20 @@
         icon="docker"
         onretry={() => void refresh()}
       />
+    {:else if askSudo}
+      <div class="dk-sudo">
+        <NeedsRoot serverID={win.serverID} command={LIST_SUDO} message={d.needsSudo} />
+        <button
+          type="button"
+          class="btn btn-primary"
+          onclick={async () => {
+            if (await sudoPrompt.ask(win.serverID, LIST_SUDO)) void refresh()
+          }}
+        >
+          <Icon name="key" size={13} />
+          {t.sudo.journal}
+        </button>
+      </div>
     {:else}
       <LoadState
         serverID={win.serverID}
@@ -415,6 +440,16 @@
 />
 
 <style>
+  .dk-sudo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    max-width: 560px;
+    margin: 32px auto;
+    padding: 0 16px;
+  }
+
   .of {
     font-size: var(--text-sm);
     font-weight: 400;

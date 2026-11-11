@@ -1,5 +1,6 @@
 <script lang="ts">
   import { toUserError } from '../../lib/api/errors'
+  import { withSudo } from '../../lib/stores/sudoPrompt.svelte'
   import { t } from '../../lib/i18n'
   import Dialog from '../../lib/ui/Dialog.svelte'
   import { backend } from './backend'
@@ -30,7 +31,14 @@
     busy = true
     error = ''
     try {
-      await backend.create(serverID, kind, name.trim())
+      const n = name.trim()
+      const k = kind
+      if (
+        !(await withSudo(serverID, `sudo docker ${k} create ${n}`, () =>
+          backend.create(serverID, k, n),
+        ))
+      )
+        return
       oncreated()
       onclose()
     } catch (e) {

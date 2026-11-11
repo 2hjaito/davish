@@ -116,10 +116,13 @@ func New(version string) (*App, error) {
 	// The emitter passes it every event, so it forgets a password when the
 	// session ends.
 	a.sudo = sudo.New(runner)
+	a.files.UseRoot(a.sudo)
 	a.services = svc.New(runner)
 	a.services.UseRoot(a.sudo)
 	a.docker = docker.New(runner)
+	a.docker.UseRoot(a.sudo)
 	a.cron = cron.New(runner, a.conns)
+	a.cron.UseRoot(a.sudo)
 	a.nginx = nginx.New(runner, a.conns, emitter{a})
 	a.nginx.UseRoot(a.sudo)
 	a.keys = sshkeys.New(a.conns, runner)
@@ -139,6 +142,7 @@ func New(version string) (*App, error) {
 	a.tunnels = ports.NewTunnels(a.conns, emitter{a}, log)
 	a.browser = ports.NewBrowser(a.conns, log)
 	a.logs = logs.New(a.conns, a.audit, emitter{a}, log)
+	a.logs.UseRoot(a.sudo)
 	if a.transfers, err = transfer.New(a.conns, emitter{a}, log, transfer.Options{}); err != nil {
 		return nil, err
 	}

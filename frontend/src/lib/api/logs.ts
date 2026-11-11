@@ -19,4 +19,8 @@ export interface LogsStarted {
 export const logsStart = (serverID: string, src: LogSource): Promise<LogsStarted> =>
   App.LogsStart(serverID, src)
 
+/** The same as root through sudo; never asks for the password itself (ADR 0018). */
+export const logsStartAsRoot = (serverID: string, src: LogSource): Promise<LogsStarted> =>
+  App.LogsStartAsRoot(serverID, src)
+
 export const logsStop = (streamID: string): Promise<void> => App.LogsStop(streamID)

@@ -6,13 +6,20 @@
     type Access,
     type FileContent,
     filesAccess,
+    filesPlanSaveAsRoot,
     filesRead,
     filesSave,
+    filesSaveAsRoot,
+    type RootSavePlan,
+    type SaveOpts,
+    type SaveResult,
   } from '../../lib/api/files'
   import { hasRuntime } from '../../lib/api/runtime'
   import { t } from '../../lib/i18n'
   import { servers } from '../../lib/stores/servers.svelte'
+  import ConfirmCommand from '../../lib/ui/ConfirmCommand.svelte'
   import Dialog from '../../lib/ui/Dialog.svelte'
+  import { withSudo } from '../../lib/stores/sudoPrompt.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import { type EditorRequest, editorRequests, openTerminalAt } from '../../lib/wm/intents.svelte'
@@ -43,6 +50,8 @@
     dirty: boolean
     /** Saving would fail (permissions); the file opens read-only. */
     access?: Access
+    /** The user chose to edit it anyway: saves go through sudo (ADR 0018). */
+    asRoot?: boolean
     /** Bumped when the text is reloaded, so the editor starts over. */
     version: number
     saving?: boolean
@@ -118,8 +127,17 @@
   }
 
   function readOnly(tab: Tab): boolean {
-    return tab.access ? !tab.access.writable : false
+    return tab.access ? !tab.access.writable && !tab.asRoot : false
   }
+
+  /** A save as root waiting on its confirmation, which shows the exact command. */
+  let rootSave = $state.raw<{
+    tab: Tab
+    plan: RootSavePlan
+    data: Uint8Array
+    opts: SaveOpts
+    done: (ok: boolean) => void
+  } | null>(null)
 
   /** Opens a terminal in the file's folder with sudoedit typed, not run. */
   function editWithSudo(tab: Tab) {
@@ -157,10 +175,14 @@
       const data = new TextEncoder().encode(view.getText())
       const expect =
         overwrite || !tab.file ? undefined : { modTime: tab.file.modTime, size: tab.file.size }
-      const res = await filesSave(win.serverID, tab.path, data, {
-        backup: backupFor(tab.path, settings.editorBackup),
-        expect,
-      })
+      const opts: SaveOpts = { backup: backupFor(tab.path, settings.editorBackup), expect }
+      const res = tab.asRoot
+        ? await saveAsRoot(tab, data, opts)
+        : await filesSave(win.serverID, tab.path, data, opts)
+      if (!res) {
+        tab.notice = undefined
+        return false
+      }
       tab.file = res.entry
       tab.dirty = false
       tab.notice = {
@@ -175,10 +197,42 @@
       if (ue.code === 'FS_CHANGED') changedId = tab.id
       // Permissions changed, or the owner could not be kept: stop editing.
       if (ue.code === 'FS_PERMISSION_DENIED' && tab.access) tab.access.writable = false
+      // No sudo after all, or a path Davish never writes as root.
+      if (ue.code === 'CMD_NEEDS_ROOT' || ue.code === 'FS_PROTECTED') {
+        tab.asRoot = false
+      }
       return false
     } finally {
       tab.saving = false
     }
+  }
+
+  /**
+   * Saves as root: shows the exact command, then runs it through sudo once
+   * confirmed. null when the user cancels. Terminal gets sudoedit, never
+   * the command itself: it reads the text on stdin, which a terminal would
+   * wait for, and an early Ctrl-D there would empty the file.
+   */
+  async function saveAsRoot(
+    tab: Tab,
+    data: Uint8Array,
+    opts: SaveOpts,
+  ): Promise<SaveResult | null> {
+    const plan = await filesPlanSaveAsRoot(win.serverID, tab.path, opts)
+    if (!(await new Promise<boolean>((done) => (rootSave = { tab, plan, data, opts, done }))))
+      return null
+    let res: SaveResult | null = null
+    const run = async () =>
+      void (res = await filesSaveAsRoot(win.serverID, tab.path, data, opts, plan))
+    if (!(await withSudo(win.serverID, plan.sudo, run, tab.access?.sudoEdit ?? plan.sudo)))
+      return null
+    return res
+  }
+
+  function answerRootSave(ok: boolean) {
+    const r = rootSave
+    rootSave = null
+    r?.done(ok)
   }
 
   function requestCloseTab(id: number) {
@@ -289,9 +343,15 @@
           <div class="readonly" role="note">
             <Icon name="lock" size={14} strokeWidth={2.2} />
             <span>{t.editor.readOnlyBody}</span>
+            <button class="btn" onclick={() => (tab.asRoot = true)}>{t.editor.editAsRoot}</button>
             <button class="btn" title={t.editor.sudoHint} onclick={() => editWithSudo(tab)}
               >{t.editor.sudo}</button
             >
+          </div>
+        {:else if tab.asRoot}
+          <div class="readonly" role="note">
+            <Icon name="key" size={14} strokeWidth={2.2} />
+            <span>{t.editor.asRootBody}</span>
           </div>
         {/if}
         {#key tab.version}
@@ -381,6 +441,21 @@
     >
   {/snippet}
 </Dialog>
+
+<!-- A save as root shows the exact command first (docs/SECURITY.md). No
+     Terminal button: the command reads the text on stdin. -->
+<ConfirmCommand
+  command={rootSave?.plan.sudo ?? null}
+  title={rootSave ? t.editor.rootSaveTitle(rootSave.tab.name) : ''}
+  body={t.editor.rootSaveBody}
+  action={t.editor.rootSaveAction}
+  tone="primary"
+  note={rootSave?.plan.backup
+    ? t.editor.rootSaveBackup(rootSave.plan.backup)
+    : t.editor.rootSaveNoBackup}
+  onclose={() => answerRootSave(false)}
+  onconfirm={() => answerRootSave(true)}
+/>
 
 <style>
   .readonly {

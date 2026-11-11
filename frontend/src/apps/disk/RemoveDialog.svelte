@@ -83,12 +83,12 @@
     busy = true
     error = ''
     try {
-      if (tg.op === 'remove') await backend.remove(serverID, tg.path, command)
-      else {
-        // As root through sudo when the file is root's (ADR 0018).
-        const run = () => backend.truncate(serverID, tg.path, command)
-        if (!(await withSudo(serverID, sudo, run))) return
-      }
+      // As root through sudo when the server refuses (ADR 0018).
+      const run =
+        tg.op === 'remove'
+          ? () => backend.remove(serverID, tg.path, command)
+          : () => backend.truncate(serverID, tg.path, command)
+      if (!(await withSudo(serverID, sudo, run))) return
       ondone(tg)
     } catch (e) {
       const ue = toUserError(e)
@@ -97,6 +97,9 @@
       else if (ue.code === 'INVALID_INPUT' && tg.op === 'truncate') {
         // Refused as root here; Terminal still gets the sudo command, typed.
         error = d.rootUntrusted
+        needsRoot = true
+      } else if (ue.code === 'FS_PROTECTED') {
+        error = ue.message
         needsRoot = true
       } else error = ue.message
       if (ue.code === 'FS_STALE') void plan(tg)

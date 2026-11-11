@@ -63,7 +63,7 @@ const (
 func (s *Service) read(ctx context.Context, serverID string, cmd shellx.Command, limit time.Duration) (audit.Result, error) {
 	ctx, cancel := context.WithTimeout(ctx, limit)
 	defer cancel()
-	res, err := s.run.Run(ctx, serverID, app, cmd)
+	res, err := s.exec(ctx, serverID, cmd)
 	if errors.Is(err, context.DeadlineExceeded) {
 		return res, apperr.New(apperr.CmdTimeout, "docker did not answer in time")
 	}
@@ -72,7 +72,8 @@ func (s *Service) read(ctx context.Context, serverID string, cmd shellx.Command,
 
 // Service talks to the docker CLI on each server.
 type Service struct {
-	run Runner
+	run  Runner
+	root Root
 }
 
 // New creates the service.
@@ -235,8 +236,8 @@ func checkExit(res audit.Result) error {
 	}
 	msg := string(res.Stderr)
 	switch {
-	// Not in the docker group: the socket is root's.
-	case strings.Contains(msg, "permission denied") && strings.Contains(msg, "docker"):
+	// Not in the docker group, and no way to root: the socket is root's.
+	case socketDenied(res):
 		return apperr.New(apperr.CmdNeedsRoot, "the docker socket requires root")
 	case strings.Contains(msg, "No such container"):
 		return apperr.New(apperr.NotFound, "no such container")
