@@ -94,8 +94,11 @@
       const ue = toUserError(e)
       // Without the rights, the way out is the same command with sudo.
       if (ue.code === 'FS_PERMISSION_DENIED') needsRoot = true
-      else if (ue.code === 'INVALID_INPUT' && tg.op === 'truncate') error = d.rootUntrusted
-      else error = ue.message
+      else if (ue.code === 'INVALID_INPUT' && tg.op === 'truncate') {
+        // Refused as root here; Terminal still gets the sudo command, typed.
+        error = d.rootUntrusted
+        needsRoot = true
+      } else error = ue.message
       if (ue.code === 'FS_STALE') void plan(tg)
     } finally {
       busy = false
