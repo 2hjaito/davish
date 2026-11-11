@@ -10,12 +10,31 @@ describe('isAvailable', () => {
     }
   })
 
-  it('keeps Linux-only apps off Windows and macOS servers', () => {
-    for (const id of ['docker', 'services', 'nginx', 'cron', 'logs'] as const) {
-      const app = getApp(id)
-      expect(isAvailable(app, 'linux')).toBe(true)
-      expect(isAvailable(app, 'windows')).toBe(false)
-      expect(isAvailable(app, 'darwin')).toBe(false)
+  it('keeps every app on Linux servers', () => {
+    for (const a of apps) expect(isAvailable(a, 'linux'), a.id).toBe(true)
+  })
+
+  it('keeps every app on macOS servers, as before Windows support', () => {
+    for (const a of apps) expect(isAvailable(a, 'darwin'), a.id).toBe(true)
+  })
+
+  it('keeps POSIX-only apps off Windows servers', () => {
+    for (const id of [
+      'docker',
+      'git',
+      'keys',
+      'ports',
+      'deploy',
+      'database',
+      'services',
+      'nginx',
+      'cron',
+      'logs',
+      'packages',
+      'disk',
+      'security',
+    ] as const) {
+      expect(isAvailable(getApp(id), 'windows'), id).toBe(false)
     }
   })
 
@@ -28,16 +47,17 @@ describe('isAvailable', () => {
     }
   })
 
-  it('offers Monitor on Linux and Windows only', () => {
+  it('offers Monitor on every OS, so a macOS server gets an answer instead of a hang', () => {
     const monitor = getApp('monitor')
-    expect(isAvailable(monitor, 'linux')).toBe(true)
-    expect(isAvailable(monitor, 'windows')).toBe(true)
-    expect(isAvailable(monitor, 'darwin')).toBe(false)
+    for (const os of ['linux', 'windows', 'darwin'] as const) {
+      expect(isAvailable(monitor, os), os).toBe(true)
+    }
   })
 
   it('filters a list for the Dock', () => {
-    const ids = availableOn(apps, 'windows').map((a) => a.id)
-    expect(ids).toContain('terminal')
-    expect(ids).not.toContain('docker')
+    const windows = availableOn(apps, 'windows').map((a) => a.id)
+    expect(windows).toContain('terminal')
+    expect(windows).not.toContain('docker')
+    expect(availableOn(apps, 'darwin')).toHaveLength(apps.length)
   })
 })

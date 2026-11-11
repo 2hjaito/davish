@@ -12,7 +12,7 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 - Terminal on a Windows server opens the plain login shell instead of sending it a Linux-only start line.
 
 ### Changed
-- Apps that need Linux (Services, Docker, Logs, Cron, Nginx and the rest) are hidden from the Dock, Spotlight and the Go menu on a Windows or macOS server, and shown greyed out in Launchpad with the reason.
+- Apps that need a POSIX shell (Services, Docker, Git, Logs, Cron, Nginx and the rest) are hidden from the Dock, Spotlight and the Go menu on a Windows server, and shown greyed out in Launchpad with the reason. Nothing changes for macOS servers except Monitor, which now says it does not support them yet instead of waiting.
 
 ## [1.13.2] - 2026-11-11
 

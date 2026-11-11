@@ -12,7 +12,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 - Terminal trên server Windows mở shell đăng nhập thường thay vì gửi dòng lệnh khởi động chỉ dành cho Linux.
 
 ### Thay đổi
-- Các app cần Linux (Services, Docker, Logs, Cron, Nginx…) được ẩn khỏi Dock, Spotlight và menu Go trên server Windows hoặc macOS, và hiện mờ trong Launchpad kèm lý do.
+- Các app cần shell POSIX (Services, Docker, Git, Logs, Cron, Nginx…) được ẩn khỏi Dock, Spotlight và menu Go trên server Windows, và hiện mờ trong Launchpad kèm lý do. Server macOS không đổi gì ngoài Monitor, nay báo chưa hỗ trợ thay vì chờ mãi.
 
 ## [1.13.2] - 2026-11-11
 

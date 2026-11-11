@@ -21,6 +21,13 @@ import type { AppDef, AppId, AppProps } from './types'
 /** Apps that only need SSH and SFTP, so any server will do. */
 const EVERYWHERE: Platform[] = ['linux', 'windows', 'darwin']
 
+/**
+ * What an app without `platforms` runs on: servers with POSIX tools. A macOS
+ * server keeps every app it had before Windows support; only a Windows
+ * server, which has no sh, is held to an explicit list.
+ */
+const POSIX: Platform[] = ['linux', 'darwin']
+
 export const apps: AppDef[] = [
   {
     id: 'terminal',
@@ -41,8 +48,9 @@ export const apps: AppDef[] = [
     load: () => import('./files/FilesApp.svelte'),
   },
   {
+    // On macOS it opens and says it does not support that OS yet, rather than waiting for ever.
     id: 'monitor',
-    platforms: ['linux', 'windows'],
+    platforms: EVERYWHERE,
     label: t.apps.monitor,
     icon: 'monitor',
     theme: 'light',
@@ -257,12 +265,13 @@ export type { AppId }
 /**
  * Whether the app works on a server running os. An OS that is not known
  * (not connected yet, detection timed out) allows everything: better to try
- * than to block an app that would have worked.
+ * than to block an app that would have worked. Windows is the only OS that
+ * blocks apps for now.
  */
 export function isAvailable(app: AppDef | undefined, os: Platform | undefined): boolean {
   if (!app) return false
   if (!os || os === 'unknown') return true
-  return (app.platforms ?? ['linux']).includes(os)
+  return (app.platforms ?? POSIX).includes(os)
 }
 
 /** The apps that work on a server running os. */

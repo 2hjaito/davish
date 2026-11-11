@@ -49,8 +49,8 @@ export interface AppDef {
    */
   layout?: boolean
   /**
-   * The server operating systems the app works on. Left out, it needs Linux
-   * (systemd, /proc, sh…); a server whose OS is not known yet gets every app.
+   * The server operating systems the app works on. Left out, it needs POSIX
+   * tools (Linux or macOS); a server whose OS is not known yet gets every app.
    */
   platforms?: Platform[]
 }
