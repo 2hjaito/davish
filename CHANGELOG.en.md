@@ -4,6 +4,8 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.13.5] - 2026-11-12
+
 ### Changed
 - The sudo password is now forgotten after 15 minutes unused, per server, as sudo itself does; Davish used to keep it until you disconnected or locked the app. Pick 5 minutes, an hour or the whole session in Settings → App lock → Forget the sudo password. Checking sudo's state does not count as a use.
 

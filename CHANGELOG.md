@@ -4,6 +4,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.13.5] - 2026-11-12
+
 ### Thay đổi
 - Mật khẩu sudo tự được quên sau 15 phút không dùng, tính riêng từng server, giống chính sudo; trước đây Davish giữ tới khi ngắt kết nối hoặc khóa app. Chọn 5 phút, 1 giờ hoặc cả phiên trong Cài đặt → Khóa app → Quên mật khẩu sudo. Hỏi trạng thái sudo không tính là dùng.
 
