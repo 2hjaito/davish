@@ -8,3 +8,4 @@
 frontend/wailsjs/** linguist-generated
 frontend/src/lib/ui/icons.ts linguist-generated
 frontend/src/lib/i18n/[a-z][a-z].ts linguist-detectable=false
+frontend/src/lib/ui/techIcons.ts linguist-generated

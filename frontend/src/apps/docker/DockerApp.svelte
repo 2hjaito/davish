@@ -61,8 +61,10 @@
   const VOLUME_FILTERS: readonly VolumeFilter[] = ['volumes', 'unusedVolumes']
   const ALL: readonly Any[] = [...FILTERS, ...IMAGE_FILTERS, ...VOLUME_FILTERS]
 
-  const saved = load('docker', { filter: 'all' as Any })
+  type View = 'cards' | 'rows'
+  const saved = load('docker', { filter: 'all' as Any, view: 'rows' as View })
   let filter = $state<Any>(ALL.includes(saved.filter) ? saved.filter : 'all')
+  let view = $state<View>(saved.view === 'cards' ? 'cards' : 'rows')
   let query = $state('')
   let containers = $state.raw<Container[] | null>(null)
   let images = $state.raw<Image[] | null>(null)
@@ -83,7 +85,7 @@
     null,
   )
 
-  $effect(() => save('docker', { filter }))
+  $effect(() => save('docker', { filter, view }))
 
   const kind = $derived(
     (IMAGE_FILTERS as readonly Any[]).includes(filter)
@@ -268,6 +270,21 @@
   onrefresh={() => void refresh()}
 >
   {#snippet actions()}
+    {#if kind === 'containers' && !page}
+      <div class="segmented" role="group" aria-label={d.table.view}>
+        {#each ['cards', 'rows'] as const as v (v)}
+          <button
+            type="button"
+            aria-pressed={view === v}
+            aria-label={d.table[v]}
+            title={d.table[v]}
+            onclick={() => (view = v)}
+          >
+            <Icon name={v === 'cards' ? 'viewCards' : 'viewTable'} size={14} strokeWidth={2.2} />
+          </button>
+        {/each}
+      </div>
+    {/if}
     <button
       class="tool"
       aria-label={d.run.pullTitle}
@@ -400,6 +417,7 @@
           serverID={win.serverID}
           containers={shown}
           {stats}
+          {view}
           onopen={(name) => (page = { kind: 'container', name })}
           onimage={(ref) => (page = { kind: 'image', ref })}
           onchanged={() => void refresh()}
@@ -448,6 +466,33 @@
     max-width: 560px;
     margin: 32px auto;
     padding: 0 16px;
+  }
+
+  .segmented {
+    flex-shrink: 0;
+    display: flex;
+    margin-right: 6px;
+    padding: 2px;
+    border-radius: 8px;
+    background: var(--fill-soft);
+  }
+
+  .segmented button {
+    display: flex;
+    padding: 4px 7px;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    font-size: var(--text-xs);
+    color: var(--fg-muted);
+    transition: background var(--dur-fast) var(--ease-out);
+  }
+
+  .segmented button[aria-pressed='true'] {
+    background: var(--chart-surface);
+    color: var(--fg);
+    font-weight: 600;
+    box-shadow: var(--switch-knob-shadow);
   }
 
   .of {

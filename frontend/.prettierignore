@@ -3,3 +3,4 @@ node_modules/
 wailsjs/
 package-lock.json
 src/lib/ui/icons.ts
+src/lib/ui/techIcons.ts

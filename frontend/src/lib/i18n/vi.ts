@@ -924,6 +924,7 @@ const vi = {
       docker: {
         does: 'Container với CPU, RAM, log, inspect; start, stop, restart; cảnh báo container khởi động lại liên tục.',
         actions: [
+          'Thẻ hoặc Bảng (nút trên thanh công cụ): mỗi project compose là một thẻ có trạng thái, image, cổng, CPU và RAM; bấm thẻ để xem các container của nó',
           'Server chưa cài Docker: gõ sẵn lệnh cài theo bản Linux vào Terminal',
           'Chọn container để xem log và chi tiết',
           'Mở log trong app Logs',
@@ -2115,6 +2116,12 @@ const vi = {
       containers: 'Container',
       back: 'Quay lại danh sách',
       gone: 'Mục này không còn trên server.',
+      view: 'Kiểu xem',
+      cards: 'Thẻ',
+      rows: 'Bảng',
+      moreImages: (n: number) => `+${n} image khác`,
+      noPorts: 'Không publish cổng nào',
+      loop: 'Có container khởi động lặp',
     },
     vol: {
       section: 'VOLUME',

@@ -938,6 +938,7 @@ const en = {
       docker: {
         does: 'Containers with CPU, RAM, logs, inspect; start, stop, restart; alerts on containers stuck restarting.',
         actions: [
+          'Cards or Table (toolbar switch): each compose project is one card with its state, image, ports, CPU and RAM; click a card for its containers',
           'No Docker on the server: types the install command for its Linux into a terminal',
           'Select a container to see its logs and details',
           'Open its logs in the Logs app',
@@ -2147,6 +2148,12 @@ const en = {
       containers: 'Containers',
       back: 'Back to the list',
       gone: 'This item is no longer on the server.',
+      view: 'View',
+      cards: 'Cards',
+      rows: 'Table',
+      moreImages: (n: number) => `+${n} more`,
+      noPorts: 'No published ports',
+      loop: 'A container keeps restarting',
     },
     vol: {
       section: 'VOLUMES',

@@ -23,7 +23,8 @@
     openTerminalAt,
   } from '../../lib/wm/intents.svelte'
   import { backend } from './backend'
-  import { ago, canDo, type Group, groups, health, parsePorts } from './containers'
+  import { ago, canDo, type Group, groupHealth, groups, health, parsePorts } from './containers'
+  import StackCard from './StackCard.svelte'
 
   interface Props {
     serverID: string
@@ -34,9 +35,11 @@
     /** Shows an image's layers. */
     onimage: (ref: string) => void
     onchanged: () => void
+    /** Cards, one per compose project or lone container, or the table. */
+    view?: 'cards' | 'rows'
   }
 
-  let { serverID, containers, stats, onopen, onimage, onchanged }: Props = $props()
+  let { serverID, containers, stats, onopen, onimage, onchanged, view = 'rows' }: Props = $props()
 
   const d = t.docker
   const tb = t.docker.table
@@ -54,14 +57,6 @@
 
   const running = (c: Container) =>
     c.state === 'running' || c.state === 'restarting' || c.state === 'paused'
-
-  function groupHealth(g: Group) {
-    const hs = g.containers.map((c) => health(c.state))
-    if (hs.includes('failed')) return 'failed'
-    if (hs.every((h) => h === 'ok')) return 'ok'
-    if (hs.includes('ok') || hs.includes('busy')) return 'busy'
-    return 'off'
-  }
 
   function sum(g: Group, f: (s: ContainerStats) => number): number | undefined {
     const ss = g.containers.map((c) => stats[c.id]).filter((s) => s !== undefined)
@@ -263,6 +258,28 @@
 <div class="dk-scroll">
   {#if shown.length === 0}
     <p class="dk-empty">{d.noMatch}</p>
+  {:else if view === 'cards'}
+    <div class="dk-cards">
+      {#each shown as g (g.key)}
+        {@const lone = g.project ? undefined : g.containers[0]}
+        <StackCard
+          {serverID}
+          group={g}
+          {stats}
+          {busy}
+          open={!!g.project && unfolded.has(g.project)}
+          actions={lone ? menu(lone) : projectMenu(g)}
+          {menu}
+          ontoggle={() => {
+            const p = g.project ?? ''
+            if (unfolded.has(p)) unfolded.delete(p)
+            else unfolded.add(p)
+          }}
+          {onopen}
+          onact={(c, a) => void act(c, a)}
+        />
+      {/each}
+    </div>
   {:else}
     <table class="dk-table dk-containers">
       <thead>

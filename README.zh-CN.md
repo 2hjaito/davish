@@ -53,7 +53,7 @@
 **服务与应用**
 
 - [服务](FEATURES.md#services)：systemd 单元、状态、journal
-- [Docker](FEATURES.md#docker)：按 compose 项目分组的容器、镜像与镜像层、数据卷
+- [Docker](FEATURES.md#docker)：每个 compose 项目一张卡片（也可切换为表格）、镜像与镜像层、数据卷
 - [Cron](FEATURES.md#cron)：用自然语言描述的定时任务
 - [Nginx](FEATURES.md#nginx)：站点管理，重载前先执行 `nginx -t`，TLS 证书到期提醒
 - [软件包](FEATURES.md#packages)：优先显示安全更新，运行时管理；缺少 Docker、nginx、git 或数据库时一键给出安装命令

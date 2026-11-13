@@ -53,7 +53,7 @@ Nothing to install on the server.
 **Services and apps**
 
 - [Services](FEATURES.md#services): systemd units, status, journal
-- [Docker](FEATURES.md#docker): containers by compose project, images and layers, volumes
+- [Docker](FEATURES.md#docker): one card per compose project (or a table), images and layers, volumes
 - [Cron](FEATURES.md#cron): schedules in plain words
 - [Nginx](FEATURES.md#nginx): sites, `nginx -t` before reload, TLS expiry
 - [Packages](FEATURES.md#packages): updates with security fixes first, runtimes; one-click install command when Docker, nginx, git or a database is missing

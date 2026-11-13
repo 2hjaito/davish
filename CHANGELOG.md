@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Docker: xem container dạng thẻ, mỗi project compose (hoặc container chạy riêng) một thẻ có logo công nghệ khi nhận ra image (n8n, WordPress, Postgres…), số container đang chạy, image, cổng publish bấm để mở trong Trình duyệt, CPU và RAM; viền đỏ khi có container khởi động lặp, bấm thẻ để xem và điều khiển từng container. Nút Thẻ/Bảng trên thanh công cụ, mặc định là bảng, Davish nhớ lựa chọn.
+
 ## [1.13.5] - 2026-11-12
 
 ### Thay đổi
