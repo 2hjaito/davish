@@ -72,8 +72,9 @@ func (s *Service) read(ctx context.Context, serverID string, cmd shellx.Command,
 
 // Service talks to the docker CLI on each server.
 type Service struct {
-	run  Runner
-	root Root
+	run   Runner
+	root  Root
+	conns Conns
 }
 
 // New creates the service.

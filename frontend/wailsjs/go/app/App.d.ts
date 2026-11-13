@@ -144,6 +144,8 @@ export function DockerRemoveVolume(arg1:string,arg2:string,arg3:string):Promise<
 
 export function DockerRunCommand(arg1:string,arg2:string):Promise<docker.RunPlan>;
 
+export function DockerStackIcon(arg1:string,arg2:string):Promise<docker.StackIcon>;
+
 export function DockerStats(arg1:string):Promise<Array<docker.Stats>>;
 
 export function DockerVolumes(arg1:string):Promise<Array<docker.Volume>>;

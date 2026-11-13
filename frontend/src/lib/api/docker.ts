@@ -247,5 +247,14 @@ export const dockerCreate = (
   name: string,
 ): Promise<void> => App.DockerCreate(serverID, kind, name)
 
+/** A compose project's own icon (a data: URL) or the framework its code uses. */
+export interface StackIcon {
+  icon?: string
+  tech?: string
+}
+
+export const dockerStackIcon = (serverID: string, dir: string): Promise<StackIcon> =>
+  App.DockerStackIcon(serverID, dir)
+
 export const dockerRunCommand = (serverID: string, name: string): Promise<RunPlan> =>
   App.DockerRunCommand(serverID, name)

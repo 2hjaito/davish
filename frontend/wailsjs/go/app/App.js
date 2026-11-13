@@ -242,6 +242,10 @@ export function DockerRunCommand(arg1, arg2) {
   return window['go']['app']['App']['DockerRunCommand'](arg1, arg2);
 }
 
+export function DockerStackIcon(arg1, arg2) {
+  return window['go']['app']['App']['DockerStackIcon'](arg1, arg2);
+}
+
 export function DockerStats(arg1) {
   return window['go']['app']['App']['DockerStats'](arg1);
 }

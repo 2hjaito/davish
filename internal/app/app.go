@@ -120,6 +120,7 @@ func New(version string) (*App, error) {
 	a.services = svc.New(runner)
 	a.services.UseRoot(a.sudo)
 	a.docker = docker.New(runner)
+	a.docker.UseConns(a.conns)
 	a.docker.UseRoot(a.sudo)
 	a.cron = cron.New(runner, a.conns)
 	a.cron.UseRoot(a.sudo)

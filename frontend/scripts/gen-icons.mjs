@@ -176,6 +176,27 @@ const TECH = {
   portainer: ['SiPortainer', '#13BEF9'],
   uptimekuma: ['SiUptimekuma', '#5CDD8B'],
   homeassistant: ['SiHomeassistant', '#18BCF2'],
+  // Frameworks, named by the project's manifest (internal/docker/icon.go).
+  next: ['SiNextdotjs', null],
+  nuxt: ['SiNuxt', '#00DC82'],
+  remix: ['SiRemix', null],
+  nest: ['SiNestjs', '#E0234E'],
+  astro: ['SiAstro', '#BC52EE'],
+  svelte: ['SiSvelte', '#FF3E00'],
+  angular: ['SiAngular', null],
+  hono: ['SiHono', '#E36002'],
+  fastify: ['SiFastify', null],
+  koa: ['SiKoa', null],
+  express: ['SiExpress', null],
+  solid: ['SiSolid', '#2C4F7C'],
+  vue: ['SiVuedotjs', '#4FC08D'],
+  react: ['SiReact', '#61DAFB'],
+  django: ['SiDjango', null],
+  fastapi: ['SiFastapi', '#009688'],
+  flask: ['SiFlask', null],
+  laravel: ['SiLaravel', '#FF2D20'],
+  rails: ['SiRubyonrails', '#D30001'],
+  spring: ['SiSpring', '#6DB33F'],
 }
 
 const techEntries = Object.entries(TECH)

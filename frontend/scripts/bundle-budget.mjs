@@ -9,7 +9,7 @@ import { gzipSync } from 'node:zlib'
 
 const BUDGET = {
   initialKB: 110, // gzip; 96 when set
-  totalKB: 650, // gzip; 506 when set, 580 by v1.2; v1.3 added windows loaded on first use; the Docker cards' tech logos (~18) load with Docker
+  totalKB: 670, // gzip; 506 when set, 580 by v1.2; v1.3 added windows loaded on first use; the Docker cards' tech and framework logos (~28) load with Docker
 }
 
 const dist = new URL('../dist/', import.meta.url)

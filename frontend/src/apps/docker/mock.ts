@@ -10,6 +10,7 @@ import type {
   ContainerAction,
   ContainerDetail,
   ContainerStats,
+  StackIcon,
   Image,
   ImageDetail,
   ImagePlan,
@@ -78,6 +79,7 @@ const list: Container[] = (
   runningFor,
   project: project || undefined,
   service: service || undefined,
+  projectDir: project ? `/home/dangth/${project}` : undefined,
 }))
 
 const delay = <T>(v: T, ms = 150) => new Promise<T>((r) => setTimeout(() => r(v), ms))
@@ -296,3 +298,8 @@ export const mockRunCommand = (name: string): Promise<RunPlan> =>
     command: `docker run -d --name ${name} --restart unless-stopped -p 127.0.0.1:8080:80 -v ${name}-data:/data nginx:1.27`,
     public: [],
   })
+
+/** The demo's compose projects: shop is a Nest app. */
+export function mockStackIcon(dir: string): Promise<StackIcon> {
+  return Promise.resolve(dir.endsWith('/shop') ? { tech: 'nest' } : {})
+}

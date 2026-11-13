@@ -23,6 +23,12 @@ func (a *App) DockerLogs(serverID, name string) (docker.Logs, error) {
 	return a.docker.Logs(a.ctx, serverID, name)
 }
 
+// DockerStackIcon reads a compose project's folder for its icon or the
+// framework its code uses, for the project's card. It only reads files.
+func (a *App) DockerStackIcon(serverID, dir string) (docker.StackIcon, error) {
+	return a.docker.StackIcon(a.ctx, serverID, dir)
+}
+
 // DockerPlan returns the exact command an action would run, and whether
 // the UI must confirm it first.
 func (a *App) DockerPlan(name, action string) (docker.Plan, error) {
