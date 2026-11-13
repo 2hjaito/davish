@@ -1,8 +1,7 @@
 import { t } from '../../lib/i18n'
 import type { Series } from '../../lib/stores/metrics.svelte'
 
-export type Section =
-  'overview' | 'processes' | 'cpu' | 'memory' | 'gpu' | 'disk' | 'network' | 'info'
+export type Section = 'overview' | 'processes' | 'cpu' | 'memory' | 'gpu' | 'disk' | 'network'
 
 export type RangeKey = '1m' | '5m' | '15m'
 
@@ -34,5 +33,4 @@ export const sectionLabels: Record<Section, string> = {
   gpu: t.monitor.gpu,
   disk: t.monitor.disk,
   network: t.monitor.network,
-  info: t.monitor.info,
 }

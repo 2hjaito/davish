@@ -5,14 +5,16 @@
   import TimeChart from '../../lib/ui/charts/TimeChart.svelte'
   import Card from './Card.svelte'
   import Hero from './Hero.svelte'
+  import MachineInfo from './MachineInfo.svelte'
   import Stat from './Stat.svelte'
   import { chartColors, memPct, type Section, type ViewProps } from './types'
 
   interface Props extends ViewProps {
+    serverID: string
     open: (s: Section) => void
   }
 
-  let { data, range, rangeLabel, windows = false, open }: Props = $props()
+  let { serverID, data, range, rangeLabel, windows = false, open }: Props = $props()
 
   const m = $derived(data.latest)
   const mem = $derived(memPct(m.memUsed, m.memTotal))
@@ -115,6 +117,8 @@
     value={m.gpus[0] && m.gpus[0].util >= 0 ? formatPct(m.gpus[0].util) : t.monitor.unknown}
   />
 </div>
+
+<MachineInfo {serverID} latest={m} />
 
 <style>
   .grid {
