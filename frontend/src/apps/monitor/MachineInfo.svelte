@@ -3,7 +3,7 @@
   import { toUserError } from '../../lib/api/errors'
   import { monitorSystemInfo, type SystemInfo } from '../../lib/api/monitor'
   import { hasRuntime } from '../../lib/api/runtime'
-  import { formatBytes, formatDuration } from '../../lib/format'
+  import { formatBytes, formatDuration, formatPct } from '../../lib/format'
   import { locale, t } from '../../lib/i18n'
   import type { Sample } from '../../lib/stores/metrics.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
@@ -89,15 +89,22 @@
   const hardwareRows = $derived.by((): Row[] => {
     if (!info) return []
     const threads = info.threads || latest.cores.length
-    const swap = info.swapTotal ?? latest.swapTotal
-    return [
+    // Swap in use is live, from the same readings as the charts above.
+    const swap = latest.swapTotal || info.swapTotal || 0
+    const out: Row[] = [
       [si.cpu, or(info.cpuModel)],
       [si.coresLabel, si.layout(info.cores ?? 0, threads, info.sockets ?? 0)],
       [m.memory, formatBytes(info.memTotal || latest.memTotal)],
-      [m.swap, swap > 0 ? formatBytes(swap) : si.noSwap],
-      [m.arch, or(info.arch)],
-      [m.virt, info.virt || m.bareMetal],
+      [m.swap, swap > 0 ? `${formatBytes(latest.swapUsed)} / ${formatBytes(swap)}` : si.noSwap],
     ]
+    // A GPU only when there is one: nvidia-smi answered.
+    for (const g of latest.gpus)
+      out.push([
+        latest.gpus.length > 1 ? `${m.gpu} ${g.index}` : m.gpu,
+        g.util >= 0 ? `${g.name} · ${formatPct(g.util)}` : g.name,
+      ])
+    out.push([m.arch, or(info.arch)], [m.virt, info.virt || m.bareMetal])
+    return out
   })
 
   const mountPoints = $derived(
