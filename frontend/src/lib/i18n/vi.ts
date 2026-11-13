@@ -2915,6 +2915,7 @@ const vi = {
     pause: 'Tạm dừng',
     resume: 'Tiếp tục',
     clear: 'Xóa màn hình',
+    copyShown: 'Sao chép các dòng đang hiện',
     wholeJournal: 'toàn bộ journal',
     empty: 'Chọn nguồn log để theo dõi',
     emptyHint:

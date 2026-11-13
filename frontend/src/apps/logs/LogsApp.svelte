@@ -19,6 +19,7 @@
   import { append, COMMON_FILES, filterLines, normalize, targetProblem } from './buffer'
   import LogView from './LogView.svelte'
   import { follow } from './stream'
+  import { copyText } from '../../lib/api/clipboard'
 
   let { win }: AppProps = $props()
 
@@ -282,6 +283,16 @@
       onclick={togglePause}
     >
       <Icon name={paused ? 'play' : 'pause'} size={13} strokeWidth={2.4} />
+    </button>
+    <button
+      type="button"
+      class="tool"
+      aria-label={t.logs.copyShown}
+      title={t.logs.copyShown}
+      disabled={shown.length === 0}
+      onclick={() => void copyText(shown.join('\n'))}
+    >
+      <Icon name="copy" size={13} strokeWidth={2.2} />
     </button>
     <button
       type="button"

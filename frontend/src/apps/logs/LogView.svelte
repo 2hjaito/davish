@@ -2,6 +2,7 @@
   import { lineLevel } from '../../lib/logLevel'
   import { findPaths } from '../../lib/logPaths'
   import { t } from '../../lib/i18n'
+  import { type Point, sliceLines } from './selection'
 
   interface Props {
     lines: readonly string[]
@@ -10,7 +11,46 @@
     onopen: (path: string, line?: number) => void
   }
 
-  let { lines, follow, onopen }: Props = $props()
+  let { lines: incoming, follow, onopen }: Props = $props()
+
+  // While text is selected in the view, what it shows holds still: new lines
+  // would scroll it or, past the buffer's cap, shift every row under the
+  // selection. They show up once the selection is gone.
+  let frozen = $state.raw<readonly string[] | null>(null)
+  const lines = $derived(frozen ?? incoming)
+
+  function selectionInView(): Selection | null {
+    const sel = document.getSelection()
+    if (!sel || sel.isCollapsed || !scroller || !sel.anchorNode) return null
+    return scroller.contains(sel.anchorNode) ? sel : null
+  }
+
+  function onselectionchange() {
+    if (selectionInView()) frozen ??= incoming
+    else frozen = null
+  }
+
+  /** Where a DOM point falls in the log, from its row's data-row. */
+  function point(node: Node, offset: number): Point | null {
+    const el = node instanceof Element ? node : node.parentElement
+    const row = el?.closest<HTMLElement>('[data-row]')
+    if (!row) return null
+    const r = document.createRange()
+    r.setStart(row, 0)
+    r.setEnd(node, offset)
+    return { row: Number(row.dataset.row), offset: r.toString().length }
+  }
+
+  // ⌘C copies the lines themselves, breaks included.
+  function oncopy(e: ClipboardEvent) {
+    const sel = selectionInView()
+    if (!sel?.anchorNode || !sel.focusNode || !e.clipboardData) return
+    const a = point(sel.anchorNode, sel.anchorOffset)
+    const b = point(sel.focusNode, sel.focusOffset)
+    if (!a || !b) return
+    e.preventDefault()
+    e.clipboardData.setData('text/plain', sliceLines(lines, a, b))
+  }
 
   // Must match .line's height in CSS: rows are absolutely placed from it.
   const ROW_H = 18
@@ -34,12 +74,14 @@
 
   $effect(() => {
     void lines.length
-    if (follow && atBottom && scroller) {
+    if (follow && atBottom && scroller && !frozen) {
       scroller.scrollTop = scroller.scrollHeight
       scrollTop = scroller.scrollTop
     }
   })
 </script>
+
+<svelte:document {onselectionchange} />
 
 <!-- Server output is shown as text only (docs/SECURITY.md); paths become
      buttons that open the Editor, nothing else is interpreted. -->
@@ -53,10 +95,15 @@
   bind:this={scroller}
   bind:clientHeight={viewport}
   {onscroll}
+  {oncopy}
 >
   <div class="rows" style:height="{lines.length * ROW_H}px">
     {#each rows as line, i (start + i)}
-      <div class="line {lineLevel(line)}" style:translate="0 {(start + i) * ROW_H}px">
+      <div
+        class="line {lineLevel(line)}"
+        data-row={start + i}
+        style:translate="0 {(start + i) * ROW_H}px"
+      >
         {#each findPaths(line) as seg, j (j)}
           {#if seg.path}
             <button
@@ -82,7 +129,15 @@
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     color: var(--fg-on-dark);
+    /* body turns selection off for the whole UI; WebKit (macOS, Linux) only
+       reads the prefixed property, so both are needed to turn it back on. */
+    -webkit-user-select: text;
     user-select: text;
+    cursor: text;
+  }
+
+  .scroller ::selection {
+    background: color-mix(in srgb, var(--accent) 45%, transparent);
   }
 
   .rows {
@@ -110,6 +165,8 @@
   }
 
   .path {
+    -webkit-user-select: text;
+    user-select: text;
     padding: 0;
     border: 0;
     background: none;

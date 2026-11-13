@@ -2862,6 +2862,7 @@ const zh = {
     pause: '暂停',
     resume: '继续',
     clear: '清屏',
+    copyShown: '复制显示的行',
     wholeJournal: '整个 journal',
     empty: '选择要跟踪的日志来源',
     emptyHint: '服务的 journal、日志文件或容器的输出。点击日志中的文件路径可在编辑器中打开。',
