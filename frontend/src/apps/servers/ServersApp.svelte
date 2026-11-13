@@ -12,6 +12,7 @@
   import Icon from '../../lib/ui/Icon.svelte'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import type { AppProps } from '../types'
+  import ServerMap from './ServerMap.svelte'
   import { alertsFor, memPct } from './summary'
 
   let { win }: AppProps = $props()
@@ -27,6 +28,22 @@
   }
 
   const up = $derived(servers.list.filter((x) => x.state === 'connected').length)
+
+  /** The server whose map is open over the grid. */
+  let mapOf = $state<string | null>(null)
+  const mapped = $derived(servers.list.find((x) => x.id === mapOf && x.state === 'connected'))
+
+  // Many servers: a name filter and alerts first.
+  let query = $state('')
+  let sort = $state<'alerts' | 'name'>('alerts')
+  const many = $derived(servers.list.length >= 4)
+  const shown = $derived.by(() => {
+    const q = query.trim().toLowerCase()
+    const list = servers.list.filter((x) => !q || `${x.name} ${x.host}`.toLowerCase().includes(q))
+    if (sort === 'name') return [...list].sort((a, b) => a.name.localeCompare(b.name))
+    const weight = (id: string) => alertsFor(notifications.list, id).count
+    return [...list].sort((a, b) => weight(b.id) - weight(a.id))
+  })
 
   // Readings flow only while this window is open, one collector per
   // connected server; the menu bar's own watch on the active one stays.
@@ -52,11 +69,30 @@
 </TitleBar>
 
 <div class="body">
-  {#if servers.list.length === 0}
+  {#if mapped}
+    <ServerMap serverID={mapped.id} name={mapped.name} onback={() => (mapOf = null)} />
+  {:else if servers.list.length === 0}
     <Empty icon="server" title={s.none} hint={s.overview.emptyHint} />
   {:else}
+    {#if many}
+      <div class="tools">
+        <input
+          type="search"
+          placeholder={s.map.filter}
+          aria-label={s.map.filter}
+          bind:value={query}
+        />
+        <div class="segmented" role="group">
+          {#each ['alerts', 'name'] as const as k (k)}
+            <button type="button" aria-pressed={sort === k} onclick={() => (sort = k)}
+              >{s.map.sort[k]}</button
+            >
+          {/each}
+        </div>
+      </div>
+    {/if}
     <div class="grid">
-      {#each servers.list as srv (srv.id)}
+      {#each shown as srv (srv.id)}
         {@const m = metrics.latest(srv.id)}
         {@const al = alertsFor(notifications.list, srv.id)}
         <article class="card" class:active={srv.id === servers.activeId}>
@@ -105,6 +141,11 @@
           {/if}
 
           <footer>
+            {#if srv.state === 'connected'}
+              <button class="btn" onclick={() => (mapOf = srv.id)}>
+                <Icon name="globe" size={13} />{s.map.open}
+              </button>
+            {/if}
             {#if srv.state === 'disconnected'}
               <button class="btn" onclick={() => void servers.ensureConnected(srv.id)}
                 >{s.overview.connect}</button
@@ -131,6 +172,49 @@
 </div>
 
 <style>
+  .tools {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .tools input {
+    flex: 1;
+    min-width: 0;
+    max-width: 280px;
+    padding: 4px 10px;
+    border: 1px solid var(--divider-soft);
+    border-radius: 8px;
+    background: var(--card-bg);
+    font: inherit;
+    font-size: var(--text-sm);
+    color: var(--fg);
+  }
+
+  .segmented {
+    display: flex;
+    padding: 2px;
+    border-radius: 8px;
+    background: var(--fill-soft);
+  }
+
+  .segmented button {
+    padding: 2px 9px;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    font-size: var(--text-xs);
+    color: var(--fg-muted);
+  }
+
+  .segmented button[aria-pressed='true'] {
+    background: var(--chart-surface);
+    color: var(--fg);
+    font-weight: 600;
+    box-shadow: var(--switch-knob-shadow);
+  }
+
   .title {
     flex: 1;
     text-align: center;

@@ -50,6 +50,8 @@ On a Windows server (OpenSSH, Windows PowerShell 5.1, nothing installed) Monitor
 
 Every server in one window, from the server menu, Launchpad or Spotlight: connected or not, CPU, memory, the `/` disk, load, uptime and network, with its alerts (a failed service, a restart loop, a full disk…) counted and the latest one shown. Connect a server or switch to it from its card. Readings are collected only while the window is open, over the same session Monitor uses.
 
+**Map** on a connected server's card shows which requests reach which program: each nginx site as a chain `domain → nginx :443 → :3000 → container (stack)`, static sites with their folder, and ports open to the outside that no site proxies to. A database port open to the Internet, an upstream nobody listens on and a certificate expiring within 14 days are flagged at the top, each with a button to the app that fixes it; every link opens its app (Nginx, the Browser, Docker at that container). Below, what runs (compose stacks and listening programs) and the disks. It only reads what Nginx, Ports, Docker and Disk already read. With four servers or more, the window filters by name and puts servers with alerts first.
+
 <img src="assets/screenshots/en/servers.jpg" alt="Every server at a glance" width="100%">
 
 ## Services
@@ -181,7 +183,7 @@ Import hosts from `~/.ssh/config` in one go, keys and `ProxyJump` included; Davi
 
 ## Spotlight & Launchpad
 
-A real menu bar (File, View, Go, Window, Help and the focused app's own commands) with every shortcut listed under `⌘/`, and a `?` on each app explaining what it does and which commands it runs. `⌘K` (or the magnifier in the menu bar) to open an app, a service, a container, a folder, a `/path`, or `> a command` typed into a terminal. Launchpad (`⌘⇧A`) shows every app in groups (files & terminal, monitoring, web & containers, security & access, development, system), with a tab per group and a search across all of them; `+` pins an app to the Dock, `−` takes it off, and one button puts the Dock back as it came.
+A real menu bar (File, View, Go, Window, Help and the focused app's own commands) with every shortcut listed under `⌘/`, and a `?` on each app explaining what it does and which commands it runs. `⌘K` (or the magnifier in the menu bar) to open an app, a service, a container, a folder, a `/path`, or `> a command` typed into a terminal. Launchpad (`⌘⇧A`) starts with the five apps you opened last, then every app in groups (files & terminal, monitoring, web & containers, security & access, development, system), with a tab per group and a search across all of them; `+` pins an app to the Dock, `−` takes it off, and one button puts the Dock back as it came.
 
 <table><tr>
   <td><img src="assets/screenshots/spotlight.jpg" alt="Spotlight"></td>
