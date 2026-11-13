@@ -915,6 +915,7 @@ const zh = {
       docker: {
         does: '容器的 CPU、内存、日志、inspect；启动、停止、重启；容器反复重启时发出警报。',
         actions: [
+          '卡片或表格（工具栏切换）：每个 compose 项目是一张卡片，显示状态、镜像、端口、CPU 和内存；点击卡片查看其中的容器',
           '服务器没有 Docker：把适合其 Linux 的安装命令输入到终端',
           '选择一个容器查看日志和详情',
           '在日志应用中打开它的日志',
@@ -2080,6 +2081,12 @@ const zh = {
       containers: '容器',
       back: '返回列表',
       gone: '这一项已不在服务器上。',
+      view: '视图',
+      cards: '卡片',
+      rows: '表格',
+      moreImages: (n: number) => `另有 ${n} 个`,
+      noPorts: '没有发布端口',
+      loop: '有容器在反复重启',
     },
     vol: {
       section: '数据卷',

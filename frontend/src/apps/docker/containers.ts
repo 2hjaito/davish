@@ -160,3 +160,53 @@ export function groups(list: readonly Container[]): Group[] {
     .map(([project, containers]) => ({ key: `project:${project}`, project, containers }))
   return [...projects, ...lone]
 }
+
+/** One dot for a group: failed if any is, ok if all are, busy if some run. */
+export function groupHealth(g: Group): Health {
+  const hs = g.containers.map((c) => health(c.state))
+  if (hs.includes('failed')) return 'failed'
+  if (hs.every((h) => h === 'ok')) return 'ok'
+  if (hs.includes('ok') || hs.includes('busy')) return 'busy'
+  return 'off'
+}
+
+/** What a group's card shows in one glance. */
+export interface Stack {
+  name: string
+  health: Health
+  up: number
+  total: number
+  /** Distinct images, the first container's first. */
+  images: string[]
+  /** Ports published on the server, once each, lowest first. */
+  ports: PortChip[]
+  /** Some container keeps restarting. */
+  looping: boolean
+  /** Docker's age of the first running container, else of the first one. */
+  age: string
+}
+
+export function stack(g: Group): Stack {
+  const cs = g.containers
+  const images = [...new Set(cs.map((c) => c.image))]
+  const seen = new Set<number>()
+  const ports: PortChip[] = []
+  for (const c of cs)
+    for (const p of parsePorts(c.ports))
+      if (p.host !== undefined && !seen.has(p.host)) {
+        seen.add(p.host)
+        ports.push(p)
+      }
+  ports.sort((a, b) => (a.host ?? 0) - (b.host ?? 0))
+  const first = cs.find((c) => c.state === 'running') ?? cs[0]
+  return {
+    name: g.project ?? cs[0]?.name ?? '',
+    health: groupHealth(g),
+    up: cs.filter((c) => c.state === 'running').length,
+    total: cs.length,
+    images,
+    ports,
+    looping: cs.some((c) => c.state === 'restarting'),
+    age: first?.runningFor ?? '',
+  }
+}

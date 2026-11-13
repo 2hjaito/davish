@@ -381,3 +381,12 @@ button.dk-chip:hover {
   color: var(--fg-muted);
   font-size: var(--text-sm);
 }
+
+/* The card view: one card per compose project or lone container. */
+.dk-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  align-items: start;
+  gap: 12px;
+  padding: 8px 16px 16px;
+}

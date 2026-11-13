@@ -1,8 +1,10 @@
 <script lang="ts">
-  import { icons, type IconName, type IconNode } from './icons'
+  import { type IconDef, icons, type IconName, type IconNode } from './icons'
 
   interface Props {
-    name: IconName
+    name?: IconName
+    /** An icon from another generated set (techIcons), in place of name. */
+    def?: IconDef
     size?: number | string
     /** Overrides the pack's stroke width, e.g. 1.8 for dock tiles. */
     strokeWidth?: number
@@ -10,9 +12,9 @@
     title?: string
   }
 
-  let { name, size = 16, strokeWidth, title }: Props = $props()
+  let { name, def, size = 16, strokeWidth, title }: Props = $props()
 
-  const icon = $derived(icons[name])
+  const icon = $derived(def ?? icons[name ?? 'help'])
 
   function withStroke(attrs: IconNode[1]): IconNode[1] {
     if (strokeWidth === undefined || !('stroke-width' in attrs)) return attrs

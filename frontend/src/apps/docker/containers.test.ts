@@ -7,10 +7,12 @@ import {
   canDo,
   clock,
   counts,
+  groupHealth,
   groups,
   health,
   parsePorts,
   since,
+  stack,
   visible,
   visibleImages,
 } from './containers'
@@ -145,5 +147,49 @@ describe('groups', () => {
     ])
     expect(g.map((x) => x.project ?? x.key)).toEqual(['alpha', 'shop', 'migrate'])
     expect(g[1]?.containers).toHaveLength(2)
+  })
+})
+
+describe('stack cards', () => {
+  const svc = (name: string, state: string, image: string, ports = '', runningFor = '') => ({
+    ...c(name, state, image),
+    project: 'shop',
+    ports,
+    runningFor,
+  })
+
+  it('sums a compose project into one card', () => {
+    const [g] = groups([
+      svc('shop-db-1', 'exited', 'postgres:16', '5432/tcp'),
+      svc(
+        'shop-web-1',
+        'running',
+        'shop:2',
+        '0.0.0.0:8080->80/tcp, :::8080->80/tcp',
+        '2 hours ago',
+      ),
+      svc('shop-api-1', 'running', 'shop:2', '127.0.0.1:3000->3000/tcp', '3 hours ago'),
+    ])
+    const s = stack(g!)
+    expect(s.name).toBe('shop')
+    expect([s.up, s.total, s.health, s.looping]).toEqual([2, 3, 'busy', false])
+    expect(s.images).toEqual(['postgres:16', 'shop:2'])
+    // Published ports only, once each, lowest first; 5432 is not published.
+    expect(s.ports.map((p) => [p.host, p.local])).toEqual([
+      [3000, true],
+      [8080, false],
+    ])
+    expect(s.age).toBe('2 hours ago')
+  })
+
+  it('flags a restart loop', () => {
+    const [g] = groups([svc('a', 'running', 'x'), svc('b', 'restarting', 'x')])
+    expect(groupHealth(g!)).toBe('failed')
+    expect(stack(g!).looping).toBe(true)
+  })
+
+  it('names a lone container after itself', () => {
+    const [g] = groups([c('redis', 'exited', 'redis:7')])
+    expect(stack(g!)).toMatchObject({ name: 'redis', up: 0, total: 1, health: 'off', age: '' })
   })
 })

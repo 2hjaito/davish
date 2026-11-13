@@ -964,6 +964,7 @@ const es = {
       docker: {
         does: 'Contenedores con CPU, RAM, registros, inspect; iniciar, detener, reiniciar; alertas de contenedores atascados reiniciándose.',
         actions: [
+          'Tarjetas o Tabla (selector de la barra): cada proyecto compose es una tarjeta con su estado, imagen, puertos, CPU y RAM; pulsa una tarjeta para ver sus contenedores',
           'Sin Docker en el servidor: escribe en un terminal el comando de instalación para su Linux',
           'Elige un contenedor para ver sus registros y detalles',
           'Abre sus registros en la app Registros',
@@ -2190,6 +2191,12 @@ const es = {
       containers: 'Contenedores',
       back: 'Volver a la lista',
       gone: 'Este elemento ya no está en el servidor.',
+      view: 'Vista',
+      cards: 'Tarjetas',
+      rows: 'Tabla',
+      moreImages: (n: number) => `+${n} más`,
+      noPorts: 'Sin puertos publicados',
+      loop: 'Un contenedor se reinicia en bucle',
     },
     vol: {
       section: 'VOLÚMENES',
