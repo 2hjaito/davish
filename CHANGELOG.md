@@ -5,9 +5,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Thêm
+- Tất cả server: nút **Bản đồ** trên thẻ server đã kết nối cho thấy request đi đường nào: mỗi site nginx là một chuỗi `tên miền → nginx :443 → :3000 → container (stack)`, site tĩnh kèm thư mục, và các cổng mở ra ngoài mà không đi qua proxy. Cảnh báo lên đầu: cổng database mở ra Internet, upstream không ai nghe, chứng chỉ hết hạn trong 14 ngày, mỗi cảnh báo có nút mở đúng app để sửa. Bên dưới là những gì đang chạy và các ổ đĩa. Chỉ đọc. Từ 4 server trở lên có ô lọc theo tên và xếp server có cảnh báo lên trước.
 - Launchpad: hàng **Gần đây** ở đầu tab Tất cả, gồm 5 app mở gần nhất (từ Dock, Spotlight hay Launchpad), nhớ qua các lần mở app.
-
-### Thêm
 - Docker: xem container dạng thẻ, mỗi project compose (hoặc container chạy riêng) một thẻ có logo công nghệ khi nhận ra image (n8n, WordPress, Postgres…), số container đang chạy, image, cổng publish bấm để mở trong Trình duyệt, CPU và RAM; viền đỏ khi có container khởi động lặp, bấm thẻ để xem và điều khiển từng container. Thẻ của project compose lấy favicon của chính dự án, hoặc framework trong `package.json`, `requirements.txt`, `composer.json`, `Gemfile`, `go.mod`… (Next, Nest, Express, Django, FastAPI, Laravel…), bằng cách đọc thư mục project qua SFTP; không chạy lệnh nào. Nút Thẻ/Bảng trên thanh công cụ, mặc định là bảng, Davish nhớ lựa chọn.
 
 ## [1.13.5] - 2026-11-12

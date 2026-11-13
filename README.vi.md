@@ -46,7 +46,7 @@ Không cài gì lên server.
 - [Editor](FEATURES.vi.md#editor): CodeMirror, lưu atomic, có sao lưu
 - [Logs](FEATURES.vi.md#logs): journal, file, container, theo dõi trực tiếp
 - [Monitor](FEATURES.vi.md#monitor): CPU, RAM, ổ đĩa, mạng, GPU, tiến trình, trên server Linux và Windows
-- [Tất cả server](FEATURES.vi.md#tất-cả-server): tình trạng và cảnh báo của mọi server trong một cửa sổ
+- [Tất cả server](FEATURES.vi.md#tất-cả-server): tình trạng và cảnh báo của mọi server trong một cửa sổ, và bản đồ những gì mỗi server đang phục vụ
 
 **Dịch vụ và ứng dụng**
 
