@@ -216,6 +216,8 @@ Davish looks for a new release on GitHub when it starts and every six hours (you
 
 Davish comes in a light and a dark look. By default it follows your computer and switches when the system does; pick Light or Dark in Settings → Appearance → Theme to keep one. Terminal and Logs stay dark either way, and the wallpaper color you chose carries over, dimmed for the night.
 
+The Dock sits at the bottom by default; Settings → Dock moves it to the left, right or top edge (windows keep clear of it, minimizing shrinks a window into its tile) and can drop its glass so only the icons float over the wallpaper.
+
 <img src="assets/screenshots/dark.jpg" alt="Davish in the dark theme">
 
 <table><tr>

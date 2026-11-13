@@ -1858,6 +1858,11 @@ const vi = {
     dockSize: 'Kích thước',
     dockSizeHint: 'Dock vẫn tự thu nhỏ khi ghim nhiều app hơn màn hình chứa được.',
     dockSizes: { small: 'Nhỏ', medium: 'Vừa', large: 'Lớn' },
+    dockPosition: 'Vị trí Dock',
+    dockPositionHint: 'Cạnh màn hình đặt Dock; cửa sổ chừa chỗ cho nó.',
+    dockPositions: { bottom: 'Dưới', left: 'Trái', right: 'Phải', top: 'Trên' },
+    dockTransparent: 'Nền Dock trong suốt',
+    dockTransparentHint: 'Bỏ lớp kính của Dock, chỉ còn các icon trên hình nền.',
     dockAutohide: 'Tự động ẩn',
     dockAutohideHint:
       'Ẩn Dock, đưa chuột xuống cạnh dưới màn hình để hiện lại. Cửa sổ phóng to dùng cả phần đó.',

@@ -45,8 +45,8 @@
 <style>
   .banners {
     position: fixed;
-    top: calc(var(--menubar-h) + 8px);
-    right: 10px;
+    top: calc(var(--menubar-h) + 8px + var(--dock-clear-top, 0px));
+    right: calc(10px + var(--dock-clear-right, 0px));
     z-index: 950;
     width: 340px;
     display: flex;

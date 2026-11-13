@@ -42,6 +42,10 @@ export const ALERTS = {
   defaults: { mem: 90, disk: 85, hold: 60 },
 } as const
 
+/** The screen edges the Dock can sit on; bottom is the default. */
+export const DOCK_POSITIONS = ['bottom', 'left', 'right', 'top'] as const
+export type DockPosition = (typeof DOCK_POSITIONS)[number]
+
 /** The Dock's tile size, in px at rest. */
 export const DOCK_SIZES = { small: 44, medium: 56, large: 68 } as const
 
@@ -67,6 +71,8 @@ interface SettingsData {
   monoFont: MonoFont
   dockSize: DockSize
   dockAutohide: boolean
+  dockPosition: DockPosition
+  dockTransparent: boolean
   menubarStats: StatId[]
   alertMem: number
   alertDisk: number
@@ -91,6 +97,8 @@ const defaults: SettingsData = {
   monoFont: 'jetbrains',
   dockSize: 'medium',
   dockAutohide: false,
+  dockPosition: 'bottom',
+  dockTransparent: false,
   menubarStats: [...DEFAULT_STATS],
   alertMem: ALERTS.defaults.mem,
   alertDisk: ALERTS.defaults.disk,
@@ -138,6 +146,14 @@ class Settings {
   /** Slides the Dock off screen until the pointer reaches the bottom edge. */
   get dockAutohide() {
     return this.#data.dockAutohide === true
+  }
+  /** Which screen edge the Dock sits on. */
+  get dockPosition(): DockPosition {
+    return DOCK_POSITIONS.includes(this.#data.dockPosition) ? this.#data.dockPosition : 'bottom'
+  }
+  /** The Dock without its glass: only the icons float over the wallpaper. */
+  get dockTransparent() {
+    return this.#data.dockTransparent === true
   }
   /** The readings the menu bar shows; unknown ids from other versions drop out. */
   get menubarStats(): StatId[] {

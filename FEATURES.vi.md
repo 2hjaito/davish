@@ -216,6 +216,8 @@ Davish tìm bản mới trên GitHub lúc mở và mỗi 6 giờ (tắt được
 
 Davish có giao diện sáng và tối. Mặc định theo máy và tự đổi khi hệ điều hành đổi; muốn giữ một kiểu thì chọn Sáng hoặc Tối trong Cài đặt → Giao diện → Chế độ. Terminal và Logs vẫn tối như cũ, màu hình nền đã chọn được giữ và dịu đi cho nền tối.
 
+Dock mặc định nằm dưới; Cài đặt → Dock cho chuyển sang cạnh trái, phải hoặc trên (cửa sổ chừa chỗ cho Dock, thu nhỏ cửa sổ thì nó co vào icon của mình) và bỏ lớp kính để chỉ còn các icon trên hình nền.
+
 <img src="assets/screenshots/dark.jpg" alt="Davish ở giao diện tối">
 
 <table><tr>

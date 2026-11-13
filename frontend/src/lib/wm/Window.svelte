@@ -40,6 +40,22 @@
     if (!el || !tile || duration === 0) return
     const box = { x: frame.x, y: frame.y, width: frame.w, height: frame.h }
     const target = tile.getBoundingClientRect()
+    if (tile.closest('[data-pos]')?.getAttribute('data-pos') !== 'bottom') {
+      // The funnel pours downward only: toward a Dock on another edge the
+      // window shrinks into its tile instead.
+      const dx = target.x + target.width / 2 - (box.x + box.width / 2)
+      const dy = target.y + target.height / 2 - (box.y + box.height / 2)
+      const small = Math.max(target.width / box.width, 0.05)
+      const frames = [
+        { transform: 'none', opacity: 1 },
+        { transform: `translate(${dx}px, ${dy}px) scale(${small})`, opacity: 0 },
+      ]
+      el.animate(minimizing ? frames : frames.reverse(), {
+        duration,
+        easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+      })
+      return
+    }
     const steps = 24
     const keyframes = Array.from({ length: steps + 1 }, (_, i) => {
       const f = genieFrame(box, target, minimizing ? i / steps : 1 - i / steps)

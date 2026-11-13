@@ -1887,6 +1887,11 @@ const en = {
     dockSize: 'Size',
     dockSizeHint: 'The Dock still shrinks when more apps are pinned than the screen can fit.',
     dockSizes: { small: 'Small', medium: 'Medium', large: 'Large' },
+    dockPosition: 'Dock position',
+    dockPositionHint: 'The screen edge the Dock sits on; windows keep clear of it.',
+    dockPositions: { bottom: 'Bottom', left: 'Left', right: 'Right', top: 'Top' },
+    dockTransparent: 'Transparent Dock',
+    dockTransparentHint: 'Drops the Dock’s glass: only the icons over the wallpaper.',
     dockAutohide: 'Automatically hide',
     dockAutohideHint:
       'Hides the Dock; move the pointer to the bottom edge of the screen to show it. Maximized windows use that space.',

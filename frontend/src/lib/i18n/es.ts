@@ -1926,6 +1926,11 @@ const es = {
     dockSizeHint:
       'El Dock se encoge igualmente cuando hay más apps fijadas de las que caben en la pantalla.',
     dockSizes: { small: 'Pequeño', medium: 'Mediano', large: 'Grande' },
+    dockPosition: 'Posición del Dock',
+    dockPositionHint: 'El borde de la pantalla donde está el Dock; las ventanas lo dejan libre.',
+    dockPositions: { bottom: 'Abajo', left: 'Izquierda', right: 'Derecha', top: 'Arriba' },
+    dockTransparent: 'Dock transparente',
+    dockTransparentHint: 'Quita el cristal del Dock: solo los iconos sobre el fondo.',
     dockAutohide: 'Ocultar automáticamente',
     dockAutohideHint:
       'Oculta el Dock; lleva el puntero al borde inferior de la pantalla para mostrarlo. Las ventanas maximizadas usan ese espacio.',
