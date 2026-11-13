@@ -116,6 +116,8 @@ export function DockerCreate(arg1:string,arg2:string,arg3:string):Promise<void>;
 
 export function DockerCreateStack(arg1:string,arg2:string,arg3:string,arg4:string):Promise<void>;
 
+export function DockerDiskUse(arg1:string):Promise<docker.DiskUse>;
+
 export function DockerImage(arg1:string,arg2:string):Promise<docker.ImageDetail>;
 
 export function DockerImages(arg1:string):Promise<Array<docker.Image>>;

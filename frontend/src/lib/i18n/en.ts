@@ -923,6 +923,7 @@ const en = {
         ],
         keys: [],
         runs: [
+          'docker info, docker ps -aq and docker inspect for Docker on the disks (in the command log)',
           'lsblk -J, ip -j addr/route, /etc/resolv.conf, who, timedatectl once for Info',
           'Reads /proc every second',
           'ps, df, nvidia-smi if present',
@@ -2083,6 +2084,8 @@ const en = {
       dns: 'DNS',
       noNet: 'The server does not list its interfaces (no ip -j).',
       openDisk: 'Open in Disk',
+      dockerOwners: 'Projects or containers with a volume or bind mount here',
+      dockerLine: (v: string, dir: string) => `Docker ${v} · data in ${dir}`,
     },
   },
   services: {

@@ -909,6 +909,7 @@ const vi = {
         ],
         keys: [],
         runs: [
+          'docker info, docker ps -aq và docker inspect cho phần Docker trên ổ đĩa (có trong Nhật ký lệnh)',
           'lsblk -J, ip -j addr/route, /etc/resolv.conf, who, timedatectl một lần cho trang Thông tin',
           'Đọc /proc mỗi giây',
           'ps, df, nvidia-smi nếu có',
@@ -2049,6 +2050,8 @@ const vi = {
       dns: 'DNS',
       noNet: 'Server không cho biết interface (thiếu ip -j).',
       openDisk: 'Mở trong Ổ đĩa',
+      dockerOwners: 'Project hoặc container có volume hay bind mount ở đây',
+      dockerLine: (v: string, dir: string) => `Docker ${v} · dữ liệu ở ${dir}`,
     },
   },
   services: {

@@ -23,6 +23,12 @@ func (a *App) DockerLogs(serverID, name string) (docker.Logs, error) {
 	return a.docker.Logs(a.ctx, serverID, name)
 }
 
+// DockerDiskUse returns Docker's version and data folder and every
+// container's volumes and bind mounts, for Monitor's Disks card.
+func (a *App) DockerDiskUse(serverID string) (docker.DiskUse, error) {
+	return a.docker.DiskUse(a.ctx, serverID)
+}
+
 // DockerStackIcon reads a compose project's folder for its icon or the
 // framework its code uses, for the project's card. It only reads files.
 func (a *App) DockerStackIcon(serverID, dir string) (docker.StackIcon, error) {

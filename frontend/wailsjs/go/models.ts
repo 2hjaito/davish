@@ -985,6 +985,28 @@ export namespace docker {
 	        this.projectFile = source["projectFile"];
 	    }
 	}
+	export class ContainerMount {
+	    container: string;
+	    project?: string;
+	    type: string;
+	    name?: string;
+	    source: string;
+	    dest: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ContainerMount(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.container = source["container"];
+	        this.project = source["project"];
+	        this.type = source["type"];
+	        this.name = source["name"];
+	        this.source = source["source"];
+	        this.dest = source["dest"];
+	    }
+	}
 	export class Detail {
 	    name: string;
 	    image: string;
@@ -1020,6 +1042,40 @@ export namespace docker {
 	        this.mounts = source["mounts"];
 	        this.json = source["json"];
 	    }
+	}
+	export class DiskUse {
+	    version: string;
+	    rootDir: string;
+	    mounts: ContainerMount[];
+	
+	    static createFrom(source: any = {}) {
+	        return new DiskUse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.version = source["version"];
+	        this.rootDir = source["rootDir"];
+	        this.mounts = this.convertValues(source["mounts"], ContainerMount);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class Image {
 	    id: string;

@@ -900,6 +900,7 @@ const zh = {
         ],
         keys: [],
         runs: [
+          '磁盘上的 Docker：docker info、docker ps -aq 和 docker inspect（记入命令日志）',
           '信息页读取一次 lsblk -J、ip -j addr/route、/etc/resolv.conf、who、timedatectl',
           '每秒读取 /proc',
           'ps、df，有 nvidia-smi 时也会运行',
@@ -2015,6 +2016,8 @@ const zh = {
       dns: 'DNS',
       noNet: '服务器没有列出网络接口（缺少 ip -j）。',
       openDisk: '在磁盘中打开',
+      dockerOwners: '在此处有数据卷或绑定挂载的项目或容器',
+      dockerLine: (v: string, dir: string) => `Docker ${v} · 数据位于 ${dir}`,
     },
   },
   services: {

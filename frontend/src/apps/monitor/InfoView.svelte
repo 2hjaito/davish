@@ -7,7 +7,10 @@
   import type { Sample } from '../../lib/stores/metrics.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
   import { openDisk } from '../../lib/wm/intents.svelte'
+  import type { DiskUse } from '../../lib/api/docker'
+  import { backend as dockerBackend } from '../docker/backend'
   import Card from './Card.svelte'
+  import { useByMount } from './dockerDisks'
   import { mockInfo } from './mock'
 
   interface Props {
@@ -23,6 +26,8 @@
 
   let info = $state<SystemInfo | null>(null)
   let error = $state('')
+  /** Docker's data and the containers' mounts; null without docker or access. */
+  let docker = $state.raw<DiskUse | null>(null)
 
   $effect(() => {
     const id = serverID
@@ -38,10 +43,23 @@
         if (!stopped) error = toUserError(e).message
       },
     )
+    docker = null
+    // Optional: no docker, no access or a sudo password to ask just leaves it out.
+    dockerBackend.diskUse(id).then(
+      (u) => {
+        if (!stopped) docker = u
+      },
+      () => {},
+    )
     return () => {
       stopped = true
     }
   })
+
+  const mountPoints = $derived(
+    (info?.disks ?? []).flatMap((d) => (d.parts ?? []).flatMap((p) => (p.mount ? [p.mount] : []))),
+  )
+  const byMount = $derived(docker ? useByMount(docker, mountPoints) : new Map())
 
   const or = (v: string | undefined) => v || m.unknown
 
@@ -134,6 +152,14 @@
                     <span class="mono muted">{p.name}</span>
                   {/if}
                   <span class="muted">{p.fstype || si.noFs} · {formatBytes(p.size)}</span>
+                  {#if p.mount && byMount.get(p.mount)}
+                    {@const use = byMount.get(p.mount)}
+                    {#if use?.root}<span class="kind docker" title={docker?.rootDir}>Docker</span
+                      >{/if}
+                    {#if use?.owners.length}
+                      <span class="owners" title={si.dockerOwners}>{use.owners.join(' · ')}</span>
+                    {/if}
+                  {/if}
                 </div>
               {/each}
             </li>
@@ -141,6 +167,9 @@
         </ul>
       {:else}
         <p class="muted">{si.noDisks}</p>
+      {/if}
+      {#if docker}
+        <p class="docker-line muted">{si.dockerLine(docker.version, docker.rootDir)}</p>
       {/if}
     </Card>
 
@@ -274,6 +303,25 @@
   .kind.hdd {
     background: color-mix(in srgb, var(--warn) 18%, transparent);
     color: var(--warn);
+  }
+
+  .kind.docker {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .owners {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--fg);
+  }
+
+  .docker-line {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--divider-soft);
   }
 
   .kind.vpn {

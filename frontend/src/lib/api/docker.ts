@@ -247,6 +247,23 @@ export const dockerCreate = (
   name: string,
 ): Promise<void> => App.DockerCreate(serverID, kind, name)
 
+/** Where Docker keeps data and what each container mounts (internal/docker.DiskUse). */
+export interface DiskUse {
+  version: string
+  rootDir: string
+  mounts: {
+    container: string
+    project?: string
+    type: 'volume' | 'bind'
+    name?: string
+    source: string
+    dest: string
+  }[]
+}
+
+export const dockerDiskUse = (serverID: string): Promise<DiskUse> =>
+  App.DockerDiskUse(serverID) as Promise<DiskUse>
+
 /** A compose project's own icon (a data: URL) or the framework its code uses. */
 export interface StackIcon {
   icon?: string

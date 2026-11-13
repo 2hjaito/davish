@@ -20,6 +20,7 @@ import {
   dockerList,
   dockerLogs,
   dockerPlan,
+  dockerDiskUse,
   dockerStackIcon,
   dockerStats,
 } from '../../lib/api/docker'
@@ -44,6 +45,7 @@ import {
   mockPlanVolume,
   mockRemoveVolume,
   mockVolumes,
+  mockDiskUse,
   mockStackIcon,
   mockStats,
 } from './mock'
@@ -71,6 +73,7 @@ export const backend = hasRuntime
       planStack: dockerPlanStack,
       createStack: dockerCreateStack,
       stackIcon: dockerStackIcon,
+      diskUse: dockerDiskUse,
     }
   : {
       list: (_serverID: string) => mockList(),
@@ -94,4 +97,5 @@ export const backend = hasRuntime
       planStack: mockPlanStack,
       createStack: mockCreateStack,
       stackIcon: (_serverID: string, dir: string) => mockStackIcon(dir),
+      diskUse: (_serverID: string) => mockDiskUse(),
     }
