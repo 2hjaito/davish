@@ -1,3 +1,10 @@
 # Check out text files with LF everywhere. Windows runners otherwise get
 # CRLF, and gofmt and Prettier then reject every file.
 * text=auto eol=lf
+
+# Keep GitHub's language bar to hand-written code. Wails bindings and the
+# icon set are generated (their PR diffs collapse); the i18n catalogs are
+# string tables, still diffed but not counted as TypeScript.
+frontend/wailsjs/** linguist-generated
+frontend/src/lib/ui/icons.ts linguist-generated
+frontend/src/lib/i18n/[a-z][a-z].ts linguist-detectable=false
