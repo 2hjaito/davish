@@ -42,11 +42,15 @@ Theo dõi journal của dịch vụ, một file hoặc một container. Lọc, t
 
 CPU từng nhân, bộ nhớ và swap, ổ đĩa, mạng theo interface, GPU NVIDIA, tiến trình. Cảnh báo RAM và ổ đĩa chỉnh được ngưỡng.
 
+Bên dưới các biểu đồ, trang **Tổng quan** mô tả máy trong bốn thẻ: hệ thống (OS, kernel, ảo hóa, khởi động lúc nào, múi giờ, systemd, ai đang đăng nhập), phần cứng (model CPU, số nhân và luồng, RAM, swap), ổ đĩa (mỗi ổ ghi NVMe, SSD, HDD hay ổ ảo, kèm model, dung lượng và những gì được mount trên đó; bấm mount để mở Ổ đĩa; có Docker thì mount chứa dữ liệu Docker được gắn nhãn, và mỗi mount ghi các project hoặc container có volume hay bind mount trên đó) và mạng (interface xếp theo LAN, VPN như Tailscale hay WireGuard, rồi bridge Docker, kèm địa chỉ, gateway mặc định và DNS). Đọc một lần bằng `lsblk`, `ip` và `/proc`; server thiếu các công cụ này thì chỉ hiện ít hơn.
+
 Trên server Windows (OpenSSH, Windows PowerShell 5.1, không cài thêm gì) Monitor đọc cùng các số liệu qua PowerShell và CIM: CPU, bộ nhớ, ổ đĩa, mạng, I/O đĩa và tiến trình. Windows không có load average, I/O wait hay steal nên các mục đó được ẩn. Các app cần Linux (Services, Docker, Logs, Cron, Nginx…) chưa dùng được trên server Windows; Launchpad hiện chúng mờ.
 
 ## Tất cả server
 
 Mọi server trong một cửa sổ, mở từ menu server, Launchpad hoặc Spotlight: đã kết nối chưa, CPU, RAM, ổ `/`, load, thời gian chạy và mạng, kèm số cảnh báo (service lỗi, container khởi động lại liên tục, ổ đầy…) và cảnh báo mới nhất. Kết nối hoặc chuyển sang server ngay trên thẻ của nó. Số liệu chỉ được thu khi cửa sổ đang mở, qua cùng phiên mà Monitor dùng.
+
+Nút **Bản đồ** trên thẻ server đã kết nối cho thấy request nào tới chương trình nào: mỗi site nginx là một chuỗi `tên miền → nginx :443 → :3000 → container (stack)`, site tĩnh kèm thư mục, và các cổng mở ra ngoài mà không site nào proxy tới. Cổng database mở ra Internet, upstream không ai nghe và chứng chỉ hết hạn trong 14 ngày được đưa lên đầu, mỗi cái có nút mở đúng app để sửa; mỗi mắt xích bấm được để mở app của nó (Nginx, Trình duyệt, Docker tại container đó). Bên dưới là những gì đang chạy (stack compose và chương trình đang nghe) và các ổ đĩa. Bản đồ chỉ đọc những gì Nginx, Cổng, Docker và Ổ đĩa vốn đã đọc. Từ 4 server trở lên, cửa sổ có ô lọc theo tên và xếp server có cảnh báo lên trước.
 
 <img src="assets/screenshots/servers.jpg" alt="Mọi server trong một màn hình" width="100%">
 
@@ -179,7 +183,7 @@ Nhập server từ `~/.ssh/config` một lần, kèm key và `ProxyJump`; Davish
 
 ## Spotlight & Launchpad
 
-`⌘K` (hoặc kính lúp trên menu bar) để mở app, dịch vụ, container, thư mục, một `/đường/dẫn`, hoặc `> một lệnh` gõ sẵn vào Terminal. Launchpad (`⌘⇧A`) hiện mọi app chia theo nhóm (tệp & terminal, giám sát, web & container, bảo mật & truy cập, phát triển, hệ thống), mỗi nhóm một tab, ô tìm kiếm tìm trên mọi nhóm; `+` ghim app vào Dock, `−` bỏ ra, và một nút đưa Dock về như lúc mới cài.
+`⌘K` (hoặc kính lúp trên menu bar) để mở app, dịch vụ, container, thư mục, một `/đường/dẫn`, hoặc `> một lệnh` gõ sẵn vào Terminal. Launchpad (`⌘⇧A`) mở đầu bằng 5 app bạn mở gần nhất, rồi tới mọi app chia theo nhóm (tệp & terminal, giám sát, web & container, bảo mật & truy cập, phát triển, hệ thống), mỗi nhóm một tab, ô tìm kiếm tìm trên mọi nhóm; `+` ghim app vào Dock, `−` bỏ ra, và một nút đưa Dock về như lúc mới cài.
 
 <table><tr>
   <td><img src="assets/screenshots/spotlight.jpg" alt="Spotlight"></td>
@@ -211,6 +215,8 @@ Davish tìm bản mới trên GitHub lúc mở và mỗi 6 giờ (tắt được
 ## Sáng và tối
 
 Davish có giao diện sáng và tối. Mặc định theo máy và tự đổi khi hệ điều hành đổi; muốn giữ một kiểu thì chọn Sáng hoặc Tối trong Cài đặt → Giao diện → Chế độ. Terminal và Logs vẫn tối như cũ, màu hình nền đã chọn được giữ và dịu đi cho nền tối.
+
+Dock mặc định nằm dưới; Cài đặt → Dock cho chuyển sang cạnh trái, phải hoặc trên (cửa sổ chừa chỗ cho Dock, thu nhỏ cửa sổ thì nó co vào icon của mình) và bỏ lớp kính để chỉ còn các icon trên hình nền.
 
 <img src="assets/screenshots/dark.jpg" alt="Davish ở giao diện tối">
 

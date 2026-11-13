@@ -1,18 +1,20 @@
 <script lang="ts">
-  import { formatBytes, formatDuration, formatPct, formatRate } from '../../lib/format'
+  import { formatBytes, formatPct, formatRate } from '../../lib/format'
   import { t } from '../../lib/i18n'
   import { level } from '../../lib/ui/charts/scale'
   import TimeChart from '../../lib/ui/charts/TimeChart.svelte'
   import Card from './Card.svelte'
   import Hero from './Hero.svelte'
+  import MachineInfo from './MachineInfo.svelte'
   import Stat from './Stat.svelte'
   import { chartColors, memPct, type Section, type ViewProps } from './types'
 
   interface Props extends ViewProps {
+    serverID: string
     open: (s: Section) => void
   }
 
-  let { data, range, rangeLabel, windows = false, open }: Props = $props()
+  let { serverID, data, range, rangeLabel, windows = false, open }: Props = $props()
 
   const m = $derived(data.latest)
   const mem = $derived(memPct(m.memUsed, m.memTotal))
@@ -31,7 +33,9 @@
   <Card title={t.monitor.cpu} icon="cpu" onopen={() => open('cpu')}>
     <Hero
       value={formatPct(m.cpu)}
-      caption={t.monitor.cores(m.cores.length)}
+      caption={windows
+        ? t.monitor.cores(m.cores.length)
+        : `${t.monitor.load} ${m.load1.toFixed(2)} · ${m.load5.toFixed(2)} · ${m.load15.toFixed(2)}`}
       tone={level(m.cpu, 85, 95)}
     />
     <TimeChart
@@ -96,25 +100,7 @@
   </Card>
 </div>
 
-<div class="facts">
-  {#if !windows}
-    <Stat
-      label={t.monitor.load}
-      value="{m.load1.toFixed(2)} · {m.load5.toFixed(2)} · {m.load15.toFixed(2)}"
-    />
-  {/if}
-  <Stat label={t.monitor.uptime} value={formatDuration(m.uptime, t.units)} />
-  <Stat
-    label={t.monitor.swap}
-    value={m.swapTotal > 0
-      ? `${formatBytes(m.swapUsed)} / ${formatBytes(m.swapTotal)}`
-      : t.monitor.unknown}
-  />
-  <Stat
-    label={t.monitor.gpu}
-    value={m.gpus[0] && m.gpus[0].util >= 0 ? formatPct(m.gpus[0].util) : t.monitor.unknown}
-  />
-</div>
+<MachineInfo {serverID} latest={m} />
 
 <style>
   .grid {
@@ -129,15 +115,5 @@
     /* Same height as a Hero, so the charts of a row line up. */
     min-height: 51px;
     align-items: center;
-  }
-
-  .facts {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    margin-top: 14px;
-    padding: 12px 14px;
-    border-radius: var(--card-radius);
-    border: 1px solid var(--divider-soft);
   }
 </style>

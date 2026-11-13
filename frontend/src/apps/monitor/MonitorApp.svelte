@@ -14,7 +14,6 @@
   import DiskView from './DiskView.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
   import GpuView from './GpuView.svelte'
-  import InfoView from './InfoView.svelte'
   import MemoryView from './MemoryView.svelte'
   import NetworkView from './NetworkView.svelte'
   import OverviewView from './OverviewView.svelte'
@@ -47,7 +46,7 @@
   /** Why there are no readings, when the server cannot give any. */
   const status = $derived(metrics.statusOf(win.serverID))
   const windows = $derived(servers.platformOf(win.serverID) === 'windows')
-  const charts = $derived(section !== 'processes' && section !== 'info')
+  const charts = $derived(section !== 'processes')
 
   function togglePause() {
     frozen = frozen ? null : (live ?? null)
@@ -81,7 +80,6 @@
         { id: 'network', icon: 'network', value: m && formatRate(m.rxBps + m.txBps) },
       ],
     },
-    { label: t.monitor.system, items: [{ id: 'info', icon: 'info' }] },
   ])
 </script>
 
@@ -156,8 +154,6 @@
         <ProcessesView serverID={win.serverID} paused={frozen !== null} />
       {:else if !data}
         <Empty icon="monitor" title={t.monitor.waiting} />
-      {:else if section === 'info'}
-        <InfoView serverID={win.serverID} latest={data.latest} />
       {:else}
         {@const props = {
           data,
@@ -166,7 +162,7 @@
           windows,
         }}
         {#if section === 'overview'}
-          <OverviewView {...props} open={(s) => (section = s)} />
+          <OverviewView {...props} serverID={win.serverID} open={(s) => (section = s)} />
         {:else if section === 'cpu'}
           <CpuView {...props} />
         {:else if section === 'memory'}

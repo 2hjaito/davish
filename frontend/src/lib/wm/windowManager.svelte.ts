@@ -1,5 +1,6 @@
 import { load, save } from '../stores/persist'
 import { clampRect, fitRect, type Rect, type SnapZone, zoneRect } from './geometry'
+import { recentApps } from '../stores/recentApps.svelte'
 
 export interface WindowState {
   id: string
@@ -147,6 +148,8 @@ export class WindowManager {
 
   /** Focuses the app's window on this server, or opens a new one. Returns true if opened. */
   openOrFocus(appId: string, serverID: string, opts: OpenOptions): boolean {
+    // Every way the user opens an app comes through here; restored windows do not.
+    recentApps.touch(appId)
     const existing = this.windows.find((w) => w.appId === appId && w.serverID === serverID)
     if (existing) {
       this.focus(existing.id)

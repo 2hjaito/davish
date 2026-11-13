@@ -26,7 +26,9 @@ export const GENIE_MS = 300
  * (another workspace), get a short zoom and fade instead.
  */
 export function windowZoom(node: Element, { out = false, appId = '' } = {}): TransitionConfig {
-  const tile = appId ? dockTile(appId) : null
+  // The genie funnel pours downward; a Dock on another edge gets the zoom.
+  const found = appId ? dockTile(appId) : null
+  const tile = found?.closest('[data-pos]')?.getAttribute('data-pos') === 'bottom' ? found : null
   const box = node.getBoundingClientRect()
   if (!tile || box.width === 0) {
     return {

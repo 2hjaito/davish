@@ -21,26 +21,43 @@
     /** Closes every window of the app in this workspace. */
     onclose: (appId: AppId) => void
     height?: number
+    width?: number
   }
 
-  let { apps, isOpen, onlaunch, onclose, height = $bindable(0) }: Props = $props()
+  let {
+    apps,
+    isOpen,
+    onlaunch,
+    onclose,
+    height = $bindable(0),
+    width = $bindable(0),
+  }: Props = $props()
+
+  /** Which edge the Dock sits on; magnify and the menu follow its axis. */
+  const pos = $derived(settings.dockPosition)
+  const vertical = $derived(pos === 'left' || pos === 'right')
 
   /** Closest the right-click menu's center gets to a screen edge: half its width and a margin. */
   const MENU_EDGE = 100
 
   // The right-click menu, like the macOS Dock's: open, keep in Dock, close.
-  let menu = $state<{ app: Tile & { id: AppId }; x: number; y: number } | null>(null)
+  // style places it beside the tile, on the screen's side of the Dock.
+  let menu = $state<{ app: Tile & { id: AppId }; style: string } | null>(null)
   let menuEl = $state<HTMLElement>()
 
   function openMenu(e: MouseEvent, app: Tile) {
     e.preventDefault()
     if (app.id === 'launchpad') return
     const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
-    menu = {
-      app: { ...app, id: app.id },
-      x: Math.min(Math.max(r.left + r.width / 2, MENU_EDGE), window.innerWidth - MENU_EDGE),
-      y: window.innerHeight - r.top + 10,
-    }
+    const x = Math.min(Math.max(r.left + r.width / 2, MENU_EDGE), window.innerWidth - MENU_EDGE)
+    const y = Math.min(Math.max(r.top + r.height / 2, MENU_EDGE), window.innerHeight - MENU_EDGE)
+    const style = {
+      bottom: `left: ${x}px; bottom: ${window.innerHeight - r.top + 10}px; translate: -50% 0`,
+      top: `left: ${x}px; top: ${r.bottom + 10}px; translate: -50% 0`,
+      left: `left: ${r.right + 10}px; top: ${y}px; translate: 0 -50%`,
+      right: `right: ${window.innerWidth - r.left + 10}px; top: ${y}px; translate: 0 -50%`,
+    }[pos]
+    menu = { app: { ...app, id: app.id }, style }
     requestAnimationFrame(() =>
       menuEl?.querySelector<HTMLElement>('button:not(:disabled)')?.focus(),
     )
@@ -68,17 +85,18 @@
   function step(): number {
     const tile = dock.querySelector<HTMLElement>('.tile')
     const gap = parseFloat(getComputedStyle(dock).getPropertyValue('--dock-gap')) || 0
-    return (tile?.offsetWidth ?? 0) + gap
+    return (vertical ? (tile?.offsetHeight ?? 0) : (tile?.offsetWidth ?? 0)) + gap
   }
 
-  /** Aims the tiles at a viewport x; null relaxes them all back to 1. */
-  function aim(clientX: number | null) {
-    if (clientX === null) {
+  /** Aims the tiles at a point along the Dock's axis; null relaxes them all back to 1. */
+  function aim(at: number | null) {
+    if (at === null) {
       targets = apps.map(() => 1)
     } else {
-      // The dock stays centered while it widens, so its center is a stable origin.
+      // The dock stays centered while it grows, so its center is a stable origin.
       const r = dock.getBoundingClientRect()
-      targets = magnify(clientX - (r.left + r.width / 2), apps.length, step())
+      const center = vertical ? r.top + r.height / 2 : r.left + r.width / 2
+      targets = magnify(at - center, apps.length, step())
     }
     if (scales.length !== apps.length) scales = apps.map(() => 1)
     if (ms(1) === 0) {
@@ -102,7 +120,7 @@
     const tile = e.target as HTMLElement
     if (!tile.matches(':focus-visible')) return
     const r = tile.getBoundingClientRect()
-    aim(r.left + r.width / 2)
+    aim(vertical ? r.top + r.height / 2 : r.left + r.width / 2)
   }
 
   $effect(() => () => cancelAnimationFrame(frame))
@@ -141,20 +159,23 @@
 />
 
 {#if settings.dockAutohide}
-  <div class="edge" aria-hidden="true" onpointerenter={reveal}></div>
+  <div class="edge" data-pos={pos} aria-hidden="true" onpointerenter={reveal}></div>
 {/if}
 
 <nav
   class="dock glass"
+  class:clear={settings.dockTransparent}
   class:menu-open={menu !== null}
   class:hidden
+  data-pos={pos}
   aria-label={t.dock.label}
   style:--count={apps.length}
   style:--dock-size="{DOCK_SIZES[settings.dockSize]}px"
   bind:this={dock}
   bind:offsetHeight={height}
+  bind:offsetWidth={width}
   onpointerenter={reveal}
-  onpointermove={(e) => aim(e.clientX)}
+  onpointermove={(e) => aim(vertical ? e.clientY : e.clientX)}
   onpointerleave={() => {
     aim(null)
     hideSoon()
@@ -201,8 +222,7 @@
     class="menu glass glass-strong"
     role="menu"
     aria-label={m.app.label}
-    style:left="{m.x}px"
-    style:bottom="{m.y}px"
+    style={m.style}
   >
     <p class="name">{m.app.label}</p>
     <button role="menuitem" onclick={() => pick(() => launch(m.app))}
@@ -233,7 +253,6 @@
   .menu {
     position: fixed;
     z-index: 950;
-    translate: -50% 0;
     min-width: 180px;
     padding: 5px;
     border-radius: var(--menu-radius);
@@ -282,32 +301,120 @@
   .dock {
     --dock-tile: min(var(--dock-size), calc((100vw - 84px) / var(--count) - var(--dock-gap)));
     --dock-tile-radius: calc(var(--dock-tile) * 0.27);
+    /* Which way a tile lifts and bounces: away from the Dock's edge. */
+    --away-x: 0;
+    --away-y: -1;
     position: absolute;
-    bottom: var(--dock-bottom);
-    left: 50%;
-    transform: translateX(-50%);
     z-index: 900;
     display: flex;
-    align-items: flex-end;
     /* The gap lives in the slots' padding so the hover area has no dead zones. */
-    padding: 9px calc(12px - var(--dock-gap) / 2) 7px;
     border-radius: var(--dock-radius);
     transition: translate var(--dur) var(--ease-out);
   }
 
-  .dock.hidden {
-    /* Past the bottom edge, shadow and all. */
+  .dock[data-pos='bottom'] {
+    bottom: var(--dock-bottom);
+    left: 50%;
+    transform: translateX(-50%);
+    align-items: flex-end;
+    padding: 9px calc(12px - var(--dock-gap) / 2) 7px;
+  }
+
+  .dock[data-pos='top'] {
+    --away-y: 1;
+    top: calc(var(--menubar-h) + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    align-items: flex-start;
+    padding: 7px calc(12px - var(--dock-gap) / 2) 9px;
+  }
+
+  .dock[data-pos='left'],
+  .dock[data-pos='right'] {
+    --dock-tile: min(
+      var(--dock-size),
+      calc((100vh - var(--menubar-h) - 84px) / var(--count) - var(--dock-gap))
+    );
+    --away-y: 0;
+    /* Centered in the space under the menu bar. */
+    top: calc(50% + var(--menubar-h) / 2);
+    transform: translateY(-50%);
+    flex-direction: column;
+  }
+
+  .dock[data-pos='left'] {
+    --away-x: 1;
+    left: var(--dock-bottom);
+    align-items: flex-start;
+    padding: calc(12px - var(--dock-gap) / 2) 9px calc(12px - var(--dock-gap) / 2) 7px;
+  }
+
+  .dock[data-pos='right'] {
+    --away-x: -1;
+    right: var(--dock-bottom);
+    align-items: flex-end;
+    padding: calc(12px - var(--dock-gap) / 2) 7px calc(12px - var(--dock-gap) / 2) 9px;
+  }
+
+  /* Past its edge, shadow and all. */
+  .dock[data-pos='bottom'].hidden {
     translate: 0 calc(100% + var(--dock-bottom) + 12px);
   }
 
-  /* Under the hidden dock: reaching the screen's bottom edge brings it up. */
+  .dock[data-pos='top'].hidden {
+    translate: 0 calc(-100% - var(--menubar-h) - 20px);
+  }
+
+  .dock[data-pos='left'].hidden {
+    translate: calc(-100% - var(--dock-bottom) - 12px) 0;
+  }
+
+  .dock[data-pos='right'].hidden {
+    translate: calc(100% + var(--dock-bottom) + 12px) 0;
+  }
+
+  /* No glass: the icons float over the wallpaper, their own shadows kept. */
+  .dock.glass.clear {
+    background: none;
+    border-color: transparent;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  /* Under the hidden dock: reaching its screen edge brings it back. */
   .edge {
     position: fixed;
+    z-index: 899;
+  }
+
+  .edge[data-pos='bottom'] {
     left: 0;
     right: 0;
     bottom: 0;
     height: 4px;
-    z-index: 899;
+  }
+
+  .edge[data-pos='top'] {
+    left: 0;
+    right: 0;
+    top: var(--menubar-h);
+    height: 4px;
+  }
+
+  .edge[data-pos='left'],
+  .edge[data-pos='right'] {
+    top: var(--menubar-h);
+    bottom: 0;
+    width: 4px;
+  }
+
+  .edge[data-pos='left'] {
+    left: 0;
+  }
+
+  .edge[data-pos='right'] {
+    right: 0;
   }
 
   /*
@@ -328,6 +435,22 @@
     margin: 0 calc((var(--scale) - 1) * var(--dock-tile) / 2);
   }
 
+  /* The running dot stays on the screen-edge side of its tile. */
+  [data-pos='top'] .slot {
+    flex-direction: column-reverse;
+  }
+
+  [data-pos='left'] .slot,
+  [data-pos='right'] .slot {
+    flex-direction: row-reverse;
+    padding: calc(var(--dock-gap) / 2) 0;
+    margin: calc((var(--scale) - 1) * var(--dock-tile) / 2) 0;
+  }
+
+  [data-pos='right'] .slot {
+    flex-direction: row;
+  }
+
   /*
    * The artwork (AppIcon) fills the tile; the tile adds what every icon shares:
    * the squircle, a soft top sheen, a hairline bevel and the drop shadow.
@@ -344,8 +467,21 @@
     background: none;
     box-shadow: var(--tile-shadow);
     transform-origin: bottom center;
-    transform: translateY(calc(-1 * var(--lift))) scale(var(--scale));
+    transform: translate(calc(var(--away-x) * var(--lift)), calc(var(--away-y) * var(--lift)))
+      scale(var(--scale));
     transition: filter var(--dur-fast) var(--ease-out);
+  }
+
+  [data-pos='top'] .tile {
+    transform-origin: top center;
+  }
+
+  [data-pos='left'] .tile {
+    transform-origin: center left;
+  }
+
+  [data-pos='right'] .tile {
+    transform-origin: center right;
   }
 
   .tile :global(svg) {
@@ -380,7 +516,7 @@
       animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1);
     }
     30% {
-      translate: 0 -18px;
+      translate: calc(var(--away-x) * 18px) calc(var(--away-y) * 18px);
       animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.3);
     }
     55% {
@@ -388,7 +524,7 @@
       animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1);
     }
     75% {
-      translate: 0 -7px;
+      translate: calc(var(--away-x) * 7px) calc(var(--away-y) * 7px);
       animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.3);
     }
     100% {
@@ -410,6 +546,35 @@
     transition:
       opacity var(--dur-fast) var(--ease-out),
       translate var(--dur-fast) var(--ease-out);
+  }
+
+  /* The label sits on the side away from the screen edge. */
+  [data-pos='top'] .tooltip {
+    bottom: auto;
+    top: calc(100% + 27px);
+    translate: 0 -4px;
+  }
+
+  [data-pos='left'] .tooltip,
+  [data-pos='right'] .tooltip {
+    bottom: auto;
+    top: 50%;
+    translate: 0 -50%;
+  }
+
+  [data-pos='left'] .tooltip {
+    left: calc(100% + 27px);
+  }
+
+  [data-pos='right'] .tooltip {
+    right: calc(100% + 27px);
+  }
+
+  [data-pos='left'] .slot:hover .tooltip,
+  [data-pos='right'] .slot:hover .tooltip,
+  [data-pos='left'] .slot:has(.tile:focus-visible) .tooltip,
+  [data-pos='right'] .slot:has(.tile:focus-visible) .tooltip {
+    translate: 0 -50%;
   }
 
   .slot:hover .tooltip,

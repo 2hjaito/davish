@@ -5,6 +5,7 @@
   import {
     ALERTS,
     type BackupMode,
+    DOCK_POSITIONS,
     DOCK_SIZES,
     type DockSize,
     MONO_FAMILIES,
@@ -224,6 +225,36 @@
       {/each}
     </div>
   </div>
+
+  <div class="row">
+    <span>
+      <strong>{t.settings.dockPosition}</strong>
+      <small>{t.settings.dockPositionHint}</small>
+    </span>
+    <div class="segmented" role="radiogroup" aria-label={t.settings.dockPosition}>
+      {#each DOCK_POSITIONS as p (p)}
+        <button
+          role="radio"
+          aria-checked={settings.dockPosition === p}
+          onclick={() => settings.set('dockPosition', p)}>{t.settings.dockPositions[p]}</button
+        >
+      {/each}
+    </div>
+  </div>
+
+  <label class="row">
+    <span>
+      <strong>{t.settings.dockTransparent}</strong>
+      <small>{t.settings.dockTransparentHint}</small>
+    </span>
+    <input
+      type="checkbox"
+      class="switch"
+      role="switch"
+      checked={settings.dockTransparent}
+      onchange={(e) => settings.set('dockTransparent', e.currentTarget.checked)}
+    />
+  </label>
 
   <label class="row">
     <span>

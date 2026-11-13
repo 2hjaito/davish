@@ -46,7 +46,7 @@ Nothing to install on the server.
 - [Editor](FEATURES.md#editor): CodeMirror with atomic saves and backups
 - [Logs](FEATURES.md#logs): journal, files and containers, live
 - [Monitor](FEATURES.md#monitor): CPU, memory, disks, network, GPUs, processes, on Linux and Windows servers
-- [All servers](FEATURES.md#all-servers): every server's health and alerts in one window
+- [All servers](FEATURES.md#all-servers): every server's health and alerts in one window, and a map of what each one serves
 
 **Services and apps**
 

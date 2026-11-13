@@ -42,11 +42,15 @@ Follow a unit's journal, a file or a container. Filter, pause, highlight errors,
 
 CPU per core, memory and swap, disks, network per interface, NVIDIA GPUs, processes. RAM and disk alerts you can tune.
 
+Below the charts, **Overview** describes the machine in four cards: the system (OS, kernel, virtualisation, when it booted, time zone, systemd, who is logged in), the hardware (CPU model, cores and threads, memory, swap), the disks (each drive marked NVMe, SSD, HDD or virtual, with its model, size and what is mounted on it; a mount opens Disk; with Docker, the mount holding Docker's data is tagged and each mount lists the compose projects or containers whose volumes and bind mounts live there) and the network (interfaces sorted LAN, VPN such as Tailscale or WireGuard, then Docker bridges, with their addresses, the default gateway and DNS). Read once with `lsblk`, `ip` and `/proc`; servers without them just show less.
+
 On a Windows server (OpenSSH, Windows PowerShell 5.1, nothing installed) Monitor reads the same figures through PowerShell and CIM: CPU, memory, drives, network, disks and processes. Windows has no load average, I/O wait or steal time, so those are left out. The other apps that need Linux (Services, Docker, Logs, Cron, Nginx…) are not available on Windows servers yet; Launchpad shows them greyed out.
 
 ## All servers
 
 Every server in one window, from the server menu, Launchpad or Spotlight: connected or not, CPU, memory, the `/` disk, load, uptime and network, with its alerts (a failed service, a restart loop, a full disk…) counted and the latest one shown. Connect a server or switch to it from its card. Readings are collected only while the window is open, over the same session Monitor uses.
+
+**Map** on a connected server's card shows which requests reach which program: each nginx site as a chain `domain → nginx :443 → :3000 → container (stack)`, static sites with their folder, and ports open to the outside that no site proxies to. A database port open to the Internet, an upstream nobody listens on and a certificate expiring within 14 days are flagged at the top, each with a button to the app that fixes it; every link opens its app (Nginx, the Browser, Docker at that container). Below, what runs (compose stacks and listening programs) and the disks. It only reads what Nginx, Ports, Docker and Disk already read. With four servers or more, the window filters by name and puts servers with alerts first.
 
 <img src="assets/screenshots/en/servers.jpg" alt="Every server at a glance" width="100%">
 
@@ -179,7 +183,7 @@ Import hosts from `~/.ssh/config` in one go, keys and `ProxyJump` included; Davi
 
 ## Spotlight & Launchpad
 
-A real menu bar (File, View, Go, Window, Help and the focused app's own commands) with every shortcut listed under `⌘/`, and a `?` on each app explaining what it does and which commands it runs. `⌘K` (or the magnifier in the menu bar) to open an app, a service, a container, a folder, a `/path`, or `> a command` typed into a terminal. Launchpad (`⌘⇧A`) shows every app in groups (files & terminal, monitoring, web & containers, security & access, development, system), with a tab per group and a search across all of them; `+` pins an app to the Dock, `−` takes it off, and one button puts the Dock back as it came.
+A real menu bar (File, View, Go, Window, Help and the focused app's own commands) with every shortcut listed under `⌘/`, and a `?` on each app explaining what it does and which commands it runs. `⌘K` (or the magnifier in the menu bar) to open an app, a service, a container, a folder, a `/path`, or `> a command` typed into a terminal. Launchpad (`⌘⇧A`) starts with the five apps you opened last, then every app in groups (files & terminal, monitoring, web & containers, security & access, development, system), with a tab per group and a search across all of them; `+` pins an app to the Dock, `−` takes it off, and one button puts the Dock back as it came.
 
 <table><tr>
   <td><img src="assets/screenshots/spotlight.jpg" alt="Spotlight"></td>
@@ -211,6 +215,8 @@ Davish looks for a new release on GitHub when it starts and every six hours (you
 ## Light and dark
 
 Davish comes in a light and a dark look. By default it follows your computer and switches when the system does; pick Light or Dark in Settings → Appearance → Theme to keep one. Terminal and Logs stay dark either way, and the wallpaper color you chose carries over, dimmed for the night.
+
+The Dock sits at the bottom by default; Settings → Dock moves it to the left, right or top edge (windows keep clear of it, minimizing shrinks a window into its tile) and can drop its glass so only the icons float over the wallpaper.
 
 <img src="assets/screenshots/dark.jpg" alt="Davish in the dark theme">
 

@@ -11,6 +11,7 @@ import type {
   ContainerDetail,
   ContainerStats,
   StackIcon,
+  DiskUse,
   Image,
   ImageDetail,
   ImagePlan,
@@ -302,4 +303,38 @@ export const mockRunCommand = (name: string): Promise<RunPlan> =>
 /** The demo's compose projects: shop is a Nest app. */
 export function mockStackIcon(dir: string): Promise<StackIcon> {
   return Promise.resolve(dir.endsWith('/shop') ? { tech: 'nest' } : {})
+}
+
+/** The demo's data: named volumes under the root folder, uploads on /mnt/data. */
+export function mockDiskUse(): Promise<DiskUse> {
+  return Promise.resolve({
+    version: '27.3.1',
+    rootDir: '/var/lib/docker',
+    mounts: [
+      {
+        container: 'shop-db-1',
+        project: 'shop',
+        type: 'volume',
+        name: 'shop_pg',
+        source: '/var/lib/docker/volumes/shop_pg/_data',
+        dest: '/var/lib/postgresql/data',
+      },
+      {
+        container: 'shop-redis-1',
+        project: 'shop',
+        type: 'volume',
+        name: 'shop_redis',
+        source: '/var/lib/docker/volumes/shop_redis/_data',
+        dest: '/data',
+      },
+      {
+        container: 'shop-api-1',
+        project: 'shop',
+        type: 'bind',
+        source: '/mnt/data/shop/uploads',
+        dest: '/app/uploads',
+      },
+      { container: 'zalo-oa-gateway', type: 'bind', source: '/mnt/data/zalo', dest: '/data' },
+    ],
+  })
 }

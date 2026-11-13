@@ -186,6 +186,10 @@ export function DockerCreateStack(arg1, arg2, arg3, arg4) {
   return window['go']['app']['App']['DockerCreateStack'](arg1, arg2, arg3, arg4);
 }
 
+export function DockerDiskUse(arg1) {
+  return window['go']['app']['App']['DockerDiskUse'](arg1);
+}
+
 export function DockerImage(arg1, arg2) {
   return window['go']['app']['App']['DockerImage'](arg1, arg2);
 }

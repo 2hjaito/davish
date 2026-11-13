@@ -60,20 +60,30 @@
   let innerWidth = $state(window.innerWidth)
   let innerHeight = $state(window.innerHeight)
   let dockHeight = $state(80)
+  let dockWidth = $state(80)
 
   const serverID = $derived(servers.activeId)
   const focused = $derived(wm.focused(serverID))
 
   $effect(() => {
+    const full = { x: 0, y: MENUBAR_H, w: innerWidth, h: innerHeight - MENUBAR_H }
+    // A hidden dock leaves the whole screen to windows, as on macOS; a shown
+    // one keeps its edge, gap included.
+    const pos = settings.dockPosition
+    const side = settings.dockAutohide
+      ? 0
+      : (pos === 'left' || pos === 'right' ? dockWidth : dockHeight) + DOCK_BOTTOM + 6
+    // The top Dock sits 8px under the menu bar rather than DOCK_BOTTOM from an edge.
+    const top = pos === 'top' && side ? dockHeight + 8 + 6 : 0
+    // Banners in the top right corner step clear of a Dock at the top or right.
+    const root = document.documentElement.style
+    root.setProperty('--dock-clear-top', `${pos === 'top' ? top : 0}px`)
+    root.setProperty('--dock-clear-right', `${pos === 'right' ? side : 0}px`)
     wm.area = {
-      x: 0,
-      y: MENUBAR_H,
-      w: innerWidth,
-      // A hidden dock leaves the whole height to windows, as on macOS.
-      h: Math.max(
-        200,
-        innerHeight - MENUBAR_H - (settings.dockAutohide ? 0 : dockHeight + DOCK_BOTTOM + 6),
-      ),
+      x: pos === 'left' ? side : 0,
+      y: full.y + top,
+      w: Math.max(320, full.w - (pos === 'left' || pos === 'right' ? side : 0)),
+      h: Math.max(200, full.h - (pos === 'bottom' ? side : top)),
     }
   })
 
@@ -335,6 +345,7 @@
           .filter((w) => w.appId === id)
           .forEach((w) => wm.close(w.id))}
       bind:height={dockHeight}
+      bind:width={dockWidth}
     />
   {/if}
 
@@ -416,7 +427,7 @@
 
   .demo {
     position: fixed;
-    top: calc(var(--menubar-h) + 8px);
+    top: calc(var(--menubar-h) + 8px + var(--dock-clear-top, 0px));
     left: 50%;
     translate: -50% 0;
     z-index: 900;
