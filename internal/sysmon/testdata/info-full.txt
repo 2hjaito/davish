@@ -1,0 +1,56 @@
+@@os
+PRETTY_NAME="Debian GNU/Linux 12 (bookworm)"
+@@uname
+6.1.0-26-amd64
+x86_64
+@@hostname
+terra
+@@cpu
+ AMD Ryzen 7 5700G with Radeon Graphics
+@@virt
+none
+@@cpucount
+16
+1
+ 8
+@@mem
+MemTotal:       65748312 kB
+SwapTotal:       1003516 kB
+@@boot
+btime 1794000000
+@@tz
+Europe/Paris
+@@users
+dang
+root
+@@systemd
+systemd 252 (252.30-1~deb12u2)
+@@lsblk
+{
+   "blockdevices": [
+      {"name":"loop0", "type":"loop", "size":67108864, "model":null, "rota":false, "tran":null, "mountpoint":"/snap/core/1", "fstype":"squashfs"},
+      {"name":"sda", "type":"disk", "size":12000138625024, "model":"WDC WD120EFBX-68B0EN0", "rota":true, "tran":"sata", "mountpoint":null, "fstype":null,
+         "children": [
+            {"name":"sda1", "type":"part", "size":12000136527872, "model":null, "rota":true, "tran":null, "mountpoint":"/srv/media", "fstype":"ext4"}
+         ]
+      },
+      {"name":"nvme0n1", "type":"disk", "size":1000204886016, "model":"Samsung SSD 980 PRO 1TB", "rota":false, "tran":"nvme", "mountpoint":null, "fstype":null,
+         "children": [
+            {"name":"nvme0n1p1", "type":"part", "size":536870912, "model":null, "rota":false, "tran":"nvme", "mountpoint":"/boot/efi", "fstype":"vfat"},
+            {"name":"nvme0n1p2", "type":"part", "size":999666294784, "model":null, "rota":false, "tran":"nvme", "mountpoint":null, "fstype":"LVM2_member",
+               "children": [
+                  {"name":"vg-root", "type":"lvm", "size":999662100480, "model":null, "rota":false, "tran":null, "mountpoint":"/", "fstype":"ext4"}
+               ]
+            }
+         ]
+      }
+   ]
+}
+@@ip
+[{"ifindex":1,"ifname":"lo","flags":["LOOPBACK","UP"],"operstate":"UNKNOWN","link_type":"loopback","address":"00:00:00:00:00:00","addr_info":[{"family":"inet","local":"127.0.0.1","prefixlen":8,"scope":"host"}]},{"ifindex":2,"ifname":"enp5s0","flags":["UP"],"operstate":"UP","link_type":"ether","address":"a8:a1:59:00:00:01","addr_info":[{"family":"inet","local":"192.168.1.20","prefixlen":24,"scope":"global"},{"family":"inet6","local":"fe80::1","prefixlen":64,"scope":"link"}]},{"ifindex":3,"ifname":"wlp4s0","flags":[],"operstate":"DOWN","link_type":"ether","address":"a8:a1:59:00:00:02","addr_info":[]},{"ifindex":4,"ifname":"docker0","operstate":"UP","link_type":"ether","address":"02:42:00:00:00:01","addr_info":[{"family":"inet","local":"172.17.0.1","prefixlen":16,"scope":"global"}]},{"ifindex":5,"ifname":"tailscale0","operstate":"UNKNOWN","link_type":"none","address":"","addr_info":[{"family":"inet","local":"100.64.0.3","prefixlen":32,"scope":"global"}]},{"ifindex":6,"ifname":"veth1a2b","operstate":"UP","link_type":"ether","address":"aa:bb:cc:00:00:01","addr_info":[]}]
+@@route
+[{"dst":"default","gateway":"192.168.1.1","dev":"enp5s0","protocol":"dhcp","flags":[]}]
+@@dns
+192.168.1.1
+1.1.1.1
+@@end

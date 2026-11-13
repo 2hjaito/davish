@@ -902,9 +902,17 @@ const vi = {
       },
       monitor: {
         does: 'CPU theo lõi, RAM, swap, ổ đĩa, mạng, GPU NVIDIA, tiến trình.',
-        actions: ['Sắp tiến trình theo CPU hoặc RAM', 'Đặt ngưỡng cảnh báo trong Cài đặt'],
+        actions: [
+          'Thông tin: hệ thống, phần cứng, ổ đĩa kèm mount, interface mạng kèm gateway và DNS',
+          'Sắp tiến trình theo CPU hoặc RAM',
+          'Đặt ngưỡng cảnh báo trong Cài đặt',
+        ],
         keys: [],
-        runs: ['Đọc /proc mỗi giây', 'ps, df, nvidia-smi nếu có'],
+        runs: [
+          'lsblk -J, ip -j addr/route, /etc/resolv.conf, who, timedatectl một lần cho trang Thông tin',
+          'Đọc /proc mỗi giây',
+          'ps, df, nvidia-smi nếu có',
+        ],
       },
       services: {
         does: 'Các unit systemd theo trạng thái, xem status và journal; khởi động, dừng, khởi động lại, xóa.',
@@ -1984,6 +1992,31 @@ const vi = {
     bareMetal: 'Không (máy thật)',
     infoLoading: 'Đang đọc thông tin server…',
     unknown: '--',
+    sysinfo: {
+      system: 'Hệ thống',
+      hardware: 'Phần cứng',
+      disks: 'Ổ đĩa',
+      network: 'Mạng',
+      osKernel: 'Hệ điều hành',
+      booted: 'Khởi động',
+      timezone: 'Múi giờ',
+      users: 'Đang đăng nhập',
+      noUsers: 'Không ai',
+      cpu: 'CPU',
+      layout: (cores: number, threads: number, sockets: number) =>
+        [cores && `${cores} nhân`, `${threads} luồng`, sockets > 1 && `${sockets} socket`]
+          .filter(Boolean)
+          .join(' · '),
+      kinds: { nvme: 'NVMe', ssd: 'SSD', hdd: 'HDD', virtual: 'Ổ ảo' },
+      noFs: 'không có hệ thống file',
+      noDisks: 'Server không cho biết ổ đĩa (thiếu lsblk).',
+      ifKinds: { lan: 'LAN', vpn: 'VPN', docker: 'Docker' },
+      down: 'tắt',
+      gateway: 'Gateway',
+      dns: 'DNS',
+      noNet: 'Server không cho biết interface (thiếu ip -j).',
+      openDisk: 'Mở trong Ổ đĩa',
+    },
   },
   services: {
     sections: 'Bộ lọc dịch vụ',

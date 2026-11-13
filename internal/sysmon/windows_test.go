@@ -3,6 +3,7 @@ package sysmon
 import (
 	"math"
 	"os"
+	"reflect"
 	"regexp"
 	"slices"
 	"strings"
@@ -201,7 +202,7 @@ func TestWindowsInfo(t *testing.T) {
 		CPUModel: "Intel(R) Core(TM) i5-9400 CPU @ 2.90GHz",
 		Virt:     "", // "none": bare metal
 	}
-	if info != want {
+	if !reflect.DeepEqual(info, want) {
 		t.Errorf("info = %+v; want %+v", info, want)
 	}
 }

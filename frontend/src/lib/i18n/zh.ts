@@ -893,9 +893,17 @@ const zh = {
       },
       monitor: {
         does: '每个核心的 CPU、内存、swap、磁盘、网络、NVIDIA GPU、进程。',
-        actions: ['按 CPU 或内存排序进程', '在设置中调整警报阈值'],
+        actions: [
+          '信息：系统、硬件、磁盘及挂载点、网络接口及网关和 DNS',
+          '按 CPU 或内存排序进程',
+          '在设置中调整警报阈值',
+        ],
         keys: [],
-        runs: ['每秒读取 /proc', 'ps、df，有 nvidia-smi 时也会运行'],
+        runs: [
+          '信息页读取一次 lsblk -J、ip -j addr/route、/etc/resolv.conf、who、timedatectl',
+          '每秒读取 /proc',
+          'ps、df，有 nvidia-smi 时也会运行',
+        ],
       },
       services: {
         does: '按状态列出 systemd 单元，查看状态和 journal；启动、停止、重启、删除。',
@@ -1950,6 +1958,31 @@ const zh = {
     bareMetal: '无（物理机）',
     infoLoading: '正在读取服务器信息…',
     unknown: '--',
+    sysinfo: {
+      system: '系统',
+      hardware: '硬件',
+      disks: '磁盘',
+      network: '网络',
+      osKernel: '操作系统',
+      booted: '启动于',
+      timezone: '时区',
+      users: '已登录',
+      noUsers: '无',
+      cpu: 'CPU',
+      layout: (cores: number, threads: number, sockets: number) =>
+        [cores && `${cores} 核`, `${threads} 线程`, sockets > 1 && `${sockets} 路`]
+          .filter(Boolean)
+          .join(' · '),
+      kinds: { nvme: 'NVMe', ssd: 'SSD', hdd: 'HDD', virtual: '虚拟磁盘' },
+      noFs: '无文件系统',
+      noDisks: '服务器没有列出磁盘（缺少 lsblk）。',
+      ifKinds: { lan: 'LAN', vpn: 'VPN', docker: 'Docker' },
+      down: '已停用',
+      gateway: '网关',
+      dns: 'DNS',
+      noNet: '服务器没有列出网络接口（缺少 ip -j）。',
+      openDisk: '在磁盘中打开',
+    },
   },
   services: {
     sections: '服务筛选',

@@ -942,9 +942,17 @@ const es = {
       },
       monitor: {
         does: 'CPU por núcleo, RAM, swap, discos, red, GPU NVIDIA, procesos.',
-        actions: ['Ordena los procesos por CPU o RAM', 'Define los umbrales de alerta en Ajustes'],
+        actions: [
+          'Información: sistema, hardware, discos con sus puntos de montaje, interfaces de red con puerta de enlace y DNS',
+          'Ordena los procesos por CPU o RAM',
+          'Define los umbrales de alerta en Ajustes',
+        ],
         keys: [],
-        runs: ['Lee /proc cada segundo', 'ps, df, nvidia-smi si existe'],
+        runs: [
+          'lsblk -J, ip -j addr/route, /etc/resolv.conf, who y timedatectl una vez para Información',
+          'Lee /proc cada segundo',
+          'ps, df, nvidia-smi si existe',
+        ],
       },
       services: {
         does: 'Unidades de systemd por estado, con status y journal; iniciar, detener, reiniciar, eliminar.',
@@ -2053,6 +2061,35 @@ const es = {
     bareMetal: 'Ninguna (bare metal)',
     infoLoading: 'Leyendo la información del servidor…',
     unknown: '--',
+    sysinfo: {
+      system: 'Sistema',
+      hardware: 'Hardware',
+      disks: 'Discos',
+      network: 'Red',
+      osKernel: 'Sistema operativo',
+      booted: 'Arrancó',
+      timezone: 'Zona horaria',
+      users: 'Con sesión',
+      noUsers: 'Nadie',
+      cpu: 'CPU',
+      layout: (cores: number, threads: number, sockets: number) =>
+        [
+          cores && `${cores} ${cores === 1 ? 'núcleo' : 'núcleos'}`,
+          `${threads} ${threads === 1 ? 'hilo' : 'hilos'}`,
+          sockets > 1 && `${sockets} zócalos`,
+        ]
+          .filter(Boolean)
+          .join(' · '),
+      kinds: { nvme: 'NVMe', ssd: 'SSD', hdd: 'HDD', virtual: 'Virtual' },
+      noFs: 'sin sistema de archivos',
+      noDisks: 'El servidor no lista sus discos (falta lsblk).',
+      ifKinds: { lan: 'LAN', vpn: 'VPN', docker: 'Docker' },
+      down: 'inactiva',
+      gateway: 'Puerta de enlace',
+      dns: 'DNS',
+      noNet: 'El servidor no lista sus interfaces (falta ip -j).',
+      openDisk: 'Abrir en Disco',
+    },
   },
   services: {
     sections: 'Filtros de servicios',

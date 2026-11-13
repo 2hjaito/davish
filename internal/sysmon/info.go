@@ -20,6 +20,25 @@ type SystemInfo struct {
 	Arch     string `json:"arch"`
 	CPUModel string `json:"cpuModel"`
 	Virt     string `json:"virt"` // kvm, docker…; empty on bare metal
+
+	// Threads the kernel schedules on; Cores and Sockets are 0 when unknown.
+	Threads int `json:"threads,omitempty"`
+	Cores   int `json:"cores,omitempty"`
+	Sockets int `json:"sockets,omitempty"`
+	// Bytes.
+	MemTotal  int64 `json:"memTotal,omitempty"`
+	SwapTotal int64 `json:"swapTotal,omitempty"`
+	// Unix seconds.
+	BootTime int64    `json:"bootTime,omitempty"`
+	Timezone string   `json:"timezone,omitempty"`
+	Users    []string `json:"users,omitempty"` // logged in now, once each
+	Systemd  string   `json:"systemd,omitempty"`
+
+	Disks      []Disk   `json:"disks,omitempty"`
+	Interfaces []Iface  `json:"interfaces,omitempty"`
+	Gateway    string   `json:"gateway,omitempty"`
+	GatewayDev string   `json:"gatewayDev,omitempty"`
+	DNS        []string `json:"dns,omitempty"`
 }
 
 // SystemInfo reads what the server is; it does not change while connected.
@@ -65,6 +84,8 @@ func parseInfo(s map[string][]string) SystemInfo {
 	if v := firstLine(s["virt"]); v != "none" {
 		info.Virt = v
 	}
+	parseHardware(&info, s)
+	parseNetwork(&info, s)
 	return info
 }
 

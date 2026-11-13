@@ -39,6 +39,25 @@ export const monitorProcesses = (serverID: string, sortBy: ProcessSort): Promise
   App.MonitorProcesses(serverID, sortBy)
 
 /** Fields the server does not reveal are empty. */
+/** A block device and what is on it (internal/sysmon.Disk). */
+export interface Disk {
+  name: string
+  model?: string
+  size: number
+  /** nvme, ssd, hdd or virtual; absent when the kernel does not say. */
+  kind?: 'nvme' | 'ssd' | 'hdd' | 'virtual'
+  parts?: { name: string; size: number; fstype?: string; mount?: string }[]
+}
+
+export interface Iface {
+  name: string
+  up: boolean
+  mac?: string
+  /** CIDR, global scope only. */
+  addrs?: string[]
+  kind: 'lan' | 'vpn' | 'docker'
+}
+
 export interface SystemInfo {
   hostname: string
   os: string
@@ -46,10 +65,25 @@ export interface SystemInfo {
   arch: string
   cpuModel: string
   virt: string
+  threads?: number
+  cores?: number
+  sockets?: number
+  memTotal?: number
+  swapTotal?: number
+  /** Unix seconds. */
+  bootTime?: number
+  timezone?: string
+  users?: string[]
+  systemd?: string
+  disks?: Disk[]
+  interfaces?: Iface[]
+  gateway?: string
+  gatewayDev?: string
+  dns?: string[]
 }
 
 export const monitorSystemInfo = (serverID: string): Promise<SystemInfo> =>
-  App.MonitorSystemInfo(serverID)
+  App.MonitorSystemInfo(serverID) as Promise<SystemInfo>
 
 /** RAM and disk percents (50–99) and how many seconds over before notifying. */
 export const monitorSetThresholds = (

@@ -3,6 +3,7 @@ package sysmon
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"slices"
 	"strings"
 	"testing"
@@ -135,7 +136,7 @@ func TestParseInfoRealOutput(t *testing.T) {
 		Kernel:   "6.12.76-linuxkit",
 		Arch:     "aarch64",
 	}
-	if got != want {
+	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %+v\nwant %+v", got, want)
 	}
 }

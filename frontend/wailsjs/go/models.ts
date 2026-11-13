@@ -3267,6 +3267,83 @@ export namespace svc {
 
 export namespace sysmon {
 	
+	export class Part {
+	    name: string;
+	    size: number;
+	    fstype?: string;
+	    mount?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Part(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.size = source["size"];
+	        this.fstype = source["fstype"];
+	        this.mount = source["mount"];
+	    }
+	}
+	export class Disk {
+	    name: string;
+	    model?: string;
+	    size: number;
+	    kind?: string;
+	    parts?: Part[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Disk(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.model = source["model"];
+	        this.size = source["size"];
+	        this.kind = source["kind"];
+	        this.parts = this.convertValues(source["parts"], Part);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Iface {
+	    name: string;
+	    up: boolean;
+	    mac?: string;
+	    addrs?: string[];
+	    kind: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Iface(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.up = source["up"];
+	        this.mac = source["mac"];
+	        this.addrs = source["addrs"];
+	        this.kind = source["kind"];
+	    }
+	}
+	
 	export class Process {
 	    pid: number;
 	    ppid: number;
@@ -3338,6 +3415,20 @@ export namespace sysmon {
 	    arch: string;
 	    cpuModel: string;
 	    virt: string;
+	    threads?: number;
+	    cores?: number;
+	    sockets?: number;
+	    memTotal?: number;
+	    swapTotal?: number;
+	    bootTime?: number;
+	    timezone?: string;
+	    users?: string[];
+	    systemd?: string;
+	    disks?: Disk[];
+	    interfaces?: Iface[];
+	    gateway?: string;
+	    gatewayDev?: string;
+	    dns?: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new SystemInfo(source);
@@ -3351,7 +3442,39 @@ export namespace sysmon {
 	        this.arch = source["arch"];
 	        this.cpuModel = source["cpuModel"];
 	        this.virt = source["virt"];
+	        this.threads = source["threads"];
+	        this.cores = source["cores"];
+	        this.sockets = source["sockets"];
+	        this.memTotal = source["memTotal"];
+	        this.swapTotal = source["swapTotal"];
+	        this.bootTime = source["bootTime"];
+	        this.timezone = source["timezone"];
+	        this.users = source["users"];
+	        this.systemd = source["systemd"];
+	        this.disks = this.convertValues(source["disks"], Disk);
+	        this.interfaces = this.convertValues(source["interfaces"], Iface);
+	        this.gateway = source["gateway"];
+	        this.gatewayDev = source["gatewayDev"];
+	        this.dns = source["dns"];
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 
 }

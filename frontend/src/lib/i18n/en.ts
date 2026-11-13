@@ -916,9 +916,17 @@ const en = {
       },
       monitor: {
         does: 'CPU per core, RAM, swap, disks, network, NVIDIA GPUs, processes.',
-        actions: ['Sort processes by CPU or RAM', 'Set alert thresholds in Settings'],
+        actions: [
+          'Info: system, hardware, disks with their mounts, network interfaces with gateway and DNS',
+          'Sort processes by CPU or RAM',
+          'Set alert thresholds in Settings',
+        ],
         keys: [],
-        runs: ['Reads /proc every second', 'ps, df, nvidia-smi if present'],
+        runs: [
+          'lsblk -J, ip -j addr/route, /etc/resolv.conf, who, timedatectl once for Info',
+          'Reads /proc every second',
+          'ps, df, nvidia-smi if present',
+        ],
       },
       services: {
         does: 'systemd units by state, with status and journal; start, stop, restart, delete.',
@@ -2014,6 +2022,35 @@ const en = {
     bareMetal: 'None (bare metal)',
     infoLoading: 'Reading server info…',
     unknown: '--',
+    sysinfo: {
+      system: 'System',
+      hardware: 'Hardware',
+      disks: 'Disks',
+      network: 'Network',
+      osKernel: 'Operating system',
+      booted: 'Booted',
+      timezone: 'Time zone',
+      users: 'Logged in',
+      noUsers: 'Nobody',
+      cpu: 'CPU',
+      layout: (cores: number, threads: number, sockets: number) =>
+        [
+          cores && `${cores} ${cores === 1 ? 'core' : 'cores'}`,
+          `${threads} ${threads === 1 ? 'thread' : 'threads'}`,
+          sockets > 1 && `${sockets} sockets`,
+        ]
+          .filter(Boolean)
+          .join(' · '),
+      kinds: { nvme: 'NVMe', ssd: 'SSD', hdd: 'HDD', virtual: 'Virtual' },
+      noFs: 'no filesystem',
+      noDisks: 'The server does not list its disks (no lsblk).',
+      ifKinds: { lan: 'LAN', vpn: 'VPN', docker: 'Docker' },
+      down: 'down',
+      gateway: 'Gateway',
+      dns: 'DNS',
+      noNet: 'The server does not list its interfaces (no ip -j).',
+      openDisk: 'Open in Disk',
+    },
   },
   services: {
     sections: 'Service filters',
