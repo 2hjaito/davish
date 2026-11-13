@@ -8,10 +8,6 @@
 Terminal, file, dịch vụ, Docker, log, cron, nginx, cổng, trình duyệt, ổ đĩa, an ninh đăng nhập, khóa SSH, gói phần mềm và git qua SSH thuần, gom trong một giao diện như một hệ điều hành.<br>
 Không cài gì lên server.
 
-<p align="center">
-  <img src="assets/demo.gif" alt="Demo davish: vòng thao tác trên file, Terminal, Docker, cổng, an ninh đăng nhập và graph git qua SSH" width="800">
-</p>
-
 [![Stars](https://img.shields.io/github/stars/2hjaito/davish?color=f6cf8f)](https://github.com/2hjaito/davish/stargazers)
 [![Downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2F2hjaito%2Fdavish%2Fstats%2Fdownloads.json)](https://github.com/2hjaito/davish/releases)
 [![Release](https://img.shields.io/github/v/release/2hjaito/davish?color=0a64d8)](https://github.com/2hjaito/davish/releases/latest)
@@ -22,7 +18,9 @@ Không cài gì lên server.
 
 [English](README.md) · **Tiếng Việt** · [简体中文](README.zh-CN.md)
 
-<img src="assets/screenshots/desktop.png" alt="Desktop Davish với Terminal, Git, Monitor và Files" width="100%">
+<p align="center">
+  <img src="assets/demo.gif" alt="Demo davish: vòng thao tác trên file, Terminal, Docker, cổng, an ninh đăng nhập và graph git qua SSH" width="800">
+</p>
 
 </div>
 
@@ -81,16 +79,12 @@ Không cài gì lên server.
 
 <table>
   <tr>
-    <td><img src="assets/screenshots/browser.jpg" alt="Web app trên server, ngay trong Davish"></td>
+    <td><img src="assets/screenshots/git.jpg" alt="Biểu đồ commit Git"></td>
     <td><img src="assets/screenshots/docker-images.jpg" alt="Các layer của image Docker"></td>
   </tr>
   <tr>
-    <td><img src="assets/screenshots/ports.jpg" alt="Cổng và tunnel"></td>
-    <td><img src="assets/screenshots/git.jpg" alt="Biểu đồ commit Git"></td>
-  </tr>
-  <tr>
+    <td><img src="assets/screenshots/browser.jpg" alt="Web app trên server, ngay trong Davish"></td>
     <td><img src="assets/screenshots/security.jpg" alt="Đăng nhập sai theo IP"></td>
-    <td><img src="assets/screenshots/disk.jpg" alt="Thứ gì chiếm ổ đĩa"></td>
   </tr>
 </table>
 

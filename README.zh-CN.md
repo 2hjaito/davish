@@ -8,10 +8,6 @@
 终端、文件、服务、Docker、日志、cron、nginx、端口、浏览器、磁盘、登录安全、SSH 密钥、软件包和 git，全部走普通 SSH，集中在一个像操作系统一样的界面里。<br>
 服务器上什么都不用装。
 
-<p align="center">
-  <img src="assets/demo.gif" alt="davish 演示：文件操作环、终端、Docker、端口、登录安全和 git 提交图，全部走 SSH" width="800">
-</p>
-
 [![Stars](https://img.shields.io/github/stars/2hjaito/davish?color=f6cf8f)](https://github.com/2hjaito/davish/stargazers)
 [![Downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2F2hjaito%2Fdavish%2Fstats%2Fdownloads.json)](https://github.com/2hjaito/davish/releases)
 [![Release](https://img.shields.io/github/v/release/2hjaito/davish?color=0a64d8)](https://github.com/2hjaito/davish/releases/latest)
@@ -22,7 +18,9 @@
 
 [English](README.md) · [Tiếng Việt](README.vi.md) · **简体中文**
 
-<img src="assets/screenshots/zh/desktop.png" alt="Davish 桌面：终端、Git、监控和文件" width="100%">
+<p align="center">
+  <img src="assets/demo.gif" alt="davish 演示：文件操作环、终端、Docker、端口、登录安全和 git 提交图，全部走 SSH" width="800">
+</p>
 
 </div>
 
@@ -81,16 +79,12 @@
 
 <table>
   <tr>
-    <td><img src="assets/screenshots/en/browser.jpg" alt="在 Davish 里打开服务器上的 Web 应用"></td>
+    <td><img src="assets/screenshots/en/git.jpg" alt="Git 提交图"></td>
     <td><img src="assets/screenshots/en/docker-images.jpg" alt="Docker 镜像"></td>
   </tr>
   <tr>
-    <td><img src="assets/screenshots/en/ports.jpg" alt="端口与隧道"></td>
-    <td><img src="assets/screenshots/en/git.jpg" alt="Git 提交图"></td>
-  </tr>
-  <tr>
+    <td><img src="assets/screenshots/en/browser.jpg" alt="在 Davish 里打开服务器上的 Web 应用"></td>
     <td><img src="assets/screenshots/en/security.jpg" alt="按 IP 统计的失败登录"></td>
-    <td><img src="assets/screenshots/en/disk.jpg" alt="磁盘空间去向"></td>
   </tr>
 </table>
 

@@ -8,10 +8,6 @@
 Terminal, files, services, Docker, logs, cron, nginx, ports, a browser, disk, login security, SSH keys, packages and git over plain SSH, in one place that feels like an operating system.<br>
 Nothing to install on the server.
 
-<p align="center">
-  <img src="assets/demo.gif" alt="davish demo: a file's action ring, Terminal, Docker, ports, login security and the git graph over SSH" width="800">
-</p>
-
 [![Stars](https://img.shields.io/github/stars/2hjaito/davish?color=f6cf8f)](https://github.com/2hjaito/davish/stargazers)
 [![Downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2F2hjaito%2Fdavish%2Fstats%2Fdownloads.json)](https://github.com/2hjaito/davish/releases)
 [![Release](https://img.shields.io/github/v/release/2hjaito/davish?color=0a64d8)](https://github.com/2hjaito/davish/releases/latest)
@@ -22,7 +18,9 @@ Nothing to install on the server.
 
 **English** · [Tiếng Việt](README.vi.md) · [简体中文](README.zh-CN.md)
 
-<img src="assets/screenshots/en/desktop.png" alt="Davish desktop with Terminal, Git, Monitor and Files" width="100%">
+<p align="center">
+  <img src="assets/demo.gif" alt="davish demo: a file's action ring, Terminal, Docker, ports, login security and the git graph over SSH" width="800">
+</p>
 
 </div>
 
@@ -81,16 +79,12 @@ Nothing to install on the server.
 
 <table>
   <tr>
-    <td><img src="assets/screenshots/en/browser.jpg" alt="A web app on the server, inside Davish"></td>
+    <td><img src="assets/screenshots/en/git.jpg" alt="Git commit graph"></td>
     <td><img src="assets/screenshots/en/docker-images.jpg" alt="Docker image layers"></td>
   </tr>
   <tr>
-    <td><img src="assets/screenshots/en/ports.jpg" alt="Ports and tunnels"></td>
-    <td><img src="assets/screenshots/en/git.jpg" alt="Git commit graph"></td>
-  </tr>
-  <tr>
+    <td><img src="assets/screenshots/en/browser.jpg" alt="A web app on the server, inside Davish"></td>
     <td><img src="assets/screenshots/en/security.jpg" alt="Failed logins by address"></td>
-    <td><img src="assets/screenshots/en/disk.jpg" alt="What fills the disk"></td>
   </tr>
 </table>
 
