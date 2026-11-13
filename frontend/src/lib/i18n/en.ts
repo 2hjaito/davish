@@ -1484,6 +1484,7 @@ const en = {
     unavailable: (os: string) => `Not available on ${os} servers yet`,
     hint: '←→↑↓ select · Enter open · Esc close',
     all: 'All',
+    recent: 'Recent',
     groups: 'App groups',
     categories: {
       files: 'Files & terminal',

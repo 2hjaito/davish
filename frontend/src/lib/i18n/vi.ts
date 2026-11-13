@@ -1464,6 +1464,7 @@ const vi = {
     unavailable: (os: string) => `Chưa hỗ trợ cho server ${os}`,
     hint: '←→↑↓ chọn · Enter mở · Esc đóng',
     all: 'Tất cả',
+    recent: 'Gần đây',
     groups: 'Nhóm app',
     categories: {
       files: 'Tệp & terminal',

@@ -11,6 +11,7 @@
   import AppIcon from '../ui/AppIcon.svelte'
   import Icon from '../ui/Icon.svelte'
   import { portal } from '../ui/portal'
+  import { recentApps } from '../stores/recentApps.svelte'
 
   interface Props {
     open: boolean
@@ -35,18 +36,29 @@
 
   // A search looks in every group, best match first. Otherwise "All"
   // shows each group under its name, and a group tab shows only it.
-  const sections = $derived.by((): { category: Category | null; apps: AppDef[] }[] => {
-    if (query.trim()) {
-      const found = apps
-        .map((a) => ({ a, s: score(query, a.label) }))
-        .filter((x) => x.s > 0)
-        .sort((x, y) => y.s - x.s)
-        .map((x) => x.a)
-      return found.length ? [{ category: null, apps: found }] : []
-    }
-    if (tab === 'all') return grouped(apps)
-    return [{ category: null, apps: apps.filter((a) => CATEGORY[a.id] === tab) }]
-  })
+  const sections = $derived.by(
+    (): { category: Category | null; label?: string; apps: AppDef[] }[] => {
+      if (query.trim()) {
+        const found = apps
+          .map((a) => ({ a, s: score(query, a.label) }))
+          .filter((x) => x.s > 0)
+          .sort((x, y) => y.s - x.s)
+          .map((x) => x.a)
+        return found.length ? [{ category: null, apps: found }] : []
+      }
+      if (tab === 'all') {
+        // The apps opened last come first, once there are any.
+        const recent = recentApps.ids
+          .map((id) => apps.find((a) => a.id === id))
+          .filter((a) => a !== undefined)
+        const all = grouped(apps)
+        return recent.length
+          ? [{ category: null, label: t.launchpad.recent, apps: recent }, ...all]
+          : all
+      }
+      return [{ category: null, apps: apps.filter((a) => CATEGORY[a.id] === tab) }]
+    },
+  )
   const shown = $derived(sections.flatMap((x) => x.apps))
   // Where each section starts in shown.
   const starts = $derived.by(() => {
@@ -169,7 +181,8 @@
       {#if shown.length > 0}
         <div class="scroll" id={gridId}>
           {#each sections as sec, k (sec.category ?? k)}
-            {#if sec.category}<h4>{t.launchpad.categories[sec.category]}</h4>{/if}
+            {#if sec.label}<h4>{sec.label}</h4>
+            {:else if sec.category}<h4>{t.launchpad.categories[sec.category]}</h4>{/if}
             <ul class="grid" style:--cols={COLS}>
               {#each sec.apps as app, j (app.id)}
                 {@const i = (starts[k] ?? 0) + j}

@@ -1442,6 +1442,7 @@ const zh = {
     unavailable: (os: string) => `${os} 服务器暂不支持`,
     hint: '←→↑↓ 选择 · 回车 打开 · Esc 关闭',
     all: '全部',
+    recent: '最近使用',
     groups: '应用分组',
     categories: {
       files: '文件与终端',

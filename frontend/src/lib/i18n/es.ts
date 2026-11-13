@@ -1515,6 +1515,7 @@ const es = {
     unavailable: (os: string) => `Aún no disponible en servidores ${os}`,
     hint: '←→↑↓ elegir · Intro abrir · Esc cerrar',
     all: 'Todas',
+    recent: 'Recientes',
     groups: 'Grupos de apps',
     categories: {
       files: 'Archivos y terminal',
