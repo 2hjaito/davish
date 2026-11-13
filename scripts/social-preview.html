@@ -1,27 +1,101 @@
 <!doctype html><html><head><meta charset="utf-8"><style>
 html,body{margin:0;width:1280px;height:640px;overflow:hidden}
-body{background:linear-gradient(135deg,#1b2140,#2b3a6b 55%,#4a3f7a);font-family:-apple-system,"SF Pro Display",Helvetica,"PingFang SC",sans-serif;color:#fff;position:relative}
-.l{position:absolute;left:80px;top:150px;width:560px}
-img.i{width:120px;height:120px}
-h1{font-size:84px;margin:20px 0 8px;letter-spacing:-2px}
-p{font-size:30px;line-height:1.35;margin:0;color:#d8def5}
-.t{margin-top:28px;font-size:22px;color:#aab3d8}
-.s{position:absolute;right:-60px;top:110px;width:640px;border-radius:14px;box-shadow:0 30px 80px rgba(0,0,0,.5);transform:perspective(1400px) rotateY(-12deg)}
+body{
+  background:
+    radial-gradient(600px 420px at 78% 38%,rgba(120,140,255,.28),transparent 70%),
+    radial-gradient(520px 360px at 8% 100%,rgba(70,120,255,.22),transparent 70%),
+    linear-gradient(135deg,#121833,#1f2a55 55%,#352e66);
+  font-family:-apple-system,"SF Pro Display",Helvetica,"PingFang SC",sans-serif;color:#fff;position:relative}
+/* thin line grid, strongest behind the text and fading toward the screenshots */
+body::before{content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px) 0 0/40px 40px,
+    linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px) 0 0/40px 40px;
+  mask:radial-gradient(900px 640px at 20% 40%,#000 30%,transparent 80%)}
+.l{position:absolute;left:72px;top:70px;width:620px;z-index:1}
+.brand{display:flex;align-items:center;gap:22px}
+.brand img{width:92px;height:92px;filter:drop-shadow(0 10px 24px rgba(30,90,255,.45))}
+h1{font-size:92px;margin:0;letter-spacing:-3px;line-height:1}
+.lead{font-size:36px;font-weight:500;line-height:1.3;margin:40px 0 0;color:#e6eaff}
+.tag{font-size:21px;color:#9fa9d4;margin:22px 0 0}
+.chips{position:absolute;left:72px;bottom:52px;width:620px;display:flex;flex-wrap:wrap;gap:10px;z-index:1}
+.chip{display:flex;align-items:center;gap:9px;padding:5px 15px 5px 6px;border-radius:999px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);font-size:17px;font-weight:500}
+.chip.more{padding:5px 15px;color:#b9c2e6}
+/* each icon is cut from the Dock of a 1600x1000 screenshot: --x/--y is its top-left corner */
+.ic{--k:calc(26/56);width:26px;height:26px;border-radius:6px;background-repeat:no-repeat;
+  background-size:calc(1600px*var(--k)) calc(1000px*var(--k));
+  background-position:calc(var(--x)*-1px*var(--k)) calc(var(--y)*-1px*var(--k))}
+.w{position:absolute;border-radius:12px;box-shadow:0 30px 70px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.12);
+  transform:perspective(1600px) rotateY(-14deg) rotateX(3deg)}
+.w1{width:620px;right:-130px;top:30px;opacity:.85}
+.w2{width:520px;right:60px;top:150px}
+.w3{width:480px;right:-30px;top:372px}
+.crop{background-repeat:no-repeat;overflow:hidden}
 </style></head><body>
-<div class="l"><img class="i" src="../assets/icon/png/davish-1024.png"><h1>Davish</h1>
-<p id="lead"></p>
-<div class="t" id="tag"></div></div>
-<img class="s" id="shot">
+<div class="l">
+  <div class="brand"><img src="../assets/icon/png/davish-1024.png"><h1>Davish</h1></div>
+  <p class="lead" id="lead"></p>
+  <p class="tag" id="tag"></p>
+</div>
+<div class="chips" id="chips"></div>
+<img class="w w1" id="s1"><div class="w w2 crop" id="s2"></div><div class="w w3 crop" id="s3"></div>
 <script>
-// ?lang=en|vi|zh picks the text and the desktop screenshot of that README.
+// ?lang=en|vi|zh picks the text and screenshots of that README.
+const DOCK = "../assets/screenshots/en/docker-images.jpg";
+const DB_DOCK = "../assets/screenshots/en/database.jpg";
+// Top-left corner of each app's icon in the Dock of the screenshot.
+const ICONS = [
+  ["git", DOCK, 937, 913], ["docker", DOCK, 541, 913], ["terminal", DOCK, 277, 913],
+  ["monitor", DOCK, 409, 913], ["files", DOCK, 343, 913], ["db", DB_DOCK, 1069, 913],
+];
+// Apps in frontend/src/apps/registry.ts, Settings aside, minus the chips above.
+const MORE = 16;
 const TEXT = {
-  en: ["A desktop for your Linux servers.<br>Open it and you're in, over SSH.", "No web panel · No login · No agent", "en/desktop.png"],
-  vi: ["Một desktop cho các server Linux.<br>Mở ra là vào, qua SSH.", "Không web panel · Không đăng nhập · Không agent", "desktop.png"],
-  zh: ["你的 Linux 服务器，就是一个桌面。<br>打开就能用，全部走 SSH。", "无 Web 面板 · 无需登录 · 无 Agent", "zh/desktop.png"],
+  en: {
+    lead: "A desktop for your Linux servers.<br>Open it and you're in, over SSH.",
+    tag: "No web panel · No login · No agent",
+    chips: { terminal: "Terminal", files: "Files", docker: "Docker", db: "Databases", git: "Git", monitor: "Monitor" },
+    more: `+${MORE} more…`,
+    shots: ["en/desktop.png", "en/git.jpg", "en/docker-images.jpg"],
+  },
+  vi: {
+    lead: "Một desktop cho các server Linux.<br>Mở ra là vào, qua SSH.",
+    tag: "Không web panel · Không đăng nhập · Không agent",
+    chips: { terminal: "Terminal", files: "Tệp", docker: "Docker", db: "Cơ sở dữ liệu", git: "Git", monitor: "Giám sát" },
+    more: `+${MORE} app khác…`,
+    shots: ["desktop.png", "git.jpg", "docker-images.jpg"],
+  },
+  zh: {
+    lead: "你的 Linux 服务器，就是一个桌面。<br>打开就能用，全部走 SSH。",
+    tag: "无 Web 面板 · 无需登录 · 无 Agent",
+    chips: { terminal: "终端", files: "文件", docker: "Docker", db: "数据库", git: "Git", monitor: "监控" },
+    more: `+${MORE} 个应用…`,
+    shots: ["zh/desktop.png", "en/git.jpg", "en/docker-images.jpg"],
+  },
 };
-const [lead, tag, shot] = TEXT[new URLSearchParams(location.search).get("lang")] ?? TEXT.en;
-document.getElementById("lead").innerHTML = lead;
-document.getElementById("tag").textContent = tag;
-document.getElementById("shot").src = "../assets/screenshots/" + shot;
+const t = TEXT[new URLSearchParams(location.search).get("lang")] ?? TEXT.en;
+document.getElementById("lead").innerHTML = t.lead;
+document.getElementById("tag").textContent = t.tag;
+document.getElementById("chips").innerHTML =
+  ICONS.map(([k, src, x, y]) =>
+    `<span class="chip"><span class="ic" style="background-image:url(${src});--x:${x};--y:${y}"></span>${t.chips[k]}</span>`).join("") +
+  `<span class="chip more">${t.more}</span>`;
+// Back: the whole desktop (menu bar, Terminal, Monitor, Dock). In front, only the
+// app windows, cut out of their 1600x1000 screenshots as [x, y, w, h].
+const CROPS = [null, [200, 140, 1100, 640], [0, 30, 1040, 440]]; // Git window, Docker window (sidebar to Image ID)
+const [desk, ...apps] = t.shots;
+document.getElementById("s1").src = "../assets/screenshots/" + desk;
+apps.forEach((s, i) => {
+  const el = document.getElementById("s" + (i + 2));
+  const [x, y, w, h] = CROPS[i + 1];
+  const k = el.offsetWidth / w;
+  Object.assign(el.style, {
+    height: h * k + "px",
+    backgroundImage: `url(../assets/screenshots/${s})`,
+    backgroundSize: `${1600 * k}px ${1000 * k}px`,
+    backgroundPosition: `${-x * k}px ${-y * k}px`,
+  });
+});
 </script>
 </body></html>
