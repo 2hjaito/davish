@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Sửa
+- Logs: bôi đen để copy được rồi. Trên macOS và Linux, WebKit chỉ đọc thuộc tính `-webkit-user-select` nên mọi dòng log bị khóa chọn. Khi đang có vùng chọn, log tạm đứng yên (không cuộn, không thêm dòng) để vùng chọn không trượt, bỏ chọn thì chạy tiếp; `⌘C` copy đúng từng dòng kể cả xuống dòng. Thêm nút Sao chép các dòng đang hiện (theo bộ lọc).
+
 ### Thêm
 - Cài đặt → Dock: đặt Dock ở cạnh dưới, trái, phải hoặc trên (cửa sổ, thông báo chừa chỗ; tự ẩn hiện lại khi chạm đúng cạnh đó), và công tắc nền Dock trong suốt chỉ còn các icon.
 - Tất cả server: nút **Bản đồ** trên thẻ server đã kết nối cho thấy request đi đường nào: mỗi site nginx là một chuỗi `tên miền → nginx :443 → :3000 → container (stack)`, site tĩnh kèm thư mục, và các cổng mở ra ngoài mà không đi qua proxy. Cảnh báo lên đầu: cổng database mở ra Internet, upstream không ai nghe, chứng chỉ hết hạn trong 14 ngày, mỗi cảnh báo có nút mở đúng app để sửa. Bên dưới là những gì đang chạy và các ổ đĩa. Chỉ đọc. Từ 4 server trở lên có ô lọc theo tên và xếp server có cảnh báo lên trước.

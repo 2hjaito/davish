@@ -3015,6 +3015,7 @@ const es = {
     pause: 'Pausar',
     resume: 'Reanudar',
     clear: 'Limpiar la pantalla',
+    copyShown: 'Copiar las líneas mostradas',
     wholeJournal: 'todo el journal',
     empty: 'Elige un origen de registro para seguirlo',
     emptyHint:

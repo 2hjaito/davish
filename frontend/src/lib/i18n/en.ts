@@ -2948,6 +2948,7 @@ const en = {
     pause: 'Pause',
     resume: 'Resume',
     clear: 'Clear screen',
+    copyShown: 'Copy the lines shown',
     wholeJournal: 'whole journal',
     empty: 'Choose a log source to follow',
     emptyHint:

@@ -4,6 +4,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Fixed
+- Logs: text can be selected and copied again. On macOS and Linux WebKit only reads `-webkit-user-select`, so every log line was locked. While a selection is in the view the log holds still (no scrolling, no new lines) so the selection does not slide, and goes on once it is cleared; `⌘C` copies the lines with their breaks. A new button copies the lines shown (after the filter).
+
 ### Added
 - Settings → Dock: put the Dock on the bottom, left, right or top edge (windows and notifications keep clear; autohide comes back from that edge), and a transparent Dock with only the icons.
 - All servers: **Map** on a connected server's card shows where requests go: each nginx site as a chain `domain → nginx :443 → :3000 → container (stack)`, static sites with their folder, and ports open to the outside without a proxy. Alerts come first: a database port open to the Internet, an upstream nobody listens on, a certificate expiring within 14 days, each with a button to the app that fixes it. Below, what runs and the disks. Read only. With four servers or more, a name filter and servers with alerts first.
