@@ -5,7 +5,7 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Added
-- Docker: containers as cards, one per compose project (or lone container), with a technology logo when Davish knows the image (n8n, WordPress, Postgres…), how many of its containers run, its image, published ports that open in the Browser, CPU and RAM; a red edge when one keeps restarting, and a click shows and controls its containers. A Cards/Table switch in the toolbar; the table by default, and Davish remembers your choice.
+- Docker: containers as cards, one per compose project (or lone container), with a technology logo when Davish knows the image (n8n, WordPress, Postgres…), how many of its containers run, its image, published ports that open in the Browser, CPU and RAM; a red edge when one keeps restarting, and a click shows and controls its containers. A compose project's card takes the project's own favicon, or the framework named in `package.json`, `requirements.txt`, `composer.json`, `Gemfile`, `go.mod`… (Next, Nest, Express, Django, FastAPI, Laravel…), read from the project folder over SFTP; nothing runs on the server. A Cards/Table switch in the toolbar; the table by default, and Davish remembers your choice.
 
 ## [1.13.5] - 2026-11-12
 

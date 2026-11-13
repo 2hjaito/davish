@@ -1286,6 +1286,20 @@ export namespace docker {
 		    return a;
 		}
 	}
+	export class StackIcon {
+	    icon?: string;
+	    tech?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new StackIcon(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.icon = source["icon"];
+	        this.tech = source["tech"];
+	    }
+	}
 	export class StackPlan {
 	    path: string;
 	    content: string;
