@@ -1782,6 +1782,7 @@ export namespace git {
 	    author: string;
 	    time: number;
 	    subject: string;
+	    email?: string;
 	    parents: string[];
 	    refs: Ref[];
 	
@@ -1796,6 +1797,7 @@ export namespace git {
 	        this.author = source["author"];
 	        this.time = source["time"];
 	        this.subject = source["subject"];
+	        this.email = source["email"];
 	        this.parents = source["parents"];
 	        this.refs = this.convertValues(source["refs"], Ref);
 	    }

@@ -494,6 +494,22 @@
     </div>
   </div>
 
+  <h2 class="section">{t.settings.gitSection}</h2>
+
+  <label class="row">
+    <span>
+      <strong>{t.settings.gitAvatars}</strong>
+      <small>{t.settings.gitAvatarsHint}</small>
+    </span>
+    <input
+      type="checkbox"
+      class="switch"
+      role="switch"
+      checked={settings.gitAvatars}
+      onchange={(e) => settings.set('gitAvatars', e.currentTarget.checked)}
+    />
+  </label>
+
   <h2 class="section">{t.settings.updates}</h2>
 
   <label class="row">

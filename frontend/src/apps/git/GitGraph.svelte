@@ -2,7 +2,8 @@
   import type { Commit, Ref } from '../../lib/api/git'
   import { t } from '../../lib/i18n'
   import Icon from '../../lib/ui/Icon.svelte'
-  import { avatarColor, initials } from './avatar'
+  import { settings } from '../../lib/stores/settings.svelte'
+  import Avatar from './Avatar.svelte'
   import { layout, type Segment } from './graph'
 
   // The history as a commit graph, styled and driven like StatusList.
@@ -153,11 +154,7 @@
         </span>
       {/each}
       <span class="name">{c.subject}</span>
-      <span
-        class="avatar"
-        style:--avatar="var(--graph-{avatarColor(c.author) + 1})"
-        aria-hidden="true">{initials(c.author)}</span
-      >
+      <Avatar name={c.author} email={c.email} remote={settings.gitAvatars} />
       <span class="sub">{new Date(c.time * 1000).toLocaleDateString('vi-VN')}</span>
     </button>
   {:else}
@@ -278,25 +275,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  .avatar {
-    display: inline-grid;
-    place-items: center;
-    flex-shrink: 0;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: color-mix(in srgb, var(--avatar) 20%, transparent);
-    color: var(--avatar);
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-  }
-
-  .scroller:focus-within .selected .avatar {
-    background: var(--fg-on-accent);
-    color: var(--accent);
   }
 
   .sentinel {

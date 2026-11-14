@@ -1936,6 +1936,10 @@ const en = {
     lockNow: 'Lock now',
     lockAfter: 'Lock when idle',
     lockAfterHint: 'Davish always locks when the computer wakes from sleep.',
+    gitSection: 'Git',
+    gitAvatars: 'Author avatars',
+    gitAvatarsHint:
+      'Load pictures from GitHub (noreply emails) and Gravatar. Author emails, hashed for Gravatar, are sent to those services. When off, only initials show.',
     updates: 'Updates',
     autoUpdate: 'Check for new versions',
     autoUpdateHint:
