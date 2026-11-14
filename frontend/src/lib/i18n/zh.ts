@@ -2908,7 +2908,7 @@ const zh = {
     CONN_UNREACHABLE: '无法连接到服务器。请检查主机、端口和网络。',
     CONN_SECRET_MISSING: '这台服务器没有保存密码或口令。',
     CONN_AGENT_UNAVAILABLE:
-      '没有找到密钥：SSH agent 是空的，~/.ssh 中也没有默认密钥。请选择“私钥”。',
+      '没有找到密钥：SSH agent 是空的或未运行，~/.ssh 中也没有默认密钥。在 Windows 上，请启动“OpenSSH Authentication Agent”服务并用 ssh-add 添加密钥，或选择“私钥”。',
     CONN_KEY_UNREADABLE: '无法读取私钥文件。',
     CONN_PASSPHRASE_WRONG: '已保存的密码短语无法解开此私钥。请编辑服务器并重新输入。',
     CONN_NOT_CONNECTED: '服务器未连接。',
