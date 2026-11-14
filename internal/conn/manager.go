@@ -39,6 +39,10 @@ type Status struct {
 	ServerID string        `json:"serverID"`
 	State    State         `json:"state"`
 	Error    *apperr.Error `json:"error,omitempty"`
+	// Detail is the technical cause of Error, home directory hidden, for
+	// the error dialog's "copy" box. Never a secret: causes here are SSH,
+	// key parsing and file errors.
+	Detail string `json:"detail,omitempty"`
 	// Platform is the server's OS once it is known; the UI greys out the
 	// apps that do not run there.
 	Platform platform.OS `json:"platform,omitempty"`
@@ -683,7 +687,14 @@ func (m *Manager) publish(id string, state State, err error) {
 		if f, ok := apperr.Format(err).(*apperr.Error); ok {
 			st.Error = f
 		}
-		m.log.Info("connection state", "server", id, "state", state, "err", fmt.Sprint(st.Error.Code))
+		st.Detail = apperr.Detail(err)
+		// A failed login logs only its result (docs/SECURITY.md); other
+		// causes are kept, or a support log could not explain them.
+		if st.Error.Code == apperr.ConnAuthFailed {
+			m.log.Info("connection state", "server", id, "state", state, "err", fmt.Sprint(st.Error.Code))
+		} else {
+			m.log.Warn("connection state", "server", id, "state", state, "err", fmt.Sprint(st.Error.Code), "detail", st.Detail)
+		}
 	}
 	m.emit.Emit(events.ConnStatus, st)
 }
