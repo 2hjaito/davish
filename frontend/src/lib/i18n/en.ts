@@ -1472,6 +1472,19 @@ const en = {
       `Remove "${name}" from Davish? Its saved password/passphrase is deleted too. The server itself is not affected.`,
     confirmDeleteButton: 'Delete',
   },
+  connError: {
+    title: (name: string) => `Could not connect to “${name}”`,
+    hint: 'The box below says what went wrong. Copy it and send it with your bug report: it holds no password, key, host or user name.',
+    copy: 'Copy error',
+    copied: 'Copied',
+    copyFailed: 'Could not copy. Select the text above and copy it by hand.',
+    openLog: 'Open log folder',
+    report: 'Report on GitHub',
+    edit: 'Edit server',
+    close: 'Close',
+    reconnect: 'Reconnect',
+    details: 'Details',
+  },
   hostKey: {
     title: 'Confirm a new server',
     body: (host: string) =>

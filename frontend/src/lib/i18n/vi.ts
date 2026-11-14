@@ -1454,6 +1454,19 @@ const vi = {
       `Xóa "${name}" khỏi Davish? Mật khẩu/passphrase đã lưu cũng bị xóa. Server không bị ảnh hưởng.`,
     confirmDeleteButton: 'Xóa',
   },
+  connError: {
+    title: (name: string) => `Không kết nối được “${name}”`,
+    hint: 'Ô bên dưới ghi rõ lỗi gì. Sao chép rồi gửi kèm khi báo lỗi: trong đó không có mật khẩu, key, địa chỉ server hay tên user.',
+    copy: 'Sao chép lỗi',
+    copied: 'Đã sao chép',
+    copyFailed: 'Không sao chép được. Hãy bôi đen đoạn chữ ở trên rồi tự sao chép.',
+    openLog: 'Mở thư mục log',
+    report: 'Báo lỗi trên GitHub',
+    edit: 'Sửa server',
+    close: 'Đóng',
+    reconnect: 'Kết nối lại',
+    details: 'Chi tiết',
+  },
   hostKey: {
     title: 'Xác nhận server lần đầu',
     body: (host: string) =>

@@ -37,6 +37,7 @@
   import Launchpad from './Launchpad.svelte'
   import Welcome from './Welcome.svelte'
   import MenuBar from './MenuBar.svelte'
+  import ConnErrorDialog from './ConnErrorDialog.svelte'
   import HostKeyDialog from './HostKeyDialog.svelte'
   import SudoDialog from './SudoDialog.svelte'
   import ServerDialog from './ServerDialog.svelte'
@@ -362,6 +363,7 @@
     </div>
   {/if}
   <HostKeyDialog />
+  <ConnErrorDialog />
   <SudoDialog />
   <SleepScreen />
 </div>
