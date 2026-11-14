@@ -164,8 +164,9 @@
     }
   }
 
-  // Scrolling loads pages on its own up to this many commits; past it the
-  // button asks, so a slow machine is not left drawing a huge history.
+  // Scrolling loads pages on its own up to this many commits; only past it
+  // does the Load more button show, so a slow machine is not left drawing a
+  // huge history.
   const AUTO_LOAD_MAX = 1000
 
   // Each page gets a new callback, so the list checks the end again.
@@ -371,7 +372,7 @@
         onselect={(k) => (selected = k)}
       />
     {/if}
-    {#if tab === 'history' && more && !query}
+    {#if tab === 'history' && more && !query && !loadMore}
       <button type="button" class="more" onclick={() => void loadLog(repo, commits?.length ?? 0)}
         >{t.git.loadMore}</button
       >
