@@ -2964,6 +2964,8 @@ const vi = {
     CONN_AGENT_UNAVAILABLE:
       'Không tìm thấy key nào: SSH agent trống và không có key mặc định trong ~/.ssh. Hãy chọn Private key.',
     CONN_KEY_UNREADABLE: 'Không đọc được file private key.',
+    CONN_PASSPHRASE_WRONG:
+      'Passphrase đã lưu không mở được private key này. Hãy sửa server và nhập lại.',
     CONN_NOT_CONNECTED: 'Server chưa được kết nối.',
     TERM_CLOSED: 'Phiên terminal đã đóng.',
     FS_PERMISSION_DENIED: 'Không có quyền truy cập.',

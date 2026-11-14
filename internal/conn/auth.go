@@ -1,7 +1,6 @@
 package conn
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"net"
@@ -13,6 +12,7 @@ import (
 	"golang.org/x/crypto/ssh/agent"
 
 	"davish/internal/apperr"
+	"davish/internal/keyfile"
 	"davish/internal/store"
 )
 
@@ -102,9 +102,7 @@ func (m *Manager) loadKey(srv store.Server) (ssh.Signer, error) {
 	if err != nil {
 		return nil, apperr.Wrap(apperr.ConnKeyUnreadable, "cannot read the private key", err)
 	}
-	// Notepad saves with a byte order mark, which the PEM reader rejects.
-	data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
-	signer, err := ssh.ParsePrivateKey(data)
+	signer, err := keyfile.Parse(data, nil)
 	var missing *ssh.PassphraseMissingError
 	if errors.As(err, &missing) {
 		pass, perr := m.secrets.Get(srv.ID, store.SecretPassphrase)
@@ -114,7 +112,10 @@ func (m *Manager) loadKey(srv store.Server) (ssh.Signer, error) {
 		if perr != nil {
 			return nil, perr
 		}
-		signer, err = ssh.ParsePrivateKeyWithPassphrase(data, []byte(pass))
+		signer, err = keyfile.Parse(data, []byte(pass))
+	}
+	if errors.Is(err, keyfile.ErrWrongPassphrase) {
+		return nil, apperr.Wrap(apperr.ConnPassphraseWrong, "the saved passphrase does not open the key", err)
 	}
 	if err != nil {
 		return nil, apperr.Wrap(apperr.ConnKeyUnreadable, "cannot parse the private key", err)

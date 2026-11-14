@@ -3069,6 +3069,8 @@ const es = {
     CONN_AGENT_UNAVAILABLE:
       'No se ha encontrado ninguna clave: el agente SSH está vacío y no hay clave por defecto en ~/.ssh. Elige Clave privada.',
     CONN_KEY_UNREADABLE: 'No se pudo leer el archivo de la clave privada.',
+    CONN_PASSPHRASE_WRONG:
+      'La frase de contraseña guardada no abre esta clave privada. Edita el servidor y escríbela de nuevo.',
     CONN_NOT_CONNECTED: 'El servidor no está conectado.',
     TERM_CLOSED: 'La sesión de terminal está cerrada.',
     FS_PERMISSION_DENIED: 'Permiso denegado.',

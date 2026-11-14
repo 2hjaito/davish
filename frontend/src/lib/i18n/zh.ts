@@ -2910,6 +2910,7 @@ const zh = {
     CONN_AGENT_UNAVAILABLE:
       '没有找到密钥：SSH agent 是空的，~/.ssh 中也没有默认密钥。请选择“私钥”。',
     CONN_KEY_UNREADABLE: '无法读取私钥文件。',
+    CONN_PASSPHRASE_WRONG: '已保存的密码短语无法解开此私钥。请编辑服务器并重新输入。',
     CONN_NOT_CONNECTED: '服务器未连接。',
     TERM_CLOSED: '终端会话已关闭。',
     FS_PERMISSION_DENIED: '权限不足。',

@@ -17,6 +17,7 @@ const (
 	ConnSecretMissing    Code = "CONN_SECRET_MISSING"
 	ConnAgentUnavailable Code = "CONN_AGENT_UNAVAILABLE"
 	ConnKeyUnreadable    Code = "CONN_KEY_UNREADABLE"
+	ConnPassphraseWrong  Code = "CONN_PASSPHRASE_WRONG"
 	ConnNotConnected     Code = "CONN_NOT_CONNECTED"
 	TermClosed           Code = "TERM_CLOSED"
 	FSPermissionDenied   Code = "FS_PERMISSION_DENIED"
