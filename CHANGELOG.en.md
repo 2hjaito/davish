@@ -4,6 +4,19 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.13.7] - 2026-11-14
+
+### Added
+- Git: each commit in the history shows the author's picture, the GitHub avatar of a noreply address or else the Gravatar of the email, over initials colored from the name (the initials stay when no picture loads or the machine is offline). To find a picture, the author's email (or its SHA-256 hash for Gravatar) is sent to GitHub's or Gravatar's image server. Scrolling near the end loads the next commits on its own, up to 1000; Load more only shows past that.
+- Apps with a list and a detail (Git, Services, Docker…): drag the line between them to make the list wider or narrower, kept per app; a double click puts it back, arrow keys move it too.
+
+### Changed
+- Scroll bars are a thin faint pill, clearer while the pointer is over the area and clearest on the bar itself.
+
+### Fixed
+- Connecting: when a server cannot connect, a dialog now says why, with a report (Davish version, OS, auth method, error code, the technical cause, the connection's log lines) you can select or copy into a bug report. It never holds a password, key, host or user name, and your home folder shows as `~`. Clicking the red failure line on a server card opens it again. Before, some failures only said "Something went wrong" and lost their cause, even in the log (#162).
+- A private key file saved by Notepad with a byte order mark could not be read; it can now.
+
 ## [1.13.6] - 2026-11-13
 
 ### Added
