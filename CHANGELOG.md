@@ -4,6 +4,11 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.13.9] - 2026-11-14
+
+### Sửa
+- Windows: chế độ đăng nhập **Automatic** dùng được key trong SSH agent của Windows (dịch vụ “OpenSSH Authentication Agent”, và agent của 1Password, Bitwarden cùng chạy trên pipe đó). Trước đây Davish chỉ tìm agent qua `SSH_AUTH_SOCK`, mà Windows không đặt biến này, nên chỉ thử các file key trong `~/.ssh` (#164). Không tìm thấy key thì thông báo chỉ cách bật dịch vụ.
+
 ## [1.13.8] - 2026-11-14
 
 ### Sửa

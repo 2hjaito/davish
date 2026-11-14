@@ -4,6 +4,11 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.13.9] - 2026-11-14
+
+### Fixed
+- Windows: **Automatic** login uses the keys in the SSH agent of Windows (the “OpenSSH Authentication Agent” service, and the 1Password and Bitwarden agents that listen on the same pipe). Davish only looked for an agent through `SSH_AUTH_SOCK`, which Windows does not set, so only the key files in `~/.ssh` were tried (#164). When no key is found, the message says how to start the service.
+
 ## [1.13.8] - 2026-11-14
 
 ### Fixed
