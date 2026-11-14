@@ -1875,10 +1875,6 @@ const zh = {
     lockNow: '立即锁定',
     lockAfter: '空闲时锁定',
     lockAfterHint: '电脑从睡眠中唤醒时，Davish 总会锁定。',
-    gitSection: 'Git',
-    gitAvatars: '作者头像',
-    gitAvatarsHint:
-      '从 GitHub（noreply 邮箱）和 Gravatar 加载头像。作者邮箱（Gravatar 为哈希值）会发送给这些服务。关闭时只显示首字母。',
     updates: '更新',
     autoUpdate: '检查新版本',
     autoUpdateHint:

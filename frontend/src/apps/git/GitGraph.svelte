@@ -2,7 +2,6 @@
   import type { Commit, Ref } from '../../lib/api/git'
   import { t } from '../../lib/i18n'
   import Icon from '../../lib/ui/Icon.svelte'
-  import { settings } from '../../lib/stores/settings.svelte'
   import Avatar from './Avatar.svelte'
   import { layout, type Segment } from './graph'
 
@@ -154,7 +153,7 @@
         </span>
       {/each}
       <span class="name">{c.subject}</span>
-      <Avatar name={c.author} email={c.email} remote={settings.gitAvatars} />
+      <Avatar name={c.author} email={c.email} />
       <span class="sub">{new Date(c.time * 1000).toLocaleDateString('vi-VN')}</span>
     </button>
   {:else}

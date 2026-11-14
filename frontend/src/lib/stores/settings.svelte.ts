@@ -81,7 +81,6 @@ interface SettingsData {
   lockAfter: number
   sudoForgetAfter: number
   autoUpdate: boolean
-  gitAvatars: boolean
 }
 
 /** The choices for forgetting an unused sudo password, in minutes; 0 is never. */
@@ -108,7 +107,6 @@ const defaults: SettingsData = {
   lockAfter: 15,
   sudoForgetAfter: 15,
   autoUpdate: true,
-  gitAvatars: false,
 }
 
 class Settings {
@@ -182,11 +180,6 @@ class Settings {
   /** Look for a new Davish on GitHub on its own (ADR 0009). */
   get autoUpdate() {
     return this.#data.autoUpdate !== false
-  }
-
-  /** Load author pictures from GitHub and Gravatar; off sends nothing out. */
-  get gitAvatars() {
-    return this.#data.gitAvatars === true
   }
 
   /** Idle minutes before the app locks; 0 is never. */

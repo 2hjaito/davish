@@ -1975,10 +1975,6 @@ const es = {
     lockNow: 'Bloquear ahora',
     lockAfter: 'Bloquear tras inactividad',
     lockAfterHint: 'Davish siempre se bloquea cuando el ordenador sale del reposo.',
-    gitSection: 'Git',
-    gitAvatars: 'Avatares de autores',
-    gitAvatarsHint:
-      'Carga imágenes de GitHub (correos noreply) y Gravatar. Los correos de los autores, en hash para Gravatar, se envían a esos servicios. Desactivado, solo se ven las iniciales.',
     updates: 'Actualizaciones',
     autoUpdate: 'Buscar versiones nuevas',
     autoUpdateHint:

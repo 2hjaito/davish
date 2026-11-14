@@ -1,6 +1,6 @@
-// Author avatars: initials drawn from the name, and, only when the user
-// turns it on in Settings, a picture from GitHub or Gravatar. With it off
-// no email leaves the machine.
+// Author avatars: the GitHub picture of a noreply address, else the
+// Gravatar of the email, over initials drawn from the name that stay
+// when no picture loads or the machine is offline.
 
 /** Number of --graph-N colors an avatar can take. */
 export const AVATAR_COLORS = 7

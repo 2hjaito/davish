@@ -1907,10 +1907,6 @@ const vi = {
     lockNow: 'Khóa ngay',
     lockAfter: 'Tự khóa khi không dùng',
     lockAfterHint: 'Davish luôn tự khóa khi máy ngủ dậy.',
-    gitSection: 'Git',
-    gitAvatars: 'Ảnh đại diện tác giả',
-    gitAvatarsHint:
-      'Lấy ảnh từ GitHub (email noreply) và Gravatar. Email tác giả, dạng mã băm cho Gravatar, sẽ được gửi tới các dịch vụ đó. Khi tắt chỉ hiện chữ cái đầu.',
     updates: 'Cập nhật',
     autoUpdate: 'Tự kiểm tra bản mới',
     autoUpdateHint:

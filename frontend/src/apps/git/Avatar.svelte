@@ -5,17 +5,15 @@
   interface Props {
     name: string
     email?: string
-    /** Fetch a picture from GitHub or Gravatar (Settings). */
-    remote: boolean
   }
 
-  let { name, email = '', remote }: Props = $props()
+  let { name, email = '' }: Props = $props()
 
   let urls = $state<string[]>([])
   let loaded = $state(false)
 
   $effect(() => {
-    const want = remote && email ? email : ''
+    const want = email
     urls = []
     loaded = false
     if (!want) return
