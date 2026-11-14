@@ -1,6 +1,7 @@
 package conn
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"net"
@@ -101,6 +102,8 @@ func (m *Manager) loadKey(srv store.Server) (ssh.Signer, error) {
 	if err != nil {
 		return nil, apperr.Wrap(apperr.ConnKeyUnreadable, "cannot read the private key", err)
 	}
+	// Notepad saves with a byte order mark, which the PEM reader rejects.
+	data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
 	signer, err := ssh.ParsePrivateKey(data)
 	var missing *ssh.PassphraseMissingError
 	if errors.As(err, &missing) {

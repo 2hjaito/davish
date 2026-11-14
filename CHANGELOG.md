@@ -4,6 +4,19 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.13.7] - 2026-11-14
+
+### Thêm
+- Git: mỗi commit trong lịch sử có ảnh tác giả, là avatar GitHub nếu email dạng noreply, không thì Gravatar của email, nằm trên chữ cái đầu tô màu theo tên (không tải được ảnh hay máy offline thì giữ chữ cái). Để tìm ảnh, email tác giả (hoặc mã băm SHA-256 với Gravatar) được gửi tới máy chủ ảnh của GitHub hay Gravatar. Cuộn gần cuối thì tự tải thêm commit, tới 1000 commit; nút Tải thêm chỉ hiện khi vượt mức đó.
+- App có danh sách và chi tiết (Git, Dịch vụ, Docker…): kéo đường chia giữa hai bên để nới hay thu hẹp danh sách, nhớ riêng từng app; nhấp đúp để đặt lại, phím mũi tên cũng di chuyển được.
+
+### Thay đổi
+- Thanh cuộn là một viên thuôn mảnh, mờ khi để yên, rõ hơn khi rê chuột vào vùng đó và rõ nhất khi rê lên chính thanh cuộn.
+
+### Sửa
+- Kết nối: server không kết nối được thì hiện hộp thoại nói rõ lý do, kèm một báo cáo (phiên bản Davish, hệ điều hành, cách xác thực, mã lỗi, nguyên nhân kỹ thuật, các dòng log kết nối) bôi đen hoặc sao chép được để gửi khi báo lỗi. Trong đó không có mật khẩu, key, địa chỉ server hay tên user, thư mục home hiện thành `~`. Bấm vào dòng lỗi màu đỏ trên thẻ server để mở lại. Trước đây có lỗi chỉ báo "Đã có lỗi xảy ra." và mất luôn nguyên nhân, kể cả trong log (#162).
+- File private key lưu bằng Notepad (có BOM ở đầu) không đọc được; giờ đã đọc được.
+
 ## [1.13.6] - 2026-11-13
 
 ### Thêm

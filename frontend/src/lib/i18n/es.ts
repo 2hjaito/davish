@@ -1502,6 +1502,19 @@ const es = {
       `¿Quitar «${name}» de Davish? También se elimina su contraseña o frase de paso guardada. El servidor en sí no se ve afectado.`,
     confirmDeleteButton: 'Eliminar',
   },
+  connError: {
+    title: (name: string) => `No se pudo conectar a “${name}”`,
+    hint: 'El recuadro de abajo explica qué falló. Cópialo y envíalo con tu informe de error: no contiene contraseñas, claves, host ni nombre de usuario.',
+    copy: 'Copiar error',
+    copied: 'Copiado',
+    copyFailed: 'No se pudo copiar. Selecciona el texto de arriba y cópialo a mano.',
+    openLog: 'Abrir carpeta de registros',
+    report: 'Informar en GitHub',
+    edit: 'Editar servidor',
+    close: 'Cerrar',
+    reconnect: 'Reconectar',
+    details: 'Detalles',
+  },
   hostKey: {
     title: 'Confirmar un servidor nuevo',
     body: (host: string) =>

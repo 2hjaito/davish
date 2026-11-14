@@ -12,6 +12,9 @@ export type { ConnState, Platform }
 export interface Server extends ServerInfo {
   /** Why the last attempt failed, when state is 'failed'. */
   error?: ErrorCode
+  /** The backend's English message and technical cause of error, for a bug report. */
+  errorMessage?: string
+  errorDetail?: string
   /** The server's OS, known once it has connected; kept across reconnects. */
   platform?: Platform
 }
@@ -52,6 +55,8 @@ class Servers {
   activeId = $state(load('activeServer', { id: '' }).id || (hasRuntime ? '' : 'dangth-vps'))
   /** A host key waiting for the user to accept it. */
   hostKeyPrompt = $state<HostKeyPrompt | null>(null)
+  /** The server whose failed connection the error dialog shows. */
+  failureOf = $state<string | null>(null)
   /** True once the list has been loaded from Go (always true in a browser). */
   ready = $state(!hasRuntime)
 
@@ -71,6 +76,12 @@ class Servers {
       s.state = st.state
       if (st.platform) s.platform = st.platform
       s.error = st.error ? toUserError(st.error).code : undefined
+      s.errorMessage = st.error?.message
+      s.errorDetail = st.detail
+      // A new host key has its own dialog; every other failure opens the
+      // error dialog, so the cause can be read and copied.
+      if (st.state === 'failed' && s.error !== 'CONN_HOSTKEY_UNKNOWN') this.failureOf = s.id
+      else if (this.failureOf === s.id && st.state !== 'failed') this.failureOf = null
     })
     const offPrompt = onHostKeyPrompt((p) => (this.hostKeyPrompt = p))
     await this.reload()
@@ -103,11 +114,17 @@ class Servers {
   async ensureConnected(id: string) {
     const s = this.list.find((x) => x.id === id)
     if (!hasRuntime || !s || (s.state !== 'disconnected' && s.state !== 'failed')) return
+    s.error = s.errorMessage = s.errorDetail = undefined
     try {
       await api.connect(id)
     } catch (e) {
-      // conn:status already marked it failed; keep the reason for the UI.
-      s.error = toUserError(e).code
+      // conn:status already marked it failed with the cause; keep the
+      // reason when the event did not carry one.
+      if (!s.error) {
+        const ue = toUserError(e)
+        s.error = ue.code
+        s.errorMessage = ue.detail
+      }
     }
   }
 
@@ -165,6 +182,15 @@ class Servers {
 
   rejectHostKey() {
     this.hostKeyPrompt = null
+  }
+
+  /** Opens the error dialog for a failed server. */
+  showFailure(id: string) {
+    this.failureOf = id
+  }
+
+  closeFailure() {
+    this.failureOf = null
   }
 }
 

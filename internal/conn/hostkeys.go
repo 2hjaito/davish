@@ -14,6 +14,8 @@ import (
 
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/knownhosts"
+
+	"davish/internal/apperr"
 )
 
 // HostKeys is the app's own known_hosts file. The user's ~/.ssh/known_hosts
@@ -46,7 +48,7 @@ func (h *HostKeys) callback(res *hostKeyResult) (ssh.HostKeyCallback, error) {
 	}
 	check, err := knownhosts.New(h.path)
 	if err != nil {
-		return nil, fmt.Errorf("load known_hosts: %w", err)
+		return nil, apperr.Wrap(apperr.Internal, "cannot read Davish's known_hosts", fmt.Errorf("load known_hosts: %w", err))
 	}
 	return func(hostname string, remote net.Addr, key ssh.PublicKey) error {
 		err := check(hostname, remote, key)
@@ -77,7 +79,7 @@ func (h *HostKeys) algorithms(addr string) ([]string, error) {
 		return nil, nil
 	}
 	if err != nil {
-		return nil, fmt.Errorf("read known_hosts: %w", err)
+		return nil, apperr.Wrap(apperr.Internal, "cannot read Davish's known_hosts", fmt.Errorf("read known_hosts: %w", err))
 	}
 	want := knownhosts.Normalize(addr)
 	var algos []string
@@ -125,11 +127,11 @@ func (h *HostKeys) Add(addr string, key ssh.PublicKey) error {
 
 func (h *HostKeys) ensureFile() error {
 	if err := os.MkdirAll(filepath.Dir(h.path), 0o700); err != nil {
-		return fmt.Errorf("create config dir: %w", err)
+		return apperr.Wrap(apperr.Internal, "cannot create Davish's config folder", fmt.Errorf("create config dir: %w", err))
 	}
 	f, err := os.OpenFile(h.path, os.O_CREATE|os.O_RDONLY, 0o600)
 	if err != nil {
-		return fmt.Errorf("create known_hosts: %w", err)
+		return apperr.Wrap(apperr.Internal, "cannot create Davish's known_hosts", fmt.Errorf("create known_hosts: %w", err))
 	}
 	return f.Close()
 }

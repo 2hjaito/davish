@@ -1434,6 +1434,19 @@ const zh = {
       `从 Davish 中移除“${name}”？其保存的密码/口令也会被删除。服务器本身不受影响。`,
     confirmDeleteButton: '删除',
   },
+  connError: {
+    title: (name: string) => `无法连接到“${name}”`,
+    hint: '下方说明了出错原因。复制后随错误报告一起发送：其中不含密码、密钥、主机或用户名。',
+    copy: '复制错误',
+    copied: '已复制',
+    copyFailed: '无法复制。请选中上方文字后手动复制。',
+    openLog: '打开日志文件夹',
+    report: '在 GitHub 上报告',
+    edit: '编辑服务器',
+    close: '关闭',
+    reconnect: '重新连接',
+    details: '详情',
+  },
   hostKey: {
     title: '确认新服务器',
     body: (host: string) =>
