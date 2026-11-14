@@ -62,6 +62,7 @@ const zh = {
     },
   },
   common: {
+    resizeSplit: '拖动以调整列表宽度',
     cancel: '取消',
     refresh: '刷新',
     needsRoot: '此操作需要服务器的 root 权限。',

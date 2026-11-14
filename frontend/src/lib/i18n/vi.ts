@@ -65,6 +65,7 @@ const vi = {
     },
   },
   common: {
+    resizeSplit: 'Kéo để đổi độ rộng danh sách',
     cancel: 'Hủy',
     refresh: 'Làm mới',
     needsRoot: 'Server cần quyền root cho thao tác này.',

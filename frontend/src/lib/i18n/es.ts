@@ -63,6 +63,7 @@ const es = {
     },
   },
   common: {
+    resizeSplit: 'Arrastra para cambiar el ancho de la lista',
     cancel: 'Cancelar',
     refresh: 'Actualizar',
     needsRoot: 'Esta acción necesita root en el servidor.',

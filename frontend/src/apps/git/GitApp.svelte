@@ -276,6 +276,7 @@
   {footer}
   {error}
   listWidth={tab === 'history' ? '58%' : '42%'}
+  splitKey="git-{tab}"
   onrefresh={refresh}
 >
   {#snippet actions()}

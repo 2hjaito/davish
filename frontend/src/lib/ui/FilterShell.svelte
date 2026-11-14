@@ -18,8 +18,10 @@
 
   import { t } from '../i18n'
   import { getWindowContext } from '../wm/context'
+  import { load, save } from '../stores/persist'
   import TitleBar from '../wm/TitleBar.svelte'
   import Icon from './Icon.svelte'
+  import { splitRatio, storedRatio } from './split'
 
   // The Finder layout of Services and Docker: filters in a translucent
   // sidebar, then a toolbar with search over a list and its detail.
@@ -46,6 +48,8 @@
     error?: string
     /** Share of the width the list takes, such as Git's wider history. */
     listWidth?: string
+    /** Where the width the user drags the list to is kept; the app by default. */
+    splitKey?: string
     onrefresh: () => void
   }
 
@@ -65,11 +69,58 @@
     footer,
     error = '',
     listWidth = '42%',
+    splitKey,
     onrefresh,
   }: Props = $props()
 
   const ctx = getWindowContext()
   const title = $derived(filters.find((f) => f.id === filter)?.label ?? '')
+
+  // The line between list and detail drags; a double click puts it back.
+  const storeKey = $derived(`split:${splitKey ?? ctx.win.appId}`)
+  let ratio = $derived(storedRatio(load<unknown>(storeKey, null)))
+  let split = $state<HTMLDivElement>()
+  let listEl = $state<HTMLDivElement>()
+  let resizing = $state(false)
+
+  function setRatio(x: number) {
+    const box = split?.getBoundingClientRect()
+    if (!box) return
+    const r = splitRatio(x - box.left, box.width)
+    if (r !== null) ratio = r
+  }
+
+  function onresizedown(e: PointerEvent) {
+    if (e.button !== 0) return
+    e.preventDefault()
+    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+    resizing = true
+  }
+
+  function onresizemove(e: PointerEvent) {
+    if (resizing) setRatio(e.clientX)
+  }
+
+  function onresizeup() {
+    if (!resizing) return
+    resizing = false
+    save(storeKey, ratio)
+  }
+
+  function onresizekey(e: KeyboardEvent) {
+    const step = e.key === 'ArrowLeft' ? -20 : e.key === 'ArrowRight' ? 20 : 0
+    const box = split?.getBoundingClientRect()
+    const list = listEl?.getBoundingClientRect()
+    if (!step || !box || !list) return
+    e.preventDefault()
+    setRatio(list.right + step)
+    save(storeKey, ratio)
+  }
+
+  function resetSplit() {
+    ratio = null
+    save(storeKey, null)
+  }
 </script>
 
 <div class="shell" class:blurred={!ctx.focused}>
@@ -130,13 +181,37 @@
     {#if !ready}
       {@render placeholder()}
     {:else}
-      <div class="split">
-        <div class="list" class:full={!detail} style:--list-w={listWidth}>
+      <div class="split" class:resizing bind:this={split}>
+        <div
+          class="list"
+          class:full={!detail}
+          style:--list-w={ratio === null ? listWidth : `${(ratio * 100).toFixed(2)}%`}
+          bind:this={listEl}
+        >
           {#if error}<p class="error"><Icon name="warning" size={13} /> {error}</p>{/if}
           {@render list()}
           {#if footer}<p class="footer">{footer}</p>{/if}
         </div>
-        {#if detail}<div class="detail">{@render detail()}</div>{/if}
+        {#if detail}
+          <!-- A focusable separator is a widget (ARIA); Svelte does not know it. -->
+          <!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_no_noninteractive_element_interactions -->
+          <div
+            class="resizer"
+            role="separator"
+            aria-orientation="vertical"
+            aria-label={t.common.resizeSplit}
+            aria-valuenow={Math.round((ratio ?? 0) * 100) || undefined}
+            title={t.common.resizeSplit}
+            tabindex="0"
+            onpointerdown={onresizedown}
+            onpointermove={onresizemove}
+            onpointerup={onresizeup}
+            onpointercancel={onresizeup}
+            ondblclick={resetSplit}
+            onkeydown={onresizekey}
+          ></div>
+          <div class="detail">{@render detail()}</div>
+        {/if}
       </div>
     {/if}
   </div>
@@ -323,9 +398,17 @@
     display: flex;
   }
 
+  .split.resizing {
+    cursor: col-resize;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
   .list {
     width: var(--list-w);
     min-width: 220px;
+    max-width: calc(100% - 280px);
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--divider-soft);
@@ -343,6 +426,37 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
+  }
+
+  /* A wide grab area over the list's border, which lights up while held. */
+  .resizer {
+    position: relative;
+    z-index: 1;
+    flex: none;
+    width: 0;
+    outline: none;
+  }
+
+  .resizer::before {
+    content: '';
+    position: absolute;
+    inset: 0 -4px;
+    cursor: col-resize;
+  }
+
+  .resizer::after {
+    content: '';
+    position: absolute;
+    inset: 0 -1px 0 -2px;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity var(--dur-fast) var(--ease-out);
+  }
+
+  .resizer:hover::after,
+  .resizer:focus-visible::after,
+  .resizing .resizer::after {
+    opacity: 1;
   }
 
   .error {
@@ -402,10 +516,15 @@
       flex-direction: column;
     }
 
+    .resizer {
+      display: none;
+    }
+
     .list:not(.full) {
       flex: 0 0 45%;
       width: auto;
       min-width: 0;
+      max-width: none;
       min-height: 0;
       border-right: 0;
       border-bottom: 1px solid var(--divider-soft);
