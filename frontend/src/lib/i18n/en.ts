@@ -52,6 +52,7 @@ const en = {
     },
   },
   common: {
+    resizeSplit: 'Drag to resize the list',
     cancel: 'Cancel',
     refresh: 'Refresh',
     needsRoot: 'This action needs root on the server.',
