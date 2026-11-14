@@ -3,7 +3,6 @@ package conn
 import (
 	"context"
 	"errors"
-	"net"
 	"os"
 	"path/filepath"
 	"strings"
@@ -63,11 +62,7 @@ func (m *Manager) authMethods(srv store.Server) ([]ssh.AuthMethod, func(), error
 
 // agentSigners returns the keys loaded in the SSH agent, if one is running.
 func (m *Manager) agentSigners() ([]ssh.Signer, func()) {
-	sock := os.Getenv("SSH_AUTH_SOCK")
-	if sock == "" {
-		return nil, func() {}
-	}
-	c, err := net.Dial("unix", sock) //nolint:gosec // SSH_AUTH_SOCK is how the user's agent is found
+	c, err := dialAgent()
 	if err != nil {
 		return nil, func() {}
 	}

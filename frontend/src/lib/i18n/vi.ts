@@ -2962,7 +2962,7 @@ const vi = {
     CONN_UNREACHABLE: 'Không kết nối được tới server. Kiểm tra host, port và mạng.',
     CONN_SECRET_MISSING: 'Chưa lưu mật khẩu hoặc passphrase cho server này.',
     CONN_AGENT_UNAVAILABLE:
-      'Không tìm thấy key nào: SSH agent trống và không có key mặc định trong ~/.ssh. Hãy chọn Private key.',
+      'Không tìm thấy key nào: SSH agent trống hoặc chưa chạy, và không có key mặc định trong ~/.ssh. Trên Windows, hãy bật dịch vụ “OpenSSH Authentication Agent” rồi nạp key bằng ssh-add, hoặc chọn Private key.',
     CONN_KEY_UNREADABLE: 'Không đọc được file private key.',
     CONN_PASSPHRASE_WRONG:
       'Passphrase đã lưu không mở được private key này. Hãy sửa server và nhập lại.',

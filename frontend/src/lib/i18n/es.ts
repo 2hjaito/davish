@@ -3067,7 +3067,7 @@ const es = {
     CONN_UNREACHABLE: 'No se pudo llegar al servidor. Comprueba el host, el puerto y la red.',
     CONN_SECRET_MISSING: 'No hay ninguna contraseña ni frase de paso guardada para este servidor.',
     CONN_AGENT_UNAVAILABLE:
-      'No se ha encontrado ninguna clave: el agente SSH está vacío y no hay clave por defecto en ~/.ssh. Elige Clave privada.',
+      'No se ha encontrado ninguna clave: el agente SSH está vacío o no se está ejecutando, y no hay clave por defecto en ~/.ssh. En Windows, inicia el servicio “OpenSSH Authentication Agent” y añade tu clave con ssh-add, o elige Clave privada.',
     CONN_KEY_UNREADABLE: 'No se pudo leer el archivo de la clave privada.',
     CONN_PASSPHRASE_WRONG:
       'La frase de contraseña guardada no abre esta clave privada. Edita el servidor y escríbela de nuevo.',
