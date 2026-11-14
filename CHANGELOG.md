@@ -4,6 +4,11 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.13.8] - 2026-11-14
+
+### Sửa
+- Dùng được private key mã hóa bằng aes256-gcm, aes128-gcm, chacha20-poly1305, aes128/192-ctr hay aes128/192-cbc (kiểu `ssh-keygen -Z`, Termix và vài công cụ khác tạo ra): trước đây Davish chỉ đọc được key aes256-ctr và aes256-cbc, còn lại báo "unknown cipher" (#162). Passphrase đã lưu không mở được key thì giờ báo đúng như vậy, thay vì "Không đọc được file private key".
+
 ## [1.13.7] - 2026-11-14
 
 ### Thêm

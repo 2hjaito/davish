@@ -4,6 +4,11 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.13.8] - 2026-11-14
+
+### Fixed
+- Private keys encrypted with aes256-gcm, aes128-gcm, chacha20-poly1305, aes128/192-ctr or aes128/192-cbc (what `ssh-keygen -Z`, Termix and some other tools write) can be used: Davish only read aes256-ctr and aes256-cbc keys and failed with "unknown cipher" (#162). A saved passphrase that does not open the key now says so instead of "Could not read the private key file".
+
 ## [1.13.7] - 2026-11-14
 
 ### Added

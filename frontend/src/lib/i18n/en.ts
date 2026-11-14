@@ -2998,6 +2998,8 @@ const en = {
     CONN_AGENT_UNAVAILABLE:
       'No key found: the SSH agent is empty and there is no default key in ~/.ssh. Choose Private key.',
     CONN_KEY_UNREADABLE: 'Could not read the private key file.',
+    CONN_PASSPHRASE_WRONG:
+      'The saved passphrase does not open this private key. Edit the server and type it again.',
     CONN_NOT_CONNECTED: 'The server is not connected.',
     TERM_CLOSED: 'The terminal session is closed.',
     FS_PERMISSION_DENIED: 'Permission denied.',
