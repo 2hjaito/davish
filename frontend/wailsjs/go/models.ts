@@ -2625,6 +2625,7 @@ export namespace packages {
 	    command: string;
 	    relogin: boolean;
 	    canInstall: boolean;
+	    installed: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Setup(source);
@@ -2637,6 +2638,7 @@ export namespace packages {
 	        this.command = source["command"];
 	        this.relogin = source["relogin"];
 	        this.canInstall = source["canInstall"];
+	        this.installed = source["installed"];
 	    }
 	}
 

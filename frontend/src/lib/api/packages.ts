@@ -50,7 +50,7 @@ export interface NpmGlobal {
 }
 
 /** A tool an app offers to install when the server lacks it. */
-export type SetupTool = 'docker' | 'nginx' | 'git' | 'mariadb' | 'postgres'
+export type SetupTool = 'docker' | 'nginx' | 'git' | 'mariadb' | 'postgres' | 'certbot'
 
 /** How to install a tool (internal/packages.Setup). */
 export interface Setup {
@@ -63,6 +63,8 @@ export interface Setup {
   relogin: boolean
   /** The login user may run it (root, sudo group, or passwordless sudo). */
   canInstall: boolean
+  /** The tool's program is on the server already. */
+  installed: boolean
 }
 
 export type PackageOp =
@@ -83,13 +85,14 @@ export const packagesCheckSecurity = (serverID: string): Promise<void> =>
 // The browser preview has no server: an Ubuntu one, as a stand-in.
 const mockSetup: Record<SetupTool, string> = {
   docker:
-    'sudo apt-get update && sudo apt-get install docker.io && sudo systemctl enable --now docker && sudo usermod -aG docker "$USER"',
+    'sudo apt-get update && sudo apt-get install docker.io && { sudo apt-get install docker-compose-v2 || sudo apt-get install docker-compose || true; } && sudo systemctl enable --now docker && sudo usermod -aG docker "$USER"',
   nginx: 'sudo apt-get update && sudo apt-get install nginx && sudo systemctl enable --now nginx',
   git: 'sudo apt-get update && sudo apt-get install git',
   mariadb:
     'sudo apt-get update && sudo apt-get install mariadb-server && sudo systemctl enable --now mariadb',
   postgres:
     'sudo apt-get update && sudo apt-get install postgresql && sudo systemctl enable --now postgresql',
+  certbot: 'sudo apt-get update && sudo apt-get install certbot python3-certbot-nginx',
 }
 
 /** The command that installs tool, to type into a terminal; nothing runs. */
@@ -102,4 +105,5 @@ export const packagesSetup = (serverID: string, tool: SetupTool): Promise<Setup>
         command: mockSetup[tool],
         relogin: tool === 'docker',
         canInstall: true,
+        installed: true,
       })

@@ -12,10 +12,10 @@ func TestPlanSetup(t *testing.T) {
 		m, tool string
 		want    string
 	}{
-		{Apt, ToolDocker, `sudo apt-get update && sudo apt-get install docker.io && sudo systemctl enable --now docker && sudo usermod -aG docker "$USER"`},
-		{Dnf, ToolDocker, `sudo dnf install moby-engine && sudo systemctl enable --now docker && sudo usermod -aG docker "$USER"`},
+		{Apt, ToolDocker, `sudo apt-get update && sudo apt-get install docker.io && { sudo apt-get install docker-compose-v2 || sudo apt-get install docker-compose || true; } && sudo systemctl enable --now docker && sudo usermod -aG docker "$USER"`},
+		{Dnf, ToolDocker, `sudo dnf install moby-engine && { sudo dnf install docker-compose || true; } && sudo systemctl enable --now docker && sudo usermod -aG docker "$USER"`},
 		{Yum, ToolDocker, `sudo yum install docker && sudo systemctl enable --now docker && sudo usermod -aG docker "$USER"`},
-		{Apk, ToolDocker, `sudo apk update && sudo apk add docker && sudo rc-update add docker && sudo rc-service docker start && sudo addgroup "$USER" docker`},
+		{Apk, ToolDocker, `sudo apk update && sudo apk add docker && { sudo apk add docker-cli-compose || true; } && sudo rc-update add docker && sudo rc-service docker start && sudo addgroup "$USER" docker`},
 
 		{Apt, ToolNginx, "sudo apt-get update && sudo apt-get install nginx && sudo systemctl enable --now nginx"},
 		{Dnf, ToolNginx, "sudo dnf install nginx && sudo systemctl enable --now nginx"},
@@ -36,6 +36,11 @@ func TestPlanSetup(t *testing.T) {
 		{Dnf, ToolPostgres, "sudo dnf install postgresql-server && sudo postgresql-setup --initdb && sudo systemctl enable --now postgresql"},
 		{Yum, ToolPostgres, "sudo yum install postgresql-server && sudo postgresql-setup --initdb && sudo systemctl enable --now postgresql"},
 		{Apk, ToolPostgres, "sudo apk update && sudo apk add postgresql && sudo rc-update add postgresql && sudo rc-service postgresql start"},
+
+		{Apt, ToolCertbot, "sudo apt-get update && sudo apt-get install certbot python3-certbot-nginx"},
+		{Dnf, ToolCertbot, "sudo dnf install certbot python3-certbot-nginx && sudo systemctl enable --now certbot-renew.timer"},
+		{Yum, ToolCertbot, "sudo yum install certbot python3-certbot-nginx && sudo systemctl enable --now certbot-renew.timer"},
+		{Apk, ToolCertbot, "sudo apk update && sudo apk add certbot certbot-nginx"},
 	}
 	for _, tt := range tests {
 		got, err := PlanSetup(tt.m, tt.tool)
@@ -81,16 +86,21 @@ func TestServiceSetup(t *testing.T) {
 	run := &fakeRunner{outs: []string{"dnf\n", "1000\ndeploy wheel\n"}}
 	s := New(run, nil)
 	got, err := s.Setup(context.Background(), "srv", ToolGit)
-	if err != nil || got.Command != "sudo dnf install git" || !got.CanInstall {
+	if err != nil || got.Command != "sudo dnf install git" || !got.CanInstall || got.Installed {
 		t.Errorf("setup = %+v, %v", got, err)
 	}
 	if _, err := s.Setup(context.Background(), "srv", "nope"); err == nil || run.calls != 2 {
 		t.Errorf("unknown tool: err %v, %d calls", err, run.calls)
 	}
-	// No command to run: no need to ask about rights.
-	run = &fakeRunner{outs: []string{"\n"}}
-	if got, err := New(run, nil).Setup(context.Background(), "srv", ToolGit); err != nil || got.CanInstall || run.calls != 1 {
-		t.Errorf("no manager = %+v, %v, %d calls", got, err, run.calls)
+	run = &fakeRunner{outs: []string{"apt\n", "1000\ndeploy\n" + installedMark + "\n"}}
+	if got, err := New(run, nil).Setup(context.Background(), "srv", ToolCertbot); err != nil || !got.Installed || got.CanInstall {
+		t.Errorf("installed = %+v, %v", got, err)
+	}
+	// No command to run: the user cannot install it through Davish, but
+	// it may be there already.
+	run = &fakeRunner{outs: []string{"\n", "0\nroot\n" + installedMark + "\n"}}
+	if got, err := New(run, nil).Setup(context.Background(), "srv", ToolGit); err != nil || got.CanInstall || !got.Installed {
+		t.Errorf("no manager = %+v, %v", got, err)
 	}
 }
 

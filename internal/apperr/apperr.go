@@ -28,6 +28,7 @@ const (
 	FSProtected          Code = "FS_PROTECTED"
 	CmdNeedsRoot         Code = "CMD_NEEDS_ROOT"
 	CmdMissing           Code = "CMD_MISSING"
+	CmdTooOld            Code = "CMD_TOO_OLD"
 	CmdFailed            Code = "CMD_FAILED"
 	CmdTimeout           Code = "CMD_TIMEOUT"
 	DockerDown           Code = "DOCKER_DOWN"

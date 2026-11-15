@@ -2977,6 +2977,8 @@ const vi = {
       'Davish không làm việc này bằng quyền root: đường dẫn là phần sống còn của hệ thống, hoặc đi qua link hay thư mục mà user khác sở hữu hoặc ghi được, người đó có thể đổi hướng root sang chỗ khác. Nếu chắc chắn, hãy dùng sudoedit hoặc sudo trong Terminal.',
     CMD_NEEDS_ROOT: 'Lệnh này cần quyền root.',
     CMD_MISSING: 'Server chưa cài chương trình cần cho thao tác này (ví dụ zip).',
+    CMD_TOO_OLD:
+      'Chương trình trên server quá cũ cho thao tác này. Hãy cập nhật nó trong Packages.',
     CMD_FAILED: 'Lệnh chạy trên server bị lỗi.',
     CMD_TIMEOUT:
       'Server không trả lời kịp nên Davish ngừng chờ. Thử lại, hoặc mở Terminal xem lệnh có bị treo (ví dụ Docker không phản hồi).',

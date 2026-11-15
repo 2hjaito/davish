@@ -81,7 +81,10 @@ func TestSetupWithoutSudo(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := "sudo apt-get update && sudo apt-get install postgresql && sudo systemctl enable --now postgresql"
-	if got.Manager != packages.Apt || got.Command != want || got.CanInstall || got.Relogin {
+	if got.Manager != packages.Apt || got.Command != want || got.CanInstall || got.Relogin || got.Installed {
 		t.Errorf("setup = %+v", got)
+	}
+	if got, err := s.Setup(context.Background(), id, packages.ToolNginx); err != nil || !got.Installed {
+		t.Errorf("nginx setup = %+v, %v", got, err)
 	}
 }

@@ -3082,6 +3082,8 @@ const es = {
       'Davish no hace esto como root: la ruta es una parte vital del sistema, o pasa por un enlace o carpeta que otro usuario posee o puede escribir, y podría enviar a root a otro sitio. Si estás seguro, usa sudoedit o sudo en la Terminal.',
     CMD_NEEDS_ROOT: 'Este comando necesita root.',
     CMD_MISSING: 'Al servidor le falta un programa que esta acción necesita (por ejemplo zip).',
+    CMD_TOO_OLD:
+      'La versión del programa que esta acción necesita es demasiado antigua en el servidor. Actualízalo en Packages.',
     CMD_FAILED: 'El comando ha fallado en el servidor.',
     CMD_TIMEOUT:
       'El servidor no respondió a tiempo, así que Davish dejó de esperar. Reinténtalo, o abre Terminal para ver si el comando se cuelga (por ejemplo, Docker no responde).',
