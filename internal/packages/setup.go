@@ -195,8 +195,10 @@ func (s *Service) Setup(ctx context.Context, serverID, tool string) (Setup, erro
 	if err != nil {
 		return Setup{}, err
 	}
-	// The installed mark comes last, after privLine's lines.
-	line := privLine + "; command -v " + shellx.Quote(t.bin) + " >/dev/null 2>&1 && echo " + installedMark
+	// The installed mark comes last, after privLine's lines. dash's
+	// command -v exits 127 for a missing program, which read takes for a
+	// missing shell command: end with true.
+	line := privLine + "; command -v " + shellx.Quote(t.bin) + " >/dev/null 2>&1 && echo " + installedMark + "; true"
 	out, err := s.read(ctx, serverID, line)
 	if err != nil {
 		return Setup{}, err
