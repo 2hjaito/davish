@@ -3011,6 +3011,8 @@ const en = {
       'Davish does not do this as root: the path is a vital part of the system, or goes through a link or folder another user owns or may write, who could send root elsewhere. Use sudoedit or sudo in Terminal if you are sure.',
     CMD_NEEDS_ROOT: 'This command needs root.',
     CMD_MISSING: 'The server lacks a program this action needs (for example zip).',
+    CMD_TOO_OLD:
+      'The server’s version of the program this action needs is too old. Update it in Packages.',
     CMD_FAILED: 'The command failed on the server.',
     CMD_TIMEOUT:
       'The server did not answer in time, so Davish stopped waiting. Retry, or open Terminal to see whether the command hangs (for example Docker not responding).',

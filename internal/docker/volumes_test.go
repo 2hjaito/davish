@@ -1,6 +1,11 @@
 package docker
 
-import "testing"
+import (
+	"errors"
+	"testing"
+
+	"davish/internal/apperr"
+)
 
 func TestParseVolumes(t *testing.T) {
 	out := `{"Images":[],"Volumes":[{"Driver":"local","Labels":"com.docker.compose.project=shop,x=y","Links":"1","Mountpoint":"/v/db","Name":"shop_db","Size":"438.6MB"},{"Driver":"local","Labels":"","Links":"0","Mountpoint":"/v/a","Name":"0a1b5a07404e73f21101ddc3cdadd630d36cc80f04883250ec280fa0a0a0a0a0","Size":"227.4kB"},{"Driver":"nfs","Labels":"","Links":"0","Name":"remote","Size":"N/A"}]}
@@ -19,6 +24,15 @@ func TestParseVolumes(t *testing.T) {
 	}
 	if vs[2].Size != -1 || vs[2].Anonymous {
 		t.Errorf("remote = %+v", vs[2])
+	}
+}
+
+func TestParseVolumesOldDocker(t *testing.T) {
+	out := "json\n" + volSep + "\n"
+	_, err := parseVolumes([]byte(out))
+	var ae *apperr.Error
+	if !errors.As(err, &ae) || ae.Code != apperr.CmdTooOld {
+		t.Errorf("old docker: %v", err)
 	}
 }
 

@@ -16,6 +16,7 @@ const (
 	ToolGit      = "git"
 	ToolMariaDB  = "mariadb"
 	ToolPostgres = "postgres"
+	ToolCertbot  = "certbot"
 )
 
 // Setup is how to install a tool on a server. Like the other package
@@ -33,42 +34,65 @@ type Setup struct {
 	// of a group sudo usually trusts, or sudo without a password. Without
 	// it the UI only says to ask whoever runs the server.
 	CanInstall bool `json:"canInstall"`
+	// Installed tells that the tool's program is already on the server.
+	Installed bool `json:"installed"`
 }
 
 // tool is what installing one tool takes.
 type tool struct {
+	// bin is the program that tells the tool is installed.
+	bin string
 	// pkgs are the packages per manager.
 	pkgs map[string][]string
+	// extra are alternatives for one more package, per manager, tried in
+	// turn; none being found does not stop the install.
+	extra map[string][]string
 	// unit is the service to enable and start; "" for none.
 	unit string
-	// init prepares the data directory before the first start, per
-	// manager; most packages do it themselves.
+	// init prepares the tool after install, per manager: the data
+	// directory before the first start, or a timer the package leaves
+	// off; most packages do it themselves.
 	init map[string][]string
 }
 
 var tools = map[string]tool{
 	ToolDocker: {
+		bin:  "docker",
 		pkgs: map[string][]string{Apt: {"docker.io"}, Dnf: {"moby-engine"}, Yum: {"docker"}, Apk: {"docker"}},
-		unit: "docker",
+		// docker compose is a separate package. Ubuntu names it
+		// docker-compose-v2; Debian 13 ships v2 as docker-compose.
+		extra: map[string][]string{Apt: {"docker-compose-v2", "docker-compose"}, Dnf: {"docker-compose"}, Apk: {"docker-cli-compose"}},
+		unit:  "docker",
 	},
 	ToolNginx: {
+		bin:  "nginx",
 		pkgs: map[string][]string{Apt: {"nginx"}, Dnf: {"nginx"}, Yum: {"nginx"}, Apk: {"nginx"}},
 		unit: "nginx",
 	},
 	ToolGit: {
+		bin:  "git",
 		pkgs: map[string][]string{Apt: {"git"}, Dnf: {"git"}, Yum: {"git"}, Apk: {"git"}},
 	},
 	ToolMariaDB: {
 		// Alpine has no mariadb-server; its init script sets up the data
 		// directory on request.
+		bin:  "mariadb",
 		pkgs: map[string][]string{Apt: {"mariadb-server"}, Dnf: {"mariadb-server"}, Yum: {"mariadb-server"}, Apk: {"mariadb", "mariadb-client"}},
 		unit: "mariadb",
 		init: map[string][]string{Apk: {"rc-service", "mariadb", "setup"}},
 	},
 	ToolPostgres: {
+		bin:  "psql",
 		pkgs: map[string][]string{Apt: {"postgresql"}, Dnf: {"postgresql-server"}, Yum: {"postgresql-server"}, Apk: {"postgresql"}},
 		unit: "postgresql",
 		init: map[string][]string{Dnf: {"postgresql-setup", "--initdb"}, Yum: {"postgresql-setup", "--initdb"}},
+	},
+	ToolCertbot: {
+		// Debian's package turns on renewal itself; Fedora's leaves its
+		// timer off. Alpine has neither: renewal is the user's cron.
+		bin:  "certbot",
+		pkgs: map[string][]string{Apt: {"certbot", "python3-certbot-nginx"}, Dnf: {"certbot", "python3-certbot-nginx"}, Yum: {"certbot", "python3-certbot-nginx"}, Apk: {"certbot", "certbot-nginx"}},
+		init: map[string][]string{Dnf: {"systemctl", "enable", "--now", "certbot-renew.timer"}, Yum: {"systemctl", "enable", "--now", "certbot-renew.timer"}},
 	},
 }
 
@@ -100,6 +124,17 @@ func PlanSetup(manager, name string) (Setup, error) {
 		steps = append(steps, refresh)
 	}
 	steps = append(steps, install)
+	if alts := t.extra[manager]; len(alts) > 0 {
+		var tries []string
+		for _, p := range alts {
+			line, err := PlanAction(manager, OpInstall, []string{p})
+			if err != nil {
+				return Setup{}, err
+			}
+			tries = append(tries, line)
+		}
+		steps = append(steps, "{ "+strings.Join(append(tries, "true"), " || ")+"; }")
+	}
 	if init, ok := t.init[manager]; ok {
 		steps = append(steps, sudo(init...))
 	}
@@ -145,9 +180,11 @@ func parsePriv(out []byte) bool {
 }
 
 // Setup plans installing tool on the server, for its package manager, and
-// tells whether the login user may run it.
+// tells whether it is there already and whether the login user may run
+// the install.
 func (s *Service) Setup(ctx context.Context, serverID, tool string) (Setup, error) {
-	if _, ok := tools[tool]; !ok {
+	t, ok := tools[tool]
+	if !ok {
 		return Setup{}, apperr.New(apperr.InvalidInput, "unknown tool")
 	}
 	m, err := s.Detect(ctx, serverID)
@@ -155,13 +192,18 @@ func (s *Service) Setup(ctx context.Context, serverID, tool string) (Setup, erro
 		return Setup{}, err
 	}
 	plan, err := PlanSetup(m, tool)
-	if err != nil || plan.Command == "" {
-		return plan, err
-	}
-	out, err := s.read(ctx, serverID, privLine)
 	if err != nil {
 		return Setup{}, err
 	}
-	plan.CanInstall = parsePriv(out)
+	// The installed mark comes last, after privLine's lines.
+	line := privLine + "; command -v " + shellx.Quote(t.bin) + " >/dev/null 2>&1 && echo " + installedMark
+	out, err := s.read(ctx, serverID, line)
+	if err != nil {
+		return Setup{}, err
+	}
+	plan.Installed = slices.Contains(lines(out), installedMark)
+	plan.CanInstall = plan.Command != "" && parsePriv(out)
 	return plan, nil
 }
+
+const installedMark = "davish-installed"

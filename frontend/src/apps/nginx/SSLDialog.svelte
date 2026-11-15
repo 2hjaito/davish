@@ -1,9 +1,11 @@
 <script lang="ts">
   import { toUserError } from '../../lib/api/errors'
   import type { SSLPlan } from '../../lib/api/nginx'
+  import { packagesSetup } from '../../lib/api/packages'
   import { t } from '../../lib/i18n'
   import Dialog from '../../lib/ui/Dialog.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
+  import NotInstalled from '../../lib/ui/NotInstalled.svelte'
   import { openTerminalAt } from '../../lib/wm/intents.svelte'
   import { backend } from './backend'
 
@@ -24,6 +26,22 @@
     if (!names) return
     void load(names, redirect)
   })
+
+  // certbot is often missing on a fresh server; without it the command
+  // only fails in the terminal. A failed check does not block.
+  let hasCertbot = $state(true)
+
+  $effect(() => {
+    if (names) void checkCertbot()
+  })
+
+  async function checkCertbot() {
+    try {
+      hasCertbot = (await packagesSetup(serverID, 'certbot')).installed
+    } catch {
+      hasCertbot = true
+    }
+  }
 
   async function load(n: string[], r: boolean) {
     error = ''
@@ -70,8 +88,19 @@
         <input type="checkbox" bind:checked={redirect} />
         <span>{t.nginx.ssl.redirect}</span>
       </label>
-      <p>{t.nginx.ssl.commandIntro}</p>
-      <pre class="command">{plan.sudo}</pre>
+      {#if hasCertbot}
+        <p>{t.nginx.ssl.commandIntro}</p>
+        <pre class="command">{plan.sudo}</pre>
+      {:else}
+        <p class="warn">{t.install.title('certbot')}</p>
+        <NotInstalled
+          {serverID}
+          tool="certbot"
+          name="certbot"
+          compact
+          onretry={() => void checkCertbot()}
+        />
+      {/if}
     {/if}
   {/if}
   {#if error}<p class="warn" role="alert">{error}</p>{/if}
@@ -79,8 +108,11 @@
   {#snippet footer()}
     <span class="spacer"></span>
     <button type="button" class="btn" onclick={onclose}>{t.common.cancel}</button>
-    <button type="button" class="btn btn-primary" disabled={!plan?.sudo} onclick={open}
-      >{t.nginx.ssl.run}</button
+    <button
+      type="button"
+      class="btn btn-primary"
+      disabled={!plan?.sudo || !hasCertbot}
+      onclick={open}>{t.nginx.ssl.run}</button
     >
   {/snippet}
 </Dialog>

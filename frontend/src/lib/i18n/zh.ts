@@ -2922,6 +2922,7 @@ const zh = {
       'Davish 不会以 root 身份执行此操作：该路径是系统的关键部分，或经过其他用户拥有或可写入的链接或文件夹，对方可能把 root 引到别处。如果确定，请在终端中使用 sudoedit 或 sudo。',
     CMD_NEEDS_ROOT: '这条命令需要 root 权限。',
     CMD_MISSING: '服务器缺少此操作需要的程序（例如 zip）。',
+    CMD_TOO_OLD: '服务器上此操作需要的程序版本过旧。请在 Packages 中更新它。',
     CMD_FAILED: '命令在服务器上执行失败。',
     CMD_TIMEOUT:
       '服务器没有及时响应，Davish 已停止等待。请重试，或打开终端查看命令是否卡住（例如 Docker 没有响应）。',
