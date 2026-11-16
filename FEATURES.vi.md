@@ -16,6 +16,12 @@ Lưu các lệnh hay gõ kèm tên, cho một server hoặc mọi server. Một 
 
 <img src="assets/screenshots/snippets.jpg" alt="Lệnh hay dùng" width="100%">
 
+## Nhật ký lệnh
+
+Mọi lệnh Davish đã chạy trên server, kèm exit code và thời gian chạy; dòng nào cũng gõ lại được vào Terminal hoặc lưu thành lệnh hay dùng. **Chỉ lệnh thay đổi server** (bật sẵn) ẩn lệnh đọc và polling, chỉ còn những gì các thao tác đã thay đổi. **Xuất script…** biến các lệnh được tick thành một bash script chạy lại chúng, mỗi lệnh qua một `ssh -t` riêng để sudo và các câu hỏi khác vẫn hỏi được: mỗi server một khối, trên mỗi dòng ghi giờ và app, sudo của Davish được viết lại thành `sudo` thường (không bao giờ có mật khẩu), còn nội dung gửi qua stdin (ví dụ file ghi bằng root) chỉ để lại comment vì không được lưu. Lệnh lỗi không được xuất trừ khi bạn chọn kèm. Sao chép hoặc lưu thành file chạy được; hộp xuất không chạy gì cả. Thao tác qua SFTP (lưu, đổi tên, upload) không có trong nhật ký.
+
+<img src="assets/screenshots/audit-export.jpg" alt="Nhật ký lệnh xuất thành script" width="100%">
+
 ## Files
 
 Trình duyệt kiểu Finder qua SFTP: tải lên, tải xuống, kéo thả từ hệ điều hành, đổi tên, xóa, nén, và copy giữa các server qua máy bạn. Chuột phải trên file để thấy mọi thao tác. Giữ chuột trên file rồi kéo nhẹ: một vòng thao tác mở quanh con trỏ (mở trong Editor hoặc Terminal, đổi tên, xóa, nén, copy đường dẫn, thêm vào màn hình chính); thả vào ô nào là chọn ô đó, thả ở giữa hoặc nhấn Esc để hủy. Chuột phải vào khoảng trống để tạo tệp hoặc thư mục ngay trong thư mục đang xem; Davish không bao giờ ghi đè file đã có.

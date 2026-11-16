@@ -16,6 +16,12 @@ Keep the commands you type often, each with a name, for one server or every serv
 
 <img src="assets/screenshots/en/snippets.jpg" alt="Saved commands" width="100%">
 
+## Command log
+
+Every command Davish ran on a server, with its exit code and how long it took; any line can be typed into Terminal again or saved as a command. **Changes only** (on by default) hides the reads and polling, leaving what an action changed. **Export script…** turns the ticked commands into a bash script that runs them again, each over its own `ssh -t` so sudo and other prompts can ask: one block per server, the time and app above each line, Davish's sudo written as a plain `sudo` (never a password), and content sent on stdin, such as a file written as root, left as a comment because it is not recorded. Failed commands stay out unless you include them. Copy it or save it as an executable file; nothing runs from the dialog. What went through SFTP (saving, renaming, uploading) is not in the log.
+
+<img src="assets/screenshots/en/audit-export.jpg" alt="The Command log exported as a script" width="100%">
+
 ## Files
 
 Finder-style browser over SFTP: upload, download, drag and drop from your OS, rename, delete, compress, and copy between servers through your machine. Hold a file and drag a little: a ring of actions opens around the pointer (open in Editor or Terminal, rename, delete, compress, copy the path, add to desktop); drop on a slice to pick it, in the middle or with Esc to cancel. Right-click empty space to create a file or folder in the folder on screen; Davish never overwrites an existing file.
