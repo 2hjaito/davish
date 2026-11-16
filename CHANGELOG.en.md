@@ -8,6 +8,14 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 - Files: the search box has three scopes. **This folder** filters as before; **Subfolders** finds names in every subfolder with `find`; **Contents** finds the lines that contain the text with `grep` (binary files, `.git` and `node_modules` are skipped). Press Enter to search the server: up to 500 results within 30 seconds, with the exact command that ran, a Stop button and a count of the places that could not be read. A content result opens in the Editor at its line; the folder button shows the file in its folder. Read only, never retried through sudo.
 - Logs: **Search all** (or Enter in the filter) searches the whole history of a file, the journal or a container on the server, not just the 200 lines on screen, and returns the latest 500 matching lines. For a file, click a result to read the lines around it and page earlier or later without downloading the file (a log of several GB stays quick).
 
+## [1.13.10] - 2026-11-16
+
+### Fixed
+- Installing Docker from Setup also installs the compose plugin (a missing compose package does not stop the install). Nginx's HTTPS dialog checks for certbot first and offers its install command instead of a certbot line that would only fail. Setup says whether the tool is installed already, and no longer fails exactly when the tool is missing. Docker older than 23 reports "Docker is too old" for volumes instead of an unclear error.
+- Windows: **Automatic** login now reads the default key files in `~\.ssh` (`id_ed25519`, `id_ecdsa`, `id_rsa`). The path, written with `\`, was never expanded to the home folder, so these files were never tried (#168).
+- An SSH agent that does not answer (a pipe nobody serves, an agent waiting for its vault to unlock) no longer leaves the connection stuck on "Connecting…": after 5 seconds Davish moves on to the key files and writes why in the log (#168).
+- A key path that points at a folder (such as `~/.ssh`) now says to choose the private key file in it, instead of "Incorrect function" on Windows (#168).
+
 ## [1.13.9] - 2026-11-14
 
 ### Fixed

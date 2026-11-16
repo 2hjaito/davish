@@ -8,6 +8,14 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 - Files: ô tìm có ba phạm vi. **Thư mục này** lọc như trước; **Cả cây** tìm tên file trong mọi thư mục con bằng `find`; **Nội dung** tìm dòng chứa chữ đó bằng `grep` (bỏ qua file nhị phân, `.git`, `node_modules`). Nhấn Enter để tìm trên server: tối đa 500 kết quả trong 30 giây, hiện đúng lệnh đã chạy, có nút Dừng và số chỗ không có quyền đọc. Kết quả nội dung mở Editor đúng dòng; nút thư mục đưa về thư mục chứa file. Chỉ đọc, không thử lại bằng sudo.
 - Logs: **Tìm trong toàn bộ** (hoặc Enter trong ô lọc) tìm trong cả lịch sử của file, journal hay container ngay trên server, không chỉ 200 dòng đang hiện, và trả 500 dòng khớp gần nhất. Với file, bấm một kết quả để đọc các dòng xung quanh, lật trang trước/sau mà không tải cả file về (file log vài GB vẫn nhanh).
 
+## [1.13.10] - 2026-11-16
+
+### Sửa
+- Cài Docker từ Setup giờ cài kèm plugin compose (thiếu gói compose thì vẫn cài Docker). Hộp thoại HTTPS của Nginx kiểm tra certbot trước và đưa lệnh cài nếu chưa có, thay vì một lệnh certbot chắc chắn lỗi. Setup cho biết công cụ đã được cài hay chưa, và không còn báo lỗi đúng lúc công cụ chưa cài. Docker cũ hơn 23 khi xem volume báo "Docker quá cũ" thay vì lỗi khó hiểu.
+- Windows: chế độ đăng nhập **Automatic** giờ đọc được các file key mặc định trong `~\.ssh` (`id_ed25519`, `id_ecdsa`, `id_rsa`). Trước đây đường dẫn có dấu `\` không được mở rộng thành thư mục home nên các file này không bao giờ được thử (#168).
+- SSH agent không trả lời (pipe không ai phục vụ, agent đang chờ mở khóa vault) không còn làm kết nối treo ở "Đang kết nối…": sau 5 giây Davish bỏ qua agent, thử các file key và ghi lý do vào log (#168).
+- Đường dẫn key trỏ vào một thư mục (ví dụ `~/.ssh`) giờ báo rõ là cần chọn file private key bên trong, thay vì "Incorrect function" trên Windows (#168).
+
 ## [1.13.9] - 2026-11-14
 
 ### Sửa
