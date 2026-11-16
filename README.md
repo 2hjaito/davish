@@ -42,9 +42,9 @@ Nothing to install on the server.
 
 - [Terminal](FEATURES.md#terminal): tabs, GPU rendering, an optional powerline prompt
 - [Saved commands](FEATURES.md#saved-commands): your frequent commands, typed into Terminal in one click
-- [Files](FEATURES.md#files): Finder-style SFTP, drag and drop, copy between servers, hold a file for a ring of actions
+- [Files](FEATURES.md#files): Finder-style SFTP, drag and drop, copy between servers, search names and contents on the server, hold a file for a ring of actions
 - [Editor](FEATURES.md#editor): CodeMirror with atomic saves and backups
-- [Logs](FEATURES.md#logs): journal, files and containers, live
+- [Logs](FEATURES.md#logs): journal, files and containers, live, and search their whole history on the server
 - [Monitor](FEATURES.md#monitor): CPU, memory, disks, network, GPUs, processes, on Linux and Windows servers
 - [All servers](FEATURES.md#all-servers): every server's health and alerts in one window, and a map of what each one serves
 

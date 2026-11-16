@@ -20,6 +20,10 @@ Keep the commands you type often, each with a name, for one server or every serv
 
 Finder-style browser over SFTP: upload, download, drag and drop from your OS, rename, delete, compress, and copy between servers through your machine. Hold a file and drag a little: a ring of actions opens around the pointer (open in Editor or Terminal, rename, delete, compress, copy the path, add to desktop); drop on a slice to pick it, in the middle or with Esc to cancel. Right-click empty space to create a file or folder in the folder on screen; Davish never overwrites an existing file.
 
+The search box filters the folder on screen. Pick **Subfolders** or **Contents** and press Enter to search the server instead: `find` by name across the whole tree, or `grep` through the files for a line (binary files, `.git` and `node_modules` are skipped). Up to 500 results arrive in a few seconds with the exact command that ran; a content result opens in the Editor at its line, and the folder button shows it in its folder. Places the account cannot read are counted, not retried as root, and **Stop** ends a long search.
+
+![Searching file contents on the server](assets/screenshots/en/files-search.jpg)
+
 ## Desktop shortcuts
 
 Drag a file, folder or script from Files onto the wallpaper, or right-click it and choose "Add to desktop" (`⌘⌥P`). Double-click to open: folders in Files, files in the Editor, scripts in a terminal tab. Each server has its own desktop, so staging's `deploy.sh` never shows on production. Right-click an icon and choose Customize (`F2`) to give it your own name, one of the built-in icons with a color, or a picture from your computer, as an alias would: the file on the server keeps its name, and the run dialog always shows the real one. Davish stores the path and these choices on your computer, never the file's content.
@@ -35,6 +39,10 @@ CodeMirror 6 with highlighting for nginx, YAML, JSON, shell, env and config file
 ## Logs
 
 Follow a unit's journal, a file or a container. Filter, pause, highlight errors, and click a file path to open it in the Editor at that line. A log you may not read is followed again as root through `sudo`.
+
+The filter only sees the lines on screen. **Search all** (or Enter in the filter) searches the source's whole history on the server and returns the latest 500 matching lines: `grep` for a file, `journalctl -g` for the journal, `docker logs | grep` for a container. For a file, click a result to read the lines around it, then page earlier or later; `sed` reads just that page, so a log of several GB is never downloaded.
+
+![Reading around a match in a log file](assets/screenshots/en/logs-search.jpg)
 
 <img src="assets/screenshots/logs.jpg" alt="Logs with clickable file paths" width="100%">
 
