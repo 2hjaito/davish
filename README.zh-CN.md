@@ -34,7 +34,7 @@
 - **多台服务器，一个桌面。** 每台服务器是一个工作区（`⌘1`…`⌘9`），各自记住自己的窗口。拖动文件即可在服务器之间复制。
 - **自动更新。** 有新版本时会显示更新内容，可选择更新、稍后或跳过此版本；Davish 自动下载、校验签名并重启到新版本，无需重新安装。
 - **简体中文、英文、越南文或西班牙文界面。** 在设置中选择语言；首次启动时跟随系统语言。中文翻译刚刚加入，欢迎在 [Issues](https://github.com/2hjaito/davish/issues) 中指出不通顺的地方。
-- **直接使用你的 `~/.ssh/config`。** 一次导入其中的主机，包括密钥和 `ProxyJump`；Davish 只读取这个文件。堡垒机后面的服务器会经由堡垒机连接，每一跳都单独校验主机密钥，整条链路断开后会自动重连。
+- **直接使用你的 `~/.ssh/config` 和 Ansible inventory。** 一次导入其中的主机，包括密钥和 `ProxyJump`，也可以一次导入整个 Ansible 分组；Davish 只读取这些文件。堡垒机后面的服务器会经由堡垒机连接，每一跳都单独校验主机密钥，整条链路断开后会自动重连。
 
 ## 功能
 
@@ -66,7 +66,7 @@
 - [磁盘](FEATURES.md#disk)：用目录树查看空间去向，说明哪些没能统计及原因，可删除和清理
 - [安全](FEATURES.md#security)：按小时和按 IP 统计的失败登录、被尝试的用户、当前会话、ufw、fail2ban
 - [SSH 密钥](FEATURES.md#ssh-keys)：authorized_keys、部署密钥、本机密钥
-- [~/.ssh/config 与 ProxyJump](FEATURES.md#sshconfig-and-proxyjump)：导入主机，经由堡垒机连接
+- [~/.ssh/config、Ansible 与 ProxyJump](FEATURES.md#sshconfig-ansible-and-proxyjump)：从 ssh config 或 INI inventory 导入主机，经由堡垒机连接
 
 **桌面**
 

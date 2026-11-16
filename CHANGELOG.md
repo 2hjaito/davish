@@ -7,6 +7,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ### Thêm
 - Files: ô tìm có ba phạm vi. **Thư mục này** lọc như trước; **Cả cây** tìm tên file trong mọi thư mục con bằng `find`; **Nội dung** tìm dòng chứa chữ đó bằng `grep` (bỏ qua file nhị phân, `.git`, `node_modules`). Nhấn Enter để tìm trên server: tối đa 500 kết quả trong 30 giây, hiện đúng lệnh đã chạy, có nút Dừng và số chỗ không có quyền đọc. Kết quả nội dung mở Editor đúng dòng; nút thư mục đưa về thư mục chứa file. Chỉ đọc, không thử lại bằng sudo.
 - Logs: **Tìm trong toàn bộ** (hoặc Enter trong ô lọc) tìm trong cả lịch sử của file, journal hay container ngay trên server, không chỉ 200 dòng đang hiện, và trả 500 dòng khớp gần nhất. Với file, bấm một kết quả để đọc các dòng xung quanh, lật trang trước/sau mà không tải cả file về (file log vài GB vẫn nhanh).
+- Nhập server từ Ansible inventory (INI): tab mới trong hộp nhập, cạnh `~/.ssh/config`. Đọc `ansible_host`, `ansible_user`, `ansible_port`, file key và `ProxyJump` trong `ansible_ssh_common_args`, có tính biến của group, group con và dải như `web[01:03]`; chọn cả group một lần. File chỉ được đọc; mật khẩu trong file không bao giờ được đọc, host dùng template, giá trị Vault hoặc kết nối không phải SSH được liệt kê là bỏ qua kèm lý do. Inventory YAML báo rõ là chưa hỗ trợ.
 
 ## [1.13.10] - 2026-11-16
 
