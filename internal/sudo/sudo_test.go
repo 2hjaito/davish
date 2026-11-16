@@ -13,6 +13,7 @@ import (
 	"davish/internal/conn"
 	"davish/internal/events"
 	"davish/internal/lock"
+	"davish/internal/shellx"
 )
 
 const secret = "hunter2-sudo"
@@ -289,5 +290,17 @@ func TestForgetAfterZeroKeepsItForTheSession(t *testing.T) {
 	time.Sleep(60 * time.Millisecond)
 	if st, _ := k.State(ctx, "srv"); st != Ready {
 		t.Fatalf("a stale timer wiped the new password: %s", st)
+	}
+}
+
+// The Command log's script export turns these lines back into a plain
+// sudo (audit.Plain); it must keep matching what Keeper runs.
+func TestPlainUndoesKeeperLines(t *testing.T) {
+	const line = "systemctl restart 'my app'"
+	want := "sudo sh -c " + shellx.Quote(line)
+	for _, l := range []string{noPasswordLine(line), passwordLine(line)} {
+		if got := audit.Plain(l); got != want {
+			t.Errorf("Plain(%q) = %q, want %q", l, got, want)
+		}
 	}
 }
