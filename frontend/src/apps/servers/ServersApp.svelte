@@ -12,6 +12,7 @@
   import Icon from '../../lib/ui/Icon.svelte'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import type { AppProps } from '../types'
+  import MultiRun from './MultiRun.svelte'
   import ServerMap from './ServerMap.svelte'
   import { alertsFor, memPct } from './summary'
 
@@ -28,6 +29,9 @@
   }
 
   const up = $derived(servers.list.filter((x) => x.state === 'connected').length)
+
+  /** Running a command on several servers, in place of the grid. */
+  let multi = $state(false)
 
   /** The server whose map is open over the grid. */
   let mapOf = $state<string | null>(null)
@@ -66,10 +70,17 @@
 <TitleBar>
   <span class="title">{win.title}</span>
   <span class="count">{s.overview.connected(up, servers.list.length)}</span>
+  {#if !multi && servers.list.length > 0}
+    <button class="run-btn" disabled={up === 0} onclick={() => (multi = true)}>
+      <Icon name="terminal" size={12} />{s.run.open}
+    </button>
+  {/if}
 </TitleBar>
 
-<div class="body">
-  {#if mapped}
+<div class="body" class:flush={multi}>
+  {#if multi}
+    <MultiRun onback={() => (multi = false)} />
+  {:else if mapped}
     <ServerMap serverID={mapped.id} name={mapped.name} onback={() => (mapOf = null)} />
   {:else if servers.list.length === 0}
     <Empty icon="server" title={s.none} hint={s.overview.emptyHint} />
@@ -237,6 +248,25 @@
     overflow: auto;
     padding: 16px 18px;
     background: var(--content-bg);
+  }
+
+  .body.flush {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .run-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+    padding: 2px 9px;
+    border: 0;
+    border-radius: var(--control-radius);
+    background: var(--fill-soft);
+    font-size: var(--text-xs);
   }
 
   .grid {

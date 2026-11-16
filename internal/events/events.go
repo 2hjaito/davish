@@ -8,6 +8,7 @@ const (
 	ConnHostKeyPrompt = "conn:hostkey-prompt"
 	TermData          = "term:data"
 	TermExit          = "term:exit"
+	FleetJob          = "fleet:job"
 	SysmonTick        = "sysmon:tick"
 	SysmonStatus      = "sysmon:status"
 	LogsLine          = "logs:line"
