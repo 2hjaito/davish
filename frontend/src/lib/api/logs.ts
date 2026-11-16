@@ -24,3 +24,49 @@ export const logsStartAsRoot = (serverID: string, src: LogSource): Promise<LogsS
   App.LogsStartAsRoot(serverID, src)
 
 export const logsStop = (streamID: string): Promise<void> => App.LogsStop(streamID)
+
+export interface LogSearchQuery {
+  query: string
+  matchCase: boolean
+}
+
+/** A line with its number in the file; 0 for journal and container lines. */
+export interface LogLine {
+  number: number
+  text: string
+}
+
+export interface LogSearchResult {
+  /** The latest matches, oldest first. */
+  lines: LogLine[]
+  /** 500 lines came back: older matches may exist. */
+  truncated: boolean
+  timedOut: boolean
+  /** The journal hid other users' entries. */
+  restricted: boolean
+  command: string
+}
+
+export interface LogPage {
+  lines: LogLine[]
+  /** The file ended before the page did. */
+  eof: boolean
+}
+
+/** Searches src's whole history on the server; token names it for logsCancelSearch. */
+export const logsSearch = (
+  serverID: string,
+  src: LogSource,
+  q: LogSearchQuery,
+  token: string,
+): Promise<LogSearchResult> => App.LogsSearch(serverID, src, q, token)
+
+export const logsCancelSearch = (token: string): Promise<void> => App.LogsCancelSearch(token)
+
+/** count (≤ 200) lines of a log file from 1-based line from. */
+export const logsAround = (
+  serverID: string,
+  file: string,
+  from: number,
+  count: number,
+): Promise<LogPage> => App.LogsAround(serverID, file, from, count)

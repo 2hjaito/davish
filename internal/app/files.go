@@ -114,3 +114,17 @@ func (a *App) FilesSaveAsRoot(serverID, path string, data []byte, opts fs.SaveOp
 func (a *App) FilesAccess(serverID, path string) (fs.Access, error) {
 	return a.files.Access(a.ctx, serverID, path)
 }
+
+// FilesSearch looks under q.Dir by name or content on the server; token
+// names it for FilesCancelSearch.
+func (a *App) FilesSearch(serverID string, q fs.SearchQuery, token string) (fs.SearchResult, error) {
+	if err := a.lock.Check(); err != nil {
+		return fs.SearchResult{}, err
+	}
+	return a.files.Search(a.ctx, serverID, q, token)
+}
+
+// FilesCancelSearch stops a running FilesSearch.
+func (a *App) FilesCancelSearch(token string) {
+	a.files.CancelSearch(token)
+}

@@ -20,6 +20,10 @@ Lưu các lệnh hay gõ kèm tên, cho một server hoặc mọi server. Một 
 
 Trình duyệt kiểu Finder qua SFTP: tải lên, tải xuống, kéo thả từ hệ điều hành, đổi tên, xóa, nén, và copy giữa các server qua máy bạn. Chuột phải trên file để thấy mọi thao tác. Giữ chuột trên file rồi kéo nhẹ: một vòng thao tác mở quanh con trỏ (mở trong Editor hoặc Terminal, đổi tên, xóa, nén, copy đường dẫn, thêm vào màn hình chính); thả vào ô nào là chọn ô đó, thả ở giữa hoặc nhấn Esc để hủy. Chuột phải vào khoảng trống để tạo tệp hoặc thư mục ngay trong thư mục đang xem; Davish không bao giờ ghi đè file đã có.
 
+Ô tìm lọc thư mục đang xem. Chọn **Cả cây** hoặc **Nội dung** rồi nhấn Enter để tìm trên server: `find` theo tên trong cả cây thư mục, hoặc `grep` trong nội dung file (bỏ qua file nhị phân, `.git` và `node_modules`). Tối đa 500 kết quả, kèm đúng lệnh đã chạy; kết quả nội dung mở trong Editor đúng dòng, nút thư mục hiện file trong thư mục chứa nó. Chỗ không có quyền đọc chỉ được đếm, không thử lại bằng root; nút **Dừng** ngắt lần tìm lâu.
+
+![Tìm nội dung file trên server](assets/screenshots/files-search.jpg)
+
 ## Lối tắt trên màn hình chính
 
 Kéo file, thư mục hoặc script từ Files ra nền desktop, hoặc chuột phải và chọn "Thêm vào màn hình chính" (`⌘⌥P`). Double-click để mở: thư mục vào Files, file vào Editor, script chạy trong một tab Terminal. Mỗi server có màn hình riêng, nên `deploy.sh` của staging không xuất hiện trên production. Chuột phải vào icon và chọn Tùy chỉnh (`F2`) để đặt tên riêng, chọn icon có sẵn kèm màu, hoặc dùng ảnh từ máy, giống một alias: file trên server giữ nguyên tên, và hộp thoại chạy luôn hiện tên thật. Davish lưu đường dẫn và các lựa chọn này trên máy bạn, không bao giờ lưu nội dung file.
@@ -35,6 +39,10 @@ CodeMirror 6, tô màu cho nginx, YAML, JSON, shell, env và file cấu hình. L
 ## Logs
 
 Theo dõi journal của dịch vụ, một file hoặc một container. Lọc, tạm dừng, tô dòng lỗi, bấm đường dẫn file để mở trong Editor đúng dòng. Log không đọc được thì được theo dõi lại bằng root qua `sudo`.
+
+Ô lọc chỉ lọc các dòng đang hiện. **Tìm trong toàn bộ** (hoặc Enter trong ô lọc) tìm trong cả lịch sử của nguồn log ngay trên server và trả 500 dòng khớp gần nhất: `grep` với file, `journalctl -g` với journal, `docker logs | grep` với container. Với file, bấm một kết quả để đọc các dòng xung quanh rồi lật trang trước, trang sau; `sed` chỉ đọc đúng trang đó, nên file log vài GB cũng không phải tải về.
+
+![Đọc quanh một dòng khớp trong file log](assets/screenshots/logs-search.jpg)
 
 <img src="assets/screenshots/logs.jpg" alt="Logs với đường dẫn file bấm được" width="100%">
 
