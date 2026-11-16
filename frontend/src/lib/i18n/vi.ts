@@ -1013,7 +1013,11 @@ const vi = {
       },
       audit: {
         does: 'Mọi lệnh Davish đã chạy thay bạn trên server.',
-        actions: ['Lọc chỉ server đang chọn'],
+        actions: [
+          'Lọc chỉ server đang chọn',
+          'Chỉ hiện lệnh thay đổi server, ẩn lệnh đọc và polling',
+          'Xuất các lệnh được tick thành bash script: mỗi lệnh chạy lại qua một ssh -t riêng, sudo viết thường, nội dung stdin chỉ để lại comment; sao chép hoặc lưu, không chạy gì',
+        ],
         keys: [],
         runs: [],
       },
@@ -2673,6 +2677,27 @@ const vi = {
   },
   audit: {
     search: 'Tìm lệnh',
+    onlyChanges: 'Chỉ lệnh thay đổi server',
+    noChanges: 'Lệnh đọc và polling đang bị ẩn: tắt “Chỉ lệnh thay đổi server” để xem mọi lệnh.',
+    export: {
+      start: 'Xuất script…',
+      pick: 'Đưa vào script',
+      picked: (n: number) => `Đã chọn ${n}`,
+      all: 'Chọn hết',
+      none: 'Bỏ chọn',
+      show: 'Xem script…',
+      title: (n: number) => `Script gồm ${n} lệnh`,
+      lead: 'Mỗi lệnh chạy lại qua một kết nối ssh riêng, có terminal để sudo hỏi được. Đọc kỹ trước khi chạy; ở đây không chạy gì cả.',
+      notIncluded:
+        'Không có trong script: thao tác qua SFTP (lưu, đổi tên, upload file), nội dung gửi qua stdin (chỉ để lại comment), và lệnh cũ hơn những gì nhật ký còn giữ.',
+      failed: 'Kèm lệnh lỗi',
+      copy: 'Sao chép',
+      copied: 'Đã sao chép.',
+      save: 'Lưu…',
+      saveTitle: 'Lưu script',
+      close: 'Đóng',
+      saved: (path: string) => `Đã lưu vào ${path}`,
+    },
     onlyThis: 'Chỉ server đang chọn',
     empty: 'Chưa chạy lệnh nào trên server',
     emptyHint:

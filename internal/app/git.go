@@ -37,7 +37,7 @@ func (a *App) GitRun(serverID, dir, op, branch, command string) (git.Result, err
 	if err := a.lock.Check(); err != nil {
 		return git.Result{}, err
 	}
-	return a.git.Run(a.ctx, serverID, dir, op, branch, command)
+	return a.git.Run(a.change(), serverID, dir, op, branch, command)
 }
 
 // GitPlanClone builds the clone line for a terminal; an empty folder only

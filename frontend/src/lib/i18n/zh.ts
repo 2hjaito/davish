@@ -1002,7 +1002,11 @@ const zh = {
       },
       audit: {
         does: 'Davish 代你在服务器上运行过的每一条命令。',
-        actions: ['只显示所选服务器'],
+        actions: [
+          '只显示所选服务器',
+          '只显示更改，隐藏读取和轮询',
+          '把勾选的命令导出为 bash 脚本：每条通过单独的 ssh -t 重新运行，sudo 写成普通形式，stdin 内容只留注释；可复制或保存，不会运行任何东西',
+        ],
         keys: [],
         runs: [],
       },
@@ -2625,6 +2629,27 @@ const zh = {
   },
   audit: {
     search: '搜索命令',
+    onlyChanges: '仅更改',
+    noChanges: '读取和轮询命令已隐藏：关闭“仅更改”可查看所有命令。',
+    export: {
+      start: '导出脚本…',
+      pick: '加入脚本',
+      picked: (n: number) => `已选 ${n} 条`,
+      all: '全选',
+      none: '全不选',
+      show: '查看脚本…',
+      title: (n: number) => `${n} 条命令的脚本`,
+      lead: '每条命令都通过单独的 ssh 连接重新运行，并带终端以便 sudo 询问。运行前请先阅读；这里不会运行任何东西。',
+      notIncluded:
+        '脚本中不包含：通过 SFTP 的操作（保存、重命名、上传文件）、通过 stdin 发送的内容（仅保留注释），以及日志已不再保留的旧命令。',
+      failed: '包含失败的命令',
+      copy: '复制',
+      copied: '已复制。',
+      save: '保存…',
+      saveTitle: '保存脚本',
+      close: '关闭',
+      saved: (path: string) => `已保存到 ${path}`,
+    },
     onlyThis: '只看所选服务器',
     empty: '还没有在服务器上运行过命令',
     emptyHint:

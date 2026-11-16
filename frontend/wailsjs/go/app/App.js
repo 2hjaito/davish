@@ -10,6 +10,14 @@ export function AuditEntries() {
   return window['go']['app']['App']['AuditEntries']();
 }
 
+export function AuditSaveScript(arg1, arg2, arg3) {
+  return window['go']['app']['App']['AuditSaveScript'](arg1, arg2, arg3);
+}
+
+export function AuditScript(arg1, arg2) {
+  return window['go']['app']['App']['AuditScript'](arg1, arg2);
+}
+
 export function BrowserOpen(arg1, arg2) {
   return window['go']['app']['App']['BrowserOpen'](arg1, arg2);
 }

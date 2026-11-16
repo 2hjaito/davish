@@ -1056,7 +1056,11 @@ const es = {
       },
       audit: {
         does: 'Cada comando que Davish ejecutó en el servidor por ti.',
-        actions: ['Mostrar solo el servidor seleccionado'],
+        actions: [
+          'Mostrar solo el servidor seleccionado',
+          'Mostrar solo cambios, ocultando lecturas y consultas periódicas',
+          'Exportar los comandos marcados como script bash: cada uno se ejecuta de nuevo por su propio ssh -t, sudo escrito de forma normal, el contenido de stdin queda como comentario; copiar o guardar, no se ejecuta nada',
+        ],
         keys: [],
         runs: [],
       },
@@ -2763,6 +2767,28 @@ const es = {
   },
   audit: {
     search: 'Buscar comandos',
+    onlyChanges: 'Solo cambios',
+    noChanges:
+      'Las lecturas y consultas periódicas están ocultas: desactiva “Solo cambios” para ver todos los comandos.',
+    export: {
+      start: 'Exportar script…',
+      pick: 'Incluir en el script',
+      picked: (n: number) => `${n} seleccionados`,
+      all: 'Seleccionar todo',
+      none: 'No seleccionar nada',
+      show: 'Ver script…',
+      title: (n: number) => `Script de ${n} ${n === 1 ? 'comando' : 'comandos'}`,
+      lead: 'Cada comando se ejecuta de nuevo por su propia conexión ssh, con terminal para que sudo pueda preguntar. Léelo antes de ejecutarlo; desde aquí no se ejecuta nada.',
+      notIncluded:
+        'No está en el script: lo que pasó por SFTP (guardar, renombrar, subir archivos), el contenido enviado por stdin (queda como comentario) y los comandos más antiguos de lo que guarda el registro.',
+      failed: 'Incluir comandos con error',
+      copy: 'Copiar',
+      copied: 'Copiado.',
+      save: 'Guardar…',
+      saveTitle: 'Guardar el script',
+      close: 'Cerrar',
+      saved: (path: string) => `Guardado en ${path}`,
+    },
     onlyThis: 'Solo el servidor seleccionado',
     empty: 'Todavía no se ha ejecutado ningún comando en el servidor',
     emptyHint:

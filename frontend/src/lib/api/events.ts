@@ -192,6 +192,10 @@ export interface AuditEntry {
   /** -1 when it did not finish (connection lost) or is a stream that runs until stopped. */
   exit: number
   durMs: number
+  /** Run for an action that changes the server, not a read (docs/adr/0022). */
+  mutating?: boolean
+  /** Content went on stdin; it is never recorded. */
+  input?: boolean
 }
 
 function on<T>(name: EventName, handler: (payload: T) => void): Unsubscribe {

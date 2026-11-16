@@ -1033,7 +1033,11 @@ const en = {
       },
       audit: {
         does: 'Every command Davish ran on the server for you.',
-        actions: ['Show only the selected server'],
+        actions: [
+          'Show only the selected server',
+          'Show only changes, hiding reads and polling',
+          'Export the ticked commands as a bash script: each runs again over its own ssh -t, sudo written plainly, stdin content left as a comment; copy or save it, nothing runs',
+        ],
         keys: [],
         runs: [],
       },
@@ -2706,6 +2710,27 @@ const en = {
   },
   audit: {
     search: 'Search commands',
+    onlyChanges: 'Changes only',
+    noChanges: 'Reads and polling are hidden: turn off “Changes only” to see every command.',
+    export: {
+      start: 'Export script…',
+      pick: 'Include in the script',
+      picked: (n: number) => `${n} selected`,
+      all: 'Select all',
+      none: 'Select none',
+      show: 'Show script…',
+      title: (n: number) => `Script of ${n} ${n === 1 ? 'command' : 'commands'}`,
+      lead: 'Each command runs again over its own ssh connection, with a terminal so sudo can ask. Read it before you run it; nothing runs from here.',
+      notIncluded:
+        'Not in the script: what went through SFTP (saving, renaming, uploading files), content sent on stdin (left as a comment), and commands older than the log keeps.',
+      failed: 'Include failed commands',
+      copy: 'Copy',
+      copied: 'Copied.',
+      save: 'Save…',
+      saveTitle: 'Save the script',
+      close: 'Close',
+      saved: (path: string) => `Saved to ${path}`,
+    },
     onlyThis: 'Selected server only',
     empty: 'No commands run on the server yet',
     emptyHint:

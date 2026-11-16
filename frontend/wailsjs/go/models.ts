@@ -97,6 +97,8 @@ export namespace audit {
 	    command: string;
 	    exit: number;
 	    durMs: number;
+	    mutating?: boolean;
+	    input?: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Entry(source);
@@ -111,6 +113,8 @@ export namespace audit {
 	        this.command = source["command"];
 	        this.exit = source["exit"];
 	        this.durMs = source["durMs"];
+	        this.mutating = source["mutating"];
+	        this.input = source["input"];
 	    }
 	}
 

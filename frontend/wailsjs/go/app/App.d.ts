@@ -28,6 +28,10 @@ export function AcceptHostKey(arg1:string,arg2:string):Promise<void>;
 
 export function AuditEntries():Promise<Array<audit.Entry>>;
 
+export function AuditSaveScript(arg1:Array<number>,arg2:boolean,arg3:string):Promise<string>;
+
+export function AuditScript(arg1:Array<number>,arg2:boolean):Promise<string>;
+
 export function BrowserOpen(arg1:string,arg2:number):Promise<ports.Site>;
 
 export function BrowserSites():Promise<Array<ports.Site>>;
