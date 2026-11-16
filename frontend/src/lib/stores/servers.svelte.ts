@@ -144,6 +144,15 @@ class Servers {
     }
   }
 
+  /** Imports Ansible inventory hosts and returns the servers added; throws a UserError. */
+  async importInventory(path: string, names: string[]): Promise<Server[]> {
+    try {
+      return await api.importInventoryHosts(path, names)
+    } finally {
+      await this.reload()
+    }
+  }
+
   async remove(id: string) {
     await api.deleteServer(id)
     shortcuts.forgetServer(id)
