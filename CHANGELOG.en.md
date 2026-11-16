@@ -4,7 +4,10 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.13.10] - 2026-11-16
+
 ### Fixed
+- Installing Docker from Setup also installs the compose plugin (a missing compose package does not stop the install). Nginx's HTTPS dialog checks for certbot first and offers its install command instead of a certbot line that would only fail. Setup says whether the tool is installed already, and no longer fails exactly when the tool is missing. Docker older than 23 reports "Docker is too old" for volumes instead of an unclear error.
 - Windows: **Automatic** login now reads the default key files in `~\.ssh` (`id_ed25519`, `id_ecdsa`, `id_rsa`). The path, written with `\`, was never expanded to the home folder, so these files were never tried (#168).
 - An SSH agent that does not answer (a pipe nobody serves, an agent waiting for its vault to unlock) no longer leaves the connection stuck on "Connecting…": after 5 seconds Davish moves on to the key files and writes why in the log (#168).
 - A key path that points at a folder (such as `~/.ssh`) now says to choose the private key file in it, instead of "Incorrect function" on Windows (#168).
