@@ -4,10 +4,13 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.14.1] - 2026-11-17
+
 ### Added
 - Settings → Performance: four presets, **Auto**, **Beautiful**, **Balanced** and **Light**, replace the Reduce glass and Reduce motion switches. Each one sets the frosted blur, the window shadow, solid fills, the wallpaper blobs and motion; **Advanced** sets each on its own, and on Linux adds two WebKitGTK workarounds that apply after a restart. **Auto** keeps the full look, times a second and a half of frames at launch without blocking anything, and offers Light (Use Light / Later) when the machine renders in software or drops frames; **Check again** measures once more. Thanks to @tian2992 (#176).
 
 ### Fixed
+- Terminal: with GPU acceleration on, the last key typed or the screen a program leaves on exit (such as `btop`) no longer waits for the next key or click to appear (#175).
 - Reduced glass paints opaque fills and a short shadow, so it is really cheaper to draw: a 96% fill was still blended over the wallpaper on every frame, and the deep shadow was redrawn while scrolling. Thanks to @tian2992 (#174).
 
 ## [1.14.0] - 2026-11-17
