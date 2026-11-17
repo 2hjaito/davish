@@ -132,7 +132,10 @@
     if (gpu === Boolean(webgl)) return
     if (gpu) {
       try {
-        const w = new WebglAddon()
+        // Keep the drawing buffer: WebKit can show the canvas a frame late
+        // otherwise, so the last key or the screen a program left on exit
+        // only appears with the next event (#175).
+        const w = new WebglAddon(true)
         w.onContextLoss(() => setRenderer(t, false))
         t.options.allowTransparency = false
         t.options.theme = theme(true)
