@@ -210,3 +210,10 @@ func (e emitter) Emit(name string, payload any) {
 // marked as changing the server, for the Command log's script export
 // (docs/adr/0022).
 func (a *App) change() context.Context { return audit.Changing(a.ctx) }
+
+// LogInfo writes one line to the app log, for what main decides before
+// the app starts (such as the Linux webview GPU policy). A plain function,
+// not a method, so Wails does not bind it.
+func LogInfo(a *App, msg string, args ...any) {
+	a.log.Info(msg, args...)
+}
