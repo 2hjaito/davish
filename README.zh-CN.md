@@ -99,7 +99,7 @@
 
 - **macOS 12 或更高版本。** 打开 `Davish-…-macos-universal.pkg` 安装到"应用程序"。应用暂未签名，首次打开会被 macOS 拦截：点击 **完成**，然后打开 **系统设置 → 隐私与安全性**，在关于 Davish 的那一行点击 **仍要打开**（如果 `Davish.app` 也被拦截，再操作一次）。也可以对文件执行 `xattr -dr com.apple.quarantine`。
 - **Windows 10 或更高版本。** 运行 `Davish-…-windows-amd64-setup.exe`；如果缺少 WebView2 运行时会自动安装。Windows SmartScreen 可能提示未知发布者：选择 **更多信息** → **仍要运行**。
-- **Linux**，需要 GTK 3 和 WebKitGTK 4.1。窗口使用 GPU 绘制，这是 WebKitGTK 自己的默认设置；在 NVIDIA 专有驱动上，Davish 会为自己设置 `WEBKIT_DISABLE_DMABUF_RENDERER=1`（解决该驱动下窗口空白的常用办法），且从不改动你已设置的值。如果窗口仍然空白或闪烁，请用 `DAVISH_WEBVIEW_GPU=never`（或 `ondemand`）启动 Davish 并提交 issue；应用日志中的 `linux webview gpu` 一行会说明所选模式及原因。
+- **Linux**，需要 GTK 3 和 WebKitGTK 4.1。窗口使用 GPU 绘制，这是 WebKitGTK 自己的默认设置；但在 NVIDIA 专有驱动上，经过测试之前 GPU 仍保持关闭。想试的话，用 `DAVISH_WEBVIEW_GPU=always` 启动 Davish（Davish 会设置 `WEBKIT_DISABLE_DMABUF_RENDERER=1`，这是解决该驱动下窗口空白的常用办法，除非你自己已设置），并在 [#185](https://github.com/2hjaito/davish/issues/185) 告诉我们结果。任何机器上如果窗口空白或闪烁，请用 `DAVISH_WEBVIEW_GPU=never` 启动；应用日志（`~/.cache/davish/logs`）中的 `linux webview gpu` 一行会说明所选模式及原因。
 
 ### 服务器需要什么
 

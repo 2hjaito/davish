@@ -53,16 +53,23 @@ var OSEnv Env = osEnv{}
 //     machine this gets wrong.
 //   - Otherwise Always, WebKitGTK's own default: GPU compositing, which
 //     WebKitGTK drops to software by itself when it cannot get GL.
-//   - On the proprietary NVIDIA driver, where DMA-BUF leaves the window
-//     blank, it also sets WEBKIT_DISABLE_DMABUF_RENDERER=1, unless that
-//     variable is already set (to anything, 0 included): the user's choice
-//     stands.
+//   - On the proprietary NVIDIA driver, Never, as before: that is where
+//     the blank window behind wails#2977 comes from, and nobody has tried
+//     the usual fix (WEBKIT_DISABLE_DMABUF_RENDERER=1 with the GPU on) on
+//     Davish yet. DAVISH_WEBVIEW_GPU=always tries it, and then the
+//     workaround is set unless the variable is already set.
 //
 // drm is the sysfs DRM folder, /sys/class/drm on a real system.
 func DecideGPU(drm string, env Env) GPUDecision {
 	if v, ok := env.LookupEnv(GPUEnv); ok {
 		switch p := strings.ToLower(strings.TrimSpace(v)); p {
-		case GPUAlways, GPUOnDemand, GPUNever:
+		case GPUAlways, GPUOnDemand:
+			d := GPUDecision{Policy: p, Reason: GPUEnv + " is set"}
+			if nvidiaProprietary(drm) {
+				d.Reason += "; " + dmabufWorkaround(env)
+			}
+			return d
+		case GPUNever:
 			return GPUDecision{Policy: p, Reason: GPUEnv + " is set"}
 		}
 		// A typo must not take the GPU away silently; say so and go on.
@@ -73,14 +80,23 @@ func DecideGPU(drm string, env Env) GPUDecision {
 	if !nvidiaProprietary(drm) {
 		return GPUDecision{Policy: GPUAlways, Reason: "default"}
 	}
+	return GPUDecision{
+		Policy: GPUNever,
+		Reason: "NVIDIA driver: GPU off until it is tested (" + GPUEnv + "=always to try it)",
+	}
+}
+
+// dmabufWorkaround sets WEBKIT_DISABLE_DMABUF_RENDERER=1 for the NVIDIA
+// driver unless the variable is set already (to anything, 0 included), and
+// says what it did.
+func dmabufWorkaround(env Env) string {
 	if v, ok := env.LookupEnv(dmabufEnv); ok {
-		return GPUDecision{Policy: GPUAlways, Reason: "NVIDIA driver; " + dmabufEnv + "=" + v + " kept as set"}
+		return "NVIDIA driver, " + dmabufEnv + "=" + v + " kept as set"
 	}
 	if err := env.Setenv(dmabufEnv, "1"); err != nil {
-		// Without the workaround the window could stay blank: play safe.
-		return GPUDecision{Policy: GPUNever, Reason: "NVIDIA driver; could not set " + dmabufEnv + ": " + err.Error()}
+		return "NVIDIA driver, could not set " + dmabufEnv + ": " + err.Error()
 	}
-	return GPUDecision{Policy: GPUAlways, Reason: "NVIDIA driver; " + dmabufEnv + "=1 set"}
+	return "NVIDIA driver, " + dmabufEnv + "=1 set"
 }
 
 // withoutKey hides one variable, to decide again as if it were unset.

@@ -99,7 +99,7 @@ Bản build sẵn cho macOS (universal), Windows và Linux nằm trong từng [r
 
 - **macOS 12 trở lên.** Mở `Davish-…-macos-universal.pkg` để cài vào Applications. App chưa được ký nên macOS sẽ chặn lần đầu: bấm **Done**, mở **Cài đặt hệ thống → Quyền riêng tư & Bảo mật**, bấm **Vẫn mở** ở dòng nhắc tới Davish (làm lại cho `Davish.app` nếu bị chặn). Hoặc chạy `xattr -dr com.apple.quarantine` trên file đó.
 - **Windows 10 trở lên.** Chạy `Davish-…-windows-amd64-setup.exe`; bộ cài tự cài WebView2 runtime nếu máy chưa có. SmartScreen có thể cảnh báo nhà phát hành không xác định: chọn **More info** → **Run anyway**.
-- **Linux** có GTK 3 và WebKitGTK 4.1. Cửa sổ được vẽ bằng GPU, đúng mặc định của WebKitGTK; với driver NVIDIA độc quyền, Davish tự đặt `WEBKIT_DISABLE_DMABUF_RENDERER=1` cho chính nó (cách sửa quen thuộc cho lỗi cửa sổ trắng), và không bao giờ đổi giá trị bạn đã đặt. Nếu cửa sổ vẫn trắng hoặc nháy, chạy Davish với `DAVISH_WEBVIEW_GPU=never` (hoặc `ondemand`) và mở issue giúp mình; log của app có dòng `linux webview gpu` ghi chế độ đã chọn và lý do.
+- **Linux** có GTK 3 và WebKitGTK 4.1. Cửa sổ được vẽ bằng GPU, đúng mặc định của WebKitGTK, trừ driver NVIDIA độc quyền: ở đó GPU vẫn tắt cho tới khi được thử. Muốn thử thì chạy Davish với `DAVISH_WEBVIEW_GPU=always` (Davish sẽ đặt `WEBKIT_DISABLE_DMABUF_RENDERER=1`, cách sửa quen thuộc cho lỗi cửa sổ trắng, trừ khi bạn tự đặt) rồi báo kết quả ở [#185](https://github.com/2hjaito/davish/issues/185). Máy nào bị cửa sổ trắng hoặc nháy thì chạy với `DAVISH_WEBVIEW_GPU=never`; log của app (`~/.cache/davish/logs`) có dòng `linux webview gpu` ghi chế độ đã chọn và lý do.
 
 ### Server cần gì
 

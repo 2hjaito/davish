@@ -62,27 +62,32 @@ func TestDecideGPU(t *testing.T) {
 		{name: "AMD", cards: []c{{"card0", "0x1002", "amdgpu"}}, wantPolicy: GPUAlways, wantReason: "default"},
 		{name: "NVIDIA on nouveau", cards: []c{{"card0", "0x10de", "nouveau"}}, wantPolicy: GPUAlways, wantReason: "default"},
 		{
+			// Nobody has tried the GPU on this driver yet: stays as before.
 			name: "NVIDIA proprietary", cards: []c{{"card0", "0x10de", "nvidia"}},
-			wantPolicy: GPUAlways, wantDmabuf: "1", wantReason: "=1 set",
+			wantPolicy: GPUNever, wantReason: "GPU off until it is tested",
 		},
 		{
 			name: "hybrid laptop, NVIDIA second", cards: []c{{"card0", "0x8086", "i915"}, {"card1", "0x10de", "nvidia"}},
-			wantPolicy: GPUAlways, wantDmabuf: "1", wantReason: "=1 set",
+			wantPolicy: GPUNever, wantReason: "GPU off until it is tested",
 		},
 		{
-			name: "user's 0 is kept", cards: []c{{"card0", "0x10de", "nvidia"}},
-			env: map[string]string{dmabufEnv: "0"}, wantPolicy: GPUAlways, wantDmabuf: "0", wantReason: "kept as set",
+			name: "NVIDIA leaves the user's variable alone", cards: []c{{"card0", "0x10de", "nvidia"}},
+			env: map[string]string{dmabufEnv: "0"}, wantPolicy: GPUNever, wantDmabuf: "0", wantReason: "GPU off",
 		},
 		{
-			name: "cannot set the workaround", cards: []c{{"card0", "0x10de", "nvidia"}},
-			failSet: true, wantPolicy: GPUNever, wantReason: "could not set",
+			name: "NVIDIA opts in: workaround set", cards: []c{{"card0", "0x10de", "nvidia"}},
+			env: map[string]string{GPUEnv: "always"}, wantPolicy: GPUAlways, wantDmabuf: "1", wantReason: "=1 set",
+		},
+		{
+			name: "NVIDIA opts in, user's 0 kept", cards: []c{{"card0", "0x10de", "nvidia"}},
+			env: map[string]string{GPUEnv: "always", dmabufEnv: "0"}, wantPolicy: GPUAlways, wantDmabuf: "0", wantReason: "kept as set",
+		},
+		{
+			name: "NVIDIA opts in, cannot set the workaround", cards: []c{{"card0", "0x10de", "nvidia"}},
+			env: map[string]string{GPUEnv: "always"}, failSet: true, wantPolicy: GPUAlways, wantReason: "could not set",
 		},
 		{name: "override never", env: map[string]string{GPUEnv: "never"}, wantPolicy: GPUNever, wantReason: "is set"},
 		{name: "override ondemand", env: map[string]string{GPUEnv: " OnDemand "}, wantPolicy: GPUOnDemand, wantReason: "is set"},
-		{
-			name: "override always on NVIDIA leaves the env alone", cards: []c{{"card0", "0x10de", "nvidia"}},
-			env: map[string]string{GPUEnv: "always"}, wantPolicy: GPUAlways, wantReason: "is set",
-		},
 		{
 			name: "garbage override is ignored, said so", env: map[string]string{GPUEnv: "fast"},
 			wantPolicy: GPUAlways, wantReason: "unknown value",
