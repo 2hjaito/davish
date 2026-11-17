@@ -81,3 +81,45 @@ func TestUserWithoutSudo(t *testing.T) {
 		t.Fatalf("set password: %v", err)
 	}
 }
+
+// The Command log marks a change made as root with the password, without
+// claiming content was sent, and the export gives it back as plain sudo
+// (docs/adr/0022).
+func TestAuditMarksForExport(t *testing.T) {
+	ctx := audit.Changing(context.Background())
+	m, id := testsshd.ConnectAs(t, testsshd.Sudoer)
+	log := audit.New(discard{})
+	k := sudo.New(audit.NewRunner(m, log))
+	if err := k.SetPassword(context.Background(), id, []byte(testsshd.SudoPassword)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := k.Run(ctx, id, "services", "systemctl restart davish-ok.service", nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := k.Run(ctx, id, "files", "cat >/dev/null", []byte("secret content\n")); err != nil {
+		t.Fatal(err)
+	}
+	var restart, write *audit.Entry
+	for _, e := range log.Entries() {
+		if e.Exit != 0 {
+			continue
+		}
+		if strings.Contains(e.Command, "davish-ok") {
+			restart = &e
+		}
+		if strings.Contains(e.Command, "cat >/dev/null") {
+			write = &e
+		}
+	}
+	if restart == nil || !restart.Mutating || restart.Input {
+		t.Fatalf("restart entry = %+v", restart)
+	}
+	if write == nil || !write.Mutating || !write.Input {
+		t.Fatalf("write entry = %+v", write)
+	}
+	script := audit.Script(log.Entries(), nil, audit.ScriptOptions{})
+	if !strings.Contains(script, `'sudo sh -c '\''systemctl restart davish-ok.service'\'''`) ||
+		strings.Contains(script, "secret content") || strings.Contains(script, testsshd.SudoPassword) {
+		t.Errorf("script:\n%s", script)
+	}
+}

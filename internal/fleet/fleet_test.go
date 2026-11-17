@@ -188,7 +188,7 @@ func TestRunParallelAndAudit(t *testing.T) {
 		t.Fatalf("audit = %d entries", len(log.entries))
 	}
 	for _, e := range log.entries {
-		if e.App != "servers" || e.Command != "uptime" {
+		if e.App != "servers" || e.Command != "uptime" || !e.Mutating {
 			t.Errorf("audit entry %+v", e)
 		}
 	}

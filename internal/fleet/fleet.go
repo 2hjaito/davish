@@ -207,6 +207,8 @@ func (s *Service) record(it Item, start time.Time, exit int) {
 		Command:  it.Command,
 		Exit:     exit,
 		DurMs:    time.Since(start).Milliseconds(),
+		// Typed to act on the servers: exported like any change (docs/adr/0022).
+		Mutating: true,
 	})
 	s.log.Info("fleet command", "server", it.ServerID, "exit", exit)
 }

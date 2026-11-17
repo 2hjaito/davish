@@ -17,7 +17,7 @@ func (a *App) KeysAdd(serverID, text, command string) error {
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.keys.Add(a.ctx, serverID, text, command)
+	return a.keys.Add(a.change(), serverID, text, command)
 }
 
 // KeysPlanRemove describes removing a key from authorized_keys.
@@ -30,7 +30,7 @@ func (a *App) KeysRemove(serverID string, plan sshkeys.KeyPlan) error {
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.keys.Remove(a.ctx, serverID, plan)
+	return a.keys.Remove(a.change(), serverID, plan)
 }
 
 // KeysServer lists the key pairs in the server user's ~/.ssh.
@@ -48,7 +48,7 @@ func (a *App) KeysCreate(serverID, name, comment, command string) error {
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.keys.Create(a.ctx, serverID, name, comment, command)
+	return a.keys.Create(a.change(), serverID, name, comment, command)
 }
 
 // KeysPlanGitTest describes testing a server key against a git host.
