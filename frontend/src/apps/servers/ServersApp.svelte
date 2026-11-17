@@ -5,6 +5,7 @@
   import { t } from '../../lib/i18n'
   import { metrics } from '../../lib/stores/metrics.svelte'
   import { notifications } from '../../lib/stores/notifications.svelte'
+  import { load, save } from '../../lib/stores/persist'
   import { type ConnState, servers } from '../../lib/stores/servers.svelte'
   import { ui } from '../../lib/stores/ui.svelte'
   import Meter from '../../lib/ui/charts/Meter.svelte'
@@ -36,6 +37,19 @@
   /** The server whose map is open over the grid. */
   let mapOf = $state<string | null>(null)
   const mapped = $derived(servers.list.find((x) => x.id === mapOf && x.state === 'connected'))
+
+  // Cards show the readings; the list fits many servers on one screen (#178).
+  let view = $state<'cards' | 'list'>(
+    load<string>('serversView', 'cards') === 'list' ? 'list' : 'cards',
+  )
+  function setView(v: 'cards' | 'list') {
+    view = v
+    save('serversView', v)
+  }
+
+  /** Any state with a live or pending connection can be ended. */
+  const linked = (st: ConnState) =>
+    st === 'connected' || st === 'connecting' || st === 'reconnecting'
 
   // Many servers: a name filter and alerts first.
   let query = $state('')
@@ -70,10 +84,18 @@
 <TitleBar>
   <span class="title">{win.title}</span>
   <span class="count">{s.overview.connected(up, servers.list.length)}</span>
-  {#if !multi && servers.list.length > 0}
-    <button class="run-btn" disabled={up === 0} onclick={() => (multi = true)}>
-      <Icon name="terminal" size={12} />{s.run.open}
+  {#if !multi}
+    <button class="run-btn" title={s.add} onclick={() => ui.addServer()}>
+      <Icon name="plus" size={12} strokeWidth={2.4} />{s.overview.add}
     </button>
+    <button class="run-btn" title={s.import} onclick={() => (ui.importDialog = true)}>
+      <Icon name="download" size={12} />{s.overview.import}
+    </button>
+    {#if servers.list.length > 0}
+      <button class="run-btn" disabled={up === 0} onclick={() => (multi = true)}>
+        <Icon name="terminal" size={12} />{s.run.open}
+      </button>
+    {/if}
   {/if}
 </TitleBar>
 
@@ -85,8 +107,8 @@
   {:else if servers.list.length === 0}
     <Empty icon="server" title={s.none} hint={s.overview.emptyHint} />
   {:else}
-    {#if many}
-      <div class="tools">
+    <div class="tools">
+      {#if many}
         <input
           type="search"
           placeholder={s.map.filter}
@@ -100,89 +122,182 @@
             >
           {/each}
         </div>
+      {/if}
+      <span class="grow"></span>
+      <div class="segmented" role="group" aria-label={s.overview.view}>
+        {#each ['cards', 'list'] as const as v (v)}
+          <button type="button" aria-pressed={view === v} onclick={() => setView(v)}
+            >{s.overview.views[v]}</button
+          >
+        {/each}
+      </div>
+    </div>
+    {#if view === 'list'}
+      <table class="list">
+        <thead>
+          <tr>
+            <th>{s.overview.server}</th>
+            <th>{s.overview.cpu}</th>
+            <th>{s.overview.ram}</th>
+            <th>{s.overview.disk}</th>
+            <th>{s.overview.load}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {#each shown as srv (srv.id)}
+            {@const m = metrics.latest(srv.id)}
+            {@const al = alertsFor(notifications.list, srv.id)}
+            {@const live = srv.state === 'connected' && m}
+            <tr class:active={srv.id === servers.activeId}>
+              <td
+                ><div class="who">
+                  <span class="dot" style:background={dotColor[srv.state]}></span>
+                  <button
+                    class="link sname"
+                    title={s.overview.switch}
+                    onclick={() => servers.select(srv.id)}>{srv.name}</button
+                  >
+                  <span class="host">{srv.user}@{srv.host}</span>
+                  {#if al.count}
+                    <span class="badge {al.level}" title={al.latest}>
+                      <Icon name="warning" size={11} strokeWidth={2.4} />{al.count}
+                    </span>
+                  {/if}
+                </div></td
+              >
+              {#if live}
+                <td class="num">{formatPct(m.cpu)}</td>
+                <td class="num">{formatPct(memPct(m.memUsed, m.memTotal))}</td>
+                <td class="num">{formatPct(m.diskPct)}</td>
+                <td class="num">{m.load1.toFixed(2)}</td>
+              {:else}
+                <td class="muted" colspan="4">{s.status[srv.state]}</td>
+              {/if}
+              <td class="acts">
+                {#if srv.state === 'connected'}
+                  <button
+                    class="icon"
+                    title={s.map.open}
+                    aria-label={s.map.open}
+                    onclick={() => (mapOf = srv.id)}><Icon name="globe" size={13} /></button
+                  >
+                {/if}
+                {#if linked(srv.state)}
+                  <button
+                    class="icon"
+                    title={s.overview.disconnect}
+                    aria-label={s.overview.disconnect}
+                    onclick={() => void servers.disconnect(srv.id)}
+                    ><Icon name="power" size={13} /></button
+                  >
+                {:else}
+                  <button
+                    class="icon"
+                    title={s.overview.connect}
+                    aria-label={s.overview.connect}
+                    onclick={() => void servers.reconnect(srv.id)}
+                    ><Icon name="refresh" size={13} /></button
+                  >
+                {/if}
+                <button
+                  class="icon"
+                  title={s.edit}
+                  aria-label={s.edit}
+                  onclick={() => ui.editServer(srv.id)}><Icon name="editor" size={13} /></button
+                >
+              </td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    {:else}
+      <div class="grid">
+        {#each shown as srv (srv.id)}
+          {@const m = metrics.latest(srv.id)}
+          {@const al = alertsFor(notifications.list, srv.id)}
+          <article class="card" class:active={srv.id === servers.activeId}>
+            <header>
+              <span class="dot" style:background={dotColor[srv.state]}></span>
+              <span class="name">{srv.name}</span>
+              {#if al.count}
+                <span class="badge {al.level}" title={al.latest}>
+                  <Icon name="warning" size={11} strokeWidth={2.4} />{al.count}
+                </span>
+              {/if}
+            </header>
+            <p class="host">{srv.user}@{srv.host}</p>
+
+            {#if srv.state === 'connected' && m}
+              <dl>
+                <dt>{s.overview.cpu}</dt>
+                <dd><Meter pct={m.cpu} label={s.overview.cpu} /></dd>
+                <dd class="val">{formatPct(m.cpu)}</dd>
+                <dt>{s.overview.ram}</dt>
+                <dd>
+                  <Meter pct={memPct(m.memUsed, m.memTotal)} label={s.overview.ram} />
+                </dd>
+                <dd class="val">{formatGB(m.memUsed)} / {formatGB(m.memTotal)} GB</dd>
+                <dt>{s.overview.disk}</dt>
+                <dd><Meter pct={m.diskPct} label={s.overview.disk} /></dd>
+                <dd class="val">{formatPct(m.diskPct)}</dd>
+              </dl>
+              <p class="facts">
+                <span>{s.overview.load} {m.load1.toFixed(2)}</span>
+                <span>{s.overview.uptime} {formatDuration(m.uptime, t.units)}</span>
+                <span>↓ {formatRateShort(m.rxBps)} ↑ {formatRateShort(m.txBps)}</span>
+              </p>
+            {:else if srv.state === 'connected'}
+              <p class="state">{s.overview.waiting}</p>
+            {:else if srv.state === 'failed'}
+              <button
+                class="state failed why"
+                title={t.connError.details}
+                onclick={() => servers.showFailure(srv.id)}
+              >
+                {s.status.failed}{#if srv.error}: {t.errors[srv.error]}{/if}
+                <span class="more">{t.connError.details} ›</span>
+              </button>
+            {:else}
+              <p class="state">{s.status[srv.state]}</p>
+            {/if}
+
+            {#if al.latest}
+              <p class="alert {al.level}"><Icon name="warning" size={12} />{al.latest}</p>
+            {/if}
+
+            <footer>
+              {#if srv.state === 'connected'}
+                <button class="btn" onclick={() => (mapOf = srv.id)}>
+                  <Icon name="globe" size={13} />{s.map.open}
+                </button>
+              {/if}
+              {#if srv.state === 'disconnected'}
+                <button class="btn" onclick={() => void servers.ensureConnected(srv.id)}
+                  >{s.overview.connect}</button
+                >
+              {:else if srv.state === 'failed'}
+                <button class="btn" onclick={() => void servers.reconnect(srv.id)}
+                  >{s.reconnect}</button
+                >
+              {:else if linked(srv.state)}
+                <button class="btn" onclick={() => void servers.disconnect(srv.id)}
+                  >{s.overview.disconnect}</button
+                >
+              {/if}
+              <button class="btn" onclick={() => ui.editServer(srv.id)}>{s.edit}</button>
+              {#if srv.id !== servers.activeId}
+                <button class="btn btn-primary" onclick={() => servers.select(srv.id)}
+                  >{s.overview.switch}</button
+                >
+              {:else}
+                <span class="here">{s.overview.here}</span>
+              {/if}
+            </footer>
+          </article>
+        {/each}
       </div>
     {/if}
-    <div class="grid">
-      {#each shown as srv (srv.id)}
-        {@const m = metrics.latest(srv.id)}
-        {@const al = alertsFor(notifications.list, srv.id)}
-        <article class="card" class:active={srv.id === servers.activeId}>
-          <header>
-            <span class="dot" style:background={dotColor[srv.state]}></span>
-            <span class="name">{srv.name}</span>
-            {#if al.count}
-              <span class="badge {al.level}" title={al.latest}>
-                <Icon name="warning" size={11} strokeWidth={2.4} />{al.count}
-              </span>
-            {/if}
-          </header>
-          <p class="host">{srv.user}@{srv.host}</p>
-
-          {#if srv.state === 'connected' && m}
-            <dl>
-              <dt>{s.overview.cpu}</dt>
-              <dd><Meter pct={m.cpu} label={s.overview.cpu} /></dd>
-              <dd class="val">{formatPct(m.cpu)}</dd>
-              <dt>{s.overview.ram}</dt>
-              <dd>
-                <Meter pct={memPct(m.memUsed, m.memTotal)} label={s.overview.ram} />
-              </dd>
-              <dd class="val">{formatGB(m.memUsed)} / {formatGB(m.memTotal)} GB</dd>
-              <dt>{s.overview.disk}</dt>
-              <dd><Meter pct={m.diskPct} label={s.overview.disk} /></dd>
-              <dd class="val">{formatPct(m.diskPct)}</dd>
-            </dl>
-            <p class="facts">
-              <span>{s.overview.load} {m.load1.toFixed(2)}</span>
-              <span>{s.overview.uptime} {formatDuration(m.uptime, t.units)}</span>
-              <span>↓ {formatRateShort(m.rxBps)} ↑ {formatRateShort(m.txBps)}</span>
-            </p>
-          {:else if srv.state === 'connected'}
-            <p class="state">{s.overview.waiting}</p>
-          {:else if srv.state === 'failed'}
-            <button
-              class="state failed why"
-              title={t.connError.details}
-              onclick={() => servers.showFailure(srv.id)}
-            >
-              {s.status.failed}{#if srv.error}: {t.errors[srv.error]}{/if}
-              <span class="more">{t.connError.details} ›</span>
-            </button>
-          {:else}
-            <p class="state">{s.status[srv.state]}</p>
-          {/if}
-
-          {#if al.latest}
-            <p class="alert {al.level}"><Icon name="warning" size={12} />{al.latest}</p>
-          {/if}
-
-          <footer>
-            {#if srv.state === 'connected'}
-              <button class="btn" onclick={() => (mapOf = srv.id)}>
-                <Icon name="globe" size={13} />{s.map.open}
-              </button>
-            {/if}
-            {#if srv.state === 'disconnected'}
-              <button class="btn" onclick={() => void servers.ensureConnected(srv.id)}
-                >{s.overview.connect}</button
-              >
-            {:else if srv.state === 'failed'}
-              <button class="btn" onclick={() => void servers.reconnect(srv.id)}
-                >{s.reconnect}</button
-              >
-              <button class="btn" onclick={() => ui.editServer(srv.id)}>{s.edit}</button>
-            {/if}
-            {#if srv.id !== servers.activeId}
-              <button class="btn btn-primary" onclick={() => servers.select(srv.id)}
-                >{s.overview.switch}</button
-              >
-            {:else}
-              <span class="here">{s.overview.here}</span>
-            {/if}
-          </footer>
-        </article>
-      {/each}
-    </div>
     <p class="hint">{s.overview.hint}</p>
   {/if}
 </div>
@@ -193,6 +308,100 @@
     align-items: center;
     gap: 10px;
     margin-bottom: 12px;
+  }
+
+  .grow {
+    flex: 1;
+  }
+
+  .list {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+  }
+
+  .list th {
+    padding: 4px 8px;
+    white-space: nowrap;
+    text-align: left;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--fg-muted);
+    border-bottom: 1px solid var(--divider-soft);
+  }
+
+  .list td {
+    padding: 5px 8px;
+    border-bottom: 1px solid var(--divider-soft);
+    white-space: nowrap;
+  }
+
+  .list tr.active td {
+    background: var(--selection-inactive);
+  }
+
+  .list .who {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .list th:first-child,
+  .list td:first-child {
+    width: 100%;
+  }
+
+  .list .sname {
+    min-width: 120px;
+    text-align: left;
+  }
+
+  .list .host {
+    color: var(--fg-muted);
+    font-size: var(--text-xs);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .list .num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .list .muted {
+    color: var(--fg-muted);
+    font-size: var(--text-xs);
+  }
+
+  .list .acts {
+    text-align: right;
+  }
+
+  .link {
+    border: 0;
+    background: none;
+    padding: 0;
+    font: inherit;
+    font-weight: 600;
+    color: var(--fg);
+    cursor: pointer;
+  }
+
+  .link:hover {
+    color: var(--accent);
+  }
+
+  .icon {
+    display: inline-flex;
+    padding: 3px 5px;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    color: var(--fg-muted);
+  }
+
+  .icon:hover {
+    background: var(--fill-soft);
+    color: var(--fg);
   }
 
   .tools input {

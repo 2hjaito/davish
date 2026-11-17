@@ -10,7 +10,7 @@ import { appLock } from '../stores/lock.svelte'
 import { servers } from '../stores/servers.svelte'
 import { ui } from '../stores/ui.svelte'
 import { updates } from '../stores/updates.svelte'
-import { openAudit, openTerminalAt, openTransfers } from '../wm/intents.svelte'
+import { openAudit, openServers, openTerminalAt, openTransfers } from '../wm/intents.svelte'
 import { wm } from '../wm/windowManager.svelte'
 import { appMenus, type Menu, type MenuEntry } from './menus.svelte'
 
@@ -75,6 +75,13 @@ export function buildMenus(): Menu[] {
       items: [
         { label: m.addServer, run: () => ui.addServer() },
         { label: m.importServers, run: () => (ui.importDialog = true) },
+        {
+          // Asked for in #178: All servers from the keyboard.
+          label: t.servers.overview.open,
+          combo: 'shift+S',
+          disabled: servers.list.length === 0,
+          run: () => openServers(servers.activeId || servers.list[0]?.id || ''),
+        },
         null,
         server && online
           ? { label: m.disconnect(server.name), run: () => void servers.disconnect(server.id) }
