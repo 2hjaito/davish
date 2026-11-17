@@ -2,12 +2,12 @@
   import { untrack } from 'svelte'
   import { MediaQuery } from 'svelte/reactivity'
 
-import { setWindowBackground } from './lib/api/runtime'
-import Desktop from './lib/shell/Desktop.svelte'
-import LockScreen from './lib/shell/LockScreen.svelte'
-import { appLock } from './lib/stores/lock.svelte'
-import { resolveTheme, settings } from './lib/stores/settings.svelte'
-import { mixWallpaper } from './lib/wallpaper'
+  import { setWindowBackground } from './lib/api/runtime'
+  import Desktop from './lib/shell/Desktop.svelte'
+  import LockScreen from './lib/shell/LockScreen.svelte'
+  import { appLock } from './lib/stores/lock.svelte'
+  import { resolveTheme, settings } from './lib/stores/settings.svelte'
+  import { mixWallpaper } from './lib/wallpaper'
 
   const systemDark = new MediaQuery('prefers-color-scheme: dark')
 
