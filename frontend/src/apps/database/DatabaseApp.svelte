@@ -400,208 +400,216 @@
   <Empty icon="disk" title={error || d.loading} />
 {:else}
   <div class="db">
-    {#if flash}
-      <p class="flash" role="status">
-        {flash}
-        {#if lastDump && flash.includes(lastDump)}
-          <button class="link" onclick={() => openFilesAt(win.serverID, dir(lastDump))}
-            >{d.showInFiles}</button
-          >
-        {/if}
-      </p>
-    {/if}
-    {#if error}<p class="error" role="alert">{error}</p>{/if}
-
-    <details class="how">
-      <summary><Icon name="info" size={13} /> {d.how.title}</summary>
-      <ul>
-        {#each d.how.items as item (item)}<li>{item}</li>{/each}
-      </ul>
-    </details>
-
-    {#each shown as e (e.kind)}
-      <section>
-        <div class="head">
-          <h4>{d.engines[e.kind]}</h4>
-          {#if e.installed && !e.needsRoot && !e.needsAuth && !e.error}
-            <button type="button" class="btn" onclick={() => void tunnel(e.kind)}>
-              <Icon name="link" size={13} />
-              {d.tunnel}
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              onclick={() => {
-                creating = e.kind
-                dbName = ''
-                userName = ''
-                createSQL = ''
-                error = ''
-              }}
+    <div class="col">
+      {#if flash}
+        <p class="flash" role="status">
+          {flash}
+          {#if lastDump && flash.includes(lastDump)}
+            <button class="link" onclick={() => openFilesAt(win.serverID, dir(lastDump))}
+              >{d.showInFiles}</button
             >
-              <Icon name="plus" size={13} />
-              {d.create}
-            </button>
           {/if}
-        </div>
-        {#if !e.installed}
-          <p class="muted">{d.notInstalled}</p>
-          <NotInstalled
-            compact
-            serverID={win.serverID}
-            tool={e.kind === 'mysql' ? 'mariadb' : 'postgres'}
-            name={d.engines[e.kind]}
-            onretry={() => void refresh()}
-          />
-        {:else if e.needsRoot}
-          <p class="muted">{d.needsRoot}</p>
-          {#if e.askSudo}
-            <button type="button" class="btn btn-primary" onclick={() => void unlock(e.kind)}>
-              <Icon name="key" size={13} />
-              {t.sudo.journal}
-            </button>
+        </p>
+      {/if}
+      {#if error}<p class="error" role="alert">{error}</p>{/if}
+
+      <details class="how">
+        <summary><Icon name="info" size={13} /> {d.how.title}</summary>
+        <ul>
+          {#each d.how.items as item (item)}<li>{item}</li>{/each}
+        </ul>
+      </details>
+
+      {#each shown as e (e.kind)}
+        <section class="card">
+          <div class="head">
+            <Icon name="disk" size={15} />
+            <h4>{d.engines[e.kind]}</h4>
+            {#if e.installed && !e.needsRoot && !e.needsAuth && !e.error}
+              <button type="button" class="btn" onclick={() => void tunnel(e.kind)}>
+                <Icon name="link" size={13} />
+                {d.tunnel}
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                onclick={() => {
+                  creating = e.kind
+                  dbName = ''
+                  userName = ''
+                  createSQL = ''
+                  error = ''
+                }}
+              >
+                <Icon name="plus" size={13} />
+                {d.create}
+              </button>
+            {/if}
+          </div>
+          {#if !e.installed}
+            <p class="muted">{d.notInstalled}</p>
+            <NotInstalled
+              compact
+              serverID={win.serverID}
+              tool={e.kind === 'mysql' ? 'mariadb' : 'postgres'}
+              name={d.engines[e.kind]}
+              onretry={() => void refresh()}
+            />
+          {:else if e.needsRoot}
+            <p class="muted">{d.needsRoot}</p>
+            <div class="actions">
+              {#if e.askSudo}
+                <button type="button" class="btn btn-primary" onclick={() => void unlock(e.kind)}>
+                  <Icon name="key" size={13} />
+                  {t.sudo.journal}
+                </button>
+              {/if}
+              <button
+                type="button"
+                class="btn"
+                onclick={() => openTerminalAt(win.serverID, undefined, e.client)}
+              >
+                <Icon name="terminal" size={13} />
+                {d.openClient(e.client)}
+              </button>
+            </div>
+          {:else if e.needsAuth}
+            <p class="muted">{d.mongo.needsAuth}</p>
+            {#if e.error}<p class="error">{e.error}</p>{/if}
+            <div class="actions">
+              <button type="button" class="btn btn-primary" onclick={() => askMongo()}>
+                <Icon name="key" size={13} />
+                {d.mongo.login}
+              </button>
+            </div>
+          {:else if e.error}
+            <p class="error">{e.error}</p>
+          {:else if e.dbs.length === 0}
+            <p class="muted">{d.none}</p>
+          {:else}
+            <table>
+              <tbody>
+                {#each e.dbs as db (db.name)}
+                  <tr>
+                    <td class="mono">{db.name}</td>
+                    {#if e.kind === 'mongo'}
+                      <td class="num muted">{d.collections(db.collections ?? 0)}</td>
+                    {/if}
+                    <td class="num muted">{formatBytes(db.size)}</td>
+                    <td class="act">
+                      <button
+                        class="link"
+                        disabled={busy === db.name}
+                        onclick={() => void dump(e.kind, db.name)}
+                        >{busy === db.name ? d.working : d.dump}</button
+                      >
+                      <button
+                        class="link"
+                        disabled={busy === db.name}
+                        onclick={() => void askRestore(e.kind, db.name)}>{d.restore}</button
+                      >
+                      <button class="link danger" onclick={() => void askDrop(e.kind, db.name)}
+                        >{d.drop}</button
+                      >
+                    </td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
           {/if}
+          {#if e.login}
+            <p class="muted small">
+              {d.mongo.loggedIn(e.login)}
+              <button class="link" onclick={() => void forgetMongo()}>{d.mongo.forget}</button>
+            </p>
+          {/if}
+        </section>
+      {/each}
+
+      <section class="card">
+        <div class="head">
+          <Icon name="file" size={15} />
+          <h4>{d.sqlite.title}</h4>
           <button
             type="button"
             class="btn"
-            onclick={() => openTerminalAt(win.serverID, undefined, e.client)}
+            onclick={() => {
+              addOpen = true
+              addPath = ''
+            }}
           >
-            <Icon name="terminal" size={13} />
-            {d.openClient(e.client)}
+            <Icon name="plus" size={13} />
+            {d.sqlite.add}
           </button>
-        {:else if e.needsAuth}
-          <p class="muted">{d.mongo.needsAuth}</p>
-          {#if e.error}<p class="error">{e.error}</p>{/if}
-          <button type="button" class="btn btn-primary" onclick={() => askMongo()}>
-            <Icon name="key" size={13} />
-            {d.mongo.login}
-          </button>
-        {:else if e.error}
-          <p class="error">{e.error}</p>
-        {:else if e.dbs.length === 0}
-          <p class="muted">{d.none}</p>
+        </div>
+        {#if files.length === 0}
+          <p class="muted">{d.sqlite.none}</p>
         {:else}
           <table>
             <tbody>
-              {#each e.dbs as db (db.name)}
+              {#each files as path (path)}
+                {@const info = infos[path]}
                 <tr>
-                  <td class="mono">{db.name}</td>
-                  {#if e.kind === 'mongo'}
-                    <td class="num muted">{d.collections(db.collections ?? 0)}</td>
-                  {/if}
-                  <td class="num muted">{formatBytes(db.size)}</td>
+                  <td class="file">
+                    <span class="mono" title={path}>{baseName(path)}</span>
+                    <small class="mono">{dir(path)}</small>
+                    {#if typeof info === 'string'}
+                      <small class="error">{info}</small>
+                    {:else if info}
+                      <details class="tables">
+                        <summary>
+                          {d.sqlite.tables(info.tables.length)} · {formatBytes(info.size)} · {info.journal}
+                          {#if info.root}· {d.sqlite.rootOnly}{/if}
+                        </summary>
+                        <ul>
+                          {#each info.tables as tb (tb.name)}
+                            <li>
+                              <span class="mono">{tb.name}</span>
+                              <small>{d.sqlite.rows(tb.rows)}</small>
+                            </li>
+                          {/each}
+                        </ul>
+                      </details>
+                    {:else}
+                      <small>{d.loading}</small>
+                    {/if}
+                  </td>
                   <td class="act">
+                    {#if info && typeof info !== 'string'}
+                      <button
+                        class="link"
+                        disabled={busy === path}
+                        onclick={() => void backupSQLite(path)}
+                        >{busy === path ? d.working : d.sqlite.backup}</button
+                      >
+                      <button class="link" onclick={() => void askSQLiteRestore(info)}
+                        >{d.restore}</button
+                      >
+                    {/if}
                     <button
                       class="link"
-                      disabled={busy === db.name}
-                      onclick={() => void dump(e.kind, db.name)}
-                      >{busy === db.name ? d.working : d.dump}</button
+                      title={d.showInFiles}
+                      aria-label={d.showInFiles}
+                      onclick={() => openFilesAt(win.serverID, dir(path))}
                     >
+                      <Icon name="folder" size={13} />
+                    </button>
                     <button
                       class="link"
-                      disabled={busy === db.name}
-                      onclick={() => void askRestore(e.kind, db.name)}>{d.restore}</button
+                      title={d.sqlite.remove}
+                      aria-label={d.sqlite.remove}
+                      onclick={() => sqliteFiles.remove(win.serverID, path)}
                     >
-                    <button class="link danger" onclick={() => void askDrop(e.kind, db.name)}
-                      >{d.drop}</button
-                    >
+                      <Icon name="close" size={13} />
+                    </button>
                   </td>
                 </tr>
               {/each}
             </tbody>
           </table>
         {/if}
-        {#if e.login}
-          <p class="muted small">
-            {d.mongo.loggedIn(e.login)}
-            <button class="link" onclick={() => void forgetMongo()}>{d.mongo.forget}</button>
-          </p>
-        {/if}
       </section>
-    {/each}
-
-    <section>
-      <div class="head">
-        <h4>{d.sqlite.title}</h4>
-        <button
-          type="button"
-          class="btn"
-          onclick={() => {
-            addOpen = true
-            addPath = ''
-          }}
-        >
-          <Icon name="plus" size={13} />
-          {d.sqlite.add}
-        </button>
-      </div>
-      {#if files.length === 0}
-        <p class="muted">{d.sqlite.none}</p>
-      {:else}
-        <table>
-          <tbody>
-            {#each files as path (path)}
-              {@const info = infos[path]}
-              <tr>
-                <td class="file">
-                  <span class="mono" title={path}>{baseName(path)}</span>
-                  <small class="mono">{dir(path)}</small>
-                  {#if typeof info === 'string'}
-                    <small class="error">{info}</small>
-                  {:else if info}
-                    <details class="tables">
-                      <summary>
-                        {d.sqlite.tables(info.tables.length)} · {formatBytes(info.size)} · {info.journal}
-                        {#if info.root}· {d.sqlite.rootOnly}{/if}
-                      </summary>
-                      <ul>
-                        {#each info.tables as tb (tb.name)}
-                          <li>
-                            <span class="mono">{tb.name}</span>
-                            <small>{d.sqlite.rows(tb.rows)}</small>
-                          </li>
-                        {/each}
-                      </ul>
-                    </details>
-                  {:else}
-                    <small>{d.loading}</small>
-                  {/if}
-                </td>
-                <td class="act">
-                  {#if info && typeof info !== 'string'}
-                    <button
-                      class="link"
-                      disabled={busy === path}
-                      onclick={() => void backupSQLite(path)}
-                      >{busy === path ? d.working : d.sqlite.backup}</button
-                    >
-                    <button class="link" onclick={() => void askSQLiteRestore(info)}
-                      >{d.restore}</button
-                    >
-                  {/if}
-                  <button
-                    class="link"
-                    title={d.showInFiles}
-                    aria-label={d.showInFiles}
-                    onclick={() => openFilesAt(win.serverID, dir(path))}
-                  >
-                    <Icon name="folder" size={13} />
-                  </button>
-                  <button
-                    class="link"
-                    title={d.sqlite.remove}
-                    aria-label={d.sqlite.remove}
-                    onclick={() => sqliteFiles.remove(win.serverID, path)}
-                  >
-                    <Icon name="close" size={13} />
-                  </button>
-                </td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      {/if}
-    </section>
+    </div>
   </div>
 {/if}
 
@@ -711,7 +719,19 @@
       </ul>
     {/if}
     <h5>{d.found.files}</h5>
-    {#if !found.sqlite3}<p class="warn">{d.found.noSqlite3}</p>{/if}
+    {#if !found.sqlite3}
+      <p class="warn"><Icon name="warning" size={14} /> {d.found.noSqlite3}</p>
+      <div class="install">
+        <NotInstalled
+          compact
+          serverID={win.serverID}
+          tool="sqlite3"
+          name="sqlite3"
+          onretry={() => void find()}
+          onopen={() => (findOpen = false)}
+        />
+      </div>
+    {/if}
     {#if found.sqlite.length === 0}
       <p class="muted">{d.found.noFiles}</p>
     {:else}
@@ -1019,18 +1039,52 @@
     color: var(--danger);
   }
 
+  .col {
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
   .head {
     display: flex;
     gap: 8px;
     align-items: center;
+    min-height: 28px;
+  }
+
+  .head > :global(svg) {
+    flex-shrink: 0;
+    color: var(--accent);
   }
 
   h4 {
     margin: 0;
+    font-size: var(--text-md);
+    font-weight: 600;
   }
 
-  section {
-    margin-top: 18px;
+  .card {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--divider-soft);
+    border-radius: var(--card-radius);
+    background: var(--card-bg);
+  }
+
+  .card > :last-child,
+  .card table tr:last-child td {
+    margin-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .install {
+    margin: 4px 0 8px;
   }
 
   .head h4 {
@@ -1060,6 +1114,7 @@
 
   .mono {
     font-family: var(--font-mono);
+    -webkit-user-select: text;
     user-select: text;
   }
 
@@ -1112,6 +1167,7 @@
     font-family: var(--font-mono);
     font-size: var(--text-sm);
     white-space: pre-wrap;
+    -webkit-user-select: text;
     user-select: text;
   }
 

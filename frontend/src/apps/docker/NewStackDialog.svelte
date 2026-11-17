@@ -146,6 +146,7 @@
     font-family: var(--font-mono);
     font-size: var(--text-sm);
     white-space: pre;
+    -webkit-user-select: text;
     user-select: text;
   }
 

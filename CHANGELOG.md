@@ -4,12 +4,19 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.14.0] - 2026-11-17
+
 ### Thêm
 - Tất cả server: **Chạy lệnh…** chạy một lệnh trên nhiều server, mỗi server một tab terminal, tối đa 4 server cùng lúc. Tab nào hỏi lại (mật khẩu sudo, `[Y/n]`) thì được đưa lên để bạn trả lời ngay trong tab; Davish không bao giờ tự nhập mật khẩu sudo khi chạy nhiều server. Hộp xác nhận liệt kê đủ server và đúng lệnh, phải gõ số server khi chạy từ 3 server hoặc lệnh trông nguy hiểm. Có exit code từng server, Dừng tất cả, Chạy lại trên server lỗi, và **Cập nhật package** theo trình quản lý package của từng server với `sudo -n`. Mỗi server một dòng trong Nhật ký lệnh.
 - Nhật ký lệnh: **Chỉ lệnh thay đổi server** (bật sẵn) ẩn lệnh đọc và polling, và **Xuất script…** biến các lệnh được tick thành bash script chạy lại chúng, mỗi lệnh qua một `ssh -t` riêng để sudo hỏi được. Mỗi server một khối, sudo của Davish viết lại thành `sudo` thường, nội dung gửi qua stdin chỉ để lại comment (không bao giờ được lưu), lệnh lỗi chỉ xuất khi bạn chọn kèm. Sao chép hoặc lưu thành file chạy được.
 - Files: ô tìm có ba phạm vi. **Thư mục này** lọc như trước; **Cả cây** tìm tên file trong mọi thư mục con bằng `find`; **Nội dung** tìm dòng chứa chữ đó bằng `grep` (bỏ qua file nhị phân, `.git`, `node_modules`). Nhấn Enter để tìm trên server: tối đa 500 kết quả trong 30 giây, hiện đúng lệnh đã chạy, có nút Dừng và số chỗ không có quyền đọc. Kết quả nội dung mở Editor đúng dòng; nút thư mục đưa về thư mục chứa file. Chỉ đọc, không thử lại bằng sudo.
 - Logs: **Tìm trong toàn bộ** (hoặc Enter trong ô lọc) tìm trong cả lịch sử của file, journal hay container ngay trên server, không chỉ 200 dòng đang hiện, và trả 500 dòng khớp gần nhất. Với file, bấm một kết quả để đọc các dòng xung quanh, lật trang trước/sau mà không tải cả file về (file log vài GB vẫn nhanh).
 - Nhập server từ Ansible inventory (INI): tab mới trong hộp nhập, cạnh `~/.ssh/config`. Đọc `ansible_host`, `ansible_user`, `ansible_port`, file key và `ProxyJump` trong `ansible_ssh_common_args`, có tính biến của group, group con và dải như `web[01:03]`; chọn cả group một lần. File chỉ được đọc; mật khẩu trong file không bao giờ được đọc, host dùng template, giá trị Vault hoặc kết nối không phải SSH được liệt kê là bỏ qua kèm lý do. Inventory YAML báo rõ là chưa hỗ trợ.
+
+### Sửa
+- Database: server chưa có sqlite3 thì hộp Dò đưa luôn lệnh cài sqlite3 theo trình quản lý package của server, kèm nút Chạy trong Terminal (hộp Dò tự đóng để Terminal không bị che), thay vì chỉ bảo đi cài trong Gói phần mềm. Các mục trong app Database hiện thành từng thẻ.
+- macOS và Linux: bôi đen và sao chép được chữ ở những chỗ đáng lẽ chọn được (đường dẫn file trong hộp Dò, lệnh trong các hộp xác nhận, diff của Git…). WebKit chỉ đọc `-webkit-user-select`, nên trước đây những chỗ này không chọn được.
+- Menu chọn server: nhiều server thì danh sách tự cuộn, các mục Tất cả server, Thêm server, Nhập luôn nằm trong tầm bấm (#178).
 
 ## [1.13.10] - 2026-11-16
 

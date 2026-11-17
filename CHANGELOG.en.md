@@ -4,12 +4,19 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.14.0] - 2026-11-17
+
 ### Added
 - All servers: **Run a command…** runs one command on several servers, each in its own terminal tab, at most four at a time. A tab that asks something (a sudo password, `[Y/n]`) comes forward and you answer there; Davish never types a sudo password for a run. The confirm dialog lists every server and the exact command, and asks you to type the number of servers from three servers or for a command that looks destructive. Exit code per server, Stop all, Run again on the failed ones, and **Update packages** with each server's package manager and `sudo -n`. One line per server in the Command log.
 - Command log: **Changes only** (on by default) hides reads and polling, and **Export script…** turns the ticked commands into a bash script that runs them again, each over its own `ssh -t` so sudo can ask. One block per server, Davish's sudo written as a plain `sudo`, content sent on stdin left as a comment (it is never recorded), failed commands only if you include them. Copy it or save it as an executable file.
 - Files: the search box has three scopes. **This folder** filters as before; **Subfolders** finds names in every subfolder with `find`; **Contents** finds the lines that contain the text with `grep` (binary files, `.git` and `node_modules` are skipped). Press Enter to search the server: up to 500 results within 30 seconds, with the exact command that ran, a Stop button and a count of the places that could not be read. A content result opens in the Editor at its line; the folder button shows the file in its folder. Read only, never retried through sudo.
 - Logs: **Search all** (or Enter in the filter) searches the whole history of a file, the journal or a container on the server, not just the 200 lines on screen, and returns the latest 500 matching lines. For a file, click a result to read the lines around it and page earlier or later without downloading the file (a log of several GB stays quick).
 - Import servers from an Ansible inventory (INI): a new tab in the import dialog next to `~/.ssh/config`. It reads `ansible_host`, `ansible_user`, `ansible_port`, the key file and a `ProxyJump` in `ansible_ssh_common_args`, with group variables, child groups and ranges such as `web[01:03]`, and lets you pick a whole group at a time. The file is only read; passwords in it are never read, and hosts with templates, Vault values or a non-SSH connection are listed as skipped with the reason. A YAML inventory says it is not supported yet.
+
+### Fixed
+- Database: when the server has no sqlite3, the Find dialog offers the sqlite3 install command for the server's package manager with a Run in Terminal button (the dialog closes so Terminal is not hidden behind it), instead of only pointing to Packages. Each section of the Database app is now a card.
+- macOS and Linux: text that should be selectable can be selected and copied again (file paths in the Find dialog, commands in confirm dialogs, Git diffs…). WebKit only reads `-webkit-user-select`, so these places could not be selected.
+- Server menu: with many servers the list scrolls, so All servers, Add a server and Import stay within reach (#178).
 
 ## [1.13.10] - 2026-11-16
 

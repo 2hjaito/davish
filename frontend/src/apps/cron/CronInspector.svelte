@@ -281,6 +281,7 @@
   code {
     font-family: var(--font-mono);
     font-size: var(--text-sm);
+    -webkit-user-select: text;
     user-select: text;
   }
 
@@ -391,6 +392,7 @@
     line-height: 1.5;
     white-space: pre-wrap;
     word-break: break-word;
+    -webkit-user-select: text;
     user-select: text;
   }
 </style>

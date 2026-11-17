@@ -326,6 +326,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    -webkit-user-select: text;
     user-select: text;
   }
 
