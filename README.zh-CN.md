@@ -28,13 +28,13 @@
 
 - **打开就能用。** 没有登录页，也没有 Web 面板：Davish 用你的 SSH 密钥连上你上次使用的服务器，直接进入它的桌面。服务器上不会多出任何监听服务，所以不需要额外开放或保护新的端口。
 - **无 Agent。** Davish 只需要 `sshd` 和 SFTP。所有操作都从你的电脑通过 SSH 完成，不会往服务器上复制、安装或留下任何东西。
-- **每条命令都看得见。** 任何有破坏性的操作（停止服务、删除文件、重启容器、替换 crontab）在执行前都会显示完整的命令。命令日志记录了 Davish 代你执行过的所有操作。
+- **每条命令都看得见。** 任何有破坏性的操作（停止服务、删除文件、重启容器、替换 crontab）在执行前都会显示完整的命令。命令日志记录了 Davish 代你执行过的所有操作，并能把更改导出为可阅读、可重放的 shell 脚本。
 - **密码只存在钥匙串里。** 密码和私钥口令只保存在系统钥匙串中。`sudo` 密码从不保存：需要 root 时，Davish 每个会话只询问一次，只保存在内存中，闲置 15 分钟后自动忘记，并通过 stdin 交给 sudo；你也可以自己在终端中运行命令。
 - **离开时自动锁定。** 独立的锁屏密码，macOS 上支持 Touch ID；电脑唤醒、空闲一段时间或按 `⌘L` 时锁定。锁定期间会话照常运行，但解锁前不会向服务器发送任何操作。
 - **多台服务器，一个桌面。** 每台服务器是一个工作区（`⌘1`…`⌘9`），各自记住自己的窗口。拖动文件即可在服务器之间复制。
 - **自动更新。** 有新版本时会显示更新内容，可选择更新、稍后或跳过此版本；Davish 自动下载、校验签名并重启到新版本，无需重新安装。
 - **简体中文、英文、越南文或西班牙文界面。** 在设置中选择语言；首次启动时跟随系统语言。中文翻译刚刚加入，欢迎在 [Issues](https://github.com/2hjaito/davish/issues) 中指出不通顺的地方。
-- **直接使用你的 `~/.ssh/config`。** 一次导入其中的主机，包括密钥和 `ProxyJump`；Davish 只读取这个文件。堡垒机后面的服务器会经由堡垒机连接，每一跳都单独校验主机密钥，整条链路断开后会自动重连。
+- **直接使用你的 `~/.ssh/config` 和 Ansible inventory。** 一次导入其中的主机，包括密钥和 `ProxyJump`，也可以一次导入整个 Ansible 分组；Davish 只读取这些文件。堡垒机后面的服务器会经由堡垒机连接，每一跳都单独校验主机密钥，整条链路断开后会自动重连。
 
 ## 功能
 
@@ -42,11 +42,12 @@
 
 - [终端](FEATURES.md#terminal)：多标签、GPU 渲染、可选的 powerline 提示符
 - [常用命令](FEATURES.md#saved-commands)：保存常用命令，一键输入到终端
+- [命令日志](FEATURES.md#command-log)：Davish 运行过的每条命令，可导出为通过 ssh 重放这些更改的脚本
 - [文件](FEATURES.md#files)：Finder 风格的 SFTP，拖放上传下载，跨服务器复制，在服务器上按文件名和内容搜索，按住文件拖动即弹出环形操作菜单
 - [编辑器](FEATURES.md#editor)：基于 CodeMirror，原子保存并自动备份
 - [日志](FEATURES.md#logs)：journal、日志文件和容器日志，实时查看，并可在服务器上搜索全部历史
 - [监控](FEATURES.md#monitor)：CPU、内存、磁盘、网络、GPU、进程，支持 Linux 和 Windows 服务器
-- [所有服务器](FEATURES.md#all-servers)：在一个窗口里查看所有服务器的状态和告警，以及每台服务器对外提供什么的地图
+- [所有服务器](FEATURES.md#all-servers)：在一个窗口里查看所有服务器的状态和告警、每台服务器对外提供什么的地图，以及在多台服务器上运行同一条命令（每台一个终端标签页）
 
 **服务与应用**
 
@@ -66,7 +67,7 @@
 - [磁盘](FEATURES.md#disk)：用目录树查看空间去向，说明哪些没能统计及原因，可删除和清理
 - [安全](FEATURES.md#security)：按小时和按 IP 统计的失败登录、被尝试的用户、当前会话、ufw、fail2ban
 - [SSH 密钥](FEATURES.md#ssh-keys)：authorized_keys、部署密钥、本机密钥
-- [~/.ssh/config 与 ProxyJump](FEATURES.md#sshconfig-and-proxyjump)：导入主机，经由堡垒机连接
+- [~/.ssh/config、Ansible 与 ProxyJump](FEATURES.md#sshconfig-ansible-and-proxyjump)：从 ssh config 或 INI inventory 导入主机，经由堡垒机连接
 
 **桌面**
 

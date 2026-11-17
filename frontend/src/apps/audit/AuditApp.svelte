@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { SvelteSet } from 'svelte/reactivity'
+
   import { copyText } from '../../lib/api/clipboard'
   import type { AuditEntry } from '../../lib/api/events'
   import { t } from '../../lib/i18n'
@@ -10,11 +12,15 @@
   import { openSnippets, openTerminalAt } from '../../lib/wm/intents.svelte'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import type { AppProps } from '../types'
+  import { defaultPick } from './exportScript'
+  import ScriptDialog from './ScriptDialog.svelte'
 
   let { win }: AppProps = $props()
 
   let query = $state('')
   let onlyThis = $state(false)
+  /** Only commands that changed a server; reads and polling are hidden. */
+  let onlyChanges = $state(true)
   let copied = $state<number | null>(null)
 
   // Newest first, like Transfers.
@@ -24,6 +30,7 @@
       .filter(
         (e) =>
           (!onlyThis || e.serverID === servers.activeId) &&
+          (!onlyChanges || e.mutating) &&
           (!q || e.command.toLowerCase().includes(q) || e.app.includes(q)),
       )
       .reverse()
@@ -55,6 +62,22 @@
     openSnippets(servers.activeId || e.serverID)
   }
 
+  // Choosing entries for a script (docs/adr/0022).
+  let picking = $state(false)
+  const picked = new SvelteSet<number>()
+  let exporting = $state<AuditEntry[] | null>(null)
+
+  function startPick() {
+    picked.clear()
+    for (const id of defaultPick(rows)) picked.add(id)
+    picking = true
+  }
+
+  function toggle(id: number, on: boolean) {
+    if (on) picked.add(id)
+    else picked.delete(id)
+  }
+
   async function copy(e: AuditEntry) {
     if (await copyText(e.command)) {
       copied = e.id
@@ -81,19 +104,40 @@
       />
     </label>
     <label class="only">
+      <input type="checkbox" class="switch" role="switch" bind:checked={onlyChanges} />
+      {t.audit.onlyChanges}
+    </label>
+    <label class="only">
       <input type="checkbox" class="switch" role="switch" bind:checked={onlyThis} />
       {t.audit.onlyThis}
     </label>
+    {#if !picking}
+      <button class="btn export" disabled={rows.length === 0} onclick={startPick}>
+        <Icon name="download" size={13} strokeWidth={2.2} />{t.audit.export.start}
+      </button>
+    {/if}
   </div>
 
   {#if audit.entries.length === 0}
     <Empty icon="list" title={t.audit.empty} hint={t.audit.emptyHint} />
   {:else if rows.length === 0}
-    <Empty icon="search" title={t.audit.noMatch} />
+    <Empty
+      icon="search"
+      title={t.audit.noMatch}
+      hint={onlyChanges && !query ? t.audit.noChanges : undefined}
+    />
   {:else}
     <ul class="rows">
       {#each rows as e (e.id)}
-        <li class="row">
+        <li class="row" class:picked={picking && picked.has(e.id)}>
+          {#if picking}
+            <input
+              type="checkbox"
+              aria-label={t.audit.export.pick}
+              checked={picked.has(e.id)}
+              onchange={(ev) => toggle(e.id, ev.currentTarget.checked)}
+            />
+          {/if}
           <span
             class="exit"
             class:ok={e.exit === 0}
@@ -143,8 +187,28 @@
     </ul>
   {/if}
 
-  <p class="footer">{t.audit.footer(audit.entries.length)}</p>
+  {#if picking}
+    <div class="pickbar">
+      <span>{t.audit.export.picked(picked.size)}</span>
+      <button class="link" onclick={() => rows.forEach((e) => picked.add(e.id))}
+        >{t.audit.export.all}</button
+      >
+      <button class="link" onclick={() => picked.clear()}>{t.audit.export.none}</button>
+      <span class="grow"></span>
+      <button class="btn" onclick={() => (picking = false)}>{t.common.cancel}</button>
+      <button
+        class="btn btn-primary"
+        disabled={picked.size === 0}
+        onclick={() => (exporting = audit.entries.filter((e) => picked.has(e.id)))}
+        >{t.audit.export.show}</button
+      >
+    </div>
+  {:else}
+    <p class="footer">{t.audit.footer(audit.entries.length)}</p>
+  {/if}
 </div>
+
+<ScriptDialog entries={exporting} onclose={() => (exporting = null)} />
 
 <style>
   .title {
@@ -262,6 +326,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    -webkit-user-select: text;
     user-select: text;
   }
 
@@ -298,6 +363,38 @@
 
   .copy.done {
     color: var(--ok);
+  }
+
+  .export {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+  }
+
+  .row.picked {
+    background: var(--selection-inactive);
+  }
+
+  .pickbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px;
+    border-top: 1px solid var(--divider-soft);
+    font-size: var(--text-sm);
+  }
+
+  .pickbar .grow {
+    flex: 1;
+  }
+
+  .link {
+    border: 0;
+    background: none;
+    padding: 0;
+    color: var(--accent);
+    font-size: var(--text-sm);
   }
 
   .footer {

@@ -17,6 +17,7 @@ const (
 	ToolMariaDB  = "mariadb"
 	ToolPostgres = "postgres"
 	ToolCertbot  = "certbot"
+	ToolSQLite   = "sqlite3"
 )
 
 // Setup is how to install a tool on a server. Like the other package
@@ -93,6 +94,11 @@ var tools = map[string]tool{
 		bin:  "certbot",
 		pkgs: map[string][]string{Apt: {"certbot", "python3-certbot-nginx"}, Dnf: {"certbot", "python3-certbot-nginx"}, Yum: {"certbot", "python3-certbot-nginx"}, Apk: {"certbot", "certbot-nginx"}},
 		init: map[string][]string{Dnf: {"systemctl", "enable", "--now", "certbot-renew.timer"}, Yum: {"systemctl", "enable", "--now", "certbot-renew.timer"}},
+	},
+	ToolSQLite: {
+		// The command-line client only; the library is there already.
+		bin:  "sqlite3",
+		pkgs: map[string][]string{Apt: {"sqlite3"}, Dnf: {"sqlite"}, Yum: {"sqlite"}, Apk: {"sqlite"}},
 	},
 }
 

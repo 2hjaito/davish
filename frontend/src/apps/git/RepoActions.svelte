@@ -289,6 +289,7 @@
     font-size: var(--text-xs);
     white-space: pre-wrap;
     word-break: break-word;
+    -webkit-user-select: text;
     user-select: text;
   }
 

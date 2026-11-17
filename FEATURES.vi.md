@@ -16,6 +16,12 @@ Lưu các lệnh hay gõ kèm tên, cho một server hoặc mọi server. Một 
 
 <img src="assets/screenshots/snippets.jpg" alt="Lệnh hay dùng" width="100%">
 
+## Nhật ký lệnh
+
+Mọi lệnh Davish đã chạy trên server, kèm exit code và thời gian chạy; dòng nào cũng gõ lại được vào Terminal hoặc lưu thành lệnh hay dùng. **Chỉ lệnh thay đổi server** (bật sẵn) ẩn lệnh đọc và polling, chỉ còn những gì các thao tác đã thay đổi. **Xuất script…** biến các lệnh được tick thành một bash script chạy lại chúng, mỗi lệnh qua một `ssh -t` riêng để sudo và các câu hỏi khác vẫn hỏi được: mỗi server một khối, trên mỗi dòng ghi giờ và app, sudo của Davish được viết lại thành `sudo` thường (không bao giờ có mật khẩu), còn nội dung gửi qua stdin (ví dụ file ghi bằng root) chỉ để lại comment vì không được lưu. Lệnh lỗi không được xuất trừ khi bạn chọn kèm. Sao chép hoặc lưu thành file chạy được; hộp xuất không chạy gì cả. Thao tác qua SFTP (lưu, đổi tên, upload) không có trong nhật ký.
+
+<img src="assets/screenshots/audit-export.jpg" alt="Nhật ký lệnh xuất thành script" width="100%">
+
 ## Files
 
 Trình duyệt kiểu Finder qua SFTP: tải lên, tải xuống, kéo thả từ hệ điều hành, đổi tên, xóa, nén, và copy giữa các server qua máy bạn. Chuột phải trên file để thấy mọi thao tác. Giữ chuột trên file rồi kéo nhẹ: một vòng thao tác mở quanh con trỏ (mở trong Editor hoặc Terminal, đổi tên, xóa, nén, copy đường dẫn, thêm vào màn hình chính); thả vào ô nào là chọn ô đó, thả ở giữa hoặc nhấn Esc để hủy. Chuột phải vào khoảng trống để tạo tệp hoặc thư mục ngay trong thư mục đang xem; Davish không bao giờ ghi đè file đã có.
@@ -61,6 +67,10 @@ Mọi server trong một cửa sổ, mở từ menu server, Launchpad hoặc Spo
 Nút **Bản đồ** trên thẻ server đã kết nối cho thấy request nào tới chương trình nào: mỗi site nginx là một chuỗi `tên miền → nginx :443 → :3000 → container (stack)`, site tĩnh kèm thư mục, và các cổng mở ra ngoài mà không site nào proxy tới. Cổng database mở ra Internet, upstream không ai nghe và chứng chỉ hết hạn trong 14 ngày được đưa lên đầu, mỗi cái có nút mở đúng app để sửa; mỗi mắt xích bấm được để mở app của nó (Nginx, Trình duyệt, Docker tại container đó). Bên dưới là những gì đang chạy (stack compose và chương trình đang nghe) và các ổ đĩa. Bản đồ chỉ đọc những gì Nginx, Cổng, Docker và Ổ đĩa vốn đã đọc. Từ 4 server trở lên, cửa sổ có ô lọc theo tên và xếp server có cảnh báo lên trước.
 
 <img src="assets/screenshots/servers.jpg" alt="Mọi server trong một màn hình" width="100%">
+
+**Chạy lệnh…** chạy một lệnh trên các server bạn chọn, như `ssh server lệnh`: mỗi server một tab terminal, tối đa 4 server cùng lúc, các server còn lại chờ lượt. Server nào hỏi lại (mật khẩu sudo, `[Y/n]`) thì tab đó được đưa lên để bạn trả lời ngay trong tab; Davish không bao giờ tự nhập mật khẩu sudo khi chạy nhiều server. Hộp xác nhận hiện đủ tên server và đúng lệnh; từ 3 server trở lên, hoặc lệnh trông như xóa, dừng, ghi đè thứ gì đó, phải gõ số server mới chạy. Mỗi tab kết thúc với exit code; **Chạy lại** cho các server lỗi. **Cập nhật package** dựng lệnh cập nhật riêng cho từng server với `sudo -n`: server nào sudo đòi mật khẩu sẽ báo, kèm nút mở Terminal. Mỗi server có một dòng trong Nhật ký lệnh.
+
+<img src="assets/screenshots/multi-run.jpg" alt="Một lệnh trên 4 server, một tab đang chờ mật khẩu sudo" width="100%">
 
 ## Services
 
@@ -185,9 +195,13 @@ Ai đăng nhập qua SSH và ai đang dò. Phía trên là số liệu 7 ngày (
 
 <img src="assets/screenshots/keys.jpg" alt="authorized_keys của server" width="100%">
 
-## ~/.ssh/config và ProxyJump
+## ~/.ssh/config, Ansible và ProxyJump
 
 Nhập server từ `~/.ssh/config` một lần, kèm key và `ProxyJump`; Davish chỉ đọc file. Server sau bastion kết nối qua nó, mỗi bậc kiểm tra host key riêng, cả chuỗi tự kết nối lại.
+
+Đã dùng Ansible? Tab **Ansible inventory** đọc inventory dạng INI (tự tìm `/etc/ansible/hosts`, `$ANSIBLE_INVENTORY` hoặc file khai báo trong `~/.ansible.cfg`, hoặc bạn tự chọn file): `ansible_host`, `ansible_user`, `ansible_port`, file key và `ProxyJump` trong `ansible_ssh_common_args`, có tính biến của group và dải như `web[01:03]`. Chọn từng host hoặc cả group một lần; group không được lưu. Mật khẩu trong inventory không bao giờ được đọc; host dùng template, Vault hay kết nối không phải SSH được liệt kê là bỏ qua, kèm lý do. Inventory YAML chưa đọc được.
+
+![Nhập server từ Ansible inventory](assets/screenshots/import-ansible.jpg)
 
 ## Spotlight & Launchpad
 

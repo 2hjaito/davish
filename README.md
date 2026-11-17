@@ -28,13 +28,13 @@ Nothing to install on the server.
 
 - **Open it and you're in.** No login screen, no web panel: Davish connects to the server you used last with your SSH key and puts you on its desktop. Nothing extra listens on the server, so there is no new port to open or protect.
 - **Agentless.** Davish only needs `sshd` and SFTP. Everything runs from your machine over SSH; nothing is copied to, installed on or left behind on the server.
-- **You see every command.** Anything destructive (stop a service, remove a file, restart a container, replace a crontab) shows the exact command before it runs. The command log records everything Davish ran on your behalf.
+- **You see every command.** Anything destructive (stop a service, remove a file, restart a container, replace a crontab) shows the exact command before it runs. The command log records everything Davish ran on your behalf, and exports the changes as a shell script you can read and run again.
 - **Secrets stay in your keychain.** Passwords and passphrases live only in the OS keychain. A `sudo` password is never saved: when root is needed, Davish asks for it once per session, keeps it in memory only, forgets it after 15 minutes unused and hands it to sudo on stdin, or you run the command in a terminal yourself.
 - **Locks when you step away.** A lock password of its own, Touch ID on macOS; it locks when the machine wakes, after idle time or with `⌘L`. Sessions keep running behind the lock, but nothing reaches a server until you unlock.
 - **Many servers, one desktop.** Each server is a workspace (`⌘1`…`⌘9`) that remembers its own windows. Copy files between servers by dragging them.
 - **Updates itself.** A new version shows its changes with Update, Later and Skip this version; Davish downloads it, checks its signature and restarts into it. No reinstalling.
 - **English, Vietnamese, Simplified Chinese or Spanish.** Pick the language in Settings; the first time, Davish follows your system's. Spanish is new: corrections are welcome in [#124](https://github.com/2hjaito/davish/issues/124).
-- **Your `~/.ssh/config` works.** Import its hosts in one go, keys and `ProxyJump` included; Davish only reads the file. Servers behind a bastion connect through it, each hop with its own host key check, and the whole chain reconnects on its own.
+- **Your `~/.ssh/config` works, and so does your Ansible inventory.** Import their hosts in one go, keys and `ProxyJump` included, a whole Ansible group at a time; Davish only reads the files. Servers behind a bastion connect through it, each hop with its own host key check, and the whole chain reconnects on its own.
 
 ## Features
 
@@ -42,11 +42,12 @@ Nothing to install on the server.
 
 - [Terminal](FEATURES.md#terminal): tabs, GPU rendering, an optional powerline prompt
 - [Saved commands](FEATURES.md#saved-commands): your frequent commands, typed into Terminal in one click
+- [Command log](FEATURES.md#command-log): every command Davish ran, exported as a script that runs the changes again over ssh
 - [Files](FEATURES.md#files): Finder-style SFTP, drag and drop, copy between servers, search names and contents on the server, hold a file for a ring of actions
 - [Editor](FEATURES.md#editor): CodeMirror with atomic saves and backups
 - [Logs](FEATURES.md#logs): journal, files and containers, live, and search their whole history on the server
 - [Monitor](FEATURES.md#monitor): CPU, memory, disks, network, GPUs, processes, on Linux and Windows servers
-- [All servers](FEATURES.md#all-servers): every server's health and alerts in one window, and a map of what each one serves
+- [All servers](FEATURES.md#all-servers): every server's health and alerts in one window, a map of what each one serves, and one command run on several servers, a terminal tab each
 
 **Services and apps**
 
@@ -66,7 +67,7 @@ Nothing to install on the server.
 - [Disk](FEATURES.md#disk): where the space goes as a tree, what could not be measured and why, delete and clean up
 - [Security](FEATURES.md#security): failed logins per hour and by address, users targeted, open sessions, ufw, fail2ban
 - [SSH keys](FEATURES.md#ssh-keys): authorized_keys, deploy keys, your own keys
-- [~/.ssh/config and ProxyJump](FEATURES.md#sshconfig-and-proxyjump): import hosts, connect through a bastion
+- [~/.ssh/config, Ansible and ProxyJump](FEATURES.md#sshconfig-ansible-and-proxyjump): import hosts from ssh config or an INI inventory, connect through a bastion
 
 **The desktop**
 

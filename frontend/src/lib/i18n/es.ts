@@ -38,7 +38,7 @@ const es = {
       },
     ],
     add: 'Añadir un servidor por SSH…',
-    import: 'o importar desde ~/.ssh/config',
+    import: 'o importar desde ~/.ssh/config o Ansible',
     foot: (mod: string) =>
       `Añade tantos servidores como quieras; cada uno es un espacio de trabajo (${mod}1…${mod}9). ${mod}K abre Spotlight para buscar apps, servicios, contenedores y carpetas.`,
   },
@@ -860,7 +860,7 @@ const es = {
   },
   menu: {
     addServer: 'Añadir servidor…',
-    importServers: 'Importar desde ~/.ssh/config…',
+    importServers: 'Importar desde ~/.ssh/config o Ansible…',
     connect: (name: string) => `Conectar ${name}`,
     disconnect: (name: string) => `Desconectar ${name}`,
     newTerminal: 'Nuevo Terminal',
@@ -1023,11 +1023,13 @@ const es = {
           'El mapa de un servidor: dominio → nginx → puerto → contenedor o programa, marcando un puerto de base de datos abierto a Internet, un upstream en el que nada escucha y un certificado a punto de caducar; lo que está en marcha y los discos',
           'Conectar un servidor',
           'Cambiar a un servidor',
+          'Ejecutar un comando en varios servidores: cada uno en su pestaña de terminal, como mucho 4 a la vez; la pestaña que pregunta algo pasa al frente. Se confirma con el nombre de cada servidor y el comando exacto; con 3 servidores o más, o un comando que borra o detiene algo, hay que escribir el número. Actualizar paquetes usa el gestor de cada servidor con sudo -n',
         ],
         keys: [],
         runs: [
           'Para el mapa: los sitios de nginx, puertos en escucha, contenedores y discos de ese servidor, leídos al abrirlo (solo lectura)',
           'La misma lectura de /proc que Monitor, para cada servidor conectado, mientras la ventana está abierta',
+          'Ejecutar un comando: exactamente el comando escrito, en cada servidor, en una sesión de terminal; una línea por servidor en el Registro de comandos. Davish nunca escribe una contraseña de sudo para esto',
         ],
       },
       snippets: {
@@ -1056,7 +1058,11 @@ const es = {
       },
       audit: {
         does: 'Cada comando que Davish ejecutó en el servidor por ti.',
-        actions: ['Mostrar solo el servidor seleccionado'],
+        actions: [
+          'Mostrar solo el servidor seleccionado',
+          'Mostrar solo cambios, ocultando lecturas y consultas periódicas',
+          'Exportar los comandos marcados como script bash: cada uno se ejecuta de nuevo por su propio ssh -t, sudo escrito de forma normal, el contenido de stdin queda como comentario; copiar o guardar, no se ejecuta nada',
+        ],
         keys: [],
         runs: [],
       },
@@ -1407,7 +1413,7 @@ const es = {
     picker: 'Elegir servidor',
     header: 'SERVIDORES',
     add: 'Añadir un servidor por SSH…',
-    import: 'Importar desde ~/.ssh/config…',
+    import: 'Importar desde ~/.ssh/config o Ansible…',
     none: 'Todavía no hay servidores',
     edit: 'Editar servidor',
     reconnect: 'Volver a conectar',
@@ -1418,6 +1424,48 @@ const es = {
       reconnecting: 'conexión perdida, reintentando…',
       disconnected: 'no conectado',
       failed: 'error de conexión',
+    },
+    run: {
+      open: 'Ejecutar un comando…',
+      title: 'Ejecutar en varios servidores',
+      back: 'Todos los servidores',
+      lead: 'El comando se ejecuta en cada servidor como lo haría “ssh servidor comando”, cada uno en su propia pestaña de terminal, como mucho 4 a la vez. Cuando un servidor pregunta algo (una contraseña, [Y/n]), su pestaña pasa al frente: responde ahí. Davish nunca escribe una contraseña de sudo en una ejecución.',
+      allOnline: (n: number) => `Todos los servidores conectados (${n})`,
+      offline: 'sin conexión',
+      command: 'Comando',
+      update: 'Actualizar paquetes',
+      updateHint:
+        'El gestor de paquetes de cada servidor, con sudo -n: si sudo pide contraseña, el servidor lo indica.',
+      runOn: (n: number) =>
+        n > 0 ? `Ejecutar en ${n} ${n === 1 ? 'servidor' : 'servidores'}…` : 'Ejecutar…',
+      skipped: (list: string) => `Omitidos: ${list}`,
+      noManager: 'sin un gestor de paquetes conocido',
+      newCommand: 'Nuevo comando',
+      progress: (running: number, queued: number) =>
+        queued > 0 ? `${running} en curso, ${queued} esperando turno` : `${running} en curso`,
+      result: (ok: number, bad: number) => `${ok} correctos, ${bad} con error`,
+      stopAll: 'Detener todo',
+      again: (n: number) => `Repetir en ${n} con error`,
+      state: {
+        queued: 'esperando turno',
+        running: 'en curso',
+        waiting: 'espera respuesta',
+        done: 'terminado',
+        failed: 'error',
+        stopped: 'detenido',
+      },
+      exit: (code: number) => (code === -1 ? 'no terminó' : `salida ${code}`),
+      sudoRefused:
+        'sudo pide una contraseña aquí. Por seguridad, Davish no usa contraseñas de sudo al ejecutar en varios servidores.',
+      openTerminal: 'Abrir Terminal',
+      answerHere: 'Este servidor está esperando: escribe la respuesta aquí.',
+      confirmTitle: (n: number) => `¿Ejecutar en ${n} ${n === 1 ? 'servidor' : 'servidores'}?`,
+      confirmBody: 'Davish ejecutará exactamente esto en cada uno de estos servidores:',
+      destructive: 'Este comando parece borrar, detener o sobrescribir algo.',
+      sudoNote:
+        'Las preguntas las respondes tú, en la pestaña de cada servidor. Cada servidor deja una línea en el Registro de comandos.',
+      typeCount: (n: number) => `Escribe ${n} para confirmar:`,
+      confirmRun: (n: number) => `Ejecutar en ${n}`,
     },
     overview: {
       open: 'Todos los servidores…',
@@ -1463,7 +1511,7 @@ const es = {
     },
   },
   importDialog: {
-    title: 'Importar desde ~/.ssh/config',
+    title: 'Importar servidores',
     lead: 'Davish solo lee este archivo y nunca escribe en él. Se omiten las entradas con comodines (*, ?) y los bloques Match.',
     loading: 'Leyendo ~/.ssh/config…',
     empty: 'No se han encontrado hosts concretos en ~/.ssh/config.',
@@ -1474,6 +1522,31 @@ const es = {
       n > 0 ? `Importar ${n} ${n === 1 ? 'servidor' : 'servidores'}` : 'Importar',
     cancel: 'Cancelar',
     jumpNote: 'Los hosts de ProxyJump también se importan si aún no están añadidos.',
+    source: 'Importar desde',
+    tabSSH: '~/.ssh/config',
+    tabAnsible: 'Inventario de Ansible',
+    ansibleLead:
+      'Un inventario INI (como /etc/ansible/hosts). Davish solo lee el archivo: los grupos sirven para elegir y no se guardan, y nunca se leen las contraseñas que contenga. Se omiten los hosts con plantillas ({{ }}), valores de Vault o una conexión que no es SSH.',
+    noFile: 'No se ha elegido ningún inventario',
+    choose: 'Elegir archivo…',
+    chooseTitle: 'Elige un inventario de Ansible',
+    loadingInventory: 'Leyendo el inventario…',
+    emptyInventory: 'No se han encontrado hosts en este inventario.',
+    groups: 'Grupos',
+    allGroups: 'Todos',
+    selectGroup: (g: string) => `Seleccionar todo en ${g}`,
+    skipped: (n: number) => `${n} ${n === 1 ? 'host omitido' : 'hosts omitidos'}`,
+    askYAML: 'Pedir compatibilidad con YAML',
+    issues: {
+      connection: (v: string) => `se conecta con ${v}, no por SSH`,
+      jinja: (v: string) => `${v} es una plantilla que solo Ansible puede rellenar`,
+      vault: (v: string) => `${v} está cifrado con Vault`,
+      port: (v: string) => `«${v}» no es un puerto`,
+      range: (p: string) => `el rango ${p} está mal escrito o da más de 256 hosts`,
+      password:
+        'El inventario define una contraseña, que no se importa. Si el servidor la necesita, añádela en Editar servidor.',
+      sshArgs: (names: string) => `opciones de ssh no importadas: ${names}`,
+    },
   },
   serverDialog: {
     addTitle: 'Añadir un servidor por SSH',
@@ -2682,7 +2755,7 @@ const es = {
       add: 'Añadir',
       added: 'Añadido',
       noSqlite3:
-        'El servidor no tiene sqlite3, así que aún no se pueden abrir archivos SQLite. Instala el paquete sqlite3 en Paquetes.',
+        'El servidor no tiene sqlite3, así que aún no se pueden abrir archivos SQLite. Instálalo primero:',
     },
     sqlite: {
       title: 'SQLite',
@@ -2799,6 +2872,28 @@ const es = {
   },
   audit: {
     search: 'Buscar comandos',
+    onlyChanges: 'Solo cambios',
+    noChanges:
+      'Las lecturas y consultas periódicas están ocultas: desactiva “Solo cambios” para ver todos los comandos.',
+    export: {
+      start: 'Exportar script…',
+      pick: 'Incluir en el script',
+      picked: (n: number) => `${n} seleccionados`,
+      all: 'Seleccionar todo',
+      none: 'No seleccionar nada',
+      show: 'Ver script…',
+      title: (n: number) => `Script de ${n} ${n === 1 ? 'comando' : 'comandos'}`,
+      lead: 'Cada comando se ejecuta de nuevo por su propia conexión ssh, con terminal para que sudo pueda preguntar. Léelo antes de ejecutarlo; desde aquí no se ejecuta nada.',
+      notIncluded:
+        'No está en el script: lo que pasó por SFTP (guardar, renombrar, subir archivos), el contenido enviado por stdin (queda como comentario) y los comandos más antiguos de lo que guarda el registro.',
+      failed: 'Incluir comandos con error',
+      copy: 'Copiar',
+      copied: 'Copiado.',
+      save: 'Guardar…',
+      saveTitle: 'Guardar el script',
+      close: 'Cerrar',
+      saved: (path: string) => `Guardado en ${path}`,
+    },
     onlyThis: 'Solo el servidor seleccionado',
     empty: 'Todavía no se ha ejecutado ningún comando en el servidor',
     emptyHint:
@@ -3200,6 +3295,10 @@ const es = {
     DB_AUTH_FAILED: 'MongoDB ha rechazado este usuario o contraseña.',
     SUDO_PASSWORD_REQUIRED: 'El servidor necesita la contraseña de sudo para esto.',
     SUDO_PASSWORD_WRONG: 'sudo no ha aceptado esta contraseña.',
+    INVENTORY_YAML_UNSUPPORTED:
+      'Este inventario es YAML (o JSON). Por ahora Davish solo lee inventarios INI.',
+    INVENTORY_SCRIPT_UNSUPPORTED:
+      'Este inventario es un script. Davish no lo ejecuta; elige un archivo de inventario INI.',
     UPDATE_DOWNLOAD_FAILED:
       'No se pudo descargar la actualización: GitHub no respondió o se cortó la red. Vuelve a intentarlo en unos minutos, o descárgala desde la página de la versión.',
     GIT_UNSAFE_OWNER:

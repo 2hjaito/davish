@@ -347,6 +347,7 @@
     font-size: var(--text-xs);
     text-overflow: ellipsis;
     white-space: nowrap;
+    -webkit-user-select: text;
     user-select: text;
   }
 

@@ -41,6 +41,11 @@ func TestPlanSetup(t *testing.T) {
 		{Dnf, ToolCertbot, "sudo dnf install certbot python3-certbot-nginx && sudo systemctl enable --now certbot-renew.timer"},
 		{Yum, ToolCertbot, "sudo yum install certbot python3-certbot-nginx && sudo systemctl enable --now certbot-renew.timer"},
 		{Apk, ToolCertbot, "sudo apk update && sudo apk add certbot certbot-nginx"},
+
+		{Apt, ToolSQLite, "sudo apt-get update && sudo apt-get install sqlite3"},
+		{Dnf, ToolSQLite, "sudo dnf install sqlite"},
+		{Yum, ToolSQLite, "sudo yum install sqlite"},
+		{Apk, ToolSQLite, "sudo apk update && sudo apk add sqlite"},
 	}
 	for _, tt := range tests {
 		got, err := PlanSetup(tt.m, tt.tool)

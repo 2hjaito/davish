@@ -50,7 +50,7 @@ export interface NpmGlobal {
 }
 
 /** A tool an app offers to install when the server lacks it. */
-export type SetupTool = 'docker' | 'nginx' | 'git' | 'mariadb' | 'postgres' | 'certbot'
+export type SetupTool = 'docker' | 'nginx' | 'git' | 'mariadb' | 'postgres' | 'certbot' | 'sqlite3'
 
 /** How to install a tool (internal/packages.Setup). */
 export interface Setup {
@@ -93,6 +93,7 @@ const mockSetup: Record<SetupTool, string> = {
   postgres:
     'sudo apt-get update && sudo apt-get install postgresql && sudo systemctl enable --now postgresql',
   certbot: 'sudo apt-get update && sudo apt-get install certbot python3-certbot-nginx',
+  sqlite3: 'sudo apt-get update && sudo apt-get install sqlite3',
 }
 
 /** The command that installs tool, to type into a terminal; nothing runs. */

@@ -115,25 +115,58 @@ func (s *Service) Start(ctx context.Context, serverID string, cols, rows int, pr
 	if os != platform.Windows {
 		command = shellCommand(prompt && loginShellIsBash(client), dir)
 	}
+	id, _, err := s.open(serverID, client, cols, rows, command, nil)
+	return id, err
+}
+
+// Run runs command on a PTY, as `ssh -t host command` would, for a run
+// on several servers at once (docs/adr/0021). It shares term:data,
+// term:exit and Write/Resize/Close with the terminal. onStart, when set,
+// gets the session ID before any output is sent; the channel yields the
+// exit code (-1 when the connection dropped) once the session ends.
+func (s *Service) Run(ctx context.Context, serverID string, cols, rows int, command string, onStart func(id string)) (string, <-chan int, error) {
+	if err := checkSize(cols, rows); err != nil {
+		return "", nil, err
+	}
+	if strings.TrimSpace(command) == "" {
+		return "", nil, apperr.New(apperr.InvalidInput, "empty command")
+	}
+	if err := ctx.Err(); err != nil {
+		return "", nil, err
+	}
+	client, err := s.clients.Client(serverID)
+	if err != nil {
+		return "", nil, err
+	}
+	return s.open(serverID, client, cols, rows, command, onStart)
+}
+
+// open starts command (the login shell when empty) on a new PTY session
+// and pumps its output until it ends.
+func (s *Service) open(serverID string, client *ssh.Client, cols, rows int, command string, onStart func(string)) (string, <-chan int, error) {
 	sess, err := client.NewSession()
 	if err != nil {
-		return "", apperr.Wrap(apperr.ConnNotConnected, "cannot open a session", err)
+		return "", nil, apperr.Wrap(apperr.ConnNotConnected, "cannot open a session", err)
 	}
 	stdin, stdout, err := startShell(sess, cols, rows, command)
 	if err != nil {
 		sess.Close() //nolint:errcheck,gosec // failed to start
-		return "", err
+		return "", nil, err
 	}
 
 	id, err := newID()
 	if err != nil {
 		sess.Close() //nolint:errcheck,gosec // failed to start
-		return "", err
+		return "", nil, err
 	}
 	s.mu.Lock()
 	s.sessions[id] = &session{serverID: serverID, ssh: sess, stdin: stdin}
 	s.mu.Unlock()
+	if onStart != nil {
+		onStart(id)
+	}
 
+	done := make(chan int, 1)
 	s.wg.Add(1)
 	go func() {
 		defer s.wg.Done()
@@ -144,9 +177,10 @@ func (s *Service) Start(ctx context.Context, serverID string, cols, rows int, pr
 		s.mu.Unlock()
 		s.emit.Emit(events.TermExit, Exit{ID: id, Code: code})
 		s.log.Info("terminal closed", "server", serverID, "code", code)
+		done <- code
 	}()
 	s.log.Info("terminal opened", "server", serverID)
-	return id, nil
+	return id, done, nil
 }
 
 // loginShellIsBash asks the server for the user's login shell. Any failure

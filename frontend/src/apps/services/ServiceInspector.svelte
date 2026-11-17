@@ -505,6 +505,7 @@
     white-space: pre-wrap;
     word-break: break-word;
     overflow-y: auto;
+    -webkit-user-select: text;
     user-select: text;
   }
 

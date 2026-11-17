@@ -25,7 +25,7 @@ func (a *App) CronApply(serverID string, change cron.Change, plan cron.Plan) err
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.cron.Apply(a.ctx, serverID, change, plan)
+	return a.cron.Apply(a.change(), serverID, change, plan)
 }
 
 // CronRuns returns the system log lines of a job's latest runs.

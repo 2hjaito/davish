@@ -22,7 +22,7 @@ func (a *App) NginxToggle(serverID, name string, enable bool, command string) er
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.nginx.Toggle(a.ctx, serverID, name, enable, command)
+	return a.nginx.Toggle(a.change(), serverID, name, enable, command)
 }
 
 // NginxTest runs nginx -t.
@@ -43,7 +43,7 @@ func (a *App) NginxReload(serverID string) (nginx.ReloadResult, error) {
 	if err := a.lock.Check(); err != nil {
 		return nginx.ReloadResult{}, err
 	}
-	return a.nginx.Reload(a.ctx, serverID)
+	return a.nginx.Reload(a.change(), serverID)
 }
 
 // NginxCheckCerts notifies TLS certificates of enabled sites that expire
@@ -63,7 +63,7 @@ func (a *App) NginxRemove(serverID, sitePath string, withCerts bool, command str
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.nginx.Remove(a.ctx, serverID, sitePath, withCerts, command)
+	return a.nginx.Remove(a.change(), serverID, sitePath, withCerts, command)
 }
 
 // NginxSiteOptions tells where new sites go and which php-fpm sockets the
@@ -87,7 +87,7 @@ func (a *App) NginxCreate(serverID string, site nginx.NewSite, config, command s
 	if err := a.lock.Check(); err != nil {
 		return nginx.CreateResult{}, err
 	}
-	return a.nginx.Create(a.ctx, serverID, site, config, command)
+	return a.nginx.Create(a.change(), serverID, site, config, command)
 }
 
 // NginxPlanSSL checks the DNS of a site's domains against the server's
@@ -111,5 +111,5 @@ func (a *App) NginxEdit(serverID, sitePath string, edit nginx.SiteEdit, backup, 
 	if err := a.lock.Check(); err != nil {
 		return nginx.CreateResult{}, err
 	}
-	return a.nginx.Edit(a.ctx, serverID, sitePath, edit, backup, command)
+	return a.nginx.Edit(a.change(), serverID, sitePath, edit, backup, command)
 }

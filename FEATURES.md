@@ -16,6 +16,12 @@ Keep the commands you type often, each with a name, for one server or every serv
 
 <img src="assets/screenshots/en/snippets.jpg" alt="Saved commands" width="100%">
 
+## Command log
+
+Every command Davish ran on a server, with its exit code and how long it took; any line can be typed into Terminal again or saved as a command. **Changes only** (on by default) hides the reads and polling, leaving what an action changed. **Export script…** turns the ticked commands into a bash script that runs them again, each over its own `ssh -t` so sudo and other prompts can ask: one block per server, the time and app above each line, Davish's sudo written as a plain `sudo` (never a password), and content sent on stdin, such as a file written as root, left as a comment because it is not recorded. Failed commands stay out unless you include them. Copy it or save it as an executable file; nothing runs from the dialog. What went through SFTP (saving, renaming, uploading) is not in the log.
+
+<img src="assets/screenshots/en/audit-export.jpg" alt="The Command log exported as a script" width="100%">
+
 ## Files
 
 Finder-style browser over SFTP: upload, download, drag and drop from your OS, rename, delete, compress, and copy between servers through your machine. Hold a file and drag a little: a ring of actions opens around the pointer (open in Editor or Terminal, rename, delete, compress, copy the path, add to desktop); drop on a slice to pick it, in the middle or with Esc to cancel. Right-click empty space to create a file or folder in the folder on screen; Davish never overwrites an existing file.
@@ -61,6 +67,10 @@ Every server in one window, from the server menu, Launchpad or Spotlight: connec
 **Map** on a connected server's card shows which requests reach which program: each nginx site as a chain `domain → nginx :443 → :3000 → container (stack)`, static sites with their folder, and ports open to the outside that no site proxies to. A database port open to the Internet, an upstream nobody listens on and a certificate expiring within 14 days are flagged at the top, each with a button to the app that fixes it; every link opens its app (Nginx, the Browser, Docker at that container). Below, what runs (compose stacks and listening programs) and the disks. It only reads what Nginx, Ports, Docker and Disk already read. With four servers or more, the window filters by name and puts servers with alerts first.
 
 <img src="assets/screenshots/en/servers.jpg" alt="Every server at a glance" width="100%">
+
+**Run a command…** runs one command on the servers you tick, as `ssh server command` would: each server in its own terminal tab, at most four at a time, the rest waiting their turn. When a server asks something (a sudo password, `[Y/n]`), its tab comes forward and you answer there; Davish never types a sudo password for a run. The confirm dialog shows every server and the exact command; from three servers, or for a command that looks like it removes, stops or overwrites something, you type the number of servers to go ahead. Each tab ends with its exit code; **Run again** retries the ones that failed. **Update packages** prepares each server's own update with `sudo -n`: a server whose sudo wants a password says so, with a button to Terminal. Each server gets one line in the Command log.
+
+<img src="assets/screenshots/en/multi-run.jpg" alt="One command on four servers, one tab waiting for a sudo password" width="100%">
 
 ## Services
 
@@ -185,9 +195,13 @@ The server's `authorized_keys` with the key Davish logs in with marked; add or r
 
 <img src="assets/screenshots/keys.jpg" alt="The server's authorized_keys" width="100%">
 
-## ~/.ssh/config and ProxyJump
+## ~/.ssh/config, Ansible and ProxyJump
 
 Import hosts from `~/.ssh/config` in one go, keys and `ProxyJump` included; Davish only reads the file. Servers behind a bastion connect through it, each hop with its own host key check, and the whole chain reconnects on its own.
+
+Already use Ansible? The **Ansible inventory** tab reads an INI inventory (it finds `/etc/ansible/hosts`, `$ANSIBLE_INVENTORY` or the one in `~/.ansible.cfg`, or you choose the file): `ansible_host`, `ansible_user`, `ansible_port`, the key file and a `ProxyJump` in `ansible_ssh_common_args`, with group variables and ranges such as `web[01:03]`. Pick hosts one by one or a whole group at a time; groups are not saved. Passwords in the inventory are never read, and hosts that use templates, Vault or a non-SSH connection are listed as skipped, with the reason. YAML inventories are not read yet.
+
+![Importing servers from an Ansible inventory](assets/screenshots/en/import-ansible.jpg)
 
 ## Spotlight & Launchpad
 

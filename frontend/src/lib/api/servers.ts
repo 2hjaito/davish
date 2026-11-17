@@ -68,6 +68,52 @@ export async function importConfigHosts(aliases: string[]): Promise<ServerInfo[]
   return (await App.ImportSSHHosts(aliases)).map(info)
 }
 
+/** Why an inventory host is skipped, or what of it is left out (internal/ansibleinv). */
+export interface InventoryIssue {
+  code: 'connection' | 'jinja' | 'vault' | 'port' | 'range' | 'password' | 'sshArgs'
+  /** The variable or value concerned; never a secret. */
+  detail?: string
+}
+
+/** A host of an Ansible inventory, as the import dialog lists it. */
+export interface InventoryHost {
+  name: string
+  groups: string[]
+  address: string
+  user: string
+  port: number
+  keyFile?: string
+  proxyJump?: string
+  notes?: InventoryIssue[]
+  exists: boolean
+}
+
+export interface InventorySkipped {
+  name: string
+  groups: string[]
+  issue: InventoryIssue
+}
+
+export interface InventoryListing {
+  path: string
+  hosts: InventoryHost[]
+  skipped: InventorySkipped[]
+  groups: string[]
+}
+
+/** The inventory Ansible would use on this machine, '' when none. */
+export const defaultInventory = (): Promise<string> => App.AnsibleDefaultInventory()
+
+/** Asks for an inventory file; '' when canceled. */
+export const pickInventory = (title: string): Promise<string> => App.AnsiblePickInventory(title)
+
+export const listInventory = async (path: string): Promise<InventoryListing> =>
+  (await App.AnsibleInventoryHosts(path)) as InventoryListing
+
+export async function importInventoryHosts(path: string, names: string[]): Promise<ServerInfo[]> {
+  return (await App.ImportAnsibleHosts(path, names)).map(info)
+}
+
 export const deleteServer = (id: string): Promise<void> => App.DeleteServer(id)
 export const reorderServers = (ids: string[]): Promise<void> => App.ReorderServers(ids)
 export const connect = (id: string): Promise<void> => App.Connect(id)

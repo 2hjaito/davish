@@ -66,49 +66,52 @@
 
   <Popover {open} onclose={() => (open = false)} label={t.servers.picker} width={300}>
     <div class="header">{t.servers.header}</div>
-    {#each servers.list as s, i (s.id)}
-      {@const active = s.id === servers.activeId}
-      <div
-        class="row"
-        class:dragging={dragging === s.id}
-        draggable="true"
-        title={t.servers.dragToReorder}
-        role="presentation"
-        ondragstart={(e) => {
-          dragging = s.id
-          e.dataTransfer?.setData('text/plain', s.id)
-        }}
-        ondragover={(e) => dragOver(e, s.id)}
-        ondrop={drop}
-        ondragend={drop}
-      >
-        <button role="menuitem" class="item" class:active onclick={() => choose(s.id)}>
-          <span
-            class="dot"
-            style:background={active && s.state === 'connected'
-              ? 'var(--ok-on-accent)'
-              : (s.color ?? dotColor[s.state])}
-            class:ring={!!s.color}
-            style:--ring={dotColor[s.state]}
-          ></span>
-          <span class="text">
-            <span class="name">{s.name}</span>
-            <span class="sub">{s.user}@{s.host} · {t.servers.status[s.state]}</span>
-          </span>
-          {#if i < 9}<span class="sub key">{shortcut(String(i + 1))}</span>{/if}
-        </button>
-        {#if s.state === 'failed'}
-          <button class="tool" aria-label={t.servers.reconnect} onclick={(e) => retry(e, s.id)}>
-            <Icon name="refresh" size={13} />
+    <!-- Many servers scroll here, so the actions below stay in reach (#178). -->
+    <div class="servers">
+      {#each servers.list as s, i (s.id)}
+        {@const active = s.id === servers.activeId}
+        <div
+          class="row"
+          class:dragging={dragging === s.id}
+          draggable="true"
+          title={t.servers.dragToReorder}
+          role="presentation"
+          ondragstart={(e) => {
+            dragging = s.id
+            e.dataTransfer?.setData('text/plain', s.id)
+          }}
+          ondragover={(e) => dragOver(e, s.id)}
+          ondrop={drop}
+          ondragend={drop}
+        >
+          <button role="menuitem" class="item" class:active onclick={() => choose(s.id)}>
+            <span
+              class="dot"
+              style:background={active && s.state === 'connected'
+                ? 'var(--ok-on-accent)'
+                : (s.color ?? dotColor[s.state])}
+              class:ring={!!s.color}
+              style:--ring={dotColor[s.state]}
+            ></span>
+            <span class="text">
+              <span class="name">{s.name}</span>
+              <span class="sub">{s.user}@{s.host} · {t.servers.status[s.state]}</span>
+            </span>
+            {#if i < 9}<span class="sub key">{shortcut(String(i + 1))}</span>{/if}
           </button>
-        {/if}
-        <button class="tool" aria-label={t.servers.edit} onclick={(e) => edit(e, s.id)}>
-          <Icon name="editor" size={13} />
-        </button>
-      </div>
-    {:else}
-      <p class="empty">{t.servers.none}</p>
-    {/each}
+          {#if s.state === 'failed'}
+            <button class="tool" aria-label={t.servers.reconnect} onclick={(e) => retry(e, s.id)}>
+              <Icon name="refresh" size={13} />
+            </button>
+          {/if}
+          <button class="tool" aria-label={t.servers.edit} onclick={(e) => edit(e, s.id)}>
+            <Icon name="editor" size={13} />
+          </button>
+        </div>
+      {:else}
+        <p class="empty">{t.servers.none}</p>
+      {/each}
+    </div>
     <div class="divider"></div>
     {#if servers.activeId}
       <button
@@ -149,6 +152,13 @@
 </div>
 
 <style>
+  .servers {
+    /* The menu bar above, the actions below and some air. */
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
   .anchor {
     position: relative;
   }

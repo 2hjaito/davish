@@ -51,6 +51,7 @@
     font-size: var(--text-xs);
     line-height: 1.55;
     color: var(--fg);
+    -webkit-user-select: text;
     user-select: text;
   }
 

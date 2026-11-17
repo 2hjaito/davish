@@ -20,19 +20,31 @@ const demo: AuditEntry[] = hasRuntime
   : [
       ['services', 'systemctl list-units --type=service --all --no-pager --output=json', 0, 84],
       ['services', 'journalctl -u nginx.service -n 200 --no-pager -o short-iso', 0, 120],
-      ['services', 'systemctl restart nginx.service', 1, 61],
+      ['services', 'systemctl restart nginx.service', 1, 61, true],
       ['docker', "docker ps -a --no-trunc --format '{{json .}}'", 0, 95],
+      ['docker', 'docker restart web', 0, 1830, true],
       ['docker', "docker stats --no-stream --no-trunc --format '{{json .}}'", 0, 2048],
+      [
+        'nginx',
+        "LC_ALL=C sudo -n -- sh -c 'tee /etc/nginx/sites-available/app.example.com >/dev/null'",
+        0,
+        70,
+        true,
+        true,
+      ],
+      ['nginx', "LC_ALL=C sudo -n -- sh -c 'nginx -t && systemctl reload nginx'", 0, 240, true],
       ['logs', 'docker logs -f --tail 200 worker', -1, 0],
-      ['files', "rm -- '/home/dangth/old notes.txt'", 0, 40],
-    ].map(([app, command, exit, durMs], i) => ({
+      ['files', "rm -- '/home/dangth/old notes.txt'", 0, 40, true],
+    ].map(([app, command, exit, durMs, mutating, input], i) => ({
       id: i + 1,
-      time: Date.now() - (7 - i) * 60_000,
+      time: Date.now() - (10 - i) * 60_000,
       serverID: 'dangth-vps',
       app: app as string,
       command: command as string,
       exit: exit as number,
       durMs: durMs as number,
+      mutating: Boolean(mutating),
+      input: Boolean(input),
     }))
 
 class AuditStore {
