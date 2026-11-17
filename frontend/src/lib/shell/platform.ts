@@ -1,5 +1,8 @@
 export const isMac = typeof navigator !== 'undefined' && navigator.userAgent.includes('Mac')
 
+/** Linux builds can change WebKitGTK's renderer. The browser preview counts too. */
+export const isLinux = typeof navigator !== 'undefined' && navigator.userAgent.includes('Linux')
+
 /** Label for a shortcut with the platform's primary modifier. */
 export function shortcut(key: string): string {
   return isMac ? `⌘${key}` : `Ctrl+${key}`

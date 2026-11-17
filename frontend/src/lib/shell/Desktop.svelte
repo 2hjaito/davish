@@ -18,6 +18,7 @@
   import { toUserError } from '../api/errors'
   import { transferReveal } from '../api/transfer'
   import { t } from '../i18n'
+  import PerfBanner from './PerfBanner.svelte'
   import {
     describeTransfer,
     type Transfer,
@@ -351,6 +352,7 @@
   {/if}
 
   <Banners />
+  <PerfBanner />
   <ServerDialog />
   <ImportDialog />
   <HelpDialog />
@@ -398,6 +400,11 @@
         color-mix(in srgb, var(--wallpaper-gold) var(--wallpaper-mix), var(--wallpaper-base)) 0,
         transparent 30%
       );
+  }
+
+  /* Light preset: a flat base, which is cheaper than four gradients. */
+  :global(:root[data-perf-wallpaper='flat']) .desktop {
+    background-image: none;
   }
 
   .workspace.hidden {

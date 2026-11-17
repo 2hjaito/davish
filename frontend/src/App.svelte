@@ -12,10 +12,14 @@
 
   $effect(() => {
     const root = document.documentElement
+    const knobs = settings.knobs
     root.dataset.theme = resolveTheme(settings.theme, systemDark.current)
     setWindowBackground(getComputedStyle(root).getPropertyValue('--wallpaper-base').trim())
-    root.dataset.reduceGlass = String(settings.reduceGlass)
-    root.dataset.reduceMotion = String(settings.reduceMotion)
+    root.dataset.perfBlur = String(knobs.blur)
+    root.dataset.perfOpaque = String(knobs.opaque)
+    root.dataset.perfShadow = knobs.shadow
+    root.dataset.perfWallpaper = knobs.wallpaper ? 'blobs' : 'flat'
+    root.dataset.reduceMotion = String(!knobs.motion)
     root.style.setProperty('--wallpaper-accent', settings.wallpaperAccent)
   })
 
