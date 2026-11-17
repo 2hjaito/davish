@@ -9,6 +9,10 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 - Logs: **Tìm trong toàn bộ** (hoặc Enter trong ô lọc) tìm trong cả lịch sử của file, journal hay container ngay trên server, không chỉ 200 dòng đang hiện, và trả 500 dòng khớp gần nhất. Với file, bấm một kết quả để đọc các dòng xung quanh, lật trang trước/sau mà không tải cả file về (file log vài GB vẫn nhanh).
 - Nhập server từ Ansible inventory (INI): tab mới trong hộp nhập, cạnh `~/.ssh/config`. Đọc `ansible_host`, `ansible_user`, `ansible_port`, file key và `ProxyJump` trong `ansible_ssh_common_args`, có tính biến của group, group con và dải như `web[01:03]`; chọn cả group một lần. File chỉ được đọc; mật khẩu trong file không bao giờ được đọc, host dùng template, giá trị Vault hoặc kết nối không phải SSH được liệt kê là bỏ qua kèm lý do. Inventory YAML báo rõ là chưa hỗ trợ.
 
+### Sửa
+- Database: server chưa có sqlite3 thì hộp Dò đưa luôn lệnh cài sqlite3 theo trình quản lý package của server, kèm nút Chạy trong Terminal (hộp Dò tự đóng để Terminal không bị che), thay vì chỉ bảo đi cài trong Gói phần mềm. Các mục trong app Database hiện thành từng thẻ.
+- macOS và Linux: bôi đen và sao chép được chữ ở những chỗ đáng lẽ chọn được (đường dẫn file trong hộp Dò, lệnh trong các hộp xác nhận, diff của Git…). WebKit chỉ đọc `-webkit-user-select`, nên trước đây những chỗ này không chọn được.
+
 ## [1.13.10] - 2026-11-16
 
 ### Sửa

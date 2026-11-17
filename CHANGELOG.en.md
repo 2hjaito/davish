@@ -9,6 +9,10 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 - Logs: **Search all** (or Enter in the filter) searches the whole history of a file, the journal or a container on the server, not just the 200 lines on screen, and returns the latest 500 matching lines. For a file, click a result to read the lines around it and page earlier or later without downloading the file (a log of several GB stays quick).
 - Import servers from an Ansible inventory (INI): a new tab in the import dialog next to `~/.ssh/config`. It reads `ansible_host`, `ansible_user`, `ansible_port`, the key file and a `ProxyJump` in `ansible_ssh_common_args`, with group variables, child groups and ranges such as `web[01:03]`, and lets you pick a whole group at a time. The file is only read; passwords in it are never read, and hosts with templates, Vault values or a non-SSH connection are listed as skipped with the reason. A YAML inventory says it is not supported yet.
 
+### Fixed
+- Database: when the server has no sqlite3, the Find dialog offers the sqlite3 install command for the server's package manager with a Run in Terminal button (the dialog closes so Terminal is not hidden behind it), instead of only pointing to Packages. Each section of the Database app is now a card.
+- macOS and Linux: text that should be selectable can be selected and copied again (file paths in the Find dialog, commands in confirm dialogs, Git diffs…). WebKit only reads `-webkit-user-select`, so these places could not be selected.
+
 ## [1.13.10] - 2026-11-16
 
 ### Fixed
