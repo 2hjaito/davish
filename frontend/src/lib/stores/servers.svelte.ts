@@ -180,6 +180,11 @@ class Servers {
 
   async disconnect(id: string) {
     if (hasRuntime) await api.disconnect(id)
+    else {
+      // The browser preview has no conn:status to report it.
+      const s = this.list.find((x) => x.id === id)
+      if (s) s.state = 'disconnected'
+    }
   }
 
   /** Trusts the prompted host key and connects. */

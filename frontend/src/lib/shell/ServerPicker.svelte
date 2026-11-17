@@ -104,6 +104,19 @@
               <Icon name="refresh" size={13} />
             </button>
           {/if}
+          {#if s.state === 'connected' || s.state === 'connecting' || s.state === 'reconnecting'}
+            <button
+              class="tool"
+              aria-label={t.servers.overview.disconnect}
+              title={t.servers.overview.disconnect}
+              onclick={(e) => {
+                e.stopPropagation()
+                void servers.disconnect(s.id)
+              }}
+            >
+              <Icon name="power" size={13} />
+            </button>
+          {/if}
           <button class="tool" aria-label={t.servers.edit} onclick={(e) => edit(e, s.id)}>
             <Icon name="editor" size={13} />
           </button>
