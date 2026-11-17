@@ -41,7 +41,6 @@
   import HostKeyDialog from './HostKeyDialog.svelte'
   import SudoDialog from './SudoDialog.svelte'
   import ServerDialog from './ServerDialog.svelte'
-  import ImportDialog from './ImportDialog.svelte'
   import HelpDialog from './HelpDialog.svelte'
   import Tour from './Tour.svelte'
   import UpdateDialog from './UpdateDialog.svelte'
@@ -352,7 +351,10 @@
 
   <Banners />
   <ServerDialog />
-  <ImportDialog />
+  {#if ui.importDialog}
+    <!-- Loaded on first use; it is not needed to start. -->
+    {#await import('./ImportDialog.svelte') then m}<m.default />{/await}
+  {/if}
   <HelpDialog />
   <Tour />
   <UpdateDialog />

@@ -1,4 +1,5 @@
 import { EventsOn } from '../../../wailsjs/runtime/runtime'
+import type { FleetJob } from './fleet'
 import type { LockState } from './lock'
 import type { Tunnel } from './ports'
 import type { ConnState, Platform } from './servers'
@@ -9,6 +10,7 @@ export const Events = {
   ConnHostKeyPrompt: 'conn:hostkey-prompt',
   TermData: 'term:data',
   TermExit: 'term:exit',
+  FleetJob: 'fleet:job',
   SysmonTick: 'sysmon:tick',
   SysmonStatus: 'sysmon:status',
   LogsLine: 'logs:line',
@@ -206,6 +208,7 @@ export const onConnStatus = (h: (p: ConnStatus) => void) => on(Events.ConnStatus
 export const onHostKeyPrompt = (h: (p: HostKeyPrompt) => void) => on(Events.ConnHostKeyPrompt, h)
 export const onTermData = (h: (p: TermData) => void) => on(Events.TermData, h)
 export const onTermExit = (h: (p: TermExit) => void) => on(Events.TermExit, h)
+export const onFleetJob = (h: (p: FleetJob) => void) => on(Events.FleetJob, h)
 export const onSysmonTick = (h: (p: SysmonTick) => void) => on(Events.SysmonTick, h)
 export const onSysmonStatus = (h: (p: SysmonStatus) => void) => on(Events.SysmonStatus, h)
 export const onNotifyNew = (h: (p: NotifyNew) => void) => on(Events.NotifyNew, h)

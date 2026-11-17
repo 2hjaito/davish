@@ -34,7 +34,7 @@ Không cài gì lên server.
 - **Nhiều server, một desktop.** Mỗi server là một workspace (`⌘1`…`⌘9`) nhớ cửa sổ riêng của nó. Kéo file để copy giữa các server.
 - **Tự cập nhật.** Có bản mới thì hiện thay đổi kèm Cập nhật, Để sau, Bỏ qua bản này; Davish tự tải, kiểm chữ ký rồi khởi động lại vào bản mới. Không phải cài lại.
 - **Tiếng Việt, tiếng Anh, tiếng Trung giản thể hoặc tiếng Tây Ban Nha.** Chọn ngôn ngữ trong Cài đặt; lần đầu Davish theo ngôn ngữ của máy.
-- **Dùng luôn `~/.ssh/config`.** Nhập host một lần, kèm key và `ProxyJump`; Davish chỉ đọc file. Server sau bastion kết nối qua nó, mỗi bậc kiểm tra host key riêng, cả chuỗi tự kết nối lại.
+- **Dùng luôn `~/.ssh/config` và Ansible inventory.** Nhập host một lần, kèm key và `ProxyJump`, cả một group Ansible một lúc; Davish chỉ đọc file. Server sau bastion kết nối qua nó, mỗi bậc kiểm tra host key riêng, cả chuỗi tự kết nối lại.
 
 ## Tính năng
 
@@ -47,7 +47,7 @@ Không cài gì lên server.
 - [Editor](FEATURES.vi.md#editor): CodeMirror, lưu atomic, có sao lưu
 - [Logs](FEATURES.vi.md#logs): journal, file, container, theo dõi trực tiếp và tìm trong toàn bộ lịch sử trên server
 - [Monitor](FEATURES.vi.md#monitor): CPU, RAM, ổ đĩa, mạng, GPU, tiến trình, trên server Linux và Windows
-- [Tất cả server](FEATURES.vi.md#tất-cả-server): tình trạng và cảnh báo của mọi server trong một cửa sổ, và bản đồ những gì mỗi server đang phục vụ
+- [Tất cả server](FEATURES.vi.md#tất-cả-server): tình trạng và cảnh báo của mọi server trong một cửa sổ, bản đồ những gì mỗi server đang phục vụ, và chạy một lệnh trên nhiều server, mỗi server một tab terminal
 
 **Dịch vụ và ứng dụng**
 
@@ -67,7 +67,7 @@ Không cài gì lên server.
 - [Ổ đĩa](FEATURES.vi.md#ổ-đĩa): nặng ở đâu dạng cây, phần chưa đo được và lý do, xóa và dọn dẹp
 - [An ninh](FEATURES.vi.md#an-ninh): đăng nhập sai theo giờ và theo IP, user bị nhắm, phiên đang mở, ufw, fail2ban
 - [Khóa SSH](FEATURES.vi.md#khóa-ssh): authorized_keys, deploy key, key trên máy
-- [~/.ssh/config và ProxyJump](FEATURES.vi.md#sshconfig-và-proxyjump): nhập host, kết nối qua bastion
+- [~/.ssh/config, Ansible và ProxyJump](FEATURES.vi.md#sshconfig-ansible-và-proxyjump): nhập host từ ssh config hoặc inventory INI, kết nối qua bastion
 
 **Desktop**
 

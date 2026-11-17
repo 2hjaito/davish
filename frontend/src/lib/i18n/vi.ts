@@ -40,7 +40,7 @@ const vi = {
       },
     ],
     add: 'Thêm server qua SSH…',
-    import: 'hoặc nhập từ ~/.ssh/config',
+    import: 'hoặc nhập từ ~/.ssh/config, Ansible',
     foot: (mod: string) =>
       `Có thể thêm nhiều server; mỗi server là một workspace (${mod}1…${mod}9). ${mod}K mở Spotlight để tìm app, dịch vụ, container, thư mục.`,
   },
@@ -823,7 +823,7 @@ const vi = {
   },
   menu: {
     addServer: 'Thêm server…',
-    importServers: 'Nhập từ ~/.ssh/config…',
+    importServers: 'Nhập từ ~/.ssh/config hoặc Ansible…',
     connect: (name: string) => `Kết nối ${name}`,
     disconnect: (name: string) => `Ngắt kết nối ${name}`,
     newTerminal: 'Terminal mới',
@@ -983,9 +983,13 @@ const vi = {
           'Bản đồ của một server: tên miền → nginx → cổng → container hoặc chương trình, cảnh báo cổng database mở ra Internet, upstream không ai nghe, chứng chỉ sắp hết hạn; những gì đang chạy và các ổ đĩa',
           'Kết nối một server',
           'Chuyển sang một server',
+          'Chạy một lệnh trên nhiều server: mỗi server một tab terminal, tối đa 4 server cùng lúc; tab nào hỏi lại thì được đưa lên. Xác nhận kèm đủ tên server và đúng lệnh; từ 3 server trở lên, hoặc lệnh xóa/dừng thứ gì đó, phải gõ số server. Cập nhật package dùng trình quản lý package của từng server với sudo -n',
         ],
         keys: [],
-        runs: ['Cùng cách đọc /proc như Monitor, cho từng server đã kết nối, khi cửa sổ đang mở'],
+        runs: [
+          'Cùng cách đọc /proc như Monitor, cho từng server đã kết nối, khi cửa sổ đang mở',
+          'Chạy lệnh: đúng lệnh bạn gõ, trên từng server, trong một phiên terminal; mỗi server một dòng trong Nhật ký lệnh. Davish không bao giờ tự nhập mật khẩu sudo cho việc này',
+        ],
       },
       snippets: {
         does: 'Các lệnh hay gõ, lưu trên máy này cho một server hoặc mọi server.',
@@ -1367,7 +1371,7 @@ const vi = {
     picker: 'Chọn server',
     header: 'SERVER',
     add: 'Thêm server qua SSH…',
-    import: 'Nhập từ ~/.ssh/config…',
+    import: 'Nhập từ ~/.ssh/config hoặc Ansible…',
     none: 'Chưa có server nào',
     edit: 'Sửa server',
     reconnect: 'Kết nối lại',
@@ -1378,6 +1382,47 @@ const vi = {
       reconnecting: 'mất kết nối, đang thử lại…',
       disconnected: 'chưa kết nối',
       failed: 'kết nối thất bại',
+    },
+    run: {
+      open: 'Chạy lệnh…',
+      title: 'Chạy trên nhiều server',
+      back: 'Tất cả server',
+      lead: 'Lệnh chạy trên từng server như “ssh server lệnh”, mỗi server một tab terminal, tối đa 4 server cùng lúc. Server nào hỏi lại (mật khẩu, [Y/n]) thì tab đó được đưa lên để bạn trả lời ngay trong tab. Davish không bao giờ tự nhập mật khẩu sudo khi chạy nhiều server.',
+      allOnline: (n: number) => `Mọi server đang kết nối (${n})`,
+      offline: 'chưa kết nối',
+      command: 'Lệnh',
+      update: 'Cập nhật package',
+      updateHint:
+        'Dùng trình quản lý package của từng server, với sudo -n: server nào sudo đòi mật khẩu sẽ báo.',
+      runOn: (n: number) => (n > 0 ? `Chạy trên ${n} server…` : 'Chạy…'),
+      skipped: (list: string) => `Bỏ qua: ${list}`,
+      noManager: 'không có trình quản lý package quen thuộc',
+      newCommand: 'Lệnh mới',
+      progress: (running: number, queued: number) =>
+        queued > 0 ? `${running} đang chạy, ${queued} chờ lượt` : `${running} đang chạy`,
+      result: (ok: number, bad: number) => `${ok} thành công, ${bad} lỗi`,
+      stopAll: 'Dừng tất cả',
+      again: (n: number) => `Chạy lại trên ${n} server lỗi`,
+      state: {
+        queued: 'chờ lượt',
+        running: 'đang chạy',
+        waiting: 'cần nhập',
+        done: 'xong',
+        failed: 'lỗi',
+        stopped: 'đã dừng',
+      },
+      exit: (code: number) => (code === -1 ? 'chưa chạy xong' : `exit ${code}`),
+      sudoRefused:
+        'sudo đòi mật khẩu trên server này. Vì chính sách bảo mật, Davish không dùng mật khẩu sudo khi chạy trên nhiều server.',
+      openTerminal: 'Mở Terminal',
+      answerHere: 'Server này đang chờ: gõ câu trả lời ngay tại đây.',
+      confirmTitle: (n: number) => `Chạy trên ${n} server?`,
+      confirmBody: 'Davish sẽ chạy đúng lệnh này trên từng server sau:',
+      destructive: 'Lệnh này trông như sẽ xóa, dừng hoặc ghi đè thứ gì đó.',
+      sudoNote:
+        'Câu hỏi của server do bạn trả lời trong tab của server đó. Mỗi server có một dòng trong Nhật ký lệnh.',
+      typeCount: (n: number) => `Gõ ${n} để xác nhận:`,
+      confirmRun: (n: number) => `Chạy trên ${n} server`,
     },
     overview: {
       open: 'Tất cả server…',
@@ -1423,7 +1468,7 @@ const vi = {
     },
   },
   importDialog: {
-    title: 'Nhập từ ~/.ssh/config',
+    title: 'Nhập server',
     lead: 'Davish chỉ đọc file này, không ghi gì vào đó. Mục có ký tự đại diện (*, ?) và Match được bỏ qua.',
     loading: 'Đang đọc ~/.ssh/config…',
     empty: 'Không thấy host cụ thể nào trong ~/.ssh/config.',
@@ -1433,6 +1478,31 @@ const vi = {
     submit: (n: number) => (n > 0 ? `Nhập ${n} server` : 'Nhập'),
     cancel: 'Hủy',
     jumpNote: 'Host trung gian trong ProxyJump được nhập kèm nếu chưa có.',
+    source: 'Nhập từ',
+    tabSSH: '~/.ssh/config',
+    tabAnsible: 'Ansible inventory',
+    ansibleLead:
+      'Inventory dạng INI (ví dụ /etc/ansible/hosts). Davish chỉ đọc file: group chỉ để chọn cho nhanh, không được lưu; mật khẩu trong file không bao giờ được đọc. Host dùng template ({{ }}), giá trị Vault hoặc kết nối không phải SSH được bỏ qua.',
+    noFile: 'Chưa chọn inventory',
+    choose: 'Chọn file…',
+    chooseTitle: 'Chọn Ansible inventory',
+    loadingInventory: 'Đang đọc inventory…',
+    emptyInventory: 'Không thấy host nào trong inventory này.',
+    groups: 'Group',
+    allGroups: 'Tất cả',
+    selectGroup: (g: string) => `Chọn hết trong ${g}`,
+    skipped: (n: number) => `Bỏ qua ${n} host`,
+    askYAML: 'Đề nghị hỗ trợ YAML',
+    issues: {
+      connection: (v: string) => `kết nối bằng ${v}, không phải SSH`,
+      jinja: (v: string) => `${v} là template, chỉ Ansible điền được`,
+      vault: (v: string) => `${v} được mã hóa bằng Vault`,
+      port: (v: string) => `“${v}” không phải số cổng`,
+      range: (p: string) => `dải ${p} sai cú pháp hoặc ra hơn 256 host`,
+      password:
+        'Inventory có đặt mật khẩu nhưng mật khẩu không được nhập. Nếu server cần, hãy thêm trong Sửa server.',
+      sshArgs: (names: string) => `tùy chọn ssh không được nhập: ${names}`,
+    },
   },
   serverDialog: {
     addTitle: 'Thêm server qua SSH',
@@ -3083,6 +3153,10 @@ const vi = {
     DB_AUTH_FAILED: 'MongoDB từ chối user hoặc mật khẩu này.',
     SUDO_PASSWORD_REQUIRED: 'Server cần mật khẩu sudo cho lệnh này.',
     SUDO_PASSWORD_WRONG: 'sudo không nhận mật khẩu này.',
+    INVENTORY_YAML_UNSUPPORTED:
+      'Inventory này là YAML (hoặc JSON). Hiện Davish chỉ đọc inventory dạng INI.',
+    INVENTORY_SCRIPT_UNSUPPORTED:
+      'Inventory này là một script. Davish không chạy nó; hãy chọn file inventory dạng INI.',
     UPDATE_DOWNLOAD_FAILED:
       'Không tải được bản cập nhật: GitHub không trả lời hoặc mạng chập chờn. Thử lại sau ít phút, hoặc tải thủ công từ trang phát hành.',
     GIT_UNSAFE_OWNER:

@@ -27,7 +27,7 @@ const en = {
       },
     ],
     add: 'Add a server over SSH…',
-    import: 'or import from ~/.ssh/config',
+    import: 'or import from ~/.ssh/config or Ansible',
     foot: (mod: string) =>
       `Add as many servers as you like; each one is a workspace (${mod}1…${mod}9). ${mod}K opens Spotlight to find apps, services, containers and folders.`,
   },
@@ -837,7 +837,7 @@ const en = {
   },
   menu: {
     addServer: 'Add server…',
-    importServers: 'Import from ~/.ssh/config…',
+    importServers: 'Import from ~/.ssh/config or Ansible…',
     connect: (name: string) => `Connect ${name}`,
     disconnect: (name: string) => `Disconnect ${name}`,
     newTerminal: 'New Terminal',
@@ -1000,11 +1000,13 @@ const en = {
           'A server’s map: domain → nginx → port → container or program, with a database port open to the Internet, an upstream nobody listens on and a certificate about to expire flagged; what runs and the disks',
           'Connect a server',
           'Switch to a server',
+          'Run a command on several servers: each in its own terminal tab, at most 4 at a time; a tab that asks something comes forward. Confirmed with every server name and the exact command; 3 servers or more, or a command that removes or stops something, asks you to type the count. Update packages uses each server’s package manager with sudo -n',
         ],
         keys: [],
         runs: [
           'For the map: that server’s nginx sites, listening ports, containers and disks, read when it opens (read only)',
           'The same /proc reading as Monitor, for each connected server, while the window is open',
+          'Run a command: exactly the command you typed, on each server, in a terminal session; one line per server in the Command log. Davish never types a sudo password for it',
         ],
       },
       snippets: {
@@ -1385,7 +1387,7 @@ const en = {
     picker: 'Choose server',
     header: 'SERVERS',
     add: 'Add a server over SSH…',
-    import: 'Import from ~/.ssh/config…',
+    import: 'Import from ~/.ssh/config or Ansible…',
     none: 'No servers yet',
     edit: 'Edit server',
     reconnect: 'Reconnect',
@@ -1396,6 +1398,47 @@ const en = {
       reconnecting: 'connection lost, retrying…',
       disconnected: 'not connected',
       failed: 'connection failed',
+    },
+    run: {
+      open: 'Run a command…',
+      title: 'Run on several servers',
+      back: 'All servers',
+      lead: 'The command runs on each server as “ssh server command” would, each in its own terminal tab, at most 4 at a time. When a server asks something (a password, [Y/n]), its tab comes forward: answer there. Davish never types a sudo password for a run.',
+      allOnline: (n: number) => `All connected servers (${n})`,
+      offline: 'not connected',
+      command: 'Command',
+      update: 'Update packages',
+      updateHint:
+        'Each server’s package manager, with sudo -n: a server whose sudo wants a password says so.',
+      runOn: (n: number) => (n > 0 ? `Run on ${n} ${n === 1 ? 'server' : 'servers'}…` : 'Run…'),
+      skipped: (list: string) => `Left out: ${list}`,
+      noManager: 'no known package manager',
+      newCommand: 'New command',
+      progress: (running: number, queued: number) =>
+        queued > 0 ? `${running} running, ${queued} waiting their turn` : `${running} running`,
+      result: (ok: number, bad: number) => `${ok} succeeded, ${bad} failed`,
+      stopAll: 'Stop all',
+      again: (n: number) => `Run again on ${n} failed`,
+      state: {
+        queued: 'waiting its turn',
+        running: 'running',
+        waiting: 'needs input',
+        done: 'done',
+        failed: 'failed',
+        stopped: 'stopped',
+      },
+      exit: (code: number) => (code === -1 ? 'did not finish' : `exit ${code}`),
+      sudoRefused:
+        'sudo wants a password here. For security, Davish does not use sudo passwords when running on several servers.',
+      openTerminal: 'Open Terminal',
+      answerHere: 'This server is waiting: type the answer here.',
+      confirmTitle: (n: number) => `Run on ${n} ${n === 1 ? 'server' : 'servers'}?`,
+      confirmBody: 'Davish will run exactly this on each of these servers:',
+      destructive: 'This command looks like it removes, stops or overwrites something.',
+      sudoNote:
+        'Prompts are answered by you, in each server’s tab. Each server gets a line in the Command log.',
+      typeCount: (n: number) => `Type ${n} to confirm:`,
+      confirmRun: (n: number) => `Run on ${n}`,
     },
     overview: {
       open: 'All servers…',
@@ -1441,7 +1484,7 @@ const en = {
     },
   },
   importDialog: {
-    title: 'Import from ~/.ssh/config',
+    title: 'Import servers',
     lead: 'Davish only reads this file and never writes to it. Entries with wildcards (*, ?) and Match blocks are skipped.',
     loading: 'Reading ~/.ssh/config…',
     empty: 'No specific hosts found in ~/.ssh/config.',
@@ -1451,6 +1494,31 @@ const en = {
     submit: (n: number) => (n > 0 ? `Import ${n} ${n === 1 ? 'server' : 'servers'}` : 'Import'),
     cancel: 'Cancel',
     jumpNote: 'ProxyJump hosts are imported too if not added yet.',
+    source: 'Import from',
+    tabSSH: '~/.ssh/config',
+    tabAnsible: 'Ansible inventory',
+    ansibleLead:
+      'An INI inventory (such as /etc/ansible/hosts). Davish only reads the file: groups help you choose and are not saved, and passwords in it are never read. Hosts with templates ({{ }}), Vault values or a non-SSH connection are skipped.',
+    noFile: 'No inventory chosen',
+    choose: 'Choose file…',
+    chooseTitle: 'Choose an Ansible inventory',
+    loadingInventory: 'Reading the inventory…',
+    emptyInventory: 'No hosts found in this inventory.',
+    groups: 'Groups',
+    allGroups: 'All',
+    selectGroup: (g: string) => `Select all in ${g}`,
+    skipped: (n: number) => `${n} ${n === 1 ? 'host' : 'hosts'} skipped`,
+    askYAML: 'Ask for YAML support',
+    issues: {
+      connection: (v: string) => `connects with ${v}, not SSH`,
+      jinja: (v: string) => `${v} is a template, which only Ansible can fill in`,
+      vault: (v: string) => `${v} is encrypted with Vault`,
+      port: (v: string) => `“${v}” is not a port`,
+      range: (p: string) => `the range ${p} is malformed or makes more than 256 hosts`,
+      password:
+        'The inventory sets a password, which is not imported. If the server needs one, add it in Edit server.',
+      sshArgs: (names: string) => `ssh options not imported: ${names}`,
+    },
   },
   serverDialog: {
     addTitle: 'Add a server over SSH',
@@ -3119,6 +3187,10 @@ const en = {
     DB_AUTH_FAILED: 'MongoDB refused this user or password.',
     SUDO_PASSWORD_REQUIRED: 'The server needs the sudo password for this.',
     SUDO_PASSWORD_WRONG: 'sudo did not accept this password.',
+    INVENTORY_YAML_UNSUPPORTED:
+      'This inventory is YAML (or JSON). Davish only reads INI inventories for now.',
+    INVENTORY_SCRIPT_UNSUPPORTED:
+      'This inventory is a script. Davish does not run it; choose an INI inventory file.',
     UPDATE_DOWNLOAD_FAILED:
       'Could not download the update: GitHub did not answer or the network dropped. Try again in a few minutes, or download it from the release page.',
     GIT_UNSAFE_OWNER:
