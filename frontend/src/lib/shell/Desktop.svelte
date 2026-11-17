@@ -402,9 +402,10 @@
       );
   }
 
-  /* Light preset: a flat base, which is cheaper than four gradients. */
+  /* Light preset: one solid color, still the swatch mixed into the base. */
   :global(:root[data-perf-wallpaper='flat']) .desktop {
     background-image: none;
+    background-color: var(--wallpaper-flat, var(--wallpaper-base));
   }
 
   .workspace.hidden {

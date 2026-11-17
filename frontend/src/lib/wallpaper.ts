@@ -1,0 +1,21 @@
+/** #rrggbb to channels. Anything else is rejected. */
+function channels(hex: string): [number, number, number] | null {
+  const m = /^#([0-9a-f]{6})$/i.exec(hex.trim())
+  if (!m?.[1]) return null
+  const n = Number.parseInt(m[1], 16)
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+}
+
+/**
+ * The flat wallpaper: the chosen swatch mixed into the base by the same
+ * amount the blobs use (--wallpaper-mix). Light is 100%, so the swatch is
+ * the color; dark keeps it dimmed.
+ */
+export function mixWallpaper(accent: string, base: string, mixPercent: number): string | null {
+  const a = channels(accent)
+  const b = channels(base)
+  if (!a || !b || !Number.isFinite(mixPercent)) return null
+  const t = Math.min(100, Math.max(0, mixPercent)) / 100
+  const hex = (n: number) => Math.round(n).toString(16).padStart(2, '0')
+  return `#${hex(a[0] * t + b[0] * (1 - t))}${hex(a[1] * t + b[1] * (1 - t))}${hex(a[2] * t + b[2] * (1 - t))}`
+}
