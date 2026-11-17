@@ -131,10 +131,14 @@
       {/if}
       <line class="grid base" x1="0" x2={width} y1={padTop + plotH} y2={padTop + plotH} />
 
-      {#each paths as p, i (i)}
-        <path d={p.area} fill={p.color} class="area" />
-        <path d={p.line} stroke={p.color} class="line" class:thin={compact} />
-      {/each}
+      <!-- The sample just before the left edge sits at a negative x; the nested
+           svg clips it so the line stops at the chart edge, not the card's. -->
+      <svg class="plot" {width} {height}>
+        {#each paths as p, i (i)}
+          <path d={p.area} fill={p.color} class="area" />
+          <path d={p.line} stroke={p.color} class="line" class:thin={compact} />
+        {/each}
+      </svg>
 
       {#if hovered}
         <line
@@ -200,6 +204,10 @@
   svg {
     display: block;
     overflow: visible;
+  }
+
+  .plot {
+    overflow: hidden;
   }
 
   .grid {
