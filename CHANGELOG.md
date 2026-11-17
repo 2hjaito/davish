@@ -4,6 +4,11 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.14.2] - 2026-11-17
+
+### Sửa
+- Linux: cửa sổ Davish có icon của app trên thanh tác vụ và Alt+Tab, thay vì icon mặc định của X11 (#181).
+
 ## [1.14.1] - 2026-11-17
 
 ### Thêm

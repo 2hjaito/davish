@@ -4,6 +4,11 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.14.2] - 2026-11-17
+
+### Fixed
+- Linux: the Davish window shows the app icon in the taskbar and Alt+Tab instead of the default X11 one (#181).
+
 ## [1.14.1] - 2026-11-17
 
 ### Added
