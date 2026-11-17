@@ -2622,7 +2622,7 @@ const es = {
       add: 'Añadir',
       added: 'Añadido',
       noSqlite3:
-        'El servidor no tiene sqlite3, así que aún no se pueden abrir archivos SQLite. Instala el paquete sqlite3 en Paquetes.',
+        'El servidor no tiene sqlite3, así que aún no se pueden abrir archivos SQLite. Instálalo primero:',
     },
     sqlite: {
       title: 'SQLite',

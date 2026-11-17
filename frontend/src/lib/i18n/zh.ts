@@ -2494,7 +2494,7 @@ const zh = {
       rootOnly: '仅 root 可读',
       add: '添加',
       added: '已添加',
-      noSqlite3: '服务器没有 sqlite3，暂时无法打开 SQLite 文件。请在软件包中安装 sqlite3。',
+      noSqlite3: '服务器没有 sqlite3，暂时无法打开 SQLite 文件。请先安装：',
     },
     sqlite: {
       title: 'SQLite',
