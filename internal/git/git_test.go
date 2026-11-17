@@ -218,9 +218,9 @@ func TestGitError(t *testing.T) {
 }
 
 func TestParseLogRecord(t *testing.T) {
-	rec := "\nabc123\x1fabc\x1fp1 p2\x1fAn\x1f1700000000\x1fHEAD -> refs/heads/main, refs/remotes/origin/main, refs/remotes/origin/HEAD, tag: refs/tags/v1.2, refs/heads/feature/x\x1fMerge branch 'x'"
+	rec := "\nabc123\x1fabc\x1fp1 p2\x1fAn\x1fan@example.com\x1f1700000000\x1fHEAD -> refs/heads/main, refs/remotes/origin/main, refs/remotes/origin/HEAD, tag: refs/tags/v1.2, refs/heads/feature/x\x1fMerge branch 'x'"
 	c := parseLogRecord(rec)
-	if c == nil || c.Subject != "Merge branch 'x'" || strings.Join(c.Parents, ",") != "p1,p2" || c.Time != 1700000000 {
+	if c == nil || c.Subject != "Merge branch 'x'" || strings.Join(c.Parents, ",") != "p1,p2" || c.Time != 1700000000 || c.Email != "an@example.com" {
 		t.Fatalf("got %+v", c)
 	}
 	want := []Ref{{"main", RefHead}, {"origin/main", RefRemote}, {"v1.2", RefTag}, {"feature/x", RefLocal}}
@@ -232,7 +232,7 @@ func TestParseLogRecord(t *testing.T) {
 			t.Errorf("ref %d = %+v, want %+v", i, c.Refs[i], want[i])
 		}
 	}
-	root := parseLogRecord("r00t\x1fr00\x1f\x1fAn\x1f1\x1fHEAD\x1finit")
+	root := parseLogRecord("r00t\x1fr00\x1f\x1fAn\x1f\x1f1\x1fHEAD\x1finit")
 	if root == nil || len(root.Parents) != 0 || len(root.Refs) != 1 || root.Refs[0].Kind != RefHead {
 		t.Fatalf("root %+v", root)
 	}

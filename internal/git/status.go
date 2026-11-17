@@ -35,6 +35,8 @@ type Commit struct {
 	Author  string `json:"author"`
 	Time    int64  `json:"time"` // unix seconds
 	Subject string `json:"subject"`
+	// Email is filled by Log only, for author avatars.
+	Email string `json:"email,omitempty"`
 	// Parents and Refs are filled by Log only, to draw the graph.
 	Parents []string `json:"parents"`
 	Refs    []Ref    `json:"refs"`
@@ -191,16 +193,17 @@ func parseCommit(line, sep string) *Commit {
 // parseLogRecord reads one record of logLine: hash, short hash, parents,
 // author, time, decorations, subject.
 func parseLogRecord(r string) *Commit {
-	f := strings.SplitN(strings.Trim(r, "\r\n"), "\x1f", 7)
-	if len(f) < 7 || f[0] == "" {
+	f := strings.SplitN(strings.Trim(r, "\r\n"), "\x1f", 8)
+	if len(f) < 8 || f[0] == "" {
 		return nil
 	}
-	c := parseCommit(strings.Join([]string{f[0], f[1], f[3], f[4], f[6]}, "\x1f"), "\x1f")
+	c := parseCommit(strings.Join([]string{f[0], f[1], f[3], f[5], f[7]}, "\x1f"), "\x1f")
 	if c == nil {
 		return nil
 	}
+	c.Email = f[4]
 	c.Parents = append(c.Parents, strings.Fields(f[2])...)
-	c.Refs = parseRefs(f[5])
+	c.Refs = parseRefs(f[6])
 	return c
 }
 
@@ -286,7 +289,7 @@ func parseStatus(out []byte) Status {
 // stash is not history, so it is left out.
 func logLine(dir string, skip int) string {
 	return readOnly + gitIn(dir, "log", "--exclude=refs/stash", "--all", "--date-order", "--decorate=full",
-		"--format=%H%x1f%h%x1f%P%x1f%an%x1f%at%x1f%D%x1f%s%x1e",
+		"--format=%H%x1f%h%x1f%P%x1f%an%x1f%ae%x1f%at%x1f%D%x1f%s%x1e",
 		"--max-count="+strconv.Itoa(LogPage), "--skip="+strconv.Itoa(skip))
 }
 

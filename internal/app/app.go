@@ -62,6 +62,7 @@ type App struct {
 	sudo      *sudo.Keeper
 	docker    *docker.Service
 	logs      *logs.Service
+	logSearch *logs.Searcher
 	cron      *cron.Service
 	nginx     *nginx.Service
 	lock      *lock.Service
@@ -146,6 +147,7 @@ func New(version string) (*App, error) {
 	a.browser = ports.NewBrowser(a.conns, log)
 	a.logs = logs.New(a.conns, a.audit, emitter{a}, log)
 	a.logs.UseRoot(a.sudo)
+	a.logSearch = logs.NewSearcher(runner)
 	if a.transfers, err = transfer.New(a.conns, emitter{a}, log, transfer.Options{}); err != nil {
 		return nil, err
 	}

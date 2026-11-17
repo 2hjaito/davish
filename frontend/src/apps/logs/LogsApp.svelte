@@ -17,6 +17,7 @@
   import { backend as dockerBackend } from '../docker/backend'
   import { backend as servicesBackend } from '../services/backend'
   import { append, COMMON_FILES, filterLines, normalize, targetProblem } from './buffer'
+  import HistorySearch from './HistorySearch.svelte'
   import LogView from './LogView.svelte'
   import { follow } from './stream'
   import { copyText } from '../../lib/api/clipboard'
@@ -42,6 +43,8 @@
   let held = $state.raw<string[]>([])
   let paused = $state(false)
   let query = $state('')
+  /** The search of the source's whole history on screen, in place of the stream. */
+  let history = $state.raw<{ source: LogSource; query: string } | null>(null)
   let status = $state<'idle' | 'live' | 'stopped' | 'lost' | 'failed'>('idle')
   let failure = $state('')
   let sudo = $state('')
@@ -74,6 +77,7 @@
   async function start(src: LogSource, asRoot = false, denied = '') {
     stop?.()
     stop = null
+    if (history && history.source !== src) history = null
     source = src
     rooted = asRoot
     askSudo = false
@@ -150,6 +154,13 @@
     e.preventDefault()
     if (problem || !connected) return
     void start(normalize({ kind, target }))
+  }
+
+  /** Searches the whole history of the source on the server. */
+  function searchHistory() {
+    const q = query.trim()
+    if (!source || !q || !connected) return
+    history = { source, query: q }
   }
 
   function halt() {
@@ -270,9 +281,16 @@
         placeholder={t.logs.filter}
         aria-label={t.logs.filter}
         bind:value={query}
-        onkeydown={(e) => e.key === 'Escape' && (query = '')}
+        onkeydown={(e) => {
+          if (e.key === 'Escape') query = ''
+          else if (e.key === 'Enter') {
+            e.preventDefault()
+            searchHistory()
+          }
+        }}
       />
     </label>
+
     <button
       type="button"
       class="tool"
@@ -309,7 +327,33 @@
     </button>
   </form>
 
-  {#if !source}
+  {#if source && query.trim() && !history}
+    <div class="more">
+      <span>{t.logs.history.onlyShown}</span>
+      <button
+        type="button"
+        class="all"
+        title={t.logs.history.hint}
+        disabled={!connected}
+        onclick={searchHistory}
+      >
+        <Icon name="search" size={11} strokeWidth={2.4} />
+        {t.logs.history.button}
+        <kbd>↵</kbd>
+      </button>
+    </div>
+  {/if}
+
+  {#if history}
+    <HistorySearch
+      serverID={win.serverID}
+      source={history.source}
+      query={history.query}
+      matchCase={false}
+      demoLines={lines}
+      onclose={() => (history = null)}
+    />
+  {:else if !source}
     <Empty icon="logs" title={t.logs.empty} hint={t.logs.emptyHint} />
   {:else if status === 'failed' && sudo}
     <div class="root">
@@ -477,6 +521,40 @@
     border: 0;
     border-radius: 50%;
     background: none;
+    color: var(--fg-on-dark-muted);
+  }
+
+  .more {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px;
+    border-bottom: 1px solid var(--divider-dark);
+    font-size: var(--text-xs);
+    color: var(--fg-on-dark-muted);
+  }
+
+  .all {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 9px;
+    border: 0;
+    border-radius: 6px;
+    background: var(--tab-hover-dark);
+    color: var(--fg-on-dark);
+    font-size: var(--text-xs);
+    white-space: nowrap;
+  }
+
+  .all:disabled {
+    opacity: 0.5;
+  }
+
+  .all kbd {
+    font-family: var(--font-mono);
+    font-size: var(--text-xxs);
     color: var(--fg-on-dark-muted);
   }
 

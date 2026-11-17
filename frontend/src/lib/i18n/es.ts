@@ -63,6 +63,7 @@ const es = {
     },
   },
   common: {
+    resizeSplit: 'Arrastra para cambiar el ancho de la lista',
     cancel: 'Cancelar',
     refresh: 'Actualizar',
     needsRoot: 'Esta acción necesita root en el servidor.',
@@ -918,6 +919,8 @@ const es = {
       files: {
         does: 'Explora archivos por SFTP: subir, descargar, renombrar, eliminar, comprimir, copiar a otro servidor.',
         actions: [
+          'Escribe en el buscador, elige Subcarpetas o Contenido y pulsa Intro para buscar en el servidor (máximo 500 resultados, 30 segundos, Detener para cortar)',
+          'El texto buscado forma parte del comando y aparece en el registro de comandos: no busques una contraseña o un token',
           'Suelta archivos de tu ordenador para subirlos',
           'Arrastra archivos a otro servidor de la barra lateral para copiarlos',
           'Arrastra un archivo al fondo de escritorio para crear un acceso directo',
@@ -938,6 +941,7 @@ const es = {
         runs: [
           'SFTP para leer y escribir',
           'rm, tar/zip para eliminar y comprimir (con confirmación)',
+          'find, grep para buscar en el árbol (solo lectura)',
         ],
       },
       monitor: {
@@ -991,6 +995,7 @@ const es = {
       logs: {
         does: 'Sigue el journal de una unidad, un archivo de registro o los registros de un contenedor. Filtra, pausa, resalta errores.',
         actions: [
+          'Buscar en todo (Intro en el filtro): busca en todo el historial del servidor, no solo en las 200 líneas visibles; en un archivo, pulsa un resultado para leer alrededor página a página',
           'Haz clic en una ruta de archivo del registro para abrirla en Editor en esa línea',
           'Pausa para leer',
         ],
@@ -1000,6 +1005,7 @@ const es = {
           'tail -F',
           'docker logs -f',
           'Un registro que no puedes leer (journal del sistema, archivos de root, docker fuera del grupo docker): se sigue de nuevo con sudo, pidiendo la contraseña de sudo una vez por sesión si hace falta',
+          'grep, journalctl -g, docker logs | grep para Buscar en todo; sed -n para leer una página del archivo',
         ],
       },
       editor: {
@@ -1501,6 +1507,19 @@ const es = {
       `¿Quitar «${name}» de Davish? También se elimina su contraseña o frase de paso guardada. El servidor en sí no se ve afectado.`,
     confirmDeleteButton: 'Eliminar',
   },
+  connError: {
+    title: (name: string) => `No se pudo conectar a “${name}”`,
+    hint: 'El recuadro de abajo explica qué falló. Cópialo y envíalo con tu informe de error: no contiene contraseñas, claves, host ni nombre de usuario.',
+    copy: 'Copiar error',
+    copied: 'Copiado',
+    copyFailed: 'No se pudo copiar. Selecciona el texto de arriba y cópialo a mano.',
+    openLog: 'Abrir carpeta de registros',
+    report: 'Informar en GitHub',
+    edit: 'Editar servidor',
+    close: 'Cerrar',
+    reconnect: 'Reconectar',
+    details: 'Detalles',
+  },
   hostKey: {
     title: 'Confirmar un servidor nuevo',
     body: (host: string) =>
@@ -1709,6 +1728,25 @@ const es = {
     path: 'Ruta',
     search: 'Buscar',
     searchLabel: 'Buscar archivos',
+    searchScope: 'Dónde buscar',
+    scopes: { here: 'Esta carpeta', tree: 'Subcarpetas', content: 'Contenido' },
+    searchMatchCase: 'Distinguir mayúsculas',
+    searchEnter: 'Pulsa Intro para buscar en el servidor',
+    searchingNames: (dir: string) => `Buscando nombres en ${dir}…`,
+    searchingContent: (dir: string) => `Buscando contenido en ${dir}…`,
+    searchStop: 'Detener',
+    searchStopped: 'Búsqueda detenida',
+    searchFound: (n: number) => (n === 1 ? '1 resultado' : `${n} resultados`),
+    searchTruncated: 'solo los primeros 500',
+    searchTimedOut: 'detenida a los 30 segundos, puede faltar algo',
+    searchDenied: (n: number) =>
+      n === 1 ? '1 lugar sin permiso de lectura' : `${n} lugares sin permiso de lectura`,
+    searchNone: 'No se encontró nada',
+    searchNoneHint: 'La búsqueda de contenido omite binarios, .git y node_modules',
+    searchReveal: 'Mostrar en la carpeta',
+    searchContentRefused:
+      'No se puede buscar contenido desde / ni en /proc, /sys, /dev, /run: abre una carpeta más concreta',
+    searchOpenFailed: 'No se pudo abrir el resultado',
     name: 'Nombre',
     size: 'Tamaño',
     modified: 'Modificado',
@@ -2995,6 +3033,25 @@ const es = {
     close: 'Cerrar',
   },
   logs: {
+    history: {
+      button: 'Buscar en todo',
+      onlyShown: 'El filtro solo ve las líneas en pantalla.',
+      hint: 'Buscar en todo el historial del servidor, no solo en las líneas visibles (Intro)',
+      searching: 'Buscando en el servidor…',
+      stop: 'Detener',
+      stopped: 'Búsqueda detenida',
+      close: 'Volver a seguir',
+      found: (n: number) => (n === 1 ? '1 línea coincide' : `${n} líneas coinciden`),
+      truncated: 'solo las 500 más recientes',
+      timedOut: 'detenida a los 60 segundos, puede faltar algo',
+      restricted: 'el journal oculta líneas de otros usuarios: sigue con sudo para verlas todas',
+      none: 'Ninguna línea coincide',
+      openAround: (n: number) => `Leer alrededor de la línea ${n}`,
+      backToResults: 'Resultados',
+      pageOf: (a: number, b: number) => `Líneas ${a}–${b}`,
+      earlier: 'Anteriores',
+      later: 'Siguientes',
+    },
     view: 'Contenido del registro',
     kinds: { journal: 'Servicio', file: 'Archivo', docker: 'Contenedor' },
     kindLabel: 'Tipo de origen del registro',
@@ -3053,8 +3110,10 @@ const es = {
     CONN_UNREACHABLE: 'No se pudo llegar al servidor. Comprueba el host, el puerto y la red.',
     CONN_SECRET_MISSING: 'No hay ninguna contraseña ni frase de paso guardada para este servidor.',
     CONN_AGENT_UNAVAILABLE:
-      'No se ha encontrado ninguna clave: el agente SSH está vacío y no hay clave por defecto en ~/.ssh. Elige Clave privada.',
+      'No se ha encontrado ninguna clave: el agente SSH está vacío o no se está ejecutando, y no hay clave por defecto en ~/.ssh. En Windows, inicia el servicio “OpenSSH Authentication Agent” y añade tu clave con ssh-add, o elige Clave privada.',
     CONN_KEY_UNREADABLE: 'No se pudo leer el archivo de la clave privada.',
+    CONN_PASSPHRASE_WRONG:
+      'La frase de contraseña guardada no abre esta clave privada. Edita el servidor y escríbela de nuevo.',
     CONN_NOT_CONNECTED: 'El servidor no está conectado.',
     TERM_CLOSED: 'La sesión de terminal está cerrada.',
     FS_PERMISSION_DENIED: 'Permiso denegado.',
@@ -3066,6 +3125,8 @@ const es = {
       'Davish no hace esto como root: la ruta es una parte vital del sistema, o pasa por un enlace o carpeta que otro usuario posee o puede escribir, y podría enviar a root a otro sitio. Si estás seguro, usa sudoedit o sudo en la Terminal.',
     CMD_NEEDS_ROOT: 'Este comando necesita root.',
     CMD_MISSING: 'Al servidor le falta un programa que esta acción necesita (por ejemplo zip).',
+    CMD_TOO_OLD:
+      'La versión del programa que esta acción necesita es demasiado antigua en el servidor. Actualízalo en Packages.',
     CMD_FAILED: 'El comando ha fallado en el servidor.',
     CMD_TIMEOUT:
       'El servidor no respondió a tiempo, así que Davish dejó de esperar. Reinténtalo, o abre Terminal para ver si el comando se cuelga (por ejemplo, Docker no responde).',

@@ -74,6 +74,11 @@ type Service struct {
 	run   Runner
 	root  Root
 	log   *slog.Logger
+
+	mu sync.Mutex
+	// searches holds the cancel of each running Search, by the token the
+	// frontend chose, so its Stop button can end it.
+	searches map[string]context.CancelFunc
 }
 
 // New creates the service.

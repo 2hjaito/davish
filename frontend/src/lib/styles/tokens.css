@@ -78,6 +78,10 @@
   --divider-soft: rgba(0, 0, 0, 0.06);
   --divider-dark: rgba(255, 255, 255, 0.08);
   --fill-soft: rgba(0, 0, 0, 0.06);
+  /* Scroll bars: faint at rest, clearer over the area, clearest when held. */
+  --scrollbar-idle: rgba(0, 0, 0, 0.1);
+  --scrollbar: rgba(0, 0, 0, 0.26);
+  --scrollbar-hover: rgba(0, 0, 0, 0.45);
   --fill-track: rgba(0, 0, 0, 0.12);
   --switch-knob: #fff;
   --switch-knob-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
@@ -244,6 +248,9 @@
   --divider: rgba(255, 255, 255, 0.1);
   --divider-soft: rgba(255, 255, 255, 0.06);
   --fill-soft: rgba(255, 255, 255, 0.08);
+  --scrollbar-idle: rgba(255, 255, 255, 0.1);
+  --scrollbar: rgba(255, 255, 255, 0.26);
+  --scrollbar-hover: rgba(255, 255, 255, 0.45);
   --fill-track: rgba(255, 255, 255, 0.16);
   --switch-knob-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   --tab-active-light: rgba(255, 255, 255, 0.1);

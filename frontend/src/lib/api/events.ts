@@ -29,6 +29,8 @@ export interface ConnStatus {
   serverID: string
   state: ConnState
   error?: { code: string; message: string }
+  /** The technical cause of error, home folder hidden, for a bug report. */
+  detail?: string
   /** Set once the server is connected. */
   platform?: Platform
 }

@@ -262,6 +262,10 @@ export function FilesAccess(arg1, arg2) {
   return window['go']['app']['App']['FilesAccess'](arg1, arg2);
 }
 
+export function FilesCancelSearch(arg1) {
+  return window['go']['app']['App']['FilesCancelSearch'](arg1);
+}
+
 export function FilesCompress(arg1, arg2, arg3, arg4) {
   return window['go']['app']['App']['FilesCompress'](arg1, arg2, arg3, arg4);
 }
@@ -312,6 +316,10 @@ export function FilesSave(arg1, arg2, arg3, arg4) {
 
 export function FilesSaveAsRoot(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['app']['App']['FilesSaveAsRoot'](arg1, arg2, arg3, arg4, arg5);
+}
+
+export function FilesSearch(arg1, arg2, arg3) {
+  return window['go']['app']['App']['FilesSearch'](arg1, arg2, arg3);
 }
 
 export function FilesStat(arg1, arg2) {
@@ -444,6 +452,18 @@ export function LockSetPassword(arg1, arg2) {
 
 export function LockState() {
   return window['go']['app']['App']['LockState']();
+}
+
+export function LogsAround(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['LogsAround'](arg1, arg2, arg3, arg4);
+}
+
+export function LogsCancelSearch(arg1) {
+  return window['go']['app']['App']['LogsCancelSearch'](arg1);
+}
+
+export function LogsSearch(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['LogsSearch'](arg1, arg2, arg3, arg4);
 }
 
 export function LogsStart(arg1, arg2) {

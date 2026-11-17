@@ -2,6 +2,7 @@
   import type { Commit, Ref } from '../../lib/api/git'
   import { t } from '../../lib/i18n'
   import Icon from '../../lib/ui/Icon.svelte'
+  import Avatar from './Avatar.svelte'
   import { layout, type Segment } from './graph'
 
   // The history as a commit graph, styled and driven like StatusList.
@@ -13,9 +14,11 @@
     label: string
     empty: string
     onselect: (hash: string) => void
+    /** Called when the end of the list scrolls into view; absent when there is no more. */
+    onmore?: () => void
   }
 
-  let { commits, graph, selected, label, empty, onselect }: Props = $props()
+  let { commits, graph, selected, label, empty, onselect, onmore }: Props = $props()
 
   // Must match .row's height in CSS: lines meet across rows.
   const ROW_H = 30
@@ -43,6 +46,21 @@
     const c = (y1 + y2) / 2
     return `M${x1} ${y1}C${x1} ${c} ${x2} ${c} ${x2} ${y2}`
   }
+
+  // Asks for the next page a little before the last row shows.
+  let sentinel = $state<HTMLDivElement>()
+  $effect(() => {
+    const more = onmore
+    if (!more || !sentinel || !scroller) return
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) more()
+      },
+      { root: scroller, rootMargin: `0px 0px ${ROW_H * 10}px 0px` },
+    )
+    io.observe(sentinel)
+    return () => io.disconnect()
+  })
 
   const isHead = (c: Commit) => c.refs.some((r) => r.kind === 'head')
 
@@ -135,11 +153,13 @@
         </span>
       {/each}
       <span class="name">{c.subject}</span>
+      <Avatar name={c.author} email={c.email} />
       <span class="sub">{new Date(c.time * 1000).toLocaleDateString('vi-VN')}</span>
     </button>
   {:else}
     <p class="none">{empty}</p>
   {/each}
+  {#if onmore && commits.length > 0}<div class="sentinel" bind:this={sentinel}></div>{/if}
 </div>
 
 <style>
@@ -254,6 +274,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .sentinel {
+    height: 1px;
   }
 
   .sub {

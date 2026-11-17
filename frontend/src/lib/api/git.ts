@@ -21,6 +21,8 @@ export interface Commit {
   /** Unix seconds. */
   time: number
   subject: string
+  /** Filled by gitLog only, for author avatars. */
+  email?: string
   /** Filled by gitLog only, to draw the graph. */
   parents: string[]
   refs: Ref[]

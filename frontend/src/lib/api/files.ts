@@ -177,3 +177,41 @@ export interface Access {
 
 export const filesAccess = (serverID: string, path: string): Promise<Access> =>
   App.FilesAccess(serverID, path)
+
+export type SearchMode = 'name' | 'content'
+
+export interface SearchQuery {
+  /** Absolute and clean; content search refuses /, /proc, /sys, /dev and /run. */
+  dir: string
+  query: string
+  mode: SearchMode
+  matchCase: boolean
+}
+
+export interface SearchHit {
+  path: string
+  /** 1-based, content search only. */
+  line?: number
+  /** The text around the match, content search only. */
+  text?: string
+}
+
+export interface SearchResult {
+  hits: SearchHit[]
+  /** More than 500 hits: the rest were cut. */
+  truncated: boolean
+  /** Places the account could not read. */
+  denied: number
+  /** The server-side 30 s limit ended the search. */
+  timedOut: boolean
+  command: string
+}
+
+/** Runs find or grep under q.dir; token names it for filesCancelSearch. */
+export const filesSearch = (
+  serverID: string,
+  q: SearchQuery,
+  token: string,
+): Promise<SearchResult> => App.FilesSearch(serverID, q, token) as Promise<SearchResult>
+
+export const filesCancelSearch = (token: string): Promise<void> => App.FilesCancelSearch(token)

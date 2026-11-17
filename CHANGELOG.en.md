@@ -4,6 +4,41 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Added
+- Files: the search box has three scopes. **This folder** filters as before; **Subfolders** finds names in every subfolder with `find`; **Contents** finds the lines that contain the text with `grep` (binary files, `.git` and `node_modules` are skipped). Press Enter to search the server: up to 500 results within 30 seconds, with the exact command that ran, a Stop button and a count of the places that could not be read. A content result opens in the Editor at its line; the folder button shows the file in its folder. Read only, never retried through sudo.
+- Logs: **Search all** (or Enter in the filter) searches the whole history of a file, the journal or a container on the server, not just the 200 lines on screen, and returns the latest 500 matching lines. For a file, click a result to read the lines around it and page earlier or later without downloading the file (a log of several GB stays quick).
+
+## [1.13.10] - 2026-11-16
+
+### Fixed
+- Installing Docker from Setup also installs the compose plugin (a missing compose package does not stop the install). Nginx's HTTPS dialog checks for certbot first and offers its install command instead of a certbot line that would only fail. Setup says whether the tool is installed already, and no longer fails exactly when the tool is missing. Docker older than 23 reports "Docker is too old" for volumes instead of an unclear error.
+- Windows: **Automatic** login now reads the default key files in `~\.ssh` (`id_ed25519`, `id_ecdsa`, `id_rsa`). The path, written with `\`, was never expanded to the home folder, so these files were never tried (#168).
+- An SSH agent that does not answer (a pipe nobody serves, an agent waiting for its vault to unlock) no longer leaves the connection stuck on "Connecting…": after 5 seconds Davish moves on to the key files and writes why in the log (#168).
+- A key path that points at a folder (such as `~/.ssh`) now says to choose the private key file in it, instead of "Incorrect function" on Windows (#168).
+
+## [1.13.9] - 2026-11-14
+
+### Fixed
+- Windows: **Automatic** login uses the keys in the SSH agent of Windows (the “OpenSSH Authentication Agent” service, and the 1Password and Bitwarden agents that listen on the same pipe). Davish only looked for an agent through `SSH_AUTH_SOCK`, which Windows does not set, so only the key files in `~/.ssh` were tried (#164). When no key is found, the message says how to start the service.
+
+## [1.13.8] - 2026-11-14
+
+### Fixed
+- Private keys encrypted with aes256-gcm, aes128-gcm, chacha20-poly1305, aes128/192-ctr or aes128/192-cbc (what `ssh-keygen -Z`, Termix and some other tools write) can be used: Davish only read aes256-ctr and aes256-cbc keys and failed with "unknown cipher" (#162). A saved passphrase that does not open the key now says so instead of "Could not read the private key file".
+
+## [1.13.7] - 2026-11-14
+
+### Added
+- Git: each commit in the history shows the author's picture, the GitHub avatar of a noreply address or else the Gravatar of the email, over initials colored from the name (the initials stay when no picture loads or the machine is offline). To find a picture, the author's email (or its SHA-256 hash for Gravatar) is sent to GitHub's or Gravatar's image server. Scrolling near the end loads the next commits on its own, up to 1000; Load more only shows past that.
+- Apps with a list and a detail (Git, Services, Docker…): drag the line between them to make the list wider or narrower, kept per app; a double click puts it back, arrow keys move it too.
+
+### Changed
+- Scroll bars are a thin faint pill, clearer while the pointer is over the area and clearest on the bar itself.
+
+### Fixed
+- Connecting: when a server cannot connect, a dialog now says why, with a report (Davish version, OS, auth method, error code, the technical cause, the connection's log lines) you can select or copy into a bug report. It never holds a password, key, host or user name, and your home folder shows as `~`. Clicking the red failure line on a server card opens it again. Before, some failures only said "Something went wrong" and lost their cause, even in the log (#162).
+- A private key file saved by Notepad with a byte order mark could not be read; it can now.
+
 ## [1.13.6] - 2026-11-13
 
 ### Added

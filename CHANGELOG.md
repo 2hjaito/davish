@@ -4,6 +4,41 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Files: ô tìm có ba phạm vi. **Thư mục này** lọc như trước; **Cả cây** tìm tên file trong mọi thư mục con bằng `find`; **Nội dung** tìm dòng chứa chữ đó bằng `grep` (bỏ qua file nhị phân, `.git`, `node_modules`). Nhấn Enter để tìm trên server: tối đa 500 kết quả trong 30 giây, hiện đúng lệnh đã chạy, có nút Dừng và số chỗ không có quyền đọc. Kết quả nội dung mở Editor đúng dòng; nút thư mục đưa về thư mục chứa file. Chỉ đọc, không thử lại bằng sudo.
+- Logs: **Tìm trong toàn bộ** (hoặc Enter trong ô lọc) tìm trong cả lịch sử của file, journal hay container ngay trên server, không chỉ 200 dòng đang hiện, và trả 500 dòng khớp gần nhất. Với file, bấm một kết quả để đọc các dòng xung quanh, lật trang trước/sau mà không tải cả file về (file log vài GB vẫn nhanh).
+
+## [1.13.10] - 2026-11-16
+
+### Sửa
+- Cài Docker từ Setup giờ cài kèm plugin compose (thiếu gói compose thì vẫn cài Docker). Hộp thoại HTTPS của Nginx kiểm tra certbot trước và đưa lệnh cài nếu chưa có, thay vì một lệnh certbot chắc chắn lỗi. Setup cho biết công cụ đã được cài hay chưa, và không còn báo lỗi đúng lúc công cụ chưa cài. Docker cũ hơn 23 khi xem volume báo "Docker quá cũ" thay vì lỗi khó hiểu.
+- Windows: chế độ đăng nhập **Automatic** giờ đọc được các file key mặc định trong `~\.ssh` (`id_ed25519`, `id_ecdsa`, `id_rsa`). Trước đây đường dẫn có dấu `\` không được mở rộng thành thư mục home nên các file này không bao giờ được thử (#168).
+- SSH agent không trả lời (pipe không ai phục vụ, agent đang chờ mở khóa vault) không còn làm kết nối treo ở "Đang kết nối…": sau 5 giây Davish bỏ qua agent, thử các file key và ghi lý do vào log (#168).
+- Đường dẫn key trỏ vào một thư mục (ví dụ `~/.ssh`) giờ báo rõ là cần chọn file private key bên trong, thay vì "Incorrect function" trên Windows (#168).
+
+## [1.13.9] - 2026-11-14
+
+### Sửa
+- Windows: chế độ đăng nhập **Automatic** dùng được key trong SSH agent của Windows (dịch vụ “OpenSSH Authentication Agent”, và agent của 1Password, Bitwarden cùng chạy trên pipe đó). Trước đây Davish chỉ tìm agent qua `SSH_AUTH_SOCK`, mà Windows không đặt biến này, nên chỉ thử các file key trong `~/.ssh` (#164). Không tìm thấy key thì thông báo chỉ cách bật dịch vụ.
+
+## [1.13.8] - 2026-11-14
+
+### Sửa
+- Dùng được private key mã hóa bằng aes256-gcm, aes128-gcm, chacha20-poly1305, aes128/192-ctr hay aes128/192-cbc (kiểu `ssh-keygen -Z`, Termix và vài công cụ khác tạo ra): trước đây Davish chỉ đọc được key aes256-ctr và aes256-cbc, còn lại báo "unknown cipher" (#162). Passphrase đã lưu không mở được key thì giờ báo đúng như vậy, thay vì "Không đọc được file private key".
+
+## [1.13.7] - 2026-11-14
+
+### Thêm
+- Git: mỗi commit trong lịch sử có ảnh tác giả, là avatar GitHub nếu email dạng noreply, không thì Gravatar của email, nằm trên chữ cái đầu tô màu theo tên (không tải được ảnh hay máy offline thì giữ chữ cái). Để tìm ảnh, email tác giả (hoặc mã băm SHA-256 với Gravatar) được gửi tới máy chủ ảnh của GitHub hay Gravatar. Cuộn gần cuối thì tự tải thêm commit, tới 1000 commit; nút Tải thêm chỉ hiện khi vượt mức đó.
+- App có danh sách và chi tiết (Git, Dịch vụ, Docker…): kéo đường chia giữa hai bên để nới hay thu hẹp danh sách, nhớ riêng từng app; nhấp đúp để đặt lại, phím mũi tên cũng di chuyển được.
+
+### Thay đổi
+- Thanh cuộn là một viên thuôn mảnh, mờ khi để yên, rõ hơn khi rê chuột vào vùng đó và rõ nhất khi rê lên chính thanh cuộn.
+
+### Sửa
+- Kết nối: server không kết nối được thì hiện hộp thoại nói rõ lý do, kèm một báo cáo (phiên bản Davish, hệ điều hành, cách xác thực, mã lỗi, nguyên nhân kỹ thuật, các dòng log kết nối) bôi đen hoặc sao chép được để gửi khi báo lỗi. Trong đó không có mật khẩu, key, địa chỉ server hay tên user, thư mục home hiện thành `~`. Bấm vào dòng lỗi màu đỏ trên thẻ server để mở lại. Trước đây có lỗi chỉ báo "Đã có lỗi xảy ra." và mất luôn nguyên nhân, kể cả trong log (#162).
+- File private key lưu bằng Notepad (có BOM ở đầu) không đọc được; giờ đã đọc được.
+
 ## [1.13.6] - 2026-11-13
 
 ### Thêm

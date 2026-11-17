@@ -52,6 +52,7 @@
   let status = $state.raw<Status | null>(null)
   let commits = $state.raw<Commit[] | null>(null)
   let more = $state(false)
+  let loadingMore = false
   let error = $state('')
   let query = $state('')
   let selected = $state<string | null>(null)
@@ -163,7 +164,23 @@
     }
   }
 
+  // Scrolling loads pages on its own up to this many commits; only past it
+  // does the Load more button show, so a slow machine is not left drawing a
+  // huge history.
+  const AUTO_LOAD_MAX = 1000
+
+  // Each page gets a new callback, so the list checks the end again.
+  const loadMore = $derived.by(() => {
+    const n = commits?.length ?? 0
+    if (!more || query.trim() || n === 0 || n >= AUTO_LOAD_MAX) return undefined
+    return () => void loadLog(repo, n)
+  })
+
   async function loadLog(dir: string, skip: number) {
+    if (skip > 0) {
+      if (loadingMore) return
+      loadingMore = true
+    }
     try {
       const page = await backend.log(win.serverID, dir, skip)
       if (dir !== repo) return
@@ -172,6 +189,8 @@
     } catch (e) {
       if (dir !== repo) return
       error = toUserError(e).message
+    } finally {
+      if (skip > 0) loadingMore = false
     }
   }
 
@@ -257,6 +276,7 @@
   {footer}
   {error}
   listWidth={tab === 'history' ? '58%' : '42%'}
+  splitKey="git-{tab}"
   onrefresh={refresh}
 >
   {#snippet actions()}
@@ -336,6 +356,7 @@
         label={t.git.tabs.history}
         empty={query ? t.git.noMatch : t.git.noCommits}
         onselect={(h) => (selected = `c:${h}`)}
+        onmore={loadMore}
       />
     {:else}
       <StatusList
@@ -352,7 +373,7 @@
         onselect={(k) => (selected = k)}
       />
     {/if}
-    {#if tab === 'history' && more && !query}
+    {#if tab === 'history' && more && !query && !loadMore}
       <button type="button" class="more" onclick={() => void loadLog(repo, commits?.length ?? 0)}
         >{t.git.loadMore}</button
       >

@@ -3,15 +3,16 @@ package conn
 import (
 	"context"
 	"errors"
-	"net"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 
 	"davish/internal/apperr"
+	"davish/internal/keyfile"
 	"davish/internal/store"
 )
 
@@ -60,22 +61,49 @@ func (m *Manager) authMethods(srv store.Server) ([]ssh.AuthMethod, func(), error
 	return nil, noop, apperr.New(apperr.InvalidInput, "unknown auth method")
 }
 
-// agentSigners returns the keys loaded in the SSH agent, if one is running.
+// agentDial connects to the user's SSH agent; tests replace it.
+var agentDial = dialAgent
+
+// agentTimeout bounds asking the agent for its keys. An agent that never
+// answers (a pipe nobody serves, an agent waiting on a locked vault) must
+// not leave the connection stuck before it even dials (#168).
+var agentTimeout = 5 * time.Second
+
+// agentSigners returns the keys loaded in the SSH agent, if one is running
+// and answers in time.
 func (m *Manager) agentSigners() ([]ssh.Signer, func()) {
-	sock := os.Getenv("SSH_AUTH_SOCK")
-	if sock == "" {
-		return nil, func() {}
-	}
-	c, err := net.Dial("unix", sock) //nolint:gosec // SSH_AUTH_SOCK is how the user's agent is found
+	c, err := agentDial()
 	if err != nil {
 		return nil, func() {}
 	}
-	release := func() { c.Close() } //nolint:errcheck,gosec // best effort
-	signers, err := agent.NewClient(c).Signers()
-	if err != nil {
-		return nil, release
+	// Closing may block while a read is pending on a Windows pipe, so it
+	// never runs on the caller's goroutine.
+	release := func() { go c.Close() } //nolint:errcheck // best effort
+	type listed struct {
+		signers []ssh.Signer
+		err     error
 	}
-	return signers, release
+	done := make(chan listed, 1)
+	go func() {
+		s, err := agent.NewClient(c).Signers()
+		done <- listed{s, err}
+	}()
+	select {
+	case l := <-done:
+		if l.err != nil {
+			if m.log != nil {
+				m.log.Warn("ssh agent did not list its keys", "err", l.err)
+			}
+			return nil, release
+		}
+		return l.signers, release
+	case <-time.After(agentTimeout):
+		if m.log != nil {
+			m.log.Warn("ssh agent did not answer in time; trying key files")
+		}
+		release()
+		return nil, func() {}
+	}
 }
 
 // defaultKeyFiles are tried in the same order as OpenSSH.
@@ -97,11 +125,17 @@ func (m *Manager) defaultKeySigners(srv store.Server) []ssh.Signer {
 }
 
 func (m *Manager) loadKey(srv store.Server) (ssh.Signer, error) {
-	data, err := os.ReadFile(expandHome(srv.KeyPath))
+	p := expandHome(srv.KeyPath)
+	if fi, err := os.Stat(p); err == nil && fi.IsDir() {
+		// Reading a folder fails with "Incorrect function" on Windows,
+		// which tells the user nothing (#168).
+		return nil, apperr.New(apperr.ConnKeyUnreadable, "the key path is a folder; choose the private key file in it, such as id_ed25519")
+	}
+	data, err := os.ReadFile(p) //nolint:gosec // the key file the user chose
 	if err != nil {
 		return nil, apperr.Wrap(apperr.ConnKeyUnreadable, "cannot read the private key", err)
 	}
-	signer, err := ssh.ParsePrivateKey(data)
+	signer, err := keyfile.Parse(data, nil)
 	var missing *ssh.PassphraseMissingError
 	if errors.As(err, &missing) {
 		pass, perr := m.secrets.Get(srv.ID, store.SecretPassphrase)
@@ -111,7 +145,10 @@ func (m *Manager) loadKey(srv store.Server) (ssh.Signer, error) {
 		if perr != nil {
 			return nil, perr
 		}
-		signer, err = ssh.ParsePrivateKeyWithPassphrase(data, []byte(pass))
+		signer, err = keyfile.Parse(data, []byte(pass))
+	}
+	if errors.Is(err, keyfile.ErrWrongPassphrase) {
+		return nil, apperr.Wrap(apperr.ConnPassphraseWrong, "the saved passphrase does not open the key", err)
 	}
 	if err != nil {
 		return nil, apperr.Wrap(apperr.ConnKeyUnreadable, "cannot parse the private key", err)
@@ -121,7 +158,9 @@ func (m *Manager) loadKey(srv store.Server) (ssh.Signer, error) {
 
 // expandHome turns a leading ~ into the user's home directory.
 func expandHome(path string) string {
-	if path != "~" && !strings.HasPrefix(path, "~/") {
+	// "~\" on Windows too: filepath.Join("~", ".ssh", …) writes it, and
+	// so do Windows users (#168).
+	if path != "~" && !strings.HasPrefix(path, "~/") && !strings.HasPrefix(path, "~"+string(filepath.Separator)) {
 		return path
 	}
 	home, err := os.UserHomeDir()

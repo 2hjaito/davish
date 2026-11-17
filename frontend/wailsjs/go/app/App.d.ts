@@ -154,6 +154,8 @@ export function DockerVolumes(arg1:string):Promise<Array<docker.Volume>>;
 
 export function FilesAccess(arg1:string,arg2:string):Promise<fs.Access>;
 
+export function FilesCancelSearch(arg1:string):Promise<void>;
+
 export function FilesCompress(arg1:string,arg2:string,arg3:string,arg4:string):Promise<fs.CompressPlan>;
 
 export function FilesCreate(arg1:string,arg2:string):Promise<void>;
@@ -179,6 +181,8 @@ export function FilesRename(arg1:string,arg2:string,arg3:string):Promise<void>;
 export function FilesSave(arg1:string,arg2:string,arg3:Array<number>,arg4:fs.SaveOptions):Promise<fs.SaveResult>;
 
 export function FilesSaveAsRoot(arg1:string,arg2:string,arg3:Array<number>,arg4:fs.SaveOptions,arg5:fs.RootSavePlan):Promise<fs.SaveResult>;
+
+export function FilesSearch(arg1:string,arg2:fs.SearchQuery,arg3:string):Promise<fs.SearchResult>;
 
 export function FilesStat(arg1:string,arg2:string):Promise<fs.Entry>;
 
@@ -245,6 +249,12 @@ export function LockReset():Promise<void>;
 export function LockSetPassword(arg1:string,arg2:string):Promise<void>;
 
 export function LockState():Promise<lock.State>;
+
+export function LogsAround(arg1:string,arg2:string,arg3:number,arg4:number):Promise<logs.Around>;
+
+export function LogsCancelSearch(arg1:string):Promise<void>;
+
+export function LogsSearch(arg1:string,arg2:logs.Source,arg3:logs.SearchQuery,arg4:string):Promise<logs.SearchResult>;
 
 export function LogsStart(arg1:string,arg2:logs.Source):Promise<logs.Started>;
 

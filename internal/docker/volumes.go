@@ -55,7 +55,12 @@ func parseVolumes(out []byte) ([]Volume, error) {
 	var sys struct {
 		Volumes []struct{ Name, Driver, Mountpoint, Links, Size, Labels string }
 	}
-	if err := json.Unmarshal([]byte(strings.TrimSpace(df)), &sys); err != nil {
+	df = strings.TrimSpace(df)
+	if !strings.HasPrefix(df, "{") {
+		// Before Docker 23, --format json is not understood.
+		return nil, apperr.New(apperr.CmdTooOld, "listing volumes needs Docker 23 or newer")
+	}
+	if err := json.Unmarshal([]byte(df), &sys); err != nil {
 		return nil, apperr.Wrap(apperr.Internal, "unexpected docker system df output", err)
 	}
 	created := map[string]string{}

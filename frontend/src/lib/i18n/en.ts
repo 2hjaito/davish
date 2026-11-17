@@ -52,6 +52,7 @@ const en = {
     },
   },
   common: {
+    resizeSplit: 'Drag to resize the list',
     cancel: 'Cancel',
     refresh: 'Refresh',
     needsRoot: 'This action needs root on the server.',
@@ -895,6 +896,8 @@ const en = {
       files: {
         does: 'Browse files over SFTP: upload, download, rename, delete, compress, copy to another server.',
         actions: [
+          'Type in the search box, pick Subfolders or Contents and press Enter to search the server (500 results at most, 30 seconds, Stop to end it)',
+          'The search text is part of the command, so it shows in the command log: do not search for a password or token',
           'Drop files from your computer to upload them',
           'Drag files onto another server in the sidebar to copy them',
           'Drag a file onto the wallpaper to make a shortcut',
@@ -912,7 +915,11 @@ const en = {
           '⌘⌥P: add to desktop',
           '⌘⇧N: new folder',
         ],
-        runs: ['SFTP to read and write', 'rm, tar/zip to delete and compress (with confirmation)'],
+        runs: [
+          'SFTP to read and write',
+          'rm, tar/zip to delete and compress (with confirmation)',
+          'find, grep to search the tree (read only)',
+        ],
       },
       monitor: {
         does: 'CPU per core, RAM, swap, disks, network, NVIDIA GPUs, processes.',
@@ -965,6 +972,7 @@ const en = {
       logs: {
         does: 'Follow a unit’s journal, a log file or a container’s logs. Filter, pause, highlight errors.',
         actions: [
+          'Search all (Enter in the filter): searches the whole history on the server, not just the 200 lines shown; for a file, click a result to read around it page by page',
           'Click a file path in the log to open it in Editor at that line',
           'Pause to read',
         ],
@@ -974,6 +982,7 @@ const en = {
           'tail -F',
           'docker logs -f',
           "A log you may not read (system journal, root's files, docker outside the docker group): followed again through sudo, asking for the sudo password once per session if needed",
+          'grep, journalctl -g, docker logs | grep for Search all; sed -n to read a page of a file',
         ],
       },
       editor: {
@@ -1471,6 +1480,19 @@ const en = {
       `Remove "${name}" from Davish? Its saved password/passphrase is deleted too. The server itself is not affected.`,
     confirmDeleteButton: 'Delete',
   },
+  connError: {
+    title: (name: string) => `Could not connect to “${name}”`,
+    hint: 'The box below says what went wrong. Copy it and send it with your bug report: it holds no password, key, host or user name.',
+    copy: 'Copy error',
+    copied: 'Copied',
+    copyFailed: 'Could not copy. Select the text above and copy it by hand.',
+    openLog: 'Open log folder',
+    report: 'Report on GitHub',
+    edit: 'Edit server',
+    close: 'Close',
+    reconnect: 'Reconnect',
+    details: 'Details',
+  },
   hostKey: {
     title: 'Confirm a new server',
     body: (host: string) =>
@@ -1675,6 +1697,24 @@ const en = {
     path: 'Path',
     search: 'Search',
     searchLabel: 'Search files',
+    searchScope: 'Where to search',
+    scopes: { here: 'This folder', tree: 'Subfolders', content: 'Contents' },
+    searchMatchCase: 'Match case',
+    searchEnter: 'Press Enter to search the server',
+    searchingNames: (dir: string) => `Searching names in ${dir}…`,
+    searchingContent: (dir: string) => `Searching contents in ${dir}…`,
+    searchStop: 'Stop',
+    searchStopped: 'Search stopped',
+    searchFound: (n: number) => (n === 1 ? '1 result' : `${n} results`),
+    searchTruncated: 'showing the first 500',
+    searchTimedOut: 'stopped after 30 seconds, results may be incomplete',
+    searchDenied: (n: number) => (n === 1 ? '1 place not readable' : `${n} places not readable`),
+    searchNone: 'Nothing found',
+    searchNoneHint: 'Content search skips binary files, .git and node_modules',
+    searchReveal: 'Show in folder',
+    searchContentRefused:
+      'Contents cannot be searched from / or in /proc, /sys, /dev, /run: open a more specific folder',
+    searchOpenFailed: 'Could not open the result',
     name: 'Name',
     size: 'Size',
     modified: 'Modified',
@@ -2928,6 +2968,25 @@ const en = {
     close: 'Close',
   },
   logs: {
+    history: {
+      button: 'Search all',
+      onlyShown: 'The filter only sees the lines on screen.',
+      hint: 'Search the whole history on the server, not just the lines shown (Enter)',
+      searching: 'Searching on the server…',
+      stop: 'Stop',
+      stopped: 'Search stopped',
+      close: 'Back to following',
+      found: (n: number) => (n === 1 ? '1 matching line' : `${n} matching lines`),
+      truncated: 'the latest 500 only',
+      timedOut: 'stopped after 60 seconds, results may be incomplete',
+      restricted: 'the journal hides other users’ lines: follow with sudo to see them all',
+      none: 'No lines match',
+      openAround: (n: number) => `Read around line ${n}`,
+      backToResults: 'Results',
+      pageOf: (a: number, b: number) => `Lines ${a}–${b}`,
+      earlier: 'Earlier',
+      later: 'Later',
+    },
     view: 'Log content',
     kinds: { journal: 'Service', file: 'File', docker: 'Container' },
     kindLabel: 'Log source type',
@@ -2982,8 +3041,10 @@ const en = {
     CONN_UNREACHABLE: 'Could not reach the server. Check the host, port and network.',
     CONN_SECRET_MISSING: 'No password or passphrase saved for this server.',
     CONN_AGENT_UNAVAILABLE:
-      'No key found: the SSH agent is empty and there is no default key in ~/.ssh. Choose Private key.',
+      'No key found: the SSH agent is empty or not running, and there is no default key in ~/.ssh. On Windows, start the “OpenSSH Authentication Agent” service and add your key with ssh-add, or choose Private key.',
     CONN_KEY_UNREADABLE: 'Could not read the private key file.',
+    CONN_PASSPHRASE_WRONG:
+      'The saved passphrase does not open this private key. Edit the server and type it again.',
     CONN_NOT_CONNECTED: 'The server is not connected.',
     TERM_CLOSED: 'The terminal session is closed.',
     FS_PERMISSION_DENIED: 'Permission denied.',
@@ -2995,6 +3056,8 @@ const en = {
       'Davish does not do this as root: the path is a vital part of the system, or goes through a link or folder another user owns or may write, who could send root elsewhere. Use sudoedit or sudo in Terminal if you are sure.',
     CMD_NEEDS_ROOT: 'This command needs root.',
     CMD_MISSING: 'The server lacks a program this action needs (for example zip).',
+    CMD_TOO_OLD:
+      'The server’s version of the program this action needs is too old. Update it in Packages.',
     CMD_FAILED: 'The command failed on the server.',
     CMD_TIMEOUT:
       'The server did not answer in time, so Davish stopped waiting. Retry, or open Terminal to see whether the command hangs (for example Docker not responding).',

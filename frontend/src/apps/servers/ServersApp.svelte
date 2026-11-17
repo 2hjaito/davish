@@ -128,12 +128,17 @@
             </p>
           {:else if srv.state === 'connected'}
             <p class="state">{s.overview.waiting}</p>
+          {:else if srv.state === 'failed'}
+            <button
+              class="state failed why"
+              title={t.connError.details}
+              onclick={() => servers.showFailure(srv.id)}
+            >
+              {s.status.failed}{#if srv.error}: {t.errors[srv.error]}{/if}
+              <span class="more">{t.connError.details} ›</span>
+            </button>
           {:else}
-            <p class="state" class:failed={srv.state === 'failed'}>
-              {s.status[srv.state]}{#if srv.state === 'failed' && srv.error}: {t.errors[
-                  srv.error
-                ]}{/if}
-            </p>
+            <p class="state">{s.status[srv.state]}</p>
           {/if}
 
           {#if al.latest}
@@ -352,6 +357,30 @@
 
   .state.failed {
     color: var(--danger);
+  }
+
+  /* The failure line opens the error dialog, where the cause can be copied. */
+  .why {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    text-align: left;
+    font: inherit;
+    font-size: var(--text-sm);
+    line-height: 1.4;
+    cursor: pointer;
+  }
+
+  .why .more {
+    margin-left: 4px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  .why:hover .more {
+    text-decoration: underline;
   }
 
   .alert {
