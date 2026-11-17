@@ -4,6 +4,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.14.1] - 2026-11-17
+
 ### Thêm
 - Cài đặt → Hiệu năng: bốn chế độ **Tự động**, **Đẹp**, **Cân bằng** và **Nhẹ** thay cho hai công tắc Giảm hiệu ứng kính và Giảm chuyển động. Mỗi chế độ đặt sẵn độ mờ kính, bóng cửa sổ, nền đặc, các mảng màu hình nền và chuyển động; **Nâng cao** chỉnh từng thứ riêng, và trên Linux có thêm hai tùy chọn của WebKitGTK, áp dụng sau khi khởi động lại. **Tự động** giữ giao diện đầy đủ, đo khoảng 1,5 giây khung hình lúc mở app mà không chặn gì, và gợi ý chuyển sang Nhẹ (Dùng Nhẹ / Để sau) khi máy vẽ bằng phần mềm hoặc rớt khung hình; **Đo lại** đo thêm lần nữa. Cảm ơn @tian2992 (#176).
 
