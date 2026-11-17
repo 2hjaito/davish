@@ -46,21 +46,22 @@ func Read(dir string) Flags {
 }
 
 // Apply sets the WebKit environment from dir on Linux. On other systems it
-// does nothing. The in-app switches are the source of truth: a flag that is
-// off clears the variable for this process.
+// does nothing. A switch that is on sets its variable; one that is off
+// leaves the environment alone, so a variable the user exported (a common
+// workaround for a blank window on some GPUs) still applies.
 func Apply(dir string) {
 	if runtime.GOOS != "linux" {
 		return
 	}
-	flags := Read(dir)
-	set("WEBKIT_DISABLE_DMABUF_RENDERER", flags.NoDmabuf)
-	set("WEBKIT_DISABLE_COMPOSITING_MODE", flags.NoCompositing)
+	apply(Read(dir))
 }
 
-func set(key string, on bool) {
-	if on {
-		_ = os.Setenv(key, "1")
-		return
+// apply sets the variable of each switch that is on.
+func apply(flags Flags) {
+	if flags.NoDmabuf {
+		_ = os.Setenv("WEBKIT_DISABLE_DMABUF_RENDERER", "1")
 	}
-	_ = os.Unsetenv(key)
+	if flags.NoCompositing {
+		_ = os.Setenv("WEBKIT_DISABLE_COMPOSITING_MODE", "1")
+	}
 }
