@@ -7,6 +7,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 ### Added
 - All servers: a compact **List** view next to the cards (remembered), add, import, edit and **disconnect** servers right from the window, and **⌘⇧S** (Ctrl+Shift+S) to open it. The server menu also has a disconnect button next to each connected server. Suggested by @HungNth and @tian2992 (#178).
 
+### Changed
+- Linux: the window is now drawn on the GPU (WebKitGTK's own default). Davish used to keep Wails' workaround that turned GPU compositing off for everyone, so every scroll and every frosted window was painted by the CPU. On the proprietary NVIDIA driver, where that workaround came from, Davish sets `WEBKIT_DISABLE_DMABUF_RENDERER=1` for itself instead, and never overrides a value you set; `DAVISH_WEBVIEW_GPU=never|ondemand|always` picks the policy by hand, and the app log says which one was used and why. Thanks to @tian2992 for spotting it (#181, #159).
+
 ## [1.14.2] - 2026-11-17
 
 ### Fixed

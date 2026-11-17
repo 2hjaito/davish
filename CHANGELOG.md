@@ -7,6 +7,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ### Thêm
 - Tất cả server: xem dạng **Danh sách** gọn bên cạnh dạng thẻ (nhớ lựa chọn), thêm, nhập, sửa và **ngắt kết nối** server ngay trong cửa sổ, và phím tắt **⌘⇧S** (Ctrl+Shift+S) để mở nó. Menu chọn server cũng có nút ngắt kết nối cạnh mỗi server đang kết nối. Theo góp ý của @HungNth và @tian2992 (#178).
 
+### Thay đổi
+- Linux: cửa sổ giờ được vẽ bằng GPU (mặc định của WebKitGTK). Trước đây Davish giữ cách né lỗi của Wails là tắt hẳn GPU cho mọi máy, nên mỗi lần cuộn và mỗi lớp kính mờ đều do CPU vẽ. Với driver NVIDIA độc quyền, nơi lỗi đó xảy ra, Davish tự đặt `WEBKIT_DISABLE_DMABUF_RENDERER=1` cho chính nó, và không bao giờ ghi đè giá trị bạn đã đặt; `DAVISH_WEBVIEW_GPU=never|ondemand|always` để tự chọn chế độ, và log của app ghi chế độ đã dùng kèm lý do. Cảm ơn @tian2992 đã phát hiện (#181, #159).
+
 ## [1.14.2] - 2026-11-17
 
 ### Sửa

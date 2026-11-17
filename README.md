@@ -99,7 +99,7 @@ Prebuilt apps for macOS (universal), Windows and Linux are attached to each [rel
 
 - **macOS 12 or later.** Open `Davish-…-macos-universal.pkg` to install into Applications. The app is not signed yet, so macOS blocks it the first time: click **Done**, open **System Settings → Privacy & Security** and click **Open Anyway** next to the line about Davish (again for `Davish.app` if it is blocked). Or run `xattr -dr com.apple.quarantine` on the file.
 - **Windows 10 or later.** Run `Davish-…-windows-amd64-setup.exe`; it installs the WebView2 runtime if it is missing. Windows SmartScreen may warn about an unknown publisher: choose **More info** → **Run anyway**.
-- **Linux** with GTK 3 and WebKitGTK 4.1.
+- **Linux** with GTK 3 and WebKitGTK 4.1. The window is drawn on the GPU, WebKitGTK's own default; on the proprietary NVIDIA driver Davish also sets `WEBKIT_DISABLE_DMABUF_RENDERER=1` for itself (the usual fix for a blank window there), and never changes a value you set. If the window still stays blank or flickers, start Davish with `DAVISH_WEBVIEW_GPU=never` (or `ondemand`) and please open an issue; the app log has a `linux webview gpu` line saying what was chosen and why.
 
 ### What the server needs
 
