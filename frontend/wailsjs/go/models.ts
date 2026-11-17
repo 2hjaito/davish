@@ -1,3 +1,139 @@
+export namespace ansibleinv {
+	
+	export class Issue {
+	    code: string;
+	    detail?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Issue(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.code = source["code"];
+	        this.detail = source["detail"];
+	    }
+	}
+	export class Candidate {
+	    name: string;
+	    groups: string[];
+	    address: string;
+	    user: string;
+	    port: number;
+	    keyFile?: string;
+	    proxyJump?: string;
+	    notes?: Issue[];
+	    exists: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Candidate(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.groups = source["groups"];
+	        this.address = source["address"];
+	        this.user = source["user"];
+	        this.port = source["port"];
+	        this.keyFile = source["keyFile"];
+	        this.proxyJump = source["proxyJump"];
+	        this.notes = this.convertValues(source["notes"], Issue);
+	        this.exists = source["exists"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	export class Skipped {
+	    name: string;
+	    groups: string[];
+	    issue: Issue;
+	
+	    static createFrom(source: any = {}) {
+	        return new Skipped(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.groups = source["groups"];
+	        this.issue = this.convertValues(source["issue"], Issue);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Listing {
+	    path: string;
+	    hosts: Candidate[];
+	    skipped: Skipped[];
+	    groups: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Listing(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.hosts = this.convertValues(source["hosts"], Candidate);
+	        this.skipped = this.convertValues(source["skipped"], Skipped);
+	        this.groups = source["groups"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
 export namespace app {
 	
 	export class FleetRun {

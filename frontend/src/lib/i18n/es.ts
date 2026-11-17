@@ -38,7 +38,7 @@ const es = {
       },
     ],
     add: 'Añadir un servidor por SSH…',
-    import: 'o importar desde ~/.ssh/config',
+    import: 'o importar desde ~/.ssh/config o Ansible',
     foot: (mod: string) =>
       `Añade tantos servidores como quieras; cada uno es un espacio de trabajo (${mod}1…${mod}9). ${mod}K abre Spotlight para buscar apps, servicios, contenedores y carpetas.`,
   },
@@ -860,7 +860,7 @@ const es = {
   },
   menu: {
     addServer: 'Añadir servidor…',
-    importServers: 'Importar desde ~/.ssh/config…',
+    importServers: 'Importar desde ~/.ssh/config o Ansible…',
     connect: (name: string) => `Conectar ${name}`,
     disconnect: (name: string) => `Desconectar ${name}`,
     newTerminal: 'Nuevo Terminal',
@@ -1409,7 +1409,7 @@ const es = {
     picker: 'Elegir servidor',
     header: 'SERVIDORES',
     add: 'Añadir un servidor por SSH…',
-    import: 'Importar desde ~/.ssh/config…',
+    import: 'Importar desde ~/.ssh/config o Ansible…',
     none: 'Todavía no hay servidores',
     edit: 'Editar servidor',
     reconnect: 'Volver a conectar',
@@ -1507,7 +1507,7 @@ const es = {
     },
   },
   importDialog: {
-    title: 'Importar desde ~/.ssh/config',
+    title: 'Importar servidores',
     lead: 'Davish solo lee este archivo y nunca escribe en él. Se omiten las entradas con comodines (*, ?) y los bloques Match.',
     loading: 'Leyendo ~/.ssh/config…',
     empty: 'No se han encontrado hosts concretos en ~/.ssh/config.',
@@ -1518,6 +1518,31 @@ const es = {
       n > 0 ? `Importar ${n} ${n === 1 ? 'servidor' : 'servidores'}` : 'Importar',
     cancel: 'Cancelar',
     jumpNote: 'Los hosts de ProxyJump también se importan si aún no están añadidos.',
+    source: 'Importar desde',
+    tabSSH: '~/.ssh/config',
+    tabAnsible: 'Inventario de Ansible',
+    ansibleLead:
+      'Un inventario INI (como /etc/ansible/hosts). Davish solo lee el archivo: los grupos sirven para elegir y no se guardan, y nunca se leen las contraseñas que contenga. Se omiten los hosts con plantillas ({{ }}), valores de Vault o una conexión que no es SSH.',
+    noFile: 'No se ha elegido ningún inventario',
+    choose: 'Elegir archivo…',
+    chooseTitle: 'Elige un inventario de Ansible',
+    loadingInventory: 'Leyendo el inventario…',
+    emptyInventory: 'No se han encontrado hosts en este inventario.',
+    groups: 'Grupos',
+    allGroups: 'Todos',
+    selectGroup: (g: string) => `Seleccionar todo en ${g}`,
+    skipped: (n: number) => `${n} ${n === 1 ? 'host omitido' : 'hosts omitidos'}`,
+    askYAML: 'Pedir compatibilidad con YAML',
+    issues: {
+      connection: (v: string) => `se conecta con ${v}, no por SSH`,
+      jinja: (v: string) => `${v} es una plantilla que solo Ansible puede rellenar`,
+      vault: (v: string) => `${v} está cifrado con Vault`,
+      port: (v: string) => `«${v}» no es un puerto`,
+      range: (p: string) => `el rango ${p} está mal escrito o da más de 256 hosts`,
+      password:
+        'El inventario define una contraseña, que no se importa. Si el servidor la necesita, añádela en Editar servidor.',
+      sshArgs: (names: string) => `opciones de ssh no importadas: ${names}`,
+    },
   },
   serverDialog: {
     addTitle: 'Añadir un servidor por SSH',
@@ -3208,6 +3233,10 @@ const es = {
     DB_AUTH_FAILED: 'MongoDB ha rechazado este usuario o contraseña.',
     SUDO_PASSWORD_REQUIRED: 'El servidor necesita la contraseña de sudo para esto.',
     SUDO_PASSWORD_WRONG: 'sudo no ha aceptado esta contraseña.',
+    INVENTORY_YAML_UNSUPPORTED:
+      'Este inventario es YAML (o JSON). Por ahora Davish solo lee inventarios INI.',
+    INVENTORY_SCRIPT_UNSUPPORTED:
+      'Este inventario es un script. Davish no lo ejecuta; elige un archivo de inventario INI.',
     UPDATE_DOWNLOAD_FAILED:
       'No se pudo descargar la actualización: GitHub no respondió o se cortó la red. Vuelve a intentarlo en unos minutos, o descárgala desde la página de la versión.',
     GIT_UNSAFE_OWNER:

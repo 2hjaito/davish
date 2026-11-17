@@ -6,6 +6,18 @@ export function AcceptHostKey(arg1, arg2) {
   return window['go']['app']['App']['AcceptHostKey'](arg1, arg2);
 }
 
+export function AnsibleDefaultInventory() {
+  return window['go']['app']['App']['AnsibleDefaultInventory']();
+}
+
+export function AnsibleInventoryHosts(arg1) {
+  return window['go']['app']['App']['AnsibleInventoryHosts'](arg1);
+}
+
+export function AnsiblePickInventory(arg1) {
+  return window['go']['app']['App']['AnsiblePickInventory'](arg1);
+}
+
 export function AuditEntries() {
   return window['go']['app']['App']['AuditEntries']();
 }
@@ -392,6 +404,10 @@ export function GitRun(arg1, arg2, arg3, arg4, arg5) {
 
 export function GitStatus(arg1, arg2) {
   return window['go']['app']['App']['GitStatus'](arg1, arg2);
+}
+
+export function ImportAnsibleHosts(arg1, arg2) {
+  return window['go']['app']['App']['ImportAnsibleHosts'](arg1, arg2);
 }
 
 export function ImportSSHHosts(arg1) {

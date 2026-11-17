@@ -40,7 +40,7 @@ const vi = {
       },
     ],
     add: 'Thêm server qua SSH…',
-    import: 'hoặc nhập từ ~/.ssh/config',
+    import: 'hoặc nhập từ ~/.ssh/config, Ansible',
     foot: (mod: string) =>
       `Có thể thêm nhiều server; mỗi server là một workspace (${mod}1…${mod}9). ${mod}K mở Spotlight để tìm app, dịch vụ, container, thư mục.`,
   },
@@ -823,7 +823,7 @@ const vi = {
   },
   menu: {
     addServer: 'Thêm server…',
-    importServers: 'Nhập từ ~/.ssh/config…',
+    importServers: 'Nhập từ ~/.ssh/config hoặc Ansible…',
     connect: (name: string) => `Kết nối ${name}`,
     disconnect: (name: string) => `Ngắt kết nối ${name}`,
     newTerminal: 'Terminal mới',
@@ -1367,7 +1367,7 @@ const vi = {
     picker: 'Chọn server',
     header: 'SERVER',
     add: 'Thêm server qua SSH…',
-    import: 'Nhập từ ~/.ssh/config…',
+    import: 'Nhập từ ~/.ssh/config hoặc Ansible…',
     none: 'Chưa có server nào',
     edit: 'Sửa server',
     reconnect: 'Kết nối lại',
@@ -1464,7 +1464,7 @@ const vi = {
     },
   },
   importDialog: {
-    title: 'Nhập từ ~/.ssh/config',
+    title: 'Nhập server',
     lead: 'Davish chỉ đọc file này, không ghi gì vào đó. Mục có ký tự đại diện (*, ?) và Match được bỏ qua.',
     loading: 'Đang đọc ~/.ssh/config…',
     empty: 'Không thấy host cụ thể nào trong ~/.ssh/config.',
@@ -1474,6 +1474,31 @@ const vi = {
     submit: (n: number) => (n > 0 ? `Nhập ${n} server` : 'Nhập'),
     cancel: 'Hủy',
     jumpNote: 'Host trung gian trong ProxyJump được nhập kèm nếu chưa có.',
+    source: 'Nhập từ',
+    tabSSH: '~/.ssh/config',
+    tabAnsible: 'Ansible inventory',
+    ansibleLead:
+      'Inventory dạng INI (ví dụ /etc/ansible/hosts). Davish chỉ đọc file: group chỉ để chọn cho nhanh, không được lưu; mật khẩu trong file không bao giờ được đọc. Host dùng template ({{ }}), giá trị Vault hoặc kết nối không phải SSH được bỏ qua.',
+    noFile: 'Chưa chọn inventory',
+    choose: 'Chọn file…',
+    chooseTitle: 'Chọn Ansible inventory',
+    loadingInventory: 'Đang đọc inventory…',
+    emptyInventory: 'Không thấy host nào trong inventory này.',
+    groups: 'Group',
+    allGroups: 'Tất cả',
+    selectGroup: (g: string) => `Chọn hết trong ${g}`,
+    skipped: (n: number) => `Bỏ qua ${n} host`,
+    askYAML: 'Đề nghị hỗ trợ YAML',
+    issues: {
+      connection: (v: string) => `kết nối bằng ${v}, không phải SSH`,
+      jinja: (v: string) => `${v} là template, chỉ Ansible điền được`,
+      vault: (v: string) => `${v} được mã hóa bằng Vault`,
+      port: (v: string) => `“${v}” không phải số cổng`,
+      range: (p: string) => `dải ${p} sai cú pháp hoặc ra hơn 256 host`,
+      password:
+        'Inventory có đặt mật khẩu nhưng mật khẩu không được nhập. Nếu server cần, hãy thêm trong Sửa server.',
+      sshArgs: (names: string) => `tùy chọn ssh không được nhập: ${names}`,
+    },
   },
   serverDialog: {
     addTitle: 'Thêm server qua SSH',
@@ -3103,6 +3128,10 @@ const vi = {
     DB_AUTH_FAILED: 'MongoDB từ chối user hoặc mật khẩu này.',
     SUDO_PASSWORD_REQUIRED: 'Server cần mật khẩu sudo cho lệnh này.',
     SUDO_PASSWORD_WRONG: 'sudo không nhận mật khẩu này.',
+    INVENTORY_YAML_UNSUPPORTED:
+      'Inventory này là YAML (hoặc JSON). Hiện Davish chỉ đọc inventory dạng INI.',
+    INVENTORY_SCRIPT_UNSUPPORTED:
+      'Inventory này là một script. Davish không chạy nó; hãy chọn file inventory dạng INI.',
     UPDATE_DOWNLOAD_FAILED:
       'Không tải được bản cập nhật: GitHub không trả lời hoặc mạng chập chờn. Thử lại sau ít phút, hoặc tải thủ công từ trang phát hành.',
     GIT_UNSAFE_OWNER:

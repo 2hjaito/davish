@@ -27,7 +27,7 @@ const en = {
       },
     ],
     add: 'Add a server over SSH…',
-    import: 'or import from ~/.ssh/config',
+    import: 'or import from ~/.ssh/config or Ansible',
     foot: (mod: string) =>
       `Add as many servers as you like; each one is a workspace (${mod}1…${mod}9). ${mod}K opens Spotlight to find apps, services, containers and folders.`,
   },
@@ -837,7 +837,7 @@ const en = {
   },
   menu: {
     addServer: 'Add server…',
-    importServers: 'Import from ~/.ssh/config…',
+    importServers: 'Import from ~/.ssh/config or Ansible…',
     connect: (name: string) => `Connect ${name}`,
     disconnect: (name: string) => `Disconnect ${name}`,
     newTerminal: 'New Terminal',
@@ -1383,7 +1383,7 @@ const en = {
     picker: 'Choose server',
     header: 'SERVERS',
     add: 'Add a server over SSH…',
-    import: 'Import from ~/.ssh/config…',
+    import: 'Import from ~/.ssh/config or Ansible…',
     none: 'No servers yet',
     edit: 'Edit server',
     reconnect: 'Reconnect',
@@ -1480,7 +1480,7 @@ const en = {
     },
   },
   importDialog: {
-    title: 'Import from ~/.ssh/config',
+    title: 'Import servers',
     lead: 'Davish only reads this file and never writes to it. Entries with wildcards (*, ?) and Match blocks are skipped.',
     loading: 'Reading ~/.ssh/config…',
     empty: 'No specific hosts found in ~/.ssh/config.',
@@ -1490,6 +1490,31 @@ const en = {
     submit: (n: number) => (n > 0 ? `Import ${n} ${n === 1 ? 'server' : 'servers'}` : 'Import'),
     cancel: 'Cancel',
     jumpNote: 'ProxyJump hosts are imported too if not added yet.',
+    source: 'Import from',
+    tabSSH: '~/.ssh/config',
+    tabAnsible: 'Ansible inventory',
+    ansibleLead:
+      'An INI inventory (such as /etc/ansible/hosts). Davish only reads the file: groups help you choose and are not saved, and passwords in it are never read. Hosts with templates ({{ }}), Vault values or a non-SSH connection are skipped.',
+    noFile: 'No inventory chosen',
+    choose: 'Choose file…',
+    chooseTitle: 'Choose an Ansible inventory',
+    loadingInventory: 'Reading the inventory…',
+    emptyInventory: 'No hosts found in this inventory.',
+    groups: 'Groups',
+    allGroups: 'All',
+    selectGroup: (g: string) => `Select all in ${g}`,
+    skipped: (n: number) => `${n} ${n === 1 ? 'host' : 'hosts'} skipped`,
+    askYAML: 'Ask for YAML support',
+    issues: {
+      connection: (v: string) => `connects with ${v}, not SSH`,
+      jinja: (v: string) => `${v} is a template, which only Ansible can fill in`,
+      vault: (v: string) => `${v} is encrypted with Vault`,
+      port: (v: string) => `“${v}” is not a port`,
+      range: (p: string) => `the range ${p} is malformed or makes more than 256 hosts`,
+      password:
+        'The inventory sets a password, which is not imported. If the server needs one, add it in Edit server.',
+      sshArgs: (names: string) => `ssh options not imported: ${names}`,
+    },
   },
   serverDialog: {
     addTitle: 'Add a server over SSH',
@@ -3137,6 +3162,10 @@ const en = {
     DB_AUTH_FAILED: 'MongoDB refused this user or password.',
     SUDO_PASSWORD_REQUIRED: 'The server needs the sudo password for this.',
     SUDO_PASSWORD_WRONG: 'sudo did not accept this password.',
+    INVENTORY_YAML_UNSUPPORTED:
+      'This inventory is YAML (or JSON). Davish only reads INI inventories for now.',
+    INVENTORY_SCRIPT_UNSUPPORTED:
+      'This inventory is a script. Davish does not run it; choose an INI inventory file.',
     UPDATE_DOWNLOAD_FAILED:
       'Could not download the update: GitHub did not answer or the network dropped. Try again in a few minutes, or download it from the release page.',
     GIT_UNSAFE_OWNER:
