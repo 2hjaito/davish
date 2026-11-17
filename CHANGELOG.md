@@ -4,8 +4,15 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.14.3] - 2026-11-17
+
 ### Thêm
 - Tất cả server: xem dạng **Danh sách** gọn bên cạnh dạng thẻ (nhớ lựa chọn), thêm, nhập, sửa và **ngắt kết nối** server ngay trong cửa sổ, và phím tắt **⌘⇧S** (Ctrl+Shift+S) để mở nó. Menu chọn server cũng có nút ngắt kết nối cạnh mỗi server đang kết nối. Theo góp ý của @HungNth và @tian2992 (#178).
+- Database: khi server chưa có `sqlite3`, phần SQLite hiện luôn lệnh cài như MariaDB và Postgres thay vì bảo vào Gói phần mềm. Mỗi engine và phần SQLite nằm trong một thẻ riêng.
+
+### Sửa
+- Monitor: đường và vùng màu của biểu đồ (Bộ nhớ, CPU, GPU, Mạng, Ổ đĩa và các biểu đồ nhỏ ở Tổng quan) không còn tràn qua mép trái của thẻ. Cảm ơn @thanhtrung5763 (#186).
+- macOS và Linux: bôi đen và copy được lệnh hiển thị trong hộp xác nhận, inspector và hộp báo lỗi.
 
 ## [1.14.2] - 2026-11-17
 

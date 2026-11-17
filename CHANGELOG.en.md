@@ -4,8 +4,15 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.14.3] - 2026-11-17
+
 ### Added
 - All servers: a compact **List** view next to the cards (remembered), add, import, edit and **disconnect** servers right from the window, and **⌘⇧S** (Ctrl+Shift+S) to open it. The server menu also has a disconnect button next to each connected server. Suggested by @HungNth and @tian2992 (#178).
+- Database: when the server has no `sqlite3`, the SQLite section shows the install command like MariaDB and Postgres do, instead of pointing to Packages. Each engine and the SQLite section sit in their own card.
+
+### Fixed
+- Monitor: the line and fill of the metric charts (Memory, CPU, GPU, Network, Disk and the Overview sparklines) no longer spill past the left edge of the card. Thanks @thanhtrung5763 (#186).
+- macOS and Linux: the commands shown in confirm dialogs, inspectors and error dialogs can be selected and copied.
 
 ## [1.14.2] - 2026-11-17
 
@@ -76,7 +83,7 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 - Settings → Dock: put the Dock on the bottom, left, right or top edge (windows and notifications keep clear; autohide comes back from that edge), and a transparent Dock with only the icons.
 
 ### Fixed
-- Logs: text can be selected and copied again. On macOS and Linux WebKit only reads `-webkit-user-select`, so every log line was locked. While a selection is in the view the log holds still (no scrolling, no new lines) so the selection does not slide, and goes on once it is cleared; `⌘C` copies the lines with their breaks. A new button copies the lines shown (after the filter).
+- Logs: text can be selected and copied. On macOS and Linux WebKit only reads `-webkit-user-select`, so every log line was locked. While a selection is in the view the log holds still (no scrolling, no new lines) so the selection does not slide, and goes on once it is cleared; `⌘C` copies the lines with their breaks. A new button copies the lines shown (after the filter).
 
 ## [1.13.5] - 2026-11-12
 
