@@ -62,6 +62,10 @@ Every server in one window, from the server menu, Launchpad or Spotlight: connec
 
 <img src="assets/screenshots/en/servers.jpg" alt="Every server at a glance" width="100%">
 
+**Run a command…** runs one command on the servers you tick, as `ssh server command` would: each server in its own terminal tab, at most four at a time, the rest waiting their turn. When a server asks something (a sudo password, `[Y/n]`), its tab comes forward and you answer there; Davish never types a sudo password for a run. The confirm dialog shows every server and the exact command; from three servers, or for a command that looks like it removes, stops or overwrites something, you type the number of servers to go ahead. Each tab ends with its exit code; **Run again** retries the ones that failed. **Update packages** prepares each server's own update with `sudo -n`: a server whose sudo wants a password says so, with a button to Terminal. Each server gets one line in the Command log.
+
+<img src="assets/screenshots/en/multi-run.jpg" alt="One command on four servers, one tab waiting for a sudo password" width="100%">
+
 ## Services
 
 systemd units by state, their status and journal; start, stop and restart. Remove a unit you no longer use: an admin's unit is deleted, a package's (such as an old `certbot`) is masked with the timer that runs it. Logged in as a user who is not root, Davish runs what systemd refuses through `sudo`: it asks for the sudo password once per session, keeps it in memory only (never on disk, in the keychain or in a log, and gone after 15 minutes unused, when you disconnect or when you lock the app), and hands it to sudo on stdin, never on a command line.

@@ -136,6 +136,38 @@ export namespace ansibleinv {
 
 export namespace app {
 	
+	export class FleetRun {
+	    id: string;
+	    jobs: fleet.Job[];
+	
+	    static createFrom(source: any = {}) {
+	        return new FleetRun(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.jobs = this.convertValues(source["jobs"], fleet.Job);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class ServerInput {
 	    id: string;
 	    name: string;
@@ -1567,6 +1599,107 @@ export namespace docker {
 	        this.name = source["name"];
 	        this.command = source["command"];
 	    }
+	}
+
+}
+
+export namespace fleet {
+	
+	export class Check {
+	    destructive: boolean;
+	    typed: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Check(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.destructive = source["destructive"];
+	        this.typed = source["typed"];
+	    }
+	}
+	export class Item {
+	    serverID: string;
+	    command: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Item(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.serverID = source["serverID"];
+	        this.command = source["command"];
+	    }
+	}
+	export class Job {
+	    runID: string;
+	    serverID: string;
+	    state: string;
+	    termID?: string;
+	    exit: number;
+	    error?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Job(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.runID = source["runID"];
+	        this.serverID = source["serverID"];
+	        this.state = source["state"];
+	        this.termID = source["termID"];
+	        this.exit = source["exit"];
+	        this.error = source["error"];
+	    }
+	}
+	export class Skip {
+	    serverID: string;
+	    reason: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Skip(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.serverID = source["serverID"];
+	        this.reason = source["reason"];
+	    }
+	}
+	export class Update {
+	    items: Item[];
+	    skipped: Skip[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Update(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.items = this.convertValues(source["items"], Item);
+	        this.skipped = this.convertValues(source["skipped"], Skip);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 
 }

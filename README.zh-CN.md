@@ -46,7 +46,7 @@
 - [编辑器](FEATURES.md#editor)：基于 CodeMirror，原子保存并自动备份
 - [日志](FEATURES.md#logs)：journal、日志文件和容器日志，实时查看，并可在服务器上搜索全部历史
 - [监控](FEATURES.md#monitor)：CPU、内存、磁盘、网络、GPU、进程，支持 Linux 和 Windows 服务器
-- [所有服务器](FEATURES.md#all-servers)：在一个窗口里查看所有服务器的状态和告警，以及每台服务器对外提供什么的地图
+- [所有服务器](FEATURES.md#all-servers)：在一个窗口里查看所有服务器的状态和告警、每台服务器对外提供什么的地图，以及在多台服务器上运行同一条命令（每台一个终端标签页）
 
 **服务与应用**
 

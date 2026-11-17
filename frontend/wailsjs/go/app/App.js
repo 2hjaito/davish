@@ -342,6 +342,22 @@ export function FilesWrite(arg1, arg2, arg3) {
   return window['go']['app']['App']['FilesWrite'](arg1, arg2, arg3);
 }
 
+export function FleetCheck(arg1, arg2) {
+  return window['go']['app']['App']['FleetCheck'](arg1, arg2);
+}
+
+export function FleetPlanUpdate(arg1) {
+  return window['go']['app']['App']['FleetPlanUpdate'](arg1);
+}
+
+export function FleetStart(arg1, arg2, arg3) {
+  return window['go']['app']['App']['FleetStart'](arg1, arg2, arg3);
+}
+
+export function FleetStop(arg1) {
+  return window['go']['app']['App']['FleetStop'](arg1);
+}
+
 export function GitBranches(arg1, arg2) {
   return window['go']['app']['App']['GitBranches'](arg1, arg2);
 }

@@ -62,6 +62,10 @@ Nút **Bản đồ** trên thẻ server đã kết nối cho thấy request nào
 
 <img src="assets/screenshots/servers.jpg" alt="Mọi server trong một màn hình" width="100%">
 
+**Chạy lệnh…** chạy một lệnh trên các server bạn chọn, như `ssh server lệnh`: mỗi server một tab terminal, tối đa 4 server cùng lúc, các server còn lại chờ lượt. Server nào hỏi lại (mật khẩu sudo, `[Y/n]`) thì tab đó được đưa lên để bạn trả lời ngay trong tab; Davish không bao giờ tự nhập mật khẩu sudo khi chạy nhiều server. Hộp xác nhận hiện đủ tên server và đúng lệnh; từ 3 server trở lên, hoặc lệnh trông như xóa, dừng, ghi đè thứ gì đó, phải gõ số server mới chạy. Mỗi tab kết thúc với exit code; **Chạy lại** cho các server lỗi. **Cập nhật package** dựng lệnh cập nhật riêng cho từng server với `sudo -n`: server nào sudo đòi mật khẩu sẽ báo, kèm nút mở Terminal. Mỗi server có một dòng trong Nhật ký lệnh.
+
+<img src="assets/screenshots/multi-run.jpg" alt="Một lệnh trên 4 server, một tab đang chờ mật khẩu sudo" width="100%">
+
 ## Services
 
 Dịch vụ systemd theo trạng thái, chi tiết và journal; khởi động, dừng, khởi động lại. Xóa dịch vụ không còn dùng: unit do admin tạo thì xóa file, unit của gói (như `certbot` cũ) thì chặn hẳn cùng timer chạy nó. Đăng nhập bằng user thường, Davish chạy qua `sudo` những gì systemd từ chối: hỏi mật khẩu sudo một lần mỗi phiên, chỉ giữ trong bộ nhớ (không lưu ổ đĩa, keychain hay nhật ký, mất sau 15 phút không dùng, khi ngắt kết nối hoặc khóa app), đưa cho sudo qua stdin, không bao giờ nằm trên dòng lệnh.

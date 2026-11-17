@@ -11,6 +11,7 @@ import {app} from '../models';
 import {disk} from '../models';
 import {fs} from '../models';
 import {docker} from '../models';
+import {fleet} from '../models';
 import {git} from '../models';
 import {sshkeys} from '../models';
 import {lock} from '../models';
@@ -194,6 +195,14 @@ export function FilesSearch(arg1:string,arg2:fs.SearchQuery,arg3:string):Promise
 export function FilesStat(arg1:string,arg2:string):Promise<fs.Entry>;
 
 export function FilesWrite(arg1:string,arg2:string,arg3:Array<number>):Promise<fs.Entry>;
+
+export function FleetCheck(arg1:string,arg2:number):Promise<fleet.Check>;
+
+export function FleetPlanUpdate(arg1:Array<string>):Promise<fleet.Update>;
+
+export function FleetStart(arg1:Array<fleet.Item>,arg2:number,arg3:number):Promise<app.FleetRun>;
+
+export function FleetStop(arg1:string):Promise<void>;
 
 export function GitBranches(arg1:string,arg2:string):Promise<Array<git.Branch>>;
 
