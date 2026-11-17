@@ -91,6 +91,8 @@ func (r *Runner) RunInput(ctx context.Context, serverID, app, line string, stdin
 		Command:  line,
 		Exit:     exit,
 		DurMs:    time.Since(start).Milliseconds(),
+		Mutating: IsChanging(ctx),
+		Input:    len(stdin) > 0 && !passwordStdin(ctx),
 	})
 	return res, err
 }

@@ -36,7 +36,7 @@ func (a *App) DiskClean(serverID, id, command string) error {
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.disk.Clean(a.ctx, serverID, id, command)
+	return a.disk.Clean(a.change(), serverID, id, command)
 }
 
 // DiskPlanRemove is the delete command for a file or folder found by the
@@ -50,7 +50,7 @@ func (a *App) DiskRemove(serverID, path, command string) error {
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.disk.Remove(a.ctx, serverID, path, command)
+	return a.disk.Remove(a.change(), serverID, path, command)
 }
 
 // DiskPlanTruncate is the command that empties a file, such as a log.
@@ -63,5 +63,5 @@ func (a *App) DiskTruncate(serverID, path, command string) error {
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.disk.Truncate(a.ctx, serverID, path, command)
+	return a.disk.Truncate(a.change(), serverID, path, command)
 }

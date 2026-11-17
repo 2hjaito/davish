@@ -29,7 +29,7 @@ func (a *App) ServicesAct(serverID, unit, action string) error {
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.services.Act(a.ctx, serverID, unit, action)
+	return a.services.Act(a.change(), serverID, unit, action)
 }
 
 // ServicesPlanRemove describes removing unit: deleting an admin's unit,
@@ -43,5 +43,5 @@ func (a *App) ServicesRemove(serverID, unit, command string) error {
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.services.Remove(a.ctx, serverID, unit, command)
+	return a.services.Remove(a.change(), serverID, unit, command)
 }

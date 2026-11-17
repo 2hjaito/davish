@@ -22,6 +22,14 @@ export function AuditEntries() {
   return window['go']['app']['App']['AuditEntries']();
 }
 
+export function AuditSaveScript(arg1, arg2, arg3) {
+  return window['go']['app']['App']['AuditSaveScript'](arg1, arg2, arg3);
+}
+
+export function AuditScript(arg1, arg2) {
+  return window['go']['app']['App']['AuditScript'](arg1, arg2);
+}
+
 export function BrowserOpen(arg1, arg2) {
   return window['go']['app']['App']['BrowserOpen'](arg1, arg2);
 }
@@ -340,6 +348,22 @@ export function FilesStat(arg1, arg2) {
 
 export function FilesWrite(arg1, arg2, arg3) {
   return window['go']['app']['App']['FilesWrite'](arg1, arg2, arg3);
+}
+
+export function FleetCheck(arg1, arg2) {
+  return window['go']['app']['App']['FleetCheck'](arg1, arg2);
+}
+
+export function FleetPlanUpdate(arg1) {
+  return window['go']['app']['App']['FleetPlanUpdate'](arg1);
+}
+
+export function FleetStart(arg1, arg2, arg3) {
+  return window['go']['app']['App']['FleetStart'](arg1, arg2, arg3);
+}
+
+export function FleetStop(arg1) {
+  return window['go']['app']['App']['FleetStop'](arg1);
 }
 
 export function GitBranches(arg1, arg2) {

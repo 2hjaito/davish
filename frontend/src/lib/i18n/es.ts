@@ -1023,11 +1023,13 @@ const es = {
           'El mapa de un servidor: dominio → nginx → puerto → contenedor o programa, marcando un puerto de base de datos abierto a Internet, un upstream en el que nada escucha y un certificado a punto de caducar; lo que está en marcha y los discos',
           'Conectar un servidor',
           'Cambiar a un servidor',
+          'Ejecutar un comando en varios servidores: cada uno en su pestaña de terminal, como mucho 4 a la vez; la pestaña que pregunta algo pasa al frente. Se confirma con el nombre de cada servidor y el comando exacto; con 3 servidores o más, o un comando que borra o detiene algo, hay que escribir el número. Actualizar paquetes usa el gestor de cada servidor con sudo -n',
         ],
         keys: [],
         runs: [
           'Para el mapa: los sitios de nginx, puertos en escucha, contenedores y discos de ese servidor, leídos al abrirlo (solo lectura)',
           'La misma lectura de /proc que Monitor, para cada servidor conectado, mientras la ventana está abierta',
+          'Ejecutar un comando: exactamente el comando escrito, en cada servidor, en una sesión de terminal; una línea por servidor en el Registro de comandos. Davish nunca escribe una contraseña de sudo para esto',
         ],
       },
       snippets: {
@@ -1056,7 +1058,11 @@ const es = {
       },
       audit: {
         does: 'Cada comando que Davish ejecutó en el servidor por ti.',
-        actions: ['Mostrar solo el servidor seleccionado'],
+        actions: [
+          'Mostrar solo el servidor seleccionado',
+          'Mostrar solo cambios, ocultando lecturas y consultas periódicas',
+          'Exportar los comandos marcados como script bash: cada uno se ejecuta de nuevo por su propio ssh -t, sudo escrito de forma normal, el contenido de stdin queda como comentario; copiar o guardar, no se ejecuta nada',
+        ],
         keys: [],
         runs: [],
       },
@@ -1418,6 +1424,48 @@ const es = {
       reconnecting: 'conexión perdida, reintentando…',
       disconnected: 'no conectado',
       failed: 'error de conexión',
+    },
+    run: {
+      open: 'Ejecutar un comando…',
+      title: 'Ejecutar en varios servidores',
+      back: 'Todos los servidores',
+      lead: 'El comando se ejecuta en cada servidor como lo haría “ssh servidor comando”, cada uno en su propia pestaña de terminal, como mucho 4 a la vez. Cuando un servidor pregunta algo (una contraseña, [Y/n]), su pestaña pasa al frente: responde ahí. Davish nunca escribe una contraseña de sudo en una ejecución.',
+      allOnline: (n: number) => `Todos los servidores conectados (${n})`,
+      offline: 'sin conexión',
+      command: 'Comando',
+      update: 'Actualizar paquetes',
+      updateHint:
+        'El gestor de paquetes de cada servidor, con sudo -n: si sudo pide contraseña, el servidor lo indica.',
+      runOn: (n: number) =>
+        n > 0 ? `Ejecutar en ${n} ${n === 1 ? 'servidor' : 'servidores'}…` : 'Ejecutar…',
+      skipped: (list: string) => `Omitidos: ${list}`,
+      noManager: 'sin un gestor de paquetes conocido',
+      newCommand: 'Nuevo comando',
+      progress: (running: number, queued: number) =>
+        queued > 0 ? `${running} en curso, ${queued} esperando turno` : `${running} en curso`,
+      result: (ok: number, bad: number) => `${ok} correctos, ${bad} con error`,
+      stopAll: 'Detener todo',
+      again: (n: number) => `Repetir en ${n} con error`,
+      state: {
+        queued: 'esperando turno',
+        running: 'en curso',
+        waiting: 'espera respuesta',
+        done: 'terminado',
+        failed: 'error',
+        stopped: 'detenido',
+      },
+      exit: (code: number) => (code === -1 ? 'no terminó' : `salida ${code}`),
+      sudoRefused:
+        'sudo pide una contraseña aquí. Por seguridad, Davish no usa contraseñas de sudo al ejecutar en varios servidores.',
+      openTerminal: 'Abrir Terminal',
+      answerHere: 'Este servidor está esperando: escribe la respuesta aquí.',
+      confirmTitle: (n: number) => `¿Ejecutar en ${n} ${n === 1 ? 'servidor' : 'servidores'}?`,
+      confirmBody: 'Davish ejecutará exactamente esto en cada uno de estos servidores:',
+      destructive: 'Este comando parece borrar, detener o sobrescribir algo.',
+      sudoNote:
+        'Las preguntas las respondes tú, en la pestaña de cada servidor. Cada servidor deja una línea en el Registro de comandos.',
+      typeCount: (n: number) => `Escribe ${n} para confirmar:`,
+      confirmRun: (n: number) => `Ejecutar en ${n}`,
     },
     overview: {
       open: 'Todos los servidores…',
@@ -2788,6 +2836,28 @@ const es = {
   },
   audit: {
     search: 'Buscar comandos',
+    onlyChanges: 'Solo cambios',
+    noChanges:
+      'Las lecturas y consultas periódicas están ocultas: desactiva “Solo cambios” para ver todos los comandos.',
+    export: {
+      start: 'Exportar script…',
+      pick: 'Incluir en el script',
+      picked: (n: number) => `${n} seleccionados`,
+      all: 'Seleccionar todo',
+      none: 'No seleccionar nada',
+      show: 'Ver script…',
+      title: (n: number) => `Script de ${n} ${n === 1 ? 'comando' : 'comandos'}`,
+      lead: 'Cada comando se ejecuta de nuevo por su propia conexión ssh, con terminal para que sudo pueda preguntar. Léelo antes de ejecutarlo; desde aquí no se ejecuta nada.',
+      notIncluded:
+        'No está en el script: lo que pasó por SFTP (guardar, renombrar, subir archivos), el contenido enviado por stdin (queda como comentario) y los comandos más antiguos de lo que guarda el registro.',
+      failed: 'Incluir comandos con error',
+      copy: 'Copiar',
+      copied: 'Copiado.',
+      save: 'Guardar…',
+      saveTitle: 'Guardar el script',
+      close: 'Cerrar',
+      saved: (path: string) => `Guardado en ${path}`,
+    },
     onlyThis: 'Solo el servidor seleccionado',
     empty: 'Todavía no se ha ejecutado ningún comando en el servidor',
     emptyHint:

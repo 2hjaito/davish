@@ -18,5 +18,5 @@ func (a *App) SecurityApply(serverID, action, ip, command string) error {
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.security.Apply(a.ctx, serverID, action, ip, command)
+	return a.security.Apply(a.change(), serverID, action, ip, command)
 }

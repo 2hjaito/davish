@@ -19,7 +19,7 @@ func (a *App) DatabaseCreate(serverID, kind, db, user string) (database.CreateRe
 	if err := a.lock.Check(); err != nil {
 		return database.CreateResult{}, err
 	}
-	return a.databases.Create(a.ctx, serverID, kind, db, user)
+	return a.databases.Create(a.change(), serverID, kind, db, user)
 }
 
 // DatabaseDropSQL is the statement that deletes a database.
@@ -32,7 +32,7 @@ func (a *App) DatabaseDrop(serverID, kind, db, sql string) error {
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.databases.Drop(a.ctx, serverID, kind, db, sql)
+	return a.databases.Drop(a.change(), serverID, kind, db, sql)
 }
 
 // DatabaseDump writes a database to ~/db-backups and returns the file.
@@ -40,7 +40,7 @@ func (a *App) DatabaseDump(serverID, kind, db string) (string, error) {
 	if err := a.lock.Check(); err != nil {
 		return "", err
 	}
-	return a.databases.Dump(a.ctx, serverID, kind, db)
+	return a.databases.Dump(a.change(), serverID, kind, db)
 }
 
 // DatabaseDumps lists a database's dumps in ~/db-backups, newest first.
@@ -58,7 +58,7 @@ func (a *App) DatabaseRestore(serverID, kind, db, file, command string) error {
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.databases.Restore(a.ctx, serverID, kind, db, file, command)
+	return a.databases.Restore(a.change(), serverID, kind, db, file, command)
 }
 
 // DatabaseMongoConnect logs in to the server's MongoDB with a connection
@@ -91,7 +91,7 @@ func (a *App) DatabaseSQLiteBackup(serverID, file string) (string, error) {
 	if err := a.lock.Check(); err != nil {
 		return "", err
 	}
-	return a.databases.BackupSQLite(a.ctx, serverID, file)
+	return a.databases.BackupSQLite(a.change(), serverID, file)
 }
 
 // DatabaseSQLiteRestoreLine is the line that puts a backup back, for a

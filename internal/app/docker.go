@@ -47,7 +47,7 @@ func (a *App) DockerAct(serverID, name, action string) error {
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.docker.Act(a.ctx, serverID, name, action)
+	return a.docker.Act(a.change(), serverID, name, action)
 }
 
 // DockerImages lists the server's images and how many containers use each.
@@ -70,7 +70,7 @@ func (a *App) DockerRemoveImage(serverID, ref, command string) error {
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.docker.RemoveImage(a.ctx, serverID, ref, command)
+	return a.docker.RemoveImage(a.change(), serverID, ref, command)
 }
 
 // DockerVolumes lists the server's volumes with their size and use.
@@ -88,7 +88,7 @@ func (a *App) DockerRemoveVolume(serverID, name, command string) error {
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.docker.RemoveVolume(a.ctx, serverID, name, command)
+	return a.docker.RemoveVolume(a.change(), serverID, name, command)
 }
 
 // DockerPullCommand is the docker pull line for a terminal.
@@ -118,7 +118,7 @@ func (a *App) DockerCreateStack(serverID, dir, template, command string) error {
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.docker.CreateStack(a.ctx, serverID, dir, template, command)
+	return a.docker.CreateStack(a.change(), serverID, dir, template, command)
 }
 
 // DockerCreate makes a network or a volume.
@@ -126,7 +126,7 @@ func (a *App) DockerCreate(serverID, kind, name string) error {
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.docker.CreateObject(a.ctx, serverID, kind, name)
+	return a.docker.CreateObject(a.change(), serverID, kind, name)
 }
 
 // DockerRunCommand rebuilds the docker run line of a container.

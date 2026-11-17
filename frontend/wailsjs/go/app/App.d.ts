@@ -11,6 +11,7 @@ import {app} from '../models';
 import {disk} from '../models';
 import {fs} from '../models';
 import {docker} from '../models';
+import {fleet} from '../models';
 import {git} from '../models';
 import {sshkeys} from '../models';
 import {lock} from '../models';
@@ -34,6 +35,10 @@ export function AnsibleInventoryHosts(arg1:string):Promise<ansibleinv.Listing>;
 export function AnsiblePickInventory(arg1:string):Promise<string>;
 
 export function AuditEntries():Promise<Array<audit.Entry>>;
+
+export function AuditSaveScript(arg1:Array<number>,arg2:boolean,arg3:string):Promise<string>;
+
+export function AuditScript(arg1:Array<number>,arg2:boolean):Promise<string>;
 
 export function BrowserOpen(arg1:string,arg2:number):Promise<ports.Site>;
 
@@ -194,6 +199,14 @@ export function FilesSearch(arg1:string,arg2:fs.SearchQuery,arg3:string):Promise
 export function FilesStat(arg1:string,arg2:string):Promise<fs.Entry>;
 
 export function FilesWrite(arg1:string,arg2:string,arg3:Array<number>):Promise<fs.Entry>;
+
+export function FleetCheck(arg1:string,arg2:number):Promise<fleet.Check>;
+
+export function FleetPlanUpdate(arg1:Array<string>):Promise<fleet.Update>;
+
+export function FleetStart(arg1:Array<fleet.Item>,arg2:number,arg3:number):Promise<app.FleetRun>;
+
+export function FleetStop(arg1:string):Promise<void>;
 
 export function GitBranches(arg1:string,arg2:string):Promise<Array<git.Branch>>;
 
