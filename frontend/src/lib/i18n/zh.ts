@@ -37,7 +37,7 @@ const zh = {
       },
     ],
     add: '通过 SSH 添加服务器…',
-    import: '或从 ~/.ssh/config 导入',
+    import: '或从 ~/.ssh/config、Ansible 导入',
     foot: (mod: string) =>
       `服务器数量不限，每台都是一个工作区（${mod}1…${mod}9）。按 ${mod}K 打开 Spotlight，查找应用、服务、容器和文件夹。`,
   },
@@ -814,7 +814,7 @@ const zh = {
   },
   menu: {
     addServer: '添加服务器…',
-    importServers: '从 ~/.ssh/config 导入…',
+    importServers: '从 ~/.ssh/config 或 Ansible 导入…',
     connect: (name: string) => `连接 ${name}`,
     disconnect: (name: string) => `断开 ${name}`,
     newTerminal: '新建终端',
@@ -1343,7 +1343,7 @@ const zh = {
     picker: '选择服务器',
     header: '服务器',
     add: '通过 SSH 添加服务器…',
-    import: '从 ~/.ssh/config 导入…',
+    import: '从 ~/.ssh/config 或 Ansible 导入…',
     none: '还没有服务器',
     edit: '编辑服务器',
     reconnect: '重新连接',
@@ -1399,7 +1399,7 @@ const zh = {
     },
   },
   importDialog: {
-    title: '从 ~/.ssh/config 导入',
+    title: '导入服务器',
     lead: 'Davish 只读取这个文件，从不写入。包含通配符（*、?）的条目和 Match 块会被跳过。',
     loading: '正在读取 ~/.ssh/config…',
     empty: '~/.ssh/config 中没有找到具体的主机。',
@@ -1409,6 +1409,30 @@ const zh = {
     submit: (n: number) => (n > 0 ? `导入 ${n} 台服务器` : '导入'),
     cancel: '取消',
     jumpNote: '尚未添加的 ProxyJump 主机也会一并导入。',
+    source: '导入来源',
+    tabSSH: '~/.ssh/config',
+    tabAnsible: 'Ansible inventory',
+    ansibleLead:
+      'INI 格式的 inventory（例如 /etc/ansible/hosts）。Davish 只读取该文件：分组仅用于选择，不会保存；文件中的密码从不读取。使用模板（{{ }}）、Vault 值或非 SSH 连接的主机会被跳过。',
+    noFile: '尚未选择 inventory',
+    choose: '选择文件…',
+    chooseTitle: '选择 Ansible inventory',
+    loadingInventory: '正在读取 inventory…',
+    emptyInventory: '此 inventory 中没有找到主机。',
+    groups: '分组',
+    allGroups: '全部',
+    selectGroup: (g: string) => `全选 ${g}`,
+    skipped: (n: number) => `已跳过 ${n} 台主机`,
+    askYAML: '请求支持 YAML',
+    issues: {
+      connection: (v: string) => `使用 ${v} 连接，而不是 SSH`,
+      jinja: (v: string) => `${v} 是模板，只有 Ansible 能填充`,
+      vault: (v: string) => `${v} 已用 Vault 加密`,
+      port: (v: string) => `“${v}” 不是端口`,
+      range: (p: string) => `范围 ${p} 格式有误或超过 256 台主机`,
+      password: 'inventory 中设置了密码，但不会导入。如服务器需要密码，请在“编辑服务器”中添加。',
+      sshArgs: (names: string) => `未导入的 ssh 选项：${names}`,
+    },
   },
   serverDialog: {
     addTitle: '通过 SSH 添加服务器',
@@ -2997,6 +3021,10 @@ const zh = {
     DB_AUTH_FAILED: 'MongoDB 拒绝了此用户或密码。',
     SUDO_PASSWORD_REQUIRED: '服务器需要 sudo 密码才能执行此操作。',
     SUDO_PASSWORD_WRONG: 'sudo 不接受此密码。',
+    INVENTORY_YAML_UNSUPPORTED:
+      '此 inventory 为 YAML（或 JSON）格式。Davish 目前只读取 INI 格式的 inventory。',
+    INVENTORY_SCRIPT_UNSUPPORTED:
+      '此 inventory 是一个脚本。Davish 不会运行它；请选择 INI 格式的 inventory 文件。',
     UPDATE_DOWNLOAD_FAILED:
       '无法下载更新：GitHub 没有响应或网络中断。请几分钟后重试，或从发布页面下载。',
     GIT_UNSAFE_OWNER:

@@ -34,7 +34,7 @@ Nothing to install on the server.
 - **Many servers, one desktop.** Each server is a workspace (`⌘1`…`⌘9`) that remembers its own windows. Copy files between servers by dragging them.
 - **Updates itself.** A new version shows its changes with Update, Later and Skip this version; Davish downloads it, checks its signature and restarts into it. No reinstalling.
 - **English, Vietnamese, Simplified Chinese or Spanish.** Pick the language in Settings; the first time, Davish follows your system's. Spanish is new: corrections are welcome in [#124](https://github.com/2hjaito/davish/issues/124).
-- **Your `~/.ssh/config` works.** Import its hosts in one go, keys and `ProxyJump` included; Davish only reads the file. Servers behind a bastion connect through it, each hop with its own host key check, and the whole chain reconnects on its own.
+- **Your `~/.ssh/config` works, and so does your Ansible inventory.** Import their hosts in one go, keys and `ProxyJump` included, a whole Ansible group at a time; Davish only reads the files. Servers behind a bastion connect through it, each hop with its own host key check, and the whole chain reconnects on its own.
 
 ## Features
 
@@ -66,7 +66,7 @@ Nothing to install on the server.
 - [Disk](FEATURES.md#disk): where the space goes as a tree, what could not be measured and why, delete and clean up
 - [Security](FEATURES.md#security): failed logins per hour and by address, users targeted, open sessions, ufw, fail2ban
 - [SSH keys](FEATURES.md#ssh-keys): authorized_keys, deploy keys, your own keys
-- [~/.ssh/config and ProxyJump](FEATURES.md#sshconfig-and-proxyjump): import hosts, connect through a bastion
+- [~/.ssh/config, Ansible and ProxyJump](FEATURES.md#sshconfig-ansible-and-proxyjump): import hosts from ssh config or an INI inventory, connect through a bastion
 
 **The desktop**
 
