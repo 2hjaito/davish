@@ -4,6 +4,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.14.0] - 2026-11-17
+
 ### Thêm
 - Tất cả server: **Chạy lệnh…** chạy một lệnh trên nhiều server, mỗi server một tab terminal, tối đa 4 server cùng lúc. Tab nào hỏi lại (mật khẩu sudo, `[Y/n]`) thì được đưa lên để bạn trả lời ngay trong tab; Davish không bao giờ tự nhập mật khẩu sudo khi chạy nhiều server. Hộp xác nhận liệt kê đủ server và đúng lệnh, phải gõ số server khi chạy từ 3 server hoặc lệnh trông nguy hiểm. Có exit code từng server, Dừng tất cả, Chạy lại trên server lỗi, và **Cập nhật package** theo trình quản lý package của từng server với `sudo -n`. Mỗi server một dòng trong Nhật ký lệnh.
 - Nhật ký lệnh: **Chỉ lệnh thay đổi server** (bật sẵn) ẩn lệnh đọc và polling, và **Xuất script…** biến các lệnh được tick thành bash script chạy lại chúng, mỗi lệnh qua một `ssh -t` riêng để sudo hỏi được. Mỗi server một khối, sudo của Davish viết lại thành `sudo` thường, nội dung gửi qua stdin chỉ để lại comment (không bao giờ được lưu), lệnh lỗi chỉ xuất khi bạn chọn kèm. Sao chép hoặc lưu thành file chạy được.

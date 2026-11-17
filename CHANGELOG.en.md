@@ -4,6 +4,8 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.14.0] - 2026-11-17
+
 ### Added
 - All servers: **Run a command…** runs one command on several servers, each in its own terminal tab, at most four at a time. A tab that asks something (a sudo password, `[Y/n]`) comes forward and you answer there; Davish never types a sudo password for a run. The confirm dialog lists every server and the exact command, and asks you to type the number of servers from three servers or for a command that looks destructive. Exit code per server, Stop all, Run again on the failed ones, and **Update packages** with each server's package manager and `sudo -n`. One line per server in the Command log.
 - Command log: **Changes only** (on by default) hides reads and polling, and **Export script…** turns the ticked commands into a bash script that runs them again, each over its own `ssh -t` so sudo can ask. One block per server, Davish's sudo written as a plain `sudo`, content sent on stdin left as a comment (it is never recorded), failed commands only if you include them. Copy it or save it as an executable file.
