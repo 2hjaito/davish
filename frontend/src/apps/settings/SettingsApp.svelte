@@ -143,20 +143,17 @@
       <strong>{t.settings.perfPreset}</strong>
       <small>{t.settings.perfPresetHint}</small>
     </span>
-    <div class="segmented wrap" role="radiogroup" aria-label={t.settings.perfPreset}>
-      {#each NAMED_PRESETS as preset (preset)}
-        <button
-          role="radio"
-          aria-checked={settings.perfPreset === preset}
-          onclick={() => settings.usePreset(preset as NamedPreset)}
-          >{t.settings.perfPresets[preset]}</button
-        >
-      {/each}
-    </div>
-    {#if settings.perfPreset === 'custom'}
-      <small>{t.settings.perfCustom}</small>
-    {/if}
-    <span class="check">
+    <div class="preset-line">
+      <div class="segmented wrap" role="radiogroup" aria-label={t.settings.perfPreset}>
+        {#each NAMED_PRESETS as preset (preset)}
+          <button
+            role="radio"
+            aria-checked={settings.perfPreset === preset}
+            onclick={() => settings.usePreset(preset as NamedPreset)}
+            >{t.settings.perfPresets[preset]}</button
+          >
+        {/each}
+      </div>
       <button
         type="button"
         class="btn"
@@ -165,12 +162,15 @@
       >
         {perfCheck.running ? t.settings.perfChecking : t.settings.perfCheck}
       </button>
-      {#if perfCheck.last === 'slow'}
-        <small>{t.settings.perfSlow}</small>
-      {:else if perfCheck.last === 'fine'}
-        <small>{t.settings.perfFine}</small>
-      {/if}
-    </span>
+    </div>
+    {#if settings.perfPreset === 'custom'}
+      <small>{t.settings.perfCustom}</small>
+    {/if}
+    {#if perfCheck.last === 'slow'}
+      <small>{t.settings.perfSlow}</small>
+    {:else if perfCheck.last === 'fine'}
+      <small>{t.settings.perfFine}</small>
+    {/if}
   </div>
 
   <div class="row stack">
@@ -736,7 +736,13 @@
 
   .segmented.wrap {
     flex-wrap: wrap;
-    align-self: flex-start;
+  }
+
+  .preset-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
   }
 
   .segmented button {
@@ -766,6 +772,7 @@
   .check {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 10px;
   }
 
