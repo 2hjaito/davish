@@ -18,7 +18,6 @@
   import { toUserError } from '../api/errors'
   import { transferReveal } from '../api/transfer'
   import { t } from '../i18n'
-  import PerfBanner from './PerfBanner.svelte'
   import {
     describeTransfer,
     type Transfer,
@@ -351,7 +350,8 @@
   {/if}
 
   <Banners />
-  <PerfBanner />
+  <!-- Its check runs after start-up, so it loads apart from the first bundle. -->
+  {#await import('./PerfBanner.svelte') then m}<m.default />{/await}
   <ServerDialog />
   {#if ui.importDialog}
     <!-- Loaded on first use; it is not needed to start. -->
