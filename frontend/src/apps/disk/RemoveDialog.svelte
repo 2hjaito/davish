@@ -180,6 +180,7 @@
     font-size: var(--text-sm);
     white-space: pre-wrap;
     overflow-wrap: anywhere;
+    -webkit-user-select: text;
     user-select: text;
   }
 
