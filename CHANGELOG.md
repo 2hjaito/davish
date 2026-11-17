@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Tất cả server: xem dạng **Danh sách** gọn bên cạnh dạng thẻ (nhớ lựa chọn), thêm, nhập, sửa và **ngắt kết nối** server ngay trong cửa sổ, và phím tắt **⌘⇧S** (Ctrl+Shift+S) để mở nó. Menu chọn server cũng có nút ngắt kết nối cạnh mỗi server đang kết nối. Theo góp ý của @HungNth và @tian2992 (#178).
+
 ## [1.14.2] - 2026-11-17
 
 ### Sửa
