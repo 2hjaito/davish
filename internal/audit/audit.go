@@ -29,6 +29,12 @@ type Entry struct {
 	// (connection lost, canceled).
 	Exit  int   `json:"exit"`
 	DurMs int64 `json:"durMs"`
+	// Mutating marks a command run for an action that changes the server,
+	// as opposed to a read or a poll (docs/adr/0022).
+	Mutating bool `json:"mutating,omitempty"`
+	// Input marks a command that was given content on stdin, such as a
+	// file written with tee. The content is never recorded.
+	Input bool `json:"input,omitempty"`
 }
 
 // Log is a ring buffer of the latest Capacity entries.
@@ -71,4 +77,20 @@ func (l *Log) Entries() []Entry {
 	out := make([]Entry, 0, len(l.ring))
 	out = append(out, l.ring[l.next:]...)
 	return append(out, l.ring[:l.next]...)
+}
+
+// Pick returns the kept entries with the given IDs, oldest first; IDs
+// already dropped from the log are skipped.
+func (l *Log) Pick(ids []uint64) []Entry {
+	want := make(map[uint64]bool, len(ids))
+	for _, id := range ids {
+		want[id] = true
+	}
+	var out []Entry
+	for _, e := range l.Entries() {
+		if want[e.ID] {
+			out = append(out, e)
+		}
+	}
+	return out
 }

@@ -15,9 +15,12 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/menu"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/linux"
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
 
 	"davish/internal/app"
+	"davish/internal/perf"
+	"davish/internal/store"
 )
 
 //go:embed all:frontend/dist
@@ -29,7 +32,18 @@ var assets embed.FS
 //go:embed wails.json
 var wailsJSON []byte
 
+// The window icon on Linux, where the window manager has no bundle to
+// take it from (#181).
+//
+//go:embed build/appicon.png
+var appIcon []byte
+
 func main() {
+	// WebKit reads these while creating the webview, so they have to be set
+	// before wails.Run. A missing config dir just leaves the defaults.
+	if dir, err := store.DefaultDir(); err == nil {
+		perf.Apply(dir)
+	}
 	start := time.Now()
 	var cfg struct {
 		Info struct{ ProductVersion string }
@@ -51,6 +65,15 @@ func main() {
 		// macOS keeps its native traffic lights over a transparent title bar;
 		// other platforms draw everything in the webview.
 		Frameless: runtime.GOOS != "darwin",
+		Linux: &linux.Options{
+			Icon: appIcon,
+			// Matches the binary, so KDE and GNOME group the window with
+			// a .desktop file named after it.
+			ProgramName: "Davish",
+			// What Wails uses when Linux is nil (wails#2977): passing options
+			// must not turn the webview's GPU policy on behind our back.
+			WebviewGpuPolicy: linux.WebviewGpuPolicyNever,
+		},
 		Mac: &mac.Options{
 			TitleBar: mac.TitleBarHidden(),
 		},

@@ -4,6 +4,50 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.14.3] - 2026-11-17
+
+### Added
+- All servers: a compact **List** view next to the cards (remembered), add, import, edit and **disconnect** servers right from the window, and **⌘⇧S** (Ctrl+Shift+S) to open it. The server menu also has a disconnect button next to each connected server. Suggested by @HungNth and @tian2992 (#178).
+
+### Fixed
+- Monitor: the line and fill of the metric charts (Memory, CPU, GPU, Network, Disk and the Overview sparklines) no longer spill past the left edge of the card. Thanks @thanhtrung5763 (#186).
+
+## [1.14.2] - 2026-11-17
+
+### Fixed
+- Linux: the Davish window shows the app icon in the taskbar and Alt+Tab instead of the default X11 one (#181).
+
+## [1.14.1] - 2026-11-17
+
+### Added
+- Settings → Performance: four presets, **Auto**, **Beautiful**, **Balanced** and **Light**, replace the Reduce glass and Reduce motion switches. Each one sets the frosted blur, the window shadow, solid fills, the wallpaper blobs and motion; **Advanced** sets each on its own, and on Linux adds two WebKitGTK workarounds that apply after a restart. **Auto** keeps the full look, times a second and a half of frames at launch without blocking anything, and offers Light (Use Light / Later) when the machine renders in software or drops frames; **Check again** measures once more. Thanks to @tian2992 (#176).
+
+### Fixed
+- Terminal: with GPU acceleration on, the last key typed or the screen a program leaves on exit (such as `btop`) no longer waits for the next key or click to appear (#175).
+- Reduced glass paints opaque fills and a short shadow, so it is really cheaper to draw: a 96% fill was still blended over the wallpaper on every frame, and the deep shadow was redrawn while scrolling. Thanks to @tian2992 (#174).
+
+## [1.14.0] - 2026-11-17
+
+### Added
+- All servers: **Run a command…** runs one command on several servers, each in its own terminal tab, at most four at a time. A tab that asks something (a sudo password, `[Y/n]`) comes forward and you answer there; Davish never types a sudo password for a run. The confirm dialog lists every server and the exact command, and asks you to type the number of servers from three servers or for a command that looks destructive. Exit code per server, Stop all, Run again on the failed ones, and **Update packages** with each server's package manager and `sudo -n`. One line per server in the Command log.
+- Command log: **Changes only** (on by default) hides reads and polling, and **Export script…** turns the ticked commands into a bash script that runs them again, each over its own `ssh -t` so sudo can ask. One block per server, Davish's sudo written as a plain `sudo`, content sent on stdin left as a comment (it is never recorded), failed commands only if you include them. Copy it or save it as an executable file.
+- Files: the search box has three scopes. **This folder** filters as before; **Subfolders** finds names in every subfolder with `find`; **Contents** finds the lines that contain the text with `grep` (binary files, `.git` and `node_modules` are skipped). Press Enter to search the server: up to 500 results within 30 seconds, with the exact command that ran, a Stop button and a count of the places that could not be read. A content result opens in the Editor at its line; the folder button shows the file in its folder. Read only, never retried through sudo.
+- Logs: **Search all** (or Enter in the filter) searches the whole history of a file, the journal or a container on the server, not just the 200 lines on screen, and returns the latest 500 matching lines. For a file, click a result to read the lines around it and page earlier or later without downloading the file (a log of several GB stays quick).
+- Import servers from an Ansible inventory (INI): a new tab in the import dialog next to `~/.ssh/config`. It reads `ansible_host`, `ansible_user`, `ansible_port`, the key file and a `ProxyJump` in `ansible_ssh_common_args`, with group variables, child groups and ranges such as `web[01:03]`, and lets you pick a whole group at a time. The file is only read; passwords in it are never read, and hosts with templates, Vault values or a non-SSH connection are listed as skipped with the reason. A YAML inventory says it is not supported yet.
+
+### Fixed
+- Database: when the server has no sqlite3, the Find dialog offers the sqlite3 install command for the server's package manager with a Run in Terminal button (the dialog closes so Terminal is not hidden behind it), instead of only pointing to Packages. Each section of the Database app is now a card.
+- macOS and Linux: text that should be selectable can be selected and copied again (file paths in the Find dialog, commands in confirm dialogs, Git diffs…). WebKit only reads `-webkit-user-select`, so these places could not be selected.
+- Server menu: with many servers the list scrolls, so All servers, Add a server and Import stay within reach (#178).
+
+## [1.13.10] - 2026-11-16
+
+### Fixed
+- Installing Docker from Setup also installs the compose plugin (a missing compose package does not stop the install). Nginx's HTTPS dialog checks for certbot first and offers its install command instead of a certbot line that would only fail. Setup says whether the tool is installed already, and no longer fails exactly when the tool is missing. Docker older than 23 reports "Docker is too old" for volumes instead of an unclear error.
+- Windows: **Automatic** login now reads the default key files in `~\.ssh` (`id_ed25519`, `id_ecdsa`, `id_rsa`). The path, written with `\`, was never expanded to the home folder, so these files were never tried (#168).
+- An SSH agent that does not answer (a pipe nobody serves, an agent waiting for its vault to unlock) no longer leaves the connection stuck on "Connecting…": after 5 seconds Davish moves on to the key files and writes why in the log (#168).
+- A key path that points at a folder (such as `~/.ssh`) now says to choose the private key file in it, instead of "Incorrect function" on Windows (#168).
+
 ## [1.13.9] - 2026-11-14
 
 ### Fixed

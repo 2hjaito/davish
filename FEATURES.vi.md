@@ -16,9 +16,19 @@ Lưu các lệnh hay gõ kèm tên, cho một server hoặc mọi server. Một 
 
 <img src="assets/screenshots/snippets.jpg" alt="Lệnh hay dùng" width="100%">
 
+## Nhật ký lệnh
+
+Mọi lệnh Davish đã chạy trên server, kèm exit code và thời gian chạy; dòng nào cũng gõ lại được vào Terminal hoặc lưu thành lệnh hay dùng. **Chỉ lệnh thay đổi server** (bật sẵn) ẩn lệnh đọc và polling, chỉ còn những gì các thao tác đã thay đổi. **Xuất script…** biến các lệnh được tick thành một bash script chạy lại chúng, mỗi lệnh qua một `ssh -t` riêng để sudo và các câu hỏi khác vẫn hỏi được: mỗi server một khối, trên mỗi dòng ghi giờ và app, sudo của Davish được viết lại thành `sudo` thường (không bao giờ có mật khẩu), còn nội dung gửi qua stdin (ví dụ file ghi bằng root) chỉ để lại comment vì không được lưu. Lệnh lỗi không được xuất trừ khi bạn chọn kèm. Sao chép hoặc lưu thành file chạy được; hộp xuất không chạy gì cả. Thao tác qua SFTP (lưu, đổi tên, upload) không có trong nhật ký.
+
+<img src="assets/screenshots/audit-export.jpg" alt="Nhật ký lệnh xuất thành script" width="100%">
+
 ## Files
 
 Trình duyệt kiểu Finder qua SFTP: tải lên, tải xuống, kéo thả từ hệ điều hành, đổi tên, xóa, nén, và copy giữa các server qua máy bạn. Chuột phải trên file để thấy mọi thao tác. Giữ chuột trên file rồi kéo nhẹ: một vòng thao tác mở quanh con trỏ (mở trong Editor hoặc Terminal, đổi tên, xóa, nén, copy đường dẫn, thêm vào màn hình chính); thả vào ô nào là chọn ô đó, thả ở giữa hoặc nhấn Esc để hủy. Chuột phải vào khoảng trống để tạo tệp hoặc thư mục ngay trong thư mục đang xem; Davish không bao giờ ghi đè file đã có.
+
+Ô tìm lọc thư mục đang xem. Chọn **Cả cây** hoặc **Nội dung** rồi nhấn Enter để tìm trên server: `find` theo tên trong cả cây thư mục, hoặc `grep` trong nội dung file (bỏ qua file nhị phân, `.git` và `node_modules`). Tối đa 500 kết quả, kèm đúng lệnh đã chạy; kết quả nội dung mở trong Editor đúng dòng, nút thư mục hiện file trong thư mục chứa nó. Chỗ không có quyền đọc chỉ được đếm, không thử lại bằng root; nút **Dừng** ngắt lần tìm lâu.
+
+![Tìm nội dung file trên server](assets/screenshots/files-search.jpg)
 
 ## Lối tắt trên màn hình chính
 
@@ -36,6 +46,10 @@ CodeMirror 6, tô màu cho nginx, YAML, JSON, shell, env và file cấu hình. L
 
 Theo dõi journal của dịch vụ, một file hoặc một container. Lọc, tạm dừng, tô dòng lỗi, bấm đường dẫn file để mở trong Editor đúng dòng. Log không đọc được thì được theo dõi lại bằng root qua `sudo`.
 
+Ô lọc chỉ lọc các dòng đang hiện. **Tìm trong toàn bộ** (hoặc Enter trong ô lọc) tìm trong cả lịch sử của nguồn log ngay trên server và trả 500 dòng khớp gần nhất: `grep` với file, `journalctl -g` với journal, `docker logs | grep` với container. Với file, bấm một kết quả để đọc các dòng xung quanh rồi lật trang trước, trang sau; `sed` chỉ đọc đúng trang đó, nên file log vài GB cũng không phải tải về.
+
+![Đọc quanh một dòng khớp trong file log](assets/screenshots/logs-search.jpg)
+
 <img src="assets/screenshots/logs.jpg" alt="Logs với đường dẫn file bấm được" width="100%">
 
 ## Monitor
@@ -50,9 +64,13 @@ Trên server Windows (OpenSSH, Windows PowerShell 5.1, không cài thêm gì) Mo
 
 Mọi server trong một cửa sổ, mở từ menu server, Launchpad hoặc Spotlight: đã kết nối chưa, CPU, RAM, ổ `/`, load, thời gian chạy và mạng, kèm số cảnh báo (service lỗi, container khởi động lại liên tục, ổ đầy…) và cảnh báo mới nhất. Kết nối hoặc chuyển sang server ngay trên thẻ của nó. Số liệu chỉ được thu khi cửa sổ đang mở, qua cùng phiên mà Monitor dùng.
 
-Nút **Bản đồ** trên thẻ server đã kết nối cho thấy request nào tới chương trình nào: mỗi site nginx là một chuỗi `tên miền → nginx :443 → :3000 → container (stack)`, site tĩnh kèm thư mục, và các cổng mở ra ngoài mà không site nào proxy tới. Cổng database mở ra Internet, upstream không ai nghe và chứng chỉ hết hạn trong 14 ngày được đưa lên đầu, mỗi cái có nút mở đúng app để sửa; mỗi mắt xích bấm được để mở app của nó (Nginx, Trình duyệt, Docker tại container đó). Bên dưới là những gì đang chạy (stack compose và chương trình đang nghe) và các ổ đĩa. Bản đồ chỉ đọc những gì Nginx, Cổng, Docker và Ổ đĩa vốn đã đọc. Từ 4 server trở lên, cửa sổ có ô lọc theo tên và xếp server có cảnh báo lên trước.
+Nút **Bản đồ** trên thẻ server đã kết nối cho thấy request nào tới chương trình nào: mỗi site nginx là một chuỗi `tên miền → nginx :443 → :3000 → container (stack)`, site tĩnh kèm thư mục, và các cổng mở ra ngoài mà không site nào proxy tới. Cổng database mở ra Internet, upstream không ai nghe và chứng chỉ hết hạn trong 14 ngày được đưa lên đầu, mỗi cái có nút mở đúng app để sửa; mỗi mắt xích bấm được để mở app của nó (Nginx, Trình duyệt, Docker tại container đó). Bên dưới là những gì đang chạy (stack compose và chương trình đang nghe) và các ổ đĩa. Bản đồ chỉ đọc những gì Nginx, Cổng, Docker và Ổ đĩa vốn đã đọc. Từ 4 server trở lên, cửa sổ có ô lọc theo tên và xếp server có cảnh báo lên trước. Dạng **Danh sách** hiện mỗi server một dòng gọn (số liệu, cảnh báo, bản đồ, kết nối hoặc ngắt kết nối, sửa), và cửa sổ tự thêm, nhập, sửa, ngắt kết nối server. `⌘⇧S` (Ctrl+Shift+S) mở nó từ bất cứ đâu.
 
 <img src="assets/screenshots/servers.jpg" alt="Mọi server trong một màn hình" width="100%">
+
+**Chạy lệnh…** chạy một lệnh trên các server bạn chọn, như `ssh server lệnh`: mỗi server một tab terminal, tối đa 4 server cùng lúc, các server còn lại chờ lượt. Server nào hỏi lại (mật khẩu sudo, `[Y/n]`) thì tab đó được đưa lên để bạn trả lời ngay trong tab; Davish không bao giờ tự nhập mật khẩu sudo khi chạy nhiều server. Hộp xác nhận hiện đủ tên server và đúng lệnh; từ 3 server trở lên, hoặc lệnh trông như xóa, dừng, ghi đè thứ gì đó, phải gõ số server mới chạy. Mỗi tab kết thúc với exit code; **Chạy lại** cho các server lỗi. **Cập nhật package** dựng lệnh cập nhật riêng cho từng server với `sudo -n`: server nào sudo đòi mật khẩu sẽ báo, kèm nút mở Terminal. Mỗi server có một dòng trong Nhật ký lệnh.
+
+<img src="assets/screenshots/multi-run.jpg" alt="Một lệnh trên 4 server, một tab đang chờ mật khẩu sudo" width="100%">
 
 ## Services
 
@@ -177,9 +195,13 @@ Ai đăng nhập qua SSH và ai đang dò. Phía trên là số liệu 7 ngày (
 
 <img src="assets/screenshots/keys.jpg" alt="authorized_keys của server" width="100%">
 
-## ~/.ssh/config và ProxyJump
+## ~/.ssh/config, Ansible và ProxyJump
 
 Nhập server từ `~/.ssh/config` một lần, kèm key và `ProxyJump`; Davish chỉ đọc file. Server sau bastion kết nối qua nó, mỗi bậc kiểm tra host key riêng, cả chuỗi tự kết nối lại.
+
+Đã dùng Ansible? Tab **Ansible inventory** đọc inventory dạng INI (tự tìm `/etc/ansible/hosts`, `$ANSIBLE_INVENTORY` hoặc file khai báo trong `~/.ansible.cfg`, hoặc bạn tự chọn file): `ansible_host`, `ansible_user`, `ansible_port`, file key và `ProxyJump` trong `ansible_ssh_common_args`, có tính biến của group và dải như `web[01:03]`. Chọn từng host hoặc cả group một lần; group không được lưu. Mật khẩu trong inventory không bao giờ được đọc; host dùng template, Vault hay kết nối không phải SSH được liệt kê là bỏ qua, kèm lý do. Inventory YAML chưa đọc được.
+
+![Nhập server từ Ansible inventory](assets/screenshots/import-ansible.jpg)
 
 ## Spotlight & Launchpad
 
@@ -215,6 +237,8 @@ Davish tìm bản mới trên GitHub lúc mở và mỗi 6 giờ (tắt được
 ## Sáng và tối
 
 Davish có giao diện sáng và tối. Mặc định theo máy và tự đổi khi hệ điều hành đổi; muốn giữ một kiểu thì chọn Sáng hoặc Tối trong Cài đặt → Giao diện → Chế độ. Terminal và Logs vẫn tối như cũ, màu hình nền đã chọn được giữ và dịu đi cho nền tối.
+
+Cài đặt → Hiệu năng chọn mức Davish dành cho hiệu ứng của chính nó: **Đẹp** (kính mờ), **Cân bằng** (bỏ độ mờ), **Nhẹ** (nền đặc, bóng ngắn, hình nền phẳng, không chuyển động), hoặc **Tự động**: giữ giao diện đầy đủ và gợi ý Nhẹ khi máy vẽ chậm. **Nâng cao** chỉnh từng hiệu ứng riêng. Đóng góp bởi @tian2992.
 
 Dock mặc định nằm dưới; Cài đặt → Dock cho chuyển sang cạnh trái, phải hoặc trên (cửa sổ chừa chỗ cho Dock, thu nhỏ cửa sổ thì nó co vào icon của mình) và bỏ lớp kính để chỉ còn các icon trên hình nền.
 

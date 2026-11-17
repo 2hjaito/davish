@@ -3,7 +3,17 @@
   import { tick, untrack } from 'svelte'
 
   import { toUserError } from '../../lib/api/errors'
-  import { type Entry, filesHome, filesList } from '../../lib/api/files'
+  import {
+    type Entry,
+    filesCancelSearch,
+    filesHome,
+    filesList,
+    filesSearch,
+    filesStat,
+    type SearchHit,
+    type SearchMode,
+    type SearchResult,
+  } from '../../lib/api/files'
   import { hasRuntime } from '../../lib/api/runtime'
   import {
     registerDropTarget,
@@ -52,7 +62,9 @@
     within,
   } from './listing'
   import { cameFrom, type FolderView, lastDir, rememberDir } from './memory'
-  import { mockHome, mockList } from './mockFs'
+  import { mockHome, mockIsDir, mockList } from './mockFs'
+  import { contentAllowed, mockSearch, modeOf, type Scope, SCOPES, searchToken } from './search'
+  import SearchResults from './SearchResults.svelte'
   import { type DropTarget, dropTargetAt, homes } from './remotes.svelte'
   import UploadConflictDialog, { type Answer } from './UploadConflictDialog.svelte'
 
@@ -76,6 +88,20 @@
   let loading = $state(false)
   let error = $state('')
   let query = $state('')
+  /** Where the search box looks; tree and content search the server on Enter. */
+  let scope = $state<Scope>('here')
+  let matchCase = $state(false)
+  /** The server search on screen, in place of the listing. */
+  let found = $state<{
+    from: string
+    query: string
+    mode: SearchMode
+    matchCase: boolean
+    result: SearchResult | null
+    error: string
+    token: string
+  } | null>(null)
+  const searching = $derived(found !== null && found.result === null && found.error === '')
   let selected = $state<string | null>(null)
   let back = $state<string[]>([])
   let forward = $state<string[]>([])
@@ -101,7 +127,9 @@
 
   const server = $derived(servers.list.find((s) => s.id === win.serverID))
   const connected = $derived(!hasRuntime || server?.state === 'connected')
-  const entries = $derived(filterEntries(sortEntries(listing, order), query))
+  const entries = $derived(
+    filterEntries(sortEntries(listing, order), scope === 'here' ? query : ''),
+  )
   const title = $derived(cwd === null ? (server?.name ?? '') : baseName(cwd))
   const busy = $derived(summarize(transfers.list, win.serverID))
   const canTransfer = $derived(hasRuntime && connected && cwd !== null)
@@ -219,6 +247,7 @@
       const view = arriving ? views.get(path) : undefined
       if (arriving) {
         query = ''
+        endSearch()
         selected = (from && cameFrom(from, path)) ?? view?.selected ?? null
       }
       if (selected !== null && !entries.some((e) => e.path === selected)) selected = null
@@ -420,6 +449,92 @@
     }
   }
 
+  async function runSearch() {
+    const mode = modeOf(scope)
+    const q = query.trim()
+    if (!mode || !q || cwd === null || !connected) return
+    endSearch()
+    const from = cwd
+    const token = searchToken()
+    const here = { from, query: q, mode, matchCase, result: null, error: '', token }
+    found = here
+    if (mode === 'content' && !contentAllowed(from)) {
+      found = { ...here, error: t.files.searchContentRefused }
+      return
+    }
+    try {
+      const result = hasRuntime
+        ? await filesSearch(win.serverID, { dir: from, query: q, mode, matchCase }, token)
+        : mockSearch(from, q, mode, matchCase)
+      if (found?.token === token) found = { ...found, result }
+    } catch (e) {
+      if (found?.token === token) found = { ...found, error: toUserError(e).message }
+    }
+  }
+
+  /** Stops a running server search and drops its results. */
+  function endSearch() {
+    if (found && found.result === null && hasRuntime) void filesCancelSearch(found.token)
+    found = null
+  }
+
+  function stopSearch() {
+    if (!found || found.result !== null) return
+    if (hasRuntime) void filesCancelSearch(found.token)
+    found = { ...found, error: t.files.searchStopped }
+  }
+
+  function setScope(s: Scope) {
+    scope = s
+    if (s === 'here') endSearch()
+    else if (found) void runSearch()
+    search?.focus()
+  }
+
+  async function openHit(hit: SearchHit) {
+    if (found?.mode === 'content') {
+      openFileInEditor(win.serverID, hit.path, hit.line)
+      return
+    }
+    try {
+      const dir = hasRuntime ? (await filesStat(win.serverID, hit.path)).dir : mockIsDir(hit.path)
+      if (dir) await go(hit.path)
+      else openFileInEditor(win.serverID, hit.path)
+    } catch (e) {
+      notifications.add({
+        id: `search-open-${win.serverID}-${hit.path}`,
+        level: 'error',
+        title: t.files.searchOpenFailed,
+        body: toUserError(e).message,
+        serverID: win.serverID,
+        at: Date.now(),
+      })
+    }
+  }
+
+  /** Leaves the results for the hit's folder, with the hit selected. */
+  async function revealHit(hit: SearchHit) {
+    const dir = parentPath(hit.path)
+    if (dir === cwd) {
+      query = ''
+      endSearch()
+    } else await go(dir)
+    if (!listing.some((e) => e.path === hit.path)) return
+    selected = hit.path
+    await tick()
+    list?.restore(null, hit.path)
+  }
+
+  function onSearchKey(e: KeyboardEvent) {
+    if (e.key === 'Escape') {
+      query = ''
+      endSearch()
+    } else if (e.key === 'Enter' && scope !== 'here') {
+      e.preventDefault()
+      void runSearch()
+    }
+  }
+
   function openEntry(e: Entry) {
     if (e.dir) void go(e.path)
     else openFileInEditor(win.serverID, e.path)
@@ -602,10 +717,35 @@
           aria-label={t.files.searchLabel}
           bind:value={query}
           bind:this={search}
-          onkeydown={(e) => e.key === 'Escape' && (query = '')}
+          oninput={() => query.trim() === '' && endSearch()}
+          onkeydown={onSearchKey}
         />
       </label>
     </div>
+
+    {#if connected && cwd !== null && (query.trim() !== '' || found)}
+      <div class="scopes" role="group" aria-label={t.files.searchScope}>
+        {#each SCOPES as s (s)}
+          <button class="scope" class:active={scope === s} onclick={() => setScope(s)}
+            >{t.files.scopes[s]}</button
+          >
+        {/each}
+        <button
+          class="scope case"
+          class:active={matchCase}
+          aria-pressed={matchCase}
+          title={t.files.searchMatchCase}
+          aria-label={t.files.searchMatchCase}
+          onclick={() => {
+            matchCase = !matchCase
+            if (found) void runSearch()
+          }}>Aa</button
+        >
+        {#if scope !== 'here' && !found}
+          <span class="hint">{t.files.searchEnter}</span>
+        {/if}
+      </div>
+    {/if}
 
     {#if error}
       <div class="error" role="alert">
@@ -619,6 +759,19 @@
       <Empty icon="server" title={t.files.offline} hint={t.files.offlineHint} />
     {:else if cwd === null}
       {#if !error}<Empty icon="folder" title={t.files.loading} />{/if}
+    {:else if found}
+      <SearchResults
+        from={found.from}
+        query={found.query}
+        mode={found.mode}
+        matchCase={found.matchCase}
+        result={found.result}
+        running={searching}
+        error={found.error}
+        onopen={(hit) => void openHit(hit)}
+        onreveal={(hit) => void revealHit(hit)}
+        onstop={stopSearch}
+      />
     {:else if entries.length === 0}
       <Empty icon="folder" title={query ? t.files.noMatch : t.files.empty} />
     {:else}
@@ -877,6 +1030,45 @@
     padding: 5px 9px;
     font-size: var(--text-sm);
     color: var(--fg-muted);
+  }
+
+  .scopes {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 14px 6px;
+    border-bottom: 1px solid var(--divider-soft);
+    font-size: var(--text-xs);
+  }
+
+  .scope {
+    border: 0;
+    border-radius: var(--control-radius);
+    padding: 3px 10px;
+    background: transparent;
+    color: var(--fg-muted);
+    font-size: var(--text-xs);
+    font-weight: 500;
+  }
+
+  .scope:hover {
+    background: var(--fill-soft);
+  }
+
+  .scope.active {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .scope.case {
+    margin-left: 4px;
+    font-family: var(--font-mono);
+  }
+
+  .scopes .hint {
+    margin-left: auto;
+    color: var(--fg-subtle);
   }
 
   .search input {

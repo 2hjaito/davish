@@ -303,38 +303,54 @@
   }
 }
 
-/* Reduced glass: Settings toggle, or the OS preference. */
-:root[data-reduce-glass='true'] {
-  --glass-bg: rgba(246, 247, 250, 0.96);
-  --glass-bg-strong: rgba(246, 247, 250, 0.96);
-  --glass-bg-menu: rgba(246, 247, 250, 0.96);
-  --glass-dark-bg: rgba(24, 26, 32, 0.97);
+/*
+ * Performance knobs, set by App.svelte from the preset. They are separate so
+ * Balanced can be opaque without the short shadow Light uses. A 96% fill is
+ * still blended over the wallpaper on every frame, and a 40px blur is
+ * rasterized again whenever the window's contents paint.
+ */
+:root[data-perf-opaque='true'] {
+  --glass-bg: #f6f7fa;
+  --glass-bg-strong: #f6f7fa;
+  --glass-bg-menu: #f6f7fa;
+  --glass-dark-bg: #181a20;
+  --content-bg: #ffffff;
+}
+
+:root[data-theme='dark'][data-perf-opaque='true'] {
+  --glass-bg: #1e2027;
+  --glass-bg-strong: #1e2027;
+  --glass-bg-menu: #24262e;
+  --glass-dark-bg: #121318;
+  --content-bg: #1e2027;
+}
+
+:root[data-perf-shadow='short'] {
+  --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 4px 12px rgba(20, 30, 60, 0.18);
+  --glass-shadow-inactive: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 2px 6px rgba(20, 30, 60, 0.12);
+  --glass-dark-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 4px 12px rgba(0, 0, 0, 0.28);
+  --glass-dark-shadow-inactive:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+:root[data-theme='dark'][data-perf-shadow='short'] {
+  --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 4px 12px rgba(0, 0, 0, 0.4);
+  --glass-shadow-inactive: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 6px rgba(0, 0, 0, 0.28);
+  --glass-dark-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 4px 12px rgba(0, 0, 0, 0.45);
+  --glass-dark-shadow-inactive:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-perf-blur='false'] {
   --glass-blur: none;
   --glass-dark-blur: none;
 }
 
-:root[data-theme='dark'][data-reduce-glass='true'] {
-  --glass-bg: rgba(30, 32, 39, 0.97);
-  --glass-bg-strong: rgba(30, 32, 39, 0.97);
-  --glass-bg-menu: rgba(36, 38, 46, 0.97);
-  --glass-dark-bg: rgba(18, 19, 24, 0.97);
-}
-
+/* Before the preset is applied, honor the OS request to skip the blur. */
 @media (prefers-reduced-transparency: reduce) {
-  :root:not([data-reduce-glass='false']) {
-    --glass-bg: rgba(246, 247, 250, 0.96);
-    --glass-bg-strong: rgba(246, 247, 250, 0.96);
-    --glass-bg-menu: rgba(246, 247, 250, 0.96);
-    --glass-dark-bg: rgba(24, 26, 32, 0.97);
+  :root:not([data-perf-blur='true']) {
     --glass-blur: none;
     --glass-dark-blur: none;
-  }
-
-  :root[data-theme='dark']:not([data-reduce-glass='false']) {
-    --glass-bg: rgba(30, 32, 39, 0.97);
-    --glass-bg-strong: rgba(30, 32, 39, 0.97);
-    --glass-bg-menu: rgba(36, 38, 46, 0.97);
-    --glass-dark-bg: rgba(18, 19, 24, 0.97);
   }
 }
 

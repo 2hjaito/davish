@@ -144,6 +144,15 @@ class Servers {
     }
   }
 
+  /** Imports Ansible inventory hosts and returns the servers added; throws a UserError. */
+  async importInventory(path: string, names: string[]): Promise<Server[]> {
+    try {
+      return await api.importInventoryHosts(path, names)
+    } finally {
+      await this.reload()
+    }
+  }
+
   async remove(id: string) {
     await api.deleteServer(id)
     shortcuts.forgetServer(id)
@@ -171,6 +180,11 @@ class Servers {
 
   async disconnect(id: string) {
     if (hasRuntime) await api.disconnect(id)
+    else {
+      // The browser preview has no conn:status to report it.
+      const s = this.list.find((x) => x.id === id)
+      if (s) s.state = 'disconnected'
+    }
   }
 
   /** Trusts the prompted host key and connects. */

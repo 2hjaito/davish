@@ -16,9 +16,19 @@ Keep the commands you type often, each with a name, for one server or every serv
 
 <img src="assets/screenshots/en/snippets.jpg" alt="Saved commands" width="100%">
 
+## Command log
+
+Every command Davish ran on a server, with its exit code and how long it took; any line can be typed into Terminal again or saved as a command. **Changes only** (on by default) hides the reads and polling, leaving what an action changed. **Export script…** turns the ticked commands into a bash script that runs them again, each over its own `ssh -t` so sudo and other prompts can ask: one block per server, the time and app above each line, Davish's sudo written as a plain `sudo` (never a password), and content sent on stdin, such as a file written as root, left as a comment because it is not recorded. Failed commands stay out unless you include them. Copy it or save it as an executable file; nothing runs from the dialog. What went through SFTP (saving, renaming, uploading) is not in the log.
+
+<img src="assets/screenshots/en/audit-export.jpg" alt="The Command log exported as a script" width="100%">
+
 ## Files
 
 Finder-style browser over SFTP: upload, download, drag and drop from your OS, rename, delete, compress, and copy between servers through your machine. Hold a file and drag a little: a ring of actions opens around the pointer (open in Editor or Terminal, rename, delete, compress, copy the path, add to desktop); drop on a slice to pick it, in the middle or with Esc to cancel. Right-click empty space to create a file or folder in the folder on screen; Davish never overwrites an existing file.
+
+The search box filters the folder on screen. Pick **Subfolders** or **Contents** and press Enter to search the server instead: `find` by name across the whole tree, or `grep` through the files for a line (binary files, `.git` and `node_modules` are skipped). Up to 500 results arrive in a few seconds with the exact command that ran; a content result opens in the Editor at its line, and the folder button shows it in its folder. Places the account cannot read are counted, not retried as root, and **Stop** ends a long search.
+
+![Searching file contents on the server](assets/screenshots/en/files-search.jpg)
 
 ## Desktop shortcuts
 
@@ -36,6 +46,10 @@ CodeMirror 6 with highlighting for nginx, YAML, JSON, shell, env and config file
 
 Follow a unit's journal, a file or a container. Filter, pause, highlight errors, and click a file path to open it in the Editor at that line. A log you may not read is followed again as root through `sudo`.
 
+The filter only sees the lines on screen. **Search all** (or Enter in the filter) searches the source's whole history on the server and returns the latest 500 matching lines: `grep` for a file, `journalctl -g` for the journal, `docker logs | grep` for a container. For a file, click a result to read the lines around it, then page earlier or later; `sed` reads just that page, so a log of several GB is never downloaded.
+
+![Reading around a match in a log file](assets/screenshots/en/logs-search.jpg)
+
 <img src="assets/screenshots/logs.jpg" alt="Logs with clickable file paths" width="100%">
 
 ## Monitor
@@ -50,9 +64,13 @@ On a Windows server (OpenSSH, Windows PowerShell 5.1, nothing installed) Monitor
 
 Every server in one window, from the server menu, Launchpad or Spotlight: connected or not, CPU, memory, the `/` disk, load, uptime and network, with its alerts (a failed service, a restart loop, a full disk…) counted and the latest one shown. Connect a server or switch to it from its card. Readings are collected only while the window is open, over the same session Monitor uses.
 
-**Map** on a connected server's card shows which requests reach which program: each nginx site as a chain `domain → nginx :443 → :3000 → container (stack)`, static sites with their folder, and ports open to the outside that no site proxies to. A database port open to the Internet, an upstream nobody listens on and a certificate expiring within 14 days are flagged at the top, each with a button to the app that fixes it; every link opens its app (Nginx, the Browser, Docker at that container). Below, what runs (compose stacks and listening programs) and the disks. It only reads what Nginx, Ports, Docker and Disk already read. With four servers or more, the window filters by name and puts servers with alerts first.
+**Map** on a connected server's card shows which requests reach which program: each nginx site as a chain `domain → nginx :443 → :3000 → container (stack)`, static sites with their folder, and ports open to the outside that no site proxies to. A database port open to the Internet, an upstream nobody listens on and a certificate expiring within 14 days are flagged at the top, each with a button to the app that fixes it; every link opens its app (Nginx, the Browser, Docker at that container). Below, what runs (compose stacks and listening programs) and the disks. It only reads what Nginx, Ports, Docker and Disk already read. With four servers or more, the window filters by name and puts servers with alerts first. **List** shows every server as one compact row (readings, alerts, map, connect or disconnect, edit), and the window adds, imports, edits and disconnects servers itself. `⌘⇧S` (Ctrl+Shift+S) opens it from anywhere.
 
 <img src="assets/screenshots/en/servers.jpg" alt="Every server at a glance" width="100%">
+
+**Run a command…** runs one command on the servers you tick, as `ssh server command` would: each server in its own terminal tab, at most four at a time, the rest waiting their turn. When a server asks something (a sudo password, `[Y/n]`), its tab comes forward and you answer there; Davish never types a sudo password for a run. The confirm dialog shows every server and the exact command; from three servers, or for a command that looks like it removes, stops or overwrites something, you type the number of servers to go ahead. Each tab ends with its exit code; **Run again** retries the ones that failed. **Update packages** prepares each server's own update with `sudo -n`: a server whose sudo wants a password says so, with a button to Terminal. Each server gets one line in the Command log.
+
+<img src="assets/screenshots/en/multi-run.jpg" alt="One command on four servers, one tab waiting for a sudo password" width="100%">
 
 ## Services
 
@@ -177,9 +195,13 @@ The server's `authorized_keys` with the key Davish logs in with marked; add or r
 
 <img src="assets/screenshots/keys.jpg" alt="The server's authorized_keys" width="100%">
 
-## ~/.ssh/config and ProxyJump
+## ~/.ssh/config, Ansible and ProxyJump
 
 Import hosts from `~/.ssh/config` in one go, keys and `ProxyJump` included; Davish only reads the file. Servers behind a bastion connect through it, each hop with its own host key check, and the whole chain reconnects on its own.
+
+Already use Ansible? The **Ansible inventory** tab reads an INI inventory (it finds `/etc/ansible/hosts`, `$ANSIBLE_INVENTORY` or the one in `~/.ansible.cfg`, or you choose the file): `ansible_host`, `ansible_user`, `ansible_port`, the key file and a `ProxyJump` in `ansible_ssh_common_args`, with group variables and ranges such as `web[01:03]`. Pick hosts one by one or a whole group at a time; groups are not saved. Passwords in the inventory are never read, and hosts that use templates, Vault or a non-SSH connection are listed as skipped, with the reason. YAML inventories are not read yet.
+
+![Importing servers from an Ansible inventory](assets/screenshots/en/import-ansible.jpg)
 
 ## Spotlight & Launchpad
 
@@ -215,6 +237,8 @@ Davish looks for a new release on GitHub when it starts and every six hours (you
 ## Light and dark
 
 Davish comes in a light and a dark look. By default it follows your computer and switches when the system does; pick Light or Dark in Settings → Appearance → Theme to keep one. Terminal and Logs stay dark either way, and the wallpaper color you chose carries over, dimmed for the night.
+
+Settings → Performance picks how much Davish spends on its own look: **Beautiful** (frosted glass), **Balanced** (no blur), **Light** (solid fills, short shadow, flat wallpaper, no motion), or **Auto**, which keeps the full look and suggests Light when this computer renders slowly. **Advanced** sets each effect on its own. Contributed by @tian2992.
 
 The Dock sits at the bottom by default; Settings → Dock moves it to the left, right or top edge (windows keep clear of it, minimizing shrinks a window into its tile) and can drop its glass so only the icons float over the wallpaper.
 

@@ -299,6 +299,9 @@ func (k *Keeper) Run(ctx context.Context, serverID, app, line string, stdin []by
 	in := withPassword(pw, stdin)
 	defer wipe(in)
 	wipe(pw)
+	if len(stdin) == 0 {
+		ctx = audit.PasswordStdin(ctx)
+	}
 	res, err = k.run.RunInput(ctx, serverID, app, passwordLine(line), in)
 	if err != nil {
 		return res, err
@@ -385,7 +388,7 @@ func (k *Keeper) SetPassword(ctx context.Context, serverID string, pw []byte) er
 	}
 	in := withPassword(pw, nil)
 	defer wipe(in)
-	res, err := k.run.RunInput(ctx, serverID, "sudo", sudoLine("-S", "-k", "-p", "", "-v"), in)
+	res, err := k.run.RunInput(audit.PasswordStdin(ctx), serverID, "sudo", sudoLine("-S", "-k", "-p", "", "-v"), in)
 	if err != nil {
 		return err
 	}

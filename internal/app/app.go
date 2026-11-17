@@ -22,6 +22,7 @@ import (
 	"davish/internal/diag"
 	"davish/internal/disk"
 	"davish/internal/docker"
+	"davish/internal/fleet"
 	"davish/internal/fs"
 	"davish/internal/git"
 	"davish/internal/lock"
@@ -62,11 +63,13 @@ type App struct {
 	sudo      *sudo.Keeper
 	docker    *docker.Service
 	logs      *logs.Service
+	logSearch *logs.Searcher
 	cron      *cron.Service
 	nginx     *nginx.Service
 	lock      *lock.Service
 	keys      *sshkeys.Service
 	packages  *packages.Service
+	fleet     *fleet.Service
 	git       *git.Service
 	databases *database.Service
 	ports     *ports.Lister
@@ -128,6 +131,7 @@ func New(version string) (*App, error) {
 	a.nginx.UseRoot(a.sudo)
 	a.keys = sshkeys.New(a.conns, runner)
 	a.packages = packages.New(runner, emitter{a})
+	a.fleet = fleet.New(a.terms, a.audit, emitter{a}, log)
 	a.git = git.New(runner)
 	a.shortcuts = shortcut.New(a.files, a.audit)
 	a.databases = database.New(runner)
@@ -146,6 +150,7 @@ func New(version string) (*App, error) {
 	a.browser = ports.NewBrowser(a.conns, log)
 	a.logs = logs.New(a.conns, a.audit, emitter{a}, log)
 	a.logs.UseRoot(a.sudo)
+	a.logSearch = logs.NewSearcher(runner)
 	if a.transfers, err = transfer.New(a.conns, emitter{a}, log, transfer.Options{}); err != nil {
 		return nil, err
 	}
@@ -165,6 +170,7 @@ func (a *App) Shutdown(_ context.Context) {
 	a.sysmon.Close()
 	a.logs.Close()
 	a.transfers.Close()
+	a.fleet.StopAll()
 	a.terms.CloseAll()
 	a.tunnels.Close()
 	a.browser.Close()
@@ -199,3 +205,8 @@ func (e emitter) Emit(name string, payload any) {
 		runtime.EventsEmit(*ctx, name, payload)
 	}
 }
+
+// change is the context for an action binding: the commands it runs are
+// marked as changing the server, for the Command log's script export
+// (docs/adr/0022).
+func (a *App) change() context.Context { return audit.Changing(a.ctx) }

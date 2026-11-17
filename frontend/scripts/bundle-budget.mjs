@@ -8,8 +8,8 @@ import process from 'node:process'
 import { gzipSync } from 'node:zlib'
 
 const BUDGET = {
-  initialKB: 110, // gzip; 96 when set
-  totalKB: 670, // gzip; 506 when set, 580 by v1.2; v1.3 added windows loaded on first use; the Docker cards' tech and framework logos (~28) load with Docker
+  initialKB: 112, // gzip; 96 when set; the performance presets (#176) are read at start, before the first paint (~1.8)
+  totalKB: 690, // gzip; 506 when set, 580 by v1.2; v1.3 added windows loaded on first use; the Docker cards' tech and framework logos (~28) load with Docker; M47 server search in Files and Logs (~4); M49 run on several servers (~6), with room for M48 Ansible import (~2); performance presets (~4)
 }
 
 const dist = new URL('../dist/', import.meta.url)

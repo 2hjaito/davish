@@ -31,7 +31,7 @@ func (a *App) FilesWrite(serverID, path string, data []byte) (fs.Entry, error) {
 	if err := a.lock.Check(); err != nil {
 		return fs.Entry{}, err
 	}
-	return a.files.Write(a.ctx, serverID, path, data)
+	return a.files.Write(a.change(), serverID, path, data)
 }
 
 // FilesMkdir creates a directory.
@@ -39,7 +39,7 @@ func (a *App) FilesMkdir(serverID, path string) error {
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.files.Mkdir(a.ctx, serverID, path)
+	return a.files.Mkdir(a.change(), serverID, path)
 }
 
 // FilesCreate makes an empty file, never replacing one.
@@ -47,7 +47,7 @@ func (a *App) FilesCreate(serverID, path string) error {
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.files.Create(a.ctx, serverID, path)
+	return a.files.Create(a.change(), serverID, path)
 }
 
 // FilesRename moves from to to without replacing anything.
@@ -55,7 +55,7 @@ func (a *App) FilesRename(serverID, from, to string) error {
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.files.Rename(a.ctx, serverID, from, to)
+	return a.files.Rename(a.change(), serverID, from, to)
 }
 
 // FilesPlanRemove returns the exact command a delete would run, for the
@@ -69,7 +69,7 @@ func (a *App) FilesRemove(serverID, path, command string) error {
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.files.Remove(a.ctx, serverID, path, command)
+	return a.files.Remove(a.change(), serverID, path, command)
 }
 
 // FilesPlanCompress returns the archive name and the exact command that
@@ -83,7 +83,7 @@ func (a *App) FilesCompress(serverID, path, format, command string) (fs.Compress
 	if err := a.lock.Check(); err != nil {
 		return fs.CompressPlan{}, err
 	}
-	return a.files.Compress(a.ctx, serverID, path, format, command)
+	return a.files.Compress(a.change(), serverID, path, format, command)
 }
 
 // FilesSave writes a file from the Editor atomically, keeping a backup of
@@ -92,7 +92,7 @@ func (a *App) FilesSave(serverID, path string, data []byte, opts fs.SaveOptions)
 	if err := a.lock.Check(); err != nil {
 		return fs.SaveResult{}, err
 	}
-	return a.files.Save(a.ctx, serverID, path, data, opts)
+	return a.files.Save(a.change(), serverID, path, data, opts)
 }
 
 // FilesPlanSaveAsRoot works out the command that saves path as root
@@ -106,11 +106,25 @@ func (a *App) FilesSaveAsRoot(serverID, path string, data []byte, opts fs.SaveOp
 	if err := a.lock.Check(); err != nil {
 		return fs.SaveResult{}, err
 	}
-	return a.files.SaveAsRoot(a.ctx, serverID, path, data, opts, plan)
+	return a.files.SaveAsRoot(a.change(), serverID, path, data, opts, plan)
 }
 
 // FilesAccess reports whether the Editor can save over path; when not, it
 // opens the file read-only and offers the sudoedit command.
 func (a *App) FilesAccess(serverID, path string) (fs.Access, error) {
 	return a.files.Access(a.ctx, serverID, path)
+}
+
+// FilesSearch looks under q.Dir by name or content on the server; token
+// names it for FilesCancelSearch.
+func (a *App) FilesSearch(serverID string, q fs.SearchQuery, token string) (fs.SearchResult, error) {
+	if err := a.lock.Check(); err != nil {
+		return fs.SearchResult{}, err
+	}
+	return a.files.Search(a.ctx, serverID, q, token)
+}
+
+// FilesCancelSearch stops a running FilesSearch.
+func (a *App) FilesCancelSearch(token string) {
+	a.files.CancelSearch(token)
 }

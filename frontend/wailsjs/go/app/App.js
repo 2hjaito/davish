@@ -6,8 +6,28 @@ export function AcceptHostKey(arg1, arg2) {
   return window['go']['app']['App']['AcceptHostKey'](arg1, arg2);
 }
 
+export function AnsibleDefaultInventory() {
+  return window['go']['app']['App']['AnsibleDefaultInventory']();
+}
+
+export function AnsibleInventoryHosts(arg1) {
+  return window['go']['app']['App']['AnsibleInventoryHosts'](arg1);
+}
+
+export function AnsiblePickInventory(arg1) {
+  return window['go']['app']['App']['AnsiblePickInventory'](arg1);
+}
+
 export function AuditEntries() {
   return window['go']['app']['App']['AuditEntries']();
+}
+
+export function AuditSaveScript(arg1, arg2, arg3) {
+  return window['go']['app']['App']['AuditSaveScript'](arg1, arg2, arg3);
+}
+
+export function AuditScript(arg1, arg2) {
+  return window['go']['app']['App']['AuditScript'](arg1, arg2);
 }
 
 export function BrowserOpen(arg1, arg2) {
@@ -262,6 +282,10 @@ export function FilesAccess(arg1, arg2) {
   return window['go']['app']['App']['FilesAccess'](arg1, arg2);
 }
 
+export function FilesCancelSearch(arg1) {
+  return window['go']['app']['App']['FilesCancelSearch'](arg1);
+}
+
 export function FilesCompress(arg1, arg2, arg3, arg4) {
   return window['go']['app']['App']['FilesCompress'](arg1, arg2, arg3, arg4);
 }
@@ -314,12 +338,32 @@ export function FilesSaveAsRoot(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['app']['App']['FilesSaveAsRoot'](arg1, arg2, arg3, arg4, arg5);
 }
 
+export function FilesSearch(arg1, arg2, arg3) {
+  return window['go']['app']['App']['FilesSearch'](arg1, arg2, arg3);
+}
+
 export function FilesStat(arg1, arg2) {
   return window['go']['app']['App']['FilesStat'](arg1, arg2);
 }
 
 export function FilesWrite(arg1, arg2, arg3) {
   return window['go']['app']['App']['FilesWrite'](arg1, arg2, arg3);
+}
+
+export function FleetCheck(arg1, arg2) {
+  return window['go']['app']['App']['FleetCheck'](arg1, arg2);
+}
+
+export function FleetPlanUpdate(arg1) {
+  return window['go']['app']['App']['FleetPlanUpdate'](arg1);
+}
+
+export function FleetStart(arg1, arg2, arg3) {
+  return window['go']['app']['App']['FleetStart'](arg1, arg2, arg3);
+}
+
+export function FleetStop(arg1) {
+  return window['go']['app']['App']['FleetStop'](arg1);
 }
 
 export function GitBranches(arg1, arg2) {
@@ -368,6 +412,10 @@ export function GitRun(arg1, arg2, arg3, arg4, arg5) {
 
 export function GitStatus(arg1, arg2) {
   return window['go']['app']['App']['GitStatus'](arg1, arg2);
+}
+
+export function ImportAnsibleHosts(arg1, arg2) {
+  return window['go']['app']['App']['ImportAnsibleHosts'](arg1, arg2);
 }
 
 export function ImportSSHHosts(arg1) {
@@ -444,6 +492,18 @@ export function LockSetPassword(arg1, arg2) {
 
 export function LockState() {
   return window['go']['app']['App']['LockState']();
+}
+
+export function LogsAround(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['LogsAround'](arg1, arg2, arg3, arg4);
+}
+
+export function LogsCancelSearch(arg1) {
+  return window['go']['app']['App']['LogsCancelSearch'](arg1);
+}
+
+export function LogsSearch(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['LogsSearch'](arg1, arg2, arg3, arg4);
 }
 
 export function LogsStart(arg1, arg2) {

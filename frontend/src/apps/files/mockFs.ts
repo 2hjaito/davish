@@ -122,3 +122,14 @@ export function mockRead(path: string): string {
   if (path.endsWith('.bashrc')) return BASHRC
   return `# ${path}\n# ${t.demo.fileBody}\n`
 }
+
+/** Every path under dir in the demo tree, depth first. */
+export function mockWalk(dir: string): { path: string; dir: boolean }[] {
+  const out: { path: string; dir: boolean }[] = []
+  for (const [name, n] of Object.entries(tree[dir] ?? {})) {
+    const path = joinPath(dir, name)
+    out.push({ path, dir: n.dir })
+    if (n.dir) out.push(...mockWalk(path))
+  }
+  return out
+}
