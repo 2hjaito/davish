@@ -19,7 +19,11 @@
   import Icon from '../../lib/ui/Icon.svelte'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import { STAT_IDS, type StatId } from '../../lib/shell/statIds'
+  import { relaunch } from '../../lib/api/update'
   import { hasRuntime } from '../../lib/api/runtime'
+  import { NAMED_PRESETS, type NamedPreset } from '../../lib/perf'
+  import { isLinux } from '../../lib/shell/platform'
+  import { perfCheck } from '../../lib/shell/perfCheck.svelte'
   import { updates } from '../../lib/stores/updates.svelte'
   import type { AppProps } from '../types'
 
@@ -31,6 +35,7 @@
 
   // A language change needs a restart, so it waits for a confirming click.
   let pickedLang = $state<Lang>(lang)
+  let advanced = $state(false)
 
   const fonts = Object.keys(MONO_FAMILIES) as MonoFont[]
   const dockSizes = Object.keys(DOCK_SIZES) as DockSize[]
@@ -131,33 +136,156 @@
     </div>
   {/if}
 
-  <label class="row">
-    <span>
-      <strong>{t.settings.reduceGlass}</strong>
-      <small>{t.settings.reduceGlassHint}</small>
-    </span>
-    <input
-      type="checkbox"
-      class="switch"
-      role="switch"
-      checked={settings.reduceGlass}
-      onchange={(e) => settings.set('reduceGlass', e.currentTarget.checked)}
-    />
-  </label>
+  <h2>{t.settings.performance}</h2>
 
-  <label class="row">
+  <div class="row stack">
     <span>
-      <strong>{t.settings.reduceMotion}</strong>
-      <small>{t.settings.reduceMotionHint}</small>
+      <strong>{t.settings.perfPreset}</strong>
+      <small>{t.settings.perfPresetHint}</small>
     </span>
-    <input
-      type="checkbox"
-      class="switch"
-      role="switch"
-      checked={settings.reduceMotion}
-      onchange={(e) => settings.set('reduceMotion', e.currentTarget.checked)}
-    />
-  </label>
+    <div class="preset-line">
+      <div class="segmented wrap" role="radiogroup" aria-label={t.settings.perfPreset}>
+        {#each NAMED_PRESETS as preset (preset)}
+          <button
+            role="radio"
+            aria-checked={settings.perfPreset === preset}
+            onclick={() => settings.usePreset(preset as NamedPreset)}
+            >{t.settings.perfPresets[preset]}</button
+          >
+        {/each}
+      </div>
+      <button
+        type="button"
+        class="btn"
+        disabled={perfCheck.running}
+        onclick={() => void perfCheck.start(true)}
+      >
+        {perfCheck.running ? t.settings.perfChecking : t.settings.perfCheck}
+      </button>
+    </div>
+    {#if settings.perfPreset === 'custom'}
+      <small>{t.settings.perfCustom}</small>
+    {/if}
+    {#if perfCheck.last === 'slow'}
+      <small>{t.settings.perfSlow}</small>
+    {:else if perfCheck.last === 'fine'}
+      <small>{t.settings.perfFine}</small>
+    {/if}
+  </div>
+
+  <div class="row stack">
+    <button
+      type="button"
+      class="advanced"
+      aria-expanded={advanced}
+      onclick={() => (advanced = !advanced)}
+    >
+      {t.settings.perfAdvanced}
+    </button>
+    {#if advanced}
+      <label class="switchrow">
+        <span>
+          <strong>{t.settings.perfBlur}</strong>
+          <small>{t.settings.perfBlurHint}</small>
+        </span>
+        <input
+          type="checkbox"
+          class="switch"
+          role="switch"
+          checked={settings.knobs.blur}
+          onchange={(e) => settings.setKnob('blur', e.currentTarget.checked)}
+        />
+      </label>
+      <label class="switchrow">
+        <span>
+          <strong>{t.settings.perfShadow}</strong>
+          <small>{t.settings.perfShadowHint}</small>
+        </span>
+        <input
+          type="checkbox"
+          class="switch"
+          role="switch"
+          checked={settings.knobs.shadow === 'short'}
+          onchange={(e) => settings.setKnob('shadow', e.currentTarget.checked ? 'short' : 'deep')}
+        />
+      </label>
+      <label class="switchrow">
+        <span>
+          <strong>{t.settings.perfOpaque}</strong>
+          <small>{t.settings.perfOpaqueHint}</small>
+        </span>
+        <input
+          type="checkbox"
+          class="switch"
+          role="switch"
+          checked={settings.knobs.opaque}
+          onchange={(e) => settings.setKnob('opaque', e.currentTarget.checked)}
+        />
+      </label>
+      <label class="switchrow">
+        <span>
+          <strong>{t.settings.perfWallpaper}</strong>
+          <small>{t.settings.perfWallpaperHint}</small>
+        </span>
+        <input
+          type="checkbox"
+          class="switch"
+          role="switch"
+          checked={settings.knobs.wallpaper}
+          onchange={(e) => settings.setKnob('wallpaper', e.currentTarget.checked)}
+        />
+      </label>
+      <label class="switchrow">
+        <span>
+          <strong>{t.settings.perfMotion}</strong>
+          <small>{t.settings.perfMotionHint}</small>
+        </span>
+        <input
+          type="checkbox"
+          class="switch"
+          role="switch"
+          checked={settings.knobs.motion}
+          onchange={(e) => settings.setKnob('motion', e.currentTarget.checked)}
+        />
+      </label>
+      {#if isLinux}
+        <label class="switchrow">
+          <span>
+            <strong>{t.settings.perfNoDmabuf}</strong>
+            <small>{t.settings.perfNoDmabufHint}</small>
+          </span>
+          <input
+            type="checkbox"
+            class="switch"
+            role="switch"
+            checked={settings.knobs.noDmabuf}
+            onchange={(e) => settings.setKnob('noDmabuf', e.currentTarget.checked)}
+          />
+        </label>
+        <label class="switchrow">
+          <span>
+            <strong>{t.settings.perfNoCompositing}</strong>
+            <small>{t.settings.perfNoCompositingHint}</small>
+          </span>
+          <input
+            type="checkbox"
+            class="switch"
+            role="switch"
+            checked={settings.knobs.noCompositing}
+            onchange={(e) => settings.setKnob('noCompositing', e.currentTarget.checked)}
+          />
+        </label>
+      {/if}
+      {#if settings.perfNeedsRestart}
+        <span class="check">
+          <small>{t.settings.perfRestartHint}</small>
+          <button type="button" class="btn" disabled={!hasRuntime} onclick={() => void relaunch()}>
+            {t.settings.perfRestart}
+          </button>
+        </span>
+      {/if}
+    {/if}
+  </div>
 
   <div class="row">
     <strong>{t.settings.wallpaper}</strong>
@@ -606,6 +734,17 @@
     background: var(--fill-soft);
   }
 
+  .segmented.wrap {
+    flex-wrap: wrap;
+  }
+
+  .preset-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
   .segmented button {
     padding: 3px 10px;
     border: 0;
@@ -628,6 +767,35 @@
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
+  }
+
+  .check {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .advanced {
+    align-self: flex-start;
+    border: 0;
+    padding: 0;
+    background: none;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .switchrow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .switchrow span {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
 
   .chips {

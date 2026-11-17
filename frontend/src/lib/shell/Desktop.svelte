@@ -350,6 +350,8 @@
   {/if}
 
   <Banners />
+  <!-- Its check runs after start-up, so it loads apart from the first bundle. -->
+  {#await import('./PerfBanner.svelte') then m}<m.default />{/await}
   <ServerDialog />
   {#if ui.importDialog}
     <!-- Loaded on first use; it is not needed to start. -->
@@ -400,6 +402,12 @@
         color-mix(in srgb, var(--wallpaper-gold) var(--wallpaper-mix), var(--wallpaper-base)) 0,
         transparent 30%
       );
+  }
+
+  /* Light preset: one solid color, still the swatch mixed into the base. */
+  :global(:root[data-perf-wallpaper='flat']) .desktop {
+    background-image: none;
+    background-color: var(--wallpaper-flat, var(--wallpaper-base));
   }
 
   .workspace.hidden {

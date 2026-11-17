@@ -1,3 +1,14 @@
+import {
+  type Knobs,
+  knobsFor,
+  isNamedPreset,
+  migratePerf,
+  type NamedPreset,
+  type PerfPreset,
+  PRESET_KNOBS,
+  presetMatching,
+  type StoredPerf,
+} from '../perf'
 import { DEFAULT_STATS, STAT_IDS, type StatId } from '../shell/statIds'
 import { load, save } from './persist'
 
@@ -60,7 +71,7 @@ export function clampPct(v: number, fallback: number): number {
   return Math.min(ALERTS.pct.max, Math.max(ALERTS.pct.min, Math.round(v)))
 }
 
-interface SettingsData {
+interface SettingsData extends StoredPerf {
   theme: Theme
   reduceGlass: boolean
   reduceMotion: boolean
@@ -109,17 +120,115 @@ const defaults: SettingsData = {
   autoUpdate: true,
 }
 
+function fields(
+  knobs: Knobs,
+): Pick<
+  SettingsData,
+  | 'perfBlur'
+  | 'perfShadow'
+  | 'perfOpaque'
+  | 'perfWallpaper'
+  | 'perfMotion'
+  | 'perfNoDmabuf'
+  | 'perfNoCompositing'
+  | 'reduceGlass'
+  | 'reduceMotion'
+> {
+  return {
+    perfBlur: knobs.blur,
+    perfShadow: knobs.shadow,
+    perfOpaque: knobs.opaque,
+    perfWallpaper: knobs.wallpaper,
+    perfMotion: knobs.motion,
+    perfNoDmabuf: knobs.noDmabuf,
+    perfNoCompositing: knobs.noCompositing,
+    // The old toggles stay in the file so an older build still sees them.
+    reduceGlass: !knobs.blur && knobs.opaque && knobs.shadow === 'short',
+    reduceMotion: !knobs.motion,
+  }
+}
+
 class Settings {
-  #data = $state<SettingsData>(load('settings', defaults))
+  #data = $state<SettingsData>(defaults)
+  /** WebKit flags this process started with. A difference needs a restart. */
+  #bootWebKit = { noDmabuf: false, noCompositing: false }
+
+  constructor() {
+    const raw = load<StoredPerf | null>('settings', null)
+    const migrated = migratePerf(raw)
+    const base = raw && typeof raw === 'object' ? { ...defaults, ...raw } : { ...defaults }
+    this.#data = {
+      ...base,
+      perfPreset: migrated.preset,
+      perfLater: migrated.later,
+      ...fields(migrated.knobs),
+    }
+    this.#bootWebKit = {
+      noDmabuf: migrated.knobs.noDmabuf,
+      noCompositing: migrated.knobs.noCompositing,
+    }
+  }
 
   get theme(): Theme {
     return THEMES.includes(this.#data.theme) ? this.#data.theme : 'system'
   }
+  /** True when the saved look is the old Reduce glass combination. */
   get reduceGlass() {
-    return this.#data.reduceGlass
+    return this.#data.reduceGlass === true
   }
+  /** True when window and dock animations are off. */
   get reduceMotion() {
-    return this.#data.reduceMotion
+    return !this.knobs.motion
+  }
+  get perfPreset(): PerfPreset {
+    return this.#data.perfPreset === 'custom' || isNamedPreset(this.#data.perfPreset)
+      ? this.#data.perfPreset
+      : 'auto'
+  }
+  /** The person dismissed the Light suggestion. */
+  get perfLater() {
+    return this.#data.perfLater === true
+  }
+  /** Knobs to paint. Auto paints Beautiful until a suggestion is applied. */
+  get knobs(): Knobs {
+    return knobsFor(this.perfPreset, {
+      blur: this.#data.perfBlur !== false,
+      shadow: this.#data.perfShadow === 'short' ? 'short' : 'deep',
+      opaque: this.#data.perfOpaque === true,
+      wallpaper: this.#data.perfWallpaper !== false,
+      motion: this.#data.perfMotion !== false,
+      noDmabuf: this.#data.perfNoDmabuf === true,
+      noCompositing: this.#data.perfNoCompositing === true,
+    })
+  }
+  /** Linux WebKit workarounds differ from the ones this process started with. */
+  get perfNeedsRestart() {
+    const k = this.knobs
+    return (
+      k.noDmabuf !== this.#bootWebKit.noDmabuf || k.noCompositing !== this.#bootWebKit.noCompositing
+    )
+  }
+
+  /** Paints a named preset. Auto keeps Beautiful on screen. */
+  usePreset(preset: NamedPreset) {
+    this.#data.perfPreset = preset
+    this.#data.perfLater = false
+    Object.assign(this.#data, fields(knobsFor(preset, PRESET_KNOBS.beautiful)))
+    save('settings', this.#data)
+  }
+
+  /** One advanced switch. Matching a preset snaps back to its name. */
+  setKnob<K extends keyof Knobs>(key: K, value: Knobs[K]) {
+    const next = { ...this.knobs, [key]: value }
+    this.#data.perfPreset = presetMatching(next)
+    Object.assign(this.#data, fields(next))
+    save('settings', this.#data)
+  }
+
+  /** Hide the Light suggestion until Check again. */
+  dismissPerfSuggestion() {
+    this.#data.perfLater = true
+    save('settings', this.#data)
   }
   get wallpaperAccent() {
     return this.#data.wallpaperAccent

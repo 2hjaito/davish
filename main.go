@@ -18,6 +18,8 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
 
 	"davish/internal/app"
+	"davish/internal/perf"
+	"davish/internal/store"
 )
 
 //go:embed all:frontend/dist
@@ -30,6 +32,11 @@ var assets embed.FS
 var wailsJSON []byte
 
 func main() {
+	// WebKit reads these while creating the webview, so they have to be set
+	// before wails.Run. A missing config dir just leaves the defaults.
+	if dir, err := store.DefaultDir(); err == nil {
+		perf.Apply(dir)
+	}
 	start := time.Now()
 	var cfg struct {
 		Info struct{ ProductVersion string }
