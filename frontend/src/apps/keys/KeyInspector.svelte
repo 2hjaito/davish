@@ -291,6 +291,7 @@
     font-size: var(--text-xs);
     white-space: pre-wrap;
     word-break: break-all;
+    -webkit-user-select: text;
     user-select: text;
   }
 </style>

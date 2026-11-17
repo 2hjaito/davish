@@ -219,6 +219,7 @@
     font-size: var(--text-xs);
     white-space: pre-wrap;
     overflow-wrap: anywhere;
+    -webkit-user-select: text;
     user-select: text;
   }
 

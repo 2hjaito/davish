@@ -170,6 +170,7 @@
     font-size: var(--text-sm);
     white-space: pre-wrap;
     word-break: break-all;
+    -webkit-user-select: text;
     user-select: text;
   }
 

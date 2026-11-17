@@ -131,6 +131,7 @@
     font-family: var(--font-mono);
     font-size: var(--text-sm);
     word-break: break-word;
+    -webkit-user-select: text;
     user-select: text;
   }
 
@@ -170,6 +171,7 @@
     font-size: var(--text-xs);
     white-space: pre-wrap;
     word-break: break-word;
+    -webkit-user-select: text;
     user-select: text;
   }
 

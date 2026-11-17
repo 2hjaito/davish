@@ -78,6 +78,7 @@
     white-space: pre-wrap;
     /* Wrap at spaces, so an address or a path is cut only when it must. */
     overflow-wrap: anywhere;
+    -webkit-user-select: text;
     user-select: text;
     max-height: 40vh;
     overflow: auto;

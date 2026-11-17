@@ -20,9 +20,11 @@
     onretry: () => void
     /** Inside a section that already names the program: no heading. */
     compact?: boolean
+    /** After the install command opens in a terminal, e.g. to close the dialog this sits in. */
+    onopen?: () => void
   }
 
-  let { serverID, tool, name, icon = 'package', onretry, compact = false }: Props = $props()
+  let { serverID, tool, name, icon = 'package', onretry, compact = false, onopen }: Props = $props()
 
   const n = t.install
 
@@ -79,7 +81,7 @@
     {:else if !setup.canInstall}
       <p class="note">{n.noRights}</p>
     {:else}
-      <NeedsRoot {serverID} command={setup.command} message={n.needsRoot} />
+      <NeedsRoot {serverID} command={setup.command} message={n.needsRoot} {onopen} />
       {#if tool === 'docker'}
         <p class="note warn"><Icon name="warning" size={13} />{n.dockerGroup}</p>
       {/if}

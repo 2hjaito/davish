@@ -2582,8 +2582,7 @@ const vi = {
       rootOnly: 'chỉ root đọc được',
       add: 'Thêm',
       added: 'Đã thêm',
-      noSqlite3:
-        'Server chưa có sqlite3 nên chưa mở được file SQLite. Cài gói sqlite3 trong Gói phần mềm.',
+      noSqlite3: 'Server chưa có sqlite3 nên chưa mở được file SQLite. Cài sqlite3 trước:',
     },
     sqlite: {
       title: 'SQLite',

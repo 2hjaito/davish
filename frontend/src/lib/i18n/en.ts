@@ -2621,7 +2621,7 @@ const en = {
       add: 'Add',
       added: 'Added',
       noSqlite3:
-        'The server has no sqlite3, so SQLite files cannot be opened yet. Install the sqlite3 package in Packages.',
+        'The server has no sqlite3, so SQLite files cannot be opened yet. Install it first:',
     },
     sqlite: {
       title: 'SQLite',

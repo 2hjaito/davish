@@ -115,6 +115,7 @@
     line-height: 1.5;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
+    -webkit-user-select: text;
     user-select: text;
     cursor: text;
   }
