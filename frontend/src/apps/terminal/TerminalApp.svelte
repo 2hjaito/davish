@@ -17,6 +17,7 @@
   import { wm } from '../../lib/wm/windowManager.svelte'
   import { mockHome } from '../files/mockFs'
   import type { AppProps } from '../types'
+  import { belowContent } from './belowContent'
   import { absoluteCwd, cwdFromTitle, parseOsc7 } from './cwd'
   import DeployProgress from './DeployProgress.svelte'
   import { MockShell } from './mockShell'
@@ -196,7 +197,14 @@
       if (tab.deploy) deploys.stop(tab.deploy)
       // -1: the connection dropped, not the shell; keep the tab to reopen it.
       if (code === -1) {
-        terms.get(tab.id)?.write(`${RESTORE}\r\n\x1b[33m${t.terminal.lost}\x1b[0m\r\n`)
+        // A program redrawing in place may have left the cursor mid-screen;
+        // the notice and the next shell go below its output, not over it.
+        const term = terms.get(tab.id)
+        term?.write(RESTORE, () =>
+          term.write(
+            `${belowContent(term.buffer.active)}\r\n\x1b[33m${t.terminal.lost}\x1b[0m\r\n`,
+          ),
+        )
         tab.lost = 'dropped'
       } else closeTab(tab.id)
     })
