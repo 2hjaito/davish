@@ -12,6 +12,7 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 ### Fixed
 - Database: when the server has no sqlite3, the Find dialog offers the sqlite3 install command for the server's package manager with a Run in Terminal button (the dialog closes so Terminal is not hidden behind it), instead of only pointing to Packages. Each section of the Database app is now a card.
 - macOS and Linux: text that should be selectable can be selected and copied again (file paths in the Find dialog, commands in confirm dialogs, Git diffs…). WebKit only reads `-webkit-user-select`, so these places could not be selected.
+- Server menu: with many servers the list scrolls, so All servers, Add a server and Import stay within reach (#178).
 
 ## [1.13.10] - 2026-11-16
 

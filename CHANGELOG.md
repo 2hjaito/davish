@@ -12,6 +12,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ### Sửa
 - Database: server chưa có sqlite3 thì hộp Dò đưa luôn lệnh cài sqlite3 theo trình quản lý package của server, kèm nút Chạy trong Terminal (hộp Dò tự đóng để Terminal không bị che), thay vì chỉ bảo đi cài trong Gói phần mềm. Các mục trong app Database hiện thành từng thẻ.
 - macOS và Linux: bôi đen và sao chép được chữ ở những chỗ đáng lẽ chọn được (đường dẫn file trong hộp Dò, lệnh trong các hộp xác nhận, diff của Git…). WebKit chỉ đọc `-webkit-user-select`, nên trước đây những chỗ này không chọn được.
+- Menu chọn server: nhiều server thì danh sách tự cuộn, các mục Tất cả server, Thêm server, Nhập luôn nằm trong tầm bấm (#178).
 
 ## [1.13.10] - 2026-11-16
 
