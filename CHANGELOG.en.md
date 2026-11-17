@@ -4,8 +4,13 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.14.3] - 2026-11-17
+
 ### Added
 - All servers: a compact **List** view next to the cards (remembered), add, import, edit and **disconnect** servers right from the window, and **⌘⇧S** (Ctrl+Shift+S) to open it. The server menu also has a disconnect button next to each connected server. Suggested by @HungNth and @tian2992 (#178).
+
+### Fixed
+- Monitor: the line and fill of the metric charts (Memory, CPU, GPU, Network, Disk and the Overview sparklines) no longer spill past the left edge of the card. Thanks @thanhtrung5763 (#186).
 
 ## [1.14.2] - 2026-11-17
 
