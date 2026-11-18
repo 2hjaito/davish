@@ -4,11 +4,16 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.14.6] - 2026-11-18
+
 ### Added
 - Database: the SQLite row grid sorts (click a column header: ascending, descending, off) and filters by the text a column contains. Davish builds the SQL from the table's real column names; there is still no SQL box, and it still reads 100 rows at a time.
 
 ### Fixed
 - Run on several servers: pressing Stop right as a command started could miss it and hold the run until the command finished on its own. Davish now sends the stop signal to the command on the server, and a server that still keeps the session going no longer holds the job past 5 seconds.
+
+### Changed
+- Linux: the window is now drawn on the GPU (WebKitGTK's own default), so scrolling, moving windows and frosted glass are smooth instead of painted by the CPU. Davish used to keep Wails' workaround that turned GPU compositing off for everyone. Tested on Intel and AMD graphics; on the proprietary NVIDIA driver, where the workaround came from, the GPU stays off by default, and `DAVISH_WEBVIEW_GPU=always` turns it on (with `WEBKIT_DISABLE_DMABUF_RENDERER=1`, unless you set it yourself). `DAVISH_WEBVIEW_GPU=never` turns it off on any machine, and the app log says which policy was used and why. Thanks to @tian2992 for spotting it and testing on Intel, AMD and NVIDIA (#181, #159, #185).
 
 ## [1.14.5] - 2026-11-18
 
@@ -33,8 +38,6 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 - Monitor: the line and fill of the metric charts (Memory, CPU, GPU, Network, Disk and the Overview sparklines) no longer spill past the left edge of the card. Thanks @thanhtrung5763 (#186).
 - macOS and Linux: the commands shown in confirm dialogs, inspectors and error dialogs can be selected and copied.
 
-### Changed
-- Linux: the window is now drawn on the GPU (WebKitGTK's own default). Davish used to keep Wails' workaround that turned GPU compositing off for everyone, so every scroll and every frosted window was painted by the CPU. On the proprietary NVIDIA driver, where that workaround came from, the GPU stays off until it has been tested: `DAVISH_WEBVIEW_GPU=always` tries it (with `WEBKIT_DISABLE_DMABUF_RENDERER=1`, unless you set it yourself), and #185 collects how it goes. `DAVISH_WEBVIEW_GPU=never` turns it off on any machine, and the app log says which policy was used and why. Thanks to @tian2992 for spotting it (#181, #159).
 
 ## [1.14.2] - 2026-11-17
 
