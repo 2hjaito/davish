@@ -51,7 +51,7 @@
     return e.durMs < 1000 ? `${e.durMs} ms` : `${(e.durMs / 1000).toFixed(1).replace('.', ',')} s`
   }
 
-  // Typed at the prompt of the server it ran on, never run (docs/SECURITY.md).
+  // Typed at the prompt of the server it ran on, never run (.claude/docs/SECURITY.md).
   function rerun(e: AuditEntry) {
     if (e.serverID !== servers.activeId) servers.select(e.serverID)
     openTerminalAt(e.serverID, undefined, e.command)
@@ -62,7 +62,7 @@
     openSnippets(servers.activeId || e.serverID)
   }
 
-  // Choosing entries for a script (docs/adr/0022).
+  // Choosing entries for a script (.claude/docs/adr/0022).
   let picking = $state(false)
   const picked = new SvelteSet<number>()
   let exporting = $state<AuditEntry[] | null>(null)

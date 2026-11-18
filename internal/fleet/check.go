@@ -79,7 +79,7 @@ type Update struct {
 }
 
 // PlanUpdate builds the package update command for each server, with
-// sudo -n: Davish never types a sudo password for a run (docs/adr/0021),
+// sudo -n: Davish never types a sudo password for a run (.claude/docs/adr/0021),
 // so a server whose sudo wants one fails and says why.
 func PlanUpdate(ctx context.Context, d Detector, serverIDs []string) Update {
 	type res struct {

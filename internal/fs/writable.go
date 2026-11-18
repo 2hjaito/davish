@@ -23,7 +23,7 @@ func writableCommand(p string) string {
 type Access struct {
 	Writable bool `json:"writable"`
 	// SudoEdit is the command to prefill in a terminal; the user presses
-	// Enter and types the sudo password there (docs/SECURITY.md).
+	// Enter and types the sudo password there (.claude/docs/SECURITY.md).
 	SudoEdit string `json:"sudoEdit"`
 }
 

@@ -19,7 +19,7 @@ export function visibleOn(list: readonly Snippet[], serverID: string, query = ''
 }
 
 // Saved commands sit in settings.json in plain text; a secret must not
-// (docs/SECURITY.md). These are the usual shapes of one on a command line.
+// (.claude/docs/SECURITY.md). These are the usual shapes of one on a command line.
 const SECRET = [
   /\b(pass(word)?|passwd|pwd|secret|token|api[-_]?key|access[-_]?key)\s*[=:]\s*\S+/i,
   /\s-p\S+/, // mysql -psecret

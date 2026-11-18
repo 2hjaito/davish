@@ -1,6 +1,6 @@
 <script lang="ts">
   // One command on several servers, each in its own terminal tab
-  // (docs/adr/0021). A tab that waits for input comes forward so the user
+  // (.claude/docs/adr/0021). A tab that waits for input comes forward so the user
   // answers there; Davish never types a sudo password for a run.
   import type { Terminal } from '@xterm/xterm'
   import { onDestroy, tick, untrack } from 'svelte'

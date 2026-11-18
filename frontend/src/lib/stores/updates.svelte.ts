@@ -1,4 +1,4 @@
-// Davish's own updates (docs/adr/0009-self-update.md): checked at start and
+// Davish's own updates (.claude/docs/adr/0009-self-update.md): checked at start and
 // every few hours while allowed, or by hand from the menu.
 import { toUserError } from '../api/errors'
 import { hasRuntime } from '../api/runtime'

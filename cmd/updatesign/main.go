@@ -1,5 +1,5 @@
 // Command updatesign makes the ed25519 key the self-updater trusts and signs
-// release checksums with it (docs/adr/0009-self-update.md).
+// release checksums with it (.claude/docs/adr/0009-self-update.md).
 //
 //	updatesign gen <private key file>   prints the public key to embed
 //	updatesign sign <file>              writes <file>.sig; the key is read

@@ -28,7 +28,7 @@
   })
 </script>
 
-<!-- Shows the exact command (docs/SECURITY.md); Cancel stays the safe default. -->
+<!-- Shows the exact command (.claude/docs/SECURITY.md); Cancel stays the safe default. -->
 <Dialog open={target !== null} {title} width={500} {onclose}>
   <p class:warn={changed}>{changed ? s.changedBody : s.runBody}</p>
   <pre class="command">{target?.command}</pre>

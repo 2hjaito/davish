@@ -1,8 +1,8 @@
 # Local SSH server for integration tests only. Never expose it outside localhost.
 # systemd runs as PID 1 so Services and Logs tests talk to a real systemctl
-# and journald (docs/adr/0005-systemd-test-sshd.md).
+# and journald (.claude/docs/adr/0005-systemd-test-sshd.md).
 # busybox's whole root to build the test containers from, with no registry
-# pull when tests run (docs/adr/0006-docker-in-test-sshd.md).
+# pull when tests run (.claude/docs/adr/0006-docker-in-test-sshd.md).
 FROM busybox:1.37 AS busybox
 
 # MongoDB 8.0 and newer refuse to start on Linux 6.19 and newer

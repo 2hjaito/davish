@@ -1,5 +1,5 @@
 // Added by Davish's proxy to every page shown in its Browser app
-// (docs/adr/0008-in-app-browser.md). It tells Davish where the page is, and
+// (.claude/docs/adr/0008-in-app-browser.md). It tells Davish where the page is, and
 // takes back, forward and reload from Davish only.
 ;(function () {
   var parent = window.parent

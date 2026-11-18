@@ -1,4 +1,4 @@
-// Choosing Command log entries to export as a script (docs/adr/0022).
+// Choosing Command log entries to export as a script (.claude/docs/adr/0022).
 import type { AuditEntry } from '../../lib/api/events'
 
 /** Entries that change a server: what the export starts from. */

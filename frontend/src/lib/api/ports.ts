@@ -60,7 +60,7 @@ export const tunnelStart = (
 export const tunnelStop = (id: string): Promise<void> => App.TunnelStop(id)
 export const tunnelList = (): Promise<Tunnel[]> => App.TunnelList()
 
-/** A server port opened in the Browser app (docs/adr/0008-in-app-browser.md). */
+/** A server port opened in the Browser app (.claude/docs/adr/0008-in-app-browser.md). */
 export interface Site {
   serverID: string
   remotePort: number

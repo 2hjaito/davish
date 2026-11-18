@@ -166,7 +166,7 @@
       />
     {:else if result.test && !result.test.ok}
       <p class="error">{t.nginx.edit.testFailed}</p>
-      <!-- Server output is shown as text only (docs/SECURITY.md). -->
+      <!-- Server output is shown as text only (.claude/docs/SECURITY.md). -->
       <pre class="command">{result.test.output}</pre>
     {/if}
   {/if}

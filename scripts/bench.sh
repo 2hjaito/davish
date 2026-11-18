@@ -1,6 +1,6 @@
 #!/bin/sh
 # Measures how fast the built app starts and how much memory it holds when
-# idle, for the numbers asked in PRs (docs/PLAN.md M21). Runs with an empty
+# idle, for the numbers asked in PRs (.claude/docs/PLAN.md M21). Runs with an empty
 # HOME so no saved server is connected: never touches a real server.
 set -eu
 

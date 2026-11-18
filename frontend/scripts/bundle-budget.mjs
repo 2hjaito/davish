@@ -1,4 +1,4 @@
-// Fails when the built JS grows past its budget (docs/PLAN.md M21). The
+// Fails when the built JS grows past its budget (.claude/docs/PLAN.md M21). The
 // initial bundle is what the first screen loads: the entry, the shell it
 // imports right away (App.svelte) and their static imports. App windows
 // load later, on first use, and count only toward the total. A run loads one

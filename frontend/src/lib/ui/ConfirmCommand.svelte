@@ -39,7 +39,7 @@
   }: Props = $props()
 </script>
 
-<!-- A destructive action shows the exact command first (docs/SECURITY.md). -->
+<!-- A destructive action shows the exact command first (.claude/docs/SECURITY.md). -->
 <Dialog open={command !== null} {title} width={480} {onclose}>
   <p>{body}</p>
   <pre class="command">{command}</pre>

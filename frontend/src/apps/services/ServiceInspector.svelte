@@ -283,7 +283,7 @@
   {:else if journal.lines.length === 0}
     <p class="muted small">{t.services.logEmpty}</p>
   {:else}
-    <!-- Server output is shown as text only (docs/SECURITY.md). -->
+    <!-- Server output is shown as text only (.claude/docs/SECURITY.md). -->
     <pre class="log" bind:this={logBox}>{#each journal.lines as line, i (i)}<span
           class="line {lineLevel(line)}">{line}</span
         >{/each}</pre>

@@ -189,7 +189,7 @@
     }
   })
 
-  // Each server reopens the windows it had (docs/ARCHITECTURE.md §5.1).
+  // Each server reopens the windows it had (.claude/docs/ARCHITECTURE.md §5.1).
   wm.keepInLayout((appId) => getApp(appId)?.layout !== false)
   wm.allowApp((appId, id) => isAvailable(getApp(appId), servers.platformOf(id)))
   function openOptions(appId: string) {

@@ -1,7 +1,7 @@
 // Package shortcut opens what a desktop icon points at. It decides what
 // kind of thing a path is, and builds the line that runs a script in a
 // terminal, refusing a script that changed since the user saw it
-// (docs/adr/0013).
+// (.claude/docs/adr/0013).
 package shortcut
 
 import (

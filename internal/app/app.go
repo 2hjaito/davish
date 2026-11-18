@@ -208,5 +208,5 @@ func (e emitter) Emit(name string, payload any) {
 
 // change is the context for an action binding: the commands it runs are
 // marked as changing the server, for the Command log's script export
-// (docs/adr/0022).
+// (.claude/docs/adr/0022).
 func (a *App) change() context.Context { return audit.Changing(a.ctx) }

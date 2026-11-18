@@ -16,7 +16,7 @@
   let { plan, replan, onclose, onconfirm }: Props = $props()
 
   // The plan shown follows the checkbox, so the command is always the one
-  // that will run (docs/SECURITY.md).
+  // that will run (.claude/docs/SECURITY.md).
   let shown = $state.raw<RemovePlan | null>(null)
   let error = $state('')
   $effect(() => {

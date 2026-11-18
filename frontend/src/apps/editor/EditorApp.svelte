@@ -442,7 +442,7 @@
   {/snippet}
 </Dialog>
 
-<!-- A save as root shows the exact command first (docs/SECURITY.md). No
+<!-- A save as root shows the exact command first (.claude/docs/SECURITY.md). No
      Terminal button: the command reads the text on stdin. -->
 <ConfirmCommand
   command={rootSave?.plan.sudo ?? null}

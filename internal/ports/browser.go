@@ -24,7 +24,7 @@ import (
 	"davish/internal/apperr"
 )
 
-// The in-app browser (docs/adr/0008-in-app-browser.md): one proxy listener
+// The in-app browser (.claude/docs/adr/0008-in-app-browser.md): one proxy listener
 // per server port, on 127.0.0.1 at a port the OS picks, shown in an iframe
 // at its own origin.
 

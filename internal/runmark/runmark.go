@@ -1,6 +1,6 @@
 // Package runmark builds the OSC 7761 progress marks a line typed into a
 // terminal prints, which the terminal swallows and the frontend draws as
-// progress (docs/adr/0012).
+// progress (.claude/docs/adr/0012).
 package runmark
 
 import (

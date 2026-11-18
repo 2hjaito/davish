@@ -84,7 +84,7 @@ func TestUserWithoutSudo(t *testing.T) {
 
 // The Command log marks a change made as root with the password, without
 // claiming content was sent, and the export gives it back as plain sudo
-// (docs/adr/0022).
+// (.claude/docs/adr/0022).
 func TestAuditMarksForExport(t *testing.T) {
 	ctx := audit.Changing(context.Background())
 	m, id := testsshd.ConnectAs(t, testsshd.Sudoer)

@@ -15,7 +15,7 @@ func (a *App) AuditEntries() []audit.Entry {
 }
 
 // AuditScript is a bash script that runs the chosen entries again over
-// ssh (docs/adr/0022); failed keeps those that exited non-zero.
+// ssh (.claude/docs/adr/0022); failed keeps those that exited non-zero.
 func (a *App) AuditScript(ids []uint64, failed bool) (string, error) {
 	servers, err := a.store.Servers(a.ctx)
 	if err != nil {

@@ -15,7 +15,7 @@
 <script lang="ts">
   import { t } from '../../lib/i18n'
 
-  // Text of the server, so plain text only: never {@html} (docs/SECURITY.md).
+  // Text of the server, so plain text only: never {@html} (.claude/docs/SECURITY.md).
   interface Props {
     text: string
     truncated: boolean

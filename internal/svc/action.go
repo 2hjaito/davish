@@ -21,7 +21,7 @@ type Plan struct {
 	// Command is exactly what Act runs.
 	Command string `json:"command"`
 	// Confirm is set for actions that interrupt a running service; the UI
-	// must show Command and wait for the user (docs/SECURITY.md).
+	// must show Command and wait for the user (.claude/docs/SECURITY.md).
 	Confirm bool `json:"confirm"`
 	// Sudo is the same command with sudo, for the user to run in a
 	// terminal when the server requires root.

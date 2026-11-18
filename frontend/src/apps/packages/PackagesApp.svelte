@@ -122,7 +122,7 @@
   }
 
   // Root is needed for every change, so the command goes to a terminal for
-  // the user to check and run (docs/SECURITY.md).
+  // the user to check and run (.claude/docs/SECURITY.md).
   async function terminal(op: PackageOp, names: string[]) {
     if (!inv) return
     planError = ''
