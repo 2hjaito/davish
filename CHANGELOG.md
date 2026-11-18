@@ -4,6 +4,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.14.7] - 2026-11-18
+
 ### Sửa
 - Tất cả server giờ mở bằng `⌘0` (Ctrl+0), cạnh `⌘1`…`⌘9` cho từng server. Bản 1.14.3 đặt nó vào `⌘⇧S`, trùng với Dịch vụ nên chỉ một trong hai chạy; `⌘⇧S` trả lại cho Dịch vụ. Cảm ơn @HungNth (#202).
 - Editor: ô tìm, ô thay, các nút và tùy chọn của thanh tìm kiếm dùng cỡ chữ của giao diện thay vì khoảng 9px, đọc được mà không phải phóng to. Cảm ơn @HungNth (#202).
