@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Sửa
+- Chạy lệnh trên nhiều server: bấm Dừng ngay lúc lệnh vừa khởi động có lúc không dừng được và giữ cả lượt chạy tới khi lệnh tự xong. Giờ Davish gửi tín hiệu dừng thẳng tới lệnh trên server, và nếu server vẫn giữ phiên thì job được coi là đã dừng sau 5 giây.
+
 ## [1.14.5] - 2026-11-18
 
 ### Thêm

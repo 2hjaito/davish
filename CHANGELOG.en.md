@@ -4,6 +4,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Fixed
+- Run on several servers: pressing Stop right as a command started could miss it and hold the run until the command finished on its own. Davish now sends the stop signal to the command on the server, and a server that still keeps the session going no longer holds the job past 5 seconds.
+
 ## [1.14.5] - 2026-11-18
 
 ### Added
