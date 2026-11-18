@@ -25,6 +25,8 @@ type fakeTerms struct {
 	fail    map[string]error
 	open    map[string]chan int
 	started []string
+	// deaf ignores Close, like a server that missed the hangup.
+	deaf bool
 }
 
 func newFake() *fakeTerms {
@@ -67,7 +69,11 @@ func (f *fakeTerms) Run(_ context.Context, serverID string, _, _ int, _ string, 
 func (f *fakeTerms) Close(id string) error {
 	f.mu.Lock()
 	ch := f.open[id]
+	deaf := f.deaf
 	f.mu.Unlock()
+	if deaf {
+		return nil
+	}
 	select {
 	case ch <- -1:
 	default:
@@ -242,6 +248,31 @@ func TestStop(t *testing.T) {
 	}
 	if len(f.started) != Parallel {
 		t.Errorf("started %v; queued servers must not start", f.started)
+	}
+}
+
+// A server that keeps a stopped command running must not hold the run:
+// the job counts as stopped after the grace period.
+func TestStopWhenTheServerKeepsRunning(t *testing.T) {
+	f := newFake()
+	f.deaf = true
+	rec := &recorder{all: make(chan Job, 100)}
+	s := New(f, &auditLog{}, rec, quiet())
+	s.stopGrace = 50 * time.Millisecond
+	id, _, err := s.Start(context.Background(), items(2, "sleep 100"), 80, 24)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for n := 0; n < 2; {
+		if j := <-rec.all; j.State == Running {
+			n++
+		}
+	}
+	s.Stop(id)
+	for _, j := range final(t, rec, 2) {
+		if j.State != Stopped || j.Exit != -1 || j.TermID == "" {
+			t.Errorf("job %+v", j)
+		}
 	}
 }
 

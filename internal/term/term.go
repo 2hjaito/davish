@@ -323,7 +323,11 @@ func (s *Service) Close(id string) error {
 	if err != nil {
 		return err
 	}
-	sess.ssh.Close() //nolint:errcheck,gosec // ends the session either way
+	// Closing alone hangs up the PTY, which a command that has not yet
+	// taken it as its terminal can miss; the server then waits for the
+	// command. A signal goes to the process itself. Old servers ignore it.
+	sess.ssh.Signal(ssh.SIGHUP) //nolint:errcheck,gosec // best effort
+	sess.ssh.Close()            //nolint:errcheck,gosec // ends the session either way
 	return nil
 }
 
