@@ -7,6 +7,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 ### Added
 - Docker: a cleaner container table. Each row has the tech logo, the name over its image, a colored state dot, ports as `8080→80` that open on click, a Created column, and restart, stop/start, delete and more buttons always in view. A compose project's containers hang off it with a tree line. The ID moved to the detail page.
 
+### Fixed
+- Windows: the close, minimize and maximize buttons are redrawn like macOS's (a darker ring, solid glyphs that stay crisp at 12px, their own colors when pressed and when the window is in the background). Only fills change, so hover and press are lighter than before, with no `filter`.
+
 ## [1.14.4] - 2026-11-18
 
 ### Added

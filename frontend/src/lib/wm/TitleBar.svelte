@@ -29,21 +29,42 @@
 >
   <div class="lights" class:inactive={!ctx.focused}>
     <button class="light close" aria-label={t.window.close} onclick={() => wm.close(ctx.win.id)}>
-      <Icon name="close" size={12} strokeWidth={2.6} />
+      <svg viewBox="0 0 85.4 85.4" aria-hidden="true">
+        <circle class="ring" cx="42.7" cy="42.7" r="42.7" />
+        <circle class="fill" cx="42.7" cy="42.7" r="39.1" />
+        <path
+          class="glyph"
+          d="m22.5 57.8 35.3-35.3c1.4-1.4 3.6-1.4 5 0l.1.1c1.4 1.4 1.4 3.6 0 5l-35.3 35.3c-1.4 1.4-3.6 1.4-5 0l-.1-.1c-1.3-1.4-1.3-3.6 0-5zm5.1-35.3 35.3 35.3c1.4 1.4 1.4 3.6 0 5l-.1.1c-1.4 1.4-3.6 1.4-5 0l-35.3-35.3c-1.4-1.4-1.4-3.6 0-5l.1-.1c1.4-1.3 3.6-1.3 5 0z"
+        />
+      </svg>
     </button>
     <button
       class="light min"
       aria-label={t.window.minimize}
       onclick={() => wm.minimize(ctx.win.id)}
     >
-      <Icon name="minimize" size={12} strokeWidth={2.6} />
+      <svg viewBox="0 0 85.4 85.4" aria-hidden="true">
+        <circle class="ring" cx="42.7" cy="42.7" r="42.7" />
+        <circle class="fill" cx="42.7" cy="42.7" r="39.1" />
+        <path
+          class="glyph"
+          d="m17.8 39.1h49.9c1.9 0 3.5 1.6 3.5 3.5v.1c0 1.9-1.6 3.5-3.5 3.5h-49.9c-1.9 0-3.5-1.6-3.5-3.5v-.1c0-1.9 1.5-3.5 3.5-3.5z"
+        />
+      </svg>
     </button>
     <button
       class="light max"
       aria-label={t.window.maximize}
       onclick={() => wm.toggleMaximize(ctx.win.id)}
     >
-      <Icon name="maximize" size={9} strokeWidth={2.8} />
+      <svg viewBox="0 0 85.4 85.4" aria-hidden="true">
+        <circle class="ring" cx="42.7" cy="42.7" r="42.7" />
+        <circle class="fill" cx="42.7" cy="42.7" r="39.1" />
+        <path
+          class="glyph"
+          d="m31.2 20.8h26.7c3.6 0 6.5 2.9 6.5 6.5v26.7zm23.2 43.7h-26.8c-3.6 0-6.5-2.9-6.5-6.5v-26.8z"
+        />
+      </svg>
     </button>
   </div>
   {@render children?.()}
@@ -83,32 +104,41 @@
     gap: 8px;
   }
 
+  /* Drawn from macOS's own: a darker ring, the fill, and a glyph that
+     shows on all three when hovering the group. Only fills change, so a
+     hover or press repaints three tiny SVGs and nothing else. */
   .light {
     width: 12px;
     height: 12px;
-    border-radius: 50%;
     border: 0;
     padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--tl-glyph);
-    transition:
-      background var(--dur) var(--ease-out),
-      filter var(--dur-fast) var(--ease-out);
+    background: none;
+    display: block;
+    border-radius: 50%;
   }
 
-  .light:active {
-    filter: brightness(0.8);
+  .light svg {
+    display: block;
+    width: 100%;
+    height: 100%;
   }
 
-  /* Like macOS: glyphs appear on all three when hovering the group. */
-  .light :global(svg) {
+  .ring {
+    fill: var(--ring);
+  }
+
+  .fill {
+    fill: var(--fill);
+  }
+
+  .glyph {
+    fill: var(--glyph);
     opacity: 0;
     transition: opacity var(--dur-fast) var(--ease-out);
   }
 
-  .lights:hover .light :global(svg) {
+  .lights:hover .glyph,
+  .light:focus-visible .glyph {
     opacity: 1;
   }
 
@@ -129,17 +159,40 @@
   }
 
   .close {
-    background: var(--tl-close);
+    --ring: #e24b41;
+    --fill: #ed6a5f;
+    --glyph: #460804;
+  }
+  .close:active {
+    --ring: #a14239;
+    --fill: #b15048;
+    --glyph: #170101;
   }
   .min {
-    background: var(--tl-min);
+    --ring: #e1a73e;
+    --fill: #f6be50;
+    --glyph: #90591d;
+  }
+  .min:active {
+    --ring: #a67f36;
+    --fill: #b8923b;
+    --glyph: #532a0a;
   }
   .max {
-    background: var(--tl-max);
+    --ring: #2dac2f;
+    --fill: #61c555;
+    --glyph: #2a6218;
+  }
+  .max:active {
+    --ring: #428234;
+    --fill: #4a9741;
+    --glyph: #113107;
   }
 
+  /* A window in the background: grey, until the group is hovered. */
   .inactive:not(:hover) .light {
-    background: var(--tl-inactive);
+    --ring: var(--tl-off-ring);
+    --fill: var(--tl-off-fill);
   }
 
   /* The sidebar's rail only fits the lights; the Help menu still has this. */
