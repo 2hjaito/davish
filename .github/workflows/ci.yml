@@ -78,10 +78,14 @@ jobs:
           go test -race ./...
           cd frontend && npm run check && npm run lint && npm run test
 
+      # npm audit checks what ships in the app. Build and test tools (vite,
+      # vitest, svelte-check) never reach users, and an advisory with no
+      # fixed version yet (picomatch, GHSA-fc5q-39xc-vjpf) would block every
+      # release.
       - name: Audit
         run: |
           govulncheck ./...
-          cd frontend && npm audit --audit-level=high
+          cd frontend && npm audit --omit=dev --audit-level=high
 
       - name: Build app
         run: |
