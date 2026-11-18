@@ -6,6 +6,11 @@
 :root {
   --sl-font: 'Geist Variable', system-ui, sans-serif;
   --sl-font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+}
+
+/* Starlight keeps its colors in a cascade layer, which anything here
+   overrides whatever the selector, so each theme sets only its own. */
+:root[data-theme='dark'] {
   --sl-color-accent-low: #0c1f4d;
   --sl-color-accent: #4b93ff;
   --sl-color-accent-high: #c4dcff;
@@ -20,7 +25,6 @@
   --sl-color-accent-low: #d6e6ff;
   --sl-color-accent: #0a64d8;
   --sl-color-accent-high: #0b3a80;
-  --sl-color-white: #0f1325;
 }
 
 h1,
