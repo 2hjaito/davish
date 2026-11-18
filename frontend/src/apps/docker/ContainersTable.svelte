@@ -25,7 +25,8 @@
   import { backend } from './backend'
   import { ago, canDo, type Group, groupHealth, groups, health, parsePorts } from './containers'
   import StackCard from './StackCard.svelte'
-  import { groupTech, imageTech } from './tech'
+  import StackLogo from './StackLogo.svelte'
+  import { imageTech } from './tech'
   import { techIcons } from '../../lib/ui/techIcons'
 
   interface Props {
@@ -338,7 +339,7 @@
                     aria-label={open ? tb.fold : tb.unfold}
                     aria-expanded={open}><Icon name="chevronRight" size={13} /></button
                   >
-                  {@render logo(groupTech(g), g.project)}
+                  <StackLogo {serverID} group={g} size={28} letter={g.project} />
                   <div class="dk-lines">
                     <span class="dk-title">{g.project}</span>
                     <span class="dk-sub"
