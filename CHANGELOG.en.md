@@ -33,6 +33,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 - Monitor: the line and fill of the metric charts (Memory, CPU, GPU, Network, Disk and the Overview sparklines) no longer spill past the left edge of the card. Thanks @thanhtrung5763 (#186).
 - macOS and Linux: the commands shown in confirm dialogs, inspectors and error dialogs can be selected and copied.
 
+### Changed
+- Linux: the window is now drawn on the GPU (WebKitGTK's own default). Davish used to keep Wails' workaround that turned GPU compositing off for everyone, so every scroll and every frosted window was painted by the CPU. On the proprietary NVIDIA driver, where that workaround came from, the GPU stays off until it has been tested: `DAVISH_WEBVIEW_GPU=always` tries it (with `WEBKIT_DISABLE_DMABUF_RENDERER=1`, unless you set it yourself), and #185 collects how it goes. `DAVISH_WEBVIEW_GPU=never` turns it off on any machine, and the app log says which policy was used and why. Thanks to @tian2992 for spotting it (#181, #159).
+
 ## [1.14.2] - 2026-11-17
 
 ### Fixed

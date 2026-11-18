@@ -44,6 +44,12 @@ func main() {
 	if dir, err := store.DefaultDir(); err == nil {
 		perf.Apply(dir)
 	}
+	// After the settings above, so a WebKit switch set there is respected
+	// (docs/adr/0023).
+	gpu := perf.GPUDecision{Policy: perf.GPUNever, Reason: "not Linux"}
+	if runtime.GOOS == "linux" {
+		gpu = perf.DecideGPU("/sys/class/drm", perf.OSEnv)
+	}
 	start := time.Now()
 	var cfg struct {
 		Info struct{ ProductVersion string }
@@ -54,6 +60,10 @@ func main() {
 	a, err := app.New(cfg.Info.ProductVersion)
 	if err != nil {
 		log.Fatal(err)
+	}
+	if runtime.GOOS == "linux" {
+		// A blank-window report starts from this line in the app log.
+		app.LogInfo(a, "linux webview gpu", "policy", gpu.Policy, "reason", gpu.Reason)
 	}
 
 	err = wails.Run(&options.App{
@@ -70,9 +80,9 @@ func main() {
 			// Matches the binary, so KDE and GNOME group the window with
 			// a .desktop file named after it.
 			ProgramName: "Davish",
-			// What Wails uses when Linux is nil (wails#2977): passing options
-			// must not turn the webview's GPU policy on behind our back.
-			WebviewGpuPolicy: linux.WebviewGpuPolicyNever,
+			// Always unless the user or the NVIDIA workaround says otherwise
+			// (perf.DecideGPU, docs/adr/0023).
+			WebviewGpuPolicy: webviewPolicy(gpu.Policy),
 		},
 		Mac: &mac.Options{
 			TitleBar: mac.TitleBarHidden(),
@@ -119,4 +129,16 @@ func appMenu() *menu.Menu {
 	m.Append(menu.AppMenu())
 	m.Append(menu.EditMenu())
 	return m
+}
+
+// webviewPolicy maps perf's policy name to Wails'.
+func webviewPolicy(p string) linux.WebviewGpuPolicy {
+	switch p {
+	case perf.GPUAlways:
+		return linux.WebviewGpuPolicyAlways
+	case perf.GPUOnDemand:
+		return linux.WebviewGpuPolicyOnDemand
+	default:
+		return linux.WebviewGpuPolicyNever
+	}
 }
