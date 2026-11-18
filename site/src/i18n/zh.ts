@@ -70,7 +70,7 @@ export const zh: Dict = {
         text: '查看服务器上仓库的状态、差异和提交图，并可 fetch 和 pull。',
       },
       {
-        key: 'docker-images',
+        key: 'docker',
         title: '清晰的 Docker',
         text: '按 compose 项目查看容器，镜像及其分层、数据卷，一键查看日志或打开 shell。',
       },

@@ -91,7 +91,7 @@ Bố cục như Docker Desktop. Container dạng thẻ hoặc bảng, chuyển b
 **Compose**: menu ⋮ của mỗi project có up, pull, restart, down và mở file compose trong Editor; **Stack compose mới…** ghi `compose.yaml` từ mẫu (một container, web + database, app + Redis) vào một thư mục, không bao giờ ghi đè file đã có. Tạo network, volume, và sao chép container bất kỳ thành lệnh `docker run` dựng lại nó.
 
 <table><tr>
-  <td><img src="assets/screenshots/docker.jpg" alt="Docker với một container khởi động lại liên tục"></td>
+  <td><img src="assets/screenshots/docker.jpg" alt="Docker với một project compose và một container khởi động lại liên tục"></td>
   <td><img src="assets/screenshots/docker-images.jpg" alt="Một image và các layer của nó"></td>
 </tr></table>
 

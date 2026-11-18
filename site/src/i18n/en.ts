@@ -69,7 +69,7 @@ export const en = {
         text: 'Status, diffs and the commit graph of the repos on your server, with fetch and pull.',
       },
       {
-        key: 'docker-images',
+        key: 'docker',
         title: 'Docker, clearly',
         text: 'Containers by compose project, images and their layers, volumes, logs and a shell in one click.',
       },

@@ -70,7 +70,7 @@ export const vi: Dict = {
         text: 'Trạng thái, diff và đồ thị commit của các repo trên server, kèm fetch và pull.',
       },
       {
-        key: 'docker-images',
+        key: 'docker',
         title: 'Docker rõ ràng',
         text: 'Container theo compose project, image và các layer, volume, log và shell chỉ một cú bấm.',
       },

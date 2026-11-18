@@ -91,7 +91,7 @@ Laid out like Docker Desktop. Containers as cards or in a table, switched from t
 **Compose**: each project's ⋮ menu has up, pull, restart and down, plus its compose file in the Editor; **New compose stack…** writes a `compose.yaml` from a template (one container, web + database, app + Redis) into a folder, never over an existing one. Create networks and volumes, and copy any container as the `docker run` command that would make it again.
 
 <table><tr>
-  <td><img src="assets/screenshots/docker.jpg" alt="Docker with a container in a restart loop"></td>
+  <td><img src="assets/screenshots/en/docker.jpg" alt="Docker with a compose project and a container in a restart loop"></td>
   <td><img src="assets/screenshots/en/docker-images.jpg" alt="An image and its layers"></td>
 </tr></table>
 
