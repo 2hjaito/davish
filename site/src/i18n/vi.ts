@@ -5,7 +5,7 @@ export const vi: Dict = {
   title: 'Davish: desktop cho server Linux của bạn',
   description:
     'Terminal, file, Docker, log, database và nhiều hơn nữa qua SSH, trong một app desktop cho macOS, Windows và Linux. Không cài gì lên server.',
-  nav: { features: 'Tính năng', security: 'Bảo mật', download: 'Tải về' },
+  nav: { features: 'Tính năng', security: 'Bảo mật', download: 'Tải về', docs: 'Tài liệu', changelog: 'Thay đổi' },
   hero: {
     title: 'Một desktop cho server Linux của bạn.',
     lead: 'Terminal, file, dịch vụ, Docker, log, database và git qua SSH, gom vào một nơi dùng như một hệ điều hành.',
@@ -15,6 +15,11 @@ export const vi: Dict = {
     github: 'Xem trên GitHub',
     version: (v: string) => `Phiên bản ${v} · Miễn phí, mã nguồn mở (GPL-3.0)`,
     shotAlt: 'Desktop của Davish: Terminal, Files và Monitor trên một server',
+    badge: (v: string) => `Có gì mới trong ${v}`,
+    docs: 'Đọc tài liệu',
+    platforms: 'Chạy trên macOS, Windows và Linux',
+    hint: 'Chọn một app để xem thử',
+    tabs: { desktop: 'Desktop', servers: 'Tất cả server', docker: 'Docker', database: 'Database', git: 'Git', security: 'An ninh' },
   },
   why: {
     title: 'Vì sao là Davish',
@@ -127,6 +132,26 @@ export const vi: Dict = {
       'Davish chưa được ký số nên macOS và Windows sẽ cảnh báo lần đầu. Hướng dẫn cài trên GitHub chỉ cách mở.',
     guide: 'Hướng dẫn cài',
   },
+  stats: {
+    downloads: 'lượt tải app',
+    apps: 'app trên một desktop',
+    version: (date: string) => `phiên bản mới nhất, ${date}`,
+    stars: 'sao trên GitHub',
+    free: 'Miễn phí',
+    freeNote: 'mã nguồn mở, GPL-3.0',
+  },
+  docs: {
+    title: 'Mười phút là dùng được',
+    lead: 'Mỗi app có một trang riêng trong tài liệu: làm gì, chạy lệnh gì trên server, và dữ liệu của bạn nằm ở đâu.',
+    start: 'Bắt đầu',
+    links: [
+      { label: 'Cài Davish', href: 'start/install/' },
+      { label: 'Kết nối server đầu tiên', href: 'start/first-server/' },
+      { label: 'Server cần gì', href: 'start/requirements/' },
+      { label: 'Phím tắt', href: 'start/shortcuts/' },
+    ],
+  },
+  community: { discord: 'Tham gia Discord', discordNote: 'Hỏi đáp, góp ý và bản dùng thử sớm.' },
   footer: {
     license: 'Davish là phần mềm tự do theo giấy phép GPL-3.0.',
     changelog: 'Nhật ký thay đổi',

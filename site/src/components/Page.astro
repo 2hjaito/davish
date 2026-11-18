@@ -1,12 +1,37 @@
 ---
-// The whole landing page, in one of three languages.
+// The landing page, in one of three languages (ADR 0025).
 import type { ImageMetadata } from 'astro'
 import { Image } from 'astro:assets'
+import {
+  ArrowRight,
+  BookOpen,
+  Check,
+  Container,
+  Database,
+  Download,
+  Eye,
+  Feather,
+  GitBranch,
+  Globe,
+  KeyRound,
+  LayoutGrid,
+  Monitor,
+  Package,
+  RefreshCw,
+  Server,
+  ShieldCheck,
+  Sparkles,
+  SquareTerminal,
+  Star,
+  Tag,
+  Zap,
+} from '@lucide/astro'
 
 import { dicts, locales, type Locale } from '../i18n'
 import Base from '../layouts/Base.astro'
 import { links, release } from '../lib/release'
-import Icon from './Icon.astro'
+import { stats } from '../lib/stats'
+import Brand from './Brand.astro'
 
 interface Props {
   locale: Locale
@@ -14,6 +39,11 @@ interface Props {
 const { locale } = Astro.props
 const t = dicts[locale]
 const r = await release()
+const s = await stats()
+const here = locales.find((l) => l.id === locale)!
+const docs = locale === 'en' ? '/docs/' : `/${locale}/docs/`
+const fmt = new Intl.NumberFormat(t.lang)
+const day = r.date ? new Intl.DateTimeFormat(t.lang, { dateStyle: 'medium' }).format(new Date(r.date)) : ''
 
 // Screenshots live in the repo's assets/: English ones in en/ (and for
 // Chinese, which only has its own desktop), Vietnamese ones at the top.
@@ -23,7 +53,11 @@ const shots = import.meta.glob<{ default: ImageMetadata }>('../../../assets/scre
 function shot(name: string): ImageMetadata {
   const dir = '../../../assets/screenshots/'
   const tries =
-    locale === 'vi' ? [`${dir}${name}`, `${dir}en/${name}`] : locale === 'zh' ? [`${dir}zh/${name}`, `${dir}en/${name}`] : [`${dir}en/${name}`]
+    locale === 'vi'
+      ? [`${dir}${name}`, `${dir}en/${name}`]
+      : locale === 'zh'
+        ? [`${dir}zh/${name}`, `${dir}en/${name}`]
+        : [`${dir}en/${name}`]
   for (const p of tries) {
     const m = shots[p]
     if (m) return m.default
@@ -31,188 +65,303 @@ function shot(name: string): ImageMetadata {
   throw new Error(`no screenshot ${name}`)
 }
 
-const platforms = [
-  { id: 'macos', icon: 'apple', main: r.files.macos, alt: r.files.macosZip },
-  { id: 'windows', icon: 'windows', main: r.files.windows, alt: r.files.windowsZip },
-  { id: 'linux', icon: 'linux', main: r.files.linux, alt: '' },
+const tabs = [
+  { id: 'desktop', icon: Monitor, file: 'desktop.png' },
+  { id: 'servers', icon: Server, file: 'servers.jpg' },
+  { id: 'docker', icon: Container, file: 'docker-images.jpg' },
+  { id: 'database', icon: Database, file: 'sqlite-rows.jpg' },
+  { id: 'git', icon: GitBranch, file: 'git.jpg' },
+  { id: 'security', icon: ShieldCheck, file: 'security.jpg' },
 ] as const
-const whyIcons = ['bolt', 'feather', 'eye', 'grid', 'key', 'refresh'] as const
-const home = locales.find((l) => l.id === locale)!.path
+const whyIcons = [Zap, Feather, Eye, LayoutGrid, KeyRound, RefreshCw]
+const platforms = [
+  { id: 'macos', main: r.files.macos, alt: r.files.macosZip },
+  { id: 'windows', main: r.files.windows, alt: r.files.windowsZip },
+  { id: 'linux', main: r.files.linux, alt: '' },
+] as const
 ---
 
 <Base locale={locale}>
-  <header class="nav">
-    <div class="wrap nav-in">
-      <a class="brand" href={home}>
-        <img src="/favicon.svg" alt="" width="28" height="28" />
+  <div class="frame">
+    <header class="nav">
+      <a class="brand" href={here.path}>
+        <img src="/favicon.svg" alt="" width="30" height="30" />
         <span>Davish</span>
       </a>
       <nav class="links" aria-label="Main">
         <a href="#features">{t.nav.features}</a>
-        <a href="#security">{t.nav.security}</a>
+        <a href={docs}>{t.nav.docs}</a>
         <a href="#download">{t.nav.download}</a>
+        <a href={links.changelog(t.lang)}>{t.nav.changelog}</a>
       </nav>
-      <details class="lang">
-        <summary aria-label={t.footer.language}><Icon name="globe" />{locales.find((l) => l.id === locale)!.name}</summary>
-        <ul>
+      <div class="actions">
+        <details class="lang">
+          <summary aria-label={t.footer.language}><Globe size={17} /><span>{here.name}</span></summary>
+          <ul>
+            {
+              locales.map((l) => (
+                <li>
+                  <a href={l.path} hreflang={l.hreflang} aria-current={l.id === locale ? 'page' : undefined}>
+                    {l.name}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </details>
+        <a class="pill" href={links.discord} aria-label="Discord"><Brand name="discord" /></a>
+        <a class="pill" href={links.repo} aria-label="GitHub">
+          <Brand name="github" />
+          {s.stars !== undefined && <span class="mono">{fmt.format(s.stars)}</span>}
+        </a>
+        <a class="pill solid" href="#download"><Download size={17} /><span>{t.nav.download}</span></a>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-text">
+        {
+          r.version && (
+            <a class="badge" href={r.notes}>
+              <Sparkles size={15} />
+              {t.hero.badge(r.version)}
+              <ArrowRight size={15} />
+            </a>
+          )
+        }
+        <h1>{t.hero.title}</h1>
+        <p class="lead">{t.hero.lead}</p>
+        <div class="cta">
+          <a class="btn primary" id="get" href="#download" data-label={t.hero.download}>
+            <Download size={18} />
+            <span>{t.nav.download}</span>
+          </a>
+          <a class="btn outline" href={docs}><BookOpen size={18} />{t.hero.docs}</a>
+        </div>
+        <p class="plats-line">
+          <Brand name="apple" size={16} />
+          <Brand name="windows" size={15} />
+          <SquareTerminal size={16} />
+          <span>{t.hero.platforms}</span>
+        </p>
+        <p class="tags">{t.hero.tags.map((tag) => <span><Check size={14} />{tag}</span>)}</p>
+      </div>
+
+      <div class="demo" data-demo>
+        <p class="hint">{t.hero.hint} <ArrowRight size={14} /></p>
+        <div class="tabs" role="tablist">
           {
-            locales.map((l) => (
+            tabs.map((tab, i) => (
+              <button
+                role="tab"
+                id={`tab-${tab.id}`}
+                aria-controls={`pane-${tab.id}`}
+                aria-selected={i === 0 ? 'true' : 'false'}
+                data-tab={tab.id}
+              >
+                <tab.icon size={16} />
+                {t.hero.tabs[tab.id]}
+              </button>
+            ))
+          }
+        </div>
+        <div class="screen">
+          {
+            tabs.map((tab, i) => (
+              <div class="pane" role="tabpanel" id={`pane-${tab.id}`} aria-labelledby={`tab-${tab.id}`} hidden={i !== 0}>
+                <Image
+                  src={shot(tab.file)}
+                  alt={i === 0 ? t.hero.shotAlt : t.hero.tabs[tab.id]}
+                  widths={[640, 960, 1400]}
+                  sizes="(max-width: 1000px) 100vw, 680px"
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                  fetchpriority={i === 0 ? 'high' : 'auto'}
+                />
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="stats" aria-label="Davish in numbers">
+      {
+        s.downloads !== undefined && (
+          <div class="stat">
+            <Download size={22} />
+            <strong>{fmt.format(s.downloads)}</strong>
+            <span>{t.stats.downloads}</span>
+          </div>
+        )
+      }
+      <div class="stat">
+        <LayoutGrid size={22} />
+        <strong>{s.apps}</strong>
+        <span>{t.stats.apps}</span>
+      </div>
+      {
+        r.version && (
+          <div class="stat">
+            <Tag size={22} />
+            <strong>{r.version}</strong>
+            <span>{t.stats.version(day)}</span>
+          </div>
+        )
+      }
+      {
+        s.stars !== undefined ? (
+          <div class="stat">
+            <Star size={22} />
+            <strong>{fmt.format(s.stars)}</strong>
+            <span>{t.stats.stars}</span>
+          </div>
+        ) : (
+          <div class="stat">
+            <Package size={22} />
+            <strong>{t.stats.free}</strong>
+            <span>{t.stats.freeNote}</span>
+          </div>
+        )
+      }
+    </section>
+
+    <div class="hatch" aria-hidden="true"></div>
+
+    <section class="block">
+      <h2>{t.why.title}</h2>
+      <div class="grid3">
+        {
+          t.why.items.map((it, i) => {
+            const I = whyIcons[i] ?? Zap
+            return (
+              <article class="cell">
+                <I size={22} />
+                <h3>{it.title}</h3>
+                <p>{it.text}</p>
+              </article>
+            )
+          })
+        }
+      </div>
+    </section>
+
+    <section class="block" id="features">
+      <h2>{t.features.title}</h2>
+      <p class="sub">{t.features.lead}</p>
+      <div class="rows">
+        {
+          t.features.show.map((f, i) => (
+            <div class:list={['row', { flip: i % 2 === 1 }]}>
+              <div class="row-text">
+                <span class="num mono">{String(i + 1).padStart(2, '0')}</span>
+                <h3>{f.title}</h3>
+                <p>{f.text}</p>
+              </div>
+              <div class="shot">
+                <Image src={shot(`${f.key}.jpg`)} alt={f.title} widths={[640, 960, 1400]} sizes="(max-width: 900px) 100vw, 720px" />
+              </div>
+            </div>
+          ))
+        }
+      </div>
+      <div class="more">
+        <h3>{t.features.more}</h3>
+        <ul class="chips">{t.features.list.map((x) => <li>{x}</li>)}</ul>
+        <a class="arrow" href={docs}>{t.features.all} <ArrowRight size={16} /></a>
+      </div>
+    </section>
+
+    <div class="hatch" aria-hidden="true"></div>
+
+    <section class="split" id="security">
+      <div class="half">
+        <ShieldCheck size={28} />
+        <h2>{t.security.title}</h2>
+        <ul class="checks">{t.security.items.map((x) => <li><Check size={18} />{x}</li>)}</ul>
+        <a class="arrow" href={links.security}>{t.security.more} <ArrowRight size={16} /></a>
+      </div>
+      <div class="half">
+        <BookOpen size={28} />
+        <h2>{t.docs.title}</h2>
+        <p class="muted">{t.docs.lead}</p>
+        <ul class="doclinks">
+          {
+            t.docs.links.map((l) => (
               <li>
-                <a href={l.path} hreflang={l.hreflang} aria-current={l.id === locale ? 'page' : undefined}>
-                  {l.name}
+                <a href={docs + l.href}>
+                  {l.label}
+                  <ArrowRight size={16} />
                 </a>
               </li>
             ))
           }
         </ul>
-      </details>
-      <a class="gh" href={links.repo} aria-label="GitHub"><Icon name="github" /></a>
-    </div>
-  </header>
-
-  <main>
-    <section class="hero">
-      <div class="wrap">
-        <h1>{t.hero.title}</h1>
-        <p class="lead">{t.hero.lead}</p>
-        <p class="tags">{t.hero.tags.map((tag) => <span>{tag}</span>)}</p>
-        <div class="cta">
-          <a class="btn primary" id="get" href="#download" data-label={t.hero.download}>
-            <Icon name="download" />
-            <span>{t.nav.download}</span>
-          </a>
-          <a class="btn ghost" href={links.repo}><Icon name="github" />{t.hero.github}</a>
-        </div>
-        {r.version && <p class="ver">{t.hero.version(r.version)}</p>}
-        <div class="shot hero-shot">
-          <Image
-            src={shot('desktop.png')}
-            alt={t.hero.shotAlt}
-            widths={[800, 1280, 1600, 2400]}
-            sizes="(max-width: 1200px) 100vw, 1160px"
-            loading="eager"
-            fetchpriority="high"
-          />
-        </div>
       </div>
     </section>
 
-    <section class="why">
-      <div class="wrap">
-        <h2>{t.why.title}</h2>
-        <div class="cards">
-          {
-            t.why.items.map((it, i) => (
-              <article class="card">
-                <span class="ico">
-                  <Icon name={whyIcons[i] ?? 'bolt'} />
-                </span>
-                <h3>{it.title}</h3>
-                <p>{it.text}</p>
-              </article>
-            ))
-          }
-        </div>
-      </div>
-    </section>
-
-    <section class="features" id="features">
-      <div class="wrap">
-        <h2>{t.features.title}</h2>
-        <p class="sub">{t.features.lead}</p>
+    <section class="block" id="download">
+      <h2>{t.download.title}</h2>
+      <p class="sub">{t.download.lead}</p>
+      <div class="grid3 plats">
         {
-          t.features.show.map((f, i) => (
-            <div class:list={['feature', { flip: i % 2 === 1 }]}>
-              <div class="text">
-                <h3>{f.title}</h3>
-                <p>{f.text}</p>
-              </div>
-              <div class="shot">
-                <Image src={shot(`${f.key}.jpg`)} alt={f.title} widths={[640, 960, 1280]} sizes="(max-width: 900px) 100vw, 680px" />
-              </div>
-            </div>
+          platforms.map((p) => (
+            <article class="cell plat" data-os={p.id}>
+              {p.id === 'linux' ? <SquareTerminal size={30} /> : <Brand name={p.id === 'macos' ? 'apple' : 'windows'} size={28} />}
+              <h3>{t.download.platforms[p.id].name}</h3>
+              <p>{t.download.platforms[p.id].note}</p>
+              <a class="btn primary" href={p.main}>
+                <Download size={18} />
+                {p.id === 'linux' ? '.tar.gz' : t.download.installer}
+              </a>
+              {p.alt && (
+                <a class="small" href={p.alt}>
+                  {t.download.archive} (.zip)
+                </a>
+              )}
+            </article>
           ))
         }
-        <div class="more">
-          <h3>{t.features.more}</h3>
-          <ul class="chips">{t.features.list.map((x) => <li>{x}</li>)}</ul>
-          <a class="arrow" href={links.features(t.lang)}>{t.features.all} →</a>
-        </div>
       </div>
+      <p class="note">
+        {t.download.unsigned} <a href={`${docs}start/install/`}>{t.download.guide}</a>
+      </p>
+      <p class="note">
+        <a href={r.notes}>{t.download.notes}</a> · <a href={r.files.sums}>{t.download.checksums}</a>
+      </p>
     </section>
 
-    <section class="security" id="security">
-      <div class="wrap">
-        <div class="panel">
-          <span class="ico big"><Icon name="shield" /></span>
-          <h2>{t.security.title}</h2>
-          <ul class="checks">
-            {
-              t.security.items.map((x) => (
-                <li>
-                  <Icon name="check" />
-                  {x}
-                </li>
-              ))
-            }
-          </ul>
-          <a class="arrow" href={links.security}>{t.security.more} →</a>
-        </div>
-      </div>
+    <section class="community">
+      <a class="discord" href={links.discord}>
+        <Brand name="discord" size={26} />
+        <span><strong>{t.community.discord}</strong><small>{t.community.discordNote}</small></span>
+        <ArrowRight size={18} />
+      </a>
     </section>
 
-    <section class="download" id="download">
-      <div class="wrap">
-        <h2>{t.download.title}</h2>
-        <p class="sub">{t.download.lead}</p>
-        <div class="plats">
-          {
-            platforms.map((p) => (
-              <article class="plat" data-os={p.id}>
-                <span class="ico big">
-                  <Icon name={p.icon} />
-                </span>
-                <h3>{t.download.platforms[p.id].name}</h3>
-                <p>{t.download.platforms[p.id].note}</p>
-                <a class="btn primary" href={p.main}>
-                  <Icon name="download" />
-                  {p.id === 'linux' ? '.tar.gz' : t.download.installer}
-                </a>
-                {p.alt && (
-                  <a class="small" href={p.alt}>
-                    {t.download.archive} (.zip)
-                  </a>
-                )}
-              </article>
-            ))
-          }
-        </div>
-        <p class="note">
-          {t.download.unsigned} <a href={`${links.readme(t.lang)}#install`}>{t.download.guide}</a>
-        </p>
-        <p class="note">
-          <a href={r.notes}>{t.download.notes}</a> · <a href={r.files.sums}>{t.download.checksums}</a>
-        </p>
-      </div>
-    </section>
-  </main>
-
-  <footer class="foot">
-    <div class="wrap foot-in">
-      <a class="brand" href={home}><img src="/favicon.svg" alt="" width="22" height="22" /><span>Davish</span></a>
+    <footer class="foot">
+      <a class="brand" href={here.path}><img src="/favicon.svg" alt="" width="22" height="22" /><span>Davish</span></a>
       <p>{t.footer.license}</p>
-      <nav aria-label={t.footer.language}>
+      <nav aria-label="Footer">
+        <a href={docs}>{t.nav.docs}</a>
         <a href={links.repo}>GitHub</a>
+        <a href={links.discord}>Discord</a>
         <a href={links.changelog(t.lang)}>{t.footer.changelog}</a>
         <a href={links.issues}>{t.footer.issues}</a>
       </nav>
-    </div>
-  </footer>
+    </footer>
+  </div>
 
   <script is:inline>
-    // Point the main button at the visitor's own platform; without this it
-    // scrolls to the download section, which works just as well.
+    // Tabs of the demo screen, and the main button pointed at the visitor's
+    // platform. The page works without either.
     ;(() => {
+      const demo = document.querySelector('[data-demo]')
+      demo?.querySelectorAll('[data-tab]').forEach((b) =>
+        b.addEventListener('click', () => {
+          demo.querySelectorAll('[data-tab]').forEach((x) => x.setAttribute('aria-selected', String(x === b)))
+          demo.querySelectorAll('.pane').forEach((p) => (p.hidden = p.id !== `pane-${b.dataset.tab}`))
+        }),
+      )
       const ua = navigator.userAgent
       const os = /Mac/.test(ua) && !/iPhone|iPad/.test(ua) ? 'macos' : /Windows/.test(ua) ? 'windows' : /Linux/.test(ua) && !/Android/.test(ua) ? 'linux' : ''
       const card = os && document.querySelector(`.plat[data-os="${os}"]`)

@@ -1,0 +1,35 @@
+/* Starlight in Davish's colors and fonts (ADR 0025). */
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+@import '@fontsource-variable/bricolage-grotesque';
+
+:root {
+  --sl-font: 'Geist Variable', system-ui, sans-serif;
+  --sl-font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+  --sl-color-accent-low: #0c1f4d;
+  --sl-color-accent: #4b93ff;
+  --sl-color-accent-high: #c4dcff;
+  /* The landing page's near-black, not Starlight's blue-gray. */
+  --sl-color-black: #0a0b10;
+  --sl-color-gray-6: #0e1017;
+  --sl-color-gray-5: #20232e;
+  --sl-color-gray-4: #3a3f4f;
+}
+
+:root[data-theme='light'] {
+  --sl-color-accent-low: #d6e6ff;
+  --sl-color-accent: #0a64d8;
+  --sl-color-accent-high: #0b3a80;
+  --sl-color-white: #0f1325;
+}
+
+h1,
+.sl-markdown-content :is(h2, h3) {
+  font-family: 'Bricolage Grotesque Variable', var(--sl-font);
+  letter-spacing: -0.02em;
+}
+
+.sl-markdown-content img {
+  border-radius: 12px;
+  border: 1px solid var(--sl-color-hairline);
+}

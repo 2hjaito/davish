@@ -5,7 +5,7 @@ export const zh: Dict = {
   title: 'Davish：你的 Linux 服务器桌面',
   description:
     '通过 SSH 使用终端、文件、Docker、日志、数据库等功能，一个适用于 macOS、Windows 和 Linux 的桌面应用。服务器上无需安装任何东西。',
-  nav: { features: '功能', security: '安全', download: '下载' },
+  nav: { features: '功能', security: '安全', download: '下载', docs: '文档', changelog: '更新日志' },
   hero: {
     title: '你的 Linux 服务器桌面。',
     lead: '终端、文件、服务、Docker、日志、数据库和 git，全部通过 SSH，集中在一个像操作系统一样的地方。',
@@ -15,6 +15,11 @@ export const zh: Dict = {
     github: '在 GitHub 上查看',
     version: (v: string) => `版本 ${v} · 免费开源（GPL-3.0）`,
     shotAlt: 'Davish 桌面：同一台服务器上的终端、文件和监控',
+    badge: (v: string) => `${v} 有哪些新内容`,
+    docs: '阅读文档',
+    platforms: '支持 macOS、Windows 和 Linux',
+    hint: '选一个应用看看',
+    tabs: { desktop: '桌面', servers: '所有服务器', docker: 'Docker', database: '数据库', git: 'Git', security: '安全' },
   },
   why: {
     title: '为什么选择 Davish',
@@ -126,6 +131,26 @@ export const zh: Dict = {
     unsigned: 'Davish 暂未进行代码签名，macOS 和 Windows 首次打开时会提示。GitHub 上的安装说明介绍了如何打开。',
     guide: '安装说明',
   },
+  stats: {
+    downloads: '次下载',
+    apps: '个应用共享一个桌面',
+    version: (date: string) => `最新版本，${date}`,
+    stars: 'GitHub 星标',
+    free: '免费',
+    freeNote: '开源，GPL-3.0',
+  },
+  docs: {
+    title: '十分钟上手',
+    lead: '每个应用在文档中都有独立页面：它做什么、在服务器上运行什么，以及你的数据存放在哪里。',
+    start: '入门',
+    links: [
+      { label: '安装 Davish', href: 'start/install/' },
+      { label: '连接第一台服务器', href: 'start/first-server/' },
+      { label: '服务器需要什么', href: 'start/requirements/' },
+      { label: '键盘快捷键', href: 'start/shortcuts/' },
+    ],
+  },
+  community: { discord: '加入 Discord', discordNote: '提问、建议和抢先体验版本。' },
   footer: {
     license: 'Davish 是基于 GPL-3.0 的自由软件。',
     changelog: '更新日志',

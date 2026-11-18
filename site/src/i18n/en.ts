@@ -4,7 +4,7 @@ export const en = {
   title: 'Davish: a desktop for your Linux servers',
   description:
     'Terminal, files, Docker, logs, databases and more over plain SSH, in one desktop app for macOS, Windows and Linux. Nothing to install on the server.',
-  nav: { features: 'Features', security: 'Security', download: 'Download' },
+  nav: { features: 'Features', security: 'Security', download: 'Download', docs: 'Docs', changelog: 'Changelog' },
   hero: {
     title: 'A desktop for your Linux servers.',
     lead: 'Terminal, files, services, Docker, logs, databases and git over plain SSH, in one place that feels like an operating system.',
@@ -14,6 +14,11 @@ export const en = {
     github: 'View on GitHub',
     version: (v: string) => `Version ${v} · Free and open source (GPL-3.0)`,
     shotAlt: 'The Davish desktop: Terminal, Files and Monitor on one server',
+    badge: (v: string) => `What’s new in ${v}`,
+    docs: 'Read the docs',
+    platforms: 'Works on macOS, Windows and Linux',
+    hint: 'Pick an app to look inside',
+    tabs: { desktop: 'Desktop', servers: 'All servers', docker: 'Docker', database: 'Database', git: 'Git', security: 'Security' },
   },
   why: {
     title: 'Why Davish',
@@ -126,6 +131,26 @@ export const en = {
       'Davish is not code-signed yet, so macOS and Windows warn the first time. The install guide on GitHub shows how to open it.',
     guide: 'Install guide',
   },
+  stats: {
+    downloads: 'downloads of the app',
+    apps: 'apps on one desktop',
+    version: (date: string) => `latest version, ${date}`,
+    stars: 'stars on GitHub',
+    free: 'Free',
+    freeNote: 'open source, GPL-3.0',
+  },
+  docs: {
+    title: 'Learn it in ten minutes',
+    lead: 'Every app has its own page in the docs: what it does, what it runs on the server, and where your data stays.',
+    start: 'Get started',
+    links: [
+      { label: 'Install Davish', href: 'start/install/' },
+      { label: 'Connect your first server', href: 'start/first-server/' },
+      { label: 'What the server needs', href: 'start/requirements/' },
+      { label: 'Keyboard shortcuts', href: 'start/shortcuts/' },
+    ],
+  },
+  community: { discord: 'Join us on Discord', discordNote: 'Questions, ideas and early builds.' },
   footer: {
     license: 'Davish is free software under the GPL-3.0.',
     changelog: 'Changelog',

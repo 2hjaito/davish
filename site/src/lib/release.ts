@@ -5,6 +5,8 @@ const repo = 'https://github.com/2hjaito/davish'
 
 export interface Release {
   version: string
+  /** When it came out, as an ISO date. */
+  date: string
   notes: string
   files: Record<'macos' | 'macosZip' | 'windows' | 'windowsZip' | 'linux' | 'sums', string>
 }
@@ -13,7 +15,7 @@ const latest = `${repo}/releases/latest`
 
 function fallback(): Release {
   const f = { macos: latest, macosZip: latest, windows: latest, windowsZip: latest, linux: latest, sums: latest }
-  return { version: '', notes: latest, files: f }
+  return { version: '', date: '', notes: latest, files: f }
 }
 
 let cached: Promise<Release> | undefined
@@ -33,10 +35,11 @@ async function load(): Promise<Release> {
       },
     })
     if (!res.ok) throw new Error(`GitHub answered ${res.status}`)
-    const r = (await res.json()) as { tag_name: string; html_url: string; assets: { name: string; browser_download_url: string }[] }
+    const r = (await res.json()) as { tag_name: string; html_url: string; published_at: string; assets: { name: string; browser_download_url: string }[] }
     const pick = (end: string) => r.assets.find((a) => a.name.endsWith(end))?.browser_download_url ?? r.html_url
     return {
       version: r.tag_name.replace(/^v/, ''),
+      date: r.published_at,
       notes: r.html_url,
       files: {
         macos: pick('-macos-universal.pkg'),
@@ -61,4 +64,5 @@ export const links = {
   security: `${repo}/blob/main/SECURITY.md`,
   changelog: (lang: string) => `${repo}/blob/main/${lang === 'vi' ? 'CHANGELOG.md' : 'CHANGELOG.en.md'}`,
   issues: `${repo}/issues`,
+  discord: 'https://discord.com/invite/eG5txdWaqr',
 }
