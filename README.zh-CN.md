@@ -16,7 +16,7 @@
 ![Go](https://img.shields.io/badge/Go-1.27-00ADD8?logo=go&logoColor=white)
 ![Svelte](https://img.shields.io/badge/Svelte-5-FF3E00?logo=svelte&logoColor=white)
 
-[English](README.md) · [Tiếng Việt](README.vi.md) · **简体中文**
+[English](README.md) · [Tiếng Việt](README.vi.md) · **简体中文** · **[davish.dangth.dev](https://davish.dangth.dev/zh/)**
 
 <p align="center">
   <img src="assets/demo.gif" alt="davish 演示：文件操作环、终端、Docker、端口、登录安全和 git 提交图，全部走 SSH" width="800">

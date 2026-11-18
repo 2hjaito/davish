@@ -1,0 +1,226 @@
+---
+// The whole landing page, in one of three languages.
+import type { ImageMetadata } from 'astro'
+import { Image } from 'astro:assets'
+
+import { dicts, locales, type Locale } from '../i18n'
+import Base from '../layouts/Base.astro'
+import { links, release } from '../lib/release'
+import Icon from './Icon.astro'
+
+interface Props {
+  locale: Locale
+}
+const { locale } = Astro.props
+const t = dicts[locale]
+const r = await release()
+
+// Screenshots live in the repo's assets/: English ones in en/ (and for
+// Chinese, which only has its own desktop), Vietnamese ones at the top.
+const shots = import.meta.glob<{ default: ImageMetadata }>('../../../assets/screenshots/**/*.{jpg,png}', {
+  eager: true,
+})
+function shot(name: string): ImageMetadata {
+  const dir = '../../../assets/screenshots/'
+  const tries =
+    locale === 'vi' ? [`${dir}${name}`, `${dir}en/${name}`] : locale === 'zh' ? [`${dir}zh/${name}`, `${dir}en/${name}`] : [`${dir}en/${name}`]
+  for (const p of tries) {
+    const m = shots[p]
+    if (m) return m.default
+  }
+  throw new Error(`no screenshot ${name}`)
+}
+
+const platforms = [
+  { id: 'macos', icon: 'apple', main: r.files.macos, alt: r.files.macosZip },
+  { id: 'windows', icon: 'windows', main: r.files.windows, alt: r.files.windowsZip },
+  { id: 'linux', icon: 'linux', main: r.files.linux, alt: '' },
+] as const
+const whyIcons = ['bolt', 'feather', 'eye', 'grid', 'key', 'refresh'] as const
+const home = locales.find((l) => l.id === locale)!.path
+---
+
+<Base locale={locale}>
+  <header class="nav">
+    <div class="wrap nav-in">
+      <a class="brand" href={home}>
+        <img src="/favicon.svg" alt="" width="28" height="28" />
+        <span>Davish</span>
+      </a>
+      <nav class="links" aria-label="Main">
+        <a href="#features">{t.nav.features}</a>
+        <a href="#security">{t.nav.security}</a>
+        <a href="#download">{t.nav.download}</a>
+      </nav>
+      <details class="lang">
+        <summary aria-label={t.footer.language}><Icon name="globe" />{locales.find((l) => l.id === locale)!.name}</summary>
+        <ul>
+          {
+            locales.map((l) => (
+              <li>
+                <a href={l.path} hreflang={l.hreflang} aria-current={l.id === locale ? 'page' : undefined}>
+                  {l.name}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </details>
+      <a class="gh" href={links.repo} aria-label="GitHub"><Icon name="github" /></a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <h1>{t.hero.title}</h1>
+        <p class="lead">{t.hero.lead}</p>
+        <p class="tags">{t.hero.tags.map((tag) => <span>{tag}</span>)}</p>
+        <div class="cta">
+          <a class="btn primary" id="get" href="#download" data-label={t.hero.download}>
+            <Icon name="download" />
+            <span>{t.nav.download}</span>
+          </a>
+          <a class="btn ghost" href={links.repo}><Icon name="github" />{t.hero.github}</a>
+        </div>
+        {r.version && <p class="ver">{t.hero.version(r.version)}</p>}
+        <div class="shot hero-shot">
+          <Image
+            src={shot('desktop.png')}
+            alt={t.hero.shotAlt}
+            widths={[800, 1280, 1600, 2400]}
+            sizes="(max-width: 1200px) 100vw, 1160px"
+            loading="eager"
+            fetchpriority="high"
+          />
+        </div>
+      </div>
+    </section>
+
+    <section class="why">
+      <div class="wrap">
+        <h2>{t.why.title}</h2>
+        <div class="cards">
+          {
+            t.why.items.map((it, i) => (
+              <article class="card">
+                <span class="ico">
+                  <Icon name={whyIcons[i] ?? 'bolt'} />
+                </span>
+                <h3>{it.title}</h3>
+                <p>{it.text}</p>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="features" id="features">
+      <div class="wrap">
+        <h2>{t.features.title}</h2>
+        <p class="sub">{t.features.lead}</p>
+        {
+          t.features.show.map((f, i) => (
+            <div class:list={['feature', { flip: i % 2 === 1 }]}>
+              <div class="text">
+                <h3>{f.title}</h3>
+                <p>{f.text}</p>
+              </div>
+              <div class="shot">
+                <Image src={shot(`${f.key}.jpg`)} alt={f.title} widths={[640, 960, 1280]} sizes="(max-width: 900px) 100vw, 680px" />
+              </div>
+            </div>
+          ))
+        }
+        <div class="more">
+          <h3>{t.features.more}</h3>
+          <ul class="chips">{t.features.list.map((x) => <li>{x}</li>)}</ul>
+          <a class="arrow" href={links.features(t.lang)}>{t.features.all} →</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="security" id="security">
+      <div class="wrap">
+        <div class="panel">
+          <span class="ico big"><Icon name="shield" /></span>
+          <h2>{t.security.title}</h2>
+          <ul class="checks">
+            {
+              t.security.items.map((x) => (
+                <li>
+                  <Icon name="check" />
+                  {x}
+                </li>
+              ))
+            }
+          </ul>
+          <a class="arrow" href={links.security}>{t.security.more} →</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="download" id="download">
+      <div class="wrap">
+        <h2>{t.download.title}</h2>
+        <p class="sub">{t.download.lead}</p>
+        <div class="plats">
+          {
+            platforms.map((p) => (
+              <article class="plat" data-os={p.id}>
+                <span class="ico big">
+                  <Icon name={p.icon} />
+                </span>
+                <h3>{t.download.platforms[p.id].name}</h3>
+                <p>{t.download.platforms[p.id].note}</p>
+                <a class="btn primary" href={p.main}>
+                  <Icon name="download" />
+                  {p.id === 'linux' ? '.tar.gz' : t.download.installer}
+                </a>
+                {p.alt && (
+                  <a class="small" href={p.alt}>
+                    {t.download.archive} (.zip)
+                  </a>
+                )}
+              </article>
+            ))
+          }
+        </div>
+        <p class="note">
+          {t.download.unsigned} <a href={`${links.readme(t.lang)}#install`}>{t.download.guide}</a>
+        </p>
+        <p class="note">
+          <a href={r.notes}>{t.download.notes}</a> · <a href={r.files.sums}>{t.download.checksums}</a>
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-in">
+      <a class="brand" href={home}><img src="/favicon.svg" alt="" width="22" height="22" /><span>Davish</span></a>
+      <p>{t.footer.license}</p>
+      <nav aria-label={t.footer.language}>
+        <a href={links.repo}>GitHub</a>
+        <a href={links.changelog(t.lang)}>{t.footer.changelog}</a>
+        <a href={links.issues}>{t.footer.issues}</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script is:inline>
+    // Point the main button at the visitor's own platform; without this it
+    // scrolls to the download section, which works just as well.
+    ;(() => {
+      const ua = navigator.userAgent
+      const os = /Mac/.test(ua) && !/iPhone|iPad/.test(ua) ? 'macos' : /Windows/.test(ua) ? 'windows' : /Linux/.test(ua) && !/Android/.test(ua) ? 'linux' : ''
+      const card = os && document.querySelector(`.plat[data-os="${os}"]`)
+      const get = document.getElementById('get')
+      if (!card || !get) return
+      card.classList.add('mine')
+      get.href = card.querySelector('a.btn').href
+      get.querySelector('span').textContent = `${get.dataset.label} ${card.querySelector('h3').textContent}`
+    })()
+  </script>
+</Base>

@@ -16,7 +16,7 @@ Không cài gì lên server.
 ![Go](https://img.shields.io/badge/Go-1.27-00ADD8?logo=go&logoColor=white)
 ![Svelte](https://img.shields.io/badge/Svelte-5-FF3E00?logo=svelte&logoColor=white)
 
-[English](README.md) · **Tiếng Việt** · [简体中文](README.zh-CN.md)
+[English](README.md) · **Tiếng Việt** · [简体中文](README.zh-CN.md) · **[davish.dangth.dev](https://davish.dangth.dev/vi/)**
 
 <p align="center">
   <img src="assets/demo.gif" alt="Demo davish: vòng thao tác trên file, Terminal, Docker, cổng, an ninh đăng nhập và graph git qua SSH" width="800">
