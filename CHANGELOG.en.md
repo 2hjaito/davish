@@ -4,6 +4,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Fixed
+- Windows: the close, minimize and maximize buttons are redrawn like macOS's (a darker ring, solid glyphs that stay crisp at 12px, their own colors when pressed and when the window is in the background). Only fills change, so hover and press are lighter than before, with no `filter`.
+
 ## [1.14.4] - 2026-11-18
 
 ### Added

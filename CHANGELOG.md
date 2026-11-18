@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Sửa
+- Cửa sổ: ba nút đóng, thu nhỏ, phóng to vẽ lại theo đúng kiểu macOS (viền đậm hơn quanh nút, glyph đặc sắc nét ở 12px, màu riêng khi nhấn và khi cửa sổ không focus). Chỉ đổi màu fill nên hover và nhấn nhẹ hơn trước, không còn dùng `filter`.
+
 ## [1.14.4] - 2026-11-18
 
 ### Thêm
