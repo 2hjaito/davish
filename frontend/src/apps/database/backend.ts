@@ -15,11 +15,13 @@ import {
   databaseSQLite,
   databaseSQLiteBackup,
   databaseSQLiteRestoreLine,
+  databaseSQLiteRows,
   type DBEngine,
   type DBKind,
   type DBLogin,
   type Found,
   type SQLiteInfo,
+  type SQLiteRows,
 } from '../../lib/api/database'
 import { tunnelStart } from '../../lib/api/ports'
 import { hasRuntime } from '../../lib/api/runtime'
@@ -74,6 +76,37 @@ const demoSQLite = (path: string): SQLiteInfo => ({
       ],
 })
 
+const demoRows = (table: string, offset: number): SQLiteRows => {
+  const total = table === 'heartbeat' ? 48_210 : table === 'ciphers' ? 342 : 12
+  const n = Math.max(0, Math.min(100, total - offset))
+  return {
+    columns: [
+      { name: 'id', type: 'INTEGER', pk: true },
+      { name: 'name', type: 'TEXT', pk: false },
+      { name: 'status', type: 'INTEGER', pk: false },
+      { name: 'note', type: 'TEXT', pk: false },
+      { name: 'data', type: 'BLOB', pk: false },
+    ],
+    allColumns: 5,
+    offset,
+    more: offset + n < total,
+    rows: Array.from({ length: n }, (_, i) => {
+      const id = offset + i + 1
+      return [
+        { k: 'num', v: String(id) },
+        { k: 'text', v: `${table}-${id}` },
+        { k: 'num', v: String(id % 3 === 0 ? 0 : 1) },
+        id % 4 === 0
+          ? { k: 'null' }
+          : id % 5 === 0
+            ? { k: 'text', v: 'Lorem ipsum dolor sit amet, '.repeat(7).slice(0, 200), cut: true }
+            : { k: 'text', v: 'ok' },
+        id % 2 === 0 ? { k: 'blob', size: 1024 + id } : { k: 'null' },
+      ]
+    }),
+  }
+}
+
 const q = (kind: DBKind, n: string) => (kind === 'mysql' ? `\`${n}\`` : `"${n}"`)
 
 export const backend = hasRuntime
@@ -94,6 +127,7 @@ export const backend = hasRuntime
       sqlite: databaseSQLite,
       sqliteBackup: databaseSQLiteBackup,
       sqliteRestoreLine: databaseSQLiteRestoreLine,
+      sqliteRows: databaseSQLiteRows,
     }
   : {
       list: (_serverID: string) => Promise.resolve(demo),
@@ -147,4 +181,6 @@ export const backend = hasRuntime
         Promise.resolve(
           `cp -p -- ${file} ${file}.before-restore && gzip -dc -- ${backup} > ${file}`,
         ),
+      sqliteRows: (_serverID: string, _file: string, table: string, offset: number) =>
+        new Promise<SQLiteRows>((r) => setTimeout(() => r(demoRows(table, offset)), 250)),
     }

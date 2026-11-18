@@ -200,3 +200,155 @@ func SQLiteRestoreLine(file, backup string) (string, error) {
 	return shellx.Cmd("cp", "-p", "--", file, file+".before-restore").String() + " && " +
 		shellx.Cmd("gzip", "-dc", "--", backup).String() + " > " + shellx.Quote(file), nil
 }
+
+// A page of rows, kept small so a peek never weighs on the app (ADR 0024).
+const (
+	sqlitePage     = 100
+	sqliteCellText = 200
+	sqliteMaxCols  = 64
+	// sqliteSep and sqliteEnd end a cell and a row; text in a cell has
+	// them replaced, so the output splits cleanly.
+	sqliteSep = "\x1f"
+	sqliteEnd = "\x1e"
+)
+
+// sqliteSeparators makes sqlite3 end cells and rows with sqliteSep and
+// sqliteEnd, set on stdin so the command line stays printable.
+const sqliteSeparators = ".separator \"\\037\" \"\\036\"\n"
+
+// SQLiteColumn is one column of a table.
+type SQLiteColumn struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+	PK   bool   `json:"pk"`
+}
+
+// SQLiteCell is one value. Text longer than sqliteCellText is cut; a blob
+// carries only its size.
+type SQLiteCell struct {
+	// Kind is null, num, text or blob.
+	Kind string `json:"k"`
+	Text string `json:"v,omitempty"`
+	Cut  bool   `json:"cut,omitempty"`
+	Size int64  `json:"size,omitempty"`
+}
+
+// SQLiteRows is one page of a table.
+type SQLiteRows struct {
+	Columns []SQLiteColumn `json:"columns"`
+	// AllColumns counts the table's columns, beyond the sqliteMaxCols shown.
+	AllColumns int            `json:"allColumns"`
+	Rows       [][]SQLiteCell `json:"rows"`
+	Offset     int            `json:"offset"`
+	More       bool           `json:"more"`
+}
+
+// noSeps keeps the separators out of a text value.
+func noSeps(expr string) string {
+	return "replace(replace(" + expr + ", char(31), ' '), char(30), ' ')"
+}
+
+// sqliteColumnsSQL lists the columns of table, or nothing when no such
+// table or view exists.
+func sqliteColumnsSQL(table string) string {
+	t := quoteText(table)
+	return sqliteSeparators + "SELECT " + noSeps("name") + ", " + noSeps("type") + ", pk FROM pragma_table_info(" + t + ")" +
+		" WHERE EXISTS (SELECT 1 FROM sqlite_master WHERE type IN ('table', 'view') AND name = " + t + ");\n"
+}
+
+// sqliteRowsSQL reads one page of table, each cell tagged with its kind:
+// n (null), b<size>, t<text>, T<cut text>, v<number>.
+func sqliteRowsSQL(table string, cols []SQLiteColumn, offset int) string {
+	var b strings.Builder
+	b.WriteString(sqliteSeparators + "SELECT ")
+	for i, c := range cols {
+		if i > 0 {
+			b.WriteString(", ")
+		}
+		q := quoteIdent(c.Name)
+		b.WriteString("CASE typeof(" + q + ") WHEN 'null' THEN 'n' WHEN 'blob' THEN 'b' || length(" + q + ")" +
+			" WHEN 'text' THEN (CASE WHEN length(" + q + ") > " + strconv.Itoa(sqliteCellText) + " THEN 'T' ELSE 't' END) || " +
+			noSeps("substr("+q+", 1, "+strconv.Itoa(sqliteCellText)+")") + " ELSE 'v' || " + q + " END")
+	}
+	b.WriteString(" FROM " + quoteIdent(table) + " LIMIT " + strconv.Itoa(sqlitePage+1) + " OFFSET " + strconv.Itoa(offset) + ";\n")
+	return b.String()
+}
+
+// splitSQLite splits sqlite3 output into rows of cells.
+func splitSQLite(out string) [][]string {
+	var rows [][]string
+	for _, r := range strings.Split(out, sqliteEnd) {
+		if r == "" || r == "\n" {
+			continue
+		}
+		rows = append(rows, strings.Split(r, sqliteSep))
+	}
+	return rows
+}
+
+func parseSQLiteCell(s string) SQLiteCell {
+	if s == "" {
+		return SQLiteCell{Kind: "null"}
+	}
+	switch v := s[1:]; s[0] {
+	case 'b':
+		n, _ := strconv.ParseInt(v, 10, 64)
+		return SQLiteCell{Kind: "blob", Size: n}
+	case 't':
+		return SQLiteCell{Kind: "text", Text: v}
+	case 'T':
+		return SQLiteCell{Kind: "text", Text: v, Cut: true}
+	case 'v':
+		return SQLiteCell{Kind: "num", Text: v}
+	default:
+		return SQLiteCell{Kind: "null"}
+	}
+}
+
+// RowsSQLite reads one page of up to sqlitePage rows of a table or view,
+// read-only, from offset.
+func (s *Service) RowsSQLite(ctx context.Context, serverID, file, table string, offset int) (SQLiteRows, error) {
+	if err := checkSQLitePath(file); err != nil {
+		return SQLiteRows{}, err
+	}
+	if table == "" || len(table) > 1024 || strings.ContainsAny(table, "\x00") || offset < 0 || offset > 1<<40 {
+		return SQLiteRows{}, apperr.New(apperr.InvalidInput, "no such table, or a bad page")
+	}
+	out, _, err := s.runSQLite(ctx, serverID, file, sqliteColumnsSQL(table))
+	if err != nil {
+		return SQLiteRows{}, err
+	}
+	page := SQLiteRows{Offset: offset, Columns: []SQLiteColumn{}, Rows: [][]SQLiteCell{}}
+	for _, c := range splitSQLite(out) {
+		if len(c) != 3 {
+			continue
+		}
+		page.Columns = append(page.Columns, SQLiteColumn{Name: c[0], Type: c[1], PK: c[2] != "0"})
+	}
+	if len(page.Columns) == 0 {
+		return SQLiteRows{}, apperr.New(apperr.NotFound, "no such table")
+	}
+	page.AllColumns = len(page.Columns)
+	if len(page.Columns) > sqliteMaxCols {
+		page.Columns = page.Columns[:sqliteMaxCols]
+	}
+	out, _, err = s.runSQLite(ctx, serverID, file, sqliteRowsSQL(table, page.Columns, offset))
+	if err != nil {
+		return SQLiteRows{}, err
+	}
+	for _, r := range splitSQLite(out) {
+		if len(r) != len(page.Columns) {
+			continue
+		}
+		if len(page.Rows) == sqlitePage {
+			page.More = true
+			break
+		}
+		row := make([]SQLiteCell, len(r))
+		for i, c := range r {
+			row[i] = parseSQLiteCell(c)
+		}
+		page.Rows = append(page.Rows, row)
+	}
+	return page, nil
+}

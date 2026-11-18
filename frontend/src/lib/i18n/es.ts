@@ -1078,7 +1078,7 @@ const es = {
           'Abre el servidor de bases de datos por un túnel para las herramientas de este ordenador',
           'Detectar: las bases de datos en marcha y los archivos SQLite del servidor (solo lectura)',
           'MongoDB con autenticación: inicia sesión una vez, se guarda en el llavero de este ordenador; Olvidar el inicio de sesión lo elimina',
-          'SQLite: tablas y filas, copia de seguridad en ~/db-backups, restauración con una línea escrita en Terminal',
+          'SQLite: tablas y filas; pulsa una tabla para ver sus filas (solo lectura, 100 por página); copia de seguridad en ~/db-backups, restauración con una línea escrita en Terminal',
         ],
         keys: [],
         runs: [
@@ -2783,6 +2783,18 @@ const es = {
       noBackups: 'Todavía no hay copias en ~/db-backups. Haz primero una copia de seguridad.',
       toTerminal: 'Escribir en Terminal',
       remove: 'Quitar de la lista',
+      view: 'Ver filas',
+      back: 'Volver',
+      prev: '100 filas anteriores',
+      next: '100 filas siguientes',
+      range: (a: number, b: number, n: number) =>
+        `Filas ${a.toLocaleString()}–${b.toLocaleString()} de ${n.toLocaleString()}`,
+      noRows: 'Sin filas',
+      blob: (size: string) => `BLOB ${size}`,
+      someColumns: (shown: number, all: number) =>
+        `Se muestran las primeras ${shown} de ${all} columnas.`,
+      readOnly:
+        'Solo lectura, 100 filas por página. El texto largo se corta a 200 caracteres; los BLOB solo muestran su tamaño.',
     },
   },
   deploy: {

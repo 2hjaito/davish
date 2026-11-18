@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Database: bấm tên một bảng SQLite để xem dữ liệu dạng lưới, chỉ đọc, 100 dòng mỗi trang. Chữ dài bị cắt ở 200 ký tự và BLOB chỉ hiện kích thước, lệnh chỉ chạy khi bấm, nên app không nặng thêm.
+
 ## [1.14.3] - 2026-11-17
 
 ### Thêm
