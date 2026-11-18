@@ -4,6 +4,7 @@ import (
 	"context"
 	"path"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -233,6 +234,16 @@ type SQLiteCell struct {
 	Size int64  `json:"size,omitempty"`
 }
 
+// SQLiteQuery narrows a page: sorted by a column, and rows whose column
+// contains some text. Davish builds the SQL; the user never types it.
+type SQLiteQuery struct {
+	Sort string `json:"sort,omitempty"`
+	Desc bool   `json:"desc,omitempty"`
+	// Column and Contains filter rows: Column's value, as text, contains Contains.
+	Column   string `json:"column,omitempty"`
+	Contains string `json:"contains,omitempty"`
+}
+
 // SQLiteRows is one page of a table.
 type SQLiteRows struct {
 	Columns []SQLiteColumn `json:"columns"`
@@ -258,7 +269,14 @@ func sqliteColumnsSQL(table string) string {
 
 // sqliteRowsSQL reads one page of table, each cell tagged with its kind:
 // n (null), b<size>, t<text>, T<cut text>, v<number>.
-func sqliteRowsSQL(table string, cols []SQLiteColumn, offset int) string {
+// likeText is a LIKE pattern that matches text anywhere, with % _ and \
+// taken literally.
+func likeText(text string) string {
+	r := strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`)
+	return quoteText("%"+r.Replace(text)+"%") + ` ESCAPE '\'`
+}
+
+func sqliteRowsSQL(table string, cols []SQLiteColumn, offset int, q SQLiteQuery) string {
 	var b strings.Builder
 	b.WriteString(sqliteSeparators + "SELECT ")
 	for i, c := range cols {
@@ -270,7 +288,17 @@ func sqliteRowsSQL(table string, cols []SQLiteColumn, offset int) string {
 			" WHEN 'text' THEN (CASE WHEN length(" + q + ") > " + strconv.Itoa(sqliteCellText) + " THEN 'T' ELSE 't' END) || " +
 			noSeps("substr("+q+", 1, "+strconv.Itoa(sqliteCellText)+")") + " ELSE 'v' || " + q + " END")
 	}
-	b.WriteString(" FROM " + quoteIdent(table) + " LIMIT " + strconv.Itoa(sqlitePage+1) + " OFFSET " + strconv.Itoa(offset) + ";\n")
+	b.WriteString(" FROM " + quoteIdent(table))
+	if q.Column != "" && q.Contains != "" {
+		b.WriteString(" WHERE CAST(" + quoteIdent(q.Column) + " AS TEXT) LIKE " + likeText(q.Contains))
+	}
+	if q.Sort != "" {
+		b.WriteString(" ORDER BY " + quoteIdent(q.Sort))
+		if q.Desc {
+			b.WriteString(" DESC")
+		}
+	}
+	b.WriteString(" LIMIT " + strconv.Itoa(sqlitePage+1) + " OFFSET " + strconv.Itoa(offset) + ";\n")
 	return b.String()
 }
 
@@ -307,7 +335,7 @@ func parseSQLiteCell(s string) SQLiteCell {
 
 // RowsSQLite reads one page of up to sqlitePage rows of a table or view,
 // read-only, from offset.
-func (s *Service) RowsSQLite(ctx context.Context, serverID, file, table string, offset int) (SQLiteRows, error) {
+func (s *Service) RowsSQLite(ctx context.Context, serverID, file, table string, offset int, q SQLiteQuery) (SQLiteRows, error) {
 	if err := checkSQLitePath(file); err != nil {
 		return SQLiteRows{}, err
 	}
@@ -328,11 +356,21 @@ func (s *Service) RowsSQLite(ctx context.Context, serverID, file, table string, 
 	if len(page.Columns) == 0 {
 		return SQLiteRows{}, apperr.New(apperr.NotFound, "no such table")
 	}
+	// Sort and filter only by a column the table has: the names reach SQL
+	// quoted, but an unknown one is a mistake to report, not to run.
+	for _, c := range []string{q.Sort, q.Column} {
+		if c != "" && !slices.ContainsFunc(page.Columns, func(x SQLiteColumn) bool { return x.Name == c }) {
+			return SQLiteRows{}, apperr.New(apperr.InvalidInput, "no such column")
+		}
+	}
+	if len(q.Contains) > 1024 {
+		return SQLiteRows{}, apperr.New(apperr.InvalidInput, "the filter is too long")
+	}
 	page.AllColumns = len(page.Columns)
 	if len(page.Columns) > sqliteMaxCols {
 		page.Columns = page.Columns[:sqliteMaxCols]
 	}
-	out, _, err = s.runSQLite(ctx, serverID, file, sqliteRowsSQL(table, page.Columns, offset))
+	out, _, err = s.runSQLite(ctx, serverID, file, sqliteRowsSQL(table, page.Columns, offset, q))
 	if err != nil {
 		return SQLiteRows{}, err
 	}

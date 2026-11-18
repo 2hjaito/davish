@@ -86,7 +86,7 @@ export function DatabaseSQLiteBackup(arg1:string,arg2:string):Promise<string>;
 
 export function DatabaseSQLiteRestoreLine(arg1:string,arg2:string):Promise<string>;
 
-export function DatabaseSQLiteRows(arg1:string,arg2:string,arg3:string,arg4:number):Promise<database.SQLiteRows>;
+export function DatabaseSQLiteRows(arg1:string,arg2:string,arg3:string,arg4:number,arg5:database.SQLiteQuery):Promise<database.SQLiteRows>;
 
 export function DeleteServer(arg1:string):Promise<void>;
 

@@ -121,8 +121,8 @@ func TestParseSQLiteCell(t *testing.T) {
 }
 
 func TestSQLiteRowsSQL(t *testing.T) {
-	got := sqliteRowsSQL(`we"ird`, []SQLiteColumn{{Name: "a b"}}, 200)
-	for _, want := range []string{`typeof("a b")`, `FROM "we""ird" LIMIT 101 OFFSET 200;`, `substr("a b", 1, 200)`} {
+	got := sqliteRowsSQL(`we"ird`, []SQLiteColumn{{Name: "a b"}}, 200, SQLiteQuery{Sort: "a b", Desc: true, Column: "a b", Contains: `50%_off\`})
+	for _, want := range []string{`typeof("a b")`, `FROM "we""ird" WHERE CAST("a b" AS TEXT) LIKE '%50\%\_off\\%' ESCAPE '\' ORDER BY "a b" DESC LIMIT 101 OFFSET 200;`, `substr("a b", 1, 200)`} {
 		if !strings.Contains(got, want) {
 			t.Errorf("rows SQL lacks %s:\n%s", want, got)
 		}
@@ -138,7 +138,7 @@ func TestRowsSQLiteRejects(t *testing.T) {
 		file, table string
 		offset      int
 	}{{"a.db", "t", 0}, {"/a.db", "", 0}, {"/a.db", "t", -1}} {
-		if _, err := s.RowsSQLite(context.Background(), "srv", c.file, c.table, c.offset); codeOf(err) != apperr.InvalidInput {
+		if _, err := s.RowsSQLite(context.Background(), "srv", c.file, c.table, c.offset, SQLiteQuery{}); codeOf(err) != apperr.InvalidInput {
 			t.Errorf("%+v: %v", c, err)
 		}
 	}
@@ -175,7 +175,7 @@ WITH RECURSIVE n(i) AS (SELECT 4 UNION ALL SELECT i + 1 FROM n WHERE i < 150) IN
 		t.Fatalf("setup: %v %s", err, out)
 	}
 	s := New(localSQLite{file})
-	page, err := s.RowsSQLite(context.Background(), "srv", "/x.db", `odd "t"`, 0)
+	page, err := s.RowsSQLite(context.Background(), "srv", "/x.db", `odd "t"`, 0, SQLiteQuery{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -195,11 +195,32 @@ WITH RECURSIVE n(i) AS (SELECT 4 UNION ALL SELECT i + 1 FROM n WHERE i < 150) IN
 	if c := r[2][1]; !c.Cut || len(c.Text) != 200 || r[2][3].Size != 5000 {
 		t.Errorf("row 3 = %+v", r[2])
 	}
-	last, err := s.RowsSQLite(context.Background(), "srv", "/x.db", `odd "t"`, 100)
+	last, err := s.RowsSQLite(context.Background(), "srv", "/x.db", `odd "t"`, 100, SQLiteQuery{})
 	if err != nil || len(last.Rows) != 50 || last.More || last.Rows[0][0].Text != "101" {
 		t.Errorf("page 2 = %d rows, more %v, %v", len(last.Rows), last.More, err)
 	}
-	if _, err := s.RowsSQLite(context.Background(), "srv", "/x.db", "nope", 0); codeOf(err) != apperr.NotFound {
+	if _, err := s.RowsSQLite(context.Background(), "srv", "/x.db", "nope", 0, SQLiteQuery{}); codeOf(err) != apperr.NotFound {
 		t.Errorf("missing table: %v", err)
+	}
+
+	// Sorted by id, newest first.
+	desc, err := s.RowsSQLite(context.Background(), "srv", "/x.db", `odd "t"`, 0, SQLiteQuery{Sort: "id", Desc: true})
+	if err != nil || desc.Rows[0][0].Text != "150" || !desc.More {
+		t.Errorf("sorted: first %+v, more %v, %v", desc.Rows[0][0], desc.More, err)
+	}
+	// Filtered: % and _ are literal, and only rows that match come back.
+	for contains, want := range map[string]int{"it's": 1, "%": 0, "_": 0, "x": 1, "3": 33} {
+		got, err := s.RowsSQLite(context.Background(), "srv", "/x.db", `odd "t"`, 0, SQLiteQuery{Column: "name", Contains: contains})
+		if contains == "3" {
+			got, err = s.RowsSQLite(context.Background(), "srv", "/x.db", `odd "t"`, 0, SQLiteQuery{Column: "id", Contains: contains})
+		}
+		if err != nil || len(got.Rows) != want {
+			t.Errorf("contains %q: %d rows, want %d, %v", contains, len(got.Rows), want, err)
+		}
+	}
+	for _, q := range []SQLiteQuery{{Sort: "nope"}, {Column: "nope", Contains: "a"}} {
+		if _, err := s.RowsSQLite(context.Background(), "srv", "/x.db", `odd "t"`, 0, q); codeOf(err) != apperr.InvalidInput {
+			t.Errorf("%+v: %v", q, err)
+		}
 	}
 }

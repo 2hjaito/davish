@@ -152,14 +152,23 @@ export interface SQLiteRows {
   more: boolean
 }
 
+/** Sort by a column, and keep rows whose column contains some text. */
+export interface SQLiteQuery {
+  sort?: string
+  desc?: boolean
+  column?: string
+  contains?: string
+}
+
 /** Reads one page (up to 100 rows) of a SQLite table, read-only. */
 export const databaseSQLiteRows = (
   serverID: string,
   file: string,
   table: string,
   offset: number,
+  query: SQLiteQuery = {},
 ): Promise<SQLiteRows> =>
-  App.DatabaseSQLiteRows(serverID, file, table, offset) as Promise<SQLiteRows>
+  App.DatabaseSQLiteRows(serverID, file, table, offset, query) as Promise<SQLiteRows>
 
 /** Copies a SQLite file to ~/db-backups; resolves to the backup's path. */
 export const databaseSQLiteBackup = (serverID: string, file: string): Promise<string> =>

@@ -758,6 +758,24 @@ export namespace database {
 		    return a;
 		}
 	}
+	export class SQLiteQuery {
+	    sort?: string;
+	    desc?: boolean;
+	    column?: string;
+	    contains?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SQLiteQuery(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sort = source["sort"];
+	        this.desc = source["desc"];
+	        this.column = source["column"];
+	        this.contains = source["contains"];
+	    }
+	}
 	export class SQLiteRows {
 	    columns: SQLiteColumn[];
 	    allColumns: number;
