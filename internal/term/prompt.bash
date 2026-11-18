@@ -1,4 +1,4 @@
-# Davish prompt, handed to `bash --rcfile` by term.Start (docs/adr/0004).
+# Davish prompt, handed to `bash --rcfile` by term.Start (.claude/docs/adr/0004).
 # Nothing is written to the server. Keep it working on bash 4.2 (CentOS 7).
 
 # Load the user's environment as a login shell would; those files usually

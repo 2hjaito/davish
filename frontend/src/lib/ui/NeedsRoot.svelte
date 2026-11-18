@@ -16,7 +16,7 @@
   let { serverID, command, message = t.common.needsRoot, onopen }: Props = $props()
 </script>
 
-<!-- Davish never stores or types a sudo password (docs/SECURITY.md): the
+<!-- Davish never stores or types a sudo password (.claude/docs/SECURITY.md): the
      command is typed at a terminal prompt and the user presses Enter. -->
 <div class="root" role="alert">
   <Icon name="lock" size={14} />

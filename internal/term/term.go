@@ -30,7 +30,7 @@ var promptScript string
 
 // promptCommand starts bash with Davish's prompt. The script travels as one
 // quoted argument and bash reads it through process substitution, so nothing
-// is written on the server (docs/adr/0004). The login shell runs this line,
+// is written on the server (.claude/docs/adr/0004). The login shell runs this line,
 // which is why it is only used when that shell is bash.
 var promptCommand = "exec bash --rcfile <(printf '%s\\n' " + shellx.Quote(promptScript) + ") -i"
 
@@ -120,7 +120,7 @@ func (s *Service) Start(ctx context.Context, serverID string, cols, rows int, pr
 }
 
 // Run runs command on a PTY, as `ssh -t host command` would, for a run
-// on several servers at once (docs/adr/0021). It shares term:data,
+// on several servers at once (.claude/docs/adr/0021). It shares term:data,
 // term:exit and Write/Resize/Close with the terminal. onStart, when set,
 // gets the session ID before any output is sent; the channel yields the
 // exit code (-1 when the connection dropped) once the session ends.

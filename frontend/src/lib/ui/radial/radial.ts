@@ -1,4 +1,4 @@
-// Geometry of the drag menu (docs/DESIGN.md, "Thao tác bằng kéo thả"):
+// Geometry of the drag menu (.claude/docs/DESIGN.md, "Thao tác bằng kéo thả"):
 // petals around the pointer, clockwise from the top, and an outer ring
 // that opens beyond a petal with choices of its own.
 

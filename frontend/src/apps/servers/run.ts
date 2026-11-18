@@ -1,4 +1,4 @@
-// Running one command on several servers (docs/adr/0021): what each tab
+// Running one command on several servers (.claude/docs/adr/0021): what each tab
 // shows, and when a tab waits for the user to type.
 import type { FleetJob, JobState } from '../../lib/api/fleet'
 

@@ -28,7 +28,7 @@ export const ICON_CHOICES = [
   'monitor',
 ] as const satisfies readonly IconName[]
 
-/** The app colors of docs/DESIGN.md, so a tinted icon sits well in the dock's company. */
+/** The app colors of .claude/docs/DESIGN.md, so a tinted icon sits well in the dock's company. */
 export const COLOR_CHOICES = {
   graphite: '#24262d',
   blue: '#2f7de1',

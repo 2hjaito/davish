@@ -6,7 +6,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 // Local name -> davi-icons export. Prefer the Feather pack (fi): stroke-based,
-// matching docs/DESIGN.md.
+// matching .claude/docs/DESIGN.md.
 const ICONS = {
   terminal: 'FiTerminal',
   files: 'FiFolder',

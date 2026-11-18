@@ -123,7 +123,7 @@
         icon: 'terminal',
         run: () => openTerminalAt(serverID, undefined, want.command),
       })
-    // Saved commands are typed at the prompt, never run (docs/SECURITY.md).
+    // Saved commands are typed at the prompt, never run (.claude/docs/SECURITY.md).
     if (connected)
       for (const s of visibleOn(snippets.list, serverID))
         all.push({

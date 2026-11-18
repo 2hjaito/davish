@@ -9,7 +9,7 @@
 
   // What an app shows when the server lacks the program it drives: the
   // command that installs it for the server's distro, typed into a
-  // terminal for the user to run (docs/SECURITY.md).
+  // terminal for the user to run (.claude/docs/SECURITY.md).
   interface Props {
     serverID: string
     tool: SetupTool

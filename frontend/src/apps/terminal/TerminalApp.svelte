@@ -90,7 +90,7 @@
       return true
     })
     // Deploy marks are swallowed whatever they hold; only this tab's run
-    // takes them (docs/adr/0012).
+    // takes them (.claude/docs/adr/0012).
     term.parser.registerOscHandler(DEPLOY_OSC, (data) => {
       const m = parseMark(data)
       if (m && m.nonce === tab.deploy) deploys.apply(m)

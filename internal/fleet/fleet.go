@@ -1,6 +1,6 @@
 // Package fleet runs one command on several servers at once, each in its
 // own terminal session on a PTY, at most Parallel at a time
-// (docs/adr/0021). The user answers any prompt in that server's tab;
+// (.claude/docs/adr/0021). The user answers any prompt in that server's tab;
 // Davish never types a sudo password for a run.
 package fleet
 
@@ -224,7 +224,7 @@ func (s *Service) record(it Item, start time.Time, exit int) {
 		Command:  it.Command,
 		Exit:     exit,
 		DurMs:    time.Since(start).Milliseconds(),
-		// Typed to act on the servers: exported like any change (docs/adr/0022).
+		// Typed to act on the servers: exported like any change (.claude/docs/adr/0022).
 		Mutating: true,
 	})
 	s.log.Info("fleet command", "server", it.ServerID, "exit", exit)

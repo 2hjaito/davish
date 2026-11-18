@@ -1,4 +1,4 @@
-/* Design tokens. Source of truth: docs/DESIGN.md. Components use only these. */
+/* Design tokens. Source of truth: .claude/docs/DESIGN.md. Components use only these. */
 :root {
   /* Font */
   --font-ui: 'Inter Variable', 'Inter', system-ui, sans-serif;

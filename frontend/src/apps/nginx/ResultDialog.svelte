@@ -70,7 +70,7 @@
 
     <details>
       <summary>{t.nginx.output}</summary>
-      <!-- Server output is shown as text only (docs/SECURITY.md). -->
+      <!-- Server output is shown as text only (.claude/docs/SECURITY.md). -->
       <pre class="output">{test.output}</pre>
     </details>
   {/if}

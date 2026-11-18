@@ -125,7 +125,7 @@ jobs:
           go-version-file: go.mod
 
       # The checksum list, signed with the key the in-app updater trusts
-      # (docs/adr/0009-self-update.md). No key, no release: an unsigned one
+      # (.claude/docs/adr/0009-self-update.md). No key, no release: an unsigned one
       # would leave users on the manual download.
       - name: Checksums and signature
         env:

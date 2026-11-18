@@ -249,7 +249,7 @@
     {/if}
   </div>
 
-  <!-- Server output is shown as text only (docs/SECURITY.md). -->
+  <!-- Server output is shown as text only (.claude/docs/SECURITY.md). -->
   {#if tab === 'inspect'}
     {#if detail}<pre class="box">{detail.json}</pre>{/if}
   {:else if logError}

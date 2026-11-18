@@ -245,7 +245,7 @@ export function getApp(id: string): AppDef | undefined {
 }
 
 // Each app's code loads the first time one of its windows opens, so the
-// first screen carries only the shell (docs/PLAN.md M21).
+// first screen carries only the shell (.claude/docs/PLAN.md M21).
 const loaded = new Map<AppId, Promise<Component<AppProps>>>()
 
 /** The app's component, loading its chunk once. */

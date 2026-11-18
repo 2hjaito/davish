@@ -1,6 +1,6 @@
 // Package update keeps Davish current from its GitHub releases: it finds a
 // newer version, verifies what it downloads against a signed checksum
-// list and swaps the running app for the new one (docs/adr/0009-self-update.md).
+// list and swaps the running app for the new one (.claude/docs/adr/0009-self-update.md).
 package update
 
 import (

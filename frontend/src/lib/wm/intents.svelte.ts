@@ -1,4 +1,4 @@
-// How one app opens another (docs/ARCHITECTURE.md §5.2), without apps
+// How one app opens another (.claude/docs/ARCHITECTURE.md §5.2), without apps
 // importing the registry that imports them.
 import type { LogSource } from '../api/logs'
 import { t } from '../i18n'
@@ -75,7 +75,7 @@ export const terminalRequests = new TerminalRequests()
 /**
  * Opens a terminal tab in dir, in serverID's Terminal window. input is
  * typed at the prompt but not run: commands needing root are prefilled
- * this way and the user presses Enter (docs/SECURITY.md).
+ * this way and the user presses Enter (.claude/docs/SECURITY.md).
  */
 export function openTerminalAt(
   serverID: string,

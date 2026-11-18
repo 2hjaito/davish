@@ -1,5 +1,5 @@
 /* Tables of the Monitor app (mounts, interfaces, processes), following the
-   list rules of docs/DESIGN.md: 11px bold headers, ~32px zebra rows, numbers
+   list rules of .claude/docs/DESIGN.md: 11px bold headers, ~32px zebra rows, numbers
    right-aligned in tabular figures. Prefixed because it is global CSS. */
 .mon-table {
   width: 100%;

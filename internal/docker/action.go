@@ -23,7 +23,7 @@ type Plan struct {
 	Action string `json:"action"`
 	// Command is exactly what Act runs.
 	Command string `json:"command"`
-	// Confirm is set for stop and restart (docs/SECURITY.md).
+	// Confirm is set for stop and restart (.claude/docs/SECURITY.md).
 	Confirm bool `json:"confirm"`
 	// Sudo is the same command with sudo, for a terminal.
 	Sudo string `json:"sudo"`

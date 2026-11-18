@@ -55,7 +55,7 @@ type ScriptOptions struct {
 // over its own `ssh -t` so sudo and other prompts still work. Entries
 // are grouped by server, in time order. sudo as Davish runs it becomes a
 // plain `sudo`, and content sent on stdin, never recorded, is left as a
-// comment (docs/adr/0022).
+// comment (.claude/docs/adr/0022).
 func Script(entries []Entry, targets map[string]Target, opt ScriptOptions) string {
 	var b strings.Builder
 	b.WriteString("#!/usr/bin/env bash\n")

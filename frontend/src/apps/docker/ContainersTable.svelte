@@ -144,7 +144,7 @@
   }
 
   // Compose commands are typed into a terminal: the user reads them and
-  // presses Enter (docs/SECURITY.md).
+  // presses Enter (.claude/docs/SECURITY.md).
   function projectMenu(g: Group) {
     const c = g.containers[0]
     const known = !!c?.projectDir

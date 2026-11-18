@@ -46,7 +46,7 @@
     error = ''
     try {
       const p = await backend.plan(serverID, dir, op, branch)
-      // A dirty tree never gets a pull to confirm (docs/PLAN.md M15).
+      // A dirty tree never gets a pull to confirm (.claude/docs/PLAN.md M15).
       if (op === 'pull' && p.dirty > 0) {
         blocked = t.git.dirtyPull(p.dirty)
         return

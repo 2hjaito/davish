@@ -6,7 +6,7 @@ import (
 	"davish/internal/update"
 )
 
-// UpdateCheck asks GitHub for the latest release (docs/adr/0009-self-update.md).
+// UpdateCheck asks GitHub for the latest release (.claude/docs/adr/0009-self-update.md).
 func (a *App) UpdateCheck() (update.Status, error) {
 	return a.updates.Check(a.ctx)
 }
@@ -26,7 +26,7 @@ func (a *App) UpdateRestart() error {
 	return nil
 }
 
-// Relaunch quits and starts Davish again (docs/adr/0010-english-ui.md).
+// Relaunch quits and starts Davish again (.claude/docs/adr/0010-english-ui.md).
 func (a *App) Relaunch() error {
 	if err := a.updates.Relaunch(); err != nil {
 		return err

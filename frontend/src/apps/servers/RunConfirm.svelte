@@ -1,6 +1,6 @@
 <script lang="ts">
   // Confirms a run on several servers: every server by name and the exact
-  // command (docs/SECURITY.md, docs/adr/0021). A destructive-looking
+  // command (.claude/docs/SECURITY.md, .claude/docs/adr/0021). A destructive-looking
   // command, or three servers or more, asks for the count to be typed.
   import type { FleetCheck } from '../../lib/api/fleet'
   import { t } from '../../lib/i18n'

@@ -1,5 +1,5 @@
 // Package audit keeps an in-memory log of commands the app ran on servers,
-// so the user can see exactly what Davish did (docs/ARCHITECTURE.md §3.7).
+// so the user can see exactly what Davish did (.claude/docs/ARCHITECTURE.md §3.7).
 package audit
 
 import (
@@ -30,7 +30,7 @@ type Entry struct {
 	Exit  int   `json:"exit"`
 	DurMs int64 `json:"durMs"`
 	// Mutating marks a command run for an action that changes the server,
-	// as opposed to a read or a poll (docs/adr/0022).
+	// as opposed to a read or a poll (.claude/docs/adr/0022).
 	Mutating bool `json:"mutating,omitempty"`
 	// Input marks a command that was given content on stdin, such as a
 	// file written with tee. The content is never recorded.

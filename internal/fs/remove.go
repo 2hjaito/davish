@@ -20,7 +20,7 @@ type RemovePlan struct {
 	// Command is exactly what Remove runs on the server.
 	Command string `json:"command"`
 	// Sudo is the same command with sudo, for a terminal when the server
-	// refuses for lack of rights (docs/SECURITY.md).
+	// refuses for lack of rights (.claude/docs/SECURITY.md).
 	Sudo string `json:"sudo"`
 }
 

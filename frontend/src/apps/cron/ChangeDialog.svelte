@@ -18,7 +18,7 @@
 </script>
 
 <!-- Replacing the crontab shows the exact command and the lines it
-     changes before anything runs (docs/SECURITY.md). -->
+     changes before anything runs (.claude/docs/SECURITY.md). -->
 <Dialog open={pending !== null} title={t.cron.confirmTitle[op]} width={540} {onclose}>
   {#if pending}
     <div class="diff">
