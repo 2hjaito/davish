@@ -4,6 +4,8 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.14.4] - 2026-11-18
+
 ### Added
 - Database: click a SQLite table to read its rows in a grid, read-only, 100 to a page. Long text is cut at 200 characters and blobs show only their size, and nothing runs until you click, so the app stays light.
 
