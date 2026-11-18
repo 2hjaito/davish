@@ -190,6 +190,15 @@ func TestSQLite(t *testing.T) {
 		}
 	}
 
+	page, err := s.RowsSQLite(ctx, id, "/srv/davish-app/app.db", "users", 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(page.Columns) != 2 || !page.Columns[0].PK || len(page.Rows) != 2 || page.More ||
+		page.Rows[1][1] != (database.SQLiteCell{Kind: "text", Text: "b"}) {
+		t.Fatalf("page = %+v", page)
+	}
+
 	file, err := s.BackupSQLite(ctx, id, "/srv/davish-app/app.db")
 	if err != nil {
 		t.Fatal(err)

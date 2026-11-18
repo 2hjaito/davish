@@ -133,6 +133,34 @@ export interface SQLiteInfo {
 export const databaseSQLite = (serverID: string, file: string): Promise<SQLiteInfo> =>
   App.DatabaseSQLite(serverID, file) as Promise<SQLiteInfo>
 
+export interface SQLiteCell {
+  /** null, num, text or blob. */
+  k: 'null' | 'num' | 'text' | 'blob'
+  v?: string
+  /** The text was longer and is cut. */
+  cut?: boolean
+  /** A blob's size in bytes; its content is never read. */
+  size?: number
+}
+
+export interface SQLiteRows {
+  columns: { name: string; type: string; pk: boolean }[]
+  /** All the table's columns, when more than shown. */
+  allColumns: number
+  rows: SQLiteCell[][]
+  offset: number
+  more: boolean
+}
+
+/** Reads one page (up to 100 rows) of a SQLite table, read-only. */
+export const databaseSQLiteRows = (
+  serverID: string,
+  file: string,
+  table: string,
+  offset: number,
+): Promise<SQLiteRows> =>
+  App.DatabaseSQLiteRows(serverID, file, table, offset) as Promise<SQLiteRows>
+
 /** Copies a SQLite file to ~/db-backups; resolves to the backup's path. */
 export const databaseSQLiteBackup = (serverID: string, file: string): Promise<string> =>
   App.DatabaseSQLiteBackup(serverID, file)
