@@ -7,14 +7,20 @@ description: >
 runs:
   using: composite
   steps:
+    # ImageOS and ImageVersion are runner variables, not in the env context.
+    - name: Runner image
+      id: image
+      shell: bash
+      run: echo "id=${ImageOS:-linux}-${ImageVersion:-0}" >> "$GITHUB_OUTPUT"
+
     - name: Restore .deb cache
       uses: actions/cache@v4
       with:
         path: /tmp/apt-debs
         # A new runner image may ship other versions; older .debs still
         # save most of the download, so fall back to any earlier cache.
-        key: linux-deps-${{ env.ImageOS }}-${{ env.ImageVersion }}-v1
-        restore-keys: linux-deps-${{ env.ImageOS }}-
+        key: linux-deps-${{ steps.image.outputs.id }}-v1
+        restore-keys: linux-deps-${{ runner.os }}-
 
     - name: Install
       shell: bash
