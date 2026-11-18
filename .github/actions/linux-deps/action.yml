@@ -1,0 +1,39 @@
+name: Linux build deps
+description: >
+  Installs GTK and WebKitGTK headers for Wails, keeping the downloaded .deb
+  files in the Actions cache. Ubuntu mirrors are sometimes slow enough to
+  hold a 25 MB WebKit package past any timeout without ever stalling, so a
+  warm cache skips them, and a cold run gives up and retries instead.
+runs:
+  using: composite
+  steps:
+    - name: Restore .deb cache
+      uses: actions/cache@v4
+      with:
+        path: /tmp/apt-debs
+        # A new runner image may ship other versions; older .debs still
+        # save most of the download, so fall back to any earlier cache.
+        key: linux-deps-${{ env.ImageOS }}-${{ env.ImageVersion }}-v1
+        restore-keys: linux-deps-${{ env.ImageOS }}-
+
+    - name: Install
+      shell: bash
+      run: |
+        set -u
+        debs=/tmp/apt-debs
+        sudo mkdir -p "$debs/partial"
+        apt=(-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30
+          -o "Dir::Cache::archives=$debs")
+        ok=
+        for try in 1 2 3; do
+          if sudo timeout 120 apt-get "${apt[@]}" update &&
+            sudo timeout 240 apt-get "${apt[@]}" install -y libgtk-3-dev libwebkit2gtk-4.1-dev; then
+            ok=1
+            break
+          fi
+          echo "::warning::apt attempt $try did not finish, retrying"
+        done
+        # The cache step saves this folder after the job, as the runner user.
+        sudo rm -rf "$debs/partial" "$debs/lock"
+        sudo chown -R "$(id -u):$(id -g)" "$debs"
+        [ -n "$ok" ]
