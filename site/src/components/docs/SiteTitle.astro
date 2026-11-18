@@ -1,0 +1,39 @@
+---
+// The docs' title, matching the landing page: logo, Davish, a Docs tag.
+// It leads home in the reader's language.
+import logo from '../../assets/logo.svg'
+
+const locale = Astro.locals.starlightRoute.locale
+const home = locale ? `/${locale}/` : '/'
+const docs = { vi: 'Tài liệu', zh: '文档' }[locale ?? ''] ?? 'Docs'
+---
+
+<a href={home} class="title">
+  <img src={logo.src} alt="" width="30" height="30" />
+  <span class="name">Davish</span>
+  <span class="tag">{docs}</span>
+</a>
+
+<style>
+  .title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--sl-color-white);
+    text-decoration: none;
+  }
+  .name {
+    font-family: 'Bricolage Grotesque Variable', var(--sl-font);
+    font-size: 21px;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+  }
+  .tag {
+    padding: 2px 8px;
+    border-radius: 7px;
+    background: var(--sl-color-gray-6);
+    color: var(--sl-color-gray-2);
+    font-size: 13px;
+    font-weight: 600;
+  }
+</style>

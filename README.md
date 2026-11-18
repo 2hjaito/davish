@@ -16,7 +16,7 @@ Nothing to install on the server.
 ![Go](https://img.shields.io/badge/Go-1.27-00ADD8?logo=go&logoColor=white)
 ![Svelte](https://img.shields.io/badge/Svelte-5-FF3E00?logo=svelte&logoColor=white)
 
-**English** · [Tiếng Việt](README.vi.md) · [简体中文](README.zh-CN.md)
+**English** · [Tiếng Việt](README.vi.md) · [简体中文](README.zh-CN.md) · **[davish.dangth.dev](https://davish.dangth.dev)**
 
 <p align="center">
   <img src="assets/demo.gif" alt="davish demo: a file's action ring, Terminal, Docker, ports, login security and the git graph over SSH" width="800">

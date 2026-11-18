@@ -1,0 +1,49 @@
+---
+// A Davish app icon, the artwork of the app's own Dock (AppIcon.svelte,
+// ADR 0003), exported once to src/assets/apps/ from the browser preview.
+// The tile finish (corners, sheen, edge) is drawn here, as the Dock does.
+const icons = import.meta.glob<{ default: { src: string } }>('../assets/apps/*.svg', { eager: true })
+
+interface Props {
+  id: string
+  size?: number
+}
+const { id, size = 22 } = Astro.props
+const src = icons[`../assets/apps/${id}.svg`]?.default.src
+---
+
+{
+  src && (
+    <span class="app-ico" style={`--s: ${size}px`}>
+      <img src={src} alt="" width={size} height={size} loading="lazy" decoding="async" />
+    </span>
+  )
+}
+
+<style>
+  .app-ico {
+    position: relative;
+    flex: none;
+    display: inline-block;
+    width: var(--s);
+    height: var(--s);
+    border-radius: 23%;
+    overflow: hidden;
+    box-shadow:
+      inset 0 0 0 0.5px rgba(255, 255, 255, 0.18),
+      0 1px 2px rgba(0, 0, 0, 0.25);
+  }
+
+  .app-ico img {
+    width: 100%;
+    height: 100%;
+  }
+
+  .app-ico::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 45%);
+    pointer-events: none;
+  }
+</style>
