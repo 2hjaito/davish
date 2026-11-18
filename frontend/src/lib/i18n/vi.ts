@@ -2336,6 +2336,7 @@ const vi = {
       name: 'Tên',
       id: 'ID',
       image: 'Image',
+      created: 'Tạo',
       ports: 'Cổng',
       status: 'Trạng thái',
       actions: 'Thao tác',

@@ -2416,6 +2416,7 @@ const es = {
       name: 'Nombre',
       id: 'ID',
       image: 'Imagen',
+      created: 'Creado',
       ports: 'Puertos',
       status: 'Estado',
       actions: 'Acciones',

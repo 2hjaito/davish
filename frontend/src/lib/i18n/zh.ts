@@ -2296,6 +2296,7 @@ const zh = {
       name: '名称',
       id: 'ID',
       image: '镜像',
+      created: '创建',
       ports: '端口',
       status: '状态',
       actions: '操作',
