@@ -914,6 +914,56 @@ p {
   font-size: 14.5px;
 }
 
+/* The people who helped */
+.thanks {
+  padding: 40px 40px 96px;
+  text-align: center;
+}
+
+.people {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  max-width: 760px;
+  margin: 32px auto 0;
+  padding: 0;
+  list-style: none;
+}
+
+.people a {
+  position: relative;
+  display: block;
+  border-radius: 50%;
+  transition: transform 0.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.people a:hover {
+  transform: translateY(-3px) scale(1.06);
+}
+
+.people img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--raise);
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--line-strong);
+}
+
+.badge-code {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 0 2px var(--bg);
+}
+
 /* Footer */
 .foot {
   display: flex;

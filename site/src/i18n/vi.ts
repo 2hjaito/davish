@@ -152,6 +152,12 @@ export const vi: Dict = {
     ],
   },
   community: { discord: 'Tham gia Discord', discordNote: 'Hỏi đáp, góp ý và bản dùng thử sớm.' },
+  thanks: {
+    title: 'Được làm cùng những người dùng nó',
+    lead: 'Code, báo lỗi, thử trên máy của chính mình và góp ý: cảm ơn các bạn.',
+    code: 'code',
+    join: 'Cùng tham gia trên GitHub',
+  },
   footer: {
     license: 'Davish là phần mềm tự do theo giấy phép GPL-3.0.',
     changelog: 'Nhật ký thay đổi',

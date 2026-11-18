@@ -5,6 +5,7 @@ import type { ImageMetadata } from 'astro'
 import { dicts, locales, type Locale } from '../i18n'
 import Base from '../layouts/Base.astro'
 import { links, release } from '../lib/release'
+import { contributors } from '../lib/contributors'
 import { stats } from '../lib/stats'
 import AppIcon from './AppIcon.astro'
 import Flag from './Flag.astro'
@@ -18,6 +19,7 @@ const { locale } = Astro.props
 const t = dicts[locale]
 const r = await release()
 const s = await stats()
+const people = await contributors()
 const here = locales.find((l) => l.id === locale)!
 const docs = locale === 'en' ? '/docs/' : `/${locale}/docs/`
 const fmt = new Intl.NumberFormat(t.lang)
@@ -339,6 +341,26 @@ const platforms = [
         <Icon name="arrow-right" size={18} />
       </a>
     </section>
+
+    {
+      people.length > 0 && (
+        <section class="thanks" data-reveal>
+          <h2>{t.thanks.title}</h2>
+          <p class="sub">{t.thanks.lead}</p>
+          <ul class="people">
+            {people.map((p) => (
+              <li>
+                <a href={p.url} title={p.code ? `@${p.login} · ${t.thanks.code}` : `@${p.login}`}>
+                  <img src={`${p.avatar}&s=96`} alt={`@${p.login}`} width="48" height="48" loading="lazy" decoding="async" />
+                  {p.code && <span class="badge-code" aria-hidden="true"><Icon name="code" size={11} stroke={2.4} /></span>}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <a class="arrow" href={links.repo}>{t.thanks.join} <Icon name="arrow-right" size={16} /></a>
+        </section>
+      )
+    }
 
     <footer class="foot">
       <a class="brand" href={here.path}><img src="/favicon.svg" alt="" width="22" height="22" /><span>Davish</span></a>

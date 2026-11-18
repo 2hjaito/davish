@@ -151,6 +151,12 @@ export const zh: Dict = {
     ],
   },
   community: { discord: '加入 Discord', discordNote: '提问、建议和抢先体验版本。' },
+  thanks: {
+    title: '与使用它的人一起打造',
+    lead: '代码、问题反馈、在自己的机器上测试以及各种建议：谢谢你们。',
+    code: '代码',
+    join: '在 GitHub 上加入他们',
+  },
   footer: {
     license: 'Davish 是基于 GPL-3.0 的自由软件。',
     changelog: '更新日志',
