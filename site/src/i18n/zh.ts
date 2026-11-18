@@ -5,7 +5,7 @@ export const zh: Dict = {
   title: 'Davish：你的 Linux 服务器桌面',
   description:
     '通过 SSH 使用终端、文件、Docker、日志、数据库等功能，一个适用于 macOS、Windows 和 Linux 的桌面应用。服务器上无需安装任何东西。',
-  nav: { features: '功能', security: '安全', download: '下载', docs: '文档', changelog: '更新日志' },
+  nav: { features: '功能', security: '安全', download: '下载', docs: '文档', theme: '浅色或深色', changelog: '更新日志' },
   hero: {
     title: '你的 Linux 服务器桌面。',
     lead: '终端、文件、服务、Docker、日志、数据库和 git，全部通过 SSH，集中在一个像操作系统一样的地方。',

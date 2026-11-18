@@ -1,6 +1,9 @@
 ---
 import '@fontsource-variable/bricolage-grotesque'
-import '@fontsource-variable/geist'
+import '@fontsource/be-vietnam-pro/400.css'
+import '@fontsource/be-vietnam-pro/500.css'
+import '@fontsource/be-vietnam-pro/600.css'
+import '@fontsource/be-vietnam-pro/700.css'
 import '@fontsource-variable/geist-mono'
 import '../styles/global.css'
 import og from '../../../assets/social-preview.png'
@@ -26,7 +29,30 @@ const image = new URL({ en: og, vi: ogVi, zh: ogZh }[locale].src, site).href
     <title>{t.title}</title>
     <meta name="description" content={t.description} />
     <meta name="color-scheme" content="dark light" />
-    <script is:inline>document.documentElement.classList.add('js')</script>
+    <script is:inline>
+      // Before paint: JavaScript is on, and the theme the visitor chose
+      // (shared with the docs) or the system's.
+      ;(() => {
+        const r = document.documentElement
+        r.classList.add('js')
+        let saved = ''
+        try {
+          saved = localStorage.getItem('starlight-theme') || ''
+        } catch {}
+        const dark = matchMedia('(prefers-color-scheme: dark)')
+        const apply = () =>
+          (r.dataset.theme = saved === 'light' || saved === 'dark' ? saved : dark.matches ? 'dark' : 'light')
+        apply()
+        dark.addEventListener('change', apply)
+        window.__setTheme = (t) => {
+          saved = t
+          try {
+            localStorage.setItem('starlight-theme', t)
+          } catch {}
+          apply()
+        }
+      })()
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={new URL(here.path, site).href} />
     {locales.map((l) => <link rel="alternate" hreflang={l.hreflang} href={new URL(l.path, site).href} />)}

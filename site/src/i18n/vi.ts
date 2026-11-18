@@ -5,7 +5,7 @@ export const vi: Dict = {
   title: 'Davish: desktop cho server Linux của bạn',
   description:
     'Terminal, file, Docker, log, database và nhiều hơn nữa qua SSH, trong một app desktop cho macOS, Windows và Linux. Không cài gì lên server.',
-  nav: { features: 'Tính năng', security: 'Bảo mật', download: 'Tải về', docs: 'Tài liệu', changelog: 'Thay đổi' },
+  nav: { features: 'Tính năng', security: 'Bảo mật', download: 'Tải về', docs: 'Tài liệu', theme: 'Sáng hoặc tối', changelog: 'Thay đổi' },
   hero: {
     title: 'Một desktop cho server Linux của bạn.',
     lead: 'Terminal, file, dịch vụ, Docker, log, database và git qua SSH, gom vào một nơi dùng như một hệ điều hành.',

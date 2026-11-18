@@ -1,10 +1,13 @@
 /* Starlight in Davish's colors and fonts (ADR 0025). */
-@import '@fontsource-variable/geist';
+@import '@fontsource/be-vietnam-pro/400.css';
+@import '@fontsource/be-vietnam-pro/500.css';
+@import '@fontsource/be-vietnam-pro/600.css';
+@import '@fontsource/be-vietnam-pro/700.css';
 @import '@fontsource-variable/geist-mono';
 @import '@fontsource-variable/bricolage-grotesque';
 
 :root {
-  --sl-font: 'Geist Variable', system-ui, sans-serif;
+  --sl-font: 'Be Vietnam Pro', system-ui, sans-serif;
   --sl-font-mono: 'Geist Mono Variable', ui-monospace, monospace;
 }
 
@@ -36,4 +39,59 @@ h1,
 .sl-markdown-content img {
   border-radius: 12px;
   border: 1px solid var(--sl-color-hairline);
+}
+
+/* Be Vietnam Pro runs larger than Starlight's default font, so the scale
+   steps down to keep text, headings and controls in proportion. */
+:root {
+  --sl-text-body: 0.9375rem;
+  --sl-text-h1: 2.125rem;
+  --sl-text-h2: 1.5rem;
+  --sl-text-h3: 1.25rem;
+  --sl-text-h4: 1.0625rem;
+  --sl-text-h5: 1rem;
+}
+
+@media (min-width: 50em) {
+  :root {
+    --sl-text-h1: 2.5rem;
+    --sl-text-h2: 1.625rem;
+    --sl-text-h3: 1.3125rem;
+  }
+}
+
+.site-title {
+  font-size: var(--sl-text-lg);
+  font-family: 'Bricolage Grotesque Variable', var(--sl-font);
+  letter-spacing: -0.01em;
+}
+
+/* Sidebar group names no bigger than a heading of the page. */
+.sidebar-content .large {
+  font-size: var(--sl-text-base);
+}
+
+/* Previous / next: a quiet row, not two big cards. */
+.pagination-links a {
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.pagination-links .link-title {
+  font-size: var(--sl-text-base);
+  font-weight: 600;
+}
+
+.pagination-links svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* The theme and language pickers fit their words in this font. */
+starlight-theme-select select,
+starlight-lang-select select {
+  width: auto;
+  field-sizing: content;
+  min-width: 5.5em;
 }

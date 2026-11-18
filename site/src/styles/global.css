@@ -20,14 +20,55 @@
   --glow: rgba(61, 139, 255, 0.18);
   --ok: #7ee2a8;
   --shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
-  --display: 'Bricolage Grotesque Variable', 'Geist Variable', system-ui, sans-serif;
-  --text: 'Geist Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --display: 'Bricolage Grotesque Variable', 'Be Vietnam Pro', system-ui, sans-serif;
+  --text: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --mono: 'Geist Mono Variable', ui-monospace, monospace;
   color-scheme: dark;
 }
 
+/* Screenshots come in both themes; only the one that matches shows, and
+   the hidden one is never downloaded (it is lazy and not displayed). */
+:root[data-theme='light'] .for-dark,
+:root[data-theme='dark'] .for-light {
+  display: none !important;
+}
+
 @media (prefers-color-scheme: light) {
-  :root {
+  :root:not([data-theme]) .for-dark {
+    display: none;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .for-light {
+    display: none;
+  }
+}
+
+/* Light: chosen with the theme button (data-theme, shared with the docs),
+   or the system's choice when nothing is chosen or JavaScript is off. */
+:root[data-theme='light'] {
+  --bg: #f6f7f9;
+  --panel: #ffffff;
+  --raise: #f0f2f6;
+  --fg: #0d1018;
+  --fg-muted: #4b5262;
+  --fg-subtle: #7a8193;
+  --line: #e2e5eb;
+  --line-strong: #cfd4dd;
+  --dot: #d9dde5;
+  --accent: #0a64d8;
+  --primary-bg: #0d1018;
+  --primary-fg: #ffffff;
+  --primary-hover: #262b38;
+  --glow: rgba(10, 100, 216, 0.12);
+  --ok: #1a9d4b;
+  --shadow: 0 30px 70px rgba(20, 30, 60, 0.16);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
     --bg: #f6f7f9;
     --panel: #ffffff;
     --raise: #f0f2f6;
@@ -78,7 +119,7 @@ body {
 
 :lang(zh-CN) {
   --display: 'Bricolage Grotesque Variable', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  --text: 'Geist Variable', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --text: 'Be Vietnam Pro', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
 }
 
 img {
@@ -125,7 +166,7 @@ p {
 }
 
 .icon,
-.lucide {
+.icon {
   flex: none;
 }
 
@@ -190,67 +231,86 @@ p {
   margin-left: auto;
 }
 
-.pill,
-.lang summary {
+/* Nav buttons: just an icon or a word, no box; a soft fill on hover. */
+.nav-btn {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  height: 38px;
-  padding: 0 12px;
-  border: 1px solid var(--line-strong);
-  border-radius: 10px;
-  background: var(--panel);
-  color: var(--fg);
-  font-size: 14.5px;
-  font-weight: 550;
+  height: 36px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  color: var(--fg-muted);
+  font: 550 14.5px var(--text);
   cursor: pointer;
+  transition:
+    color 0.15s,
+    background 0.15s;
 }
 
-.pill:hover,
-.lang summary:hover {
+.nav-btn:hover,
+.lang:focus-within .nav-btn {
+  color: var(--fg);
   background: var(--raise);
   text-decoration: none;
 }
 
-.pill.solid {
-  background: var(--primary-bg);
-  border-color: var(--primary-bg);
-  color: var(--primary-fg);
+.nav-btn.get {
+  color: var(--accent);
+  font-weight: 650;
 }
 
-.pill.solid:hover {
-  background: var(--primary-hover);
+.theme span {
+  display: flex;
 }
 
+/* Languages open on hover, or on focus from the keyboard. */
 .lang {
   position: relative;
-}
-
-.lang summary {
-  list-style: none;
-}
-
-.lang summary::-webkit-details-marker {
-  display: none;
 }
 
 .lang ul {
   position: absolute;
   right: 0;
-  top: calc(100% + 8px);
+  top: 100%;
+  z-index: 20;
   margin: 0;
   padding: 6px;
   list-style: none;
-  min-width: 160px;
+  min-width: 170px;
   background: var(--panel);
-  border: 1px solid var(--line-strong);
   border-radius: 12px;
   box-shadow: var(--shadow);
+  opacity: 0;
+  visibility: hidden;
+  translate: 0 4px;
+  transition:
+    opacity 0.15s,
+    translate 0.15s,
+    visibility 0.15s;
+}
+
+/* A bridge over the gap, so the menu stays open on the way down. */
+.lang ul::before {
+  content: '';
+  position: absolute;
+  inset: -10px 0 auto;
+  height: 10px;
+}
+
+.lang:hover ul,
+.lang:focus-within ul {
+  opacity: 1;
+  visibility: visible;
+  translate: 0 6px;
 }
 
 .lang a {
-  display: block;
-  padding: 7px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
   border-radius: 8px;
   color: var(--fg);
   font-size: 15px;
@@ -276,8 +336,8 @@ p {
     gap: 12px;
     padding: 0 16px;
   }
-  .lang summary span,
-  .pill.solid span {
+  .lang .nav-btn span,
+  .nav-btn.get span {
     display: none;
   }
 }
@@ -293,7 +353,7 @@ p {
 
 @media (min-width: 1000px) {
   .hero {
-    grid-template-columns: 9fr 13fr;
+    grid-template-columns: 10fr 13fr;
   }
 }
 
@@ -331,7 +391,7 @@ p {
   text-decoration: none;
 }
 
-.badge .lucide:first-child {
+.badge .icon:first-child {
   color: var(--accent);
 }
 
@@ -359,11 +419,11 @@ p {
   align-items: center;
   justify-content: center;
   gap: 9px;
-  height: 50px;
-  padding: 0 24px;
+  height: 48px;
+  padding: 0 20px;
   border-radius: 12px;
   font-weight: 600;
-  font-size: 16.5px;
+  font-size: 16px;
   transition:
     background 0.15s,
     transform 0.15s;
@@ -422,7 +482,7 @@ p {
   gap: 6px;
 }
 
-.tags .lucide {
+.tags .icon {
   color: var(--ok);
 }
 
@@ -490,7 +550,7 @@ p {
   box-shadow: 0 0 0 1px var(--accent);
 }
 
-.tabs button[aria-selected='true'] .lucide {
+.tabs button[aria-selected='true'] .icon {
   color: var(--accent);
 }
 
@@ -540,7 +600,7 @@ p {
   background: var(--panel);
 }
 
-.stat .lucide {
+.stat .icon {
   color: var(--fg-muted);
   margin-bottom: 10px;
 }
@@ -592,7 +652,7 @@ p {
   background: var(--panel);
 }
 
-.cell > .lucide {
+.cell > .icon {
   color: var(--accent);
 }
 
@@ -711,7 +771,7 @@ p {
   background: var(--panel);
 }
 
-.half > .lucide {
+.half > .icon {
   color: var(--accent);
 }
 
@@ -733,7 +793,7 @@ p {
   color: var(--fg-muted);
 }
 
-.checks .lucide {
+.checks .icon {
   margin-top: 4px;
   color: var(--ok);
 }
@@ -931,4 +991,13 @@ p {
     --s: 1.025;
     box-shadow: 0 40px 90px rgba(0, 0, 0, 0.5);
   }
+}
+
+.theme .moon,
+:root[data-theme='dark'] .theme .sun {
+  display: none;
+}
+
+:root[data-theme='dark'] .theme .moon {
+  display: block;
 }

@@ -1,0 +1,60 @@
+---
+// Small flags for the language menu, drawn here: emoji flags show as two
+// letters on Windows.
+interface Props {
+  id: 'en' | 'vi' | 'zh'
+  size?: number
+}
+const { id, size = 20 } = Astro.props
+const star = (cx: number, cy: number, r: number, rot = 0) => {
+  const pts: string[] = []
+  for (let i = 0; i < 10; i++) {
+    const a = ((rot - 90 + i * 36) * Math.PI) / 180
+    const rr = i % 2 ? r * 0.382 : r
+    pts.push(`${(cx + rr * Math.cos(a)).toFixed(2)},${(cy + rr * Math.sin(a)).toFixed(2)}`)
+  }
+  return pts.join(' ')
+}
+---
+
+<svg class="flag" viewBox="0 0 30 20" width={size} height={(size * 2) / 3} aria-hidden="true">
+  {
+    id === 'vi' && (
+      <>
+        <rect width="30" height="20" fill="#da251d" />
+        <polygon points={star(15, 10.4, 6)} fill="#ffff00" />
+      </>
+    )
+  }
+  {
+    id === 'zh' && (
+      <>
+        <rect width="30" height="20" fill="#de2910" />
+        <polygon points={star(5, 5, 3)} fill="#ffde00" />
+        <polygon points={star(10, 2, 1)} fill="#ffde00" />
+        <polygon points={star(12, 4, 1)} fill="#ffde00" />
+        <polygon points={star(12, 7, 1)} fill="#ffde00" />
+        <polygon points={star(10, 9, 1)} fill="#ffde00" />
+      </>
+    )
+  }
+  {
+    id === 'en' && (
+      <>
+        <rect width="30" height="20" fill="#012169" />
+        <path d="M0 0l30 20M30 0L0 20" stroke="#fff" stroke-width="4" />
+        <path d="M0 0l30 20M30 0L0 20" stroke="#c8102e" stroke-width="1.6" />
+        <path d="M15 0v20M0 10h30" stroke="#fff" stroke-width="6" />
+        <path d="M15 0v20M0 10h30" stroke="#c8102e" stroke-width="3.4" />
+      </>
+    )
+  }
+</svg>
+
+<style>
+  .flag {
+    flex: none;
+    border-radius: 3px;
+    box-shadow: 0 0 0 1px rgba(127, 127, 127, 0.25);
+  }
+</style>

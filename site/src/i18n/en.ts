@@ -4,7 +4,7 @@ export const en = {
   title: 'Davish: a desktop for your Linux servers',
   description:
     'Terminal, files, Docker, logs, databases and more over plain SSH, in one desktop app for macOS, Windows and Linux. Nothing to install on the server.',
-  nav: { features: 'Features', security: 'Security', download: 'Download', docs: 'Docs', changelog: 'Changelog' },
+  nav: { features: 'Features', security: 'Security', download: 'Download', docs: 'Docs', theme: 'Light or dark', changelog: 'Changelog' },
   hero: {
     title: 'A desktop for your Linux servers.',
     lead: 'Terminal, files, services, Docker, logs, databases and git over plain SSH, in one place that feels like an operating system.',

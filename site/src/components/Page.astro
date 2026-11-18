@@ -1,37 +1,14 @@
 ---
 // The landing page, in one of three languages (ADR 0025).
 import type { ImageMetadata } from 'astro'
-import { Image } from 'astro:assets'
-import {
-  ArrowRight,
-  BookOpen,
-  Check,
-  Container,
-  Database,
-  Download,
-  Eye,
-  Feather,
-  GitBranch,
-  Globe,
-  KeyRound,
-  LayoutGrid,
-  Monitor,
-  Package,
-  RefreshCw,
-  Server,
-  ShieldCheck,
-  Sparkles,
-  SquareTerminal,
-  Star,
-  Tag,
-  Zap,
-} from '@lucide/astro'
 
 import { dicts, locales, type Locale } from '../i18n'
 import Base from '../layouts/Base.astro'
 import { links, release } from '../lib/release'
 import { stats } from '../lib/stats'
-import Brand from './Brand.astro'
+import Flag from './Flag.astro'
+import Icon from './Icon.astro'
+import Shot from './Shot.astro'
 
 interface Props {
   locale: Locale
@@ -65,15 +42,26 @@ function shot(name: string): ImageMetadata {
   throw new Error(`no screenshot ${name}`)
 }
 
+// The site's own pairs, one per theme from the same scene, in
+// assets/screenshots/site/<en|vi>/<light|dark>/; Chinese uses English.
+function pair(name: string): { light: ImageMetadata; dark?: ImageMetadata } {
+  const base = name.replace(/\.(png|jpg)$/, '')
+  const lang = locale === 'vi' ? 'vi' : 'en'
+  const at = (theme: string) => shots[`../../../assets/screenshots/site/${lang}/${theme}/${base}.jpg`]?.default
+  const light = at('light')
+  const dark = at('dark')
+  return light && dark ? { light, dark } : { light: shot(name) }
+}
+
 const tabs = [
-  { id: 'desktop', icon: Monitor, file: 'desktop.png' },
-  { id: 'servers', icon: Server, file: 'servers.jpg' },
-  { id: 'docker', icon: Container, file: 'docker.jpg' },
-  { id: 'database', icon: Database, file: 'sqlite-rows.jpg' },
-  { id: 'git', icon: GitBranch, file: 'git.jpg' },
-  { id: 'security', icon: ShieldCheck, file: 'security.jpg' },
+  { id: 'desktop', icon: 'device-desktop', file: 'desktop.png' },
+  { id: 'servers', icon: 'server-2', file: 'servers.jpg' },
+  { id: 'docker', icon: 'brand-docker', file: 'docker.jpg' },
+  { id: 'database', icon: 'database', file: 'sqlite-rows.jpg' },
+  { id: 'git', icon: 'git-branch', file: 'git.jpg' },
+  { id: 'security', icon: 'shield-check', file: 'security.jpg' },
 ] as const
-const whyIcons = [Zap, Feather, Eye, LayoutGrid, KeyRound, RefreshCw]
+const whyIcons = ['bolt', 'feather', 'eye', 'layout-grid', 'key', 'refresh']
 const platforms = [
   { id: 'macos', main: r.files.macos, alt: r.files.macosZip },
   { id: 'windows', main: r.files.windows, alt: r.files.windowsZip },
@@ -95,26 +83,35 @@ const platforms = [
         <a href={links.changelog(t.lang)}>{t.nav.changelog}</a>
       </nav>
       <div class="actions">
-        <details class="lang">
-          <summary aria-label={t.footer.language}><Globe size={17} /><span>{here.name}</span></summary>
+        <div class="lang">
+          <button type="button" class="nav-btn" aria-haspopup="true" aria-label={t.footer.language}>
+            <Flag id={locale} />
+            <span>{here.name}</span>
+            <Icon name="chevron-down" size={14} />
+          </button>
           <ul>
             {
               locales.map((l) => (
                 <li>
                   <a href={l.path} hreflang={l.hreflang} aria-current={l.id === locale ? 'page' : undefined}>
+                    <Flag id={l.id} />
                     {l.name}
                   </a>
                 </li>
               ))
             }
           </ul>
-        </details>
-        <a class="pill" href={links.discord} aria-label="Discord"><Brand name="discord" /></a>
-        <a class="pill" href={links.repo} aria-label="GitHub">
-          <Brand name="github" />
+        </div>
+        <button class="nav-btn theme" type="button" aria-label={t.nav.theme} title={t.nav.theme} data-theme-toggle>
+          <span class="sun"><Icon name="sun" size={17} /></span>
+          <span class="moon"><Icon name="moon" size={17} /></span>
+        </button>
+        <a class="nav-btn" href={links.discord} aria-label="Discord"><Icon name="brand-discord" /></a>
+        <a class="nav-btn" href={links.repo} aria-label="GitHub">
+          <Icon name="brand-github" />
           {s.stars !== undefined && <span class="mono">{fmt.format(s.stars)}</span>}
         </a>
-        <a class="pill solid" href="#download"><Download size={17} /><span>{t.nav.download}</span></a>
+        <a class="nav-btn get" href="#download"><Icon name="download" size={17} /><span>{t.nav.download}</span></a>
       </div>
     </header>
 
@@ -123,9 +120,9 @@ const platforms = [
         {
           r.version && (
             <a class="badge" href={r.notes}>
-              <Sparkles size={15} />
+              <Icon name="sparkles" size={15} />
               {t.hero.badge(r.version)}
-              <ArrowRight size={15} />
+              <Icon name="arrow-right" size={15} />
             </a>
           )
         }
@@ -133,22 +130,22 @@ const platforms = [
         <p class="lead">{t.hero.lead}</p>
         <div class="cta">
           <a class="btn primary" id="get" href="#download" data-label={t.hero.download}>
-            <Download size={18} />
+            <Icon name="download" size={18} />
             <span>{t.nav.download}</span>
           </a>
-          <a class="btn outline" href={docs}><BookOpen size={18} />{t.hero.docs}</a>
+          <a class="btn outline" href={docs}><Icon name="book" size={18} />{t.hero.docs}</a>
         </div>
         <p class="plats-line">
-          <Brand name="apple" size={16} />
-          <Brand name="windows" size={15} />
-          <SquareTerminal size={16} />
+          <Icon name="brand-apple" size={16} />
+          <Icon name="brand-windows" size={15} />
+          <Icon name="terminal-2" size={16} />
           <span>{t.hero.platforms}</span>
         </p>
-        <p class="tags">{t.hero.tags.map((tag) => <span><Check size={14} />{tag}</span>)}</p>
+        <p class="tags">{t.hero.tags.map((tag) => <span><Icon name="check" size={14} />{tag}</span>)}</p>
       </div>
 
       <div class="demo" data-demo data-reveal style="--delay: 0.12s">
-        <p class="hint">{t.hero.hint} <ArrowRight size={14} /></p>
+        <p class="hint">{t.hero.hint} <Icon name="arrow-right" size={14} /></p>
         <div class="tabs" role="tablist">
           {
             tabs.map((tab, i) => (
@@ -159,7 +156,7 @@ const platforms = [
                 aria-selected={i === 0 ? 'true' : 'false'}
                 data-tab={tab.id}
               >
-                <tab.icon size={16} />
+                <Icon name={tab.icon} size={16} />
                 {t.hero.tabs[tab.id]}
               </button>
             ))
@@ -169,13 +166,11 @@ const platforms = [
           {
             tabs.map((tab, i) => (
               <div class="pane" role="tabpanel" id={`pane-${tab.id}`} aria-labelledby={`tab-${tab.id}`} hidden={i !== 0}>
-                <Image
-                  src={shot(tab.file)}
+                <Shot
+                  {...pair(tab.file)}
                   alt={i === 0 ? t.hero.shotAlt : t.hero.tabs[tab.id]}
                   widths={[640, 960, 1400]}
-                  sizes="(max-width: 1000px) 100vw, 680px"
-                  loading={i === 0 ? 'eager' : 'lazy'}
-                  fetchpriority={i === 0 ? 'high' : 'auto'}
+                  sizes="(max-width: 1000px) 100vw, 720px"
                 />
               </div>
             ))
@@ -188,21 +183,21 @@ const platforms = [
       {
         s.downloads !== undefined && (
           <div class="stat" data-reveal style="--delay: 0.00s">
-            <Download size={22} />
+            <Icon name="download" size={22} />
             <strong>{fmt.format(s.downloads)}</strong>
             <span>{t.stats.downloads}</span>
           </div>
         )
       }
       <div class="stat" data-reveal style="--delay: 0.08s">
-        <LayoutGrid size={22} />
+        <Icon name="layout-grid" size={22} />
         <strong>{s.apps}</strong>
         <span>{t.stats.apps}</span>
       </div>
       {
         r.version && (
           <div class="stat" data-reveal style="--delay: 0.16s">
-            <Tag size={22} />
+            <Icon name="tag" size={22} />
             <strong>{r.version}</strong>
             <span>{t.stats.version(day)}</span>
           </div>
@@ -211,13 +206,13 @@ const platforms = [
       {
         s.stars !== undefined ? (
           <div class="stat" data-reveal style="--delay: 0.24s">
-            <Star size={22} />
+            <Icon name="star" size={22} />
             <strong>{fmt.format(s.stars)}</strong>
             <span>{t.stats.stars}</span>
           </div>
         ) : (
           <div class="stat" data-reveal style="--delay: 0.24s">
-            <Package size={22} />
+            <Icon name="package" size={22} />
             <strong>{t.stats.free}</strong>
             <span>{t.stats.freeNote}</span>
           </div>
@@ -230,10 +225,9 @@ const platforms = [
       <div class="grid3">
         {
           t.why.items.map((it, i) => {
-            const I = whyIcons[i] ?? Zap
             return (
               <article class="cell" data-reveal style={`--delay: ${(i % 3) * 0.08}s`}>
-                <I size={22} />
+                <Icon name={whyIcons[i] ?? 'bolt'} size={24} />
                 <h3>{it.title}</h3>
                 <p>{it.text}</p>
               </article>
@@ -256,7 +250,7 @@ const platforms = [
                 <p>{f.text}</p>
               </div>
               <div class="shot" data-tilt>
-                <Image src={shot(`${f.key}.jpg`)} alt={f.title} widths={[640, 960, 1400]} sizes="(max-width: 900px) 100vw, 720px" />
+                <Shot {...pair(`${f.key}.jpg`)} alt={f.title} widths={[640, 960, 1400]} sizes="(max-width: 900px) 100vw, 720px" />
               </div>
             </div>
           ))
@@ -265,19 +259,19 @@ const platforms = [
       <div class="more" data-reveal>
         <h3>{t.features.more}</h3>
         <ul class="chips">{t.features.list.map((x) => <li>{x}</li>)}</ul>
-        <a class="arrow" href={docs}>{t.features.all} <ArrowRight size={16} /></a>
+        <a class="arrow" href={docs}>{t.features.all} <Icon name="arrow-right" size={16} /></a>
       </div>
     </section>
 
     <section class="split" id="security">
       <div class="half" data-reveal>
-        <ShieldCheck size={28} />
+        <Icon name="shield-check" size={28} />
         <h2>{t.security.title}</h2>
-        <ul class="checks">{t.security.items.map((x) => <li><Check size={18} />{x}</li>)}</ul>
-        <a class="arrow" href={links.security}>{t.security.more} <ArrowRight size={16} /></a>
+        <ul class="checks">{t.security.items.map((x) => <li><Icon name="check" size={18} />{x}</li>)}</ul>
+        <a class="arrow" href={links.security}>{t.security.more} <Icon name="arrow-right" size={16} /></a>
       </div>
       <div class="half" data-reveal style="--delay: 0.1s">
-        <BookOpen size={28} />
+        <Icon name="book" size={28} />
         <h2>{t.docs.title}</h2>
         <p class="muted">{t.docs.lead}</p>
         <ul class="doclinks">
@@ -286,7 +280,7 @@ const platforms = [
               <li>
                 <a href={docs + l.href}>
                   {l.label}
-                  <ArrowRight size={16} />
+                  <Icon name="arrow-right" size={16} />
                 </a>
               </li>
             ))
@@ -302,11 +296,11 @@ const platforms = [
         {
           platforms.map((p) => (
             <article class="cell plat" data-os={p.id} data-reveal style={`--delay: ${platforms.indexOf(p) * 0.08}s`}>
-              {p.id === 'linux' ? <SquareTerminal size={30} /> : <Brand name={p.id === 'macos' ? 'apple' : 'windows'} size={28} />}
+              <Icon name={{ macos: 'brand-apple', windows: 'brand-windows', linux: 'terminal-2' }[p.id]} size={30} />
               <h3>{t.download.platforms[p.id].name}</h3>
               <p>{t.download.platforms[p.id].note}</p>
               <a class="btn primary" href={p.main}>
-                <Download size={18} />
+                <Icon name="download" size={18} />
                 {p.id === 'linux' ? '.tar.gz' : t.download.installer}
               </a>
               {p.alt && (
@@ -328,9 +322,9 @@ const platforms = [
 
     <section class="community">
       <a class="discord" href={links.discord} data-reveal>
-        <Brand name="discord" size={26} />
+        <Icon name="brand-discord" size={26} />
         <span><strong>{t.community.discord}</strong><small>{t.community.discordNote}</small></span>
-        <ArrowRight size={18} />
+        <Icon name="arrow-right" size={18} />
       </a>
     </section>
 
@@ -358,6 +352,10 @@ const platforms = [
           demo.querySelectorAll('.pane').forEach((p) => (p.hidden = p.id !== `pane-${b.dataset.tab}`))
         }),
       )
+      document.querySelector('[data-theme-toggle]')?.addEventListener('click', () =>
+        window.__setTheme?.(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'),
+      )
+
       // Slide content up as it comes into view.
       const io =
         'IntersectionObserver' in window &&
