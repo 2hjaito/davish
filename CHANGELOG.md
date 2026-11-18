@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Docker: bảng container gọn và dễ đọc hơn. Mỗi dòng có logo công nghệ, tên kèm image ở dòng dưới, trạng thái có chấm màu, cổng dạng `8080→80` bấm để mở, cột Tạo, và nút khởi động lại, dừng/chạy, xóa, thêm luôn hiện. Container của một compose project nối với project bằng đường dạng cây. Cột ID chuyển vào trang chi tiết.
+
 ## [1.14.4] - 2026-11-18
 
 ### Thêm

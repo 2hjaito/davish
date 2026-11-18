@@ -4,6 +4,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Added
+- Docker: a cleaner container table. Each row has the tech logo, the name over its image, a colored state dot, ports as `8080→80` that open on click, a Created column, and restart, stop/start, delete and more buttons always in view. A compose project's containers hang off it with a tree line. The ID moved to the detail page.
+
 ## [1.14.4] - 2026-11-18
 
 ### Added

@@ -2369,6 +2369,7 @@ const en = {
       name: 'Name',
       id: 'ID',
       image: 'Image',
+      created: 'Created',
       ports: 'Ports',
       status: 'Status',
       actions: 'Actions',
