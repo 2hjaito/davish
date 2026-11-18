@@ -1,6 +1,6 @@
 // Package fleet runs one command on several servers at once, each in its
 // own terminal session on a PTY, at most Parallel at a time
-// (docs/adr/0021). The user answers any prompt in that server's tab;
+// (.claude/docs/adr/0021). The user answers any prompt in that server's tab;
 // Davish never types a sudo password for a run.
 package fleet
 
@@ -83,6 +83,9 @@ type Service struct {
 
 	mu   sync.Mutex
 	runs map[string]*run
+
+	// stopGrace is how long a stopped job may take to end.
+	stopGrace time.Duration
 }
 
 type run struct {
@@ -91,7 +94,16 @@ type run struct {
 
 // New creates the service.
 func New(terms Terms, audit Auditor, emit Emitter, log *slog.Logger) *Service {
-	return &Service{terms: terms, audit: audit, emit: emit, log: log, runs: map[string]*run{}}
+	return &Service{terms: terms, audit: audit, emit: emit, log: log, runs: map[string]*run{}, stopGrace: 5 * time.Second}
+}
+
+// afterCancel fires grace after ctx is canceled, never before.
+func afterCancel(ctx context.Context, grace time.Duration) <-chan struct{} {
+	c := make(chan struct{})
+	context.AfterFunc(ctx, func() {
+		time.AfterFunc(grace, func() { close(c) })
+	})
+	return c
 }
 
 // Start begins a run and returns its ID and the jobs, all queued. Each
@@ -179,9 +191,14 @@ func (s *Service) runOne(ctx context.Context, id string, it Item, cols, rows int
 		s.send(job)
 		return
 	}
-	// A stop while it runs ends the session; its exit code follows.
+	// A stop while it runs ends the session; its exit code follows. A
+	// server that keeps the command going anyway does not hold the run:
+	// after stopGrace the job counts as stopped.
 	stop := context.AfterFunc(ctx, func() { _ = s.terms.Close(termID) })
-	job.Exit = <-done
+	select {
+	case job.Exit = <-done:
+	case <-afterCancel(ctx, s.stopGrace):
+	}
 	stop()
 
 	job.TermID = termID
@@ -207,7 +224,7 @@ func (s *Service) record(it Item, start time.Time, exit int) {
 		Command:  it.Command,
 		Exit:     exit,
 		DurMs:    time.Since(start).Milliseconds(),
-		// Typed to act on the servers: exported like any change (docs/adr/0022).
+		// Typed to act on the servers: exported like any change (.claude/docs/adr/0022).
 		Mutating: true,
 	})
 	s.log.Info("fleet command", "server", it.ServerID, "exit", exit)

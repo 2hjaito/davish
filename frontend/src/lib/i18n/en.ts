@@ -1055,7 +1055,7 @@ const en = {
           'Open the database server through a tunnel for tools on this computer',
           'Find: the databases running and the SQLite files on the server (read-only)',
           'MongoDB with authentication: log in once, kept in this computer’s keychain; Forget login removes it',
-          'SQLite: tables and rows, back up to ~/db-backups, restore with a line typed into Terminal',
+          'SQLite: tables and rows; click a table to read its rows (read-only, 100 a page, sort by a column, filter by text); back up to ~/db-backups, restore with a line typed into Terminal',
         ],
         keys: [],
         runs: [
@@ -2369,6 +2369,7 @@ const en = {
       name: 'Name',
       id: 'ID',
       image: 'Image',
+      created: 'Created',
       ports: 'Ports',
       status: 'Status',
       actions: 'Actions',
@@ -2727,6 +2728,24 @@ const en = {
       noBackups: 'No backups in ~/db-backups yet. Back it up first.',
       toTerminal: 'Type into Terminal',
       remove: 'Remove from list',
+      view: 'View rows',
+      back: 'Back',
+      prev: 'Previous 100 rows',
+      next: 'Next 100 rows',
+      range: (a: number, b: number, n: number) =>
+        `Rows ${a.toLocaleString()}–${b.toLocaleString()} of ${n.toLocaleString()}`,
+      rangeFiltered: (a: number, b: number) =>
+        `Matching rows ${a.toLocaleString()}–${b.toLocaleString()}`,
+      filterColumn: 'Column to filter',
+      filterContains: 'contains…',
+      filter: 'Filter',
+      clearFilter: 'Clear',
+      sortBy: (c: string) => `Sort by ${c}`,
+      noRows: 'No rows',
+      blob: (size: string) => `BLOB ${size}`,
+      someColumns: (shown: number, all: number) => `Showing the first ${shown} of ${all} columns.`,
+      readOnly:
+        'Read-only, 100 rows a page. Long text is cut at 200 characters; blobs show only their size.',
     },
   },
   deploy: {

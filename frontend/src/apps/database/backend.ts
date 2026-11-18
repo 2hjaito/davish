@@ -15,11 +15,14 @@ import {
   databaseSQLite,
   databaseSQLiteBackup,
   databaseSQLiteRestoreLine,
+  databaseSQLiteRows,
   type DBEngine,
   type DBKind,
   type DBLogin,
   type Found,
   type SQLiteInfo,
+  type SQLiteQuery,
+  type SQLiteRows,
 } from '../../lib/api/database'
 import { tunnelStart } from '../../lib/api/ports'
 import { hasRuntime } from '../../lib/api/runtime'
@@ -74,6 +77,99 @@ const demoSQLite = (path: string): SQLiteInfo => ({
       ],
 })
 
+// Uptime Kuma's heartbeat table, newest first; other tables get a generic shape.
+const demoRows = (table: string, offset: number): SQLiteRows => {
+  const total = table === 'heartbeat' ? 48_210 : table === 'ciphers' ? 342 : 12
+  const n = Math.max(0, Math.min(100, total - offset))
+  const rows = Array.from({ length: n }, (_, i) => offset + i)
+  if (table === 'heartbeat') {
+    const sites = ['dangth.dev', 'api.dangth.dev', 'davitek.com']
+    const t0 = Date.UTC(2026, 10, 18, 5, 20, 0)
+    return {
+      columns: [
+        { name: 'id', type: 'INTEGER', pk: true },
+        { name: 'monitor_id', type: 'INTEGER', pk: false },
+        { name: 'status', type: 'BOOLEAN', pk: false },
+        { name: 'msg', type: 'TEXT', pk: false },
+        { name: 'time', type: 'DATETIME', pk: false },
+        { name: 'ping', type: 'INTEGER', pk: false },
+        { name: 'important', type: 'BOOLEAN', pk: false },
+        { name: 'end_time', type: 'DATETIME', pk: false },
+      ],
+      allColumns: 8,
+      offset,
+      more: offset + n < total,
+      rows: rows.map((r) => {
+        const monitor = (r % 3) + 1
+        const down = r === 7 || r === 8
+        const at = new Date(t0 - Math.floor(r / 3) * 60_000).toISOString().replace('T', ' ')
+        return [
+          { k: 'num', v: String(total - r) },
+          { k: 'num', v: String(monitor) },
+          { k: 'num', v: down ? '0' : '1' },
+          down
+            ? {
+                k: 'text',
+                v: `connect ECONNREFUSED 10.0.0.12:443 while requesting https://${sites[monitor - 1]}/health`,
+              }
+            : { k: 'text', v: '200 - OK' },
+          { k: 'text', v: at.slice(0, 19) },
+          down ? { k: 'null' } : { k: 'num', v: String(38 + ((r * 37) % 140)) },
+          { k: 'num', v: r === 7 || r === 9 ? '1' : '0' },
+          { k: 'null' },
+        ]
+      }),
+    }
+  }
+  return {
+    columns: [
+      { name: 'id', type: 'INTEGER', pk: true },
+      { name: 'name', type: 'TEXT', pk: false },
+      { name: 'data', type: 'BLOB', pk: false },
+    ],
+    allColumns: 3,
+    offset,
+    more: offset + n < total,
+    rows: rows.map((r) => [
+      { k: 'num', v: String(r + 1) },
+      { k: 'text', v: `${table}-${r + 1}` },
+      r % 2 ? { k: 'blob', size: 1024 + r } : { k: 'null' },
+    ]),
+  }
+}
+
+// Sorts and filters the demo's first 500 rows, like the server would.
+function demoQuery(table: string, offset: number, query: SQLiteQuery): SQLiteRows {
+  if (!query.sort && !query.contains) return demoRows(table, offset)
+  const all = [0, 100, 200, 300, 400].flatMap((at) => demoRows(table, at).rows)
+  const cols = demoRows(table, 0).columns
+  const at = (name?: string) => cols.findIndex((c) => c.name === name)
+  const text = (row: SQLiteRows['rows'][number], i: number) => row[i]?.v ?? ''
+  let rows = all
+  const f = at(query.column)
+  if (f >= 0 && query.contains) {
+    const needle = query.contains.toLowerCase()
+    rows = rows.filter((row) => text(row, f).toLowerCase().includes(needle))
+  }
+  const s = at(query.sort)
+  if (s >= 0) {
+    const num = (v: string) => (v === '' || isNaN(Number(v)) ? v : Number(v))
+    rows = [...rows].sort((a, b) => {
+      const x = num(text(a, s))
+      const y = num(text(b, s))
+      const c = x < y ? -1 : x > y ? 1 : 0
+      return query.desc ? -c : c
+    })
+  }
+  return {
+    columns: cols,
+    allColumns: cols.length,
+    offset,
+    more: offset + 100 < rows.length,
+    rows: rows.slice(offset, offset + 100),
+  }
+}
+
 const q = (kind: DBKind, n: string) => (kind === 'mysql' ? `\`${n}\`` : `"${n}"`)
 
 export const backend = hasRuntime
@@ -94,6 +190,7 @@ export const backend = hasRuntime
       sqlite: databaseSQLite,
       sqliteBackup: databaseSQLiteBackup,
       sqliteRestoreLine: databaseSQLiteRestoreLine,
+      sqliteRows: databaseSQLiteRows,
     }
   : {
       list: (_serverID: string) => Promise.resolve(demo),
@@ -147,4 +244,12 @@ export const backend = hasRuntime
         Promise.resolve(
           `cp -p -- ${file} ${file}.before-restore && gzip -dc -- ${backup} > ${file}`,
         ),
+      sqliteRows: (
+        _serverID: string,
+        _file: string,
+        table: string,
+        offset: number,
+        query: SQLiteQuery = {},
+      ) =>
+        new Promise<SQLiteRows>((r) => setTimeout(() => r(demoQuery(table, offset, query)), 250)),
     }

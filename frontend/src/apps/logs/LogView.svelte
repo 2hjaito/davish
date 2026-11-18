@@ -83,7 +83,7 @@
 
 <svelte:document {onselectionchange} />
 
-<!-- Server output is shown as text only (docs/SECURITY.md); paths become
+<!-- Server output is shown as text only (.claude/docs/SECURITY.md); paths become
      buttons that open the Editor, nothing else is interpreted. -->
 <!-- Focusable so the keyboard can scroll it, as a scrollable region should be. -->
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->

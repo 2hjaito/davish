@@ -14,7 +14,7 @@ export interface Shortcut extends Cell {
   color?: string
   /** Id of a picture from this computer, which wins over icon and color. */
   image?: string
-  /** SHA-256 of the script allowed to run without asking (docs/adr/0013). */
+  /** SHA-256 of the script allowed to run without asking (.claude/docs/adr/0013). */
   trusted?: string
 }
 

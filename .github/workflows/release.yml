@@ -55,13 +55,9 @@ jobs:
 
       - name: Linux build deps
         if: runner.os == 'Linux'
-        # A hung Ubuntu mirror once held every runner for an hour; give up
-        # and retry quickly instead.
-        timeout-minutes: 10
-        run: |
-          apt="-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30"
-          sudo apt-get $apt update
-          sudo apt-get $apt install -y libgtk-3-dev libwebkit2gtk-4.1-dev
+        # Cached .debs, and a retry when a mirror crawls (.github/actions/linux-deps).
+        timeout-minutes: 20
+        uses: ./.github/actions/linux-deps
 
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.17.0
@@ -129,7 +125,7 @@ jobs:
           go-version-file: go.mod
 
       # The checksum list, signed with the key the in-app updater trusts
-      # (docs/adr/0009-self-update.md). No key, no release: an unsigned one
+      # (.claude/docs/adr/0009-self-update.md). No key, no release: an unsigned one
       # would leave users on the manual download.
       - name: Checksums and signature
         env:

@@ -1,7 +1,7 @@
 // Package packages reads what the server's package manager has installed
 // and what it could upgrade, and plans the commands that change them.
 // Changing packages needs root, so those commands are run by the user in
-// a terminal (docs/SECURITY.md); this package only reads.
+// a terminal (.claude/docs/SECURITY.md); this package only reads.
 package packages
 
 import (

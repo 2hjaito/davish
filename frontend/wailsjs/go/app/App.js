@@ -122,6 +122,10 @@ export function DatabaseSQLiteRestoreLine(arg1, arg2) {
   return window['go']['app']['App']['DatabaseSQLiteRestoreLine'](arg1, arg2);
 }
 
+export function DatabaseSQLiteRows(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['app']['App']['DatabaseSQLiteRows'](arg1, arg2, arg3, arg4, arg5);
+}
+
 export function DeleteServer(arg1) {
   return window['go']['app']['App']['DeleteServer'](arg1);
 }

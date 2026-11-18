@@ -1,6 +1,6 @@
 <script lang="ts">
   // The chosen Command log entries as a bash script: read it, then copy it
-  // or save it (docs/adr/0022). Nothing runs from here.
+  // or save it (.claude/docs/adr/0022). Nothing runs from here.
   import { copyText } from '../../lib/api/clipboard'
   import { auditSaveScript, auditScript } from '../../lib/api/audit'
   import { toUserError } from '../../lib/api/errors'

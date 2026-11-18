@@ -18,6 +18,7 @@
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import type { AppProps } from '../types'
   import { backend } from './backend'
+  import SQLiteTable from './SQLiteTable.svelte'
 
   let { win }: AppProps = $props()
   const ctx = getWindowContext()
@@ -296,6 +297,8 @@
   const files = $derived(sqliteFiles.of(win.serverID))
   /** Each file's tables, or why it could not be read. */
   let infos = $state.raw<Record<string, SQLiteInfo | string>>({})
+  // The table being looked at, in place of the list.
+  let viewing = $state.raw<{ file: string; table: string; rows: number } | null>(null)
 
   async function loadSQLite(path: string) {
     try {
@@ -398,6 +401,14 @@
   <Empty icon="server" title={d.offline} />
 {:else if engines === null}
   <Empty icon="disk" title={error || d.loading} />
+{:else if viewing}
+  <SQLiteTable
+    serverID={win.serverID}
+    file={viewing.file}
+    table={viewing.table}
+    total={viewing.rows}
+    onback={() => (viewing = null)}
+  />
 {:else}
   <div class="db">
     <div class="col">
@@ -564,7 +575,13 @@
                         <ul>
                           {#each info.tables as tb (tb.name)}
                             <li>
-                              <span class="mono">{tb.name}</span>
+                              <button
+                                class="link mono"
+                                title={d.sqlite.view}
+                                onclick={() =>
+                                  (viewing = { file: path, table: tb.name, rows: tb.rows })}
+                                >{tb.name}</button
+                              >
                               <small>{d.sqlite.rows(tb.rows)}</small>
                             </li>
                           {/each}

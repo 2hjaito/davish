@@ -1,4 +1,4 @@
-/* Design tokens. Source of truth: docs/DESIGN.md. Components use only these. */
+/* Design tokens. Source of truth: .claude/docs/DESIGN.md. Components use only these. */
 :root {
   /* Font */
   --font-ui: 'Inter Variable', 'Inter', system-ui, sans-serif;
@@ -44,11 +44,8 @@
   --offline: #9aa0ab;
 
   /* Traffic lights */
-  --tl-close: #ff5f57;
-  --tl-min: #febc2e;
-  --tl-max: #28c840;
-  --tl-inactive: #c7cad1;
-  --tl-glyph: rgba(0, 0, 0, 0.5);
+  --tl-off-ring: #d1d0d2;
+  --tl-off-fill: #c7c7c7;
 
   /* Light glass */
   --glass-bg: rgba(255, 255, 255, 0.22);
@@ -224,7 +221,8 @@
   --diff-added: rgba(126, 226, 168, 0.14);
 
   /* Traffic lights */
-  --tl-inactive: #4a4e58;
+  --tl-off-ring: #44474f;
+  --tl-off-fill: #4a4e58;
 
   /* Smoky glass */
   --glass-bg: rgba(34, 36, 44, 0.42);

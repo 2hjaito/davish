@@ -17,7 +17,7 @@
 </script>
 
 <!--
-  App icons (docs/adr/0003-app-icon-artwork.md) on a 64×64 grid. Davish's own
+  App icons (.claude/docs/adr/0003-app-icon-artwork.md) on a 64×64 grid. Davish's own
   apps get drawn artwork: one bold, filled shape on a rich gradient. Apps that
   manage a third-party tool show that tool's official mark. Colors here are
   artwork, not UI tokens.

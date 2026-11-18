@@ -179,7 +179,7 @@ export interface DeployStep {
 /** A recipe as one terminal line (internal/git.Deploy). */
 export interface DeployLine {
   line: string
-  /** Tags the progress marks the line prints (docs/adr/0012). */
+  /** Tags the progress marks the line prints (.claude/docs/adr/0012). */
   nonce: string
   /** Labels of the steps that run. */
   steps: string[]

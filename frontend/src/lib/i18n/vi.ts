@@ -1037,7 +1037,7 @@ const vi = {
           'Mở database server qua tunnel cho công cụ trên máy này',
           'Dò: tìm database đang chạy và file SQLite trên server (chỉ đọc)',
           'MongoDB bật xác thực: đăng nhập một lần, lưu trong keychain của máy này; Quên thông tin đăng nhập để xóa',
-          'SQLite: xem bảng và số dòng, backup ra ~/db-backups, khôi phục bằng lệnh gõ sẵn vào Terminal',
+          'SQLite: xem bảng và số dòng; bấm tên bảng để xem dữ liệu (chỉ đọc, 100 dòng/trang, sắp xếp theo cột, lọc theo chữ); backup ra ~/db-backups, khôi phục bằng lệnh gõ sẵn vào Terminal',
         ],
         keys: [],
         runs: [
@@ -2336,6 +2336,7 @@ const vi = {
       name: 'Tên',
       id: 'ID',
       image: 'Image',
+      created: 'Tạo',
       ports: 'Cổng',
       status: 'Trạng thái',
       actions: 'Thao tác',
@@ -2690,6 +2691,24 @@ const vi = {
       noBackups: 'Chưa có bản backup nào trong ~/db-backups. Bấm Backup trước.',
       toTerminal: 'Gõ vào Terminal',
       remove: 'Bỏ khỏi danh sách',
+      view: 'Xem dữ liệu',
+      back: 'Quay lại',
+      prev: '100 dòng trước',
+      next: '100 dòng sau',
+      range: (a: number, b: number, n: number) =>
+        `Dòng ${a.toLocaleString()}–${b.toLocaleString()} / ${n.toLocaleString()}`,
+      rangeFiltered: (a: number, b: number) =>
+        `Dòng khớp ${a.toLocaleString()}–${b.toLocaleString()}`,
+      filterColumn: 'Cột để lọc',
+      filterContains: 'có chứa…',
+      filter: 'Lọc',
+      clearFilter: 'Bỏ lọc',
+      sortBy: (c: string) => `Sắp xếp theo ${c}`,
+      noRows: 'Không có dòng nào',
+      blob: (size: string) => `BLOB ${size}`,
+      someColumns: (shown: number, all: number) => `Đang hiện ${shown} / ${all} cột đầu.`,
+      readOnly:
+        'Chỉ đọc, 100 dòng mỗi trang. Chữ dài bị cắt ở 200 ký tự; BLOB chỉ hiện kích thước.',
     },
   },
   deploy: {

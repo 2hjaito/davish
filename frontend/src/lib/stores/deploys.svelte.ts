@@ -1,5 +1,5 @@
 // Deploy runs a terminal is showing, read from the progress marks the
-// deploy line prints (internal/git/deploy.go, docs/adr/0012). Marks come
+// deploy line prints (internal/git/deploy.go, .claude/docs/adr/0012). Marks come
 // from server output, which anyone on the server can write: they only
 // draw progress, are taken only with the nonce of a run being watched,
 // and never decide what runs.

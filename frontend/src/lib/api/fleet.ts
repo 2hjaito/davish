@@ -1,5 +1,5 @@
 // Typed wrappers for running a command on several servers
-// (internal/app/fleet.go, docs/adr/0021).
+// (internal/app/fleet.go, .claude/docs/adr/0021).
 import * as App from '../../../wailsjs/go/app/App'
 import { fleet } from '../../../wailsjs/go/models'
 

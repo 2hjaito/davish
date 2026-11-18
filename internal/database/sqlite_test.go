@@ -1,7 +1,10 @@
 package database
 
 import (
+	"bytes"
 	"context"
+	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -98,5 +101,126 @@ func TestInspectSQLiteErrors(t *testing.T) {
 	}
 	if _, err := New(nil).InspectSQLite(context.Background(), "srv", "a.db"); codeOf(err) != apperr.InvalidInput {
 		t.Errorf("relative path: %v", err)
+	}
+}
+
+func TestParseSQLiteCell(t *testing.T) {
+	for in, want := range map[string]SQLiteCell{
+		"n":        {Kind: "null"},
+		"":         {Kind: "null"},
+		"b2048":    {Kind: "blob", Size: 2048},
+		"tsome\tx": {Kind: "text", Text: "some\tx"},
+		"Tlong":    {Kind: "text", Text: "long", Cut: true},
+		"t":        {Kind: "text"},
+		"v-3.5":    {Kind: "num", Text: "-3.5"},
+	} {
+		if got := parseSQLiteCell(in); got != want {
+			t.Errorf("parseSQLiteCell(%q) = %+v, want %+v", in, got, want)
+		}
+	}
+}
+
+func TestSQLiteRowsSQL(t *testing.T) {
+	got := sqliteRowsSQL(`we"ird`, []SQLiteColumn{{Name: "a b"}}, 200, SQLiteQuery{Sort: "a b", Desc: true, Column: "a b", Contains: `50%_off\`})
+	for _, want := range []string{`typeof("a b")`, `FROM "we""ird" WHERE CAST("a b" AS TEXT) LIKE '%50\%\_off\\%' ESCAPE '\' ORDER BY "a b" DESC LIMIT 101 OFFSET 200;`, `substr("a b", 1, 200)`} {
+		if !strings.Contains(got, want) {
+			t.Errorf("rows SQL lacks %s:\n%s", want, got)
+		}
+	}
+	if c := sqliteColumnsSQL(`x'); DROP TABLE y; --`); !strings.Contains(c, `pragma_table_info('x''); DROP TABLE y; --')`) {
+		t.Errorf("columns SQL = %s", c)
+	}
+}
+
+func TestRowsSQLiteRejects(t *testing.T) {
+	s := New(nil)
+	for _, c := range []struct {
+		file, table string
+		offset      int
+	}{{"a.db", "t", 0}, {"/a.db", "", 0}, {"/a.db", "t", -1}} {
+		if _, err := s.RowsSQLite(context.Background(), "srv", c.file, c.table, c.offset, SQLiteQuery{}); codeOf(err) != apperr.InvalidInput {
+			t.Errorf("%+v: %v", c, err)
+		}
+	}
+}
+
+// localSQLite runs the lines on a sqlite3 on this computer, so the SQL
+// Davish builds is checked against a real SQLite.
+type localSQLite struct{ file string }
+
+func (l localSQLite) RunInput(ctx context.Context, _, _, _ string, stdin []byte) (audit.Result, error) {
+	cmd := exec.CommandContext(ctx, "sqlite3", "-readonly", "-batch", "-noheader", "-separator", "\t", l.file) //nolint:gosec // a temp file of this test
+	cmd.Stdin = bytes.NewReader(stdin)
+	var out, errb bytes.Buffer
+	cmd.Stdout, cmd.Stderr = &out, &errb
+	err := cmd.Run()
+	res := audit.Result{Stdout: out.Bytes(), Stderr: errb.Bytes()}
+	if err != nil {
+		res.Exit = 1
+	}
+	return res, nil
+}
+
+func TestRowsSQLiteOnRealSQLite(t *testing.T) {
+	if _, err := exec.LookPath("sqlite3"); err != nil {
+		t.Skip("no sqlite3 here")
+	}
+	file := filepath.Join(t.TempDir(), "t.db")
+	setup := `CREATE TABLE "odd ""t""" (id INTEGER PRIMARY KEY, name TEXT, note, data BLOB);
+INSERT INTO "odd ""t""" VALUES (1, 'a' || char(9) || 'b' || char(10) || 'c' || char(31) || char(30), NULL, x'0102');
+INSERT INTO "odd ""t""" VALUES (2, 'it''s', 3.5, NULL);
+INSERT INTO "odd ""t""" VALUES (3, printf('%.300c', 'x'), -7, zeroblob(5000));
+WITH RECURSIVE n(i) AS (SELECT 4 UNION ALL SELECT i + 1 FROM n WHERE i < 150) INSERT INTO "odd ""t""" (id) SELECT i FROM n;`
+	if out, err := exec.Command("sqlite3", file, setup).CombinedOutput(); err != nil { //nolint:gosec // a temp file of this test
+		t.Fatalf("setup: %v %s", err, out)
+	}
+	s := New(localSQLite{file})
+	page, err := s.RowsSQLite(context.Background(), "srv", "/x.db", `odd "t"`, 0, SQLiteQuery{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(page.Columns) != 4 || page.Columns[0] != (SQLiteColumn{Name: "id", Type: "INTEGER", PK: true}) || page.AllColumns != 4 {
+		t.Fatalf("columns = %+v", page.Columns)
+	}
+	if len(page.Rows) != 100 || !page.More {
+		t.Fatalf("rows = %d, more = %v", len(page.Rows), page.More)
+	}
+	r := page.Rows
+	if r[0][1] != (SQLiteCell{Kind: "text", Text: "a\tb\nc  "}) || r[0][2].Kind != "null" || r[0][3] != (SQLiteCell{Kind: "blob", Size: 2}) {
+		t.Errorf("row 1 = %+v", r[0])
+	}
+	if r[1][1].Text != "it's" || r[1][2] != (SQLiteCell{Kind: "num", Text: "3.5"}) {
+		t.Errorf("row 2 = %+v", r[1])
+	}
+	if c := r[2][1]; !c.Cut || len(c.Text) != 200 || r[2][3].Size != 5000 {
+		t.Errorf("row 3 = %+v", r[2])
+	}
+	last, err := s.RowsSQLite(context.Background(), "srv", "/x.db", `odd "t"`, 100, SQLiteQuery{})
+	if err != nil || len(last.Rows) != 50 || last.More || last.Rows[0][0].Text != "101" {
+		t.Errorf("page 2 = %d rows, more %v, %v", len(last.Rows), last.More, err)
+	}
+	if _, err := s.RowsSQLite(context.Background(), "srv", "/x.db", "nope", 0, SQLiteQuery{}); codeOf(err) != apperr.NotFound {
+		t.Errorf("missing table: %v", err)
+	}
+
+	// Sorted by id, newest first.
+	desc, err := s.RowsSQLite(context.Background(), "srv", "/x.db", `odd "t"`, 0, SQLiteQuery{Sort: "id", Desc: true})
+	if err != nil || desc.Rows[0][0].Text != "150" || !desc.More {
+		t.Errorf("sorted: first %+v, more %v, %v", desc.Rows[0][0], desc.More, err)
+	}
+	// Filtered: % and _ are literal, and only rows that match come back.
+	for contains, want := range map[string]int{"it's": 1, "%": 0, "_": 0, "x": 1, "3": 33} {
+		got, err := s.RowsSQLite(context.Background(), "srv", "/x.db", `odd "t"`, 0, SQLiteQuery{Column: "name", Contains: contains})
+		if contains == "3" {
+			got, err = s.RowsSQLite(context.Background(), "srv", "/x.db", `odd "t"`, 0, SQLiteQuery{Column: "id", Contains: contains})
+		}
+		if err != nil || len(got.Rows) != want {
+			t.Errorf("contains %q: %d rows, want %d, %v", contains, len(got.Rows), want, err)
+		}
+	}
+	for _, q := range []SQLiteQuery{{Sort: "nope"}, {Column: "nope", Contains: "a"}} {
+		if _, err := s.RowsSQLite(context.Background(), "srv", "/x.db", `odd "t"`, 0, q); codeOf(err) != apperr.InvalidInput {
+			t.Errorf("%+v: %v", q, err)
+		}
 	}
 }

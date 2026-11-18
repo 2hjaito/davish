@@ -1,0 +1,411 @@
+---
+// The landing page, in one of three languages (ADR 0025).
+import type { ImageMetadata } from 'astro'
+
+import { dicts, locales, type Locale } from '../i18n'
+import Base from '../layouts/Base.astro'
+import { links, release } from '../lib/release'
+import { stats } from '../lib/stats'
+import AppIcon from './AppIcon.astro'
+import Flag from './Flag.astro'
+import Icon from './Icon.astro'
+import Shot from './Shot.astro'
+
+interface Props {
+  locale: Locale
+}
+const { locale } = Astro.props
+const t = dicts[locale]
+const r = await release()
+const s = await stats()
+const here = locales.find((l) => l.id === locale)!
+const docs = locale === 'en' ? '/docs/' : `/${locale}/docs/`
+const fmt = new Intl.NumberFormat(t.lang)
+const day = r.date ? new Intl.DateTimeFormat(t.lang, { dateStyle: 'medium' }).format(new Date(r.date)) : ''
+
+// Screenshots live in the repo's assets/: English ones in en/ (and for
+// Chinese, which only has its own desktop), Vietnamese ones at the top.
+const shots = import.meta.glob<{ default: ImageMetadata }>('../../../assets/screenshots/**/*.{jpg,png}', {
+  eager: true,
+})
+function shot(name: string): ImageMetadata {
+  const dir = '../../../assets/screenshots/'
+  const tries =
+    locale === 'vi'
+      ? [`${dir}${name}`, `${dir}en/${name}`]
+      : locale === 'zh'
+        ? [`${dir}zh/${name}`, `${dir}en/${name}`]
+        : [`${dir}en/${name}`]
+  for (const p of tries) {
+    const m = shots[p]
+    if (m) return m.default
+  }
+  throw new Error(`no screenshot ${name}`)
+}
+
+// The site's own pairs, one per theme from the same scene, in
+// assets/screenshots/site/<en|vi>/<light|dark>/; Chinese uses English.
+function pair(name: string): { light: ImageMetadata; dark?: ImageMetadata } {
+  const base = name.replace(/\.(png|jpg)$/, '')
+  const lang = locale === 'vi' ? 'vi' : 'en'
+  const at = (theme: string) => shots[`../../../assets/screenshots/site/${lang}/${theme}/${base}.jpg`]?.default
+  const light = at('light')
+  const dark = at('dark')
+  return light && dark ? { light, dark } : { light: shot(name) }
+}
+
+const tabs = [
+  { id: 'desktop', icon: 'launchpad', file: 'desktop.png' },
+  { id: 'servers', icon: 'servers', file: 'servers.jpg' },
+  { id: 'docker', icon: 'docker', file: 'docker.jpg' },
+  { id: 'database', icon: 'database', file: 'sqlite-rows.jpg' },
+  { id: 'git', icon: 'git', file: 'git.jpg' },
+  { id: 'security', icon: 'security', file: 'security.jpg' },
+] as const
+// The app behind each "also inside" chip, in the order of t.features.list.
+const chipIcons = ['terminal', 'files', 'editor', 'logs', 'monitor', 'services', 'cron', 'nginx', 'packages', 'ports', 'browser', 'disk', 'keys', 'snippets', 'audit', 'launchpad']
+const whyIcons = ['bolt', 'feather', 'eye', 'layout-grid', 'key', 'refresh']
+const platforms = [
+  { id: 'macos', main: r.files.macos, alt: r.files.macosZip },
+  { id: 'windows', main: r.files.windows, alt: r.files.windowsZip },
+  { id: 'linux', main: r.files.linux, alt: '' },
+] as const
+---
+
+<Base locale={locale}>
+  <div class="frame">
+    <header class="nav">
+      <a class="brand" href={here.path}>
+        <img src="/favicon.svg" alt="" width="30" height="30" />
+        <span>Davish</span>
+      </a>
+      <nav class="links" aria-label="Main">
+        <a href="#features">{t.nav.features}</a>
+        <a href={docs}>{t.nav.docs}</a>
+        <a href="#download">{t.nav.download}</a>
+        <a href={links.changelog(t.lang)}>{t.nav.changelog}</a>
+      </nav>
+      <div class="actions">
+        <div class="lang">
+          <button type="button" class="nav-btn" aria-haspopup="true" aria-label={t.footer.language}>
+            <Flag id={locale} />
+            <span>{here.name}</span>
+            <Icon name="chevron-down" size={14} />
+          </button>
+          <ul>
+            {
+              locales.map((l) => (
+                <li>
+                  <a href={l.path} hreflang={l.hreflang} aria-current={l.id === locale ? 'page' : undefined}>
+                    <Flag id={l.id} />
+                    {l.name}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <button class="nav-btn theme" type="button" aria-label={t.nav.theme} title={t.nav.theme} data-theme-toggle>
+          <span class="sun"><Icon name="sun" size={17} /></span>
+          <span class="moon"><Icon name="moon" size={17} /></span>
+        </button>
+        <a class="nav-btn" href={links.discord} aria-label="Discord"><Icon name="brand-discord" /></a>
+        <a class="nav-btn" href={links.repo} aria-label="GitHub">
+          <Icon name="brand-github" />
+          {s.stars !== undefined && <span class="mono">{fmt.format(s.stars)}</span>}
+        </a>
+        <a class="nav-btn get" href="#download"><Icon name="download" size={17} /><span>{t.nav.download}</span></a>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-text" data-reveal>
+        {
+          r.version && (
+            <a class="badge" href={r.notes}>
+              <Icon name="sparkles" size={15} />
+              {t.hero.badge(r.version)}
+              <Icon name="arrow-right" size={15} />
+            </a>
+          )
+        }
+        <h1>{t.hero.title}</h1>
+        <p class="lead">{t.hero.lead}</p>
+        <div class="cta">
+          <a class="btn primary" id="get" href="#download" data-label={t.hero.download}>
+            <Icon name="download" size={18} />
+            <span>{t.nav.download}</span>
+          </a>
+          <a class="btn outline" href={docs}><Icon name="book" size={18} />{t.hero.docs}</a>
+        </div>
+        <p class="plats-line">
+          <Icon name="brand-apple" size={16} />
+          <Icon name="brand-windows" size={15} />
+          <Icon name="terminal-2" size={16} />
+          <span>{t.hero.platforms}</span>
+        </p>
+        <p class="tags">{t.hero.tags.map((tag) => <span><Icon name="check" size={14} />{tag}</span>)}</p>
+      </div>
+
+      <div class="demo" data-demo data-reveal style="--delay: 0.12s">
+        <p class="hint">{t.hero.hint} <Icon name="arrow-right" size={14} /></p>
+        <div class="tabs" role="tablist">
+          {
+            tabs.map((tab, i) => (
+              <button
+                role="tab"
+                id={`tab-${tab.id}`}
+                aria-controls={`pane-${tab.id}`}
+                aria-selected={i === 0 ? 'true' : 'false'}
+                data-tab={tab.id}
+              >
+                <AppIcon id={tab.icon} size={16} />
+                {t.hero.tabs[tab.id]}
+              </button>
+            ))
+          }
+        </div>
+        <div class="screen" data-tilt>
+          {
+            tabs.map((tab, i) => (
+              <div class="pane" role="tabpanel" id={`pane-${tab.id}`} aria-labelledby={`tab-${tab.id}`} hidden={i !== 0}>
+                <Shot
+                  {...pair(tab.file)}
+                  alt={i === 0 ? t.hero.shotAlt : t.hero.tabs[tab.id]}
+                  widths={[640, 960, 1400]}
+                  sizes="(max-width: 1000px) 100vw, 720px"
+                />
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="stats" aria-label="Davish in numbers">
+      {
+        s.downloads !== undefined && (
+          <div class="stat" data-reveal style="--delay: 0.00s">
+            <Icon name="download" size={22} />
+            <strong>{fmt.format(s.downloads)}</strong>
+            <span>{t.stats.downloads}</span>
+          </div>
+        )
+      }
+      <div class="stat" data-reveal style="--delay: 0.08s">
+        <Icon name="layout-grid" size={22} />
+        <strong>{s.apps}</strong>
+        <span>{t.stats.apps}</span>
+      </div>
+      {
+        r.version && (
+          <div class="stat" data-reveal style="--delay: 0.16s">
+            <Icon name="tag" size={22} />
+            <strong>{r.version}</strong>
+            <span>{t.stats.version(day)}</span>
+          </div>
+        )
+      }
+      {
+        s.stars !== undefined ? (
+          <div class="stat" data-reveal style="--delay: 0.24s">
+            <Icon name="star" size={22} />
+            <strong>{fmt.format(s.stars)}</strong>
+            <span>{t.stats.stars}</span>
+          </div>
+        ) : (
+          <div class="stat" data-reveal style="--delay: 0.24s">
+            <Icon name="package" size={22} />
+            <strong>{t.stats.free}</strong>
+            <span>{t.stats.freeNote}</span>
+          </div>
+        )
+      }
+    </section>
+
+    <section class="block">
+      <h2 data-reveal>{t.why.title}</h2>
+      <div class="grid3">
+        {
+          t.why.items.map((it, i) => {
+            return (
+              <article class="cell" data-reveal style={`--delay: ${(i % 3) * 0.08}s`}>
+                <Icon name={whyIcons[i] ?? 'bolt'} size={24} />
+                <h3>{it.title}</h3>
+                <p>{it.text}</p>
+              </article>
+            )
+          })
+        }
+      </div>
+    </section>
+
+    <section class="block" id="features">
+      <h2 data-reveal>{t.features.title}</h2>
+      <p class="sub" data-reveal>{t.features.lead}</p>
+      <div class="rows">
+        {
+          t.features.show.map((f, i) => (
+            <div class:list={['row', { flip: i % 2 === 1 }]} data-reveal>
+              <div class="row-text">
+                <span class="num mono">{String(i + 1).padStart(2, '0')}</span>
+                <h3>{f.title}</h3>
+                <p>{f.text}</p>
+              </div>
+              <div class="shot" data-tilt>
+                <Shot {...pair(`${f.key}.jpg`)} alt={f.title} widths={[640, 960, 1400]} sizes="(max-width: 900px) 100vw, 720px" />
+              </div>
+            </div>
+          ))
+        }
+      </div>
+      <div class="more" data-reveal>
+        <h3>{t.features.more}</h3>
+        <ul class="chips">
+          {
+            t.features.list.map((x, i) => (
+              <li>
+                <AppIcon id={chipIcons[i] ?? 'launchpad'} size={22} />
+                {x}
+              </li>
+            ))
+          }
+        </ul>
+        <a class="arrow" href={docs}>{t.features.all} <Icon name="arrow-right" size={16} /></a>
+      </div>
+    </section>
+
+    <section class="split" id="security">
+      <div class="half" data-reveal>
+        <Icon name="shield-check" size={28} />
+        <h2>{t.security.title}</h2>
+        <ul class="checks">{t.security.items.map((x) => <li><Icon name="check" size={18} />{x}</li>)}</ul>
+        <a class="arrow" href={links.security}>{t.security.more} <Icon name="arrow-right" size={16} /></a>
+      </div>
+      <div class="half" data-reveal style="--delay: 0.1s">
+        <Icon name="book" size={28} />
+        <h2>{t.docs.title}</h2>
+        <p class="muted">{t.docs.lead}</p>
+        <ul class="doclinks">
+          {
+            t.docs.links.map((l) => (
+              <li>
+                <a href={docs + l.href}>
+                  {l.label}
+                  <Icon name="arrow-right" size={16} />
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <section class="block" id="download">
+      <h2 data-reveal>{t.download.title}</h2>
+      <p class="sub" data-reveal>{t.download.lead}</p>
+      <div class="grid3 plats">
+        {
+          platforms.map((p) => (
+            <article class="cell plat" data-os={p.id} data-reveal style={`--delay: ${platforms.indexOf(p) * 0.08}s`}>
+              <Icon name={{ macos: 'brand-apple', windows: 'brand-windows', linux: 'terminal-2' }[p.id]} size={30} />
+              <h3>{t.download.platforms[p.id].name}</h3>
+              <p>{t.download.platforms[p.id].note}</p>
+              <a class="btn primary" href={p.main}>
+                <Icon name="download" size={18} />
+                {p.id === 'linux' ? '.tar.gz' : t.download.installer}
+              </a>
+              {p.alt && (
+                <a class="small" href={p.alt}>
+                  {t.download.archive} (.zip)
+                </a>
+              )}
+            </article>
+          ))
+        }
+      </div>
+      <p class="note">
+        {t.download.unsigned} <a href={`${docs}start/install/`}>{t.download.guide}</a>
+      </p>
+      <p class="note">
+        <a href={r.notes}>{t.download.notes}</a> · <a href={r.files.sums}>{t.download.checksums}</a>
+      </p>
+    </section>
+
+    <section class="community">
+      <a class="discord" href={links.discord} data-reveal>
+        <Icon name="brand-discord" size={26} />
+        <span><strong>{t.community.discord}</strong><small>{t.community.discordNote}</small></span>
+        <Icon name="arrow-right" size={18} />
+      </a>
+    </section>
+
+    <footer class="foot">
+      <a class="brand" href={here.path}><img src="/favicon.svg" alt="" width="22" height="22" /><span>Davish</span></a>
+      <p>{t.footer.license}</p>
+      <nav aria-label="Footer">
+        <a href={docs}>{t.nav.docs}</a>
+        <a href={links.repo}>GitHub</a>
+        <a href={links.discord}>Discord</a>
+        <a href={links.changelog(t.lang)}>{t.footer.changelog}</a>
+        <a href={links.issues}>{t.footer.issues}</a>
+      </nav>
+    </footer>
+  </div>
+
+  <script is:inline>
+    // Demo tabs, reveal on scroll, tilting screenshots, and the main button
+    // pointed at the visitor's platform. The page works without all of it.
+    ;(() => {
+      const demo = document.querySelector('[data-demo]')
+      demo?.querySelectorAll('[data-tab]').forEach((b) =>
+        b.addEventListener('click', () => {
+          demo.querySelectorAll('[data-tab]').forEach((x) => x.setAttribute('aria-selected', String(x === b)))
+          demo.querySelectorAll('.pane').forEach((p) => (p.hidden = p.id !== `pane-${b.dataset.tab}`))
+        }),
+      )
+      document.querySelector('[data-theme-toggle]')?.addEventListener('click', () =>
+        window.__setTheme?.(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'),
+      )
+
+      // Slide content up as it comes into view.
+      const io =
+        'IntersectionObserver' in window &&
+        new IntersectionObserver(
+          (es) =>
+            es.forEach((e) => {
+              if (!e.isIntersecting) return
+              e.target.classList.add('in')
+              io.unobserve(e.target)
+            }),
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.12 },
+        )
+      document.querySelectorAll('[data-reveal]').forEach((el) => (io ? io.observe(el) : el.classList.add('in')))
+
+      // Screenshots lean toward the pointer.
+      if (matchMedia('(hover: hover) and (prefers-reduced-motion: no-preference)').matches)
+        document.querySelectorAll('[data-tilt]').forEach((el) => {
+          el.addEventListener('pointermove', (ev) => {
+            const r = el.getBoundingClientRect()
+            const x = (ev.clientX - r.left) / r.width - 0.5
+            const y = (ev.clientY - r.top) / r.height - 0.5
+            el.style.setProperty('--ry', `${(x * 5).toFixed(2)}deg`)
+            el.style.setProperty('--rx', `${(-y * 4).toFixed(2)}deg`)
+          })
+          el.addEventListener('pointerleave', () => {
+            el.style.removeProperty('--rx')
+            el.style.removeProperty('--ry')
+          })
+        })
+
+      const ua = navigator.userAgent
+      const os = /Mac/.test(ua) && !/iPhone|iPad/.test(ua) ? 'macos' : /Windows/.test(ua) ? 'windows' : /Linux/.test(ua) && !/Android/.test(ua) ? 'linux' : ''
+      const card = os && document.querySelector(`.plat[data-os="${os}"]`)
+      const get = document.getElementById('get')
+      if (!card || !get) return
+      card.classList.add('mine')
+      get.href = card.querySelector('a.btn').href
+      get.querySelector('span').textContent = `${get.dataset.label} ${card.querySelector('h3').textContent}`
+    })()
+  </script>
+</Base>

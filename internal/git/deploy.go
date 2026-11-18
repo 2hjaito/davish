@@ -19,9 +19,9 @@ type Step struct {
 // Deploy is a recipe made into one terminal line.
 type Deploy struct {
 	// Line is typed into a terminal; Davish presses Enter only when Sudo
-	// is false (docs/SECURITY.md).
+	// is false (.claude/docs/SECURITY.md).
 	Line string `json:"line"`
-	// Nonce tags the progress marks of this run (docs/adr/0012).
+	// Nonce tags the progress marks of this run (.claude/docs/adr/0012).
 	Nonce string `json:"nonce"`
 	// Steps are the labels of the steps that run, numbered from 1 in the marks.
 	Steps []string `json:"steps"`

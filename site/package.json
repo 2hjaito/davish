@@ -1,0 +1,20 @@
+{
+  "name": "davish-site",
+  "private": true,
+  "type": "module",
+  "description": "davish.dangth.dev: the landing page and the docs (ADR 0025). Built apart from the app.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "0.43.1",
+    "@fontsource-variable/bricolage-grotesque": "5.3.0",
+    "@fontsource-variable/geist-mono": "5.3.0",
+    "@fontsource/be-vietnam-pro": "5.3.0",
+    "@tabler/icons": "3.50.0",
+    "astro": "7.4.12",
+    "sharp": "0.35.5"
+  }
+}

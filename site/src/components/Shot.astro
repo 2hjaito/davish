@@ -1,0 +1,27 @@
+---
+// A screenshot in the page's theme: both versions are in the HTML, CSS
+// shows the one that matches, and the hidden one is never fetched (lazy
+// and not displayed). One image serves both themes when there is no pair.
+import type { ImageMetadata } from 'astro'
+import { Image } from 'astro:assets'
+
+interface Props {
+  light: ImageMetadata
+  dark?: ImageMetadata
+  alt: string
+  widths: number[]
+  sizes: string
+}
+const { light, dark, alt, widths, sizes } = Astro.props
+---
+
+{
+  dark ? (
+    <>
+      <Image class="for-light" src={light} {alt} {widths} {sizes} loading="lazy" />
+      <Image class="for-dark" src={dark} {alt} {widths} {sizes} loading="lazy" />
+    </>
+  ) : (
+    <Image src={light} {alt} {widths} {sizes} loading="lazy" />
+  )
+}

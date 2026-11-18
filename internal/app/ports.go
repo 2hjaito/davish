@@ -34,7 +34,7 @@ func (a *App) TunnelList() []ports.Tunnel {
 }
 
 // BrowserOpen starts (or reuses) the in-app browser's proxy for a server
-// port; see docs/adr/0008-in-app-browser.md.
+// port; see .claude/docs/adr/0008-in-app-browser.md.
 func (a *App) BrowserOpen(serverID string, port int) (ports.Site, error) {
 	if err := a.lock.Check(); err != nil {
 		return ports.Site{}, err

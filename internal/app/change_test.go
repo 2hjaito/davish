@@ -9,7 +9,7 @@ import (
 )
 
 // Bindings that act on a server must mark their commands as changing
-// it, or the Command log cannot export them (docs/adr/0022). A new
+// it, or the Command log cannot export them (.claude/docs/adr/0022). A new
 // binding whose name says it acts fails here until it uses a.change(),
 // or is listed as an exception with the reason.
 func TestActionBindingsMarkChanges(t *testing.T) {

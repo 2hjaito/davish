@@ -1,11 +1,37 @@
 # Changelog
 
-Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), phiên bản theo [SemVer](https://semver.org/lang/vi/): `v0.<milestone>.<patch>` trong giai đoạn phát triển, `v1.0.0` khi xong M10 (`docs/GIT.md`).
+Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), phiên bản theo [SemVer](https://semver.org/lang/vi/): `v0.<milestone>.<patch>` trong giai đoạn phát triển, `v1.0.0` khi xong M10 (`.claude/docs/GIT.md`).
 
 ## [Unreleased]
 
 ### Thêm
+- Database: lưới dữ liệu SQLite sắp xếp được (bấm tiêu đề cột: tăng, giảm, bỏ) và lọc theo chữ một cột có chứa. Davish tự dựng câu SQL từ tên cột có thật trong bảng, vẫn không có ô gõ SQL, vẫn chỉ đọc 100 dòng mỗi lần.
+
+### Sửa
+- Chạy lệnh trên nhiều server: bấm Dừng ngay lúc lệnh vừa khởi động có lúc không dừng được và giữ cả lượt chạy tới khi lệnh tự xong. Giờ Davish gửi tín hiệu dừng thẳng tới lệnh trên server, và nếu server vẫn giữ phiên thì job được coi là đã dừng sau 5 giây.
+
+## [1.14.5] - 2026-11-18
+
+### Thêm
+- Docker: bảng container gọn và dễ đọc hơn. Mỗi dòng có logo công nghệ, tên kèm image ở dòng dưới, trạng thái có chấm màu, cổng dạng `8080→80` bấm để mở, cột Tạo, và nút khởi động lại, dừng/chạy, xóa, thêm luôn hiện. Container của một compose project nối với project bằng đường dạng cây. Cột ID chuyển vào trang chi tiết.
+
+### Sửa
+- Cửa sổ: ba nút đóng, thu nhỏ, phóng to vẽ lại theo đúng kiểu macOS (viền đậm hơn quanh nút, glyph đặc sắc nét ở 12px, màu riêng khi nhấn và khi cửa sổ không focus). Chỉ đổi màu fill nên hover và nhấn nhẹ hơn trước, không còn dùng `filter`.
+
+## [1.14.4] - 2026-11-18
+
+### Thêm
+- Database: bấm tên một bảng SQLite để xem dữ liệu dạng lưới, chỉ đọc, 100 dòng mỗi trang. Chữ dài bị cắt ở 200 ký tự và BLOB chỉ hiện kích thước, lệnh chỉ chạy khi bấm, nên app không nặng thêm.
+
+## [1.14.3] - 2026-11-17
+
+### Thêm
 - Tất cả server: xem dạng **Danh sách** gọn bên cạnh dạng thẻ (nhớ lựa chọn), thêm, nhập, sửa và **ngắt kết nối** server ngay trong cửa sổ, và phím tắt **⌘⇧S** (Ctrl+Shift+S) để mở nó. Menu chọn server cũng có nút ngắt kết nối cạnh mỗi server đang kết nối. Theo góp ý của @HungNth và @tian2992 (#178).
+- Database: khi server chưa có `sqlite3`, phần SQLite hiện luôn lệnh cài như MariaDB và Postgres thay vì bảo vào Gói phần mềm. Mỗi engine và phần SQLite nằm trong một thẻ riêng.
+
+### Sửa
+- Monitor: đường và vùng màu của biểu đồ (Bộ nhớ, CPU, GPU, Mạng, Ổ đĩa và các biểu đồ nhỏ ở Tổng quan) không còn tràn qua mép trái của thẻ. Cảm ơn @thanhtrung5763 (#186).
+- macOS và Linux: bôi đen và copy được lệnh hiển thị trong hộp xác nhận, inspector và hộp báo lỗi.
 
 ### Thay đổi
 - Linux: cửa sổ giờ được vẽ bằng GPU (mặc định của WebKitGTK). Trước đây Davish giữ cách né lỗi của Wails là tắt hẳn GPU cho mọi máy, nên mỗi lần cuộn và mỗi lớp kính mờ đều do CPU vẽ. Với driver NVIDIA độc quyền, nơi lỗi đó xảy ra, GPU vẫn tắt cho tới khi được thử: `DAVISH_WEBVIEW_GPU=always` để thử (kèm `WEBKIT_DISABLE_DMABUF_RENDERER=1`, trừ khi bạn tự đặt), kết quả gom ở #185. `DAVISH_WEBVIEW_GPU=never` tắt GPU trên bất kỳ máy nào, và log của app ghi chế độ đã dùng kèm lý do. Cảm ơn @tian2992 đã phát hiện (#181, #159).

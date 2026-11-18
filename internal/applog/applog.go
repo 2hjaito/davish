@@ -1,5 +1,5 @@
 // Package applog writes the app's log as JSON to rotating files under
-// os.UserCacheDir()/davish/logs (docs/CONVENTIONS.md), so a user can send
+// os.UserCacheDir()/davish/logs (.claude/docs/CONVENTIONS.md), so a user can send
 // what happened to whoever supports them. Secrets are never logged.
 package applog
 

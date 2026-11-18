@@ -1,5 +1,5 @@
 // Package lock keeps Davish locked behind Touch ID or a password of its
-// own while the user is away (docs/adr/0007-app-lock.md). It only guards
+// own while the user is away (.claude/docs/adr/0007-app-lock.md). It only guards
 // the app's own UI and bindings: SSH sessions, log streams and transfers
 // keep running while locked.
 package lock

@@ -1,6 +1,6 @@
 // The server map: which requests reach which program. Pure, so it is tested
 // on its own; the window reads nginx sites, listening ports and containers
-// and hands them here (docs/PLAN.md M45).
+// and hands them here (.claude/docs/PLAN.md M45).
 import type { Container } from '../../lib/api/docker'
 import type { NginxSite } from '../../lib/api/nginx'
 import type { Port } from '../../lib/api/ports'

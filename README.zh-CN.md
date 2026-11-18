@@ -16,7 +16,7 @@
 ![Go](https://img.shields.io/badge/Go-1.27-00ADD8?logo=go&logoColor=white)
 ![Svelte](https://img.shields.io/badge/Svelte-5-FF3E00?logo=svelte&logoColor=white)
 
-[English](README.md) · [Tiếng Việt](README.vi.md) · **简体中文**
+[English](README.md) · [Tiếng Việt](README.vi.md) · **简体中文** · **[davish.dangth.dev](https://davish.dangth.dev/zh/)**
 
 <p align="center">
   <img src="assets/demo.gif" alt="davish 演示：文件操作环、终端、Docker、端口、登录安全和 git 提交图，全部走 SSH" width="800">
@@ -56,7 +56,7 @@
 - [Cron](FEATURES.md#cron)：用自然语言描述的定时任务
 - [Nginx](FEATURES.md#nginx)：站点管理，重载前先执行 `nginx -t`，TLS 证书到期提醒
 - [软件包](FEATURES.md#packages)：优先显示安全更新，运行时管理；缺少 Docker、nginx、git 或数据库时一键给出安装命令
-- [数据库](FEATURES.md#database)：MariaDB/MySQL、PostgreSQL、MongoDB 和 SQLite；查找、创建、导出与恢复，MongoDB 登录信息保存在钥匙串
+- [数据库](FEATURES.md#database)：MariaDB/MySQL、PostgreSQL、MongoDB 和 SQLite；查找、创建、导出与恢复、查看 SQLite 表数据，MongoDB 登录信息保存在钥匙串
 - [Git](FEATURES.md#git)：状态、差异、提交图、fetch 和 pull
 - [桌面快捷方式](FEATURES.md#desktop-shortcuts)：把 `deploy.sh` 拖到桌面，双击运行，可随时停止
 

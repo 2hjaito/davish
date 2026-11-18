@@ -138,7 +138,7 @@
   {/if}
 
   <h4>{t.keys.publicKey}</h4>
-  <!-- Public keys only; never a private one. Shown as text (docs/SECURITY.md). -->
+  <!-- Public keys only; never a private one. Shown as text (.claude/docs/SECURITY.md). -->
   <pre class="public">{publicLine}</pre>
 </section>
 

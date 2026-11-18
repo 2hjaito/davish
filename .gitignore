@@ -86,5 +86,9 @@ desktop.ini
 CLAUDE.local.md
 
 # ---------- Kept private: project plans and agent instructions ----------
-/docs/
+/.claude/docs/
 /CLAUDE.md
+
+# Landing page build (site/, ADR 0025)
+site/dist/
+site/.astro/

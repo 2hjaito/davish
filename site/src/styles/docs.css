@@ -1,0 +1,164 @@
+/* Starlight in Davish's colors and fonts (ADR 0025). */
+@import '@fontsource/be-vietnam-pro/400.css';
+@import '@fontsource/be-vietnam-pro/500.css';
+@import '@fontsource/be-vietnam-pro/600.css';
+@import '@fontsource/be-vietnam-pro/700.css';
+@import '@fontsource-variable/geist-mono';
+@import '@fontsource-variable/bricolage-grotesque';
+
+:root {
+  --sl-font: 'Be Vietnam Pro', system-ui, sans-serif;
+  --sl-font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+}
+
+/* Starlight keeps its colors in a cascade layer, which anything here
+   overrides whatever the selector, so each theme sets only its own. */
+:root[data-theme='dark'] {
+  --sl-color-accent-low: #0c1f4d;
+  --sl-color-accent: #4b93ff;
+  --sl-color-accent-high: #c4dcff;
+  /* The landing page's near-black, not Starlight's blue-gray. */
+  --sl-color-black: #0a0b10;
+  --sl-color-gray-6: #0e1017;
+  --sl-color-gray-5: #20232e;
+  --sl-color-gray-4: #3a3f4f;
+}
+
+:root[data-theme='light'] {
+  --sl-color-accent-low: #d6e6ff;
+  --sl-color-accent: #0a64d8;
+  --sl-color-accent-high: #0b3a80;
+}
+
+h1,
+.sl-markdown-content :is(h2, h3) {
+  font-family: 'Bricolage Grotesque Variable', var(--sl-font);
+  letter-spacing: -0.02em;
+}
+
+.sl-markdown-content img {
+  border-radius: 12px;
+  border: 1px solid var(--sl-color-hairline);
+}
+
+/* Be Vietnam Pro runs larger than Starlight's default font, so the scale
+   steps down to keep text, headings and controls in proportion. */
+:root {
+  --sl-text-body: 0.9375rem;
+  --sl-text-h1: 2.125rem;
+  --sl-text-h2: 1.5rem;
+  --sl-text-h3: 1.25rem;
+  --sl-text-h4: 1.0625rem;
+  --sl-text-h5: 1rem;
+}
+
+@media (min-width: 50em) {
+  :root {
+    --sl-text-h1: 2.5rem;
+    --sl-text-h2: 1.625rem;
+    --sl-text-h3: 1.3125rem;
+  }
+}
+
+.site-title {
+  font-size: var(--sl-text-lg);
+  font-family: 'Bricolage Grotesque Variable', var(--sl-font);
+  letter-spacing: -0.01em;
+}
+
+/* Sidebar group names no bigger than a heading of the page. */
+.sidebar-content .large {
+  font-size: var(--sl-text-base);
+}
+
+/* Previous / next: a quiet row, not two big cards. */
+.pagination-links a {
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.pagination-links .link-title {
+  font-size: var(--sl-text-base);
+  font-weight: 600;
+}
+
+.pagination-links svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* The theme and language pickers fit their words in this font. */
+starlight-theme-select select,
+starlight-lang-select select {
+  width: auto;
+  field-sizing: content;
+  min-width: 5.5em;
+}
+
+/* Like the landing page: header without a rule, nav buttons without boxes,
+   the page and sidebar on one background, a soft current item. */
+:root[data-theme='light'] {
+  --sl-color-black: #f6f7f9;
+  --sl-color-gray-7: #eef0f4;
+  --sl-color-gray-6: #e6e9ef;
+  --sl-color-bg-nav: #f6f7f9;
+  --sl-color-bg-sidebar: #f6f7f9;
+}
+
+:root[data-theme='dark'] {
+  --sl-color-bg-nav: #0a0b10;
+  --sl-color-bg-sidebar: #0a0b10;
+}
+
+header.header {
+  border-bottom-color: transparent;
+}
+
+.right-group,
+.social-icons {
+  gap: 4px !important;
+}
+
+.social-icons::after {
+  display: none;
+}
+
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  color: var(--sl-color-gray-2);
+  font: 550 14.5px var(--sl-font);
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+
+.nav-btn:hover,
+.lang:focus-within .nav-btn {
+  color: var(--sl-color-white);
+  background: var(--sl-color-gray-6);
+}
+
+.sidebar-content a[aria-current='page'] {
+  background: var(--sl-color-accent-low);
+  color: var(--sl-color-text-accent);
+  font-weight: 600;
+}
+
+/* Same order as the landing page: language, theme, Discord, GitHub. */
+.right-group .lang {
+  order: -2;
+}
+
+.right-group .theme-btn {
+  order: -1;
+}

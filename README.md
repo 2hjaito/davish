@@ -16,7 +16,7 @@ Nothing to install on the server.
 ![Go](https://img.shields.io/badge/Go-1.27-00ADD8?logo=go&logoColor=white)
 ![Svelte](https://img.shields.io/badge/Svelte-5-FF3E00?logo=svelte&logoColor=white)
 
-**English** · [Tiếng Việt](README.vi.md) · [简体中文](README.zh-CN.md)
+**English** · [Tiếng Việt](README.vi.md) · [简体中文](README.zh-CN.md) · **[davish.dangth.dev](https://davish.dangth.dev)**
 
 <p align="center">
   <img src="assets/demo.gif" alt="davish demo: a file's action ring, Terminal, Docker, ports, login security and the git graph over SSH" width="800">
@@ -56,7 +56,7 @@ Nothing to install on the server.
 - [Cron](FEATURES.md#cron): schedules in plain words
 - [Nginx](FEATURES.md#nginx): sites, `nginx -t` before reload, TLS expiry
 - [Packages](FEATURES.md#packages): updates with security fixes first, runtimes; one-click install command when Docker, nginx, git or a database is missing
-- [Database](FEATURES.md#database): MariaDB/MySQL, PostgreSQL, MongoDB and SQLite; find, create, dump and restore, MongoDB login kept in the keychain
+- [Database](FEATURES.md#database): MariaDB/MySQL, PostgreSQL, MongoDB and SQLite; find, create, dump and restore, read SQLite tables, MongoDB login kept in the keychain
 - [Git](FEATURES.md#git): status, diffs, commit graph, fetch and pull
 - [Shortcuts](FEATURES.md#desktop-shortcuts): drag `deploy.sh` onto the desktop, double-click to run, with a stop button
 

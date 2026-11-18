@@ -84,14 +84,14 @@ Dịch vụ systemd theo trạng thái, chi tiết và journal; khởi động, 
 
 ## Docker
 
-Bố cục như Docker Desktop. Container dạng thẻ hoặc bảng, chuyển bằng nút trên thanh công cụ. Mặc định là dạng bảng. Dạng thẻ cho mỗi project compose, hoặc container chạy riêng, một thẻ: favicon của chính dự án, không có thì framework mà code dùng (Next, Nest, Express, Django, Laravel…, đọc `package.json` và các file tương tự trong thư mục project qua SFTP), không có nữa thì logo của image Davish nhận ra (n8n, WordPress, Postgres…); không tìm được gì thì không có avatar, bao nhiêu container đang chạy, image, các cổng publish (bấm để mở trong Trình duyệt của Davish), CPU và RAM, viền đỏ khi có container khởi động lặp; bấm thẻ để xem các container của nó. Dạng bảng (ID, image, cổng, CPU, RAM, trạng thái) gom theo project compose, phía trên là CPU và RAM chúng dùng chung; khởi động, dừng, menu ⋮ (log, shell trong container, khởi động lại, chi tiết) và xóa ngay trên dòng, mọi thao tác phá hủy đều hiện đúng lệnh trước. Cổng publish bấm là mở trong Trình duyệt của Davish. Image kèm dung lượng image đang được dùng, các layer và cấu hình; chạy image trong Terminal hoặc xóa image không dùng. Volume kèm dung lượng và còn container nào dùng không. Vẫn cảnh báo container khởi động lại liên tục.
+Bố cục như Docker Desktop. Container dạng thẻ hoặc bảng, chuyển bằng nút trên thanh công cụ. Mặc định là dạng bảng. Dạng thẻ cho mỗi project compose, hoặc container chạy riêng, một thẻ: favicon của chính dự án, không có thì framework mà code dùng (Next, Nest, Express, Django, Laravel…, đọc `package.json` và các file tương tự trong thư mục project qua SFTP), không có nữa thì logo của image Davish nhận ra (n8n, WordPress, Postgres…); không tìm được gì thì không có avatar, bao nhiêu container đang chạy, image, các cổng publish (bấm để mở trong Trình duyệt của Davish), CPU và RAM, viền đỏ khi có container khởi động lặp; bấm thẻ để xem các container của nó. Dạng bảng hiện logo, tên kèm image ở dòng dưới, trạng thái, cổng dạng `8080→80`, CPU, RAM và thời gian tạo của từng container, gom theo project compose bằng đường dạng cây, dòng của project hiện CPU và RAM chúng dùng chung; khởi động lại, chạy hoặc dừng, xóa và menu ⋮ (log, shell trong container, chi tiết) nằm ngay trên dòng, mọi thao tác phá hủy đều hiện đúng lệnh trước. Cổng publish bấm là mở trong Trình duyệt của Davish. Image kèm dung lượng image đang được dùng, các layer và cấu hình; chạy image trong Terminal hoặc xóa image không dùng. Volume kèm dung lượng và còn container nào dùng không. Vẫn cảnh báo container khởi động lại liên tục.
 
 **Pull image…** và **Chạy container mới…**: form nhập tên, image, cổng, biến môi trường (gõ tay hoặc file `.env`), volume, chính sách khởi động lại, network rồi sinh đủ lệnh `docker run`. Cổng mặc định bind `127.0.0.1`, cảnh báo khi bind `0.0.0.0`. Lệnh được gõ sẵn vào Terminal để bạn nhấn Enter và xem tiến độ.
 
 **Compose**: menu ⋮ của mỗi project có up, pull, restart, down và mở file compose trong Editor; **Stack compose mới…** ghi `compose.yaml` từ mẫu (một container, web + database, app + Redis) vào một thư mục, không bao giờ ghi đè file đã có. Tạo network, volume, và sao chép container bất kỳ thành lệnh `docker run` dựng lại nó.
 
 <table><tr>
-  <td><img src="assets/screenshots/docker.jpg" alt="Docker với một container khởi động lại liên tục"></td>
+  <td><img src="assets/screenshots/docker.jpg" alt="Docker với một project compose và một container khởi động lại liên tục"></td>
   <td><img src="assets/screenshots/docker-images.jpg" alt="Một image và các layer của nó"></td>
 </tr></table>
 
@@ -137,9 +137,11 @@ Database MariaDB/MySQL, PostgreSQL và MongoDB kèm dung lượng, cùng các fi
 
 **MongoDB** hiện từng database kèm số collection. Khi bật xác thực, đăng nhập một lần bằng host, cổng, user, mật khẩu hoặc connection string: Davish thử trước, được mới lưu vào keychain của máy này như mật khẩu SSH, không bao giờ vào file; **Quên thông tin đăng nhập** để xóa. Connection string đi vào `mongosh` qua stdin nên không nằm trên dòng lệnh, trong `ps` hay nhật ký lệnh; `mongodump` và `mongorestore` đọc nó từ một file chỉ bạn đọc được, bị xóa ngay khi chạy xong.
 
-**Dò** tìm (chỉ đọc) database server đang chạy (kèm cổng MongoDB và có bật xác thực không) và file SQLite trong `/var/lib`, `/opt`, `/srv` và thư mục home, bấm một lần để thêm. File **SQLite**, thêm bằng đường dẫn hoặc **Mở bằng Database** trong Files, hiện bảng và số dòng, backup bằng cơ chế backup trực tuyến của SQLite (an toàn khi app đang ghi); khôi phục thì gõ sẵn vào Terminal vì app đang dùng file phải dừng trước. Khối **Davish kết nối thế nào?** trong app giải thích tất cả bằng lời dễ hiểu.
+**Dò** tìm (chỉ đọc) database server đang chạy (kèm cổng MongoDB và có bật xác thực không) và file SQLite trong `/var/lib`, `/opt`, `/srv` và thư mục home, bấm một lần để thêm. File **SQLite**, thêm bằng đường dẫn hoặc **Mở bằng Database** trong Files, hiện bảng và số dòng; bấm tên bảng để xem dữ liệu, chỉ đọc, 100 dòng mỗi trang, sắp xếp theo cột hoặc lọc theo chữ một cột có chứa, chữ dài bị cắt và BLOB chỉ hiện kích thước nên xem nhanh mà không nặng app. File SQLite backup bằng cơ chế backup trực tuyến của SQLite (an toàn khi app đang ghi); khôi phục thì gõ sẵn vào Terminal vì app đang dùng file phải dừng trước. Khối **Davish kết nối thế nào?** trong app giải thích tất cả bằng lời dễ hiểu.
 
 <img src="assets/screenshots/database.jpg" alt="MariaDB, PostgreSQL, MongoDB và SQLite trong app Database" width="100%">
+
+<img src="assets/screenshots/sqlite-rows.jpg" alt="Xem dữ liệu một bảng SQLite, 100 dòng mỗi trang" width="100%">
 
 ## Triển khai app
 

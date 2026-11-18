@@ -11,7 +11,7 @@ const (
 
 // Changing marks the commands run with ctx as part of an action that
 // changes the server, so the Command log can export them as a script
-// (docs/adr/0022). Action bindings call services with it.
+// (.claude/docs/adr/0022). Action bindings call services with it.
 func Changing(ctx context.Context) context.Context {
 	return context.WithValue(ctx, changingKey, true)
 }

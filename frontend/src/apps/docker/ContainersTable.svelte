@@ -25,6 +25,8 @@
   import { backend } from './backend'
   import { ago, canDo, type Group, groupHealth, groups, health, parsePorts } from './containers'
   import StackCard from './StackCard.svelte'
+  import { groupTech, imageTech } from './tech'
+  import { techIcons } from '../../lib/ui/techIcons'
 
   interface Props {
     serverID: string
@@ -142,7 +144,7 @@
   }
 
   // Compose commands are typed into a terminal: the user reads them and
-  // presses Enter (docs/SECURITY.md).
+  // presses Enter (.claude/docs/SECURITY.md).
   function projectMenu(g: Group) {
     const c = g.containers[0]
     const known = !!c?.projectDir
@@ -163,79 +165,102 @@
   const kind = $derived(confirming?.action ?? 'stop')
 </script>
 
+{#snippet logo(tech: ReturnType<typeof imageTech>, letter: string)}
+  {#if tech}
+    {@const l = techIcons[tech]}
+    <span class="dk-logo" style:color={l.color ?? 'var(--fg)'} title={tech}>
+      <Icon def={l} size={16} />
+    </span>
+  {:else}
+    <span class="dk-logo dk-letter" aria-hidden="true">{letter.slice(0, 1).toUpperCase()}</span>
+  {/if}
+{/snippet}
+
 {#snippet row(c: Container, child: boolean)}
   {@const s = stats[c.id]}
   {@const ports = parsePorts(c.ports)}
+  {@const label = child && c.service ? c.service : c.name}
   <tr class:dk-child={child} onclick={() => onopen(c.name)}>
     <td class="dk-name">
-      <span class="dk-dot {health(c.state)}" title={d.states[c.state] ?? c.state}></span>
-      <span>{child && c.service ? c.service : c.name}</span>
-      {#if child && c.service}<span class="dk-sub">{c.name}</span>{/if}
+      <div class="dk-who">
+        {@render logo(imageTech(c.image), label)}
+        <div class="dk-lines">
+          <span class="dk-title" title={c.name}>{label}</span>
+          <button
+            class="dk-link dk-sub"
+            title={c.image}
+            onclick={(e) => {
+              e.stopPropagation()
+              onimage(
+                c.image.includes(':') || c.image.startsWith('sha256')
+                  ? c.image
+                  : `${c.image}:latest`,
+              )
+            }}>{c.image}</button
+          >
+        </div>
+      </div>
     </td>
-    <td class="mono">{c.id.slice(0, 12)}</td>
-    <td>
-      <button
-        class="dk-link"
-        title={c.image}
-        onclick={(e) => {
-          e.stopPropagation()
-          onimage(
-            c.image.includes(':') || c.image.startsWith('sha256') ? c.image : `${c.image}:latest`,
-          )
-        }}>{c.image}</button
-      >
+    <td class="dk-status" title={c.status}>
+      <span class="dk-dot {health(c.state)}"></span>
+      {d.states[c.state] ?? c.state}
     </td>
-    <td>
+    <td class="c-ports">
       {#each ports as p (`${p.host}:${p.container}`)}
         {#if p.host}
           <button
-            class="dk-chip"
+            class="dk-port"
             title={tb.openPort(p.host)}
             onclick={(e) => {
               e.stopPropagation()
               openInBrowser(serverID, p.host ?? 0)
-            }}>{p.host}:{p.container}</button
+            }}>{p.host}→{p.container}</button
           >
         {:else}
-          <span class="dk-chip">{p.container}</span>
+          <span class="dk-port off">{p.container}</span>
         {/if}
       {:else}
-        <span class="muted">–</span>
+        <span class="muted">—</span>
       {/each}
     </td>
-    <td class="num">{s ? formatPct(s.cpu) : '–'}</td>
-    <td class="num">{s ? formatBytes(s.memUsed) : '–'}</td>
-    <td class="muted" title={c.status}>
-      {d.states[c.state] ?? c.state}{#if c.runningFor}<span class="dk-sub"
-          >{` · ${ago(c.runningFor)}`}</span
-        >{/if}
-    </td>
+    <td class="num c-cpu">{s ? formatPct(s.cpu) : '—'}</td>
+    <td class="num c-ram">{s ? formatBytes(s.memUsed) : '—'}</td>
+    <td class="muted c-created">{c.runningFor ? ago(c.runningFor) : '—'}</td>
     <td>
       <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
       <div class="dk-actions" onclick={(e) => e.stopPropagation()}>
+        <button
+          class="icon-btn"
+          aria-label={d.actions.restart}
+          title={d.actions.restart}
+          disabled={busy === c.name || !canDo(c.state, 'restart')}
+          onclick={() => void act(c, 'restart')}><Icon name="refresh" size={13} /></button
+        >
         {#if running(c)}
           <button
-            class="icon-btn"
+            class="icon-btn danger"
             aria-label={d.actions.stop}
+            title={d.actions.stop}
             disabled={busy === c.name}
-            onclick={() => void act(c, 'stop')}><Icon name="stop" size={14} /></button
+            onclick={() => void act(c, 'stop')}><Icon name="stop" size={13} /></button
           >
         {:else}
           <button
             class="icon-btn go"
             aria-label={d.actions.start}
+            title={d.actions.start}
             disabled={busy === c.name || !canDo(c.state, 'start')}
-            onclick={() => void act(c, 'start')}><Icon name="play" size={15} /></button
+            onclick={() => void act(c, 'start')}><Icon name="play" size={14} /></button
           >
         {/if}
-        <ActionMenu label={tb.more(c.name)} actions={menu(c)} />
         <button
           class="icon-btn danger"
           aria-label={d.actions.rm}
           disabled={running(c) || busy === c.name}
           title={running(c) ? tb.stopFirst : d.actions.rm}
-          onclick={() => void act(c, 'rm')}><Icon name="trash" size={14} /></button
+          onclick={() => void act(c, 'rm')}><Icon name="trash" size={13} /></button
         >
+        <ActionMenu label={tb.more(c.name)} actions={menu(c)} />
       </div>
     </td>
   </tr>
@@ -285,12 +310,11 @@
       <thead>
         <tr>
           <th>{tb.name}</th>
-          <th>{tb.id}</th>
-          <th>{tb.image}</th>
-          <th>{tb.ports}</th>
-          <th class="num">CPU</th>
-          <th class="num">RAM</th>
           <th>{tb.status}</th>
+          <th class="c-ports">{tb.ports}</th>
+          <th class="num c-cpu">CPU</th>
+          <th class="num c-ram">RAM</th>
+          <th class="c-created">{tb.created}</th>
           <th class="num">{tb.actions}</th>
         </tr>
       </thead>
@@ -307,24 +331,32 @@
                 open ? unfolded.delete(g.project ?? '') : unfolded.add(g.project ?? '')}
             >
               <td class="dk-name">
-                <button
-                  class="dk-chevron"
-                  class:open
-                  aria-label={open ? tb.fold : tb.unfold}
-                  aria-expanded={open}><Icon name="chevronRight" size={13} /></button
-                >
-                <span class="dk-dot {groupHealth(g)}"></span>
-                <span>{g.project}</span>
-                <span class="dk-sub">{tb.compose(up, g.containers.length)}</span>
+                <div class="dk-who">
+                  <button
+                    class="dk-chevron"
+                    class:open
+                    aria-label={open ? tb.fold : tb.unfold}
+                    aria-expanded={open}><Icon name="chevronRight" size={13} /></button
+                  >
+                  {@render logo(groupTech(g), g.project)}
+                  <div class="dk-lines">
+                    <span class="dk-title">{g.project}</span>
+                    <span class="dk-sub"
+                      ><span class="dk-dot {groupHealth(g)}"></span>
+                      {tb.compose(up, g.containers.length)}</span
+                    >
+                  </div>
+                </div>
               </td>
               <td></td>
-              <td></td>
-              <td></td>
-              <td class="num">{cpu !== undefined ? formatPct(cpu) : ''}</td>
-              <td class="num">{mem !== undefined ? formatBytes(mem) : ''}</td>
-              <td></td>
+              <td class="c-ports"></td>
+              <td class="num c-cpu">{cpu !== undefined ? formatPct(cpu) : ''}</td>
+              <td class="num c-ram">{mem !== undefined ? formatBytes(mem) : ''}</td>
+              <td class="c-created"></td>
               <td class="num" onclick={(e) => e.stopPropagation()}>
-                <ActionMenu label={d.compose.more(g.project)} actions={projectMenu(g)} />
+                <div class="dk-actions">
+                  <ActionMenu label={d.compose.more(g.project)} actions={projectMenu(g)} />
+                </div>
               </td>
             </tr>
             {#if open}

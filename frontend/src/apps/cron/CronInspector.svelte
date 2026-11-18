@@ -204,7 +204,7 @@
   {:else if runs.lines.length === 0}
     <p class="muted small">{t.cron.runsEmpty}</p>
   {:else}
-    <!-- Server output is shown as text only (docs/SECURITY.md). -->
+    <!-- Server output is shown as text only (.claude/docs/SECURITY.md). -->
     <pre class="log">{runs.lines.join('\n')}</pre>
   {/if}
 </section>

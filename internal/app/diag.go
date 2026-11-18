@@ -19,7 +19,7 @@ type SupportInfo struct {
 	OS      string `json:"os"`
 	LogPath string `json:"logPath"`
 	// LogTail is the end of the log file: commands, errors, connection
-	// states. It never holds secrets (docs/SECURITY.md).
+	// states. It never holds secrets (.claude/docs/SECURITY.md).
 	LogTail string `json:"logTail"`
 }
 

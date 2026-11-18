@@ -5,7 +5,33 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Added
+- Database: the SQLite row grid sorts (click a column header: ascending, descending, off) and filters by the text a column contains. Davish builds the SQL from the table's real column names; there is still no SQL box, and it still reads 100 rows at a time.
+
+### Fixed
+- Run on several servers: pressing Stop right as a command started could miss it and hold the run until the command finished on its own. Davish now sends the stop signal to the command on the server, and a server that still keeps the session going no longer holds the job past 5 seconds.
+
+## [1.14.5] - 2026-11-18
+
+### Added
+- Docker: a cleaner container table. Each row has the tech logo, the name over its image, a colored state dot, ports as `8080→80` that open on click, a Created column, and restart, stop/start, delete and more buttons always in view. A compose project's containers hang off it with a tree line. The ID moved to the detail page.
+
+### Fixed
+- Windows: the close, minimize and maximize buttons are redrawn like macOS's (a darker ring, solid glyphs that stay crisp at 12px, their own colors when pressed and when the window is in the background). Only fills change, so hover and press are lighter than before, with no `filter`.
+
+## [1.14.4] - 2026-11-18
+
+### Added
+- Database: click a SQLite table to read its rows in a grid, read-only, 100 to a page. Long text is cut at 200 characters and blobs show only their size, and nothing runs until you click, so the app stays light.
+
+## [1.14.3] - 2026-11-17
+
+### Added
 - All servers: a compact **List** view next to the cards (remembered), add, import, edit and **disconnect** servers right from the window, and **⌘⇧S** (Ctrl+Shift+S) to open it. The server menu also has a disconnect button next to each connected server. Suggested by @HungNth and @tian2992 (#178).
+- Database: when the server has no `sqlite3`, the SQLite section shows the install command like MariaDB and Postgres do, instead of pointing to Packages. Each engine and the SQLite section sit in their own card.
+
+### Fixed
+- Monitor: the line and fill of the metric charts (Memory, CPU, GPU, Network, Disk and the Overview sparklines) no longer spill past the left edge of the card. Thanks @thanhtrung5763 (#186).
+- macOS and Linux: the commands shown in confirm dialogs, inspectors and error dialogs can be selected and copied.
 
 ### Changed
 - Linux: the window is now drawn on the GPU (WebKitGTK's own default). Davish used to keep Wails' workaround that turned GPU compositing off for everyone, so every scroll and every frosted window was painted by the CPU. On the proprietary NVIDIA driver, where that workaround came from, the GPU stays off until it has been tested: `DAVISH_WEBVIEW_GPU=always` tries it (with `WEBKIT_DISABLE_DMABUF_RENDERER=1`, unless you set it yourself), and #185 collects how it goes. `DAVISH_WEBVIEW_GPU=never` turns it off on any machine, and the app log says which policy was used and why. Thanks to @tian2992 for spotting it (#181, #159).
@@ -79,7 +105,7 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 - Settings → Dock: put the Dock on the bottom, left, right or top edge (windows and notifications keep clear; autohide comes back from that edge), and a transparent Dock with only the icons.
 
 ### Fixed
-- Logs: text can be selected and copied again. On macOS and Linux WebKit only reads `-webkit-user-select`, so every log line was locked. While a selection is in the view the log holds still (no scrolling, no new lines) so the selection does not slide, and goes on once it is cleared; `⌘C` copies the lines with their breaks. A new button copies the lines shown (after the filter).
+- Logs: text can be selected and copied. On macOS and Linux WebKit only reads `-webkit-user-select`, so every log line was locked. While a selection is in the view the log holds still (no scrolling, no new lines) so the selection does not slide, and goes on once it is cleared; `⌘C` copies the lines with their breaks. A new button copies the lines shown (after the filter).
 
 ## [1.13.5] - 2026-11-12
 

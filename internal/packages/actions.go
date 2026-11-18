@@ -11,7 +11,7 @@ import (
 )
 
 // Operations on packages. All of them need root, so they are typed into a
-// terminal for the user to run (docs/SECURITY.md), never run by Davish.
+// terminal for the user to run (.claude/docs/SECURITY.md), never run by Davish.
 const (
 	OpInstall         = "install"
 	OpRemove          = "remove"

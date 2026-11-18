@@ -1,7 +1,7 @@
 // Package sshkeys manages SSH keys around a server: the keys allowed to
 // log in to it (authorized_keys) and the server's own keys, such as a
 // deploy key for git. Every change is a shell command the user confirms
-// first (docs/SECURITY.md).
+// first (.claude/docs/SECURITY.md).
 package sshkeys
 
 import (

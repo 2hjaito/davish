@@ -688,7 +688,7 @@ func (m *Manager) publish(id string, state State, err error) {
 			st.Error = f
 		}
 		st.Detail = apperr.Detail(err)
-		// A failed login logs only its result (docs/SECURITY.md); other
+		// A failed login logs only its result (.claude/docs/SECURITY.md); other
 		// causes are kept, or a support log could not explain them.
 		if st.Error.Code == apperr.ConnAuthFailed {
 			m.log.Info("connection state", "server", id, "state", state, "err", fmt.Sprint(st.Error.Code))

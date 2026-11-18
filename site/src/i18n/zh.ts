@@ -1,0 +1,160 @@
+import type { Dict } from './en'
+
+export const zh: Dict = {
+  lang: 'zh-CN',
+  title: 'Davish：你的 Linux 服务器桌面',
+  description:
+    '通过 SSH 使用终端、文件、Docker、日志、数据库等功能，一个适用于 macOS、Windows 和 Linux 的桌面应用。服务器上无需安装任何东西。',
+  nav: { features: '功能', security: '安全', download: '下载', docs: '文档', theme: '浅色或深色', changelog: '更新日志' },
+  hero: {
+    title: '你的 Linux 服务器桌面。',
+    lead: '终端、文件、服务、Docker、日志、数据库和 git，全部通过 SSH，集中在一个像操作系统一样的地方。',
+    tags: ['没有 Web 面板', '没有登录页', '没有 Agent'],
+    download: '下载',
+    other: '其他平台',
+    github: '在 GitHub 上查看',
+    version: (v: string) => `版本 ${v} · 免费开源（GPL-3.0）`,
+    shotAlt: 'Davish 桌面：同一台服务器上的终端、文件和监控',
+    badge: (v: string) => `${v} 有哪些新内容`,
+    docs: '阅读文档',
+    platforms: '支持 macOS、Windows 和 Linux',
+    hint: '选一个应用看看',
+    tabs: { desktop: '桌面', servers: '所有服务器', docker: 'Docker', database: '数据库', git: 'Git', security: '安全' },
+  },
+  why: {
+    title: '为什么选择 Davish',
+    items: [
+      {
+        title: '打开就能用',
+        text: '没有登录页，也没有 Web 面板。Davish 用你的 SSH 密钥连接，直接进入服务器的桌面。服务器上不会多出任何监听服务。',
+      },
+      {
+        title: '无 Agent',
+        text: '只需要 sshd 和 SFTP。所有操作都在你的电脑上完成，不会往服务器上复制、安装或留下任何东西。',
+      },
+      {
+        title: '每条命令都看得见',
+        text: '任何有破坏性的操作都会先显示完整命令。命令日志记录一切，并能把更改导出为脚本。',
+      },
+      {
+        title: '多台服务器，一个桌面',
+        text: '每台服务器是一个工作区，各自记住自己的窗口。拖动文件即可在服务器之间复制。',
+      },
+      {
+        title: '直接使用你的 ssh 配置',
+        text: '从 ~/.ssh/config 或 Ansible inventory 导入主机，包括密钥和 ProxyJump。',
+      },
+      {
+        title: '自动更新',
+        text: '有新版本时显示更新内容；Davish 自动下载、校验签名并重启到新版本。',
+      },
+    ],
+  },
+  features: {
+    title: '服务器需要的一切，都在你熟悉的窗口里',
+    lead: '二十多个应用共享一个桌面：像在自己的电脑上一样拖动、贴靠和切换。',
+    show: [
+      {
+        key: 'servers',
+        title: '所有服务器一目了然',
+        text: '在一个窗口中查看每台服务器的健康状况和告警，以及每台服务器在提供什么：域名、nginx、端口、容器。',
+      },
+      {
+        key: 'multi-run',
+        title: '一条命令，多台服务器',
+        text: '在多台服务器上同时运行一条命令，每台一个终端标签页，停止按钮真正能停下来。',
+      },
+      {
+        key: 'git',
+        title: '服务器上的 Git',
+        text: '查看服务器上仓库的状态、差异和提交图，并可 fetch 和 pull。',
+      },
+      {
+        key: 'docker',
+        title: '清晰的 Docker',
+        text: '按 compose 项目查看容器，镜像及其分层、数据卷，一键查看日志或打开 shell。',
+      },
+      {
+        key: 'sqlite-rows',
+        title: '不需要 Web 面板的数据库',
+        text: 'MariaDB、PostgreSQL、MongoDB 和 SQLite：创建、导出与恢复，并可逐页查看 SQLite 表。',
+      },
+      {
+        key: 'security',
+        title: '谁在敲门',
+        text: '按小时和地址统计的登录失败、当前会话、ufw 和 fail2ban，无需离开桌面。',
+      },
+    ],
+    more: '还包括',
+    list: [
+      '终端',
+      '文件（SFTP）',
+      '编辑器',
+      '日志',
+      '监控',
+      '服务',
+      'Cron',
+      'Nginx',
+      '软件包',
+      '端口与隧道',
+      '浏览器',
+      '磁盘',
+      'SSH 密钥',
+      '常用命令',
+      '命令日志',
+      'Spotlight 与 Launchpad',
+    ],
+    all: '查看全部功能',
+  },
+  security: {
+    title: '值得托付 root 权限',
+    items: [
+      '密码和私钥口令只保存在系统钥匙串中。',
+      'sudo 密码从不保存：每个会话只询问一次，只保存在内存中，15 分钟后忘记。',
+      '离开时可用独立密码或 Touch ID 锁定。',
+      '更新经过校验：更新程序在安装前会校验发布签名。',
+    ],
+    more: '阅读安全说明',
+  },
+  download: {
+    title: '下载 Davish',
+    lead: '免费支持 macOS、Windows 和 Linux。服务器只需要带 SFTP 的 OpenSSH。',
+    platforms: {
+      macos: { name: 'macOS', note: 'macOS 12 或更高版本，Apple 芯片和 Intel' },
+      windows: { name: 'Windows', note: 'Windows 10 或更高版本，64 位' },
+      linux: { name: 'Linux', note: 'GTK 3 和 WebKitGTK 4.1，x86-64' },
+    },
+    installer: '安装包',
+    archive: '便携版',
+    checksums: '校验和',
+    notes: '更新说明',
+    unsigned: 'Davish 暂未进行代码签名，macOS 和 Windows 首次打开时会提示。GitHub 上的安装说明介绍了如何打开。',
+    guide: '安装说明',
+  },
+  stats: {
+    downloads: '次下载',
+    apps: '个应用共享一个桌面',
+    version: (date: string) => `最新版本，${date}`,
+    stars: 'GitHub 星标',
+    free: '免费',
+    freeNote: '开源，GPL-3.0',
+  },
+  docs: {
+    title: '十分钟上手',
+    lead: '每个应用在文档中都有独立页面：它做什么、在服务器上运行什么，以及你的数据存放在哪里。',
+    start: '入门',
+    links: [
+      { label: '安装 Davish', href: 'start/install/' },
+      { label: '连接第一台服务器', href: 'start/first-server/' },
+      { label: '服务器需要什么', href: 'start/requirements/' },
+      { label: '键盘快捷键', href: 'start/shortcuts/' },
+    ],
+  },
+  community: { discord: '加入 Discord', discordNote: '提问、建议和抢先体验版本。' },
+  footer: {
+    license: 'Davish 是基于 GPL-3.0 的自由软件。',
+    changelog: '更新日志',
+    issues: '报告问题',
+    language: '语言',
+  },
+}
