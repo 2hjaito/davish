@@ -21,6 +21,7 @@ import {
   type DBLogin,
   type Found,
   type SQLiteInfo,
+  type SQLiteQuery,
   type SQLiteRows,
 } from '../../lib/api/database'
 import { tunnelStart } from '../../lib/api/ports'
@@ -137,6 +138,38 @@ const demoRows = (table: string, offset: number): SQLiteRows => {
   }
 }
 
+// Sorts and filters the demo's first 500 rows, like the server would.
+function demoQuery(table: string, offset: number, query: SQLiteQuery): SQLiteRows {
+  if (!query.sort && !query.contains) return demoRows(table, offset)
+  const all = [0, 100, 200, 300, 400].flatMap((at) => demoRows(table, at).rows)
+  const cols = demoRows(table, 0).columns
+  const at = (name?: string) => cols.findIndex((c) => c.name === name)
+  const text = (row: SQLiteRows['rows'][number], i: number) => row[i]?.v ?? ''
+  let rows = all
+  const f = at(query.column)
+  if (f >= 0 && query.contains) {
+    const needle = query.contains.toLowerCase()
+    rows = rows.filter((row) => text(row, f).toLowerCase().includes(needle))
+  }
+  const s = at(query.sort)
+  if (s >= 0) {
+    const num = (v: string) => (v === '' || isNaN(Number(v)) ? v : Number(v))
+    rows = [...rows].sort((a, b) => {
+      const x = num(text(a, s))
+      const y = num(text(b, s))
+      const c = x < y ? -1 : x > y ? 1 : 0
+      return query.desc ? -c : c
+    })
+  }
+  return {
+    columns: cols,
+    allColumns: cols.length,
+    offset,
+    more: offset + 100 < rows.length,
+    rows: rows.slice(offset, offset + 100),
+  }
+}
+
 const q = (kind: DBKind, n: string) => (kind === 'mysql' ? `\`${n}\`` : `"${n}"`)
 
 export const backend = hasRuntime
@@ -211,6 +244,12 @@ export const backend = hasRuntime
         Promise.resolve(
           `cp -p -- ${file} ${file}.before-restore && gzip -dc -- ${backup} > ${file}`,
         ),
-      sqliteRows: (_serverID: string, _file: string, table: string, offset: number) =>
-        new Promise<SQLiteRows>((r) => setTimeout(() => r(demoRows(table, offset)), 250)),
+      sqliteRows: (
+        _serverID: string,
+        _file: string,
+        table: string,
+        offset: number,
+        query: SQLiteQuery = {},
+      ) =>
+        new Promise<SQLiteRows>((r) => setTimeout(() => r(demoQuery(table, offset, query)), 250)),
     }

@@ -101,6 +101,6 @@ func (a *App) DatabaseSQLiteRestoreLine(file, backup string) (string, error) {
 }
 
 // DatabaseSQLiteRows reads one page of a SQLite table, read-only.
-func (a *App) DatabaseSQLiteRows(serverID, file, table string, offset int) (database.SQLiteRows, error) {
-	return a.databases.RowsSQLite(a.ctx, serverID, file, table, offset)
+func (a *App) DatabaseSQLiteRows(serverID, file, table string, offset int, q database.SQLiteQuery) (database.SQLiteRows, error) {
+	return a.databases.RowsSQLite(a.ctx, serverID, file, table, offset, q)
 }

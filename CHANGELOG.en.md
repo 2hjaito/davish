@@ -4,6 +4,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Added
+- Database: the SQLite row grid sorts (click a column header: ascending, descending, off) and filters by the text a column contains. Davish builds the SQL from the table's real column names; there is still no SQL box, and it still reads 100 rows at a time.
+
 ### Fixed
 - Run on several servers: pressing Stop right as a command started could miss it and hold the run until the command finished on its own. Davish now sends the stop signal to the command on the server, and a server that still keeps the session going no longer holds the job past 5 seconds.
 

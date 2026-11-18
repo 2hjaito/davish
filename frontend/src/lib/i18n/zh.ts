@@ -1026,7 +1026,7 @@ const zh = {
           '通过隧道打开数据库服务器，供这台电脑上的工具使用',
           '查找：服务器上正在运行的数据库和 SQLite 文件（只读）',
           '启用身份验证的 MongoDB：登录一次，保存在本机钥匙串；“忘记登录信息”可删除',
-          'SQLite：表和行数；点击表名查看数据（只读，每页 100 行）；备份到 ~/db-backups，通过输入到终端的命令恢复',
+          'SQLite：表和行数；点击表名查看数据（只读，每页 100 行，可按列排序、按文字筛选）；备份到 ~/db-backups，通过输入到终端的命令恢复',
         ],
         keys: [],
         runs: [
@@ -2655,6 +2655,13 @@ const zh = {
       next: '下 100 行',
       range: (a: number, b: number, n: number) =>
         `第 ${a.toLocaleString()}–${b.toLocaleString()} 行，共 ${n.toLocaleString()} 行`,
+      rangeFiltered: (a: number, b: number) =>
+        `匹配的第 ${a.toLocaleString()}–${b.toLocaleString()} 行`,
+      filterColumn: '要筛选的列',
+      filterContains: '包含…',
+      filter: '筛选',
+      clearFilter: '清除',
+      sortBy: (c: string) => `按 ${c} 排序`,
       noRows: '没有数据',
       blob: (size: string) => `BLOB ${size}`,
       someColumns: (shown: number, all: number) => `仅显示前 ${shown} 列，共 ${all} 列。`,

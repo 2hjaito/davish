@@ -1078,7 +1078,7 @@ const es = {
           'Abre el servidor de bases de datos por un túnel para las herramientas de este ordenador',
           'Detectar: las bases de datos en marcha y los archivos SQLite del servidor (solo lectura)',
           'MongoDB con autenticación: inicia sesión una vez, se guarda en el llavero de este ordenador; Olvidar el inicio de sesión lo elimina',
-          'SQLite: tablas y filas; pulsa una tabla para ver sus filas (solo lectura, 100 por página); copia de seguridad en ~/db-backups, restauración con una línea escrita en Terminal',
+          'SQLite: tablas y filas; pulsa una tabla para ver sus filas (solo lectura, 100 por página, ordenar por columna, filtrar por texto); copia de seguridad en ~/db-backups, restauración con una línea escrita en Terminal',
         ],
         keys: [],
         runs: [
@@ -2790,6 +2790,13 @@ const es = {
       next: '100 filas siguientes',
       range: (a: number, b: number, n: number) =>
         `Filas ${a.toLocaleString()}–${b.toLocaleString()} de ${n.toLocaleString()}`,
+      rangeFiltered: (a: number, b: number) =>
+        `Filas que coinciden ${a.toLocaleString()}–${b.toLocaleString()}`,
+      filterColumn: 'Columna a filtrar',
+      filterContains: 'contiene…',
+      filter: 'Filtrar',
+      clearFilter: 'Quitar',
+      sortBy: (c: string) => `Ordenar por ${c}`,
       noRows: 'Sin filas',
       blob: (size: string) => `BLOB ${size}`,
       someColumns: (shown: number, all: number) =>
