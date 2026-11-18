@@ -26,6 +26,7 @@ const image = new URL({ en: og, vi: ogVi, zh: ogZh }[locale].src, site).href
     <title>{t.title}</title>
     <meta name="description" content={t.description} />
     <meta name="color-scheme" content="dark light" />
+    <script is:inline>document.documentElement.classList.add('js')</script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={new URL(here.path, site).href} />
     {locales.map((l) => <link rel="alternate" hreflang={l.hreflang} href={new URL(l.path, site).href} />)}

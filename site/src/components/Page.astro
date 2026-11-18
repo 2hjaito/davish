@@ -119,7 +119,7 @@ const platforms = [
     </header>
 
     <section class="hero">
-      <div class="hero-text">
+      <div class="hero-text" data-reveal>
         {
           r.version && (
             <a class="badge" href={r.notes}>
@@ -147,7 +147,7 @@ const platforms = [
         <p class="tags">{t.hero.tags.map((tag) => <span><Check size={14} />{tag}</span>)}</p>
       </div>
 
-      <div class="demo" data-demo>
+      <div class="demo" data-demo data-reveal style="--delay: 0.12s">
         <p class="hint">{t.hero.hint} <ArrowRight size={14} /></p>
         <div class="tabs" role="tablist">
           {
@@ -165,7 +165,7 @@ const platforms = [
             ))
           }
         </div>
-        <div class="screen">
+        <div class="screen" data-tilt>
           {
             tabs.map((tab, i) => (
               <div class="pane" role="tabpanel" id={`pane-${tab.id}`} aria-labelledby={`tab-${tab.id}`} hidden={i !== 0}>
@@ -187,21 +187,21 @@ const platforms = [
     <section class="stats" aria-label="Davish in numbers">
       {
         s.downloads !== undefined && (
-          <div class="stat">
+          <div class="stat" data-reveal style="--delay: 0.00s">
             <Download size={22} />
             <strong>{fmt.format(s.downloads)}</strong>
             <span>{t.stats.downloads}</span>
           </div>
         )
       }
-      <div class="stat">
+      <div class="stat" data-reveal style="--delay: 0.08s">
         <LayoutGrid size={22} />
         <strong>{s.apps}</strong>
         <span>{t.stats.apps}</span>
       </div>
       {
         r.version && (
-          <div class="stat">
+          <div class="stat" data-reveal style="--delay: 0.16s">
             <Tag size={22} />
             <strong>{r.version}</strong>
             <span>{t.stats.version(day)}</span>
@@ -210,13 +210,13 @@ const platforms = [
       }
       {
         s.stars !== undefined ? (
-          <div class="stat">
+          <div class="stat" data-reveal style="--delay: 0.24s">
             <Star size={22} />
             <strong>{fmt.format(s.stars)}</strong>
             <span>{t.stats.stars}</span>
           </div>
         ) : (
-          <div class="stat">
+          <div class="stat" data-reveal style="--delay: 0.24s">
             <Package size={22} />
             <strong>{t.stats.free}</strong>
             <span>{t.stats.freeNote}</span>
@@ -225,16 +225,14 @@ const platforms = [
       }
     </section>
 
-    <div class="hatch" aria-hidden="true"></div>
-
     <section class="block">
-      <h2>{t.why.title}</h2>
+      <h2 data-reveal>{t.why.title}</h2>
       <div class="grid3">
         {
           t.why.items.map((it, i) => {
             const I = whyIcons[i] ?? Zap
             return (
-              <article class="cell">
+              <article class="cell" data-reveal style={`--delay: ${(i % 3) * 0.08}s`}>
                 <I size={22} />
                 <h3>{it.title}</h3>
                 <p>{it.text}</p>
@@ -246,41 +244,39 @@ const platforms = [
     </section>
 
     <section class="block" id="features">
-      <h2>{t.features.title}</h2>
-      <p class="sub">{t.features.lead}</p>
+      <h2 data-reveal>{t.features.title}</h2>
+      <p class="sub" data-reveal>{t.features.lead}</p>
       <div class="rows">
         {
           t.features.show.map((f, i) => (
-            <div class:list={['row', { flip: i % 2 === 1 }]}>
+            <div class:list={['row', { flip: i % 2 === 1 }]} data-reveal>
               <div class="row-text">
                 <span class="num mono">{String(i + 1).padStart(2, '0')}</span>
                 <h3>{f.title}</h3>
                 <p>{f.text}</p>
               </div>
-              <div class="shot">
+              <div class="shot" data-tilt>
                 <Image src={shot(`${f.key}.jpg`)} alt={f.title} widths={[640, 960, 1400]} sizes="(max-width: 900px) 100vw, 720px" />
               </div>
             </div>
           ))
         }
       </div>
-      <div class="more">
+      <div class="more" data-reveal>
         <h3>{t.features.more}</h3>
         <ul class="chips">{t.features.list.map((x) => <li>{x}</li>)}</ul>
         <a class="arrow" href={docs}>{t.features.all} <ArrowRight size={16} /></a>
       </div>
     </section>
 
-    <div class="hatch" aria-hidden="true"></div>
-
     <section class="split" id="security">
-      <div class="half">
+      <div class="half" data-reveal>
         <ShieldCheck size={28} />
         <h2>{t.security.title}</h2>
         <ul class="checks">{t.security.items.map((x) => <li><Check size={18} />{x}</li>)}</ul>
         <a class="arrow" href={links.security}>{t.security.more} <ArrowRight size={16} /></a>
       </div>
-      <div class="half">
+      <div class="half" data-reveal style="--delay: 0.1s">
         <BookOpen size={28} />
         <h2>{t.docs.title}</h2>
         <p class="muted">{t.docs.lead}</p>
@@ -300,12 +296,12 @@ const platforms = [
     </section>
 
     <section class="block" id="download">
-      <h2>{t.download.title}</h2>
-      <p class="sub">{t.download.lead}</p>
+      <h2 data-reveal>{t.download.title}</h2>
+      <p class="sub" data-reveal>{t.download.lead}</p>
       <div class="grid3 plats">
         {
           platforms.map((p) => (
-            <article class="cell plat" data-os={p.id}>
+            <article class="cell plat" data-os={p.id} data-reveal style={`--delay: ${platforms.indexOf(p) * 0.08}s`}>
               {p.id === 'linux' ? <SquareTerminal size={30} /> : <Brand name={p.id === 'macos' ? 'apple' : 'windows'} size={28} />}
               <h3>{t.download.platforms[p.id].name}</h3>
               <p>{t.download.platforms[p.id].note}</p>
@@ -331,7 +327,7 @@ const platforms = [
     </section>
 
     <section class="community">
-      <a class="discord" href={links.discord}>
+      <a class="discord" href={links.discord} data-reveal>
         <Brand name="discord" size={26} />
         <span><strong>{t.community.discord}</strong><small>{t.community.discordNote}</small></span>
         <ArrowRight size={18} />
@@ -352,8 +348,8 @@ const platforms = [
   </div>
 
   <script is:inline>
-    // Tabs of the demo screen, and the main button pointed at the visitor's
-    // platform. The page works without either.
+    // Demo tabs, reveal on scroll, tilting screenshots, and the main button
+    // pointed at the visitor's platform. The page works without all of it.
     ;(() => {
       const demo = document.querySelector('[data-demo]')
       demo?.querySelectorAll('[data-tab]').forEach((b) =>
@@ -362,6 +358,36 @@ const platforms = [
           demo.querySelectorAll('.pane').forEach((p) => (p.hidden = p.id !== `pane-${b.dataset.tab}`))
         }),
       )
+      // Slide content up as it comes into view.
+      const io =
+        'IntersectionObserver' in window &&
+        new IntersectionObserver(
+          (es) =>
+            es.forEach((e) => {
+              if (!e.isIntersecting) return
+              e.target.classList.add('in')
+              io.unobserve(e.target)
+            }),
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.12 },
+        )
+      document.querySelectorAll('[data-reveal]').forEach((el) => (io ? io.observe(el) : el.classList.add('in')))
+
+      // Screenshots lean toward the pointer.
+      if (matchMedia('(hover: hover) and (prefers-reduced-motion: no-preference)').matches)
+        document.querySelectorAll('[data-tilt]').forEach((el) => {
+          el.addEventListener('pointermove', (ev) => {
+            const r = el.getBoundingClientRect()
+            const x = (ev.clientX - r.left) / r.width - 0.5
+            const y = (ev.clientY - r.top) / r.height - 0.5
+            el.style.setProperty('--ry', `${(x * 5).toFixed(2)}deg`)
+            el.style.setProperty('--rx', `${(-y * 4).toFixed(2)}deg`)
+          })
+          el.addEventListener('pointerleave', () => {
+            el.style.removeProperty('--rx')
+            el.style.removeProperty('--ry')
+          })
+        })
+
       const ua = navigator.userAgent
       const os = /Mac/.test(ua) && !/iPhone|iPad/.test(ua) ? 'macos' : /Windows/.test(ua) ? 'windows' : /Linux/.test(ua) && !/Android/.test(ua) ? 'linux' : ''
       const card = os && document.querySelector(`.plat[data-os="${os}"]`)

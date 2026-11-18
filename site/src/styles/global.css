@@ -67,6 +67,7 @@ html {
 
 body {
   margin: 0;
+  overflow-x: clip;
   background: var(--bg);
   color: var(--fg);
   font-family: var(--text);
@@ -128,11 +129,10 @@ p {
   flex: none;
 }
 
-/* The frame: one column with hairline sides, cells inside. */
+/* One column; sections are set apart by space and soft panels. */
 .frame {
   max-width: 1240px;
   margin: 0 auto;
-  border-inline: 1px solid var(--line);
   min-height: 100vh;
 }
 
@@ -145,9 +145,10 @@ p {
   align-items: center;
   gap: 28px;
   height: 68px;
-  padding: 0 24px;
-  border-bottom: 1px solid var(--line);
-  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  /* Full width, though it sits in the 1240px column. */
+  margin-inline: calc(50% - 50vw);
+  padding: 0 max(24px, calc(50vw - 620px + 24px));
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
   backdrop-filter: blur(14px) saturate(160%);
   -webkit-backdrop-filter: blur(14px) saturate(160%);
 }
@@ -285,13 +286,22 @@ p {
 .hero {
   display: grid;
   grid-template-columns: 1fr;
-  border-bottom: 1px solid var(--line);
+  align-items: center;
+  gap: 8px;
+  padding: 0 24px;
 }
 
 @media (min-width: 1000px) {
   .hero {
-    grid-template-columns: 11fr 13fr;
+    grid-template-columns: 9fr 13fr;
   }
+}
+
+/* Grid items may shrink below their content (the tabs scroll instead). */
+.hero > *,
+.split > *,
+.row > * {
+  min-width: 0;
 }
 
 .hero-text {
@@ -300,7 +310,7 @@ p {
   align-items: flex-start;
   justify-content: center;
   gap: 26px;
-  padding: 72px 40px;
+  padding: 64px 16px;
 }
 
 .badge {
@@ -326,7 +336,7 @@ p {
 }
 
 .hero h1 {
-  font-size: clamp(44px, 6.4vw, 78px);
+  font-size: clamp(42px, 5.6vw, 72px);
   font-weight: 800;
   letter-spacing: -0.045em;
   line-height: 0.98;
@@ -421,20 +431,11 @@ p {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 40px 32px;
+  padding: 32px;
+  border-radius: 24px;
   background:
     radial-gradient(ellipse 70% 60% at 60% 40%, var(--glow), transparent 70%),
     radial-gradient(var(--dot) 1.2px, transparent 1.3px) 0 0 / 18px 18px;
-  border-top: 1px solid var(--line);
-}
-
-@media (min-width: 1000px) {
-  .demo {
-    border-top: 0;
-    border-left: 1px solid var(--line);
-    padding: 56px 0 56px 40px;
-    overflow: hidden;
-  }
 }
 
 .hint {
@@ -464,13 +465,13 @@ p {
   align-items: center;
   gap: 7px;
   flex: none;
-  height: 36px;
-  padding: 0 11px;
+  height: 34px;
+  padding: 0 10px;
   border: 1px solid var(--line-strong);
   border-radius: 10px;
   background: var(--panel);
   color: var(--fg-muted);
-  font: 550 13.5px var(--text);
+  font: 550 13px var(--text);
   cursor: pointer;
   transition:
     background 0.15s,
@@ -496,17 +497,8 @@ p {
 .screen {
   border-radius: 14px;
   overflow: hidden;
-  border: 1px solid var(--line-strong);
   box-shadow: var(--shadow);
   background: var(--raise);
-}
-
-@media (min-width: 1000px) {
-  .screen {
-    width: 112%;
-    border-radius: 14px 0 0 14px;
-    border-right: 0;
-  }
 }
 
 .pane:not([hidden]) {
@@ -529,6 +521,8 @@ p {
 .stats {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 32px 24px 0;
 }
 
 @media (min-width: 900px) {
@@ -541,9 +535,9 @@ p {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 32px 28px;
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  padding: 28px;
+  border-radius: 18px;
+  background: var(--panel);
 }
 
 .stat .lucide {
@@ -564,16 +558,9 @@ p {
   font-size: 15px;
 }
 
-.hatch {
-  height: 28px;
-  border-bottom: 1px solid var(--line);
-  background: repeating-linear-gradient(-45deg, var(--line) 0 1px, transparent 1px 9px);
-}
-
 /* Sections */
 .block {
-  padding: 96px 40px;
-  border-bottom: 1px solid var(--line);
+  padding: 112px 40px 0;
 }
 
 .block > h2,
@@ -595,15 +582,13 @@ p {
 .grid3 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
   margin-top: 56px;
-  border-top: 1px solid var(--line);
-  border-left: 1px solid var(--line);
 }
 
 .cell {
   padding: 32px 28px;
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  border-radius: 18px;
   background: var(--panel);
 }
 
@@ -667,7 +652,6 @@ p {
 .shot {
   border-radius: 14px;
   overflow: hidden;
-  border: 1px solid var(--line-strong);
   box-shadow: var(--shadow);
 }
 
@@ -707,15 +691,13 @@ p {
 .split {
   display: grid;
   grid-template-columns: 1fr;
-  border-bottom: 1px solid var(--line);
+  gap: 16px;
+  padding: 112px 40px 0;
 }
 
 @media (min-width: 900px) {
   .split {
     grid-template-columns: 1fr 1fr;
-  }
-  .split .half + .half {
-    border-left: 1px solid var(--line);
   }
 }
 
@@ -724,7 +706,9 @@ p {
   flex-direction: column;
   align-items: flex-start;
   gap: 20px;
-  padding: 72px 40px;
+  padding: 48px 40px;
+  border-radius: 24px;
+  background: var(--panel);
 }
 
 .half > .lucide {
@@ -755,21 +739,24 @@ p {
 }
 
 .doclinks {
+  display: grid;
+  gap: 4px;
   width: 100%;
   margin: 0;
   padding: 0;
   list-style: none;
-  border-top: 1px solid var(--line);
 }
 
 .doclinks a {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 15px 2px;
-  border-bottom: 1px solid var(--line);
+  padding: 13px 16px;
+  border-radius: 12px;
+  background: var(--raise);
   color: var(--fg);
   font-weight: 550;
+  transition: background 0.15s, color 0.15s;
 }
 
 .doclinks a:hover {
@@ -827,8 +814,7 @@ p {
 
 /* Community */
 .community {
-  padding: 48px 40px;
-  border-bottom: 1px solid var(--line);
+  padding: 96px 40px;
 }
 
 .discord {
@@ -838,8 +824,7 @@ p {
   max-width: 640px;
   margin: 0 auto;
   padding: 20px 24px;
-  border: 1px solid var(--line-strong);
-  border-radius: 16px;
+  border-radius: 18px;
   background:
     radial-gradient(ellipse 80% 120% at 0% 50%, rgba(88, 101, 242, 0.18), transparent 70%),
     var(--panel);
@@ -889,26 +874,61 @@ p {
 }
 
 @media (max-width: 640px) {
-  .hero-text,
+  .hero,
+  .stats,
   .block,
-  .half,
+  .split,
   .community,
   .foot {
     padding-inline: 16px;
   }
   .hero-text {
-    padding-block: 48px;
+    padding: 48px 0 24px;
   }
   .demo {
-    padding: 28px 16px;
+    padding: 20px 14px;
   }
-  .block {
-    padding-block: 72px;
+  .block,
+  .split {
+    padding-top: 80px;
+  }
+  .half {
+    padding: 32px 22px;
   }
   .stat {
-    padding: 24px 16px;
+    padding: 22px 18px;
   }
   .foot nav {
     margin-left: 0;
+  }
+}
+
+/* Content slides up as it scrolls into view; only with JavaScript on
+   (html.js) and motion allowed, so nothing hides without it. */
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-reveal] {
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+      opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
+      transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transition-delay: var(--delay, 0s);
+  }
+
+  .js [data-reveal].in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Screenshots lean toward the pointer and grow a little on hover. */
+  [data-tilt] {
+    transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.35s;
+    transform: perspective(1200px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(var(--s, 1));
+    will-change: transform;
+  }
+
+  [data-tilt]:hover {
+    --s: 1.025;
+    box-shadow: 0 40px 90px rgba(0, 0, 0, 0.5);
   }
 }
