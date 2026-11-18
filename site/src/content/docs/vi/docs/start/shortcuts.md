@@ -9,7 +9,8 @@ sidebar:
 |---|---|
 | `⌘K` | Spotlight |
 | `⌘1` … `⌘9` | Chuyển workspace server |
-| `⌘⇧S` | Tất cả server |
+| `⌘0` | Tất cả server |
+| `⌘⇧S` | Dịch vụ |
 | `⌘W` · `⌘M` | Đóng · thu nhỏ cửa sổ |
 | `⌘,` | Cài đặt |
 | `⌘L` | Khóa Davish |

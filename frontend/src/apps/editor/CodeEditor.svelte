@@ -69,6 +69,14 @@
       borderBottom: '1px solid var(--divider-soft)',
     },
     '.cm-panel.cm-search': { fontFamily: 'var(--font-ui)', fontSize: 'var(--text-sm)' },
+    // CodeMirror sizes these at 70-80% of the panel, which left the search
+    // field around 9px (#202); they take the UI size instead.
+    '.cm-panel.cm-search label, .cm-panel.cm-search .cm-textfield, .cm-panel.cm-search .cm-button':
+      { fontSize: 'var(--text-sm)' },
+    '.cm-panel.cm-search .cm-textfield': { padding: '3px 7px', minWidth: '180px' },
+    '.cm-panel.cm-search .cm-button': { padding: '3px 10px' },
+    '.cm-panel.cm-search input[type=checkbox]': { margin: '0 5px 0 8px', verticalAlign: '-2px' },
+    '.cm-panel.cm-search [name=close]': { fontSize: '18px', padding: '2px 6px' },
     '.cm-textfield, .cm-button': {
       borderRadius: 'var(--control-radius)',
       border: '1px solid var(--divider)',

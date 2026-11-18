@@ -4,6 +4,10 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Fixed
+- All servers now opens with `⌘0` (Ctrl+0), next to `⌘1`…`⌘9` for one server each. 1.14.3 had given it `⌘⇧S`, which Services already had, so only one of them ran; `⌘⇧S` is back to Services. Thanks @HungNth (#202).
+- Editor: the search and replace fields, buttons and options use the interface's text size instead of about 9px, readable without zooming in. Thanks @HungNth (#202).
+
 ## [1.14.6] - 2026-11-18
 
 ### Added
