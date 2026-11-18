@@ -20,7 +20,7 @@ runs:
         # A new runner image may ship other versions; older .debs still
         # save most of the download, so fall back to any earlier cache.
         key: linux-deps-${{ steps.image.outputs.id }}-v1
-        restore-keys: linux-deps-${{ runner.os }}-
+        restore-keys: linux-deps-
 
     - name: Install
       shell: bash
