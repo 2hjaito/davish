@@ -76,9 +76,10 @@ export function buildMenus(): Menu[] {
         { label: m.addServer, run: () => ui.addServer() },
         { label: m.importServers, run: () => (ui.importDialog = true) },
         {
-          // Asked for in #178: All servers from the keyboard.
+          // Asked for in #178: All servers from the keyboard. ⌘0 sits next
+          // to ⌘1…⌘9, one server each; ⌘⇧S is Services (#202).
           label: t.servers.overview.open,
-          combo: 'shift+S',
+          combo: '0',
           disabled: servers.list.length === 0,
           run: () => openServers(servers.activeId || servers.list[0]?.id || ''),
         },

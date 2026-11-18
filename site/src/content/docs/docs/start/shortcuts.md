@@ -9,7 +9,8 @@ sidebar:
 |---|---|
 | `⌘K` | Spotlight |
 | `⌘1` … `⌘9` | Switch server workspace |
-| `⌘⇧S` | All servers |
+| `⌘0` | All servers |
+| `⌘⇧S` | Services |
 | `⌘W` · `⌘M` | Close · minimize window |
 | `⌘,` | Settings |
 | `⌘L` | Lock Davish |
