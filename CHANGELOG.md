@@ -4,11 +4,16 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.14.6] - 2026-11-18
+
 ### Thêm
 - Database: lưới dữ liệu SQLite sắp xếp được (bấm tiêu đề cột: tăng, giảm, bỏ) và lọc theo chữ một cột có chứa. Davish tự dựng câu SQL từ tên cột có thật trong bảng, vẫn không có ô gõ SQL, vẫn chỉ đọc 100 dòng mỗi lần.
 
 ### Sửa
 - Chạy lệnh trên nhiều server: bấm Dừng ngay lúc lệnh vừa khởi động có lúc không dừng được và giữ cả lượt chạy tới khi lệnh tự xong. Giờ Davish gửi tín hiệu dừng thẳng tới lệnh trên server, và nếu server vẫn giữ phiên thì job được coi là đã dừng sau 5 giây.
+
+### Thay đổi
+- Linux: cửa sổ giờ được vẽ bằng GPU (mặc định của WebKitGTK), nên cuộn, kéo cửa sổ và lớp kính mờ mượt hẳn thay vì do CPU vẽ. Trước đây Davish giữ cách né lỗi của Wails là tắt hẳn GPU cho mọi máy. Đã thử trên card Intel và AMD; với driver NVIDIA độc quyền, nơi lỗi cũ xảy ra, GPU vẫn tắt mặc định, đặt `DAVISH_WEBVIEW_GPU=always` để bật (kèm `WEBKIT_DISABLE_DMABUF_RENDERER=1`, trừ khi bạn tự đặt). `DAVISH_WEBVIEW_GPU=never` tắt GPU trên bất kỳ máy nào, và log của app ghi chế độ đã dùng kèm lý do. Cảm ơn @tian2992 đã phát hiện và thử trên Intel, AMD và NVIDIA (#181, #159, #185).
 
 ## [1.14.5] - 2026-11-18
 
@@ -33,8 +38,6 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 - Monitor: đường và vùng màu của biểu đồ (Bộ nhớ, CPU, GPU, Mạng, Ổ đĩa và các biểu đồ nhỏ ở Tổng quan) không còn tràn qua mép trái của thẻ. Cảm ơn @thanhtrung5763 (#186).
 - macOS và Linux: bôi đen và copy được lệnh hiển thị trong hộp xác nhận, inspector và hộp báo lỗi.
 
-### Thay đổi
-- Linux: cửa sổ giờ được vẽ bằng GPU (mặc định của WebKitGTK). Trước đây Davish giữ cách né lỗi của Wails là tắt hẳn GPU cho mọi máy, nên mỗi lần cuộn và mỗi lớp kính mờ đều do CPU vẽ. Với driver NVIDIA độc quyền, nơi lỗi đó xảy ra, GPU vẫn tắt cho tới khi được thử: `DAVISH_WEBVIEW_GPU=always` để thử (kèm `WEBKIT_DISABLE_DMABUF_RENDERER=1`, trừ khi bạn tự đặt), kết quả gom ở #185. `DAVISH_WEBVIEW_GPU=never` tắt GPU trên bất kỳ máy nào, và log của app ghi chế độ đã dùng kèm lý do. Cảm ơn @tian2992 đã phát hiện (#181, #159).
 
 ## [1.14.2] - 2026-11-17
 
