@@ -102,7 +102,7 @@ export const vi: Dict = {
       'SSH key',
       'Lệnh hay dùng',
       'Nhật ký lệnh',
-      'Spotlight',
+      'Spotlight & Launchpad',
     ],
     all: 'Xem mọi tính năng',
   },

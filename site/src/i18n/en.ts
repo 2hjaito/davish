@@ -101,7 +101,7 @@ export const en = {
       'SSH keys',
       'Saved commands',
       'Command log',
-      'Spotlight',
+      'Spotlight & Launchpad',
     ],
     all: 'See every feature',
   },

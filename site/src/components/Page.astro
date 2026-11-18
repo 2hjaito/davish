@@ -6,6 +6,7 @@ import { dicts, locales, type Locale } from '../i18n'
 import Base from '../layouts/Base.astro'
 import { links, release } from '../lib/release'
 import { stats } from '../lib/stats'
+import AppIcon from './AppIcon.astro'
 import Flag from './Flag.astro'
 import Icon from './Icon.astro'
 import Shot from './Shot.astro'
@@ -54,13 +55,15 @@ function pair(name: string): { light: ImageMetadata; dark?: ImageMetadata } {
 }
 
 const tabs = [
-  { id: 'desktop', icon: 'device-desktop', file: 'desktop.png' },
-  { id: 'servers', icon: 'server-2', file: 'servers.jpg' },
-  { id: 'docker', icon: 'brand-docker', file: 'docker.jpg' },
+  { id: 'desktop', icon: 'launchpad', file: 'desktop.png' },
+  { id: 'servers', icon: 'servers', file: 'servers.jpg' },
+  { id: 'docker', icon: 'docker', file: 'docker.jpg' },
   { id: 'database', icon: 'database', file: 'sqlite-rows.jpg' },
-  { id: 'git', icon: 'git-branch', file: 'git.jpg' },
-  { id: 'security', icon: 'shield-check', file: 'security.jpg' },
+  { id: 'git', icon: 'git', file: 'git.jpg' },
+  { id: 'security', icon: 'security', file: 'security.jpg' },
 ] as const
+// The app behind each "also inside" chip, in the order of t.features.list.
+const chipIcons = ['terminal', 'files', 'editor', 'logs', 'monitor', 'services', 'cron', 'nginx', 'packages', 'ports', 'browser', 'disk', 'keys', 'snippets', 'audit', 'launchpad']
 const whyIcons = ['bolt', 'feather', 'eye', 'layout-grid', 'key', 'refresh']
 const platforms = [
   { id: 'macos', main: r.files.macos, alt: r.files.macosZip },
@@ -156,7 +159,7 @@ const platforms = [
                 aria-selected={i === 0 ? 'true' : 'false'}
                 data-tab={tab.id}
               >
-                <Icon name={tab.icon} size={16} />
+                <AppIcon id={tab.icon} size={16} />
                 {t.hero.tabs[tab.id]}
               </button>
             ))
@@ -258,7 +261,16 @@ const platforms = [
       </div>
       <div class="more" data-reveal>
         <h3>{t.features.more}</h3>
-        <ul class="chips">{t.features.list.map((x) => <li>{x}</li>)}</ul>
+        <ul class="chips">
+          {
+            t.features.list.map((x, i) => (
+              <li>
+                <AppIcon id={chipIcons[i] ?? 'launchpad'} size={22} />
+                {x}
+              </li>
+            ))
+          }
+        </ul>
         <a class="arrow" href={docs}>{t.features.all} <Icon name="arrow-right" size={16} /></a>
       </div>
     </section>

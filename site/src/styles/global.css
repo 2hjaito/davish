@@ -526,7 +526,7 @@ p {
   gap: 7px;
   flex: none;
   height: 34px;
-  padding: 0 10px;
+  padding: 0 9px 0 7px;
   border: 1px solid var(--line-strong);
   border-radius: 10px;
   background: var(--panel);
@@ -732,7 +732,10 @@ p {
 }
 
 .chips li {
-  padding: 7px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 14px 7px 8px;
   border: 1px solid var(--line-strong);
   border-radius: 10px;
   background: var(--panel);

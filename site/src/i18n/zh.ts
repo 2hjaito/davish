@@ -102,7 +102,7 @@ export const zh: Dict = {
       'SSH 密钥',
       '常用命令',
       '命令日志',
-      'Spotlight',
+      'Spotlight 与 Launchpad',
     ],
     all: '查看全部功能',
   },
