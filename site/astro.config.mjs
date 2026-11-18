@@ -16,7 +16,6 @@ export default defineConfig({
   integrations: [
     starlight({
       title: { en: 'Davish Docs', vi: 'Tài liệu Davish', 'zh-CN': 'Davish 文档' },
-      logo: { src: './src/assets/logo.svg' },
       favicon: '/favicon.svg',
       defaultLocale: 'root',
       locales: {
@@ -30,6 +29,13 @@ export default defineConfig({
       ],
       editLink: { baseUrl: 'https://github.com/2hjaito/davish/edit/main/site/' },
       customCss: ['./src/styles/docs.css'],
+      // The header's parts, matched to the landing page's nav.
+      components: {
+        SiteTitle: './src/components/docs/SiteTitle.astro',
+        SocialIcons: './src/components/docs/SocialIcons.astro',
+        ThemeSelect: './src/components/docs/ThemeSelect.astro',
+        LanguageSelect: './src/components/docs/LanguageSelect.astro',
+      },
       sidebar: [
         group('Get started', 'Bắt đầu', '入门', 'start'),
         group('On the server', 'Trên server', '服务器上', 'on-the-server'),

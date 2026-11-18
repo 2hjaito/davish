@@ -1,0 +1,94 @@
+---
+// Flags that open on hover, like the landing page; each leads to this same
+// page in the other language.
+import Flag from '../Flag.astro'
+import Icon from '../Icon.astro'
+
+const langs = [
+  { id: 'en', prefix: '', name: 'English', hreflang: 'en' },
+  { id: 'vi', prefix: '/vi', name: 'Tiếng Việt', hreflang: 'vi' },
+  { id: 'zh', prefix: '/zh', name: '简体中文', hreflang: 'zh-CN' },
+] as const
+const current = Astro.locals.starlightRoute.locale ?? 'en'
+const here = langs.find((l) => l.id === current) ?? langs[0]
+const rest = Astro.url.pathname.replace(/^\/(vi|zh)(?=\/)/, '')
+---
+
+<div class="lang">
+  <button type="button" class="nav-btn" aria-haspopup="true">
+    <Flag id={here.id} />
+    <span>{here.name}</span>
+    <Icon name="chevron-down" size={14} />
+  </button>
+  <ul>
+    {
+      langs.map((l) => (
+        <li>
+          <a href={l.prefix + rest} hreflang={l.hreflang} aria-current={l.id === here.id ? 'page' : undefined}>
+            <Flag id={l.id} />
+            {l.name}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .lang {
+    position: relative;
+  }
+  .lang ul {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    z-index: 20;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    min-width: 170px;
+    background: var(--sl-color-gray-6);
+    border-radius: 12px;
+    box-shadow:
+      0 0 0 1px var(--sl-color-gray-5),
+      0 20px 50px rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    visibility: hidden;
+    translate: 0 4px;
+    transition:
+      opacity 0.15s,
+      translate 0.15s,
+      visibility 0.15s;
+  }
+  .lang ul::before {
+    content: '';
+    position: absolute;
+    inset: -10px 0 auto;
+    height: 10px;
+  }
+  .lang:hover ul,
+  .lang:focus-within ul {
+    opacity: 1;
+    visibility: visible;
+    translate: 0 6px;
+  }
+  .lang li {
+    margin: 0;
+  }
+  .lang a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    color: var(--sl-color-white);
+    font-size: 15px;
+    text-decoration: none;
+  }
+  .lang a:hover {
+    background: var(--sl-color-gray-5);
+  }
+  .lang a[aria-current] {
+    color: var(--sl-color-text-accent);
+  }
+</style>

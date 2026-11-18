@@ -95,3 +95,70 @@ starlight-lang-select select {
   field-sizing: content;
   min-width: 5.5em;
 }
+
+/* Like the landing page: header without a rule, nav buttons without boxes,
+   the page and sidebar on one background, a soft current item. */
+:root[data-theme='light'] {
+  --sl-color-black: #f6f7f9;
+  --sl-color-gray-7: #eef0f4;
+  --sl-color-gray-6: #e6e9ef;
+  --sl-color-bg-nav: #f6f7f9;
+  --sl-color-bg-sidebar: #f6f7f9;
+}
+
+:root[data-theme='dark'] {
+  --sl-color-bg-nav: #0a0b10;
+  --sl-color-bg-sidebar: #0a0b10;
+}
+
+header.header {
+  border-bottom-color: transparent;
+}
+
+.right-group,
+.social-icons {
+  gap: 4px !important;
+}
+
+.social-icons::after {
+  display: none;
+}
+
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  color: var(--sl-color-gray-2);
+  font: 550 14.5px var(--sl-font);
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+
+.nav-btn:hover,
+.lang:focus-within .nav-btn {
+  color: var(--sl-color-white);
+  background: var(--sl-color-gray-6);
+}
+
+.sidebar-content a[aria-current='page'] {
+  background: var(--sl-color-accent-low);
+  color: var(--sl-color-text-accent);
+  font-weight: 600;
+}
+
+/* Same order as the landing page: language, theme, Discord, GitHub. */
+.right-group .lang {
+  order: -2;
+}
+
+.right-group .theme-btn {
+  order: -1;
+}

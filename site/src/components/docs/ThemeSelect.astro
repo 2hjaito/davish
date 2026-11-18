@@ -1,0 +1,41 @@
+---
+// One button between light and dark, sharing starlight-theme with the
+// landing page. Starlight's own head script still applies the saved choice
+// before paint.
+import Icon from '../Icon.astro'
+
+const label = { vi: 'Sáng hoặc tối', zh: '浅色或深色' }[Astro.locals.starlightRoute.locale ?? ''] ?? 'Light or dark'
+---
+
+<button class="nav-btn theme-btn" type="button" aria-label={label} title={label} data-theme-toggle>
+  <span class="sun"><Icon name="sun" size={17} /></span>
+  <span class="moon"><Icon name="moon" size={17} /></span>
+</button>
+
+<script is:inline>
+  // Rendered twice (header and mobile menu): one click handler for the page.
+  if (!window.__dvTheme) {
+    window.__dvTheme = true
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest?.('[data-theme-toggle]')) return
+      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'
+      document.documentElement.dataset.theme = next
+      try {
+        localStorage.setItem('starlight-theme', next)
+      } catch {}
+    })
+  }
+</script>
+
+<style>
+  .theme-btn .sun {
+    display: flex;
+  }
+  .theme-btn .moon,
+  :global(:root[data-theme='dark']) .theme-btn .sun {
+    display: none;
+  }
+  :global(:root[data-theme='dark']) .theme-btn .moon {
+    display: flex;
+  }
+</style>
