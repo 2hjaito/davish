@@ -4,11 +4,14 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.14.8] - 2026-11-19
+
 ### Changed
 - Settings is rebuilt in the style of macOS System Settings: a sidebar with a search field and a colored icon for each pane (General, Appearance, Performance, Menu bar, Dock, Terminal, Editor, Alerts, Security), the chosen pane's grouped cards on the right, and back and forward between the panes you visited. The theme is picked from previews, and menu bar readings each get their own switch. Language and Updates move to General, App lock and sudo to Security. Davish remembers the last pane open.
 
 ### Fixed
 - All servers now opens with `⌘O` (Ctrl+O). On Windows the webview keeps Ctrl+0 for its zoom and never passes it on, so the `⌘0` from 1.14.7 did nothing there. Thanks @HungNth (#209).
+- Docker: the containers table now shows each compose project's icon like the cards do, including projects that run locally built images (they used to get a plain letter).
 
 ## [1.14.7] - 2026-11-18
 

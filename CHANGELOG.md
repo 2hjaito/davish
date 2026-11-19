@@ -4,11 +4,14 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.14.8] - 2026-11-19
+
 ### Đổi
 - Cài đặt dựng lại theo kiểu System Settings của macOS: sidebar có ô tìm kiếm và icon màu cho từng mục (Chung, Giao diện, Hiệu năng, Thanh menu, Dock, Terminal, Editor, Cảnh báo, Bảo mật), bên phải là trang của mục đó với các nhóm thẻ, nút lùi/tiến giữa các trang đã xem. Chế độ sáng/tối chọn bằng ảnh xem trước, số liệu thanh menu bật tắt từng dòng. Ngôn ngữ và Cập nhật chuyển sang Chung, khóa app và sudo sang Bảo mật. Davish nhớ mục mở gần nhất.
 
 ### Sửa
 - Tất cả server giờ mở bằng `⌘O` (Ctrl+O). Trên Windows, khung web giữ Ctrl+0 cho việc phóng to thu nhỏ và không chuyển cho Davish, nên `⌘0` của bản 1.14.7 không làm gì. Cảm ơn @HungNth (#209).
+- Docker: bảng container giờ hiện đúng icon của từng project compose như dạng thẻ, kể cả project chạy image tự build (trước đó chỉ hiện chữ cái đầu).
 
 ## [1.14.7] - 2026-11-18
 
