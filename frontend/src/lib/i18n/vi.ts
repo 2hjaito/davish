@@ -987,7 +987,7 @@ const vi = {
           'Thêm, nhập, sửa hoặc ngắt kết nối server ngay trong cửa sổ này',
           'Chạy một lệnh trên nhiều server: mỗi server một tab terminal, tối đa 4 server cùng lúc; tab nào hỏi lại thì được đưa lên. Xác nhận kèm đủ tên server và đúng lệnh; từ 3 server trở lên, hoặc lệnh xóa/dừng thứ gì đó, phải gõ số server. Cập nhật package dùng trình quản lý package của từng server với sudo -n',
         ],
-        keys: ['⌘0 (Ctrl+0): mở Tất cả server'],
+        keys: ['⌘O (Ctrl+O): mở Tất cả server'],
         runs: [
           'Cùng cách đọc /proc như Monitor, cho từng server đã kết nối, khi cửa sổ đang mở',
           'Chạy lệnh: đúng lệnh bạn gõ, trên từng server, trong một phiên terminal; mỗi server một dòng trong Nhật ký lệnh. Davish không bao giờ tự nhập mật khẩu sudo cho việc này',
@@ -1956,6 +1956,13 @@ const vi = {
     route: (from: string, to: string) => `${from} → ${to}`,
   },
   settings: {
+    general: 'Chung',
+    security: 'Bảo mật',
+    search: 'Tìm kiếm',
+    noResults: 'Không có kết quả',
+    back: 'Quay lại',
+    forward: 'Tiến tới',
+    panes: 'Các mục',
     appearance: 'Giao diện',
     theme: 'Chế độ',
     themeHint: 'Tự động theo chế độ sáng hoặc tối của máy.',

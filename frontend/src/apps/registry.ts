@@ -171,7 +171,7 @@ export const apps: AppDef[] = [
     label: t.apps.settings,
     icon: 'settings',
     theme: 'light',
-    size: { w: 580, h: 600 },
+    size: { w: 760, h: 580 },
     load: () => import('./settings/SettingsApp.svelte'),
     layout: false,
   },

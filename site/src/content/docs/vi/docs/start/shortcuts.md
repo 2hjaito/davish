@@ -9,7 +9,7 @@ sidebar:
 |---|---|
 | `⌘K` | Spotlight |
 | `⌘1` … `⌘9` | Chuyển workspace server |
-| `⌘0` | Tất cả server |
+| `⌘O` | Tất cả server |
 | `⌘⇧S` | Dịch vụ |
 | `⌘W` · `⌘M` | Đóng · thu nhỏ cửa sổ |
 | `⌘,` | Cài đặt |

@@ -1027,7 +1027,7 @@ const es = {
           'Añadir, importar, editar o desconectar un servidor desde esta ventana',
           'Ejecutar un comando en varios servidores: cada uno en su pestaña de terminal, como mucho 4 a la vez; la pestaña que pregunta algo pasa al frente. Se confirma con el nombre de cada servidor y el comando exacto; con 3 servidores o más, o un comando que borra o detiene algo, hay que escribir el número. Actualizar paquetes usa el gestor de cada servidor con sudo -n',
         ],
-        keys: ['⌘0 (Ctrl+0): abrir Todos los servidores'],
+        keys: ['⌘O (Ctrl+O): abrir Todos los servidores'],
         runs: [
           'Para el mapa: los sitios de nginx, puertos en escucha, contenedores y discos de ese servidor, leídos al abrirlo (solo lectura)',
           'La misma lectura de /proc que Monitor, para cada servidor conectado, mientras la ventana está abierta',
@@ -2018,6 +2018,13 @@ const es = {
     route: (from: string, to: string) => `${from} → ${to}`,
   },
   settings: {
+    general: 'General',
+    security: 'Seguridad',
+    search: 'Buscar',
+    noResults: 'Sin resultados',
+    back: 'Atrás',
+    forward: 'Adelante',
+    panes: 'Secciones',
     appearance: 'Apariencia',
     theme: 'Tema',
     themeHint: 'Automático sigue el modo claro u oscuro de tu ordenador.',

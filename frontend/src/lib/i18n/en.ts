@@ -1004,7 +1004,7 @@ const en = {
           'Add, import, edit or disconnect a server right from this window',
           'Run a command on several servers: each in its own terminal tab, at most 4 at a time; a tab that asks something comes forward. Confirmed with every server name and the exact command; 3 servers or more, or a command that removes or stops something, asks you to type the count. Update packages uses each server’s package manager with sudo -n',
         ],
-        keys: ['⌘0 (Ctrl+0): open All servers'],
+        keys: ['⌘O (Ctrl+O): open All servers'],
         runs: [
           'For the map: that server’s nginx sites, listening ports, containers and disks, read when it opens (read only)',
           'The same /proc reading as Monitor, for each connected server, while the window is open',
@@ -1982,6 +1982,13 @@ const en = {
     route: (from: string, to: string) => `${from} → ${to}`,
   },
   settings: {
+    general: 'General',
+    security: 'Security',
+    search: 'Search',
+    noResults: 'No results',
+    back: 'Back',
+    forward: 'Forward',
+    panes: 'Sections',
     appearance: 'Appearance',
     theme: 'Theme',
     themeHint: 'Auto follows the light or dark setting of your computer.',
