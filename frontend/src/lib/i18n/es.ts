@@ -2018,6 +2018,13 @@ const es = {
     route: (from: string, to: string) => `${from} → ${to}`,
   },
   settings: {
+    general: 'General',
+    security: 'Seguridad',
+    search: 'Buscar',
+    noResults: 'Sin resultados',
+    back: 'Atrás',
+    forward: 'Adelante',
+    panes: 'Secciones',
     appearance: 'Apariencia',
     theme: 'Tema',
     themeHint: 'Automático sigue el modo claro u oscuro de tu ordenador.',

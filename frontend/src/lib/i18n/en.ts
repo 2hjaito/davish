@@ -1982,6 +1982,13 @@ const en = {
     route: (from: string, to: string) => `${from} → ${to}`,
   },
   settings: {
+    general: 'General',
+    security: 'Security',
+    search: 'Search',
+    noResults: 'No results',
+    back: 'Back',
+    forward: 'Forward',
+    panes: 'Sections',
     appearance: 'Appearance',
     theme: 'Theme',
     themeHint: 'Auto follows the light or dark setting of your computer.',

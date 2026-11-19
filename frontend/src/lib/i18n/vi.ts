@@ -1956,6 +1956,13 @@ const vi = {
     route: (from: string, to: string) => `${from} → ${to}`,
   },
   settings: {
+    general: 'Chung',
+    security: 'Bảo mật',
+    search: 'Tìm kiếm',
+    noResults: 'Không có kết quả',
+    back: 'Quay lại',
+    forward: 'Tiến tới',
+    panes: 'Các mục',
     appearance: 'Giao diện',
     theme: 'Chế độ',
     themeHint: 'Tự động theo chế độ sáng hoặc tối của máy.',

@@ -26,7 +26,7 @@ Changes from other contributors reach `main` only through a pull request reviewe
 
 Davish connects to the servers you add, over SSH. Everything it does on a server, including the web pages shown in its built-in browser, goes through that SSH connection. It does not collect usage data, telemetry or crash reports.
 
-The one other connection is the **update check**: a request to `api.github.com` at startup and every 6 hours to look for a new version, and the download from GitHub Releases when you choose to update. No user or device identifier is sent. Turn it off with Settings → Updates → Check for new versions; a manual check is still available in the menu.
+The one other connection is the **update check**: a request to `api.github.com` at startup and every 6 hours to look for a new version, and the download from GitHub Releases when you choose to update. No user or device identifier is sent. Turn it off with Settings → General → Check for new versions; a manual check is still available in the menu.
 
 This program will not transfer any other information to other networked systems unless specifically requested by the user or the person installing or operating it.
 

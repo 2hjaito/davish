@@ -1,0 +1,67 @@
+// The panes of Settings, in sidebar order, and the words each one answers
+// to in the sidebar search.
+import { t } from '../../lib/i18n'
+import { STAT_IDS } from '../../lib/shell/statIds'
+
+export const PANES = [
+  'general',
+  'appearance',
+  'performance',
+  'menubar',
+  'dock',
+  'terminal',
+  'editor',
+  'alerts',
+  'security',
+] as const
+
+export type Pane = (typeof PANES)[number]
+
+export function paneLabel(p: Pane): string {
+  return t.settings[p]
+}
+
+/** Everything a pane shows a title for: its name, then its rows. */
+function words(p: Pane): string[] {
+  const s = t.settings
+  switch (p) {
+    case 'general':
+      return [s.language, s.updates, s.autoUpdate, s.checkNow]
+    case 'appearance':
+      return [s.theme, ...Object.values(s.themes), s.wallpaper, s.monoFont]
+    case 'performance':
+      return [
+        s.perfPreset,
+        s.perfAdvanced,
+        s.perfBlur,
+        s.perfShadow,
+        s.perfOpaque,
+        s.perfWallpaper,
+        s.perfMotion,
+        s.perfNoDmabuf,
+        s.perfNoCompositing,
+      ]
+    case 'menubar':
+      return [s.menubarStats, ...STAT_IDS.map((id) => t.menubar.stats.names[id])]
+    case 'dock':
+      return [s.dockSize, s.dockPosition, s.dockTransparent, s.dockAutohide]
+    case 'terminal':
+      return [s.fontSize, s.prompt, s.gpu]
+    case 'editor':
+      return [s.backup]
+    case 'alerts':
+      return [s.alertMem, s.alertDisk, s.alertHold]
+    case 'security':
+      return [s.lock, s.lockAfter, s.lockChange, s.sudoForget]
+  }
+}
+
+const fold = (s: string) =>
+  s.normalize('NFD').replace(/\p{M}/gu, '').replace(/đ/g, 'd').toLowerCase()
+
+/** The panes whose name or rows contain query, ignoring case and accents. */
+export function searchPanes(query: string): Pane[] {
+  const q = fold(query.trim())
+  if (!q) return [...PANES]
+  return PANES.filter((p) => [paneLabel(p), ...words(p)].some((w) => fold(w).includes(q)))
+}

@@ -1925,6 +1925,13 @@ const zh = {
     route: (from: string, to: string) => `${from} → ${to}`,
   },
   settings: {
+    general: '通用',
+    security: '安全',
+    search: '搜索',
+    noResults: '无结果',
+    back: '后退',
+    forward: '前进',
+    panes: '分类',
     appearance: '外观',
     theme: '主题',
     themeHint: '“自动”会跟随电脑的浅色或深色设置。',

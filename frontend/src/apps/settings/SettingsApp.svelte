@@ -2,6 +2,7 @@
   import { toUserError } from '../../lib/api/errors'
   import { lang, type Lang, LANGS, locale, switchLang, t } from '../../lib/i18n'
   import { appLock, LOCK_AFTER, MIN_LOCK_PASSWORD } from '../../lib/stores/lock.svelte'
+  import { load, save } from '../../lib/stores/persist'
   import {
     ALERTS,
     type BackupMode,
@@ -16,7 +17,9 @@
     THEMES,
     WALLPAPER_ACCENTS,
   } from '../../lib/stores/settings.svelte'
+  import DavishMark from '../../lib/ui/DavishMark.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
+  import { getWindowContext } from '../../lib/wm/context'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import { STAT_IDS, type StatId } from '../../lib/shell/statIds'
   import { relaunch } from '../../lib/api/update'
@@ -25,9 +28,46 @@
   import { isLinux } from '../../lib/shell/platform'
   import { perfCheck } from '../../lib/shell/perfCheck.svelte'
   import { updates } from '../../lib/stores/updates.svelte'
+  import PaneIcon from './PaneIcon.svelte'
+  import { type Pane, PANES, paneLabel, searchPanes } from './panes'
+  import ThemePreview from './ThemePreview.svelte'
   import type { AppProps } from '../types'
 
+  // The pane's name stands in for the window title, so win is not read.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let { win }: AppProps = $props()
+  const ctx = getWindowContext()
+
+  // Like System Settings: a sidebar of panes, back and forward between the
+  // ones visited, and the last one shown again next time.
+  const saved = load<Pane>('settingsPane', 'general')
+  let history = $state<Pane[]>([PANES.includes(saved) ? saved : 'general'])
+  let at = $state(0)
+  const pane = $derived(history[at] ?? 'general')
+
+  function go(p: Pane) {
+    if (p === pane) return
+    history = [...history.slice(0, at + 1), p]
+    at = history.length - 1
+    save('settingsPane', p)
+  }
+
+  function step(dir: 1 | -1) {
+    const next = at + dir
+    if (next < 0 || next >= history.length) return
+    at = next
+    save('settingsPane', history[at])
+  }
+
+  let query = $state('')
+  const found = $derived(searchPanes(query))
+
+  // Typing shows the first pane that matches unless the current one does.
+  function onSearch() {
+    const hits = searchPanes(query)
+    const first = hits[0]
+    if (first && !hits.includes(pane)) go(first)
+  }
 
   function stepFont(dir: 1 | -1) {
     settings.set('terminalFontSize', settings.terminalFontSize + dir * TERMINAL_FONT.step)
@@ -35,14 +75,16 @@
 
   // A language change needs a restart, so it waits for a confirming click.
   let pickedLang = $state<Lang>(lang)
-  let advanced = $state(false)
 
   const fonts = Object.keys(MONO_FAMILIES) as MonoFont[]
   const dockSizes = Object.keys(DOCK_SIZES) as DockSize[]
 
-  function toggleStat(id: StatId) {
-    const on = settings.menubarStats
-    settings.set('menubarStats', on.includes(id) ? on.filter((s) => s !== id) : [...on, id])
+  function toggleStat(id: StatId, on: boolean) {
+    const now = settings.menubarStats
+    settings.set(
+      'menubarStats',
+      on ? [...now.filter((s) => s !== id), id] : now.filter((s) => s !== id),
+    )
   }
   const backups: BackupMode[] = ['etc', 'always', 'never']
   // Lock password forms: one at a time (set, change or turn off).
@@ -89,613 +131,757 @@
     { key: 'alertMem', label: t.settings.alertMem, hint: t.settings.alertMemHint },
     { key: 'alertDisk', label: t.settings.alertDisk, hint: t.settings.alertDiskHint },
   ] as const
+
+  type BoolKnob = 'blur' | 'opaque' | 'wallpaper' | 'motion' | 'noDmabuf' | 'noCompositing'
+  const perfKnobs: { key: BoolKnob; label: string; hint: string }[] = [
+    { key: 'blur', label: t.settings.perfBlur, hint: t.settings.perfBlurHint },
+    { key: 'opaque', label: t.settings.perfOpaque, hint: t.settings.perfOpaqueHint },
+    { key: 'wallpaper', label: t.settings.perfWallpaper, hint: t.settings.perfWallpaperHint },
+    { key: 'motion', label: t.settings.perfMotion, hint: t.settings.perfMotionHint },
+  ]
+  // WebKitGTK workarounds, only on Linux.
+  if (isLinux)
+    perfKnobs.push(
+      { key: 'noDmabuf', label: t.settings.perfNoDmabuf, hint: t.settings.perfNoDmabufHint },
+      {
+        key: 'noCompositing',
+        label: t.settings.perfNoCompositing,
+        hint: t.settings.perfNoCompositingHint,
+      },
+    )
 </script>
 
-<TitleBar>
-  <span class="title">{win.title}</span>
-  <span class="spacer"></span>
-</TitleBar>
+{#snippet head(label: string, hint?: string)}
+  <span class="head">
+    <span class="label">{label}</span>
+    {#if hint}<small>{hint}</small>{/if}
+  </span>
+{/snippet}
 
-<div class="body">
-  <h2>{t.settings.appearance}</h2>
+{#snippet toggle(label: string, hint: string, checked: boolean, set: (on: boolean) => void)}
+  <label class="row">
+    {@render head(label, hint)}
+    <input
+      type="checkbox"
+      class="switch"
+      role="switch"
+      {checked}
+      onchange={(e) => set(e.currentTarget.checked)}
+    />
+  </label>
+{/snippet}
 
-  <div class="row">
-    <span>
-      <strong>{t.settings.theme}</strong>
-      <small>{t.settings.themeHint}</small>
-    </span>
-    <div class="segmented" role="radiogroup" aria-label={t.settings.theme}>
-      {#each THEMES as th (th)}
+{#snippet segmented<T extends string | number>(
+  label: string,
+  options: readonly T[],
+  value: T,
+  name: (v: T) => string,
+  pick: (v: T) => void,
+)}
+  <div class="segmented" role="radiogroup" aria-label={label}>
+    {#each options as o (o)}
+      <button role="radio" aria-checked={value === o} onclick={() => pick(o)}>{name(o)}</button>
+    {/each}
+  </div>
+{/snippet}
+
+<div class="settings">
+  <nav class="sidebar" aria-label={t.settings.panes}>
+    <TitleBar bare />
+    <div class="search">
+      <Icon name="search" size={13} />
+      <input
+        type="search"
+        placeholder={t.settings.search}
+        aria-label={t.settings.search}
+        spellcheck="false"
+        bind:value={query}
+        oninput={onSearch}
+        onkeydown={(e) => {
+          if (e.key === 'Escape' && query) {
+            e.stopPropagation()
+            query = ''
+          }
+        }}
+      />
+    </div>
+    <div class="items">
+      {#if !query}
         <button
-          role="radio"
-          aria-checked={settings.theme === th}
-          onclick={() => settings.set('theme', th)}>{t.settings.themes[th]}</button
+          class="about"
+          class:active={pane === 'general'}
+          title={t.settings.version(__APP_VERSION__)}
+          onclick={() => go('general')}
         >
-      {/each}
-    </div>
-  </div>
-
-  <div class="row">
-    <span>
-      <strong>{t.settings.language}</strong>
-      <small>{t.settings.languageHint}</small>
-    </span>
-    <!-- A list rather than a segmented control: languages keep being added. -->
-    <select class="input pick" aria-label={t.settings.language} bind:value={pickedLang}>
-      {#each LANGS as l (l)}
-        <option value={l}>{t.settings.langs[l]}</option>
-      {/each}
-    </select>
-  </div>
-  {#if pickedLang !== lang}
-    <div class="row">
-      <small>{t.settings.langRestart}</small>
-      <button type="button" class="btn" onclick={() => switchLang(pickedLang)}
-        >{t.settings.langApply}</button
-      >
-    </div>
-  {/if}
-
-  <h2>{t.settings.performance}</h2>
-
-  <div class="row stack">
-    <span>
-      <strong>{t.settings.perfPreset}</strong>
-      <small>{t.settings.perfPresetHint}</small>
-    </span>
-    <div class="preset-line">
-      <div class="segmented wrap" role="radiogroup" aria-label={t.settings.perfPreset}>
-        {#each NAMED_PRESETS as preset (preset)}
-          <button
-            role="radio"
-            aria-checked={settings.perfPreset === preset}
-            onclick={() => settings.usePreset(preset as NamedPreset)}
-            >{t.settings.perfPresets[preset]}</button
-          >
-        {/each}
-      </div>
-      <button
-        type="button"
-        class="btn"
-        disabled={perfCheck.running}
-        onclick={() => void perfCheck.start(true)}
-      >
-        {perfCheck.running ? t.settings.perfChecking : t.settings.perfCheck}
-      </button>
-    </div>
-    {#if settings.perfPreset === 'custom'}
-      <small>{t.settings.perfCustom}</small>
-    {/if}
-    {#if perfCheck.last === 'slow'}
-      <small>{t.settings.perfSlow}</small>
-    {:else if perfCheck.last === 'fine'}
-      <small>{t.settings.perfFine}</small>
-    {/if}
-  </div>
-
-  <div class="row stack">
-    <button
-      type="button"
-      class="advanced"
-      aria-expanded={advanced}
-      onclick={() => (advanced = !advanced)}
-    >
-      {t.settings.perfAdvanced}
-    </button>
-    {#if advanced}
-      <label class="switchrow">
-        <span>
-          <strong>{t.settings.perfBlur}</strong>
-          <small>{t.settings.perfBlurHint}</small>
-        </span>
-        <input
-          type="checkbox"
-          class="switch"
-          role="switch"
-          checked={settings.knobs.blur}
-          onchange={(e) => settings.setKnob('blur', e.currentTarget.checked)}
-        />
-      </label>
-      <label class="switchrow">
-        <span>
-          <strong>{t.settings.perfShadow}</strong>
-          <small>{t.settings.perfShadowHint}</small>
-        </span>
-        <input
-          type="checkbox"
-          class="switch"
-          role="switch"
-          checked={settings.knobs.shadow === 'short'}
-          onchange={(e) => settings.setKnob('shadow', e.currentTarget.checked ? 'short' : 'deep')}
-        />
-      </label>
-      <label class="switchrow">
-        <span>
-          <strong>{t.settings.perfOpaque}</strong>
-          <small>{t.settings.perfOpaqueHint}</small>
-        </span>
-        <input
-          type="checkbox"
-          class="switch"
-          role="switch"
-          checked={settings.knobs.opaque}
-          onchange={(e) => settings.setKnob('opaque', e.currentTarget.checked)}
-        />
-      </label>
-      <label class="switchrow">
-        <span>
-          <strong>{t.settings.perfWallpaper}</strong>
-          <small>{t.settings.perfWallpaperHint}</small>
-        </span>
-        <input
-          type="checkbox"
-          class="switch"
-          role="switch"
-          checked={settings.knobs.wallpaper}
-          onchange={(e) => settings.setKnob('wallpaper', e.currentTarget.checked)}
-        />
-      </label>
-      <label class="switchrow">
-        <span>
-          <strong>{t.settings.perfMotion}</strong>
-          <small>{t.settings.perfMotionHint}</small>
-        </span>
-        <input
-          type="checkbox"
-          class="switch"
-          role="switch"
-          checked={settings.knobs.motion}
-          onchange={(e) => settings.setKnob('motion', e.currentTarget.checked)}
-        />
-      </label>
-      {#if isLinux}
-        <label class="switchrow">
-          <span>
-            <strong>{t.settings.perfNoDmabuf}</strong>
-            <small>{t.settings.perfNoDmabufHint}</small>
+          <DavishMark size={36} />
+          <span class="about-text">
+            <strong>Davish</strong>
+            <small>{__APP_VERSION__}</small>
           </span>
-          <input
-            type="checkbox"
-            class="switch"
-            role="switch"
-            checked={settings.knobs.noDmabuf}
-            onchange={(e) => settings.setKnob('noDmabuf', e.currentTarget.checked)}
-          />
-        </label>
-        <label class="switchrow">
-          <span>
-            <strong>{t.settings.perfNoCompositing}</strong>
-            <small>{t.settings.perfNoCompositingHint}</small>
-          </span>
-          <input
-            type="checkbox"
-            class="switch"
-            role="switch"
-            checked={settings.knobs.noCompositing}
-            onchange={(e) => settings.setKnob('noCompositing', e.currentTarget.checked)}
-          />
-        </label>
-      {/if}
-      {#if settings.perfNeedsRestart}
-        <span class="check">
-          <small>{t.settings.perfRestartHint}</small>
-          <button type="button" class="btn" disabled={!hasRuntime} onclick={() => void relaunch()}>
-            {t.settings.perfRestart}
-          </button>
-        </span>
-      {/if}
-    {/if}
-  </div>
-
-  <div class="row">
-    <strong>{t.settings.wallpaper}</strong>
-    <div class="swatches" role="radiogroup" aria-label={t.settings.wallpaper}>
-      {#each WALLPAPER_ACCENTS as c (c)}
-        <button
-          class="swatch"
-          role="radio"
-          aria-checked={settings.wallpaperAccent === c}
-          aria-label={t.settings.wallpaperColor(c)}
-          style:background={c}
-          onclick={() => settings.set('wallpaperAccent', c)}
-        ></button>
-      {/each}
-    </div>
-  </div>
-
-  <div class="row">
-    <span>
-      <strong>{t.settings.monoFont}</strong>
-      <small>{t.settings.monoFontHint}</small>
-    </span>
-    <div class="segmented" role="radiogroup" aria-label={t.settings.monoFont}>
-      {#each fonts as f (f)}
-        <button
-          role="radio"
-          aria-checked={settings.monoFont === f}
-          style:font-family={MONO_FAMILIES[f]}
-          onclick={() => settings.set('monoFont', f)}>{t.settings.monoFonts[f]}</button
-        >
-      {/each}
-    </div>
-  </div>
-
-  <h2 class="section">{t.settings.menubar}</h2>
-
-  <div class="row stack">
-    <span>
-      <strong>{t.settings.menubarStats}</strong>
-      <small>{t.settings.menubarStatsHint}</small>
-    </span>
-    <div class="chips" role="group" aria-label={t.settings.menubarStats}>
-      {#each STAT_IDS as id (id)}
-        <button aria-pressed={settings.menubarStats.includes(id)} onclick={() => toggleStat(id)}
-          >{t.menubar.stats.names[id]}</button
-        >
-      {/each}
-    </div>
-  </div>
-
-  <h2 class="section">{t.settings.dock}</h2>
-
-  <div class="row">
-    <span>
-      <strong>{t.settings.dockSize}</strong>
-      <small>{t.settings.dockSizeHint}</small>
-    </span>
-    <div class="segmented" role="radiogroup" aria-label={t.settings.dockSize}>
-      {#each dockSizes as s (s)}
-        <button
-          role="radio"
-          aria-checked={settings.dockSize === s}
-          onclick={() => settings.set('dockSize', s)}>{t.settings.dockSizes[s]}</button
-        >
-      {/each}
-    </div>
-  </div>
-
-  <div class="row">
-    <span>
-      <strong>{t.settings.dockPosition}</strong>
-      <small>{t.settings.dockPositionHint}</small>
-    </span>
-    <div class="segmented" role="radiogroup" aria-label={t.settings.dockPosition}>
-      {#each DOCK_POSITIONS as p (p)}
-        <button
-          role="radio"
-          aria-checked={settings.dockPosition === p}
-          onclick={() => settings.set('dockPosition', p)}>{t.settings.dockPositions[p]}</button
-        >
-      {/each}
-    </div>
-  </div>
-
-  <label class="row">
-    <span>
-      <strong>{t.settings.dockTransparent}</strong>
-      <small>{t.settings.dockTransparentHint}</small>
-    </span>
-    <input
-      type="checkbox"
-      class="switch"
-      role="switch"
-      checked={settings.dockTransparent}
-      onchange={(e) => settings.set('dockTransparent', e.currentTarget.checked)}
-    />
-  </label>
-
-  <label class="row">
-    <span>
-      <strong>{t.settings.dockAutohide}</strong>
-      <small>{t.settings.dockAutohideHint}</small>
-    </span>
-    <input
-      type="checkbox"
-      class="switch"
-      role="switch"
-      checked={settings.dockAutohide}
-      onchange={(e) => settings.set('dockAutohide', e.currentTarget.checked)}
-    />
-  </label>
-
-  <h2 class="section">{t.settings.terminal}</h2>
-
-  <div class="row">
-    <span>
-      <strong>{t.settings.fontSize}</strong>
-      <small>{t.settings.fontSizeHint}</small>
-    </span>
-    <div class="stepper">
-      <button
-        aria-label={t.settings.fontSmaller}
-        disabled={settings.terminalFontSize <= TERMINAL_FONT.min}
-        onclick={() => stepFont(-1)}
-      >
-        <Icon name="minus" size={12} strokeWidth={2.2} />
-      </button>
-      <output aria-live="polite">{settings.terminalFontSize.toLocaleString(locale)}</output>
-      <button
-        aria-label={t.settings.fontLarger}
-        disabled={settings.terminalFontSize >= TERMINAL_FONT.max}
-        onclick={() => stepFont(1)}
-      >
-        <Icon name="plus" size={12} strokeWidth={2.2} />
-      </button>
-    </div>
-  </div>
-
-  <label class="row">
-    <span>
-      <strong>{t.settings.prompt}</strong>
-      <small>{t.settings.promptHint}</small>
-    </span>
-    <input
-      type="checkbox"
-      class="switch"
-      role="switch"
-      checked={settings.terminalPrompt}
-      onchange={(e) => settings.set('terminalPrompt', e.currentTarget.checked)}
-    />
-  </label>
-
-  <label class="row">
-    <span>
-      <strong>{t.settings.gpu}</strong>
-      <small>{t.settings.gpuHint}</small>
-    </span>
-    <input
-      type="checkbox"
-      class="switch"
-      role="switch"
-      checked={settings.terminalGpu}
-      onchange={(e) => settings.set('terminalGpu', e.currentTarget.checked)}
-    />
-  </label>
-
-  <h2 class="section">{t.settings.alerts}</h2>
-
-  {#each pctRows as r (r.key)}
-    <div class="row">
-      <span>
-        <strong>{r.label}</strong>
-        <small>{r.hint}</small>
-      </span>
-      <div class="stepper">
-        <button
-          aria-label="{t.settings.lower} {r.label}"
-          disabled={settings[r.key] <= ALERTS.pct.min}
-          onclick={() =>
-            settings.set(r.key, Math.max(ALERTS.pct.min, settings[r.key] - ALERTS.pct.step))}
-        >
-          <Icon name="minus" size={12} strokeWidth={2.2} />
         </button>
-        <output aria-live="polite">{settings[r.key]}%</output>
+      {/if}
+      {#each found as p (p)}
         <button
-          aria-label="{t.settings.higher} {r.label}"
-          disabled={settings[r.key] >= ALERTS.pct.max}
-          onclick={() =>
-            settings.set(r.key, Math.min(ALERTS.pct.max, settings[r.key] + ALERTS.pct.step))}
+          class="item"
+          class:active={pane === p}
+          aria-current={pane === p ? 'page' : undefined}
+          aria-label={paneLabel(p)}
+          title={paneLabel(p)}
+          onclick={() => go(p)}
         >
-          <Icon name="plus" size={12} strokeWidth={2.2} />
+          <PaneIcon pane={p} />
+          <span class="name">{paneLabel(p)}</span>
+        </button>
+      {/each}
+      {#if found.length === 0}
+        <p class="none">{t.settings.noResults}</p>
+      {/if}
+    </div>
+  </nav>
+
+  <div class="main">
+    <!-- Pointer handlers here only add window dragging, as on the title bar. -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div class="toolbar" onpointerdown={ctx.startDrag} ondblclick={ctx.toggleMaximize}>
+      <div class="history">
+        <button
+          aria-label={t.settings.back}
+          title={t.settings.back}
+          disabled={at === 0}
+          onclick={() => step(-1)}
+        >
+          <Icon name="chevronLeft" size={14} strokeWidth={2.2} />
+        </button>
+        <span class="sep"></span>
+        <button
+          aria-label={t.settings.forward}
+          title={t.settings.forward}
+          disabled={at >= history.length - 1}
+          onclick={() => step(1)}
+        >
+          <Icon name="chevronRight" size={14} strokeWidth={2.2} />
         </button>
       </div>
+      <h2 class="title">{paneLabel(pane)}</h2>
     </div>
-  {/each}
 
-  <div class="row">
-    <span>
-      <strong>{t.settings.alertHold}</strong>
-      <small>{t.settings.alertHoldHint}</small>
-    </span>
-    <div class="segmented" role="radiogroup" aria-label={t.settings.alertHold}>
-      {#each ALERTS.holds as h (h)}
-        <button
-          role="radio"
-          aria-checked={settings.alertHold === h}
-          onclick={() => settings.set('alertHold', h)}>{t.settings.holds[h]}</button
-        >
-      {/each}
-    </div>
-  </div>
-
-  <h2 class="section">{t.settings.lock}</h2>
-
-  {#if !appLock.state.enabled}
-    <form class="row lockform" onsubmit={saveLock}>
-      <small>{t.settings.lockIntro}</small>
-      <label class="field">
-        <span>{t.settings.lockNew}</span>
-        <input class="input" type="password" autocomplete="new-password" bind:value={next} />
-      </label>
-      <label class="field">
-        <span>{t.settings.lockConfirm}</span>
-        <input class="input" type="password" autocomplete="new-password" bind:value={again} />
-      </label>
-      <div class="formfoot">
-        <small class="msg">{next ? (lockProblem ?? '') : lockMsg}</small>
-        <button class="btn btn-primary" disabled={lockBusy || lockProblem !== null}
-          >{t.settings.lockEnable}</button
-        >
-      </div>
-    </form>
-  {:else}
-    <div class="row">
-      <span>
-        <strong>{t.settings.lockOn}</strong>
-        <small
-          >{appLock.state.biometric ? t.settings.lockOnTouchID : t.settings.lockOnPassword}</small
-        >
-      </span>
-      <button class="btn" onclick={() => appLock.lock()}>{t.settings.lockNow}</button>
-    </div>
-    <div class="row">
-      <span>
-        <strong>{t.settings.lockAfter}</strong>
-        <small>{t.settings.lockAfterHint}</small>
-      </span>
-      <div class="segmented" role="radiogroup" aria-label={t.settings.lockAfter}>
-        {#each LOCK_AFTER as m (m)}
-          <button
-            role="radio"
-            aria-checked={settings.lockAfter === m}
-            onclick={() => settings.set('lockAfter', m)}>{t.settings.lockAfters[m]}</button
-          >
-        {/each}
-      </div>
-    </div>
-    {#if lockForm}
-      <form class="row lockform" onsubmit={saveLock}>
-        <label class="field">
-          <span>{t.settings.lockCurrent}</span>
-          <input
-            class="input"
-            type="password"
-            autocomplete="current-password"
-            bind:value={current}
-          />
-          {#if lockForm === 'disable'}<small>{t.settings.lockDisableHint}</small>{/if}
-        </label>
-        {#if lockForm === 'change'}
-          <label class="field">
-            <span>{t.settings.lockNew}</span>
-            <input class="input" type="password" autocomplete="new-password" bind:value={next} />
-          </label>
-          <label class="field">
-            <span>{t.settings.lockConfirm}</span>
-            <input class="input" type="password" autocomplete="new-password" bind:value={again} />
-          </label>
-        {/if}
-        <div class="formfoot">
-          <small class="msg">{lockForm === 'change' && next ? (lockProblem ?? '') : lockMsg}</small>
-          <button type="button" class="btn" onclick={closeLockForm}>{t.lock.cancel}</button>
-          <button
-            class="btn {lockForm === 'disable' ? 'btn-danger' : 'btn-primary'}"
-            disabled={lockBusy || !current || (lockForm === 'change' && lockProblem !== null)}
-            >{lockForm === 'disable' ? t.settings.lockDisable : t.settings.lockSave}</button
-          >
+    <div class="content">
+      {#if pane === 'general'}
+        <div class="card">
+          <div class="row">
+            {@render head(t.settings.language, t.settings.languageHint)}
+            <!-- A list rather than a segmented control: languages keep being added. -->
+            <select class="input pick" aria-label={t.settings.language} bind:value={pickedLang}>
+              {#each LANGS as l (l)}
+                <option value={l}>{t.settings.langs[l]}</option>
+              {/each}
+            </select>
+          </div>
+          {#if pickedLang !== lang}
+            <div class="row">
+              <small>{t.settings.langRestart}</small>
+              <button type="button" class="btn" onclick={() => switchLang(pickedLang)}
+                >{t.settings.langApply}</button
+              >
+            </div>
+          {/if}
         </div>
-      </form>
-    {:else}
-      <div class="lockactions">
-        {#if lockMsg}<small class="msg">{lockMsg}</small>{/if}
-        <button class="btn" onclick={() => ((lockForm = 'change'), (lockMsg = ''))}
-          >{t.settings.lockChange}</button
-        >
-        <button class="btn" onclick={() => ((lockForm = 'disable'), (lockMsg = ''))}
-          >{t.settings.lockDisable}</button
-        >
-      </div>
-    {/if}
-  {/if}
 
-  <div class="row">
-    <span>
-      <strong>{t.settings.sudoForget}</strong>
-      <small>{t.settings.sudoForgetHint}</small>
-    </span>
-    <div class="segmented" role="radiogroup" aria-label={t.settings.sudoForget}>
-      {#each SUDO_FORGET_AFTER as m (m)}
-        <button
-          role="radio"
-          aria-checked={settings.sudoForgetAfter === m}
-          onclick={() => settings.set('sudoForgetAfter', m)}>{t.settings.sudoForgets[m]}</button
-        >
-      {/each}
+        <h3>{t.settings.updates}</h3>
+        <div class="card">
+          {@render toggle(
+            t.settings.autoUpdate,
+            t.settings.autoUpdateHint,
+            settings.autoUpdate,
+            (on) => settings.set('autoUpdate', on),
+          )}
+          <div class="row">
+            {@render head(t.settings.version(__APP_VERSION__))}
+            <button class="btn" disabled={!hasRuntime} onclick={() => void updates.check(true)}
+              >{t.settings.checkNow}</button
+            >
+          </div>
+        </div>
+      {:else if pane === 'appearance'}
+        <div class="card">
+          <div class="row stack">
+            {@render head(t.settings.theme, t.settings.themeHint)}
+            <div class="themes" role="radiogroup" aria-label={t.settings.theme}>
+              {#each THEMES as th (th)}
+                <button
+                  class="theme"
+                  role="radio"
+                  aria-checked={settings.theme === th}
+                  onclick={() => settings.set('theme', th)}
+                >
+                  <span class="preview"><ThemePreview theme={th} /></span>
+                  <span>{t.settings.themes[th]}</span>
+                </button>
+              {/each}
+            </div>
+          </div>
+        </div>
+
+        <h3>{t.settings.wallpaper}</h3>
+        <div class="card">
+          <div class="row">
+            <div class="swatches" role="radiogroup" aria-label={t.settings.wallpaper}>
+              {#each WALLPAPER_ACCENTS as c (c)}
+                <button
+                  class="swatch"
+                  role="radio"
+                  aria-checked={settings.wallpaperAccent === c}
+                  aria-label={t.settings.wallpaperColor(c)}
+                  style:background={c}
+                  onclick={() => settings.set('wallpaperAccent', c)}
+                ></button>
+              {/each}
+            </div>
+          </div>
+        </div>
+
+        <h3>{t.settings.monoFont}</h3>
+        <div class="card">
+          <div class="row">
+            {@render head(t.settings.monoFont, t.settings.monoFontHint)}
+            <div class="segmented" role="radiogroup" aria-label={t.settings.monoFont}>
+              {#each fonts as f (f)}
+                <button
+                  role="radio"
+                  aria-checked={settings.monoFont === f}
+                  style:font-family={MONO_FAMILIES[f]}
+                  onclick={() => settings.set('monoFont', f)}>{t.settings.monoFonts[f]}</button
+                >
+              {/each}
+            </div>
+          </div>
+        </div>
+      {:else if pane === 'performance'}
+        <div class="card">
+          <div class="row stack">
+            {@render head(t.settings.perfPreset, t.settings.perfPresetHint)}
+            <div class="preset-line">
+              {@render segmented(
+                t.settings.perfPreset,
+                NAMED_PRESETS,
+                settings.perfPreset as NamedPreset,
+                (p) => t.settings.perfPresets[p],
+                (p) => settings.usePreset(p),
+              )}
+              <button
+                type="button"
+                class="btn"
+                disabled={perfCheck.running}
+                onclick={() => void perfCheck.start(true)}
+              >
+                {perfCheck.running ? t.settings.perfChecking : t.settings.perfCheck}
+              </button>
+            </div>
+            {#if settings.perfPreset === 'custom'}
+              <small>{t.settings.perfCustom}</small>
+            {/if}
+            {#if perfCheck.last === 'slow'}
+              <small>{t.settings.perfSlow}</small>
+            {:else if perfCheck.last === 'fine'}
+              <small>{t.settings.perfFine}</small>
+            {/if}
+          </div>
+        </div>
+
+        <h3>{t.settings.perfAdvanced}</h3>
+        <div class="card">
+          {@render toggle(
+            t.settings.perfShadow,
+            t.settings.perfShadowHint,
+            settings.knobs.shadow === 'short',
+            (on) => settings.setKnob('shadow', on ? 'short' : 'deep'),
+          )}
+          {#each perfKnobs as k (k.key)}
+            {@render toggle(k.label, k.hint, settings.knobs[k.key], (on) =>
+              settings.setKnob(k.key, on),
+            )}
+          {/each}
+          {#if settings.perfNeedsRestart}
+            <div class="row">
+              <small>{t.settings.perfRestartHint}</small>
+              <button
+                type="button"
+                class="btn"
+                disabled={!hasRuntime}
+                onclick={() => void relaunch()}
+              >
+                {t.settings.perfRestart}
+              </button>
+            </div>
+          {/if}
+        </div>
+      {:else if pane === 'menubar'}
+        <p class="intro">{t.settings.menubarStatsHint}</p>
+        <h3>{t.settings.menubarStats}</h3>
+        <div class="card">
+          {#each STAT_IDS as id (id)}
+            {@render toggle(
+              t.menubar.stats.names[id],
+              '',
+              settings.menubarStats.includes(id),
+              (on) => toggleStat(id, on),
+            )}
+          {/each}
+        </div>
+      {:else if pane === 'dock'}
+        <div class="card">
+          <div class="row">
+            {@render head(t.settings.dockSize, t.settings.dockSizeHint)}
+            {@render segmented(
+              t.settings.dockSize,
+              dockSizes,
+              settings.dockSize,
+              (s) => t.settings.dockSizes[s],
+              (s) => settings.set('dockSize', s),
+            )}
+          </div>
+          <div class="row">
+            {@render head(t.settings.dockPosition, t.settings.dockPositionHint)}
+            {@render segmented(
+              t.settings.dockPosition,
+              DOCK_POSITIONS,
+              settings.dockPosition,
+              (p) => t.settings.dockPositions[p],
+              (p) => settings.set('dockPosition', p),
+            )}
+          </div>
+        </div>
+        <div class="card">
+          {@render toggle(
+            t.settings.dockTransparent,
+            t.settings.dockTransparentHint,
+            settings.dockTransparent,
+            (on) => settings.set('dockTransparent', on),
+          )}
+          {@render toggle(
+            t.settings.dockAutohide,
+            t.settings.dockAutohideHint,
+            settings.dockAutohide,
+            (on) => settings.set('dockAutohide', on),
+          )}
+        </div>
+      {:else if pane === 'terminal'}
+        <div class="card">
+          <div class="row">
+            {@render head(t.settings.fontSize, t.settings.fontSizeHint)}
+            <div class="stepper">
+              <button
+                aria-label={t.settings.fontSmaller}
+                disabled={settings.terminalFontSize <= TERMINAL_FONT.min}
+                onclick={() => stepFont(-1)}
+              >
+                <Icon name="minus" size={12} strokeWidth={2.2} />
+              </button>
+              <output aria-live="polite">{settings.terminalFontSize.toLocaleString(locale)}</output>
+              <button
+                aria-label={t.settings.fontLarger}
+                disabled={settings.terminalFontSize >= TERMINAL_FONT.max}
+                onclick={() => stepFont(1)}
+              >
+                <Icon name="plus" size={12} strokeWidth={2.2} />
+              </button>
+            </div>
+          </div>
+          {@render toggle(t.settings.prompt, t.settings.promptHint, settings.terminalPrompt, (on) =>
+            settings.set('terminalPrompt', on),
+          )}
+          {@render toggle(t.settings.gpu, t.settings.gpuHint, settings.terminalGpu, (on) =>
+            settings.set('terminalGpu', on),
+          )}
+        </div>
+      {:else if pane === 'editor'}
+        <div class="card">
+          <div class="row">
+            {@render head(t.settings.backup, t.settings.backupHint)}
+            {@render segmented(
+              t.settings.backup,
+              backups,
+              settings.editorBackup,
+              (b) => t.settings.backups[b],
+              (b) => settings.set('editorBackup', b),
+            )}
+          </div>
+        </div>
+      {:else if pane === 'alerts'}
+        <div class="card">
+          {#each pctRows as r (r.key)}
+            <div class="row">
+              {@render head(r.label, r.hint)}
+              <div class="stepper">
+                <button
+                  aria-label="{t.settings.lower} {r.label}"
+                  disabled={settings[r.key] <= ALERTS.pct.min}
+                  onclick={() =>
+                    settings.set(
+                      r.key,
+                      Math.max(ALERTS.pct.min, settings[r.key] - ALERTS.pct.step),
+                    )}
+                >
+                  <Icon name="minus" size={12} strokeWidth={2.2} />
+                </button>
+                <output aria-live="polite">{settings[r.key]}%</output>
+                <button
+                  aria-label="{t.settings.higher} {r.label}"
+                  disabled={settings[r.key] >= ALERTS.pct.max}
+                  onclick={() =>
+                    settings.set(
+                      r.key,
+                      Math.min(ALERTS.pct.max, settings[r.key] + ALERTS.pct.step),
+                    )}
+                >
+                  <Icon name="plus" size={12} strokeWidth={2.2} />
+                </button>
+              </div>
+            </div>
+          {/each}
+          <div class="row">
+            {@render head(t.settings.alertHold, t.settings.alertHoldHint)}
+            {@render segmented(
+              t.settings.alertHold,
+              ALERTS.holds,
+              settings.alertHold,
+              (h) => t.settings.holds[h] ?? '',
+              (h) => settings.set('alertHold', h),
+            )}
+          </div>
+        </div>
+      {:else if pane === 'security'}
+        <h3 class="first">{t.settings.lock}</h3>
+        <div class="card">
+          {#if !appLock.state.enabled}
+            <form class="row lockform" onsubmit={saveLock}>
+              <small>{t.settings.lockIntro}</small>
+              <label class="field">
+                <span>{t.settings.lockNew}</span>
+                <input
+                  class="input"
+                  type="password"
+                  autocomplete="new-password"
+                  bind:value={next}
+                />
+              </label>
+              <label class="field">
+                <span>{t.settings.lockConfirm}</span>
+                <input
+                  class="input"
+                  type="password"
+                  autocomplete="new-password"
+                  bind:value={again}
+                />
+              </label>
+              <div class="formfoot">
+                <small class="msg">{next ? (lockProblem ?? '') : lockMsg}</small>
+                <button class="btn btn-primary" disabled={lockBusy || lockProblem !== null}
+                  >{t.settings.lockEnable}</button
+                >
+              </div>
+            </form>
+          {:else}
+            <div class="row">
+              {@render head(
+                t.settings.lockOn,
+                appLock.state.biometric ? t.settings.lockOnTouchID : t.settings.lockOnPassword,
+              )}
+              <button class="btn" onclick={() => appLock.lock()}>{t.settings.lockNow}</button>
+            </div>
+            <div class="row">
+              {@render head(t.settings.lockAfter, t.settings.lockAfterHint)}
+              {@render segmented(
+                t.settings.lockAfter,
+                LOCK_AFTER,
+                settings.lockAfter,
+                (m) => t.settings.lockAfters[m as keyof typeof t.settings.lockAfters],
+                (m) => settings.set('lockAfter', m),
+              )}
+            </div>
+            {#if lockForm}
+              <form class="row lockform" onsubmit={saveLock}>
+                <label class="field">
+                  <span>{t.settings.lockCurrent}</span>
+                  <input
+                    class="input"
+                    type="password"
+                    autocomplete="current-password"
+                    bind:value={current}
+                  />
+                  {#if lockForm === 'disable'}<small>{t.settings.lockDisableHint}</small>{/if}
+                </label>
+                {#if lockForm === 'change'}
+                  <label class="field">
+                    <span>{t.settings.lockNew}</span>
+                    <input
+                      class="input"
+                      type="password"
+                      autocomplete="new-password"
+                      bind:value={next}
+                    />
+                  </label>
+                  <label class="field">
+                    <span>{t.settings.lockConfirm}</span>
+                    <input
+                      class="input"
+                      type="password"
+                      autocomplete="new-password"
+                      bind:value={again}
+                    />
+                  </label>
+                {/if}
+                <div class="formfoot">
+                  <small class="msg"
+                    >{lockForm === 'change' && next ? (lockProblem ?? '') : lockMsg}</small
+                  >
+                  <button type="button" class="btn" onclick={closeLockForm}>{t.lock.cancel}</button>
+                  <button
+                    class="btn {lockForm === 'disable' ? 'btn-danger' : 'btn-primary'}"
+                    disabled={lockBusy ||
+                      !current ||
+                      (lockForm === 'change' && lockProblem !== null)}
+                    >{lockForm === 'disable' ? t.settings.lockDisable : t.settings.lockSave}</button
+                  >
+                </div>
+              </form>
+            {:else}
+              <div class="row lockactions">
+                {#if lockMsg}<small class="msg">{lockMsg}</small>{/if}
+                <button class="btn" onclick={() => ((lockForm = 'change'), (lockMsg = ''))}
+                  >{t.settings.lockChange}</button
+                >
+                <button class="btn" onclick={() => ((lockForm = 'disable'), (lockMsg = ''))}
+                  >{t.settings.lockDisable}</button
+                >
+              </div>
+            {/if}
+          {/if}
+        </div>
+
+        <div class="card">
+          <div class="row">
+            {@render head(t.settings.sudoForget, t.settings.sudoForgetHint)}
+            {@render segmented(
+              t.settings.sudoForget,
+              SUDO_FORGET_AFTER,
+              settings.sudoForgetAfter,
+              (m) => t.settings.sudoForgets[m] ?? '',
+              (m) => settings.set('sudoForgetAfter', m),
+            )}
+          </div>
+        </div>
+      {/if}
     </div>
-  </div>
-
-  <h2 class="section">{t.settings.editor}</h2>
-
-  <div class="row">
-    <span>
-      <strong>{t.settings.backup}</strong>
-      <small>{t.settings.backupHint}</small>
-    </span>
-    <div class="segmented" role="radiogroup" aria-label={t.settings.backup}>
-      {#each backups as b (b)}
-        <button
-          role="radio"
-          aria-checked={settings.editorBackup === b}
-          onclick={() => settings.set('editorBackup', b)}>{t.settings.backups[b]}</button
-        >
-      {/each}
-    </div>
-  </div>
-
-  <h2 class="section">{t.settings.updates}</h2>
-
-  <label class="row">
-    <span>
-      <strong>{t.settings.autoUpdate}</strong>
-      <small>{t.settings.autoUpdateHint}</small>
-    </span>
-    <input
-      type="checkbox"
-      class="switch"
-      role="switch"
-      checked={settings.autoUpdate}
-      onchange={(e) => settings.set('autoUpdate', e.currentTarget.checked)}
-    />
-  </label>
-  <div class="row">
-    <span>
-      <strong>{t.settings.version(__APP_VERSION__)}</strong>
-    </span>
-    <button class="btn" disabled={!hasRuntime} onclick={() => void updates.check(true)}
-      >{t.settings.checkNow}</button
-    >
   </div>
 </div>
 
 <style>
-  .title {
+  /* System Settings: a translucent sidebar of colored tiles beside an
+     almost opaque pane of grouped cards. */
+  .settings {
     flex: 1;
-    text-align: center;
-    font-weight: 600;
+    min-height: 0;
+    display: flex;
   }
 
-  .spacer {
-    width: 52px;
-  }
-
-  .body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 14px 20px;
+  .sidebar {
+    width: 210px;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    gap: 4px;
   }
 
-  h2 {
-    margin: 0 0 6px;
-    font-size: var(--text-xs);
-    font-weight: 600;
-    color: var(--fg-muted);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-
-  .section {
-    margin-top: 14px;
-  }
-
-  .lockform {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
-
-  .formfoot,
-  .lockactions {
+  .search {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
+    gap: 6px;
+    margin: 0 10px 8px;
+    padding: 5px 8px;
+    border-radius: var(--control-radius);
+    background: var(--fill-soft);
+    color: var(--fg-subtle);
+    transition: box-shadow var(--dur-fast) var(--ease-out);
   }
 
-  .msg {
+  .search:focus-within {
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .search input {
     flex: 1;
+    min-width: 0;
+    border: 0;
+    padding: 0;
+    background: none;
+    outline: none;
+    color: var(--fg);
+  }
+
+  .search input::-webkit-search-cancel-button {
+    cursor: pointer;
+  }
+
+  .items {
+    flex: 1;
+    min-height: 0;
+    padding: 0 10px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    overflow-y: auto;
+  }
+
+  .item,
+  .about {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    text-align: left;
+    border: 0;
+    background: none;
+    color: inherit;
+    padding: 5px 8px;
+    border-radius: var(--control-radius);
+    transition: background var(--dur-fast) var(--ease-out);
+  }
+
+  .about {
+    margin-bottom: 8px;
+    padding: 6px 8px;
+  }
+
+  .about-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .about-text strong {
+    font-weight: 600;
+  }
+
+  .item:hover:not(.active),
+  .about:hover:not(.active) {
+    background: var(--row-hover);
+  }
+
+  .item.active {
+    background: var(--accent);
+    color: var(--fg-on-accent);
+  }
+
+  .about.active {
+    background: var(--sidebar-active);
+  }
+
+  .name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .none {
+    margin: 12px 8px;
+    color: var(--fg-muted);
+    font-size: var(--text-sm);
+  }
+
+  .main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--content-bg);
+    border-left: 1px solid var(--divider-soft);
+  }
+
+  .toolbar {
+    height: var(--window-titlebar-h);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 16px;
+  }
+
+  .history {
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+    background: var(--fill-soft);
+  }
+
+  .history button {
+    display: flex;
+    padding: 4px 7px;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: inherit;
+    transition: background var(--dur-fast) var(--ease-out);
+  }
+
+  .history button:hover:not(:disabled) {
+    background: var(--fill-track);
+  }
+
+  .history button:disabled {
+    opacity: 0.3;
+  }
+
+  .sep {
+    width: 1px;
+    height: 14px;
+    background: var(--divider);
+  }
+
+  .title {
+    min-width: 0;
+    margin: 0;
+    font-size: var(--text-lg);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 6px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  h3 {
+    margin: 6px 0 -4px 12px;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--fg-muted);
+  }
+
+  h3.first {
+    margin-top: 0;
+  }
+
+  .intro {
+    margin: 0 12px;
+    color: var(--fg-muted);
+    font-size: var(--text-sm);
+  }
+
+  .card {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 0 14px;
+    border-radius: 10px;
+    background: var(--fill-soft);
   }
 
   .row {
@@ -703,12 +889,22 @@
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 10px 12px;
-    border-radius: var(--item-radius);
-    background: var(--glass-highlight);
+    min-height: 40px;
+    padding: 9px 0;
   }
 
-  .row span {
+  .row + .row {
+    border-top: 1px solid var(--divider-soft);
+  }
+
+  .row.stack {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .head {
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -725,17 +921,53 @@
     min-width: 160px;
   }
 
+  .themes {
+    display: flex;
+    justify-content: space-around;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .theme {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    border: 0;
+    padding: 0;
+    background: none;
+    color: var(--fg-muted);
+    font-size: var(--text-sm);
+  }
+
+  .preview {
+    padding: 2px;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    transition: border-color var(--dur-fast) var(--ease-out);
+  }
+
+  .theme[aria-checked='true'] {
+    color: var(--fg);
+    font-weight: 600;
+  }
+
+  .theme[aria-checked='true'] .preview {
+    border-color: var(--accent);
+  }
+
+  .theme:hover:not([aria-checked='true']) .preview {
+    border-color: var(--divider);
+  }
+
   /* A choice of a few, like macOS segmented controls. */
   .segmented {
     flex-shrink: 0;
     display: flex;
+    flex-wrap: wrap;
     padding: 2px;
     border-radius: 8px;
     background: var(--fill-soft);
-  }
-
-  .segmented.wrap {
-    flex-wrap: wrap;
   }
 
   .preset-line {
@@ -743,6 +975,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    flex-wrap: wrap;
   }
 
   .segmented button {
@@ -763,64 +996,22 @@
     box-shadow: var(--switch-knob-shadow);
   }
 
-  .row.stack {
+  .lockform {
     flex-direction: column;
     align-items: stretch;
-    gap: 10px;
+    gap: 8px;
   }
 
-  .check {
+  .formfoot,
+  .lockactions {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 10px;
+    gap: 8px;
   }
 
-  .advanced {
-    align-self: flex-start;
-    border: 0;
-    padding: 0;
-    background: none;
-    color: var(--accent);
-    font-weight: 600;
-  }
-
-  .switchrow {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-  }
-
-  .switchrow span {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  .chips button {
-    padding: 3px 10px;
-    border: 1px solid var(--divider);
-    border-radius: 999px;
-    background: none;
-    font-size: var(--text-xs);
-    color: var(--fg-muted);
-    transition:
-      background var(--dur-fast) var(--ease-out),
-      color var(--dur-fast) var(--ease-out);
-  }
-
-  .chips button[aria-pressed='true'] {
-    border-color: transparent;
-    background: var(--accent);
-    color: var(--fg-on-accent);
-    font-weight: 600;
+  .msg {
+    flex: 1;
   }
 
   /* Segmented − value + control, like the macOS font size stepper. */
@@ -858,7 +1049,8 @@
 
   .swatches {
     display: flex;
-    gap: 8px;
+    flex-wrap: wrap;
+    gap: 10px;
   }
 
   .swatch {
@@ -869,7 +1061,7 @@
     padding: 0;
     transition:
       transform var(--dur-fast) var(--ease-spring),
-      border-color var(--dur-fast) var(--ease-out);
+      box-shadow var(--dur-fast) var(--ease-out);
   }
 
   .swatch:hover {
@@ -877,6 +1069,29 @@
   }
 
   .swatch[aria-checked='true'] {
-    border-color: var(--accent);
+    border-color: var(--content-bg);
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+
+  /* A narrow window keeps only the tiles, as in Files and Monitor. */
+  @container window (max-width: 560px) {
+    .sidebar {
+      width: var(--sidebar-rail-w);
+    }
+
+    .search,
+    .about,
+    .name,
+    .none {
+      display: none;
+    }
+
+    .item {
+      justify-content: center;
+    }
+
+    .row:not(.stack) {
+      flex-wrap: wrap;
+    }
   }
 </style>
