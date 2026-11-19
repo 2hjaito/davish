@@ -5,11 +5,8 @@
   import ActionMenu, { type Action } from '../../lib/ui/ActionMenu.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import { openInBrowser } from '../../lib/wm/intents.svelte'
-  import { techIcons } from '../../lib/ui/techIcons'
   import { ago, canDo, type Group, health, stack } from './containers'
-  import type { StackIcon } from '../../lib/api/docker'
-  import { knownTech, projectIcon } from './projectIcon'
-  import { groupTech } from './tech'
+  import StackLogo from './StackLogo.svelte'
 
   interface Props {
     serverID: string
@@ -34,22 +31,6 @@
   const tb = t.docker.table
 
   const s = $derived(stack(group))
-  const dir = $derived(group.project ? group.containers[0]?.projectDir : undefined)
-  let found = $state.raw<StackIcon>({})
-  $effect(() => {
-    const d = dir
-    found = {}
-    if (!d) return
-    let live = true
-    void projectIcon(serverID, d).then((r) => {
-      if (live) found = r
-    })
-    return () => {
-      live = false
-    }
-  })
-  // The project's own code says more than the images it runs.
-  const tech = $derived(knownTech(found.tech) ?? groupTech(group))
   const lone = $derived(group.project ? undefined : group.containers[0])
   const usage = $derived.by(() => {
     const ss = group.containers.map((c) => stats[c.id]).filter((x) => x !== undefined)
@@ -87,14 +68,7 @@
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions, a11y_no_noninteractive_element_interactions -->
 <article class="sc" class:failed={s.health === 'failed'} onclick={activate}>
   <header>
-    {#if found.icon}
-      <span class="logo"><img src={found.icon} alt="" /></span>
-    {:else if tech}
-      {@const logo = techIcons[tech]}
-      <span class="logo" style:color={logo.color ?? 'var(--fg)'} title={tech}>
-        <Icon def={logo} size={20} />
-      </span>
-    {/if}
+    <StackLogo {serverID} {group} />
     <div class="title">
       <button
         class="name"
@@ -193,23 +167,6 @@
     align-items: center;
     gap: 10px;
     min-width: 0;
-  }
-
-  .logo {
-    flex: none;
-    display: grid;
-    place-items: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 9px;
-    background: var(--chart-surface);
-    box-shadow: inset 0 0 0 1px var(--divider-soft);
-  }
-
-  .logo img {
-    width: 22px;
-    height: 22px;
-    object-fit: contain;
   }
 
   .title {
