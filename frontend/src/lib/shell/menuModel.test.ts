@@ -16,4 +16,15 @@ describe('buildMenus', () => {
       }
     expect(clashes).toEqual([])
   })
+
+  // #209: the Windows webview keeps Ctrl+0, Ctrl+= and Ctrl+- for zoom
+  // and never passes them on, so a menu item there would never run.
+  it('leaves the zoom keys to the webview', () => {
+    const zoom = ['0', '=', '-', '+']
+    const taken = buildMenus()
+      .flatMap((m) => m.items)
+      .filter((it) => it?.combo && zoom.includes(it.combo.replace('shift+', '')))
+      .map((it) => it?.label)
+    expect(taken).toEqual([])
+  })
 })

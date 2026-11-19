@@ -9,7 +9,7 @@ sidebar:
 |---|---|
 | `⌘K` | Spotlight |
 | `⌘1` … `⌘9` | Switch server workspace |
-| `⌘0` | All servers |
+| `⌘O` | All servers |
 | `⌘⇧S` | Services |
 | `⌘W` · `⌘M` | Close · minimize window |
 | `⌘,` | Settings |

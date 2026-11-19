@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Sửa
+- Tất cả server giờ mở bằng `⌘O` (Ctrl+O). Trên Windows, khung web giữ Ctrl+0 cho việc phóng to thu nhỏ và không chuyển cho Davish, nên `⌘0` của bản 1.14.7 không làm gì. Cảm ơn @HungNth (#209).
+
 ## [1.14.7] - 2026-11-18
 
 ### Sửa

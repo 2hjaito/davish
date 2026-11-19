@@ -4,6 +4,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Fixed
+- All servers now opens with `⌘O` (Ctrl+O). On Windows the webview keeps Ctrl+0 for its zoom and never passes it on, so the `⌘0` from 1.14.7 did nothing there. Thanks @HungNth (#209).
+
 ## [1.14.7] - 2026-11-18
 
 ### Fixed
