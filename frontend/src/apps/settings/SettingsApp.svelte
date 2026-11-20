@@ -18,6 +18,9 @@
     WALLPAPER_ACCENTS,
   } from '../../lib/stores/settings.svelte'
   import DavishMark from '../../lib/ui/DavishMark.svelte'
+  import ProfileAvatar from '../../lib/ui/ProfileAvatar.svelte'
+  import { MAX_NAME, profile } from '../../lib/stores/profile.svelte'
+  import { IMAGE_ACCEPT, iconImage } from '../../lib/shell/shortcutLook'
   import Icon from '../../lib/ui/Icon.svelte'
   import { getWindowContext } from '../../lib/wm/context'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
@@ -87,6 +90,22 @@
     )
   }
   const backups: BackupMode[] = ['etc', 'always', 'never']
+
+  // The account picture: a file from this computer, cropped square and
+  // shrunk (as a shortcut icon), kept only in settings.json.
+  let avatarMsg = $state('')
+  async function pickAvatar(e: Event) {
+    const input = e.currentTarget as HTMLInputElement
+    const file = input.files?.[0]
+    input.value = '' // so the same file can be picked again
+    if (!file) return
+    try {
+      profile.set({ avatar: await iconImage(file) })
+      avatarMsg = ''
+    } catch {
+      avatarMsg = t.settings.avatarBad
+    }
+  }
   // Lock password forms: one at a time (set, change or turn off).
   let lockForm = $state<'change' | 'disable' | null>(null)
   let current = $state('')
@@ -206,32 +225,35 @@
       />
     </div>
     <div class="items">
-      {#if !query}
-        <button
-          class="about"
-          class:active={pane === 'general'}
-          title={t.settings.version(__APP_VERSION__)}
-          onclick={() => go('general')}
-        >
-          <DavishMark size={36} />
-          <span class="about-text">
-            <strong>Davish</strong>
-            <small>{__APP_VERSION__}</small>
-          </span>
-        </button>
-      {/if}
       {#each found as p (p)}
-        <button
-          class="item"
-          class:active={pane === p}
-          aria-current={pane === p ? 'page' : undefined}
-          aria-label={paneLabel(p)}
-          title={paneLabel(p)}
-          onclick={() => go(p)}
-        >
-          <PaneIcon pane={p} />
-          <span class="name">{paneLabel(p)}</span>
-        </button>
+        {#if p === 'account' && !query}
+          <button
+            class="about"
+            class:active={pane === 'account'}
+            aria-current={pane === 'account' ? 'page' : undefined}
+            title={paneLabel('account')}
+            onclick={() => go('account')}
+          >
+            <ProfileAvatar size={36} />
+            <span class="about-text">
+              <strong>{profile.name || t.settings.account}</strong>
+              <small>{t.settings.accountHint}</small>
+            </span>
+          </button>
+        {:else}
+          <button
+            class="item"
+            class:last={p === 'about'}
+            class:active={pane === p}
+            aria-current={pane === p ? 'page' : undefined}
+            aria-label={paneLabel(p)}
+            title={paneLabel(p)}
+            onclick={() => go(p)}
+          >
+            <PaneIcon pane={p} />
+            <span class="name">{paneLabel(p)}</span>
+          </button>
+        {/if}
       {/each}
       {#if found.length === 0}
         <p class="none">{t.settings.noResults}</p>
@@ -285,6 +307,153 @@
               >
             </div>
           {/if}
+        </div>
+      {:else if pane === 'account'}
+        <div class="profile">
+          <ProfileAvatar size={64} />
+          <div class="profile-actions">
+            <label class="btn">
+              {t.settings.avatarPick}
+              <input class="file" type="file" accept={IMAGE_ACCEPT} onchange={pickAvatar} />
+            </label>
+            {#if profile.avatar}
+              <button class="btn" onclick={() => profile.set({ avatar: '' })}
+                >{t.settings.avatarRemove}</button
+              >
+            {/if}
+            {#if avatarMsg}<small class="msg">{avatarMsg}</small>{/if}
+          </div>
+        </div>
+        <div class="card">
+          <label class="row">
+            {@render head(t.settings.profileName)}
+            <input
+              class="input pick"
+              type="text"
+              maxlength={MAX_NAME}
+              placeholder={t.settings.profileNamePlaceholder}
+              spellcheck="false"
+              value={profile.name}
+              onchange={(e) => profile.set({ name: e.currentTarget.value })}
+            />
+          </label>
+        </div>
+        <p class="intro">{t.settings.profileHint}</p>
+
+        <h3>{t.settings.lock}</h3>
+        <div class="card">
+          {#if !appLock.state.enabled}
+            <form class="row lockform" onsubmit={saveLock}>
+              <small>{t.settings.lockIntro}</small>
+              <label class="field">
+                <span>{t.settings.lockNew}</span>
+                <input
+                  class="input"
+                  type="password"
+                  autocomplete="new-password"
+                  bind:value={next}
+                />
+              </label>
+              <label class="field">
+                <span>{t.settings.lockConfirm}</span>
+                <input
+                  class="input"
+                  type="password"
+                  autocomplete="new-password"
+                  bind:value={again}
+                />
+              </label>
+              <div class="formfoot">
+                <small class="msg">{next ? (lockProblem ?? '') : lockMsg}</small>
+                <button class="btn btn-primary" disabled={lockBusy || lockProblem !== null}
+                  >{t.settings.lockEnable}</button
+                >
+              </div>
+            </form>
+          {:else}
+            <div class="row">
+              {@render head(
+                t.settings.lockOn,
+                appLock.state.biometric ? t.settings.lockOnTouchID : t.settings.lockOnPassword,
+              )}
+              <button class="btn" onclick={() => appLock.lock()}>{t.settings.lockNow}</button>
+            </div>
+            <div class="row">
+              {@render head(t.settings.lockAfter, t.settings.lockAfterHint)}
+              {@render segmented(
+                t.settings.lockAfter,
+                LOCK_AFTER,
+                settings.lockAfter,
+                (m) => t.settings.lockAfters[m as keyof typeof t.settings.lockAfters],
+                (m) => settings.set('lockAfter', m),
+              )}
+            </div>
+            {#if lockForm}
+              <form class="row lockform" onsubmit={saveLock}>
+                <label class="field">
+                  <span>{t.settings.lockCurrent}</span>
+                  <input
+                    class="input"
+                    type="password"
+                    autocomplete="current-password"
+                    bind:value={current}
+                  />
+                  {#if lockForm === 'disable'}<small>{t.settings.lockDisableHint}</small>{/if}
+                </label>
+                {#if lockForm === 'change'}
+                  <label class="field">
+                    <span>{t.settings.lockNew}</span>
+                    <input
+                      class="input"
+                      type="password"
+                      autocomplete="new-password"
+                      bind:value={next}
+                    />
+                  </label>
+                  <label class="field">
+                    <span>{t.settings.lockConfirm}</span>
+                    <input
+                      class="input"
+                      type="password"
+                      autocomplete="new-password"
+                      bind:value={again}
+                    />
+                  </label>
+                {/if}
+                <div class="formfoot">
+                  <small class="msg"
+                    >{lockForm === 'change' && next ? (lockProblem ?? '') : lockMsg}</small
+                  >
+                  <button type="button" class="btn" onclick={closeLockForm}>{t.lock.cancel}</button>
+                  <button
+                    class="btn {lockForm === 'disable' ? 'btn-danger' : 'btn-primary'}"
+                    disabled={lockBusy ||
+                      !current ||
+                      (lockForm === 'change' && lockProblem !== null)}
+                    >{lockForm === 'disable' ? t.settings.lockDisable : t.settings.lockSave}</button
+                  >
+                </div>
+              </form>
+            {:else}
+              <div class="row lockactions">
+                {#if lockMsg}<small class="msg">{lockMsg}</small>{/if}
+                <button class="btn" onclick={() => ((lockForm = 'change'), (lockMsg = ''))}
+                  >{t.settings.lockChange}</button
+                >
+                <button class="btn" onclick={() => ((lockForm = 'disable'), (lockMsg = ''))}
+                  >{t.settings.lockDisable}</button
+                >
+              </div>
+            {/if}
+          {/if}
+        </div>
+      {:else if pane === 'about'}
+        <div class="aboutpane">
+          <DavishMark size={72} />
+          <strong>Davish</strong>
+          <small>{t.settings.version(__APP_VERSION__)}</small>
+          <p>{t.help.aboutBody}</p>
+          <small>{t.settings.license}</small>
         </div>
 
         <h3>{t.settings.updates}</h3>
@@ -551,112 +720,11 @@
           </div>
         </div>
       {:else if pane === 'security'}
-        <h3 class="first">{t.settings.lock}</h3>
         <div class="card">
-          {#if !appLock.state.enabled}
-            <form class="row lockform" onsubmit={saveLock}>
-              <small>{t.settings.lockIntro}</small>
-              <label class="field">
-                <span>{t.settings.lockNew}</span>
-                <input
-                  class="input"
-                  type="password"
-                  autocomplete="new-password"
-                  bind:value={next}
-                />
-              </label>
-              <label class="field">
-                <span>{t.settings.lockConfirm}</span>
-                <input
-                  class="input"
-                  type="password"
-                  autocomplete="new-password"
-                  bind:value={again}
-                />
-              </label>
-              <div class="formfoot">
-                <small class="msg">{next ? (lockProblem ?? '') : lockMsg}</small>
-                <button class="btn btn-primary" disabled={lockBusy || lockProblem !== null}
-                  >{t.settings.lockEnable}</button
-                >
-              </div>
-            </form>
-          {:else}
-            <div class="row">
-              {@render head(
-                t.settings.lockOn,
-                appLock.state.biometric ? t.settings.lockOnTouchID : t.settings.lockOnPassword,
-              )}
-              <button class="btn" onclick={() => appLock.lock()}>{t.settings.lockNow}</button>
-            </div>
-            <div class="row">
-              {@render head(t.settings.lockAfter, t.settings.lockAfterHint)}
-              {@render segmented(
-                t.settings.lockAfter,
-                LOCK_AFTER,
-                settings.lockAfter,
-                (m) => t.settings.lockAfters[m as keyof typeof t.settings.lockAfters],
-                (m) => settings.set('lockAfter', m),
-              )}
-            </div>
-            {#if lockForm}
-              <form class="row lockform" onsubmit={saveLock}>
-                <label class="field">
-                  <span>{t.settings.lockCurrent}</span>
-                  <input
-                    class="input"
-                    type="password"
-                    autocomplete="current-password"
-                    bind:value={current}
-                  />
-                  {#if lockForm === 'disable'}<small>{t.settings.lockDisableHint}</small>{/if}
-                </label>
-                {#if lockForm === 'change'}
-                  <label class="field">
-                    <span>{t.settings.lockNew}</span>
-                    <input
-                      class="input"
-                      type="password"
-                      autocomplete="new-password"
-                      bind:value={next}
-                    />
-                  </label>
-                  <label class="field">
-                    <span>{t.settings.lockConfirm}</span>
-                    <input
-                      class="input"
-                      type="password"
-                      autocomplete="new-password"
-                      bind:value={again}
-                    />
-                  </label>
-                {/if}
-                <div class="formfoot">
-                  <small class="msg"
-                    >{lockForm === 'change' && next ? (lockProblem ?? '') : lockMsg}</small
-                  >
-                  <button type="button" class="btn" onclick={closeLockForm}>{t.lock.cancel}</button>
-                  <button
-                    class="btn {lockForm === 'disable' ? 'btn-danger' : 'btn-primary'}"
-                    disabled={lockBusy ||
-                      !current ||
-                      (lockForm === 'change' && lockProblem !== null)}
-                    >{lockForm === 'disable' ? t.settings.lockDisable : t.settings.lockSave}</button
-                  >
-                </div>
-              </form>
-            {:else}
-              <div class="row lockactions">
-                {#if lockMsg}<small class="msg">{lockMsg}</small>{/if}
-                <button class="btn" onclick={() => ((lockForm = 'change'), (lockMsg = ''))}
-                  >{t.settings.lockChange}</button
-                >
-                <button class="btn" onclick={() => ((lockForm = 'disable'), (lockMsg = ''))}
-                  >{t.settings.lockDisable}</button
-                >
-              </div>
-            {/if}
-          {/if}
+          <div class="row">
+            {@render head(t.settings.lock, t.settings.lockMoved)}
+            <button class="btn" onclick={() => go('account')}>{t.settings.openAccount}</button>
+          </div>
         </div>
 
         <div class="card">
@@ -865,8 +933,55 @@
     color: var(--fg-muted);
   }
 
-  h3.first {
-    margin-top: 0;
+  /* The account pane opens with the picture, as in System Settings. */
+  .profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0 4px;
+  }
+
+  .profile-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .profile-actions .msg {
+    flex-basis: 100%;
+    text-align: center;
+  }
+
+  .file {
+    display: none;
+  }
+
+  .aboutpane {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 24px 4px;
+    text-align: center;
+  }
+
+  .aboutpane strong {
+    margin-top: 6px;
+    font-size: var(--text-lg);
+    font-weight: 600;
+  }
+
+  .aboutpane p {
+    max-width: 420px;
+    margin: 8px 0 4px;
+    font-size: var(--text-sm);
+  }
+
+  .item.last {
+    margin-top: 10px;
   }
 
   .intro {

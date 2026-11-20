@@ -7,6 +7,8 @@
   import { appLock } from '../stores/lock.svelte'
   import { notifications } from '../stores/notifications.svelte'
   import DavishMark from '../ui/DavishMark.svelte'
+  import ProfileAvatar from '../ui/ProfileAvatar.svelte'
+  import { profile } from '../stores/profile.svelte'
   import Icon from '../ui/Icon.svelte'
 
   let now = $state(new Date())
@@ -117,7 +119,13 @@
   </div>
 
   <div class="card">
-    <DavishMark size={56} />
+    {#if profile.name || profile.avatar}
+      <!-- Like the macOS login window: whose session this is. -->
+      <ProfileAvatar size={64} />
+      {#if profile.name}<p class="who">{profile.name}</p>{/if}
+    {:else}
+      <DavishMark size={56} />
+    {/if}
     <h1>{t.lock.title}</h1>
 
     {#if resetting}
@@ -172,6 +180,12 @@
 </div>
 
 <style>
+  .who {
+    margin: 2px 0 -4px;
+    font-size: var(--text-lg);
+    font-weight: 600;
+  }
+
   .lock {
     position: fixed;
     inset: 0;

@@ -1044,7 +1044,9 @@ const vi = {
       settings: {
         does: 'Ngôn ngữ, chế độ sáng tối, giao diện, phông, ngưỡng cảnh báo, khóa app, prompt Terminal.',
         actions: [
-          'Khóa app: chọn thời gian giữ mật khẩu sudo khi không dùng (mặc định 15 phút, theo từng server)',
+          'Tài khoản (đầu sidebar): họ tên, ảnh đại diện, mật khẩu khóa app và Touch ID; tên và ảnh hiện ở màn hình khóa, chỉ lưu trên máy này',
+          'Bảo mật: chọn thời gian giữ mật khẩu sudo khi không dùng (mặc định 15 phút, theo từng server)',
+          'Về Davish (cuối sidebar): phiên bản, giấy phép, tự kiểm tra cập nhật',
         ],
         keys: [],
         runs: [],
@@ -1999,6 +2001,19 @@ const vi = {
   settings: {
     general: 'Chung',
     security: 'Bảo mật',
+    account: 'Tài khoản',
+    accountHint: 'Hồ sơ, khóa app',
+    profileName: 'Họ tên',
+    profileNamePlaceholder: 'Tên của bạn',
+    avatarPick: 'Chọn ảnh…',
+    avatarRemove: 'Xóa ảnh',
+    avatarBad: 'Chỉ nhận ảnh PNG, JPEG hoặc WebP dưới 20 MB.',
+    profileHint:
+      'Tên và ảnh chỉ lưu trên máy này, hiện ở Cài đặt và màn hình khóa. Không gửi đi đâu.',
+    about: 'Về Davish',
+    license: 'Mã nguồn mở, giấy phép GPL-3.0.',
+    lockMoved: 'Mật khẩu khóa app và Touch ID nằm ở Tài khoản.',
+    openAccount: 'Mở Tài khoản',
     search: 'Tìm kiếm',
     noResults: 'Không có kết quả',
     back: 'Quay lại',

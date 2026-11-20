@@ -1086,7 +1086,9 @@ const es = {
       settings: {
         does: 'Idioma, tema claro u oscuro, apariencia, fuentes, umbrales de alerta, bloqueo de la app, prompt de Terminal.',
         actions: [
-          'Bloqueo de la app: elige cuánto se guarda una contraseña de sudo sin usar (15 minutos por defecto, por servidor)',
+          'Cuenta (arriba en la barra lateral): nombre, imagen, contraseña de bloqueo y Touch ID; el nombre y la imagen se ven en la pantalla de bloqueo y se quedan en este equipo',
+          'Seguridad: elige cuánto se guarda una contraseña de sudo sin usar (15 minutos por defecto, por servidor)',
+          'Acerca de Davish (abajo en la barra lateral): versión, licencia, buscar actualizaciones',
         ],
         keys: [],
         runs: [],
@@ -2062,6 +2064,19 @@ const es = {
   settings: {
     general: 'General',
     security: 'Seguridad',
+    account: 'Cuenta',
+    accountHint: 'Perfil, bloqueo de la app',
+    profileName: 'Nombre',
+    profileNamePlaceholder: 'Tu nombre',
+    avatarPick: 'Elegir imagen…',
+    avatarRemove: 'Quitar imagen',
+    avatarBad: 'Solo imágenes PNG, JPEG o WebP de menos de 20 MB.',
+    profileHint:
+      'Tu nombre e imagen se quedan en este equipo y se ven en Ajustes y en la pantalla de bloqueo. No se envía nada.',
+    about: 'Acerca de Davish',
+    license: 'Código abierto con licencia GPL-3.0.',
+    lockMoved: 'La contraseña de bloqueo y Touch ID están en Cuenta.',
+    openAccount: 'Abrir Cuenta',
     search: 'Buscar',
     noResults: 'Sin resultados',
     back: 'Atrás',
