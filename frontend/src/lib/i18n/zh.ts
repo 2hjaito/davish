@@ -1374,6 +1374,7 @@ const zh = {
     sleep: '关闭显示',
     quit: '退出 Davish',
     wakeHint: '点击或按任意键继续',
+    wakeHintLocked: '点击或按任意键输入锁定密码',
   },
   sudo: {
     title: (server: string) => `${server} 的 sudo 密码`,

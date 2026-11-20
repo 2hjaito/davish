@@ -1438,6 +1438,7 @@ const es = {
     sleep: 'Apagar la pantalla',
     quit: 'Salir de Davish',
     wakeHint: 'Haz clic o pulsa cualquier tecla para continuar',
+    wakeHintLocked: 'Haz clic o pulsa cualquier tecla para escribir la contraseña de bloqueo',
   },
   sudo: {
     title: (server: string) => `Contraseña de sudo para ${server}`,

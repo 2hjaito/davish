@@ -1411,6 +1411,7 @@ const en = {
     sleep: 'Sleep display',
     quit: 'Quit Davish',
     wakeHint: 'Click or press any key to continue',
+    wakeHintLocked: 'Click or press any key to enter the lock password',
   },
   sudo: {
     title: (server: string) => `sudo password for ${server}`,

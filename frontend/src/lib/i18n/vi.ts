@@ -1395,6 +1395,7 @@ const vi = {
     sleep: 'Ngủ màn hình',
     quit: 'Thoát Davish',
     wakeHint: 'Bấm chuột hoặc nhấn phím bất kỳ để tiếp tục',
+    wakeHintLocked: 'Bấm chuột hoặc nhấn phím bất kỳ để nhập mật khẩu khóa',
   },
   sudo: {
     title: (server: string) => `Mật khẩu sudo cho ${server}`,
