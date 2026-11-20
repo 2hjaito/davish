@@ -4,6 +4,10 @@ import * as App from '../../../wailsjs/go/app/App'
 export interface Repo {
   path: string
   name: string
+  /** From the origin remote; both empty without one. */
+  host: string
+  /** The user, org or GitLab group the repository belongs to. */
+  owner: string
 }
 
 export type RefKind = 'head' | 'local' | 'remote' | 'tag'

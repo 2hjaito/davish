@@ -16,7 +16,8 @@ func TestFindLineQuotesFolders(t *testing.T) {
 	for _, want := range []string{
 		`find "$HOME" /var/www /srv /opt '/srv/my site' '/x/it'\''s' '/x/$(reboot)' '/x/` + "`id`" + `' -mindepth 1`,
 		`-maxdepth 4`,
-		`| head -n 500; true`,
+		`| head -n 500 | while IFS= read -r g; do`,
+		`git config -f "$g/config" --get remote.origin.url`,
 	} {
 		if !strings.Contains(line, want) {
 			t.Errorf("line %q lacks %q", line, want)
@@ -83,8 +84,8 @@ func TestFindWithoutGit(t *testing.T) {
 
 func TestParseFind(t *testing.T) {
 	out := strings.Join([]string{
-		"/var/www/shop/.git",
-		"/home/deploy/api/.git",
+		"/var/www/shop/.git\x1fhttps://deploy:ghp_secret@github.com/acme/shop.git",
+		"/home/deploy/api/.git\x1fgit@gitlab.com:team/sub/api.git",
 		"/srv/home/deploy/api/.git",
 		"/home/deploy/api/.git",
 		"/opt/tool/.git\r",
@@ -94,10 +95,10 @@ func TestParseFind(t *testing.T) {
 	}, "\n")
 	got := parseFind([]byte(out))
 	want := []Repo{
-		{"/home/deploy/api", "api"},
-		{"/opt/tool", "tool"},
-		{"/srv/home/deploy/api", "api"},
-		{"/var/www/shop", "shop"},
+		{"/home/deploy/api", "api", "gitlab.com", "team/sub"},
+		{"/opt/tool", "tool", "", ""},
+		{"/srv/home/deploy/api", "api", "", ""},
+		{"/var/www/shop", "shop", "github.com", "acme"},
 	}
 	if len(got) != len(want) {
 		t.Fatalf("got %v, want %v", got, want)
@@ -235,5 +236,21 @@ func TestParseLogRecord(t *testing.T) {
 	root := parseLogRecord("r00t\x1fr00\x1f\x1fAn\x1f\x1f1\x1fHEAD\x1finit")
 	if root == nil || len(root.Parents) != 0 || len(root.Refs) != 1 || root.Refs[0].Kind != RefHead {
 		t.Fatalf("root %+v", root)
+	}
+}
+
+func TestRemoteOwner(t *testing.T) {
+	for u, want := range map[string]string{
+		"git@github.com:Octo/app.git":              "github.com Octo",
+		"ssh://git@git.example.com:2222/a/b/c.git": "git.example.com a/b",
+		"https://tok@GitHub.com/acme/site":         "github.com acme",
+		"https://github.com/app":                   " ",
+		"/srv/mirror/app.git":                      " ",
+		"":                                         " ",
+	} {
+		host, owner := remoteOwner(u)
+		if host+" "+owner != want {
+			t.Errorf("%q = %q %q, want %q", u, host, owner, want)
+		}
 	}
 }

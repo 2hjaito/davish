@@ -21,9 +21,9 @@ import type {
 const delay = <T>(v: T, ms = 200) => new Promise<T>((r) => setTimeout(() => r(v), ms))
 
 const repos: Repo[] = [
-  { path: '/home/deploy/api', name: 'api' },
-  { path: '/srv/docs', name: 'docs' },
-  { path: '/var/www/shop', name: 'shop' },
+  { path: '/home/deploy/api', name: 'api', host: 'github.com', owner: 'acme' },
+  { path: '/srv/docs', name: 'docs', host: 'gitlab.com', owner: 'team' },
+  { path: '/var/www/shop', name: 'shop', host: 'github.com', owner: 'octocat' },
 ]
 
 const subjects = [
@@ -98,8 +98,8 @@ function commits(dir: string): Commit[] {
 
 export const mockFind = (extra: string[]): Promise<Repo[]> =>
   delay(
-    [...repos, ...extra.map((p) => ({ path: `${p}/app`, name: 'app' }))].sort((a, b) =>
-      a.path.localeCompare(b.path),
+    [...repos, ...extra.map((p) => ({ path: `${p}/app`, name: 'app', host: '', owner: '' }))].sort(
+      (a, b) => a.path.localeCompare(b.path),
     ),
   )
 

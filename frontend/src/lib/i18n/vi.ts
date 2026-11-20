@@ -527,6 +527,7 @@ const vi = {
     repos: 'Repo',
     search: 'Tìm file hoặc commit',
     searchRepos: 'Tìm repo',
+    noRemote: 'Chưa có remote',
     tabs: { changes: 'Thay đổi', history: 'Lịch sử' },
     finding: 'Đang tìm repo…',
     offline: 'Server chưa kết nối',
