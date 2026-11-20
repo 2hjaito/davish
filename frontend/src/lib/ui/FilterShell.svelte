@@ -166,7 +166,7 @@
     {/if}
     <div class="items">
       {@render sidebarTop?.()}
-      <span class="group">{group}</span>
+      {#if group}<span class="group">{group}</span>{/if}
       {#each shownFilters as f (f.id)}
         {#if f.section && !filterQuery.trim()}<span class="group">{f.section}</span>{/if}
         <button
