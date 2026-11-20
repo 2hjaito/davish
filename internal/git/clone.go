@@ -59,6 +59,28 @@ func parseURL(u string) (host, name string, ssh bool, err error) {
 	return "", "", false, apperr.New(apperr.InvalidInput, "not a git URL over SSH or HTTPS")
 }
 
+// remoteHTTPS is httpsURL that also takes user:token@ and http, as an
+// existing remote may; only the host and path are kept from it.
+var remoteHTTPS = regexp.MustCompile(`^https?://(?:[^/@\s]+@)?([A-Za-z0-9.-]+)(?::\d+)?/([A-Za-z0-9._/~-]+?)(?:\.git)?/?$`)
+
+// remoteOwner returns a remote URL's host and owner: the user or org, or
+// a GitLab group with its subgroups. Anything else gives empty strings.
+func remoteOwner(u string) (host, owner string) {
+	u = strings.TrimSpace(u)
+	m := remoteHTTPS.FindStringSubmatch(u)
+	if m == nil && (strings.HasPrefix(u, "ssh://") || (!strings.Contains(u, "://") && strings.Contains(u, "@"))) {
+		m = sshURL.FindStringSubmatch(u)
+	}
+	if m == nil {
+		return "", ""
+	}
+	dir := path.Dir(strings.Trim(m[2], "/"))
+	if dir == "." || dir == "/" {
+		return "", ""
+	}
+	return strings.ToLower(m[1]), dir
+}
+
 // PlanClone builds the clone line for spec. An empty Dir only parses the
 // URL, to suggest a folder.
 func PlanClone(spec CloneSpec) (ClonePlan, error) {

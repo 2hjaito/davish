@@ -2458,6 +2458,8 @@ export namespace git {
 	export class Repo {
 	    path: string;
 	    name: string;
+	    host: string;
+	    owner: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Repo(source);
@@ -2467,6 +2469,8 @@ export namespace git {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.path = source["path"];
 	        this.name = source["name"];
+	        this.host = source["host"];
+	        this.owner = source["owner"];
 	    }
 	}
 	export class Result {

@@ -52,13 +52,21 @@ const (
 type Repo struct {
 	Path string `json:"path"`
 	Name string `json:"name"`
+	// Host and Owner come from the origin remote (github.com, octocat),
+	// to group repositories by the account or org they belong to. Both
+	// are empty without a remote Davish can read; the URL itself is never
+	// kept, as an https one may carry a token.
+	Host  string `json:"host"`
+	Owner string `json:"owner"`
 }
 
 // findLine builds the search: every .git (a folder, or a file for a
 // worktree or submodule) at most maxDepth below a root, not looking into
 // node_modules, vendor or hidden folders such as ~/.nvm, which is itself a
 // clone. -mindepth 1 keeps a root that is hidden, or a repo itself, from
-// being pruned. Missing roots are fine, so errors are dropped. Without git
+// being pruned. Missing roots are fine, so errors are dropped. Each hit is
+// printed with its origin URL after a unit separator; a .git file
+// (worktree, submodule) has no config there, so its URL is empty. Without git
 // it prints noGit instead, so the app offers to install git rather than
 // showing no repositories.
 func findLine(extra []string) string {
@@ -73,7 +81,8 @@ func findLine(extra []string) string {
 		`timeout 15 find ` + strings.Join(roots, " ") +
 		` -mindepth 1 -maxdepth ` + strconv.Itoa(maxDepth) +
 		` \( -name .git -print -prune \) -o \( -name node_modules -o -name vendor -o -name '.?*' \) -prune` +
-		` 2>/dev/null | head -n ` + strconv.Itoa(maxRepos) + `; true`
+		` 2>/dev/null | head -n ` + strconv.Itoa(maxRepos) +
+		` | while IFS= read -r g; do printf '%s\037%s\n' "$g" "$(git config -f "$g/config" --get remote.origin.url 2>/dev/null)"; done; true`
 }
 
 // noGit is what findLine prints when git is missing; no path ends so.
@@ -117,13 +126,15 @@ func parseFind(out []byte) []Repo {
 	seen := map[string]bool{}
 	sc := bufio.NewScanner(bytes.NewReader(out))
 	for sc.Scan() {
-		dir, ok := strings.CutSuffix(strings.TrimRight(sc.Text(), "\r"), "/.git")
+		hit, url, _ := strings.Cut(strings.TrimRight(sc.Text(), "\r"), "\x1f")
+		dir, ok := strings.CutSuffix(hit, "/.git")
 		// $HOME may sit under a root, or a user folder overlap one.
 		if !ok || dir == "" || seen[dir] {
 			continue
 		}
 		seen[dir] = true
-		repos = append(repos, Repo{Path: dir, Name: path.Base(dir)})
+		host, owner := remoteOwner(url)
+		repos = append(repos, Repo{Path: dir, Name: path.Base(dir), Host: host, Owner: owner})
 	}
 	slices.SortFunc(repos, func(a, b Repo) int { return strings.Compare(a.Path, b.Path) })
 	return repos

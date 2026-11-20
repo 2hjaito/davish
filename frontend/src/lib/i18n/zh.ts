@@ -520,6 +520,7 @@ const zh = {
     repos: '仓库',
     search: '搜索文件或提交',
     searchRepos: '搜索仓库',
+    noRemote: '无远程',
     tabs: { changes: '更改', history: '历史' },
     finding: '正在查找仓库…',
     offline: '服务器未连接',

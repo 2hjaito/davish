@@ -531,6 +531,7 @@ const en = {
     repos: 'Repos',
     search: 'Search files or commits',
     searchRepos: 'Search repos',
+    noRemote: 'No remote',
     tabs: { changes: 'Changes', history: 'History' },
     finding: 'Finding repos…',
     offline: 'Server not connected',

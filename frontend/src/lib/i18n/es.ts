@@ -550,6 +550,7 @@ const es = {
     repos: 'Repositorios',
     search: 'Buscar archivos o commits',
     searchRepos: 'Buscar repos',
+    noRemote: 'Sin remoto',
     tabs: { changes: 'Cambios', history: 'Historial' },
     finding: 'Buscando repositorios…',
     offline: 'Servidor no conectado',

@@ -30,6 +30,7 @@
   import AccountCard from './AccountCard.svelte'
   import AccountPage from './AccountPage.svelte'
   import { identities } from './identities.svelte'
+  import { groupRepos, myKey } from './groups'
 
   type Tab = 'changes' | 'history'
 
@@ -72,17 +73,29 @@
   const extra = $derived(folders[win.serverID] ?? [])
 
   // Two repositories may share a name; the parent folder tells them apart.
+  // Grouped by the account or org of each origin remote; one group alone
+  // takes the sidebar heading instead of a section.
+  const groups = $derived(groupRepos(repos ?? [], myKey(identities.get(win.serverID).identity)))
+  const groupLabel = (key: string) => key || t.git.noRemote
+  const sidebarGroup = $derived(
+    groups.length === 1 ? (groups[0]?.key ?? '') || (server?.name ?? '') : '',
+  )
+
+  // Two repositories may share a name; the parent folder tells them apart.
   const filters = $derived<FilterItem[]>(
-    (repos ?? []).map((r) => {
-      const twin = (repos ?? []).some((o) => o !== r && o.name === r.name)
-      const parent = r.path.slice(0, r.path.length - r.name.length - 1)
-      return {
-        id: r.path,
-        label: twin ? `${r.name} — ${parent.split('/').pop() || '/'}` : r.name,
-        icon: 'gitBranch',
-        count: r.path === repo && status ? status.changes.length || undefined : undefined,
-      }
-    }),
+    groups.flatMap((g) =>
+      g.repos.map((r, i) => {
+        const twin = (repos ?? []).some((o) => o !== r && o.name === r.name)
+        const parent = r.path.slice(0, r.path.length - r.name.length - 1)
+        return {
+          id: r.path,
+          label: twin ? `${r.name} — ${parent.split('/').pop() || '/'}` : r.name,
+          icon: 'gitBranch',
+          count: r.path === repo && status ? status.changes.length || undefined : undefined,
+          section: groups.length > 1 && i === 0 ? groupLabel(g.key) : undefined,
+        }
+      }),
+    ),
   )
 
   function changeNote(c: Change): string {
@@ -293,7 +306,7 @@
 </script>
 
 <FilterShell
-  group={server?.name ?? ''}
+  group={sidebarGroup}
   {filters}
   bind:filter={() => (showAccount ? '' : repo), (r) => ((repo = r), (showAccount = false))}
   sidebarLabel={t.git.repos}
