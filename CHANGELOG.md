@@ -4,6 +4,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.14.9] - 2026-11-20
+
 ### Thêm
 - Git: tài khoản ở đầu sidebar, kèm ô tìm repo. Trang tài khoản cho biết người dùng SSH, tên và email git, có lưu token HTTPS không, các key trong `~/.ssh` và tài khoản GitHub/GitLab mà key của server đăng nhập được (chỉ đọc, mỗi host hỏi riêng, host không kết nối tới thì ẩn).
 - Cài đặt: mục **Tài khoản** ở đầu sidebar với họ tên, ảnh đại diện và mật khẩu khóa app (chuyển từ Bảo mật sang). Tên và ảnh chỉ lưu trên máy này, hiện ở màn hình khóa và màn hình ngủ.

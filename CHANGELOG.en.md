@@ -4,6 +4,8 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.14.9] - 2026-11-20
+
 ### Added
 - Git: an account at the top of the sidebar, with a search over the repositories. Its page shows the SSH user, git's name and email, whether HTTPS tokens are stored, the keys in `~/.ssh` and the GitHub/GitLab account the server's keys sign in to (read only; each host is asked on its own, and one the server never reaches is left out).
 - Settings: an **Account** pane at the top of the sidebar with your name, picture and the app lock password (moved from Security). The name and picture stay on this computer and show on the lock and sleep screens.
