@@ -135,6 +135,43 @@ export interface ClonePlan {
 
 export const gitPlanClone = (spec: CloneSpec): Promise<ClonePlan> => App.GitPlanClone(spec)
 
+/** Runs a clone the server can do without a prompt; GIT_AUTH_FAILED means it needs a terminal. */
+export const gitClone = (serverID: string, spec: CloneSpec): Promise<OpResult> =>
+  App.GitClone(serverID, spec) as Promise<OpResult>
+
+/** A public key in ~/.ssh on the server. */
+export interface SSHKey {
+  type: string
+  bits: number
+  fingerprint: string
+  comment: string
+}
+
+/** What a code host answered to ssh -T with the server's keys. */
+export interface HostLogin {
+  host: string
+  state: 'ok' | 'denied' | 'unreachable'
+  /** The user, or owner/repo for a deploy key. */
+  account: string
+  deploy: boolean
+}
+
+/** Who the session is on the server and as whom git and the code hosts know it. */
+export interface Identity {
+  user: string
+  home: string
+  host: string
+  gitName: string
+  gitEmail: string
+  /** credential.helper, which keeps HTTPS tokens. */
+  helper: string
+  keys: SSHKey[]
+  hosts: HostLogin[]
+}
+
+export const gitIdentity = (serverID: string): Promise<Identity> =>
+  App.GitIdentity(serverID) as Promise<Identity>
+
 export const gitInitCommand = (dir: string, remote: string, url: string): Promise<string> =>
   App.GitInitCommand(dir, remote, url)
 

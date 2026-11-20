@@ -50,6 +50,13 @@
     listWidth?: string
     /** Where the width the user drags the list to is kept; the app by default. */
     splitKey?: string
+    /** Puts a search over the sidebar that narrows the filters by name. */
+    filterSearchLabel?: string
+    /** Above the filters, under their search: an account card, say. */
+    sidebarTop?: Snippet
+    /** Shown in place of the list and detail, under pageTitle. */
+    page?: Snippet
+    pageTitle?: string
     onrefresh: () => void
   }
 
@@ -70,11 +77,24 @@
     error = '',
     listWidth = '42%',
     splitKey,
+    filterSearchLabel,
+    sidebarTop,
+    page,
+    pageTitle = '',
     onrefresh,
   }: Props = $props()
 
   const ctx = getWindowContext()
-  const title = $derived(filters.find((f) => f.id === filter)?.label ?? '')
+  const title = $derived(page ? pageTitle : (filters.find((f) => f.id === filter)?.label ?? ''))
+
+  // The sidebar search ignores case and accents, like Settings.
+  let filterQuery = $state('')
+  const fold = (s: string) =>
+    s.normalize('NFD').replace(/\p{M}/gu, '').replace(/đ/g, 'd').toLowerCase()
+  const shownFilters = $derived.by(() => {
+    const q = fold(filterQuery.trim())
+    return q ? filters.filter((f) => fold(f.label).includes(q)) : filters
+  })
 
   // The line between list and detail drags; a double click puts it back.
   const storeKey = $derived(`split:${splitKey ?? ctx.win.appId}`)
@@ -126,10 +146,29 @@
 <div class="shell" class:blurred={!ctx.focused}>
   <nav class="sidebar" aria-label={sidebarLabel}>
     <TitleBar bare />
+    {#if filterSearchLabel}
+      <label class="side-search">
+        <Icon name="search" size={13} />
+        <input
+          type="search"
+          placeholder={filterSearchLabel}
+          aria-label={filterSearchLabel}
+          spellcheck="false"
+          bind:value={filterQuery}
+          onkeydown={(e) => {
+            if (e.key === 'Escape' && filterQuery) {
+              e.stopPropagation()
+              filterQuery = ''
+            }
+          }}
+        />
+      </label>
+    {/if}
     <div class="items">
+      {@render sidebarTop?.()}
       <span class="group">{group}</span>
-      {#each filters as f (f.id)}
-        {#if f.section}<span class="group">{f.section}</span>{/if}
+      {#each shownFilters as f (f.id)}
+        {#if f.section && !filterQuery.trim()}<span class="group">{f.section}</span>{/if}
         <button
           class="item"
           class:active={filter === f.id}
@@ -156,16 +195,18 @@
       <span class="spacer"></span>
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <span class="actions" onpointerdown={(e) => e.stopPropagation()}>{@render actions?.()}</span>
-      <label class="search" onpointerdown={(e) => e.stopPropagation()}>
-        <Icon name="search" size={13} strokeWidth={2.2} />
-        <input
-          type="text"
-          placeholder={searchLabel}
-          aria-label={searchLabel}
-          bind:value={query}
-          onkeydown={(e) => e.key === 'Escape' && (query = '')}
-        />
-      </label>
+      {#if !page}
+        <label class="search" onpointerdown={(e) => e.stopPropagation()}>
+          <Icon name="search" size={13} strokeWidth={2.2} />
+          <input
+            type="text"
+            placeholder={searchLabel}
+            aria-label={searchLabel}
+            bind:value={query}
+            onkeydown={(e) => e.key === 'Escape' && (query = '')}
+          />
+        </label>
+      {/if}
       <button
         class="tool"
         aria-label={t.common.refresh}
@@ -178,7 +219,9 @@
       </button>
     </div>
 
-    {#if !ready}
+    {#if page}
+      <div class="page">{@render page()}</div>
+    {:else if !ready}
       {@render placeholder()}
     {:else}
       <div class="split" class:resizing bind:this={split}>
@@ -229,6 +272,38 @@
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
+  }
+
+  .side-search {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 10px 8px;
+    padding: 5px 8px;
+    border-radius: var(--control-radius);
+    background: var(--fill-soft);
+    color: var(--fg-subtle);
+    transition: box-shadow var(--dur-fast) var(--ease-out);
+  }
+
+  .side-search:focus-within {
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .side-search input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    padding: 0;
+    background: none;
+    outline: none;
+    color: var(--fg);
+  }
+
+  .page {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
   }
 
   .items {

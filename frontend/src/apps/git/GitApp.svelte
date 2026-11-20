@@ -8,6 +8,7 @@
     type Change,
     type Commit,
     type Diff,
+    type Identity,
     type Repo,
     type Status,
   } from '../../lib/api/git'
@@ -27,6 +28,8 @@
   import ActionMenu from '../../lib/ui/ActionMenu.svelte'
   import GitGraph from './GitGraph.svelte'
   import RepoInspector, { type Selected } from './RepoInspector.svelte'
+  import AccountCard from './AccountCard.svelte'
+  import AccountPage from './AccountPage.svelte'
 
   type Tab = 'changes' | 'history'
 
@@ -59,6 +62,11 @@
   let diff = $state.raw<Diff | null>(null)
   let diffError = $state('')
   let editingFolders = $state(false)
+  /** The account page is open in place of a repository. */
+  let showAccount = $state(false)
+  let identity = $state.raw<Identity | null>(null)
+  let identityError = $state('')
+  let readingIdentity = false
 
   $effect(() => save('git', { tab, folders, repo: lastRepo }))
 
@@ -150,6 +158,37 @@
     }
   }
 
+  // Who the server works as: read with the repositories, not polled, as
+  // it asks GitHub and GitLab over ssh.
+  async function loadIdentity() {
+    if (readingIdentity || !connected) return
+    readingIdentity = true
+    const id = win.serverID
+    try {
+      const got = await backend.identity(id)
+      if (id !== win.serverID) return
+      identity = got
+      identityError = ''
+    } catch (e) {
+      identityError = toUserError(e).message
+    } finally {
+      readingIdentity = false
+    }
+  }
+
+  // A clone lands where the search may not look; its folder is added.
+  async function cloned(dir: string) {
+    await findRepos()
+    if (!(repos ?? []).some((r) => r.path === dir)) {
+      folders = { ...folders, [win.serverID]: [...extra.filter((f) => f !== dir), dir] }
+      await findRepos()
+    }
+    if ((repos ?? []).some((r) => r.path === dir)) {
+      repo = dir
+      showAccount = false
+    }
+  }
+
   // Answers for a repository no longer open are dropped.
   async function loadStatus(dir: string) {
     try {
@@ -196,6 +235,7 @@
 
   function refresh() {
     void findRepos()
+    if (showAccount) void loadIdentity()
     if (!repo) return
     void loadStatus(repo)
     if (tab === 'history') void loadLog(repo, 0)
@@ -245,7 +285,11 @@
   // Load when the server comes up and when the window regains focus; no
   // polling, as every read is a command in the audit log.
   $effect(() => {
-    if (connected) untrack(() => void findRepos())
+    if (connected)
+      untrack(() => {
+        void findRepos()
+        void loadIdentity()
+      })
   })
   let wasFocused = untrack(() => ctx.focused)
   $effect(() => {
@@ -267,9 +311,12 @@
 <FilterShell
   group={server?.name ?? ''}
   {filters}
-  bind:filter={() => repo, (r) => (repo = r)}
+  bind:filter={() => (showAccount ? '' : repo), (r) => ((repo = r), (showAccount = false))}
   sidebarLabel={t.git.repos}
   searchLabel={t.git.search}
+  filterSearchLabel={t.git.searchRepos}
+  page={showAccount && connected ? accountPage : undefined}
+  pageTitle={t.git.account.title}
   bind:query
   refreshing={!connected || finding}
   ready={connected && (repos?.length ?? 0) > 0}
@@ -279,6 +326,18 @@
   splitKey="git-{tab}"
   onrefresh={refresh}
 >
+  {#snippet sidebarTop()}
+    {#if connected}
+      <AccountCard
+        {identity}
+        active={showAccount}
+        onclick={() => {
+          showAccount = true
+          if (!identity) void loadIdentity()
+        }}
+      />
+    {/if}
+  {/snippet}
   {#snippet actions()}
     <button
       class="tool"
@@ -395,7 +454,18 @@
   {/snippet}
 </FilterShell>
 
-<CloneDialog serverID={win.serverID} mode={cloneMode} {repo} onclose={() => (cloneMode = null)} />
+{#snippet accountPage()}
+  <AccountPage serverID={win.serverID} {identity} error={identityError} />
+{/snippet}
+
+<CloneDialog
+  serverID={win.serverID}
+  mode={cloneMode}
+  {repo}
+  {identity}
+  oncloned={(dir) => void cloned(dir)}
+  onclose={() => (cloneMode = null)}
+/>
 <FoldersDialog
   open={editingFolders}
   folders={extra}

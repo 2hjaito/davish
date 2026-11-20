@@ -374,6 +374,10 @@ export function GitBranches(arg1, arg2) {
   return window['go']['app']['App']['GitBranches'](arg1, arg2);
 }
 
+export function GitClone(arg1, arg2) {
+  return window['go']['app']['App']['GitClone'](arg1, arg2);
+}
+
 export function GitDeployInfo(arg1, arg2) {
   return window['go']['app']['App']['GitDeployInfo'](arg1, arg2);
 }
@@ -388,6 +392,10 @@ export function GitDiff(arg1, arg2) {
 
 export function GitFind(arg1, arg2) {
   return window['go']['app']['App']['GitFind'](arg1, arg2);
+}
+
+export function GitIdentity(arg1) {
+  return window['go']['app']['App']['GitIdentity'](arg1);
 }
 
 export function GitInitCommand(arg1, arg2, arg3) {

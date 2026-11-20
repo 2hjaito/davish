@@ -1,10 +1,12 @@
 // The git calls, or demo data in the plain browser preview.
 import {
   gitBranches,
+  gitClone,
   gitDiff,
   gitDeployInfo,
   gitDeployLine,
   gitFind,
+  gitIdentity,
   gitInitCommand,
   gitLog,
   gitPlan,
@@ -16,10 +18,12 @@ import {
 import { hasRuntime } from '../../lib/api/runtime'
 import {
   mockBranches,
+  mockClone,
   mockDeployInfo,
   mockDeployLine,
   mockDiff,
   mockFind,
+  mockIdentity,
   mockInitCommand,
   mockLog,
   mockPlan,
@@ -39,6 +43,8 @@ export const backend = hasRuntime
       plan: gitPlan,
       run: gitRun,
       planClone: gitPlanClone,
+      clone: gitClone,
+      identity: gitIdentity,
       initCommand: gitInitCommand,
       remoteCommand: gitRemoteCommand,
       deployInfo: gitDeployInfo,
@@ -53,6 +59,8 @@ export const backend = hasRuntime
       plan: mockPlan,
       run: mockRun,
       planClone: mockPlanClone,
+      clone: mockClone,
+      identity: (_serverID: string) => mockIdentity(),
       initCommand: mockInitCommand,
       remoteCommand: mockRemoteCommand,
       deployInfo: (_serverID: string, dir: string) => mockDeployInfo(dir),

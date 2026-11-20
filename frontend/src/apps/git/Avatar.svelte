@@ -5,21 +5,26 @@
   interface Props {
     name: string
     email?: string
+    /** A picture to try before the email's, such as a GitHub account's. */
+    src?: string
+    /** Diameter in px. */
+    size?: number
   }
 
-  let { name, email = '' }: Props = $props()
+  let { name, email = '', src = '', size = 20 }: Props = $props()
 
   let urls = $state<string[]>([])
   let loaded = $state(false)
 
   $effect(() => {
     const want = email
-    urls = []
+    const first = src ? [src] : []
+    urls = first
     loaded = false
     if (!want) return
     let live = true
     void avatarUrls(want).then((list) => {
-      if (live) urls = list
+      if (live) urls = [...first, ...list]
     })
     return () => {
       live = false
@@ -34,7 +39,12 @@
   }
 </script>
 
-<span class="avatar" style:--avatar="var(--graph-{avatarColor(name) + 1})" aria-hidden="true">
+<span
+  class="avatar"
+  style:--avatar="var(--graph-{avatarColor(name) + 1})"
+  style:--size="{size}px"
+  aria-hidden="true"
+>
   {#if !loaded}{initials(name)}{/if}
   {#if urls[0]}
     {#key urls[0]}
@@ -57,13 +67,13 @@
     display: inline-grid;
     place-items: center;
     flex-shrink: 0;
-    width: 20px;
-    height: 20px;
+    width: var(--size);
+    height: var(--size);
     border-radius: 50%;
     overflow: hidden;
     background: color-mix(in srgb, var(--avatar) 20%, transparent);
     color: var(--avatar);
-    font-size: 9px;
+    font-size: calc(var(--size) * 0.45);
     font-weight: 700;
     letter-spacing: -0.02em;
   }

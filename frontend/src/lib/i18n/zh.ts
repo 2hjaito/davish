@@ -519,6 +519,7 @@ const zh = {
   git: {
     repos: '仓库',
     search: '搜索文件或提交',
+    searchRepos: '搜索仓库',
     tabs: { changes: '更改', history: '历史' },
     finding: '正在查找仓库…',
     offline: '服务器未连接',
@@ -662,14 +663,48 @@ const zh = {
       branchDefault: '默认分支',
       remote: '远程名称',
       remoteHint: (dir: string) => `在 ${dir} 中。已有的远程会被修改，没有则新增。`,
-      sshPinned: (host: string) =>
-        `SSH 需要 ${host} 接受的密钥，例如部署密钥。会先把 ${host} 公布的主机密钥加入 known_hosts，ssh 就不会询问是否信任。`,
-      sshUnpinned: (host: string) =>
-        `SSH 需要 ${host} 接受的密钥，例如部署密钥。首次连接时 ssh 会显示 ${host} 的指纹：输入 yes 前，请与该站点公布的指纹核对。`,
+      sshUnknown: (host: string) =>
+        `SSH 需要一个 ${host} 接受的密钥，例如部署密钥。没有的话，克隆会打开终端让 ssh 询问。`,
+      sshDenied: (host: string) =>
+        `服务器上没有 ${host} 接受的密钥。请创建部署密钥并添加到仓库，或改用 HTTPS URL 克隆。`,
+      readyAs: (host: string, account: string) => `服务器以 ${account} 身份登录 ${host}。`,
+      readyDeploy: (host: string, repo: string) =>
+        `服务器有 ${host} 上 ${repo} 的部署密钥；它只能克隆该仓库。`,
+      httpsNote: '公开仓库可直接克隆。私有仓库需要令牌：Davish 会打开终端让你输入。',
+      run: '克隆',
+      cloning: '正在克隆…',
+      needsTerminal: '远程需要登录。打开已输入命令的终端，按 Enter，然后在那里输入用户名和令牌：',
       next: '预览',
       commandIntro:
         '打开一个已输入好这条命令的终端，按回车运行。HTTPS 可能会在那里要求输入用户名和令牌。命令：',
       open: '在终端中打开',
+    },
+    account: {
+      title: '账户',
+      loading: '正在读取账户…',
+      failed: '无法读取账户',
+      server: '服务器上',
+      sshUser: 'SSH 用户',
+      home: '主目录',
+      hostname: '主机名',
+      gitName: '名字 (user.name)',
+      gitEmail: '邮箱 (user.email)',
+      notSet: '未设置',
+      gitHint:
+        '在服务器上创建的提交使用此名字和邮箱。可在终端用 git config --global user.name 和 user.email 修改。',
+      helper: 'HTTPS 令牌存储',
+      noHelper: '无，HTTPS 每次都会询问令牌',
+      hosts: '通过 SSH 的 GitHub 和 GitLab',
+      loginOk: (account: string) => `已登录为 ${account}`,
+      loginDeploy: (repo: string) => `${repo} 的部署密钥`,
+      loginDenied: '没有被接受的密钥',
+      loginUnreachable: '无法连接',
+      noLogin: '服务器的密钥无法登录 GitHub 或 GitLab，因此通过 SSH 克隆会被拒绝。',
+      keys: '服务器上的 SSH 密钥',
+      noKeys: '~/.ssh 中没有密钥。',
+      openKeys: '打开 SSH 密钥',
+      readOnly:
+        '只读。Davish 用服务器的密钥通过 ssh -T 询问 GitHub 和 GitLab，只信任它们公布的主机密钥，不在服务器上写入任何内容。',
     },
     deployKey: '创建部署密钥',
     deployKeyHint:
@@ -1163,7 +1198,8 @@ const zh = {
           '服务器没有 git：把适合其 Linux 的安装命令输入到终端',
           '通过确认对话框 fetch、pull（仓库有未提交改动时阻止）、切换分支',
           '在终端中根据 lockfile 安装依赖',
-          '克隆仓库（固定 GitHub/GitLab 的 SSH 主机密钥）、git init、设置远程：输入到终端',
+          '侧边栏顶部的账户：SSH 用户、git 名字和邮箱、服务器密钥能登录的 GitHub/GitLab 账户（只读）',
+          '服务器有被接受的密钥或仓库公开时，一键克隆；需要令牌的仓库输入到终端。git init、设置远程：输入到终端',
           '部署：Davish 找出如何构建以及由什么运行应用（pm2、systemd、compose），你开关各个步骤；在终端中运行，有进度、历史记录和完成通知',
           '添加用于查找仓库的文件夹',
         ],
@@ -1171,6 +1207,8 @@ const zh = {
         runs: [
           'git status、log、diff',
           'git fetch、git pull --ff-only、git switch（需确认）',
+          'git clone 到空目录（git 拒绝已有文件的目录）',
+          '账户：id、git config --global、ssh-keygen -l、ssh -T git@github.com 和 git@gitlab.com（只读）',
           '打开部署时：读取 package.json、pm2 jlist、systemctl show、docker ps（只读）',
         ],
       },

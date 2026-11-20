@@ -1,9 +1,11 @@
 package git
 
 import (
+	"context"
 	"path"
 	"regexp"
 	"strings"
+	"time"
 
 	"davish/internal/apperr"
 	"davish/internal/shellx"
@@ -60,6 +62,12 @@ func parseURL(u string) (host, name string, ssh bool, err error) {
 // PlanClone builds the clone line for spec. An empty Dir only parses the
 // URL, to suggest a folder.
 func PlanClone(spec CloneSpec) (ClonePlan, error) {
+	return planClone(spec, false)
+}
+
+// planClone builds the clone line; quiet makes it one Davish runs itself,
+// where git can ask nothing and a stuck remote is cut off.
+func planClone(spec CloneSpec, quiet bool) (ClonePlan, error) {
 	u := strings.TrimSpace(spec.URL)
 	host, name, ssh, err := parseURL(u)
 	if err != nil {
@@ -82,6 +90,9 @@ func PlanClone(spec CloneSpec) (ClonePlan, error) {
 	}
 	args = append(args, "--", u, dir)
 	clone := shellx.Cmd("git", args...).String()
+	if quiet {
+		clone = shellx.Cmd("env", append([]string{"GIT_TERMINAL_PROMPT=0", "timeout", "900", "git"}, args...)...).String()
+	}
 	if key, ok := knownHosts[host]; ssh && ok {
 		p.Pinned = true
 		kh := "~/.ssh/known_hosts"
@@ -90,6 +101,49 @@ func PlanClone(spec CloneSpec) (ClonePlan, error) {
 	}
 	p.Command = clone
 	return p, nil
+}
+
+// Clone runs the clone of spec on the server, for a URL the server can
+// reach without a prompt: an SSH key the host accepts, or a public HTTPS
+// repository. A remote that wants a password fails with GIT_AUTH_FAILED,
+// and the clone is then typed into a terminal instead. git refuses a
+// folder that is not empty, so nothing on the server is overwritten.
+func (s *Service) Clone(ctx context.Context, serverID string, spec CloneSpec) (Result, error) {
+	if strings.TrimSpace(spec.Dir) == "" {
+		return Result{}, apperr.New(apperr.InvalidInput, "folder must be an absolute path")
+	}
+	p, err := planClone(spec, true)
+	if err != nil {
+		return Result{}, err
+	}
+	ctx, cancel := context.WithTimeout(ctx, 16*time.Minute)
+	defer cancel()
+	res, err := s.run.RunLine(ctx, serverID, app, p.Command)
+	if err != nil {
+		return Result{}, err
+	}
+	out := string(res.Stdout) + string(res.Stderr)
+	if len(out) > maxOutput {
+		out = out[len(out)-maxOutput:]
+	}
+	r := Result{Output: redact(strings.TrimSpace(strings.ToValidUTF8(out, "\uFFFD")))}
+	if res.Exit != 0 {
+		r.Error = cloneError(res.Exit, r.Output)
+	}
+	return r, nil
+}
+
+func cloneError(exit int, out string) apperr.Code {
+	switch {
+	case strings.Contains(out, "already exists and is not an empty directory"):
+		return apperr.FSExists
+	case strings.Contains(out, "Permission denied") && !strings.Contains(out, "publickey"),
+		strings.Contains(out, "could not create work tree"), strings.Contains(out, "could not create leading directories"):
+		return apperr.FSPermissionDenied
+	case strings.Contains(out, "Remote branch") && strings.Contains(out, "not found"):
+		return apperr.NotFound
+	}
+	return opError(exit, out)
 }
 
 // remoteName accepts a plain remote name.
