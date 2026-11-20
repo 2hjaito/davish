@@ -286,8 +286,17 @@ mkdir -p ~/gitclone/full; echo x > ~/gitclone/full/f`)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if me.User != "tester" || me.Home != "/home/tester" || len(me.Hosts) != 2 {
+	if me.User != "tester" || me.Home != "/home/tester" {
 		t.Errorf("identity = %+v", me)
+	}
+	// The test container may have no way out; each host still answers.
+	for _, h := range git.IdentityHosts {
+		if l, err := s.HostLogin(ctx, id, h); err != nil || l.Host != h {
+			t.Errorf("%s = %+v, %v", h, l, err)
+		}
+	}
+	if _, err := s.HostLogin(ctx, id, "evil.example.com"); err == nil {
+		t.Error("unknown host asked")
 	}
 
 	// A local path is not a URL Davish clones; an https one that cannot be

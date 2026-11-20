@@ -82,3 +82,9 @@ func (a *App) GitClone(serverID string, spec git.CloneSpec) (git.Result, error) 
 	}
 	return a.git.Clone(a.change(), serverID, spec)
 }
+
+// GitHostLogin asks one code host which account the server's SSH keys
+// sign in as.
+func (a *App) GitHostLogin(serverID, host string) (git.HostLogin, error) {
+	return a.git.HostLogin(a.ctx, serverID, host)
+}

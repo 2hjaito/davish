@@ -24,7 +24,8 @@ Hi theptaydo! You've successfully authenticated, but GitHub does not provide she
 @@host:gitlab.com
 git@gitlab.com: Permission denied (publickey).
 `
-	id := parseIdentity(sections(out))
+	sec := sections(out)
+	id := parseIdentity(sec)
 	if id.User != "root" || id.Home != "/root" || id.Host != "stoic-merkle" || id.GitName != "Dang Tran" ||
 		id.GitEmail != "dang@example.com" || id.Helper != "" {
 		t.Errorf("identity = %+v", id)
@@ -37,8 +38,9 @@ git@gitlab.com: Permission denied (publickey).
 		{Host: "github.com", State: LoginOK, Account: "theptaydo"},
 		{Host: "gitlab.com", State: LoginDenied},
 	}
-	if len(id.Hosts) != 2 || id.Hosts[0] != want[0] || id.Hosts[1] != want[1] {
-		t.Errorf("hosts = %+v", id.Hosts)
+	hosts := []HostLogin{parseLogin("github.com", sec["host:github.com"]), parseLogin("gitlab.com", sec["host:gitlab.com"])}
+	if len(id.Hosts) != 0 || hosts[0] != want[0] || hosts[1] != want[1] {
+		t.Errorf("hosts = %+v, %+v", id.Hosts, hosts)
 	}
 }
 

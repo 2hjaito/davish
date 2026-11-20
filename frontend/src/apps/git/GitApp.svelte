@@ -8,7 +8,6 @@
     type Change,
     type Commit,
     type Diff,
-    type Identity,
     type Repo,
     type Status,
   } from '../../lib/api/git'
@@ -30,6 +29,7 @@
   import RepoInspector, { type Selected } from './RepoInspector.svelte'
   import AccountCard from './AccountCard.svelte'
   import AccountPage from './AccountPage.svelte'
+  import { identities } from './identities.svelte'
 
   type Tab = 'changes' | 'history'
 
@@ -64,9 +64,6 @@
   let editingFolders = $state(false)
   /** The account page is open in place of a repository. */
   let showAccount = $state(false)
-  let identity = $state.raw<Identity | null>(null)
-  let identityError = $state('')
-  let readingIdentity = false
 
   $effect(() => save('git', { tab, folders, repo: lastRepo }))
 
@@ -158,23 +155,10 @@
     }
   }
 
-  // Who the server works as: read with the repositories, not polled, as
-  // it asks GitHub and GitLab over ssh.
-  async function loadIdentity() {
-    if (readingIdentity || !connected) return
-    readingIdentity = true
-    const id = win.serverID
-    try {
-      const got = await backend.identity(id)
-      if (id !== win.serverID) return
-      identity = got
-      identityError = ''
-    } catch (e) {
-      identityError = toUserError(e).message
-    } finally {
-      readingIdentity = false
-    }
-  }
+  // Who the server works as: read once per session (identities), not
+  // polled, as it asks GitHub and GitLab over ssh.
+  const ident = $derived(identities.get(win.serverID))
+  const identity = $derived(ident.identity)
 
   // A clone lands where the search may not look; its folder is added.
   async function cloned(dir: string) {
@@ -235,7 +219,7 @@
 
   function refresh() {
     void findRepos()
-    if (showAccount) void loadIdentity()
+    if (showAccount) void identities.load(win.serverID, true)
     if (!repo) return
     void loadStatus(repo)
     if (tab === 'history') void loadLog(repo, 0)
@@ -288,7 +272,7 @@
     if (connected)
       untrack(() => {
         void findRepos()
-        void loadIdentity()
+        void identities.load(win.serverID)
       })
   })
   let wasFocused = untrack(() => ctx.focused)
@@ -333,7 +317,7 @@
         active={showAccount}
         onclick={() => {
           showAccount = true
-          if (!identity) void loadIdentity()
+          void identities.load(win.serverID)
         }}
       />
     {/if}
@@ -455,7 +439,7 @@
 </FilterShell>
 
 {#snippet accountPage()}
-  <AccountPage serverID={win.serverID} {identity} error={identityError} />
+  <AccountPage serverID={win.serverID} {identity} pending={ident.pending} error={ident.error} />
 {/snippet}
 
 <CloneDialog
@@ -463,6 +447,7 @@
   mode={cloneMode}
   {repo}
   {identity}
+  pending={ident.pending}
   oncloned={(dir) => void cloned(dir)}
   onclose={() => (cloneMode = null)}
 />

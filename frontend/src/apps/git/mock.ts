@@ -8,6 +8,7 @@ import type {
   DeployLine,
   DeployStep,
   Diff,
+  HostLogin,
   Identity,
   DiffRequest,
   GitOp,
@@ -295,11 +296,14 @@ export const mockIdentity = (): Promise<Identity> =>
         comment: 'deploy@web-1',
       },
     ],
-    hosts: [
-      { host: 'github.com', state: 'ok', account: 'octocat', deploy: false },
-      { host: 'gitlab.com', state: 'denied', account: '', deploy: false },
-    ],
+    hosts: [],
   })
+
+// GitHub answers at once; GitLab, which this server never reaches, late.
+export const mockHostLogin = (host: string): Promise<HostLogin> =>
+  host === 'github.com'
+    ? delay({ host, state: 'ok', account: 'octocat', deploy: false }, 600)
+    : delay({ host, state: 'unreachable', account: '', deploy: false }, 4000)
 
 // A private https repository needs a token, so it goes to a terminal.
 export const mockClone = (_serverID: string, spec: CloneSpec): Promise<OpResult> =>

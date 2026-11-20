@@ -12,10 +12,16 @@
   interface Props {
     serverID: string
     identity: Identity | null
+    /** Code hosts still being asked. */
+    pending: string[]
     error: string
   }
 
-  let { serverID, identity, error }: Props = $props()
+  let { serverID, identity, pending, error }: Props = $props()
+
+  // Only hosts the keys sign in to: a server that never uses GitLab is not
+  // told it cannot reach it.
+  const logins = $derived((identity?.hosts ?? []).filter((h) => h.state === 'ok'))
   const a = t.git.account
 
   function openKeys() {
@@ -23,8 +29,7 @@
   }
 
   function loginText(h: HostLogin): string {
-    if (h.state === 'ok') return h.deploy ? a.loginDeploy(h.account) : a.loginOk(h.account)
-    return h.state === 'denied' ? a.loginDenied : a.loginUnreachable
+    return h.deploy ? a.loginDeploy(h.account) : a.loginOk(h.account)
   }
 </script>
 
@@ -72,18 +77,26 @@
     <p class="hint">{a.gitHint}</p>
 
     <h3>{a.hosts}</h3>
-    <div class="card">
-      {#each identity.hosts as h (h.host)}
-        <div class="row">
-          <span>{h.host}</span>
-          <span class="state {h.state}">
-            <Icon name={h.state === 'ok' ? 'check' : 'warning'} size={13} />
-            {loginText(h)}
-          </span>
-        </div>
-      {/each}
-    </div>
-    {#if !identity.hosts.some((h) => h.state === 'ok')}
+    {#if logins.length > 0 || pending.length > 0}
+      <div class="card">
+        {#each logins as h (h.host)}
+          <div class="row">
+            <span>{h.host}</span>
+            <span class="state ok">
+              <Icon name="check" size={13} />
+              {loginText(h)}
+            </span>
+          </div>
+        {/each}
+        {#each pending.filter((p) => !logins.some((l) => l.host === p)) as host (host)}
+          <div class="row">
+            <span>{host}</span>
+            <span class="state">{a.asking}</span>
+          </div>
+        {/each}
+      </div>
+    {/if}
+    {#if logins.length === 0 && pending.length === 0}
       <div class="note">
         <p>{a.noLogin}</p>
         <button type="button" class="btn" onclick={openKeys}>
@@ -212,10 +225,6 @@
 
   .state.ok {
     color: var(--ok);
-  }
-
-  .state.denied {
-    color: var(--warn);
   }
 
   .note {

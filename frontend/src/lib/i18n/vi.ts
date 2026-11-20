@@ -681,6 +681,7 @@ const vi = {
         'Repo public clone được ngay. Repo private cần token: Davish sẽ mở Terminal để bạn nhập.',
       run: 'Clone',
       cloning: 'Đang clone…',
+      checking: (host: string) => `Đang kiểm tra key của server với ${host}…`,
       needsTerminal:
         'Remote cần đăng nhập. Mở Terminal với lệnh gõ sẵn, nhấn Enter rồi nhập tên người dùng và token ở đó:',
       next: 'Xem trước',
@@ -703,11 +704,10 @@ const vi = {
         'Commit tạo trên server mang tên và email này. Đổi bằng git config --global user.name và user.email trong Terminal.',
       helper: 'Lưu token HTTPS',
       noHelper: 'Không, HTTPS hỏi token mỗi lần',
-      hosts: 'GitHub và GitLab qua SSH',
+      hosts: 'Đăng nhập code host qua SSH',
       loginOk: (account: string) => `Đăng nhập là ${account}`,
       loginDeploy: (repo: string) => `Deploy key của ${repo}`,
-      loginDenied: 'Chưa có key được chấp nhận',
-      loginUnreachable: 'Không kết nối được',
+      asking: 'Đang kiểm tra…',
       noLogin:
         'Key của server chưa đăng nhập được GitHub hay GitLab, nên clone qua SSH sẽ bị từ chối.',
       keys: 'Khóa SSH trên server',

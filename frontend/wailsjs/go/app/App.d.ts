@@ -222,6 +222,8 @@ export function GitDiff(arg1:string,arg2:git.DiffRequest):Promise<git.Diff>;
 
 export function GitFind(arg1:string,arg2:Array<string>):Promise<Array<git.Repo>>;
 
+export function GitHostLogin(arg1:string,arg2:string):Promise<git.HostLogin>;
+
 export function GitIdentity(arg1:string):Promise<git.Identity>;
 
 export function GitInitCommand(arg1:string,arg2:string,arg3:string):Promise<string>;

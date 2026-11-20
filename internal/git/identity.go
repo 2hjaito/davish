@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"davish/internal/apperr"
 	"davish/internal/shellx"
 )
 
@@ -27,7 +28,8 @@ type Identity struct {
 	// Helper is git's credential.helper, which keeps HTTPS tokens.
 	Helper string   `json:"helper"`
 	Keys   []SSHKey `json:"keys"`
-	// Hosts are GitHub and GitLab as reached over SSH with the server's keys.
+	// Hosts are GitHub and GitLab as reached over SSH with the server's
+	// keys; empty from Identity, which does not ask them.
 	Hosts []HostLogin `json:"hosts"`
 }
 
@@ -62,17 +64,34 @@ type HostLogin struct {
 // identityHosts are the hosts asked, in order: those whose key is pinned.
 var identityHosts = []string{"github.com", "gitlab.com"}
 
-// Identity reads who the session is and which code hosts accept its keys.
+// Identity reads who the session is: quick, as it runs no network call.
+// Hosts is left empty; HostLogins fills it.
 func (s *Service) Identity(ctx context.Context, serverID string) (Identity, error) {
-	args := []string{"-s", "--"}
-	for _, h := range identityHosts {
-		args = append(args, knownHosts[h])
-	}
-	res, err := s.run.RunInput(ctx, serverID, app, shellx.Cmd("sh", args...).String(), []byte(identityScript))
+	res, err := s.run.RunInput(ctx, serverID, app, shellx.Cmd("sh", "-s", "--", "local").String(), []byte(identityScript))
 	if err != nil {
 		return Identity{}, err
 	}
 	return parseIdentity(sections(string(res.Stdout))), nil
+}
+
+// IdentityHosts are the code hosts HostLogin can ask: those whose SSH
+// host key is pinned.
+var IdentityHosts = identityHosts
+
+// HostLogin asks one code host which account the server's keys sign in
+// as. Each host is its own call, so a slow or blocked one (many servers
+// never reach GitLab) holds up nothing else; it gives up after 8 seconds.
+func (s *Service) HostLogin(ctx context.Context, serverID, host string) (HostLogin, error) {
+	key, ok := knownHosts[host]
+	if !ok {
+		return HostLogin{}, apperr.New(apperr.InvalidInput, "not a known code host")
+	}
+	line := shellx.Cmd("sh", "-s", "--", "hosts", key).String()
+	res, err := s.run.RunInput(ctx, serverID, app, line, []byte(identityScript))
+	if err != nil {
+		return HostLogin{}, err
+	}
+	return parseLogin(host, sections(string(res.Stdout))["host:"+host]), nil
 }
 
 func parseIdentity(sec map[string]string) Identity {
@@ -86,13 +105,6 @@ func parseIdentity(sec map[string]string) Identity {
 		Helper:   one("helper"),
 		Keys:     parseKeys(sec["keys"]),
 		Hosts:    []HostLogin{},
-	}
-	for _, h := range identityHosts {
-		out, ok := sec["host:"+h]
-		if !ok {
-			continue
-		}
-		id.Hosts = append(id.Hosts, parseLogin(h, out))
 	}
 	return id
 }

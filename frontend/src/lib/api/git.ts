@@ -169,8 +169,16 @@ export interface Identity {
   hosts: HostLogin[]
 }
 
+/** The quick part: no network call, hosts left empty. */
 export const gitIdentity = (serverID: string): Promise<Identity> =>
   App.GitIdentity(serverID) as Promise<Identity>
+
+/** The code hosts gitHostLogin can ask (internal/git.identityHosts). */
+export const CODE_HOSTS = ['github.com', 'gitlab.com'] as const
+
+/** Asks one code host which account the server's keys sign in as; 8 s at most. */
+export const gitHostLogin = (serverID: string, host: string): Promise<HostLogin> =>
+  App.GitHostLogin(serverID, host) as Promise<HostLogin>
 
 export const gitInitCommand = (dir: string, remote: string, url: string): Promise<string> =>
   App.GitInitCommand(dir, remote, url)

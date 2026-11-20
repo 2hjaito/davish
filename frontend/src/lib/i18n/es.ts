@@ -715,6 +715,7 @@ const es = {
         'Un repo público se clona al momento. Uno privado necesita un token: Davish abre una terminal para que lo escribas.',
       run: 'Clonar',
       cloning: 'Clonando…',
+      checking: (host: string) => `Comprobando las claves del servidor con ${host}…`,
       needsTerminal:
         'El remoto pide iniciar sesión. Abre una terminal con el comando escrito, pulsa Enter y escribe allí el usuario y el token:',
       next: 'Vista previa',
@@ -737,11 +738,10 @@ const es = {
         'Los commits hechos en el servidor llevan este nombre y correo. Cámbialos con git config --global user.name y user.email en una terminal.',
       helper: 'Almacén de tokens HTTPS',
       noHelper: 'Ninguno, HTTPS pide el token cada vez',
-      hosts: 'GitHub y GitLab por SSH',
+      hosts: 'Sesiones de code host por SSH',
       loginOk: (account: string) => `Sesión iniciada como ${account}`,
       loginDeploy: (repo: string) => `Deploy key de ${repo}`,
-      loginDenied: 'Ninguna clave aceptada',
-      loginUnreachable: 'No se pudo conectar',
+      asking: 'Comprobando…',
       noLogin:
         'Las claves del servidor no inician sesión ni en GitHub ni en GitLab, así que un clon por SSH sería rechazado.',
       keys: 'Claves SSH en el servidor',

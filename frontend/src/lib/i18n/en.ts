@@ -693,6 +693,7 @@ const en = {
         'A public repo clones right away. A private one needs a token: Davish opens a terminal for you to type it.',
       run: 'Clone',
       cloning: 'Cloning…',
+      checking: (host: string) => `Checking the server's keys with ${host}…`,
       needsTerminal:
         'The remote wants a login. Open a terminal with the command typed, press Enter, then give the username and token there:',
       next: 'Preview',
@@ -715,11 +716,10 @@ const en = {
         'Commits made on the server carry this name and email. Change them with git config --global user.name and user.email in a terminal.',
       helper: 'HTTPS token storage',
       noHelper: 'None, HTTPS asks for a token each time',
-      hosts: 'GitHub and GitLab over SSH',
+      hosts: 'Code host sign-ins over SSH',
       loginOk: (account: string) => `Signed in as ${account}`,
       loginDeploy: (repo: string) => `Deploy key of ${repo}`,
-      loginDenied: 'No key accepted',
-      loginUnreachable: 'Could not connect',
+      asking: 'Checking…',
       noLogin:
         "The server's keys sign in to neither GitHub nor GitLab, so a clone over SSH would be refused.",
       keys: 'SSH keys on the server',

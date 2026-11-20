@@ -16,12 +16,22 @@
     repo?: string
     /** Who the server works as, to tell whether an SSH clone can run here. */
     identity?: Identity | null
+    /** Code hosts still being asked which account the keys sign in as. */
+    pending?: string[]
     /** A clone finished in dir. */
     oncloned?: (dir: string) => void
     onclose: () => void
   }
 
-  let { serverID, mode, repo = '', identity = null, oncloned, onclose }: Props = $props()
+  let {
+    serverID,
+    mode,
+    repo = '',
+    identity = null,
+    pending = [],
+    oncloned,
+    onclose,
+  }: Props = $props()
   const g = t.git.clone
 
   let url = $state('')
@@ -136,6 +146,8 @@
   {#if info && mode === 'clone'}
     {#if !info.ssh}
       <p class="status"><Icon name="info" size={13} /> {g.httpsNote}</p>
+    {:else if pending.includes(info.host)}
+      <p class="status">{g.checking(info.host)}</p>
     {:else if login?.state === 'ok'}
       <p class="status ok">
         <Icon name="check" size={13} />

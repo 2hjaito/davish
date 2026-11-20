@@ -394,6 +394,10 @@ export function GitFind(arg1, arg2) {
   return window['go']['app']['App']['GitFind'](arg1, arg2);
 }
 
+export function GitHostLogin(arg1, arg2) {
+  return window['go']['app']['App']['GitHostLogin'](arg1, arg2);
+}
+
 export function GitIdentity(arg1) {
   return window['go']['app']['App']['GitIdentity'](arg1);
 }
