@@ -86,7 +86,7 @@ func (s *Service) HostLogin(ctx context.Context, serverID, host string) (HostLog
 	if !ok {
 		return HostLogin{}, apperr.New(apperr.InvalidInput, "not a known code host")
 	}
-	line := shellx.Cmd("sh", "-s", "--", "hosts", key).String()
+	line := shellx.Cmd("sh", "-s", "--", "host", key).String()
 	res, err := s.run.RunInput(ctx, serverID, app, line, []byte(identityScript))
 	if err != nil {
 		return HostLogin{}, err
