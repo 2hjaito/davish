@@ -212,6 +212,8 @@ export function FleetStop(arg1:string):Promise<void>;
 
 export function GitBranches(arg1:string,arg2:string):Promise<Array<git.Branch>>;
 
+export function GitClone(arg1:string,arg2:git.CloneSpec):Promise<git.Result>;
+
 export function GitDeployInfo(arg1:string,arg2:string):Promise<git.DeployInfo>;
 
 export function GitDeployLine(arg1:string,arg2:Array<git.Step>):Promise<git.Deploy>;
@@ -219,6 +221,10 @@ export function GitDeployLine(arg1:string,arg2:Array<git.Step>):Promise<git.Depl
 export function GitDiff(arg1:string,arg2:git.DiffRequest):Promise<git.Diff>;
 
 export function GitFind(arg1:string,arg2:Array<string>):Promise<Array<git.Repo>>;
+
+export function GitHostLogin(arg1:string,arg2:string):Promise<git.HostLogin>;
+
+export function GitIdentity(arg1:string):Promise<git.Identity>;
 
 export function GitInitCommand(arg1:string,arg2:string,arg3:string):Promise<string>;
 

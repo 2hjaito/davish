@@ -4,6 +4,7 @@ import { t } from '../../lib/i18n'
 import { STAT_IDS } from '../../lib/shell/statIds'
 
 export const PANES = [
+  'account',
   'general',
   'appearance',
   'performance',
@@ -13,6 +14,7 @@ export const PANES = [
   'editor',
   'alerts',
   'security',
+  'about',
 ] as const
 
 export type Pane = (typeof PANES)[number]
@@ -25,8 +27,10 @@ export function paneLabel(p: Pane): string {
 function words(p: Pane): string[] {
   const s = t.settings
   switch (p) {
+    case 'account':
+      return [s.profileName, s.avatarPick, s.lock, s.lockAfter, s.lockChange]
     case 'general':
-      return [s.language, s.updates, s.autoUpdate, s.checkNow]
+      return [s.language]
     case 'appearance':
       return [s.theme, ...Object.values(s.themes), s.wallpaper, s.monoFont]
     case 'performance':
@@ -52,7 +56,9 @@ function words(p: Pane): string[] {
     case 'alerts':
       return [s.alertMem, s.alertDisk, s.alertHold]
     case 'security':
-      return [s.lock, s.lockAfter, s.lockChange, s.sudoForget]
+      return [s.sudoForget]
+    case 'about':
+      return ['Davish', s.updates, s.autoUpdate, s.checkNow]
   }
 }
 

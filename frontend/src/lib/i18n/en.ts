@@ -530,6 +530,7 @@ const en = {
   git: {
     repos: 'Repos',
     search: 'Search files or commits',
+    searchRepos: 'Search repos',
     tabs: { changes: 'Changes', history: 'History' },
     finding: 'Finding repos…',
     offline: 'Server not connected',
@@ -681,14 +682,51 @@ const en = {
       branchDefault: 'the default branch',
       remote: 'Remote name',
       remoteHint: (dir: string) => `In ${dir}. An existing remote is changed, a new one added.`,
-      sshPinned: (host: string) =>
-        `SSH needs a key ${host} accepts, such as a deploy key. ${host}'s published host key is added to known_hosts first, so ssh does not ask to trust it.`,
-      sshUnpinned: (host: string) =>
-        `SSH needs a key ${host} accepts, such as a deploy key. The first time, ssh shows ${host}'s fingerprint: compare it with the one the host publishes before typing yes.`,
+      sshUnknown: (host: string) =>
+        `SSH needs a key ${host} accepts, such as a deploy key. Without one, the clone opens a terminal for ssh to ask.`,
+      sshDenied: (host: string) =>
+        `The server has no key ${host} accepts. Create a deploy key and add it to the repo, or clone with an HTTPS URL.`,
+      readyAs: (host: string, account: string) => `The server signs in to ${host} as ${account}.`,
+      readyDeploy: (host: string, repo: string) =>
+        `The server has a deploy key of ${repo} on ${host}; it can only clone that repo.`,
+      httpsNote:
+        'A public repo clones right away. A private one needs a token: Davish opens a terminal for you to type it.',
+      run: 'Clone',
+      cloning: 'Cloning…',
+      checking: (host: string) => `Checking the server's keys with ${host}…`,
+      needsTerminal:
+        'The remote wants a login. Open a terminal with the command typed, press Enter, then give the username and token there:',
       next: 'Preview',
       commandIntro:
         'Opens a terminal with this command typed in; press Enter to run it. HTTPS may ask for a user name and token there. Command:',
       open: 'Open in Terminal',
+    },
+    account: {
+      title: 'Account',
+      loading: 'Reading the account…',
+      failed: 'Could not read the account',
+      server: 'On the server',
+      sshUser: 'SSH user',
+      home: 'Home folder',
+      hostname: 'Hostname',
+      gitName: 'Name (user.name)',
+      gitEmail: 'Email (user.email)',
+      notSet: 'Not set',
+      gitHint:
+        'Commits made on the server carry this name and email. Change them with git config --global user.name and user.email in a terminal.',
+      helper: 'HTTPS token storage',
+      noHelper: 'None, HTTPS asks for a token each time',
+      hosts: 'Code host sign-ins over SSH',
+      loginOk: (account: string) => `Signed in as ${account}`,
+      loginDeploy: (repo: string) => `Deploy key of ${repo}`,
+      asking: 'Checking…',
+      noLogin:
+        "The server's keys sign in to neither GitHub nor GitLab, so a clone over SSH would be refused.",
+      keys: 'SSH keys on the server',
+      noKeys: 'No keys in ~/.ssh.',
+      openKeys: 'Open SSH Keys',
+      readOnly:
+        "Read only. Davish asks GitHub and GitLab with ssh -T using the server's keys, trusts only their published host keys, and writes nothing on the server.",
     },
     deployKey: 'Create a deploy key',
     deployKeyHint:
@@ -1024,7 +1062,9 @@ const en = {
       settings: {
         does: 'Language, light or dark theme, appearance, fonts, alert thresholds, app lock, Terminal prompt.',
         actions: [
-          'App lock: choose how long an unused sudo password is kept (15 minutes by default, per server)',
+          'Account (top of the sidebar): name, picture, app lock password and Touch ID; the name and picture show on the lock screen and stay on this computer',
+          'Security: choose how long an unused sudo password is kept (15 minutes by default, per server)',
+          'About Davish (bottom of the sidebar): version, license, update checks',
         ],
         keys: [],
         runs: [],
@@ -1194,7 +1234,8 @@ const en = {
           'No git on the server: types the install command for its Linux into a terminal',
           'Fetch, Pull (blocked when the repo is dirty), switch branch through a confirmation dialog',
           'Install dependencies from the lockfile in Terminal',
-          'Clone a repository (SSH host key of GitHub/GitLab pinned), git init, set a remote: typed into a terminal',
+          'Account at the top of the sidebar: SSH user, git name and email, the GitHub/GitLab account the server keys sign in to (read only)',
+          'Clone a repository with one button when the server has an accepted key or the repo is public; one that needs a token is typed into a terminal. git init, set a remote: typed into a terminal',
           'Deploy: Davish finds how to build and what runs the app (pm2, systemd, compose), you switch steps on or off; runs in a terminal with progress, history and a notification when done',
           'Add folders to search for repos',
         ],
@@ -1202,6 +1243,8 @@ const en = {
         runs: [
           'git status, log, diff',
           'git fetch, git pull --ff-only, git switch (with confirmation)',
+          'git clone into an empty folder (git refuses one that has files)',
+          'Account: id, git config --global, ssh-keygen -l, ssh -T git@github.com and git@gitlab.com (read only)',
           'When Deploy opens: reads package.json, pm2 jlist, systemctl show, docker ps (read only)',
         ],
       },
@@ -1368,6 +1411,7 @@ const en = {
     sleep: 'Sleep display',
     quit: 'Quit Davish',
     wakeHint: 'Click or press any key to continue',
+    wakeHintLocked: 'Click or press any key to enter the lock password',
   },
   sudo: {
     title: (server: string) => `sudo password for ${server}`,
@@ -1984,6 +2028,19 @@ const en = {
   settings: {
     general: 'General',
     security: 'Security',
+    account: 'Account',
+    accountHint: 'Profile, app lock',
+    profileName: 'Name',
+    profileNamePlaceholder: 'Your name',
+    avatarPick: 'Choose picture…',
+    avatarRemove: 'Remove picture',
+    avatarBad: 'Only PNG, JPEG or WebP pictures under 20 MB.',
+    profileHint:
+      'Your name and picture stay on this computer and show in Settings and on the lock screen. Nothing is sent anywhere.',
+    about: 'About Davish',
+    license: 'Open source under the GPL-3.0 license.',
+    lockMoved: 'The app lock password and Touch ID are under Account.',
+    openAccount: 'Open Account',
     search: 'Search',
     noResults: 'No results',
     back: 'Back',

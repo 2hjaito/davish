@@ -270,3 +270,49 @@ func TestFindOnServerWithoutGit(t *testing.T) {
 		t.Errorf("err = %v, want CMD_MISSING", err)
 	}
 }
+
+func TestIdentityAndClone(t *testing.T) {
+	m, id := testsshd.Connect(t)
+	s := git.New(audit.NewRunner(m, audit.New(discard{})))
+	ctx := context.Background()
+	testsshd.Run(t, m, id, `set -e; rm -rf ~/gitclone; mkdir -p ~/gitclone; cd ~/gitclone
+git init -q --bare -b main src.git
+git -c user.name=T -c user.email=t@example.com clone -q src.git w 2>/dev/null; cd w
+git -c user.name=T -c user.email=t@example.com commit -q --allow-empty -m one; git push -q origin HEAD:main 2>/dev/null
+mkdir -p ~/gitclone/full; echo x > ~/gitclone/full/f`)
+	t.Cleanup(func() { testsshd.Run(t, m, id, `rm -rf ~/gitclone`) })
+
+	me, err := s.Identity(ctx, id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if me.User != "tester" || me.Home != "/home/tester" {
+		t.Errorf("identity = %+v", me)
+	}
+	// The test container may have no way out; each host still answers.
+	for _, h := range git.IdentityHosts {
+		if l, err := s.HostLogin(ctx, id, h); err != nil || l.Host != h {
+			t.Errorf("%s = %+v, %v", h, l, err)
+		}
+	}
+	if _, err := s.HostLogin(ctx, id, "evil.example.com"); err == nil {
+		t.Error("unknown host asked")
+	}
+
+	// A local path is not a URL Davish clones; an https one that cannot be
+	// reached fails without a prompt, and a full folder is left alone.
+	if _, err := s.Clone(ctx, id, git.CloneSpec{URL: "/home/tester/gitclone/src.git", Dir: "/home/tester/gitclone/a"}); err == nil {
+		t.Error("local path accepted")
+	}
+	r, err := s.Clone(ctx, id, git.CloneSpec{URL: "https://127.0.0.1:1/o/a.git", Dir: "/home/tester/gitclone/full"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Error == "" {
+		t.Errorf("clone into a full folder = %+v", r)
+	}
+	out := testsshd.Run(t, m, id, `cat ~/gitclone/full/f`)
+	if strings.TrimSpace(out) != "x" {
+		t.Errorf("full folder changed: %q", out)
+	}
+}

@@ -2359,6 +2359,86 @@ export namespace git {
 	        this.untracked = source["untracked"];
 	    }
 	}
+	export class HostLogin {
+	    host: string;
+	    state: string;
+	    account: string;
+	    deploy: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new HostLogin(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.host = source["host"];
+	        this.state = source["state"];
+	        this.account = source["account"];
+	        this.deploy = source["deploy"];
+	    }
+	}
+	export class SSHKey {
+	    type: string;
+	    bits: number;
+	    fingerprint: string;
+	    comment: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SSHKey(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.type = source["type"];
+	        this.bits = source["bits"];
+	        this.fingerprint = source["fingerprint"];
+	        this.comment = source["comment"];
+	    }
+	}
+	export class Identity {
+	    user: string;
+	    home: string;
+	    host: string;
+	    gitName: string;
+	    gitEmail: string;
+	    helper: string;
+	    keys: SSHKey[];
+	    hosts: HostLogin[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Identity(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.user = source["user"];
+	        this.home = source["home"];
+	        this.host = source["host"];
+	        this.gitName = source["gitName"];
+	        this.gitEmail = source["gitEmail"];
+	        this.helper = source["helper"];
+	        this.keys = this.convertValues(source["keys"], SSHKey);
+	        this.hosts = this.convertValues(source["hosts"], HostLogin);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	
 	export class Plan {
 	    command: string;
@@ -2403,6 +2483,7 @@ export namespace git {
 	        this.error = source["error"];
 	    }
 	}
+	
 	export class Status {
 	    branch: string;
 	    upstream: string;

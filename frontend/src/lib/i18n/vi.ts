@@ -526,6 +526,7 @@ const vi = {
   git: {
     repos: 'Repo',
     search: 'Tìm file hoặc commit',
+    searchRepos: 'Tìm repo',
     tabs: { changes: 'Thay đổi', history: 'Lịch sử' },
     finding: 'Đang tìm repo…',
     offline: 'Server chưa kết nối',
@@ -669,14 +670,51 @@ const vi = {
       branchDefault: 'nhánh mặc định',
       remote: 'Tên remote',
       remoteHint: (dir: string) => `Trong ${dir}. Remote đã có thì đổi URL, chưa có thì thêm mới.`,
-      sshPinned: (host: string) =>
-        `SSH cần một key được ${host} chấp nhận, ví dụ deploy key. Host key ${host} công bố được thêm vào known_hosts trước nên ssh không hỏi tin hay không.`,
-      sshUnpinned: (host: string) =>
-        `SSH cần một key được ${host} chấp nhận, ví dụ deploy key. Lần đầu ssh hiện fingerprint của ${host}: so với fingerprint host công bố trước khi gõ yes.`,
+      sshUnknown: (host: string) =>
+        `SSH cần một key được ${host} chấp nhận, ví dụ deploy key. Chưa có thì clone sẽ mở Terminal để ssh hỏi.`,
+      sshDenied: (host: string) =>
+        `Server chưa có key được ${host} chấp nhận. Tạo deploy key rồi thêm vào repo, hoặc clone bằng URL HTTPS.`,
+      readyAs: (host: string, account: string) => `Server đăng nhập ${host} là ${account}.`,
+      readyDeploy: (host: string, repo: string) =>
+        `Server có deploy key của ${repo} trên ${host}; key này chỉ clone được repo đó.`,
+      httpsNote:
+        'Repo public clone được ngay. Repo private cần token: Davish sẽ mở Terminal để bạn nhập.',
+      run: 'Clone',
+      cloning: 'Đang clone…',
+      checking: (host: string) => `Đang kiểm tra key của server với ${host}…`,
+      needsTerminal:
+        'Remote cần đăng nhập. Mở Terminal với lệnh gõ sẵn, nhấn Enter rồi nhập tên người dùng và token ở đó:',
       next: 'Xem trước',
       commandIntro:
         'Mở Terminal với lệnh gõ sẵn; nhấn Enter để chạy. HTTPS có thể hỏi tên người dùng và token ở đó. Lệnh:',
       open: 'Mở trong Terminal',
+    },
+    account: {
+      title: 'Tài khoản',
+      loading: 'Đang đọc tài khoản…',
+      failed: 'Không đọc được tài khoản',
+      server: 'Trên server',
+      sshUser: 'Người dùng SSH',
+      home: 'Thư mục home',
+      hostname: 'Tên máy',
+      gitName: 'Tên (user.name)',
+      gitEmail: 'Email (user.email)',
+      notSet: 'Chưa đặt',
+      gitHint:
+        'Commit tạo trên server mang tên và email này. Đổi bằng git config --global user.name và user.email trong Terminal.',
+      helper: 'Lưu token HTTPS',
+      noHelper: 'Không, HTTPS hỏi token mỗi lần',
+      hosts: 'Đăng nhập code host qua SSH',
+      loginOk: (account: string) => `Đăng nhập là ${account}`,
+      loginDeploy: (repo: string) => `Deploy key của ${repo}`,
+      asking: 'Đang kiểm tra…',
+      noLogin:
+        'Key của server chưa đăng nhập được GitHub hay GitLab, nên clone qua SSH sẽ bị từ chối.',
+      keys: 'Khóa SSH trên server',
+      noKeys: 'Chưa có key nào trong ~/.ssh.',
+      openKeys: 'Mở Khóa SSH',
+      readOnly:
+        'Chỉ đọc. Davish hỏi GitHub và GitLab bằng ssh -T với key của server, tin đúng host key họ công bố, không ghi gì lên server.',
     },
     deployKey: 'Tạo deploy key',
     deployKeyHint:
@@ -1006,7 +1044,9 @@ const vi = {
       settings: {
         does: 'Ngôn ngữ, chế độ sáng tối, giao diện, phông, ngưỡng cảnh báo, khóa app, prompt Terminal.',
         actions: [
-          'Khóa app: chọn thời gian giữ mật khẩu sudo khi không dùng (mặc định 15 phút, theo từng server)',
+          'Tài khoản (đầu sidebar): họ tên, ảnh đại diện, mật khẩu khóa app và Touch ID; tên và ảnh hiện ở màn hình khóa, chỉ lưu trên máy này',
+          'Bảo mật: chọn thời gian giữ mật khẩu sudo khi không dùng (mặc định 15 phút, theo từng server)',
+          'Về Davish (cuối sidebar): phiên bản, giấy phép, tự kiểm tra cập nhật',
         ],
         keys: [],
         runs: [],
@@ -1178,7 +1218,8 @@ const vi = {
         does: 'Repo trên server: nhánh, ahead/behind, file thay đổi, diff, biểu đồ commit.',
         actions: [
           'Server chưa cài git: gõ sẵn lệnh cài theo bản Linux vào Terminal',
-          'Clone repo (ghim host key GitHub/GitLab), git init, đặt remote: gõ sẵn vào Terminal',
+          'Tài khoản ở đầu sidebar: người dùng SSH, tên và email git, tài khoản GitHub/GitLab mà key của server đăng nhập được (chỉ đọc)',
+          'Clone repo bằng một nút khi server đã có key được chấp nhận hoặc repo public; repo cần token thì gõ sẵn vào Terminal. git init, đặt remote: gõ sẵn vào Terminal',
           'Deploy: Davish tìm cách build và app đang chạy (pm2, systemd, compose), bạn bật/tắt từng bước; chạy trong Terminal với tiến trình, lịch sử và thông báo khi xong',
           'Fetch, Pull (chặn khi repo bẩn), đổi nhánh qua hộp xác nhận',
           'Cài dependency theo lockfile trong Terminal',
@@ -1188,6 +1229,8 @@ const vi = {
         runs: [
           'git status, log, diff',
           'git fetch, git pull --ff-only, git switch (có xác nhận)',
+          'git clone vào thư mục trống (git từ chối thư mục có sẵn file)',
+          'Tài khoản: id, git config --global, ssh-keygen -l, ssh -T git@github.com và git@gitlab.com (chỉ đọc)',
           'Khi mở Deploy: đọc package.json, pm2 jlist, systemctl show, docker ps (chỉ đọc)',
         ],
       },
@@ -1352,6 +1395,7 @@ const vi = {
     sleep: 'Ngủ màn hình',
     quit: 'Thoát Davish',
     wakeHint: 'Bấm chuột hoặc nhấn phím bất kỳ để tiếp tục',
+    wakeHintLocked: 'Bấm chuột hoặc nhấn phím bất kỳ để nhập mật khẩu khóa',
   },
   sudo: {
     title: (server: string) => `Mật khẩu sudo cho ${server}`,
@@ -1958,6 +2002,19 @@ const vi = {
   settings: {
     general: 'Chung',
     security: 'Bảo mật',
+    account: 'Tài khoản',
+    accountHint: 'Hồ sơ, khóa app',
+    profileName: 'Họ tên',
+    profileNamePlaceholder: 'Tên của bạn',
+    avatarPick: 'Chọn ảnh…',
+    avatarRemove: 'Xóa ảnh',
+    avatarBad: 'Chỉ nhận ảnh PNG, JPEG hoặc WebP dưới 20 MB.',
+    profileHint:
+      'Tên và ảnh chỉ lưu trên máy này, hiện ở Cài đặt và màn hình khóa. Không gửi đi đâu.',
+    about: 'Về Davish',
+    license: 'Mã nguồn mở, giấy phép GPL-3.0.',
+    lockMoved: 'Mật khẩu khóa app và Touch ID nằm ở Tài khoản.',
+    openAccount: 'Mở Tài khoản',
     search: 'Tìm kiếm',
     noResults: 'Không có kết quả',
     back: 'Quay lại',

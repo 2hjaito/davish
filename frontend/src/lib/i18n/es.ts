@@ -549,6 +549,7 @@ const es = {
   git: {
     repos: 'Repositorios',
     search: 'Buscar archivos o commits',
+    searchRepos: 'Buscar repos',
     tabs: { changes: 'Cambios', history: 'Historial' },
     finding: 'Buscando repositorios…',
     offline: 'Servidor no conectado',
@@ -702,14 +703,52 @@ const es = {
       branchDefault: 'la rama por defecto',
       remote: 'Nombre del remoto',
       remoteHint: (dir: string) => `En ${dir}. Si el remoto ya existe se cambia; si no, se añade.`,
-      sshPinned: (host: string) =>
-        `SSH necesita una clave que ${host} acepte, como una deploy key. La clave de host publicada de ${host} se añade antes a known_hosts, para que ssh no pregunte si confiar en ella.`,
-      sshUnpinned: (host: string) =>
-        `SSH necesita una clave que ${host} acepte, como una deploy key. La primera vez, ssh muestra la huella de ${host}: compárala con la que publica el host antes de escribir yes.`,
+      sshUnknown: (host: string) =>
+        `SSH necesita una clave que ${host} acepte, como una deploy key. Sin ella, el clon abre una terminal para que ssh pregunte.`,
+      sshDenied: (host: string) =>
+        `El servidor no tiene ninguna clave que ${host} acepte. Crea una deploy key y añádela al repo, o clona con una URL HTTPS.`,
+      readyAs: (host: string, account: string) =>
+        `El servidor inicia sesión en ${host} como ${account}.`,
+      readyDeploy: (host: string, repo: string) =>
+        `El servidor tiene una deploy key de ${repo} en ${host}; solo puede clonar ese repo.`,
+      httpsNote:
+        'Un repo público se clona al momento. Uno privado necesita un token: Davish abre una terminal para que lo escribas.',
+      run: 'Clonar',
+      cloning: 'Clonando…',
+      checking: (host: string) => `Comprobando las claves del servidor con ${host}…`,
+      needsTerminal:
+        'El remoto pide iniciar sesión. Abre una terminal con el comando escrito, pulsa Enter y escribe allí el usuario y el token:',
       next: 'Vista previa',
       commandIntro:
         'Abre un terminal con este comando escrito; pulsa Intro para ejecutarlo. Con HTTPS puede pedir ahí un usuario y un token. Comando:',
       open: 'Abrir en Terminal',
+    },
+    account: {
+      title: 'Cuenta',
+      loading: 'Leyendo la cuenta…',
+      failed: 'No se pudo leer la cuenta',
+      server: 'En el servidor',
+      sshUser: 'Usuario SSH',
+      home: 'Carpeta home',
+      hostname: 'Nombre del equipo',
+      gitName: 'Nombre (user.name)',
+      gitEmail: 'Correo (user.email)',
+      notSet: 'Sin definir',
+      gitHint:
+        'Los commits hechos en el servidor llevan este nombre y correo. Cámbialos con git config --global user.name y user.email en una terminal.',
+      helper: 'Almacén de tokens HTTPS',
+      noHelper: 'Ninguno, HTTPS pide el token cada vez',
+      hosts: 'Sesiones de code host por SSH',
+      loginOk: (account: string) => `Sesión iniciada como ${account}`,
+      loginDeploy: (repo: string) => `Deploy key de ${repo}`,
+      asking: 'Comprobando…',
+      noLogin:
+        'Las claves del servidor no inician sesión ni en GitHub ni en GitLab, así que un clon por SSH sería rechazado.',
+      keys: 'Claves SSH en el servidor',
+      noKeys: 'No hay claves en ~/.ssh.',
+      openKeys: 'Abrir Claves SSH',
+      readOnly:
+        'Solo lectura. Davish pregunta a GitHub y GitLab con ssh -T usando las claves del servidor, confía solo en sus claves de host publicadas y no escribe nada en el servidor.',
     },
     deployKey: 'Crear una deploy key',
     deployKeyHint:
@@ -1047,7 +1086,9 @@ const es = {
       settings: {
         does: 'Idioma, tema claro u oscuro, apariencia, fuentes, umbrales de alerta, bloqueo de la app, prompt de Terminal.',
         actions: [
-          'Bloqueo de la app: elige cuánto se guarda una contraseña de sudo sin usar (15 minutos por defecto, por servidor)',
+          'Cuenta (arriba en la barra lateral): nombre, imagen, contraseña de bloqueo y Touch ID; el nombre y la imagen se ven en la pantalla de bloqueo y se quedan en este equipo',
+          'Seguridad: elige cuánto se guarda una contraseña de sudo sin usar (15 minutos por defecto, por servidor)',
+          'Acerca de Davish (abajo en la barra lateral): versión, licencia, buscar actualizaciones',
         ],
         keys: [],
         runs: [],
@@ -1217,7 +1258,8 @@ const es = {
           'Sin git en el servidor: escribe en un terminal el comando de instalación para su Linux',
           'Fetch, Pull (bloqueado si el repositorio tiene cambios), cambiar de rama mediante un diálogo de confirmación',
           'Instalar dependencias desde el lockfile en Terminal',
-          'Clonar un repositorio (clave de host SSH de GitHub/GitLab fijada), git init, configurar un remoto: escrito en un terminal',
+          'Cuenta arriba en la barra lateral: usuario SSH, nombre y correo de git, la cuenta de GitHub/GitLab en la que entran las claves del servidor (solo lectura)',
+          'Clonar un repositorio con un botón cuando el servidor tiene una clave aceptada o el repo es público; uno que pide token se escribe en un terminal. git init, configurar un remoto: escrito en un terminal',
           'Desplegar: Davish averigua cómo compilar y qué ejecuta la app (pm2, systemd, compose), tú activas o desactivas los pasos; se ejecuta en un terminal con progreso, historial y un aviso al terminar',
           'Añadir carpetas donde buscar repositorios',
         ],
@@ -1225,6 +1267,8 @@ const es = {
         runs: [
           'git status, log, diff',
           'git fetch, git pull --ff-only, git switch (con confirmación)',
+          'git clone en una carpeta vacía (git rechaza una con archivos)',
+          'Cuenta: id, git config --global, ssh-keygen -l, ssh -T git@github.com y git@gitlab.com (solo lectura)',
           'Al abrir Desplegar: lee package.json, pm2 jlist, systemctl show, docker ps (solo lectura)',
         ],
       },
@@ -1394,6 +1438,7 @@ const es = {
     sleep: 'Apagar la pantalla',
     quit: 'Salir de Davish',
     wakeHint: 'Haz clic o pulsa cualquier tecla para continuar',
+    wakeHintLocked: 'Haz clic o pulsa cualquier tecla para escribir la contraseña de bloqueo',
   },
   sudo: {
     title: (server: string) => `Contraseña de sudo para ${server}`,
@@ -2020,6 +2065,19 @@ const es = {
   settings: {
     general: 'General',
     security: 'Seguridad',
+    account: 'Cuenta',
+    accountHint: 'Perfil, bloqueo de la app',
+    profileName: 'Nombre',
+    profileNamePlaceholder: 'Tu nombre',
+    avatarPick: 'Elegir imagen…',
+    avatarRemove: 'Quitar imagen',
+    avatarBad: 'Solo imágenes PNG, JPEG o WebP de menos de 20 MB.',
+    profileHint:
+      'Tu nombre e imagen se quedan en este equipo y se ven en Ajustes y en la pantalla de bloqueo. No se envía nada.',
+    about: 'Acerca de Davish',
+    license: 'Código abierto con licencia GPL-3.0.',
+    lockMoved: 'La contraseña de bloqueo y Touch ID están en Cuenta.',
+    openAccount: 'Abrir Cuenta',
     search: 'Buscar',
     noResults: 'Sin resultados',
     back: 'Atrás',

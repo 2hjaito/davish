@@ -8,6 +8,8 @@ import type {
   DeployLine,
   DeployStep,
   Diff,
+  HostLogin,
+  Identity,
   DiffRequest,
   GitOp,
   OpResult,
@@ -277,3 +279,40 @@ export function mockDeployLine(dir: string, steps: DeployStep[]): Promise<Deploy
     sudo: kept.some((s) => /(^|[\s;&|(])sudo\s/.test(s.command)),
   })
 }
+
+export const mockIdentity = (): Promise<Identity> =>
+  delay({
+    user: 'deploy',
+    home: '/home/deploy',
+    host: 'web-1',
+    gitName: 'Deploy Bot',
+    gitEmail: 'deploy@example.com',
+    helper: '',
+    keys: [
+      {
+        type: 'ED25519',
+        bits: 256,
+        fingerprint: 'SHA256:q1w2e3r4t5y6u7i8o9p0',
+        comment: 'deploy@web-1',
+      },
+    ],
+    hosts: [],
+  })
+
+// GitHub answers at once; GitLab, which this server never reaches, late.
+export const mockHostLogin = (host: string): Promise<HostLogin> =>
+  host === 'github.com'
+    ? delay({ host, state: 'ok', account: 'octocat', deploy: false }, 600)
+    : delay({ host, state: 'unreachable', account: '', deploy: false }, 4000)
+
+// A private https repository needs a token, so it goes to a terminal.
+export const mockClone = (_serverID: string, spec: CloneSpec): Promise<OpResult> =>
+  delay(
+    spec.url.includes('private')
+      ? {
+          output:
+            "fatal: could not read Username for 'https://github.com': terminal prompts disabled",
+          error: 'GIT_AUTH_FAILED',
+        }
+      : { output: `Cloning into '${spec.dir}'...`, error: '' },
+  )

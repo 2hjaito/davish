@@ -1,5 +1,7 @@
 <script lang="ts">
   import AppIcon from '../../lib/ui/AppIcon.svelte'
+  import DavishMark from '../../lib/ui/DavishMark.svelte'
+  import ProfileAvatar from '../../lib/ui/ProfileAvatar.svelte'
   import type { Pane } from './panes'
 
   interface Props {
@@ -18,7 +20,7 @@
 
   // The rest are drawn by the app icon rules (ADR 0003): one bold filled
   // shape on a rich vertical gradient. Colors are artwork, not tokens.
-  const BG: Record<Pane, [string, string]> = {
+  const BG: Record<Exclude<Pane, 'account' | 'about'>, [string, string]> = {
     general: ['#f5f6f9', '#b3b7c2'],
     appearance: ['#8a93ff', '#3a3fd0'],
     performance: ['#ffbe4d', '#f06a00'],
@@ -34,11 +36,15 @@
   const ref = (name: string) => `${uid}-${name}`
   const url = (name: string) => `url(#${ref(name)})`
   const app = $derived(APP[pane])
-  const [top, bottom] = $derived(BG[pane])
+  const [top, bottom] = $derived(pane === 'account' || pane === 'about' ? ['', ''] : BG[pane])
 </script>
 
 <span class="tile" style:--size="{size}px">
-  {#if app}
+  {#if pane === 'account'}
+    <ProfileAvatar {size} />
+  {:else if pane === 'about'}
+    <DavishMark {size} />
+  {:else if app}
     <AppIcon id={app} {size} />
   {:else}
     <svg viewBox="0 0 64 64" width={size} height={size} aria-hidden="true">

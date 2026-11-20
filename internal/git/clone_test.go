@@ -56,3 +56,28 @@ func TestInitCommand(t *testing.T) {
 		t.Errorf("init = %s, %v", c, err)
 	}
 }
+
+func TestPlanCloneQuiet(t *testing.T) {
+	p, err := planClone(CloneSpec{URL: "https://github.com/o/a.git", Dir: "/srv/a"}, true)
+	if err != nil || p.Command != "env GIT_TERMINAL_PROMPT=0 timeout 900 git clone -- https://github.com/o/a.git /srv/a" {
+		t.Errorf("quiet = %+v, %v", p, err)
+	}
+	p, _ = planClone(CloneSpec{URL: "git@github.com:o/a.git", Dir: "/srv/a"}, true)
+	if !strings.HasSuffix(p.Command, "; } && env GIT_TERMINAL_PROMPT=0 timeout 900 git clone -- git@github.com:o/a.git /srv/a") {
+		t.Errorf("quiet ssh = %s", p.Command)
+	}
+}
+
+func TestCloneError(t *testing.T) {
+	for out, want := range map[string]string{
+		"fatal: destination path '/srv/a' already exists and is not an empty directory.":                             "FS_EXISTS",
+		"fatal: could not create leading directories of '/x/a': Permission denied":                                   "FS_PERMISSION_DENIED",
+		"git@github.com: Permission denied (publickey).\nfatal: Could not read from remote":                          "GIT_AUTH_FAILED",
+		"fatal: could not read Username for 'https://github.com': terminal prompts disabled":                         "GIT_AUTH_FAILED",
+		"warning: Could not find remote branch dev to clone.\nfatal: Remote branch dev not found in upstream origin": "NOT_FOUND",
+	} {
+		if got := cloneError(128, out); string(got) != want {
+			t.Errorf("%q = %s, want %s", out, got, want)
+		}
+	}
+}

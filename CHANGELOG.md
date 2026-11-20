@@ -4,6 +4,15 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Git: tài khoản ở đầu sidebar, kèm ô tìm repo. Trang tài khoản cho biết người dùng SSH, tên và email git, có lưu token HTTPS không, các key trong `~/.ssh` và tài khoản GitHub/GitLab mà key của server đăng nhập được (chỉ đọc, mỗi host hỏi riêng, host không kết nối tới thì ẩn).
+- Cài đặt: mục **Tài khoản** ở đầu sidebar với họ tên, ảnh đại diện và mật khẩu khóa app (chuyển từ Bảo mật sang). Tên và ảnh chỉ lưu trên máy này, hiện ở màn hình khóa và màn hình ngủ.
+
+### Đổi
+- Git: Clone chạy bằng một nút khi server đã có key được chấp nhận hoặc repo public, xong thì mở luôn repo mới. Repo cần token mới gõ sẵn lệnh vào Terminal như trước.
+- Cài đặt: thẻ Davish trước đây mở trang Chung nên bị trùng; giờ là **Về Davish** ở cuối sidebar, chứa phiên bản, giấy phép và phần cập nhật.
+- Màn hình ngủ hiện ảnh và tên của bạn như macOS; đã bật khóa app thì thức dậy sẽ hỏi mật khẩu.
+
 ## [1.14.8] - 2026-11-19
 
 ### Đổi

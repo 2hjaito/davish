@@ -46,6 +46,7 @@ const ICONS = {
   upload: 'FiUpload',
   download: 'FiDownload',
   lock: 'FiLock',
+  user: 'FiUser',
   fingerprint: 'LuFingerprintPattern',
   key: 'FiKey',
   package: 'FiPackage',

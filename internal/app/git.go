@@ -68,3 +68,23 @@ func (a *App) GitDeployInfo(serverID, dir string) (git.DeployInfo, error) {
 func (a *App) GitDeployLine(dir string, steps []git.Step) (git.Deploy, error) {
 	return git.DeployLine(dir, steps)
 }
+
+// GitIdentity reads who the session is on the server and which code hosts
+// accept its SSH keys.
+func (a *App) GitIdentity(serverID string) (git.Identity, error) {
+	return a.git.Identity(a.ctx, serverID)
+}
+
+// GitClone runs a clone the server can do without a prompt.
+func (a *App) GitClone(serverID string, spec git.CloneSpec) (git.Result, error) {
+	if err := a.lock.Check(); err != nil {
+		return git.Result{}, err
+	}
+	return a.git.Clone(a.change(), serverID, spec)
+}
+
+// GitHostLogin asks one code host which account the server's SSH keys
+// sign in as.
+func (a *App) GitHostLogin(serverID, host string) (git.HostLogin, error) {
+	return a.git.HostLogin(a.ctx, serverID, host)
+}

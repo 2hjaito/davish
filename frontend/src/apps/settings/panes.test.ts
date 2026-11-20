@@ -17,6 +17,13 @@ describe('searchPanes', () => {
     expect(searchPanes('dock')).toContain('dock')
   })
 
+  it('puts the account first and Davish last, with the lock under the account', () => {
+    expect(PANES[0]).toBe('account')
+    expect(PANES[PANES.length - 1]).toBe('about')
+    expect(searchPanes('khóa app')).toContain('account')
+    expect(searchPanes('kiểm tra ngay')).toEqual(['about'])
+  })
+
   it('finds nothing for unknown words', () => {
     expect(searchPanes('zzzz')).toEqual([])
   })

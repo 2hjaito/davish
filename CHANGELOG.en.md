@@ -4,6 +4,15 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Added
+- Git: an account at the top of the sidebar, with a search over the repositories. Its page shows the SSH user, git's name and email, whether HTTPS tokens are stored, the keys in `~/.ssh` and the GitHub/GitLab account the server's keys sign in to (read only; each host is asked on its own, and one the server never reaches is left out).
+- Settings: an **Account** pane at the top of the sidebar with your name, picture and the app lock password (moved from Security). The name and picture stay on this computer and show on the lock and sleep screens.
+
+### Changed
+- Git: Clone runs with one button when the server has an accepted key or the repository is public, then opens the new repository. Only one that needs a token is typed into a terminal, as before.
+- Settings: the Davish card used to open General, so the two were the same; it is now **About Davish** at the bottom of the sidebar, with the version, license and updates.
+- The sleep screen shows your picture and name, as on macOS; with the app lock on, waking from it asks for the password.
+
 ## [1.14.8] - 2026-11-19
 
 ### Changed
