@@ -1262,6 +1262,8 @@
     background:
       radial-gradient(circle, var(--picked, transparent) 0 38%, transparent 40%),
       conic-gradient(#ff6b6b, #ffd93d, #6bcb77, #4dd4e6, #4d96ff, #b06bff, #ff6bb5, #ff6b6b);
+    /* Inside the border only: under the see-through border the wheel's corners showed as a square. */
+    background-clip: padding-box;
   }
 
   .custom-slot {
