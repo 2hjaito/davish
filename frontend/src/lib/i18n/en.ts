@@ -2085,6 +2085,11 @@ const en = {
     perfNoCompositingHint: 'Makes WebKitGTK paint on the CPU. Applies after a restart.',
     perfCheck: 'Check again',
     perfChecking: 'Measuring…',
+    perfProbing: 'Trying Beautiful to time it; the look changes for a moment…',
+    perfResult: (fps: number, preset: string) =>
+      `About ${fps} frames per second. Best here: ${preset}.`,
+    perfOnIt: ' You are on it.',
+    perfUse: (preset: string) => `Use ${preset}`,
     perfSlow: 'This computer is painting slowly. Light would be easier on it.',
     perfFine: 'This computer is keeping up with the current look.',
     perfSuggestTitle: 'Switch to Light?',

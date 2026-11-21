@@ -18,6 +18,12 @@
   let { win, focused, theme, children }: Props = $props()
 
   const frame = $derived(wm.frame(win))
+  // On whole device pixels: a window at x = 230.5 draws its text and icons
+  // between pixels, which looks soft.
+  const px = (v: number) => Math.round(v * devicePixelRatio) / devicePixelRatio
+  // A drag is the only time the window needs its own layer; keeping one all
+  // the time lets WebKit reuse a raster made mid-animation, blurring icons.
+  let moving = $state(false)
   const edges: Edge[] = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw']
   /** Pointer travel before a title-bar press counts as a drag. */
   const DRAG_SLOP = 3
@@ -116,6 +122,7 @@
         if (!dragging) {
           if (Math.hypot(dx, dy) < DRAG_SLOP) return
           dragging = true
+          moving = true
           start = wm.unsnapForDrag(win.id, ev.clientX) ?? win.rect
           origin = { x: ev.clientX, y: ev.clientY }
           return
@@ -126,6 +133,7 @@
       },
       () => {
         wm.snapPreview = null
+        moving = false
         if (!dragging) return
         if (zone) wm.snap(win.id, zone)
         else wm.commit(win.id)
@@ -171,9 +179,10 @@
   class:minimized={win.minimized}
   class:snapped={win.snap !== null}
   class:animating={win.animating}
+  class:moving
   aria-label={t.window.label(win.title)}
   aria-hidden={win.minimized}
-  style:translate="{frame.x}px {frame.y}px"
+  style:translate="{px(frame.x)}px {px(frame.y)}px"
   style:width="{frame.w}px"
   style:height="{frame.h}px"
   style:z-index={win.z}
@@ -206,12 +215,16 @@
     /* Apps lay out by their window's width, not the screen's: a snapped window is narrow on any screen. */
     container: window / inline-size;
     transform-origin: center;
-    will-change: translate, transform;
     transition:
       opacity var(--dur) var(--ease-out),
       transform var(--dur-slow) var(--ease-out),
       box-shadow var(--dur) var(--ease-out),
       visibility 0s;
+  }
+
+  .window.animating,
+  .window.moving {
+    will-change: translate, transform;
   }
 
   /* Snap and maximize glide to the new frame; drags and resizes stay instant. */

@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { clampFontSize, resolveTheme, settings, TERMINAL_FONT, WALLPAPER_ACCENTS } from './settings.svelte'
+import {
+  clampFontSize,
+  resolveTheme,
+  settings,
+  TERMINAL_FONT,
+  WALLPAPER_ACCENTS,
+} from './settings.svelte'
 
 describe('clampFontSize', () => {
   it.each([

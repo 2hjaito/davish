@@ -2058,6 +2058,11 @@ const vi = {
     perfNoCompositingHint: 'Buộc WebKitGTK vẽ bằng CPU. Có hiệu lực sau khi khởi động lại.',
     perfCheck: 'Kiểm tra lại',
     perfChecking: 'Đang đo…',
+    perfProbing: 'Đang thử mức Đẹp để đo, giao diện đổi trong giây lát…',
+    perfResult: (fps: number, preset: string) =>
+      `Đo được khoảng ${fps} khung hình/giây. Nên dùng: ${preset}.`,
+    perfOnIt: ' Bạn đang dùng mức này.',
+    perfUse: (preset: string) => `Dùng ${preset}`,
     perfSlow: 'Máy này vẽ chậm. Mức Nhẹ sẽ nhẹ hơn.',
     perfFine: 'Máy này vẽ mượt với giao diện hiện tại.',
     perfSuggestTitle: 'Dùng mức Nhẹ?',

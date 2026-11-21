@@ -576,7 +576,26 @@
             {#if settings.perfPreset === 'custom'}
               <small>{t.settings.perfCustom}</small>
             {/if}
-            {#if perfCheck.last === 'slow'}
+            {#if perfCheck.running && perfCheck.probing}
+              <small>{t.settings.perfProbing}</small>
+            {:else if perfCheck.pick}
+              {@const pick = perfCheck.pick}
+              <div class="perf-result">
+                <small>
+                  {t.settings.perfResult(perfCheck.fps, t.settings.perfPresets[pick])}
+                  {#if settings.perfPreset === pick}{t.settings.perfOnIt}{/if}
+                </small>
+                {#if settings.perfPreset !== pick}
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    onclick={() => settings.usePreset(pick)}
+                  >
+                    {t.settings.perfUse(t.settings.perfPresets[pick])}
+                  </button>
+                {/if}
+              </div>
+            {:else if perfCheck.last === 'slow'}
               <small>{t.settings.perfSlow}</small>
             {:else if perfCheck.last === 'fine'}
               <small>{t.settings.perfFine}</small>
@@ -1110,6 +1129,14 @@
     padding: 2px;
     border-radius: 8px;
     background: var(--fill-soft);
+  }
+
+  .perf-result {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
   }
 
   .preset-line {

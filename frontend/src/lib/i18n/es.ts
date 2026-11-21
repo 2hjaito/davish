@@ -2128,6 +2128,11 @@ const es = {
     perfNoCompositingHint: 'Hace que WebKitGTK dibuje con la CPU. Se aplica al reiniciar.',
     perfCheck: 'Comprobar de nuevo',
     perfChecking: 'Midiendo…',
+    perfProbing: 'Probando Bonito para medir; el aspecto cambia un momento…',
+    perfResult: (fps: number, preset: string) =>
+      `Unos ${fps} fotogramas por segundo. Lo mejor aquí: ${preset}.`,
+    perfOnIt: ' Ya lo usas.',
+    perfUse: (preset: string) => `Usar ${preset}`,
     perfSlow: 'Este equipo dibuja lento. Ligero le costaría menos.',
     perfFine: 'Este equipo sigue el aspecto actual.',
     perfSuggestTitle: '¿Pasar a Ligero?',

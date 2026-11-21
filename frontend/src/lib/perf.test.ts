@@ -2,12 +2,15 @@ import { describe, expect, it } from 'vitest'
 
 import {
   frameP95,
+  framesPerSecond,
   knobsEqual,
   machineIsSlow,
   migratePerf,
   PRESET_KNOBS,
   presetMatching,
+  recommendPreset,
   SLOW_FRAME_MS,
+  SMOOTH_FRAME_MS,
 } from './perf'
 
 describe('presetMatching', () => {
@@ -71,5 +74,33 @@ describe('machineIsSlow', () => {
   it('does not nag on a short sample', () => {
     expect(machineIsSlow('NVIDIA', [40, 40, 40])).toBe(false)
     expect(frameP95([10, 20, 30, 40])).toBe(30)
+  })
+})
+
+describe('recommendPreset', () => {
+  const frames = (ms: number) => Array.from({ length: 60 }, () => ms)
+
+  it('is Beautiful when frames stay smooth', () => {
+    expect(recommendPreset('Apple M2', frames(16.7))).toBe('beautiful')
+  })
+
+  it('is Balanced between smooth and slow', () => {
+    expect(recommendPreset('Apple M2', frames(SMOOTH_FRAME_MS + 4))).toBe('balanced')
+  })
+
+  it('is Light when slow or drawn in software', () => {
+    expect(recommendPreset('Apple M2', frames(SLOW_FRAME_MS + 5))).toBe('light')
+    expect(recommendPreset('llvmpipe (LLVM 15.0.7, 256 bits)', frames(16.7))).toBe('light')
+  })
+
+  it('trusts a short sample to be smooth', () => {
+    expect(recommendPreset('Apple M2', [40, 40])).toBe('beautiful')
+  })
+})
+
+describe('framesPerSecond', () => {
+  it('reads the median frame gap', () => {
+    expect(framesPerSecond([16.7, 16.6, 16.7, 50])).toBe(60)
+    expect(framesPerSecond([])).toBe(0)
   })
 })

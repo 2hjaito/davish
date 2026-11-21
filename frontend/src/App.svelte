@@ -5,6 +5,7 @@
   import { setWindowBackground } from './lib/api/runtime'
   import Desktop from './lib/shell/Desktop.svelte'
   import LockScreen from './lib/shell/LockScreen.svelte'
+  import { perfCheck } from './lib/shell/perfCheck.svelte'
   import { appLock } from './lib/stores/lock.svelte'
   import { resolveTheme, settings } from './lib/stores/settings.svelte'
   import { mixWallpaper } from './lib/wallpaper'
@@ -13,7 +14,7 @@
 
   $effect(() => {
     const root = document.documentElement
-    const knobs = settings.knobs
+    const knobs = perfCheck.probing ?? settings.knobs
     root.dataset.theme = resolveTheme(settings.theme, systemDark.current)
     root.dataset.perfBlur = String(knobs.blur)
     root.dataset.perfOpaque = String(knobs.opaque)
