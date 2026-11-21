@@ -2033,6 +2033,7 @@ const zh = {
     perfRestart: '重新启动',
     perfRestartHint: 'WebKit 的绘制方式会在 Davish 重启后生效。',
     wallpaper: '壁纸颜色',
+    wallpaperCustom: '选择任意颜色',
     wallpaperColor: (c: string) => `颜色 ${c}`,
     menubar: '菜单栏',
     menubarStats: '菜单栏中的指标',

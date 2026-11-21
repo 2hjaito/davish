@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { clampFontSize, resolveTheme, TERMINAL_FONT } from './settings.svelte'
+import { clampFontSize, resolveTheme, settings, TERMINAL_FONT, WALLPAPER_ACCENTS } from './settings.svelte'
 
 describe('clampFontSize', () => {
   it.each([
@@ -28,5 +28,19 @@ describe('resolveTheme', () => {
     ['dark', false, 'dark'],
   ] as const)('resolveTheme(%s, systemDark=%s) = %s', (theme, systemDark, want) => {
     expect(resolveTheme(theme, systemDark)).toBe(want)
+  })
+})
+
+describe('wallpaperAccent', () => {
+  it('keeps any #rrggbb color, lowercased', () => {
+    settings.set('wallpaperAccent', '#12AB9F')
+    expect(settings.wallpaperAccent).toBe('#12ab9f')
+  })
+
+  it('falls back to the first swatch for anything else', () => {
+    for (const bad of ['red', '#fff', 'url(x)', '']) {
+      settings.set('wallpaperAccent', bad)
+      expect(settings.wallpaperAccent).toBe(WALLPAPER_ACCENTS[0])
+    }
   })
 })

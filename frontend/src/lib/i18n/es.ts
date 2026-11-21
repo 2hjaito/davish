@@ -2137,6 +2137,7 @@ const es = {
     perfRestart: 'Reiniciar',
     perfRestartHint: 'El cambio de renderizado de WebKit se aplica al reiniciar Davish.',
     wallpaper: 'Color del fondo de escritorio',
+    wallpaperCustom: 'Elegir cualquier color',
     wallpaperColor: (c: string) => `Color ${c}`,
     menubar: 'Barra de menús',
     menubarStats: 'Lecturas en la barra de menús',

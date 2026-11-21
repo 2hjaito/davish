@@ -41,6 +41,18 @@
   let { win }: AppProps = $props()
   const ctx = getWindowContext()
 
+  // A color picked outside the swatches. Dragging in the picker fires input
+  // on every move; only the color it rests on is applied and saved.
+  const customAccent = $derived(
+    !(WALLPAPER_ACCENTS as readonly string[]).includes(settings.wallpaperAccent),
+  )
+  let accentTimer: ReturnType<typeof setTimeout> | undefined
+  function pickAccent(color: string) {
+    clearTimeout(accentTimer)
+    accentTimer = setTimeout(() => settings.set('wallpaperAccent', color.toLowerCase()), 120)
+  }
+  $effect(() => () => clearTimeout(accentTimer))
+
   // Like System Settings: a sidebar of panes, back and forward between the
   // ones visited, and the last one shown again next time.
   const saved = load<Pane>('settingsPane', 'general')
@@ -495,6 +507,21 @@
         <div class="card">
           <div class="row">
             <div class="swatches" role="radiogroup" aria-label={t.settings.wallpaper}>
+              <label
+                class="swatch custom"
+                class:on={customAccent}
+                title={t.settings.wallpaperCustom}
+                style:--picked={customAccent ? settings.wallpaperAccent : undefined}
+              >
+                <input
+                  type="color"
+                  role="radio"
+                  aria-checked={customAccent}
+                  aria-label={t.settings.wallpaperCustom}
+                  value={settings.wallpaperAccent}
+                  oninput={(e) => pickAccent(e.currentTarget.value)}
+                />
+              </label>
               {#each WALLPAPER_ACCENTS as c (c)}
                 <button
                   class="swatch"
@@ -1183,9 +1210,28 @@
     transform: scale(1.12);
   }
 
-  .swatch[aria-checked='true'] {
+  .swatch[aria-checked='true'],
+  .swatch.custom.on {
     border-color: var(--content-bg);
     box-shadow: 0 0 0 2px var(--accent);
+  }
+
+  /* Any color: a color wheel, showing the picked color in its middle once chosen. */
+  .swatch.custom {
+    position: relative;
+    cursor: pointer;
+    background:
+      radial-gradient(circle, var(--picked, transparent) 0 38%, transparent 40%),
+      conic-gradient(#ff6b6b, #ffd93d, #6bcb77, #4dd4e6, #4d96ff, #b06bff, #ff6bb5, #ff6b6b);
+  }
+
+  .swatch.custom input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
   }
 
   /* A narrow window keeps only the tiles, as in Files and Monitor. */

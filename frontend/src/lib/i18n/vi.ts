@@ -2067,6 +2067,7 @@ const vi = {
     perfRestart: 'Khởi động lại',
     perfRestartHint: 'Cách vẽ của WebKit đổi sau khi Davish khởi động lại.',
     wallpaper: 'Màu hình nền',
+    wallpaperCustom: 'Chọn màu bất kỳ',
     wallpaperColor: (c: string) => `Màu ${c}`,
     menubar: 'Thanh menu',
     menubarStats: 'Số liệu trên thanh menu',

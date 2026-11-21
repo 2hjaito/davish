@@ -2094,6 +2094,7 @@ const en = {
     perfRestart: 'Restart',
     perfRestartHint: 'The WebKit rendering change applies after Davish restarts.',
     wallpaper: 'Wallpaper color',
+    wallpaperCustom: 'Pick any color',
     wallpaperColor: (c: string) => `Color ${c}`,
     menubar: 'Menu bar',
     menubarStats: 'Readings in the menu bar',

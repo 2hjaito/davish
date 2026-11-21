@@ -12,7 +12,19 @@ import {
 import { DEFAULT_STATS, STAT_IDS, type StatId } from '../shell/statIds'
 import { load, save } from './persist'
 
-export const WALLPAPER_ACCENTS = ['#8fb2ff', '#c3a6ff', '#9fe0c8', '#ffb38a'] as const
+export const WALLPAPER_ACCENTS = [
+  '#8fb2ff',
+  '#c3a6ff',
+  '#9fe0c8',
+  '#ffb38a',
+  '#ffa3c7',
+  '#ffd97a',
+  '#8fd8f0',
+  '#c4c9d4',
+] as const
+
+/** A wallpaper color: one of the swatches or any color picked, as #rrggbb. */
+const HEX_COLOR = /^#[0-9a-f]{6}$/i
 
 export const TERMINAL_FONT = { min: 10, max: 20, step: 0.5, default: 12.5 } as const
 
@@ -231,7 +243,8 @@ class Settings {
     save('settings', this.#data)
   }
   get wallpaperAccent() {
-    return this.#data.wallpaperAccent
+    const c = this.#data.wallpaperAccent
+    return typeof c === 'string' && HEX_COLOR.test(c) ? c.toLowerCase() : WALLPAPER_ACCENTS[0]
   }
   get terminalPrompt() {
     return this.#data.terminalPrompt !== false
