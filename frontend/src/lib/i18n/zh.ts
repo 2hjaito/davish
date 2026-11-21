@@ -1974,6 +1974,7 @@ const zh = {
     account: '账户',
     accountHint: '个人资料、应用锁',
     profileName: '名字',
+    profileNameEdit: '编辑姓名',
     profileNamePlaceholder: '你的名字',
     avatarPick: '选择图片…',
     avatarRemove: '移除图片',

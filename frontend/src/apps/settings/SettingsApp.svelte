@@ -114,6 +114,7 @@
   // The account picture: a file from this computer, cropped square and
   // shrunk (as a shortcut icon), kept only in settings.json.
   let avatarMsg = $state('')
+  let editingName = $state(false)
   async function pickAvatar(e: Event) {
     const input = e.currentTarget as HTMLInputElement
     const file = input.files?.[0]
@@ -330,33 +331,66 @@
         </div>
       {:else if pane === 'account'}
         <div class="profile">
-          <ProfileAvatar size={64} />
-          <div class="profile-actions">
-            <label class="btn">
-              {t.settings.avatarPick}
-              <input class="file" type="file" accept={IMAGE_ACCEPT} onchange={pickAvatar} />
+          <div class="avatar-edit">
+            <label class="avatar-pick" title={t.settings.avatarPick}>
+              <ProfileAvatar size={88} />
+              <span class="avatar-cover" aria-hidden="true"><Icon name="camera" size={26} /></span>
+              <input
+                class="file"
+                type="file"
+                accept={IMAGE_ACCEPT}
+                aria-label={t.settings.avatarPick}
+                onchange={pickAvatar}
+              />
             </label>
             {#if profile.avatar}
-              <button class="btn" onclick={() => profile.set({ avatar: '' })}
-                >{t.settings.avatarRemove}</button
+              <button
+                class="avatar-remove"
+                aria-label={t.settings.avatarRemove}
+                title={t.settings.avatarRemove}
+                onclick={() => profile.set({ avatar: '' })}
               >
+                <Icon name="trash" size={13} />
+              </button>
             {/if}
-            {#if avatarMsg}<small class="msg">{avatarMsg}</small>{/if}
           </div>
-        </div>
-        <div class="card">
-          <label class="row">
-            {@render head(t.settings.profileName)}
+          {#if editingName}
+            <!-- svelte-ignore a11y_autofocus -->
             <input
-              class="input pick"
+              class="input name-input"
               type="text"
               maxlength={MAX_NAME}
               placeholder={t.settings.profileNamePlaceholder}
+              aria-label={t.settings.profileName}
               spellcheck="false"
+              autofocus
               value={profile.name}
-              onchange={(e) => profile.set({ name: e.currentTarget.value })}
+              onkeydown={(e) => {
+                if (e.key === 'Enter') e.currentTarget.blur()
+                if (e.key === 'Escape') {
+                  e.currentTarget.value = profile.name
+                  editingName = false
+                }
+              }}
+              onblur={(e) => {
+                if (editingName) profile.set({ name: e.currentTarget.value.trim() })
+                editingName = false
+              }}
             />
-          </label>
+          {:else}
+            <button
+              class="name-edit"
+              title={t.settings.profileNameEdit}
+              aria-label={t.settings.profileNameEdit}
+              onclick={() => (editingName = true)}
+            >
+              <strong class:empty={!profile.name}
+                >{profile.name || t.settings.profileNamePlaceholder}</strong
+              >
+              <Icon name="editor" size={14} />
+            </button>
+          {/if}
+          {#if avatarMsg}<small class="msg">{avatarMsg}</small>{/if}
         </div>
         <p class="intro">{t.settings.profileHint}</p>
 
@@ -1001,17 +1035,107 @@
     padding: 8px 0 4px;
   }
 
-  .profile-actions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
+  .profile .msg {
+    text-align: center;
   }
 
-  .profile-actions .msg {
-    flex-basis: 100%;
+  /* The picture: hover shows a camera to change it, and a bin to remove it. */
+  .avatar-edit {
+    position: relative;
+  }
+
+  .avatar-pick {
+    position: relative;
+    display: block;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .avatar-cover {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.42);
+    color: #fff;
+    opacity: 0;
+    transition: opacity var(--dur-fast) var(--ease-out);
+  }
+
+  .avatar-pick:hover .avatar-cover,
+  .avatar-pick:focus-within .avatar-cover {
+    opacity: 1;
+  }
+
+  .avatar-pick:focus-within {
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .avatar-remove {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: 50%;
+    border: 2px solid var(--content-bg);
+    background: var(--danger);
+    color: var(--fg-on-accent);
+    opacity: 0;
+    transform: scale(0.8);
+    transition:
+      opacity var(--dur-fast) var(--ease-out),
+      transform var(--dur-fast) var(--ease-spring);
+  }
+
+  .avatar-edit:hover .avatar-remove,
+  .avatar-remove:focus-visible {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* The name under the picture; the pencil turns it into a field. */
+  .name-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--fg);
+    font-size: 18px;
+  }
+
+  .name-edit strong {
+    font-weight: 600;
+  }
+
+  .name-edit strong.empty {
+    color: var(--fg-muted);
+    font-weight: 500;
+  }
+
+  .name-edit :global(svg) {
+    color: var(--fg-muted);
+  }
+
+  .name-edit:hover {
+    background: var(--fill-soft);
+  }
+
+  .name-edit:hover :global(svg) {
+    color: var(--accent);
+  }
+
+  .name-input {
+    width: min(280px, 100%);
     text-align: center;
+    font-size: var(--text-lg);
   }
 
   .file {
