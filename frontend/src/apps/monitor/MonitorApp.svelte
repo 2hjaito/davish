@@ -151,7 +151,7 @@
           <Empty icon="server" title={t.monitor.noReadings} hint={t.monitor.noReadingsHint} />
         {/if}
       {:else if section === 'processes'}
-        <ProcessesView serverID={win.serverID} paused={frozen !== null} />
+        <ProcessesView serverID={win.serverID} paused={frozen !== null || !ctx.showing} />
       {:else if !data}
         <Empty icon="monitor" title={t.monitor.waiting} />
       {:else}

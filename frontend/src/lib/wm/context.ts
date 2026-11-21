@@ -6,6 +6,8 @@ export interface WindowContext {
   readonly win: WindowState
   readonly focused: boolean
   readonly theme: 'light' | 'dark'
+  /** On screen right now: not minimized, on the active server, app not hidden. Pollers stop when false. */
+  readonly showing: boolean
   startDrag(e: PointerEvent): void
   toggleMaximize(e: MouseEvent): void
 }

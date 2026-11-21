@@ -6,6 +6,8 @@
   import { setWindowContext } from './context'
   import { type Edge, type Rect, resizeRect, snapZone, zoneRect } from './geometry'
   import { genieFrame } from './genie'
+  import { servers } from '../stores/servers.svelte'
+  import { pageVisible } from './pageVisible.svelte'
   import { type WindowState, wm } from './windowManager.svelte'
 
   interface Props {
@@ -165,6 +167,9 @@
     },
     get theme() {
       return theme
+    },
+    get showing() {
+      return !win.minimized && win.serverID === servers.activeId && pageVisible.visible
     },
     startDrag,
     toggleMaximize(e: MouseEvent) {
