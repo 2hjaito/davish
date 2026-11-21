@@ -17,7 +17,7 @@ Không cài gì lên server.
 ![Svelte](https://img.shields.io/badge/Svelte-5-FF3E00?logo=svelte&logoColor=white)
 [![Discord](https://profilyze.vercel.app/api/badge/social?platform=discord&value=Join+The+Code+Well&theme=outline)](https://discord.com/invite/eG5txdWaqr)
 
-[English](README.md) · **Tiếng Việt** · [简体中文](README.zh-CN.md) · **[davish.dangth.dev](https://davish.dangth.dev/vi/)**
+[English](README.md) · **Tiếng Việt** · [简体中文](README.zh-CN.md) · **[davish.app](https://davish.app/vi/)**
 
 <p align="center">
   <img src="assets/demo.gif" alt="Demo davish: vòng thao tác trên file, Terminal, Docker, cổng, an ninh đăng nhập và graph git qua SSH" width="800">

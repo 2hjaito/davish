@@ -1,4 +1,4 @@
-// davish.dangth.dev (ADR 0025): the landing page in src/pages, the docs
+// davish.app (ADR 0025): the landing page in src/pages, the docs
 // under /docs with Starlight. Static HTML; it never ships with the app.
 import starlight from '@astrojs/starlight'
 import { defineConfig } from 'astro/config'
@@ -10,7 +10,7 @@ const group = (en, vi, zh, dir) => ({
 })
 
 export default defineConfig({
-  site: 'https://davish.dangth.dev',
+  site: 'https://davish.app',
   // Screenshots come from the repo's assets/, outside this folder.
   vite: { server: { fs: { allow: ['..'] } } },
   integrations: [

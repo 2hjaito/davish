@@ -4,6 +4,11 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.14.10] - 2026-11-21
+
+### Sửa
+- Danh sách không có khung chi tiết dùng hết chiều ngang cửa sổ: Bảo mật hiện đủ 5 thẻ trên một hàng, bảng Docker không còn bị cắt mất cột Thao tác.
+
 ## [1.14.9] - 2026-11-20
 
 ### Thêm

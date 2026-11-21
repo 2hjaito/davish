@@ -17,7 +17,7 @@
 ![Svelte](https://img.shields.io/badge/Svelte-5-FF3E00?logo=svelte&logoColor=white)
 [![Discord](https://profilyze.vercel.app/api/badge/social?platform=discord&value=Join+The+Code+Well&theme=outline)](https://discord.com/invite/eG5txdWaqr)
 
-[English](README.md) · [Tiếng Việt](README.vi.md) · **简体中文** · **[davish.dangth.dev](https://davish.dangth.dev/zh/)**
+[English](README.md) · [Tiếng Việt](README.vi.md) · **简体中文** · **[davish.app](https://davish.app/zh/)**
 
 <p align="center">
   <img src="assets/demo.gif" alt="davish 演示：文件操作环、终端、Docker、端口、登录安全和 git 提交图，全部走 SSH" width="800">

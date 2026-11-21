@@ -4,6 +4,11 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.14.10] - 2026-11-21
+
+### Fixed
+- Lists without a detail pane take the whole width of the window: Security shows all five cards on one row, and the Docker table no longer cuts off its Actions column.
+
 ## [1.14.9] - 2026-11-20
 
 ### Added
