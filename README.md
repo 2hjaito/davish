@@ -15,6 +15,7 @@ Nothing to install on the server.
 ![Platforms](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-6b7180)
 ![Go](https://img.shields.io/badge/Go-1.27-00ADD8?logo=go&logoColor=white)
 ![Svelte](https://img.shields.io/badge/Svelte-5-FF3E00?logo=svelte&logoColor=white)
+[![Discord](https://profilyze.vercel.app/api/badge/social?platform=discord&value=Join+The+Code+Well&theme=outline)](https://discord.com/invite/eG5txdWaqr)
 
 **English** · [Tiếng Việt](README.vi.md) · [简体中文](README.zh-CN.md) · **[davish.dangth.dev](https://davish.dangth.dev)**
 
