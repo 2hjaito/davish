@@ -52,6 +52,16 @@
     accentTimer = setTimeout(() => settings.set('wallpaperAccent', color.toLowerCase()), 120)
   }
   $effect(() => () => clearTimeout(accentTimer))
+  let colorInput = $state<HTMLInputElement>()
+  function openPicker() {
+    const input = colorInput
+    if (!input) return
+    try {
+      input.showPicker()
+    } catch {
+      input.click()
+    }
+  }
 
   // Like System Settings: a sidebar of panes, back and forward between the
   // ones visited, and the last one shown again next time.
@@ -507,21 +517,26 @@
         <div class="card">
           <div class="row">
             <div class="swatches" role="radiogroup" aria-label={t.settings.wallpaper}>
-              <label
-                class="swatch custom"
-                class:on={customAccent}
-                title={t.settings.wallpaperCustom}
-                style:--picked={customAccent ? settings.wallpaperAccent : undefined}
-              >
-                <input
-                  type="color"
+              <span class="custom-slot">
+                <button
+                  class="swatch custom"
                   role="radio"
                   aria-checked={customAccent}
                   aria-label={t.settings.wallpaperCustom}
+                  title={t.settings.wallpaperCustom}
+                  style:--picked={customAccent ? settings.wallpaperAccent : undefined}
+                  onclick={openPicker}
+                ></button>
+                <!-- The native well stays off screen in all but position: WebKit draws it square. -->
+                <input
+                  bind:this={colorInput}
+                  type="color"
+                  tabindex="-1"
+                  aria-hidden="true"
                   value={settings.wallpaperAccent}
                   oninput={(e) => pickAccent(e.currentTarget.value)}
                 />
-              </label>
+              </span>
               {#each WALLPAPER_ACCENTS as c (c)}
                 <button
                   class="swatch"
@@ -1237,8 +1252,7 @@
     transform: scale(1.12);
   }
 
-  .swatch[aria-checked='true'],
-  .swatch.custom.on {
+  .swatch[aria-checked='true'] {
     border-color: var(--content-bg);
     box-shadow: 0 0 0 2px var(--accent);
   }
@@ -1252,28 +1266,23 @@
       conic-gradient(#ff6b6b, #ffd93d, #6bcb77, #4dd4e6, #4d96ff, #b06bff, #ff6bb5, #ff6b6b);
   }
 
-  .swatch.custom {
-    overflow: hidden;
+  .custom-slot {
+    position: relative;
+    display: inline-flex;
   }
 
-  /* The native color well is square in WebKit; it stays invisible and clipped to the circle. */
-  .swatch.custom input {
+  /* 1px under the wheel, so the picker opens there; never seen. */
+  .custom-slot input {
     position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
+    left: 50%;
+    bottom: 0;
+    width: 1px;
+    height: 1px;
     margin: 0;
     padding: 0;
     border: 0;
-    border-radius: 50%;
     opacity: 0;
-    cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
-  }
-
-  .swatch.custom:has(input:focus-visible) {
-    box-shadow: 0 0 0 2px var(--accent);
+    pointer-events: none;
   }
 
   /* A narrow window keeps only the tiles, as in Files and Monitor. */
