@@ -27,4 +27,33 @@ describe('buildMenus', () => {
       .map((it) => it?.label)
     expect(taken).toEqual([])
   })
+
+  // The primary modifier is ⌘ on macOS and Ctrl elsewhere. These are the
+  // keys the OS or the webview takes before the page sees them (see
+  // AGENT_REVIEW.md 2.2); a menu item on one would silently never run.
+  const reserved: Record<string, { plain: string[]; any?: string[] }> = {
+    macOS: { plain: ['Q', 'H', 'Tab', ' ', '`'] },
+    Windows: { plain: ['P'], any: ['0', '=', '-', '+'] },
+    Linux: { plain: [], any: ['0', '=', '-', '+'] },
+  }
+  // Wails adds no Window menu on macOS (main.go builds only AppMenu and
+  // EditMenu), so ⌘M is free for Minimize there. Not tried by hand yet.
+  const allowed = new Set(['M'])
+
+  for (const [os, keys] of Object.entries(reserved)) {
+    it(`keeps menu shortcuts off the keys ${os} reserves`, () => {
+      const taken = buildMenus()
+        .flatMap((m) => m.items)
+        .filter((it) => it?.combo)
+        .filter((it) => {
+          const combo = it?.combo ?? ''
+          const shifted = combo.startsWith('shift+')
+          const key = combo.replace('shift+', '')
+          if (allowed.has(key) && os === 'macOS') return false
+          return keys.any?.includes(key) || (!shifted && keys.plain.includes(key.toUpperCase()))
+        })
+        .map((it) => `${it?.label} (${it?.combo})`)
+      expect(taken).toEqual([])
+    })
+  }
 })
