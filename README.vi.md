@@ -172,3 +172,13 @@ Davish là phần mềm tự do theo [GNU General Public License v3.0](LICENSE).
 Free code signing for the Windows builds is provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org). Vai trò trong nhóm, những file được ký và những gì Davish gửi ra mạng: [CODE_SIGNING.md](CODE_SIGNING.md) (tiếng Anh).
 
 Nếu davish giúp bạn tiết kiệm thời gian, một ⭐ trên GitHub sẽ giúp rất nhiều!
+
+## Lịch sử sao
+
+<a href="https://www.star-history.com/?repos=2hjaito%2Fdavish&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=2hjaito/davish&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=2hjaito/davish&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=2hjaito/davish&type=date&legend=top-left" />
+ </picture>
+</a>
