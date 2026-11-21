@@ -2032,7 +2032,7 @@ const en = {
     account: 'Account',
     accountHint: 'Profile, app lock',
     profileName: 'Name',
-    profileNameEdit: 'Edit name',
+    profileNameEdit: 'Click to edit your name',
     profileNamePlaceholder: 'Your name',
     avatarPick: 'Choose picture…',
     avatarRemove: 'Remove picture',

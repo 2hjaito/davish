@@ -183,7 +183,11 @@
   .who {
     margin: 2px 0 -4px;
     font-size: var(--text-lg);
-    font-weight: 600;
+    font-weight: 600; /* A long name without spaces must not push past the screen's edge. */
+    max-width: min(420px, 80vw);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .lock {

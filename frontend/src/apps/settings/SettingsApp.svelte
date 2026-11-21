@@ -20,8 +20,9 @@
   import DavishMark from '../../lib/ui/DavishMark.svelte'
   import ProfileAvatar from '../../lib/ui/ProfileAvatar.svelte'
   import { MAX_NAME, profile } from '../../lib/stores/profile.svelte'
-  import { IMAGE_ACCEPT, iconImage } from '../../lib/shell/shortcutLook'
+  import { avatarImage, IMAGE_ACCEPT } from '../../lib/shell/shortcutLook'
   import Icon from '../../lib/ui/Icon.svelte'
+  import PopupMenu from '../../lib/ui/PopupMenu.svelte'
   import { getWindowContext } from '../../lib/wm/context'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import { STAT_IDS, type StatId } from '../../lib/shell/statIds'
@@ -115,13 +116,25 @@
   // shrunk (as a shortcut icon), kept only in settings.json.
   let avatarMsg = $state('')
   let editingName = $state(false)
+  // The picture's menu (Choose…, Remove), under the picture like macOS.
+  let avatarMenu = $state<{ x: number; y: number } | null>(null)
+  let avatarButton = $state<HTMLButtonElement>()
+  let avatarInput = $state<HTMLInputElement>()
+  function openAvatarMenu() {
+    if (!profile.avatar) {
+      avatarInput?.click()
+      return
+    }
+    const r = avatarButton?.getBoundingClientRect()
+    if (r) avatarMenu = { x: r.left + r.width / 2 - 100, y: r.bottom + 6 }
+  }
   async function pickAvatar(e: Event) {
     const input = e.currentTarget as HTMLInputElement
     const file = input.files?.[0]
     input.value = '' // so the same file can be picked again
     if (!file) return
     try {
-      profile.set({ avatar: await iconImage(file) })
+      profile.set({ avatar: await avatarImage(file) })
       avatarMsg = ''
     } catch {
       avatarMsg = t.settings.avatarBad
@@ -331,33 +344,30 @@
         </div>
       {:else if pane === 'account'}
         <div class="profile">
-          <div class="avatar-edit">
-            <label class="avatar-pick" title={t.settings.avatarPick}>
-              <ProfileAvatar size={88} />
-              <span class="avatar-cover" aria-hidden="true"><Icon name="camera" size={26} /></span>
-              <input
-                class="file"
-                type="file"
-                accept={IMAGE_ACCEPT}
-                aria-label={t.settings.avatarPick}
-                onchange={pickAvatar}
-              />
-            </label>
-            {#if profile.avatar}
-              <button
-                class="avatar-remove"
-                aria-label={t.settings.avatarRemove}
-                title={t.settings.avatarRemove}
-                onclick={() => profile.set({ avatar: '' })}
-              >
-                <Icon name="trash" size={13} />
-              </button>
-            {/if}
-          </div>
+          <button
+            class="avatar-edit"
+            bind:this={avatarButton}
+            aria-label={t.settings.avatarPick}
+            title={t.settings.avatarPick}
+            aria-haspopup={profile.avatar ? 'menu' : undefined}
+            onclick={openAvatarMenu}
+          >
+            <ProfileAvatar size={88} />
+            <span class="avatar-cover" aria-hidden="true"><Icon name="camera" size={24} /></span>
+          </button>
+          <input
+            class="file"
+            type="file"
+            accept={IMAGE_ACCEPT}
+            tabindex="-1"
+            aria-hidden="true"
+            bind:this={avatarInput}
+            onchange={pickAvatar}
+          />
           {#if editingName}
             <!-- svelte-ignore a11y_autofocus -->
             <input
-              class="input name-input"
+              class="name-field"
               type="text"
               maxlength={MAX_NAME}
               placeholder={t.settings.profileNamePlaceholder}
@@ -365,6 +375,7 @@
               spellcheck="false"
               autofocus
               value={profile.name}
+              onfocus={(e) => e.currentTarget.select()}
               onkeydown={(e) => {
                 if (e.key === 'Enter') e.currentTarget.blur()
                 if (e.key === 'Escape') {
@@ -379,19 +390,33 @@
             />
           {:else}
             <button
-              class="name-edit"
+              class="name-field"
+              class:empty={!profile.name}
               title={t.settings.profileNameEdit}
-              aria-label={t.settings.profileNameEdit}
               onclick={() => (editingName = true)}
             >
-              <strong class:empty={!profile.name}
-                >{profile.name || t.settings.profileNamePlaceholder}</strong
-              >
-              <Icon name="editor" size={14} />
+              {profile.name || t.settings.profileNamePlaceholder}
             </button>
           {/if}
           {#if avatarMsg}<small class="msg">{avatarMsg}</small>{/if}
         </div>
+        {#if avatarMenu}
+          <PopupMenu
+            x={avatarMenu.x}
+            y={avatarMenu.y}
+            label={t.settings.avatarPick}
+            anchor={avatarButton}
+            actions={[
+              { label: t.settings.avatarPick, run: () => avatarInput?.click() },
+              {
+                label: t.settings.avatarRemove,
+                danger: true,
+                run: () => profile.set({ avatar: '' }),
+              },
+            ]}
+            onclose={() => (avatarMenu = null)}
+          />
+        {/if}
         <p class="intro">{t.settings.profileHint}</p>
 
         <h3>{t.settings.lock}</h3>
@@ -918,6 +943,13 @@
     min-width: 0;
   }
 
+  .about-text strong,
+  .about-text small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .about-text strong {
     font-weight: 600;
   }
@@ -1039,15 +1071,14 @@
     text-align: center;
   }
 
-  /* The picture: hover shows a camera to change it, and a bin to remove it. */
+  /* The picture: hover dims it under a camera; a click changes or removes it. */
   .avatar-edit {
     position: relative;
-  }
-
-  .avatar-pick {
-    position: relative;
     display: block;
+    padding: 0;
+    border: 0;
     border-radius: 50%;
+    background: none;
     cursor: pointer;
   }
 
@@ -1057,85 +1088,62 @@
     display: grid;
     place-items: center;
     border-radius: 50%;
-    background: rgba(0, 0, 0, 0.42);
+    background: rgba(0, 0, 0, 0.4);
     color: #fff;
     opacity: 0;
     transition: opacity var(--dur-fast) var(--ease-out);
+    /* A layer of its own from the start: WebKit otherwise moves the camera by a
+       half pixel when the fade begins and ends. */
+    will-change: opacity;
   }
 
-  .avatar-pick:hover .avatar-cover,
-  .avatar-pick:focus-within .avatar-cover {
+  .avatar-edit:hover .avatar-cover,
+  .avatar-edit:focus-visible .avatar-cover {
     opacity: 1;
   }
 
-  .avatar-pick:focus-within {
+  .avatar-edit:focus-visible {
+    outline: none;
     box-shadow: 0 0 0 3px var(--accent-soft);
   }
 
-  .avatar-remove {
-    position: absolute;
-    right: -2px;
-    bottom: -2px;
-    display: grid;
-    place-items: center;
-    width: 28px;
-    height: 28px;
-    padding: 0;
-    border-radius: 50%;
-    border: 2px solid var(--content-bg);
-    background: var(--danger);
-    color: var(--fg-on-accent);
-    opacity: 0;
-    transform: scale(0.8);
-    transition:
-      opacity var(--dur-fast) var(--ease-out),
-      transform var(--dur-fast) var(--ease-spring);
-  }
-
-  .avatar-edit:hover .avatar-remove,
-  .avatar-remove:focus-visible {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  /* The name under the picture; the pencil turns it into a field. */
-  .name-edit {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 4px 10px;
-    border: 0;
+  /* The name and its field share one box, so editing does not move anything. */
+  .name-field {
+    box-sizing: border-box;
+    width: min(300px, 100%);
+    height: 34px;
+    padding: 0 10px;
+    border: 1px solid transparent;
     border-radius: 8px;
     background: transparent;
     color: var(--fg);
+    font: inherit;
     font-size: 18px;
-  }
-
-  .name-edit strong {
     font-weight: 600;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  .name-edit strong.empty {
+  button.name-field {
+    cursor: text;
+  }
+
+  button.name-field:hover {
+    background: var(--fill-soft);
+  }
+
+  button.name-field.empty {
     color: var(--fg-muted);
     font-weight: 500;
   }
 
-  .name-edit :global(svg) {
-    color: var(--fg-muted);
-  }
-
-  .name-edit:hover {
-    background: var(--fill-soft);
-  }
-
-  .name-edit:hover :global(svg) {
-    color: var(--accent);
-  }
-
-  .name-input {
-    width: min(280px, 100%);
-    text-align: center;
-    font-size: var(--text-lg);
+  input.name-field {
+    border-color: var(--accent);
+    background: var(--content-bg);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+    outline: none;
   }
 
   .file {

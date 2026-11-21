@@ -2006,7 +2006,7 @@ const vi = {
     account: 'Tài khoản',
     accountHint: 'Hồ sơ, khóa app',
     profileName: 'Họ tên',
-    profileNameEdit: 'Sửa tên',
+    profileNameEdit: 'Bấm để sửa tên',
     profileNamePlaceholder: 'Tên của bạn',
     avatarPick: 'Chọn ảnh…',
     avatarRemove: 'Xóa ảnh',

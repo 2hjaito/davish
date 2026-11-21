@@ -2069,7 +2069,7 @@ const es = {
     account: 'Cuenta',
     accountHint: 'Perfil, bloqueo de la app',
     profileName: 'Nombre',
-    profileNameEdit: 'Editar nombre',
+    profileNameEdit: 'Haz clic para editar tu nombre',
     profileNamePlaceholder: 'Tu nombre',
     avatarPick: 'Elegir imagen…',
     avatarRemove: 'Quitar imagen',
