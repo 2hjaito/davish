@@ -56,11 +56,9 @@
   function openPicker() {
     const input = colorInput
     if (!input) return
-    try {
-      input.showPicker()
-    } catch {
-      input.click()
-    }
+    // click, not showPicker: WebKit's showPicker loses the anchor and opens
+    // the panel in a screen corner; a click opens it under the wheel.
+    input.click()
   }
 
   // Like System Settings: a sidebar of panes, back and forward between the
@@ -527,7 +525,7 @@
                   style:--picked={customAccent ? settings.wallpaperAccent : undefined}
                   onclick={openPicker}
                 ></button>
-                <!-- The native well stays off screen in all but position: WebKit draws it square. -->
+                <!-- The native well hides behind the wheel: WebKit draws it square, whatever its opacity. -->
                 <input
                   bind:this={colorInput}
                   type="color"
@@ -1269,16 +1267,18 @@
   .custom-slot {
     position: relative;
     display: inline-flex;
+    isolation: isolate;
   }
 
-  /* 1px under the wheel, so the picker opens there; never seen. */
+  /* Small and centered behind the wheel, so it never shows and the picker opens under the wheel. */
   .custom-slot input {
     position: absolute;
     left: 50%;
-    bottom: 0;
-    width: 1px;
-    height: 1px;
-    margin: 0;
+    top: 50%;
+    z-index: -1;
+    width: 12px;
+    height: 12px;
+    margin: -6px 0 0 -6px;
     padding: 0;
     border: 0;
     opacity: 0;
