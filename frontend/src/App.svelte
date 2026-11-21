@@ -33,7 +33,7 @@
       requestAnimationFrame(() => (root.dataset.wallpaperReady = 'true'))
   })
 
-  // WebKit can keep the menu bar's and Dock's blur of the old wallpaper until
+  // WebKit can keep the menu bar's, Dock's and desktop icons' blur of the old wallpaper until
   // something else repaints them. Once the color has glided (tokens.css),
   // nudge their opacity by a hair, which makes it blur the new one.
   let nudge = 1
