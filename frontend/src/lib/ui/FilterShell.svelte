@@ -489,10 +489,12 @@
     border-right: 1px solid var(--divider-soft);
   }
 
+  /* No detail beside it: the whole width, not what a detail would leave. */
   .list.full {
     flex: 1;
     width: auto;
     min-width: 0;
+    max-width: none;
     border-right: 0;
   }
 
