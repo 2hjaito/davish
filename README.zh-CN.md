@@ -15,6 +15,7 @@
 ![Platforms](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-6b7180)
 ![Go](https://img.shields.io/badge/Go-1.27-00ADD8?logo=go&logoColor=white)
 ![Svelte](https://img.shields.io/badge/Svelte-5-FF3E00?logo=svelte&logoColor=white)
+[![Discord](https://profilyze.vercel.app/api/badge/social?platform=discord&value=Join+The+Code+Well&theme=outline)](https://discord.com/invite/eG5txdWaqr)
 
 [English](README.md) · [Tiếng Việt](README.vi.md) · **简体中文** · **[davish.dangth.dev](https://davish.dangth.dev/zh/)**
 
@@ -172,3 +173,13 @@ Davish 是基于 [GNU 通用公共许可证 v3.0](LICENSE) 的自由软件。贡
 Windows 版本的免费代码签名由 [SignPath.io](https://about.signpath.io) 提供，证书由 [SignPath Foundation](https://signpath.org) 颁发。团队角色、签名范围以及 Davish 会通过网络发送哪些内容：见 [CODE_SIGNING.md](CODE_SIGNING.md)。
 
 如果 davish 帮你节省了时间，在 GitHub 上点个 ⭐ 会很有帮助！
+
+## Star 历史
+
+<a href="https://www.star-history.com/?repos=2hjaito%2Fdavish&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=2hjaito/davish&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=2hjaito/davish&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=2hjaito/davish&type=date&legend=top-left" />
+ </picture>
+</a>

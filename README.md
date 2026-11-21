@@ -15,6 +15,7 @@ Nothing to install on the server.
 ![Platforms](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-6b7180)
 ![Go](https://img.shields.io/badge/Go-1.27-00ADD8?logo=go&logoColor=white)
 ![Svelte](https://img.shields.io/badge/Svelte-5-FF3E00?logo=svelte&logoColor=white)
+[![Discord](https://profilyze.vercel.app/api/badge/social?platform=discord&value=Join+The+Code+Well&theme=outline)](https://discord.com/invite/eG5txdWaqr)
 
 **English** · [Tiếng Việt](README.vi.md) · [简体中文](README.zh-CN.md) · **[davish.dangth.dev](https://davish.dangth.dev)**
 
@@ -172,3 +173,13 @@ Davish is free software under the [GNU General Public License v3.0](LICENSE). Co
 Free code signing for the Windows builds is provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org). Team roles, what is signed and what Davish sends over the network: [CODE_SIGNING.md](CODE_SIGNING.md).
 
 If davish saves you time, a ⭐ on GitHub helps a lot!
+
+## Star History
+
+<a href="https://www.star-history.com/?repos=2hjaito%2Fdavish&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=2hjaito/davish&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=2hjaito/davish&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=2hjaito/davish&type=date&legend=top-left" />
+ </picture>
+</a>
