@@ -8,6 +8,11 @@ describe('cleanProfile', () => {
     expect(cleanProfile({ name: '  Dang  ', avatar })).toEqual({ name: 'Dang', avatar })
   })
 
+  it('keeps a JPEG picture', () => {
+    const avatar = 'data:image/jpeg;base64,/9j/'
+    expect(cleanProfile({ name: 'A', avatar }).avatar).toBe(avatar)
+  })
+
   it('drops junk', () => {
     expect(cleanProfile(null)).toEqual({ name: '', avatar: '' })
     expect(cleanProfile({ name: 3, avatar: 'https://x/y.png' })).toEqual({ name: '', avatar: '' })

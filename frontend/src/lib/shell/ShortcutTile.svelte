@@ -43,6 +43,11 @@
     border-radius: var(--dock-tile-radius);
   }
 
+  /* See MenuBar: refreshes the glass's blur of the wallpaper after a color change. */
+  .glass {
+    opacity: var(--backdrop-nudge, 1);
+  }
+
   .tinted {
     color: var(--fg-on-accent);
   }

@@ -352,6 +352,30 @@
   }
 }
 
+/*
+ * The wallpaper color glides to a new pick instead of jumping. Registered as
+ * colors so the gradients can interpolate; a WebView without @property just
+ * switches at once.
+ */
+@property --wallpaper-accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #8fb2ff;
+}
+
+@property --wallpaper-flat {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #cdd7ea;
+}
+
+/* Only after the first paint: the saved color must not glide in at start. */
+:root[data-wallpaper-ready] {
+  transition:
+    --wallpaper-accent calc(var(--dur-slow) * 2) var(--ease-out),
+    --wallpaper-flat calc(var(--dur-slow) * 2) var(--ease-out);
+}
+
 /* Reduced motion: Settings toggle, or the OS preference. */
 :root[data-reduce-motion='true'] {
   --dur-fast: 0ms;

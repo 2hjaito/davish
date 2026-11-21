@@ -5,6 +5,7 @@
   import { setWindowBackground } from './lib/api/runtime'
   import Desktop from './lib/shell/Desktop.svelte'
   import LockScreen from './lib/shell/LockScreen.svelte'
+  import { perfCheck } from './lib/shell/perfCheck.svelte'
   import { appLock } from './lib/stores/lock.svelte'
   import { resolveTheme, settings } from './lib/stores/settings.svelte'
   import { mixWallpaper } from './lib/wallpaper'
@@ -13,7 +14,7 @@
 
   $effect(() => {
     const root = document.documentElement
-    const knobs = settings.knobs
+    const knobs = perfCheck.probing ?? settings.knobs
     root.dataset.theme = resolveTheme(settings.theme, systemDark.current)
     root.dataset.perfBlur = String(knobs.blur)
     root.dataset.perfOpaque = String(knobs.opaque)
@@ -28,6 +29,21 @@
     const flat = mixWallpaper(accent, base, Number.isFinite(mix) ? mix : 100)
     if (flat) root.style.setProperty('--wallpaper-flat', flat)
     setWindowBackground(!knobs.wallpaper && flat ? flat : base)
+    if (!root.dataset.wallpaperReady)
+      requestAnimationFrame(() => (root.dataset.wallpaperReady = 'true'))
+  })
+
+  // WebKit can keep the menu bar's, Dock's and desktop icons' blur of the old wallpaper until
+  // something else repaints them. Once the color has glided (tokens.css),
+  // nudge their opacity by a hair, which makes it blur the new one.
+  let nudge = 1
+  $effect(() => {
+    void settings.wallpaperAccent
+    const timer = setTimeout(() => {
+      nudge = nudge === 1 ? 0.999 : 1
+      document.documentElement.style.setProperty('--backdrop-nudge', String(nudge))
+    }, 600)
+    return () => clearTimeout(timer)
   })
 
   $effect(() => {

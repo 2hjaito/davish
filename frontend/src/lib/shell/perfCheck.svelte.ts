@@ -1,4 +1,12 @@
-import { machineIsSlow, PROBE_MS } from '../perf'
+import {
+  framesPerSecond,
+  type Knobs,
+  machineIsSlow,
+  type NamedPreset,
+  PRESET_KNOBS,
+  PROBE_MS,
+  recommendPreset,
+} from '../perf'
 import { settings } from '../stores/settings.svelte'
 
 /** The WebGL renderer, or "" when WebGL is missing. */
@@ -38,6 +46,11 @@ class PerfCheck {
   running = $state(false)
   /** Result of the latest check, for the Settings line. */
   last = $state<'idle' | 'slow' | 'fine'>('idle')
+  /** The look the latest Check again found smooth here, and the frame rate it saw. */
+  pick = $state<Exclude<NamedPreset, 'auto'> | null>(null)
+  fps = $state(0)
+  /** While Check again times frames, the look it times (Beautiful), in place of the chosen one. */
+  probing = $state<Knobs | null>(null)
 
   /**
    * Times about 1.5s of frames without blocking the UI. manual is Check
@@ -49,12 +62,23 @@ class PerfCheck {
     if (manual) this.suggestion = false
     try {
       const renderer = rendererName()
+      // Check again times the heaviest look, so its answer holds for every
+      // preset; the chosen look comes back right after.
+      if (manual) {
+        this.probing = { ...PRESET_KNOBS.beautiful }
+        await sampleFrames(100)
+      }
       const frames = await sampleFrames(PROBE_MS)
       const slow = machineIsSlow(renderer, frames)
+      if (manual) {
+        this.pick = recommendPreset(renderer, frames)
+        this.fps = framesPerSecond(frames)
+      }
       this.last = slow ? 'slow' : 'fine'
       const offer = slow && settings.perfPreset !== 'light' && (manual || !settings.perfLater)
       this.suggestion = offer
     } finally {
+      this.probing = null
       this.running = false
     }
   }

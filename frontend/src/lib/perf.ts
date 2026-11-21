@@ -180,3 +180,27 @@ export function machineIsSlow(renderer: string, samples: readonly number[]): boo
   if (samples.length < 20) return false
   return frameP95(samples) > SLOW_FRAME_MS
 }
+
+/** Frames up to this (p95) keep the Beautiful look smooth: about 50 fps or better. */
+export const SMOOTH_FRAME_MS = 20
+
+/**
+ * The look this machine draws smoothly, timed with Beautiful on: slow is
+ * Light, a tail between smooth and slow is Balanced, otherwise Beautiful.
+ */
+export function recommendPreset(
+  renderer: string,
+  samples: readonly number[],
+): Exclude<NamedPreset, 'auto'> {
+  if (machineIsSlow(renderer, samples)) return 'light'
+  if (samples.length >= 20 && frameP95(samples) > SMOOTH_FRAME_MS) return 'balanced'
+  return 'beautiful'
+}
+
+/** Frames per second from the median frame gap, rounded. 0 for no sample. */
+export function framesPerSecond(samples: readonly number[]): number {
+  if (samples.length === 0) return 0
+  const sorted = [...samples].sort((a, b) => a - b)
+  const median = sorted[Math.floor(sorted.length / 2)] ?? 0
+  return median > 0 ? Math.round(1000 / median) : 0
+}

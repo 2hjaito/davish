@@ -12,12 +12,13 @@ export interface ProfileData {
 /** Longest name kept, so a paste cannot fill the sidebar. */
 export const MAX_NAME = 64
 
-/** Keeps a stored profile sane: strings only, a capped name, a PNG data URL. */
+/** Keeps a stored profile sane: strings only, a capped name, a PNG or JPEG data URL. */
 export function cleanProfile(raw: unknown): ProfileData {
   const r = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {}
   const name = typeof r.name === 'string' ? r.name.trim().slice(0, MAX_NAME) : ''
+  // JPEG since the sharper 256px pictures; PNG from before stays readable.
   const avatar =
-    typeof r.avatar === 'string' && r.avatar.startsWith('data:image/png;base64,') ? r.avatar : ''
+    typeof r.avatar === 'string' && /^data:image\/(png|jpeg);base64,/.test(r.avatar) ? r.avatar : ''
   return { name, avatar }
 }
 

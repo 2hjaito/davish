@@ -89,3 +89,40 @@ export async function iconImage(file: File): Promise<string> {
   bitmap.close()
   return canvas.toDataURL('image/png')
 }
+
+// The account picture: sharp at 88px on a 2x screen with room to spare, as a
+// JPEG so a photo stays around 30 KB. The profile key, name included, must
+// stay under the 64 KiB a settings key may hold (internal/store).
+const AVATAR_PX = 256
+const AVATAR_MAX_CHARS = 56_000
+
+/** Turns a picture from this computer into a square JPEG data URL for the account. */
+export async function avatarImage(file: File): Promise<string> {
+  if (!IMAGE_TYPES.includes(file.type) || file.size > MAX_SOURCE) {
+    throw new Error('unsupported image')
+  }
+  const bitmap = await createImageBitmap(file)
+  try {
+    const { x, y, side } = squareCrop(bitmap.width, bitmap.height)
+    for (const [px, quality] of [
+      [AVATAR_PX, 0.88],
+      [AVATAR_PX, 0.72],
+      [192, 0.6],
+    ] as const) {
+      const canvas = document.createElement('canvas')
+      canvas.width = canvas.height = px
+      const ctx = canvas.getContext('2d')
+      if (!ctx) throw new Error('no canvas')
+      // JPEG has no transparency: a see-through PNG lands on white, not black.
+      ctx.fillStyle = '#fff'
+      ctx.fillRect(0, 0, px, px)
+      ctx.imageSmoothingQuality = 'high'
+      ctx.drawImage(bitmap, x, y, side, side, 0, 0, px, px)
+      const url = canvas.toDataURL('image/jpeg', quality)
+      if (url.length <= AVATAR_MAX_CHARS) return url
+    }
+    throw new Error('image too large')
+  } finally {
+    bitmap.close()
+  }
+}

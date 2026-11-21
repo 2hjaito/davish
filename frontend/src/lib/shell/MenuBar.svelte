@@ -130,6 +130,8 @@
     background: var(--glass-bg);
     -webkit-backdrop-filter: var(--glass-blur);
     backdrop-filter: var(--glass-blur);
+    /* App.svelte flips this after a wallpaper change: WebKit keeps a stale blur otherwise. */
+    opacity: var(--backdrop-nudge, 1);
   }
 
   /* Room for the macOS close/minimize/zoom buttons drawn by the OS. */
