@@ -29,6 +29,21 @@
     const flat = mixWallpaper(accent, base, Number.isFinite(mix) ? mix : 100)
     if (flat) root.style.setProperty('--wallpaper-flat', flat)
     setWindowBackground(!knobs.wallpaper && flat ? flat : base)
+    if (!root.dataset.wallpaperReady)
+      requestAnimationFrame(() => (root.dataset.wallpaperReady = 'true'))
+  })
+
+  // WebKit can keep the menu bar's and Dock's blur of the old wallpaper until
+  // something else repaints them. Once the color has glided (tokens.css),
+  // nudge their opacity by a hair, which makes it blur the new one.
+  let nudge = 1
+  $effect(() => {
+    void settings.wallpaperAccent
+    const timer = setTimeout(() => {
+      nudge = nudge === 1 ? 0.999 : 1
+      document.documentElement.style.setProperty('--backdrop-nudge', String(nudge))
+    }, 600)
+    return () => clearTimeout(timer)
   })
 
   $effect(() => {

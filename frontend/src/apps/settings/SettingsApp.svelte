@@ -1252,13 +1252,28 @@
       conic-gradient(#ff6b6b, #ffd93d, #6bcb77, #4dd4e6, #4d96ff, #b06bff, #ff6bb5, #ff6b6b);
   }
 
+  .swatch.custom {
+    overflow: hidden;
+  }
+
+  /* The native color well is square in WebKit; it stays invisible and clipped to the circle. */
   .swatch.custom input {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
     opacity: 0;
     cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .swatch.custom:has(input:focus-visible) {
+    box-shadow: 0 0 0 2px var(--accent);
   }
 
   /* A narrow window keeps only the tiles, as in Files and Monitor. */

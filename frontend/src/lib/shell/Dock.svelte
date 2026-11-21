@@ -310,6 +310,8 @@
     /* The gap lives in the slots' padding so the hover area has no dead zones. */
     border-radius: var(--dock-radius);
     transition: translate var(--dur) var(--ease-out);
+    /* See MenuBar: refreshes the blur behind the Dock after a wallpaper change. */
+    opacity: var(--backdrop-nudge, 1);
   }
 
   .dock[data-pos='bottom'] {
