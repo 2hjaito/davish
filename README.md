@@ -17,7 +17,7 @@ Nothing to install on the server.
 ![Svelte](https://img.shields.io/badge/Svelte-5-FF3E00?logo=svelte&logoColor=white)
 [![Discord](https://profilyze.vercel.app/api/badge/social?platform=discord&value=Join+The+Code+Well&theme=outline)](https://discord.com/invite/eG5txdWaqr)
 
-**English** · [Tiếng Việt](README.vi.md) · [简体中文](README.zh-CN.md) · **[davish.dangth.dev](https://davish.dangth.dev)**
+**English** · [Tiếng Việt](README.vi.md) · [简体中文](README.zh-CN.md) · **[davish.app](https://davish.app)**
 
 <p align="center">
   <img src="assets/demo.gif" alt="davish demo: a file's action ring, Terminal, Docker, ports, login security and the git graph over SSH" width="800">

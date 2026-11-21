@@ -16,7 +16,7 @@ interface Props {
 }
 const { locale } = Astro.props
 const t = dicts[locale]
-const site = Astro.site ?? new URL('https://davish.dangth.dev')
+const site = Astro.site ?? new URL('https://davish.app')
 const here = locales.find((l) => l.id === locale)!
 const image = new URL({ en: og, vi: ogVi, zh: ogZh }[locale].src, site).href
 ---

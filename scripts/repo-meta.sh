@@ -7,6 +7,6 @@ REPO="${REPO:-2hjaito/davish}"
 
 gh repo edit "$REPO" \
   --description "A desktop for your Linux servers. No web panel, no login, no agent. Open it and you're in, over SSH." \
-  --homepage "https://davish.dangth.dev" \
+  --homepage "https://davish.app" \
   --add-topic ssh,sftp,vps,server-management,linux,devops,sysadmin,desktop-app \
   --add-topic wails,golang,svelte,docker,nginx,terminal,self-hosted

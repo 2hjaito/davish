@@ -1,6 +1,6 @@
 name: site
 
-# Builds davish.dangth.dev (site/, ADR 0025) and publishes it on GitHub
+# Builds davish.app (site/, ADR 0025) and publishes it on GitHub
 # Pages. Runs when the page or the screenshots it shows change, and after
 # each release, so the download buttons point at the new files. A release
 # made with GITHUB_TOKEN does not trigger other workflows, hence

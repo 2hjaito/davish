@@ -2,7 +2,7 @@
   "name": "davish-site",
   "private": true,
   "type": "module",
-  "description": "davish.dangth.dev: the landing page and the docs (ADR 0025). Built apart from the app.",
+  "description": "davish.app: the landing page and the docs (ADR 0025). Built apart from the app.",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
