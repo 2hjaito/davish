@@ -4,6 +4,21 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.14.11] - 2026-11-21
+
+### Added
+- Appearance: 8 wallpaper colors (adds pink, yellow, sky and gray) and a color wheel first that opens the system color picker for any color. A new color glides in over half a second.
+- Performance: **Check again** times frames with Beautiful on and says which preset suits this machine (Beautiful, Balanced or Light), with the frame rate and a button to use it.
+
+### Changed
+- Account: the name sits under the picture and a click edits it in place. Hovering the picture shows a camera; a click chooses a new one or removes it.
+- The account picture is kept at 256 px, so it is sharp on Retina screens (pick it again once for the sharp copy).
+
+### Fixed
+- Icons and text in windows no longer look soft after a minimize and restore, or when a window sits on a fractional pixel.
+- The menu bar, Dock and desktop icons follow a new wallpaper color right away, without waiting or switching windows.
+- A long name no longer spills out of the Settings sidebar, the lock screen or the sleep screen.
+
 ## [1.14.10] - 2026-11-21
 
 ### Fixed

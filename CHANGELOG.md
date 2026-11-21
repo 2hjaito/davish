@@ -4,6 +4,21 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.14.11] - 2026-11-21
+
+### Thêm
+- Giao diện: 8 màu hình nền (thêm hồng, vàng, xanh trời, xám) và vòng màu đầu hàng để chọn màu bất kỳ bằng bộ chọn màu của hệ điều hành. Màu mới chuyển dần trong nửa giây.
+- Hiệu năng: **Kiểm tra lại** đo khung hình với mức Đẹp rồi nói mức nào hợp với máy này (Đẹp, Cân bằng hoặc Nhẹ), kèm số khung hình/giây và nút dùng ngay.
+
+### Đổi
+- Tài khoản: tên nằm dưới ảnh, bấm để sửa ngay tại chỗ. Rê chuột vào ảnh hiện máy ảnh, bấm để chọn ảnh mới hoặc xóa ảnh.
+- Ảnh đại diện lưu ở 256 px nên nét trên màn hình Retina (chọn lại ảnh một lần để có bản nét).
+
+### Sửa
+- Icon và chữ trong cửa sổ không còn mờ sau khi thu nhỏ rồi mở lại, hoặc khi cửa sổ nằm ở vị trí lẻ điểm ảnh.
+- Thanh menu, Dock và icon trên desktop đổi theo màu hình nền ngay, không phải chờ hay chuyển cửa sổ.
+- Tên dài không còn tràn khỏi sidebar Cài đặt, màn hình khóa và màn hình ngủ.
+
 ## [1.14.10] - 2026-11-21
 
 ### Sửa
