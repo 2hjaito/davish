@@ -807,8 +807,10 @@
                 >
                   <span class="preview">
                     <span class="scheme" style:background={sw.bg} style:color={sw.fg}>
-                      <span style:color={sw.accents[0]}>~</span>
-                      <span style:color={sw.accents[1]}>$</span> ls
+                      <span>
+                        <span style:color={sw.accents[0]}>~</span>
+                        <span style:color={sw.accents[1]}>$</span> ls
+                      </span>
                       <span class="dots">
                         {#each sw.accents as c (c)}<i style:background={c}></i>{/each}
                       </span>
