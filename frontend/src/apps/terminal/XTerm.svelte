@@ -168,7 +168,7 @@
       // Read once here; the effect below applies later changes in place.
       fontSize: untrack(() => settings.terminalFontSize),
       lineHeight: LINE_HEIGHT,
-      scrollback: 5000,
+      scrollback: untrack(() => settings.terminalScrollback),
       macOptionIsMeta: true,
       theme: theme(false),
     })
@@ -213,6 +213,11 @@
   $effect(() => {
     const gpu = settings.terminalGpu
     if (term) setRenderer(term, gpu)
+  })
+
+  $effect(() => {
+    const lines = settings.terminalScrollback
+    if (term && term.options.scrollback !== lines) term.options.scrollback = lines
   })
 
   $effect(() => {

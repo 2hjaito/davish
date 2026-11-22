@@ -2173,6 +2173,12 @@ const es = {
     gpu: 'Aceleración por GPU',
     gpuHint:
       'Dibuja con WebGL, más rápido con salidas grandes. El fondo del terminal pasa a ser sólido en lugar de cristal esmerilado.',
+    termSolid: 'Fondo sólido',
+    termSolidHint:
+      'Dibuja el terminal sobre un color sólido en lugar de cristal esmerilado. Siempre activo con la aceleración por GPU o Rendimiento → Fondos sólidos.',
+    scrollback: 'Historial',
+    scrollbackHint:
+      'Líneas que cada pestaña conserva para desplazarse atrás. Menos líneas usan menos memoria; se aplica a todas las ventanas de Terminal.',
     monoFont: 'Fuente monoespaciada',
     monoFontHint: 'La usan Terminal, Editor y Registros.',
     monoFonts: { jetbrains: 'JetBrains Mono', system: 'Fuente del sistema' },

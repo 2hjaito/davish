@@ -2102,6 +2102,12 @@ const vi = {
     gpu: 'Tăng tốc GPU',
     gpuHint:
       'Vẽ bằng WebGL, nhanh hơn khi in output lớn. Nền terminal chuyển sang màu đặc thay cho kính mờ.',
+    termSolid: 'Nền đặc',
+    termSolidHint:
+      'Vẽ terminal trên màu đặc thay cho kính mờ. Luôn bật khi dùng tăng tốc GPU hoặc Hiệu năng → Nền đặc.',
+    scrollback: 'Số dòng cuộn lại',
+    scrollbackHint:
+      'Số dòng mỗi tab giữ lại để cuộn xem. Ít dòng hơn thì dùng ít bộ nhớ hơn; áp dụng cho mọi cửa sổ Terminal.',
     monoFont: 'Font chữ mono',
     monoFontHint: 'Dùng cho Terminal, Editor và Logs.',
     monoFonts: { jetbrains: 'JetBrains Mono', system: 'Font của hệ thống' },

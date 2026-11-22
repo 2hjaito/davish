@@ -14,6 +14,7 @@
     settings,
     SUDO_FORGET_AFTER,
     TERMINAL_FONT,
+    TERMINAL_SCROLLBACK,
     THEMES,
     WALLPAPER_ACCENTS,
   } from '../../lib/stores/settings.svelte'
@@ -780,6 +781,22 @@
           {@render toggle(t.settings.gpu, t.settings.gpuHint, settings.terminalGpu, (on) =>
             settings.set('terminalGpu', on),
           )}
+          {@render toggle(
+            t.settings.termSolid,
+            t.settings.termSolidHint,
+            settings.terminalOpaque,
+            (on) => settings.set('terminalSolid', on),
+          )}
+          <div class="row">
+            {@render head(t.settings.scrollback, t.settings.scrollbackHint)}
+            {@render segmented(
+              t.settings.scrollback,
+              TERMINAL_SCROLLBACK,
+              settings.terminalScrollback,
+              (n) => n.toLocaleString(locale),
+              (n) => settings.set('terminalScrollback', n),
+            )}
+          </div>
         </div>
       {:else if pane === 'editor'}
         <div class="card">

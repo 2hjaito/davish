@@ -8,7 +8,7 @@ import process from 'node:process'
 import { gzipSync } from 'node:zlib'
 
 const BUDGET = {
-  initialKB: 114, // gzip; 96 when set; the performance presets (#176) are read at start, before the first paint (~1.8); the lock screen shows the user's picture and name (~1); Check again recommends a preset and the wallpaper takes any color (~0.9)
+  initialKB: 115, // gzip; 96 when set; the performance presets (#176) are read at start, before the first paint (~1.8); the lock screen shows the user's picture and name (~1); Check again recommends a preset and the wallpaper takes any color (~0.9); Terminal's solid background and scrollback live in the settings store, read at start (~0.1)
   totalKB: 704, // gzip; 506 when set, 580 by v1.2; v1.3 added windows loaded on first use; the Docker cards' tech and framework logos (~28) load with Docker; M47 server search in Files and Logs (~4); M49 run on several servers (~6), with room for M48 Ansible import (~2); performance presets (~4); M51 SQLite rows with sort and filter, loaded with Database (~4); Settings as System Settings panes with search and drawn icons, loaded with Settings (~3); Git account page and one-click clone, Settings account and About panes (~3); wallpaper picker, preset recommendation and the account header's inline edits (~1)
 }
 

@@ -35,6 +35,16 @@ export function clampFontSize(size: number): number {
   return Math.min(TERMINAL_FONT.max, Math.max(TERMINAL_FONT.min, snapped))
 }
 
+/** How many lines a Terminal tab keeps to scroll back through, fewest first. */
+export const TERMINAL_SCROLLBACK = [1000, 5000, 20000] as const
+export type TerminalScrollback = (typeof TERMINAL_SCROLLBACK)[number]
+const DEFAULT_SCROLLBACK: TerminalScrollback = 5000
+
+/** One of the choices; anything else (junk from storage) is the default. */
+export function clampScrollback(lines: unknown): TerminalScrollback {
+  return TERMINAL_SCROLLBACK.find((n) => n === lines) ?? DEFAULT_SCROLLBACK
+}
+
 /** The monospace font of Terminal, Editor and Logs. */
 export type MonoFont = 'jetbrains' | 'system'
 
@@ -90,6 +100,8 @@ interface SettingsData extends StoredPerf {
   wallpaperAccent: string
   terminalFontSize: number
   terminalGpu: boolean
+  terminalSolid: boolean
+  terminalScrollback: TerminalScrollback
   terminalPrompt: boolean
   monoFont: MonoFont
   dockSize: DockSize
@@ -116,6 +128,8 @@ const defaults: SettingsData = {
   wallpaperAccent: WALLPAPER_ACCENTS[0],
   terminalFontSize: TERMINAL_FONT.default,
   terminalGpu: false,
+  terminalSolid: false,
+  terminalScrollback: DEFAULT_SCROLLBACK,
   terminalPrompt: true,
   monoFont: 'jetbrains',
   dockSize: 'medium',
@@ -251,6 +265,19 @@ class Settings {
   }
   get terminalGpu() {
     return this.#data.terminalGpu === true
+  }
+  get terminalSolid() {
+    return this.#data.terminalSolid === true
+  }
+  /**
+   * Whether the terminal draws on a solid background rather than the glass.
+   * GPU drawing and the opaque performance setting (Light) always do.
+   */
+  get terminalOpaque() {
+    return this.terminalGpu || this.terminalSolid || this.knobs.opaque
+  }
+  get terminalScrollback(): TerminalScrollback {
+    return clampScrollback(this.#data.terminalScrollback)
   }
   get terminalFontSize() {
     return clampFontSize(this.#data.terminalFontSize)

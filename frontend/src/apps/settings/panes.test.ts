@@ -12,6 +12,10 @@ describe('searchPanes', () => {
     expect(searchPanes('cỡ chữ')).toEqual(['terminal'])
   })
 
+  it('finds the terminal rows added for solid background and scrollback', () => {
+    expect(searchPanes('cuộn lại')).toEqual(['terminal'])
+  })
+
   it('ignores case and Vietnamese accents', () => {
     expect(searchPanes('BAO MAT')).toContain('security')
     expect(searchPanes('dock')).toContain('dock')
