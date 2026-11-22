@@ -2168,6 +2168,20 @@ const es = {
     termScheme: 'Esquema de color',
     termSchemeHint:
       'Los colores del texto y del fondo. Todos los esquemas salvo Davish dibujan sobre un fondo sólido.',
+    editorFont: 'Tamaño de letra',
+    editorFontHint:
+      'El tamaño del texto en todas las ventanas del Editor. La fuente es la monoespaciada de toda la app.',
+    editorWrap: 'Ajustar líneas largas',
+    editorWrapHint:
+      'Las líneas largas continúan en la fila siguiente en lugar de desplazarse hacia los lados.',
+    editorLineNumbers: 'Números de línea',
+    editorLineNumbersHint: 'Muestra el número junto a cada línea.',
+    editorWhitespace: 'Mostrar espacios y tabulaciones',
+    editorWhitespaceHint:
+      'Dibuja una marca por cada espacio y tabulación, para detectar una tabulación en un archivo YAML.',
+    editorIndent: 'Sangrar con',
+    editorIndentHint: 'Lo que insertan la tecla Tab y la sangría automática.',
+    editorIndents: { '2': '2 espacios', '4': '4 espacios', tab: 'Tab' },
     termFont: 'Fuente',
     termFontHint:
       'Una fuente instalada en este equipo, solo para Terminal. Déjalo vacío para usar la fuente monoespaciada de abajo.',

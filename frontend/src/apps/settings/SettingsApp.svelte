@@ -10,6 +10,8 @@
     DOCK_POSITIONS,
     DOCK_SIZES,
     type DockSize,
+    EDITOR_FONT,
+    EDITOR_INDENTS,
     MONO_FAMILIES,
     type MonoFont,
     settings,
@@ -98,6 +100,9 @@
     if (first && !hits.includes(pane)) go(first)
   }
 
+  function stepEditorFont(dir: 1 | -1) {
+    settings.set('editorFontSize', settings.editorFontSize + dir * EDITOR_FONT.step)
+  }
   function stepFont(dir: 1 | -1) {
     settings.set('terminalFontSize', settings.terminalFontSize + dir * TERMINAL_FONT.step)
   }
@@ -227,6 +232,25 @@
       onchange={(e) => set(e.currentTarget.checked)}
     />
   </label>
+{/snippet}
+
+{#snippet stepper(
+  value: number,
+  atMin: boolean,
+  atMax: boolean,
+  smaller: string,
+  larger: string,
+  step: (dir: 1 | -1) => void,
+)}
+  <div class="stepper">
+    <button aria-label={smaller} disabled={atMin} onclick={() => step(-1)}>
+      <Icon name="minus" size={12} strokeWidth={2.2} />
+    </button>
+    <output aria-live="polite">{value.toLocaleString(locale)}</output>
+    <button aria-label={larger} disabled={atMax} onclick={() => step(1)}>
+      <Icon name="plus" size={12} strokeWidth={2.2} />
+    </button>
+  </div>
 {/snippet}
 
 {#snippet segmented<T extends string | number>(
@@ -761,23 +785,14 @@
         <div class="card">
           <div class="row">
             {@render head(t.settings.fontSize, t.settings.fontSizeHint)}
-            <div class="stepper">
-              <button
-                aria-label={t.settings.fontSmaller}
-                disabled={settings.terminalFontSize <= TERMINAL_FONT.min}
-                onclick={() => stepFont(-1)}
-              >
-                <Icon name="minus" size={12} strokeWidth={2.2} />
-              </button>
-              <output aria-live="polite">{settings.terminalFontSize.toLocaleString(locale)}</output>
-              <button
-                aria-label={t.settings.fontLarger}
-                disabled={settings.terminalFontSize >= TERMINAL_FONT.max}
-                onclick={() => stepFont(1)}
-              >
-                <Icon name="plus" size={12} strokeWidth={2.2} />
-              </button>
-            </div>
+            {@render stepper(
+              settings.terminalFontSize,
+              settings.terminalFontSize <= TERMINAL_FONT.min,
+              settings.terminalFontSize >= TERMINAL_FONT.max,
+              t.settings.fontSmaller,
+              t.settings.fontLarger,
+              stepFont,
+            )}
           </div>
           <div class="row stack">
             {@render head(t.settings.termScheme, t.settings.termSchemeHint)}
@@ -861,6 +876,45 @@
         </div>
       {:else if pane === 'editor'}
         <div class="card">
+          <div class="row">
+            {@render head(t.settings.editorFont, t.settings.editorFontHint)}
+            {@render stepper(
+              settings.editorFontSize,
+              settings.editorFontSize <= EDITOR_FONT.min,
+              settings.editorFontSize >= EDITOR_FONT.max,
+              t.settings.fontSmaller,
+              t.settings.fontLarger,
+              stepEditorFont,
+            )}
+          </div>
+          {@render toggle(
+            t.settings.editorWrap,
+            t.settings.editorWrapHint,
+            settings.editorWrap,
+            (on) => settings.set('editorWrap', on),
+          )}
+          {@render toggle(
+            t.settings.editorLineNumbers,
+            t.settings.editorLineNumbersHint,
+            settings.editorLineNumbers,
+            (on) => settings.set('editorLineNumbers', on),
+          )}
+          {@render toggle(
+            t.settings.editorWhitespace,
+            t.settings.editorWhitespaceHint,
+            settings.editorWhitespace,
+            (on) => settings.set('editorWhitespace', on),
+          )}
+          <div class="row">
+            {@render head(t.settings.editorIndent, t.settings.editorIndentHint)}
+            {@render segmented(
+              t.settings.editorIndent,
+              EDITOR_INDENTS,
+              settings.editorIndent,
+              (i) => t.settings.editorIndents[i],
+              (i) => settings.set('editorIndent', i),
+            )}
+          </div>
           <div class="row">
             {@render head(t.settings.backup, t.settings.backupHint)}
             {@render segmented(

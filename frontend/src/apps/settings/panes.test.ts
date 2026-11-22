@@ -8,8 +8,9 @@ describe('searchPanes', () => {
   })
 
   it('finds a pane by the name of one of its rows', () => {
-    // "Cỡ chữ" is a Terminal row.
-    expect(searchPanes('cỡ chữ')).toEqual(['terminal'])
+    // "Prompt Davish" is a Terminal row; "Cỡ chữ" is one of Terminal and of Editor.
+    expect(searchPanes('prompt')).toEqual(['terminal'])
+    expect(searchPanes('cỡ chữ')).toEqual(['terminal', 'editor'])
   })
 
   it('finds the terminal rows added for solid background and scrollback', () => {

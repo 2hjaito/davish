@@ -76,6 +76,23 @@ export function cleanFontName(name: unknown): string {
     .slice(0, 60)
 }
 
+export const EDITOR_FONT = { min: 10, max: 22, step: 0.5, default: 12.5 } as const
+
+/** Keeps an editor font size in range and on the step grid; junk falls back to the default. */
+export function clampEditorFontSize(size: unknown): number {
+  if (typeof size !== 'number' || !Number.isFinite(size)) return EDITOR_FONT.default
+  const snapped = Math.round(size / EDITOR_FONT.step) * EDITOR_FONT.step
+  return Math.min(EDITOR_FONT.max, Math.max(EDITOR_FONT.min, snapped))
+}
+
+/** What the Tab key and auto-indent put in: two spaces, four spaces or a tab character. */
+export const EDITOR_INDENTS = ['2', '4', 'tab'] as const
+export type EditorIndent = (typeof EDITOR_INDENTS)[number]
+
+export function clampIndent(indent: unknown): EditorIndent {
+  return EDITOR_INDENTS.find((i) => i === indent) ?? '2'
+}
+
 /** The monospace font of Terminal, Editor and Logs. */
 export type MonoFont = 'jetbrains' | 'system'
 
@@ -148,6 +165,11 @@ interface SettingsData extends StoredPerf {
   alertDisk: number
   alertHold: number
   editorBackup: BackupMode
+  editorFontSize: number
+  editorWrap: boolean
+  editorLineNumbers: boolean
+  editorWhitespace: boolean
+  editorIndent: EditorIndent
   lockAfter: number
   sudoForgetAfter: number
   autoUpdate: boolean
@@ -180,6 +202,11 @@ const defaults: SettingsData = {
   alertDisk: ALERTS.defaults.disk,
   alertHold: ALERTS.defaults.hold,
   editorBackup: 'etc',
+  editorFontSize: EDITOR_FONT.default,
+  editorWrap: false,
+  editorLineNumbers: true,
+  editorWhitespace: false,
+  editorIndent: '2',
   lockAfter: 15,
   sudoForgetAfter: 15,
   autoUpdate: true,
@@ -387,6 +414,23 @@ class Settings {
     return ['etc', 'always', 'never'].includes(this.#data.editorBackup)
       ? this.#data.editorBackup
       : 'etc'
+  }
+  get editorFontSize() {
+    return clampEditorFontSize(this.#data.editorFontSize)
+  }
+  /** Long lines continue on the next row instead of scrolling sideways. */
+  get editorWrap() {
+    return this.#data.editorWrap === true
+  }
+  get editorLineNumbers() {
+    return this.#data.editorLineNumbers !== false
+  }
+  /** Spaces and tabs drawn as marks. */
+  get editorWhitespace() {
+    return this.#data.editorWhitespace === true
+  }
+  get editorIndent(): EditorIndent {
+    return clampIndent(this.#data.editorIndent)
   }
 
   /** Look for a new Davish on GitHub on its own (ADR 0009). */

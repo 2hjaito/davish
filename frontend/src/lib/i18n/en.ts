@@ -2124,6 +2124,18 @@ const en = {
     termScheme: 'Color scheme',
     termSchemeHint:
       'The colors of text and background. Every scheme but Davish draws on a solid background.',
+    editorFont: 'Font size',
+    editorFontHint:
+      'The text size in every Editor window. The font is the monospace font of the whole app.',
+    editorWrap: 'Wrap long lines',
+    editorWrapHint: 'Long lines continue on the next row instead of scrolling sideways.',
+    editorLineNumbers: 'Line numbers',
+    editorLineNumbersHint: 'Show the line number beside each line.',
+    editorWhitespace: 'Show spaces and tabs',
+    editorWhitespaceHint: 'Draws a mark for each space and tab, to spot a tab in a YAML file.',
+    editorIndent: 'Indent with',
+    editorIndentHint: 'What the Tab key and auto-indent insert.',
+    editorIndents: { '2': '2 spaces', '4': '4 spaces', tab: 'Tab' },
     termFont: 'Font',
     termFontHint:
       'A font installed on this computer, for Terminal only. Leave empty to use the monospace font below.',

@@ -4,10 +4,14 @@ import {
   clampFontSize,
   cleanFontName,
   clampCursor,
+  clampEditorFontSize,
+  clampIndent,
   clampScheme,
   clampScrollback,
   resolveTheme,
   settings,
+  EDITOR_FONT,
+  EDITOR_INDENTS,
   TERMINAL_CURSORS,
   TERMINAL_FONT,
   TERMINAL_SCHEMES,
@@ -155,5 +159,35 @@ describe('terminalFontFamily', () => {
     settings.set('terminalFont', 'Fira Code')
     expect(settings.terminalFontFamily).toBe(`'Fira Code', ${settings.monoFamily}`)
     settings.set('terminalFont', '')
+  })
+})
+
+describe('editor settings', () => {
+  it.each([
+    [12.5, 12.5],
+    [13.2, 13],
+    [3, EDITOR_FONT.min],
+    [99, EDITOR_FONT.max],
+    [Number.NaN, EDITOR_FONT.default],
+    ['big', EDITOR_FONT.default],
+    [undefined, EDITOR_FONT.default],
+  ])('clampEditorFontSize(%j) = %d', (size, want) => {
+    expect(clampEditorFontSize(size)).toBe(want)
+  })
+
+  it.each([...EDITOR_INDENTS])('keeps the indent %s', (i) => {
+    expect(clampIndent(i)).toBe(i)
+  })
+
+  it.each(['8', 'spaces', 2, null, undefined])('falls back to 2 spaces for %j', (junk) => {
+    expect(clampIndent(junk)).toBe('2')
+  })
+
+  it('starts as the editor always was', () => {
+    expect(settings.editorWrap).toBe(false)
+    expect(settings.editorLineNumbers).toBe(true)
+    expect(settings.editorWhitespace).toBe(false)
+    expect(settings.editorIndent).toBe('2')
+    expect(settings.editorFontSize).toBe(12.5)
   })
 })

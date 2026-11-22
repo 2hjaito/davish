@@ -62,7 +62,14 @@ function words(p: Pane): string[] {
         s.scrollback,
       ]
     case 'editor':
-      return [s.backup]
+      return [
+        s.editorFont,
+        s.editorWrap,
+        s.editorLineNumbers,
+        s.editorWhitespace,
+        s.editorIndent,
+        s.backup,
+      ]
     case 'alerts':
       return [s.alertMem, s.alertDisk, s.alertHold]
     case 'security':
