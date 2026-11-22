@@ -170,6 +170,7 @@ interface SettingsData extends StoredPerf {
   editorLineNumbers: boolean
   editorWhitespace: boolean
   editorIndent: EditorIndent
+  filesShowHidden: boolean
   lockAfter: number
   sudoForgetAfter: number
   autoUpdate: boolean
@@ -207,6 +208,7 @@ const defaults: SettingsData = {
   editorLineNumbers: true,
   editorWhitespace: false,
   editorIndent: '2',
+  filesShowHidden: true,
   lockAfter: 15,
   sudoForgetAfter: 15,
   autoUpdate: true,
@@ -431,6 +433,10 @@ class Settings {
   }
   get editorIndent(): EditorIndent {
     return clampIndent(this.#data.editorIndent)
+  }
+  /** Files lists names that start with a dot. */
+  get filesShowHidden() {
+    return this.#data.filesShowHidden !== false
   }
 
   /** Look for a new Davish on GitHub on its own (ADR 0009). */

@@ -11,6 +11,7 @@ import {
   parentPath,
   scrollToRow,
   sortEntries,
+  visibleEntries,
   visibleRows,
   within,
 } from './listing'
@@ -115,6 +116,29 @@ describe('filterEntries', () => {
 
   it('keeps everything for an empty query', () => {
     expect(filterEntries(list, '  ')).toBe(list)
+  })
+})
+
+describe('visibleEntries', () => {
+  const all = [
+    entry('.env', false),
+    entry('.ssh', true),
+    entry('app.js', false),
+    entry('src', true),
+  ]
+
+  it('lists everything when hidden names are shown', () => {
+    expect(visibleEntries(all, true)).toBe(all)
+  })
+
+  it('drops the names that start with a dot, files and folders alike', () => {
+    expect(visibleEntries(all, false).map((e) => e.name)).toEqual(['app.js', 'src'])
+  })
+
+  it('keeps a dot that is not first', () => {
+    expect(
+      visibleEntries([entry('a.b', false), entry('..', true)], false).map((e) => e.name),
+    ).toEqual(['a.b'])
   })
 })
 

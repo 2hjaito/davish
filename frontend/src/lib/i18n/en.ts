@@ -2174,6 +2174,10 @@ const en = {
     lower: 'Lower',
     higher: 'Higher',
     editor: 'Editor',
+    files: 'Files',
+    filesHidden: 'Show hidden files',
+    filesHiddenHint:
+      'Names that start with a dot, such as .env or .ssh. Hiding them only tidies the list; the files are still there.',
     lock: 'App lock',
     lockIntro:
       'Covers Davish and blocks every action on servers while you are away. SSH sessions, logs and transfers keep running.',

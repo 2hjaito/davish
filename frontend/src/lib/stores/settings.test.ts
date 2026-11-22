@@ -190,4 +190,11 @@ describe('editor settings', () => {
     expect(settings.editorIndent).toBe('2')
     expect(settings.editorFontSize).toBe(12.5)
   })
+
+  it('shows hidden files in Files until told not to', () => {
+    expect(settings.filesShowHidden).toBe(true)
+    settings.set('filesShowHidden', false)
+    expect(settings.filesShowHidden).toBe(false)
+    settings.set('filesShowHidden', true)
+  })
 })

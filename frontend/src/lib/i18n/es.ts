@@ -2220,6 +2220,10 @@ const es = {
     lower: 'Bajar',
     higher: 'Subir',
     editor: 'Editor',
+    files: 'Archivos',
+    filesHidden: 'Mostrar archivos ocultos',
+    filesHiddenHint:
+      'Los nombres que empiezan por punto, como .env o .ssh. Ocultarlos solo ordena la lista; los archivos siguen ahí.',
     lock: 'Bloqueo de la app',
     lockIntro:
       'Tapa Davish y bloquea cualquier acción en los servidores mientras no estás. Las sesiones SSH, los registros y las transferencias siguen funcionando.',

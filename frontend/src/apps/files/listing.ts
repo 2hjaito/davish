@@ -41,6 +41,14 @@ export function nextOrder(current: SortOrder, key: SortKey): SortOrder {
   return { key, desc: key !== 'name' }
 }
 
+/** A name starting with a dot is hidden, as in `ls`. */
+export const isHidden = (e: Entry) => e.name.startsWith('.')
+
+/** The entries to list: all of them, or without the hidden ones. */
+export function visibleEntries(entries: readonly Entry[], showHidden: boolean): readonly Entry[] {
+  return showHidden ? entries : entries.filter((e) => !isHidden(e))
+}
+
 export function filterEntries(entries: readonly Entry[], query: string): readonly Entry[] {
   const q = query.trim().toLocaleLowerCase('vi')
   if (!q) return entries

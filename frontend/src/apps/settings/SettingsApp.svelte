@@ -926,6 +926,15 @@
             )}
           </div>
         </div>
+      {:else if pane === 'files'}
+        <div class="card">
+          {@render toggle(
+            t.settings.filesHidden,
+            t.settings.filesHiddenHint,
+            settings.filesShowHidden,
+            (on) => settings.set('filesShowHidden', on),
+          )}
+        </div>
       {:else if pane === 'alerts'}
         <div class="card">
           {#each pctRows as r (r.key)}

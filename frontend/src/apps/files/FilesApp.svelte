@@ -32,6 +32,7 @@
   import { load, save } from '../../lib/stores/persist'
   import { notifications } from '../../lib/stores/notifications.svelte'
   import { servers } from '../../lib/stores/servers.svelte'
+  import { settings } from '../../lib/stores/settings.svelte'
   import { landingKey, summarize, transfers } from '../../lib/stores/transfers.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
@@ -59,6 +60,7 @@
     type SortKey,
     type SortOrder,
     sortEntries,
+    visibleEntries,
     within,
   } from './listing'
   import { cameFrom, type FolderView, lastDir, rememberDir } from './memory'
@@ -127,8 +129,10 @@
 
   const server = $derived(servers.list.find((s) => s.id === win.serverID))
   const connected = $derived(!hasRuntime || server?.state === 'connected')
+  /** What the folder holds, less the hidden names when Settings says so. */
+  const visible = $derived(visibleEntries(listing, settings.filesShowHidden))
   const entries = $derived(
-    filterEntries(sortEntries(listing, order), scope === 'here' ? query : ''),
+    filterEntries(sortEntries(visible, order), scope === 'here' ? query : ''),
   )
   const title = $derived(cwd === null ? (server?.name ?? '') : baseName(cwd))
   const busy = $derived(summarize(transfers.list, win.serverID))
@@ -816,7 +820,7 @@
           >{t.files.transferring(busy.count, formatPct(busy.fraction * 100))}</button
         >
       {:else if cwd !== null && connected}
-        <span class="count">{t.files.count(listing.length)}</span>
+        <span class="count">{t.files.count(visible.length)}</span>
       {/if}
     </nav>
   </div>

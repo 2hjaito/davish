@@ -17,6 +17,10 @@ describe('searchPanes', () => {
     expect(searchPanes('cuộn lại')).toEqual(['terminal'])
   })
 
+  it('has a Files pane, found by its row', () => {
+    expect(searchPanes('file ẩn')).toEqual(['files'])
+  })
+
   it('ignores case and Vietnamese accents', () => {
     expect(searchPanes('BAO MAT')).toContain('security')
     expect(searchPanes('dock')).toContain('dock')

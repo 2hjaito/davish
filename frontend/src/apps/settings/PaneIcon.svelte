@@ -12,10 +12,11 @@
   let { pane, size = 22 }: Props = $props()
 
   // Panes that are about an app wear that app's icon.
-  const APP: Partial<Record<Pane, 'settings' | 'terminal' | 'editor'>> = {
+  const APP: Partial<Record<Pane, 'settings' | 'terminal' | 'editor' | 'files'>> = {
     general: 'settings',
     terminal: 'terminal',
     editor: 'editor',
+    files: 'files',
   }
 
   // The rest are drawn by the app icon rules (ADR 0003): one bold filled
@@ -28,6 +29,7 @@
     dock: ['#5ab1ff', '#1d58d4'],
     terminal: ['#3b404c', '#121418'],
     editor: ['#ff5c8f', '#d9103c'],
+    files: ['#6ad3ff', '#1a8ae0'],
     alerts: ['#ff7a70', '#d9231a'],
     security: ['#b88cff', '#6a2ee0'],
   }

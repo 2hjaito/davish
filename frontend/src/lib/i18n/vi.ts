@@ -2145,6 +2145,10 @@ const vi = {
     lower: 'Giảm',
     higher: 'Tăng',
     editor: 'Editor',
+    files: 'Files',
+    filesHidden: 'Hiện file ẩn',
+    filesHiddenHint:
+      'Tên bắt đầu bằng dấu chấm, như .env hay .ssh. Ẩn chỉ làm danh sách gọn hơn; file vẫn còn đó.',
     lock: 'Khóa app',
     lockIntro:
       'Che Davish và chặn mọi thao tác lên server khi bạn rời máy. Phiên SSH, log và transfer vẫn chạy.',
