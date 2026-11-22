@@ -6,6 +6,7 @@
   import {
     ALERTS,
     type BackupMode,
+    cleanFontName,
     DOCK_POSITIONS,
     DOCK_SIZES,
     type DockSize,
@@ -14,6 +15,7 @@
     settings,
     SUDO_FORGET_AFTER,
     TERMINAL_FONT,
+    TERMINAL_CURSORS,
     TERMINAL_SCHEMES,
     TERMINAL_SCROLLBACK,
     THEMES,
@@ -802,6 +804,38 @@
               {/each}
             </div>
           </div>
+          <label class="row">
+            {@render head(t.settings.termFont, t.settings.termFontHint)}
+            <input
+              class="input fontname"
+              type="text"
+              spellcheck="false"
+              autocomplete="off"
+              maxlength="60"
+              placeholder={t.settings.termFontPlaceholder}
+              value={settings.terminalFont}
+              onchange={(e) => {
+                settings.set('terminalFont', cleanFontName(e.currentTarget.value))
+                e.currentTarget.value = settings.terminalFont
+              }}
+            />
+          </label>
+          <div class="row">
+            {@render head(t.settings.termCursor)}
+            {@render segmented(
+              t.settings.termCursor,
+              TERMINAL_CURSORS,
+              settings.terminalCursor,
+              (c) => t.settings.termCursors[c],
+              (c) => settings.set('terminalCursor', c),
+            )}
+          </div>
+          {@render toggle(
+            t.settings.termBlink,
+            t.settings.termBlinkHint,
+            settings.terminalBlink,
+            (on) => settings.set('terminalBlink', on),
+          )}
           {@render toggle(t.settings.prompt, t.settings.promptHint, settings.terminalPrompt, (on) =>
             settings.set('terminalPrompt', on),
           )}
@@ -1308,6 +1342,11 @@
 
   .theme:hover:not([aria-checked='true']) .preview {
     border-color: var(--divider);
+  }
+
+  .fontname {
+    flex-shrink: 0;
+    width: 200px;
   }
 
   /* A tile of a terminal scheme: its background, a prompt and three accent dots. */

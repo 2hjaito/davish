@@ -2124,6 +2124,14 @@ const en = {
     termScheme: 'Color scheme',
     termSchemeHint:
       'The colors of text and background. Every scheme but Davish draws on a solid background.',
+    termFont: 'Font',
+    termFontHint:
+      'A font installed on this computer, for Terminal only. Leave empty to use the monospace font below.',
+    termFontPlaceholder: 'Default',
+    termCursor: 'Cursor',
+    termCursors: { bar: 'Bar', block: 'Block', underline: 'Underline' },
+    termBlink: 'Blinking cursor',
+    termBlinkHint: 'The cursor blinks while the terminal has focus.',
     termSchemes: { davish: 'Davish', hacker: 'Hacker', solarized: 'Solarized', dracula: 'Dracula' },
     fontSmaller: 'Smaller font',
     fontLarger: 'Larger font',

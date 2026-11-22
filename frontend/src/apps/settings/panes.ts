@@ -50,7 +50,17 @@ function words(p: Pane): string[] {
     case 'dock':
       return [s.dockSize, s.dockPosition, s.dockTransparent, s.dockAutohide]
     case 'terminal':
-      return [s.fontSize, s.termScheme, s.prompt, s.gpu, s.termSolid, s.scrollback]
+      return [
+        s.fontSize,
+        s.termScheme,
+        s.termFont,
+        s.termCursor,
+        s.termBlink,
+        s.prompt,
+        s.gpu,
+        s.termSolid,
+        s.scrollback,
+      ]
     case 'editor':
       return [s.backup]
     case 'alerts':

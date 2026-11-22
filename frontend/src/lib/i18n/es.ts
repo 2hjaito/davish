@@ -2168,6 +2168,14 @@ const es = {
     termScheme: 'Esquema de color',
     termSchemeHint:
       'Los colores del texto y del fondo. Todos los esquemas salvo Davish dibujan sobre un fondo sólido.',
+    termFont: 'Fuente',
+    termFontHint:
+      'Una fuente instalada en este equipo, solo para Terminal. Déjalo vacío para usar la fuente monoespaciada de abajo.',
+    termFontPlaceholder: 'Predeterminada',
+    termCursor: 'Cursor',
+    termCursors: { bar: 'Barra', block: 'Bloque', underline: 'Subrayado' },
+    termBlink: 'Cursor parpadeante',
+    termBlinkHint: 'El cursor parpadea mientras el terminal tiene el foco.',
     termSchemes: { davish: 'Davish', hacker: 'Hacker', solarized: 'Solarized', dracula: 'Dracula' },
     fontSmaller: 'Letra más pequeña',
     fontLarger: 'Letra más grande',

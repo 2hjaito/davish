@@ -53,6 +53,29 @@ export function clampScheme(id: unknown): TerminalScheme {
   return TERMINAL_SCHEMES.find((s) => s === id) ?? 'davish'
 }
 
+/** The shapes of the terminal cursor. */
+export const TERMINAL_CURSORS = ['bar', 'block', 'underline'] as const
+export type TerminalCursor = (typeof TERMINAL_CURSORS)[number]
+
+export function clampCursor(shape: unknown): TerminalCursor {
+  return TERMINAL_CURSORS.find((c) => c === shape) ?? 'bar'
+}
+
+/**
+ * A font family name as typed, reduced to what a family name is made of
+ * (letters, digits, space, dot, hyphen, underscore) so it can sit inside
+ * quotes in a CSS font stack; anything else (a stray quote, a comma) is
+ * dropped. Empty means "the monospace font of the whole app".
+ */
+export function cleanFontName(name: unknown): string {
+  if (typeof name !== 'string') return ''
+  return name
+    .replace(/[^\p{L}\p{N} ._-]/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 60)
+}
+
 /** The monospace font of Terminal, Editor and Logs. */
 export type MonoFont = 'jetbrains' | 'system'
 
@@ -110,6 +133,9 @@ interface SettingsData extends StoredPerf {
   terminalGpu: boolean
   terminalSolid: boolean
   terminalScheme: TerminalScheme
+  terminalCursor: TerminalCursor
+  terminalBlink: boolean
+  terminalFont: string
   terminalScrollback: TerminalScrollback
   terminalPrompt: boolean
   monoFont: MonoFont
@@ -139,6 +165,9 @@ const defaults: SettingsData = {
   terminalGpu: false,
   terminalSolid: false,
   terminalScheme: 'davish',
+  terminalCursor: 'bar',
+  terminalBlink: false,
+  terminalFont: '',
   terminalScrollback: DEFAULT_SCROLLBACK,
   terminalPrompt: true,
   monoFont: 'jetbrains',
@@ -294,6 +323,21 @@ class Settings {
   }
   get terminalScheme(): TerminalScheme {
     return clampScheme(this.#data.terminalScheme)
+  }
+  get terminalCursor(): TerminalCursor {
+    return clampCursor(this.#data.terminalCursor)
+  }
+  get terminalBlink() {
+    return this.#data.terminalBlink === true
+  }
+  /** The family the person named for Terminal only; empty for the app's monospace font. */
+  get terminalFont() {
+    return cleanFontName(this.#data.terminalFont)
+  }
+  /** The CSS font-family of Terminal: the named font if installed, then monoFamily. */
+  get terminalFontFamily() {
+    const name = this.terminalFont
+    return name ? `'${name}', ${this.monoFamily}` : this.monoFamily
   }
   get terminalScrollback(): TerminalScrollback {
     return clampScrollback(this.#data.terminalScrollback)

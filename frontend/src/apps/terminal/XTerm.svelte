@@ -169,13 +169,13 @@
     if (!host) return
     const t = new Terminal({
       allowTransparency: true,
-      // A steady bar, as in macOS Terminal: no blinking, and the same shape
-      // whether the terminal has focus or not.
-      cursorBlink: false,
-      cursorStyle: 'bar',
+      // A steady bar by default, as in macOS Terminal; the same shape whether
+      // the terminal has focus or not. Settings can change both.
+      cursorBlink: untrack(() => settings.terminalBlink),
+      cursorStyle: untrack(() => settings.terminalCursor),
       cursorWidth: 2,
-      cursorInactiveStyle: 'bar',
-      fontFamily: untrack(() => settings.monoFamily),
+      cursorInactiveStyle: untrack(() => settings.terminalCursor),
+      fontFamily: untrack(() => settings.terminalFontFamily),
       // Read once here; the effect below applies later changes in place.
       fontSize: untrack(() => settings.terminalFontSize),
       lineHeight: LINE_HEIGHT,
@@ -240,7 +240,16 @@
   })
 
   $effect(() => {
-    const family = settings.monoFamily
+    const shape = settings.terminalCursor
+    const blink = settings.terminalBlink
+    if (!term) return
+    term.options.cursorStyle = shape
+    term.options.cursorInactiveStyle = shape
+    term.options.cursorBlink = blink
+  })
+
+  $effect(() => {
+    const family = settings.terminalFontFamily
     if (!term || term.options.fontFamily === family) return
     term.options.fontFamily = family
     fit?.fit()

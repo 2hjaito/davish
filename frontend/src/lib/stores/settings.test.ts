@@ -2,10 +2,13 @@ import { describe, expect, it } from 'vitest'
 
 import {
   clampFontSize,
+  cleanFontName,
+  clampCursor,
   clampScheme,
   clampScrollback,
   resolveTheme,
   settings,
+  TERMINAL_CURSORS,
   TERMINAL_FONT,
   TERMINAL_SCHEMES,
   TERMINAL_SCROLLBACK,
@@ -109,5 +112,48 @@ describe('clampScheme', () => {
     settings.set('terminalScheme', 'dracula')
     expect(settings.terminalOpaque).toBe(true)
     settings.set('terminalScheme', 'davish')
+  })
+})
+
+describe('clampCursor', () => {
+  it.each([...TERMINAL_CURSORS])('keeps %s', (shape) => {
+    expect(clampCursor(shape)).toBe(shape)
+  })
+
+  it.each(['line', '', 1, null, undefined])('falls back to bar for %s', (junk) => {
+    expect(clampCursor(junk)).toBe('bar')
+  })
+})
+
+describe('cleanFontName', () => {
+  it.each([
+    ['Fira Code', 'Fira Code'],
+    ['  MesloLGS   NF ', 'MesloLGS NF'],
+    ['Hack Nerd Font Mono', 'Hack Nerd Font Mono'],
+    ['Iosevka-Term_1.0', 'Iosevka-Term_1.0'],
+    ['Cascadia Código', 'Cascadia Código'],
+    ["Fira'; color: red; --x: '", 'Fira color red --x'],
+    ['"a", b, monospace', 'a b monospace'],
+    ['a{}()<>\\/', 'a'],
+    ['', ''],
+    ['   ', ''],
+  ])('cleanFontName(%j) = %j', (typed, want) => {
+    expect(cleanFontName(typed)).toBe(want)
+  })
+
+  it('keeps at most 60 characters, and ignores what is not text', () => {
+    expect(cleanFontName('x'.repeat(100))).toHaveLength(60)
+    expect(cleanFontName(42)).toBe('')
+    expect(cleanFontName(undefined)).toBe('')
+  })
+})
+
+describe('terminalFontFamily', () => {
+  it('is the app monospace font until a name is set, then the name first', () => {
+    settings.set('terminalFont', '')
+    expect(settings.terminalFontFamily).toBe(settings.monoFamily)
+    settings.set('terminalFont', 'Fira Code')
+    expect(settings.terminalFontFamily).toBe(`'Fira Code', ${settings.monoFamily}`)
+    settings.set('terminalFont', '')
   })
 })
