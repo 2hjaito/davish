@@ -1087,7 +1087,7 @@ const es = {
       settings: {
         does: 'Idioma, tema claro u oscuro, apariencia, fuentes, umbrales de alerta, bloqueo de la app, prompt de Terminal.',
         actions: [
-          'Cuenta (arriba en la barra lateral): nombre, imagen, contraseña de bloqueo y Touch ID; el nombre y la imagen se ven en la pantalla de bloqueo y se quedan en este equipo',
+          `Cuenta (arriba en la barra lateral): nombre, imagen, contraseña de bloqueo${isMac ? ' y Touch ID' : ''}; el nombre y la imagen se ven en la pantalla de bloqueo y se quedan en este equipo`,
           'Seguridad: elige cuánto se guarda una contraseña de sudo sin usar (15 minutos por defecto, por servidor)',
           'Acerca de Davish (abajo en la barra lateral): versión, licencia, buscar actualizaciones',
         ],
@@ -1283,7 +1283,7 @@ const es = {
     steps: [
       {
         title: 'Elige un servidor',
-        body: 'Cada servidor es su propio espacio de trabajo. Cambia de servidor aquí o con ⌘1…⌘9.',
+        body: `Cada servidor es su propio espacio de trabajo. Cambia de servidor aquí o con ${isMac ? '⌘1…⌘9' : 'Ctrl+1…Ctrl+9'}.`,
       },
       {
         title: 'Métricas',
@@ -2078,7 +2078,9 @@ const es = {
       'Tu nombre e imagen se quedan en este equipo y se ven en Ajustes y en la pantalla de bloqueo. No se envía nada.',
     about: 'Acerca de Davish',
     license: 'Código abierto con licencia GPL-3.0.',
-    lockMoved: 'La contraseña de bloqueo y Touch ID están en Cuenta.',
+    lockMoved: isMac
+      ? 'La contraseña de bloqueo y Touch ID están en Cuenta.'
+      : 'La contraseña de bloqueo está en Cuenta.',
     openAccount: 'Abrir Cuenta',
     search: 'Buscar',
     noResults: 'Sin resultados',

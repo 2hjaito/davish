@@ -313,6 +313,7 @@
       <Icon name="grid" size={15} strokeWidth={2.2} />
     </button>
     <ActionMenu
+      tool
       label={d.create.more}
       actions={[
         { label: d.create.title.network, disabled: !connected, run: () => (creating = 'network') },

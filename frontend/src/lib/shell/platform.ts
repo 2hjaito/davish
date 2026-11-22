@@ -3,9 +3,12 @@ export const isMac = typeof navigator !== 'undefined' && navigator.userAgent.inc
 /** Linux builds can change WebKitGTK's renderer. The browser preview counts too. */
 export const isLinux = typeof navigator !== 'undefined' && navigator.userAgent.includes('Linux')
 
-/** Label for a shortcut with the platform's primary modifier. */
+/**
+ * Label for a shortcut with the platform's primary modifier. key may lead with
+ * ⇧ or ⌥, which read Shift+ and Alt+ off the Mac.
+ */
 export function shortcut(key: string): string {
-  return isMac ? `⌘${key}` : `Ctrl+${key}`
+  return isMac ? `⌘${key}` : `Ctrl+${key.replace('⇧', 'Shift+').replace('⌥', 'Alt+')}`
 }
 
 export function hasPrimaryModifier(e: KeyboardEvent): boolean {

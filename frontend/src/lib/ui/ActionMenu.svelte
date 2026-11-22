@@ -8,13 +8,15 @@
   import Icon from './Icon.svelte'
   import PopupMenu from './PopupMenu.svelte'
 
-  // The ⋮ button of a table row.
+  // The ⋮ button of a table row, or of a toolbar when tool is set.
   interface Props {
     label: string
     actions: readonly (Action | null)[]
+    /** Styled like the toolbar's .tool buttons beside it. */
+    tool?: boolean
   }
 
-  let { label, actions }: Props = $props()
+  let { label, actions, tool = false }: Props = $props()
 
   let pos = $state<{ x: number; y: number; up: boolean } | null>(null)
   let button = $state<HTMLButtonElement>()
@@ -35,13 +37,14 @@
 
 <button
   bind:this={button}
-  class="icon-btn"
+  class={tool ? 'tool' : 'icon-btn'}
   aria-label={label}
+  title={tool ? label : undefined}
   aria-haspopup="menu"
   aria-expanded={pos !== null}
   onclick={toggle}
 >
-  <Icon name="more" size={15} />
+  <Icon name="more" size={15} strokeWidth={tool ? 2.2 : undefined} />
 </button>
 
 {#if pos}

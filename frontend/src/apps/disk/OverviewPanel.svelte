@@ -219,6 +219,8 @@
 
   .legend b {
     margin-left: auto;
+    flex-shrink: 0;
+    white-space: nowrap;
     color: var(--fg);
     font-weight: 500;
     font-variant-numeric: tabular-nums;
