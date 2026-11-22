@@ -14,6 +14,7 @@
     settings,
     SUDO_FORGET_AFTER,
     TERMINAL_FONT,
+    TERMINAL_SCHEMES,
     TERMINAL_SCROLLBACK,
     THEMES,
     WALLPAPER_ACCENTS,
@@ -33,6 +34,7 @@
   import { isLinux } from '../../lib/shell/platform'
   import { perfCheck } from '../../lib/shell/perfCheck.svelte'
   import { updates } from '../../lib/stores/updates.svelte'
+  import { swatch } from '../terminal/schemes'
   import PaneIcon from './PaneIcon.svelte'
   import { type Pane, PANES, paneLabel, searchPanes } from './panes'
   import ThemePreview from './ThemePreview.svelte'
@@ -775,6 +777,31 @@
               </button>
             </div>
           </div>
+          <div class="row stack">
+            {@render head(t.settings.termScheme, t.settings.termSchemeHint)}
+            <div class="themes" role="radiogroup" aria-label={t.settings.termScheme}>
+              {#each TERMINAL_SCHEMES as id (id)}
+                {@const sw = swatch(id)}
+                <button
+                  class="theme"
+                  role="radio"
+                  aria-checked={settings.terminalScheme === id}
+                  onclick={() => settings.set('terminalScheme', id)}
+                >
+                  <span class="preview">
+                    <span class="scheme" style:background={sw.bg} style:color={sw.fg}>
+                      <span style:color={sw.accents[0]}>~</span>
+                      <span style:color={sw.accents[1]}>$</span> ls
+                      <span class="dots">
+                        {#each sw.accents as c (c)}<i style:background={c}></i>{/each}
+                      </span>
+                    </span>
+                  </span>
+                  <span>{t.settings.termSchemes[id]}</span>
+                </button>
+              {/each}
+            </div>
+          </div>
           {@render toggle(t.settings.prompt, t.settings.promptHint, settings.terminalPrompt, (on) =>
             settings.set('terminalPrompt', on),
           )}
@@ -1281,6 +1308,31 @@
 
   .theme:hover:not([aria-checked='true']) .preview {
     border-color: var(--divider);
+  }
+
+  /* A tile of a terminal scheme: its background, a prompt and three accent dots. */
+  .scheme {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    width: 88px;
+    height: 56px;
+    padding: 8px 9px;
+    border-radius: 7px;
+    font: 600 11px/1.2 var(--font-mono, monospace);
+    text-align: left;
+  }
+
+  .scheme .dots {
+    display: flex;
+    gap: 4px;
+  }
+
+  .scheme .dots i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
   }
 
   /* A choice of a few, like macOS segmented controls. */

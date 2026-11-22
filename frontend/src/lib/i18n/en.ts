@@ -2121,6 +2121,10 @@ const en = {
     terminal: 'Terminal',
     fontSize: 'Font size',
     fontSizeHint: 'Applies to every Terminal window.',
+    termScheme: 'Color scheme',
+    termSchemeHint:
+      'The colors of text and background. Every scheme but Davish draws on a solid background.',
+    termSchemes: { davish: 'Davish', hacker: 'Hacker', solarized: 'Solarized', dracula: 'Dracula' },
     fontSmaller: 'Smaller font',
     fontLarger: 'Larger font',
     prompt: 'Davish prompt',
@@ -2131,7 +2135,7 @@ const en = {
       'Draws with WebGL, faster on large output. The terminal background turns solid instead of frosted glass.',
     termSolid: 'Solid background',
     termSolidHint:
-      'Draws the terminal on a solid color instead of frosted glass. Always on with GPU acceleration or Performance → Solid fills.',
+      'Draws the terminal on a solid color instead of frosted glass. Always on with GPU acceleration, Performance → Solid fills or a color scheme other than Davish.',
     scrollback: 'Scrollback',
     scrollbackHint:
       'Lines each tab keeps to scroll back through. Fewer lines use less memory; applies to every Terminal window.',

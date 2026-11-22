@@ -2094,6 +2094,9 @@ const vi = {
     terminal: 'Terminal',
     fontSize: 'Cỡ chữ',
     fontSizeHint: 'Áp dụng cho mọi cửa sổ Terminal.',
+    termScheme: 'Bảng màu',
+    termSchemeHint: 'Màu chữ và màu nền. Mọi bảng màu trừ Davish đều vẽ trên nền đặc.',
+    termSchemes: { davish: 'Davish', hacker: 'Hacker', solarized: 'Solarized', dracula: 'Dracula' },
     fontSmaller: 'Giảm cỡ chữ',
     fontLarger: 'Tăng cỡ chữ',
     prompt: 'Prompt Davish',
@@ -2104,7 +2107,7 @@ const vi = {
       'Vẽ bằng WebGL, nhanh hơn khi in output lớn. Nền terminal chuyển sang màu đặc thay cho kính mờ.',
     termSolid: 'Nền đặc',
     termSolidHint:
-      'Vẽ terminal trên màu đặc thay cho kính mờ. Luôn bật khi dùng tăng tốc GPU hoặc Hiệu năng → Nền đặc.',
+      'Vẽ terminal trên màu đặc thay cho kính mờ. Luôn bật khi dùng tăng tốc GPU, Hiệu năng → Nền đặc hoặc bảng màu khác Davish.',
     scrollback: 'Số dòng cuộn lại',
     scrollbackHint:
       'Số dòng mỗi tab giữ lại để cuộn xem. Ít dòng hơn thì dùng ít bộ nhớ hơn; áp dụng cho mọi cửa sổ Terminal.',

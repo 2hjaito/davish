@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest'
 
 import {
   clampFontSize,
+  clampScheme,
   clampScrollback,
   resolveTheme,
   settings,
   TERMINAL_FONT,
+  TERMINAL_SCHEMES,
   TERMINAL_SCROLLBACK,
   WALLPAPER_ACCENTS,
 } from './settings.svelte'
@@ -86,5 +88,26 @@ describe('terminalOpaque', () => {
     expect(settings.terminalOpaque).toBe(true)
     settings.usePreset('beautiful')
     expect(settings.terminalOpaque).toBe(false)
+  })
+})
+
+describe('clampScheme', () => {
+  it.each([...TERMINAL_SCHEMES])('keeps %s', (id) => {
+    expect(clampScheme(id)).toBe(id)
+  })
+
+  it.each(['neon', '', 3, null, undefined])('falls back to davish for %s', (junk) => {
+    expect(clampScheme(junk)).toBe('davish')
+  })
+
+  it('makes the terminal solid for a scheme with its own background', () => {
+    settings.usePreset('beautiful')
+    settings.set('terminalGpu', false)
+    settings.set('terminalSolid', false)
+    settings.set('terminalScheme', 'davish')
+    expect(settings.terminalOpaque).toBe(false)
+    settings.set('terminalScheme', 'dracula')
+    expect(settings.terminalOpaque).toBe(true)
+    settings.set('terminalScheme', 'davish')
   })
 })

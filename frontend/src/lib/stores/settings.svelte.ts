@@ -45,6 +45,14 @@ export function clampScrollback(lines: unknown): TerminalScrollback {
   return TERMINAL_SCROLLBACK.find((n) => n === lines) ?? DEFAULT_SCROLLBACK
 }
 
+/** The color schemes of Terminal; their colors are in apps/terminal/schemes.ts. */
+export const TERMINAL_SCHEMES = ['davish', 'hacker', 'solarized', 'dracula'] as const
+export type TerminalScheme = (typeof TERMINAL_SCHEMES)[number]
+
+export function clampScheme(id: unknown): TerminalScheme {
+  return TERMINAL_SCHEMES.find((s) => s === id) ?? 'davish'
+}
+
 /** The monospace font of Terminal, Editor and Logs. */
 export type MonoFont = 'jetbrains' | 'system'
 
@@ -101,6 +109,7 @@ interface SettingsData extends StoredPerf {
   terminalFontSize: number
   terminalGpu: boolean
   terminalSolid: boolean
+  terminalScheme: TerminalScheme
   terminalScrollback: TerminalScrollback
   terminalPrompt: boolean
   monoFont: MonoFont
@@ -129,6 +138,7 @@ const defaults: SettingsData = {
   terminalFontSize: TERMINAL_FONT.default,
   terminalGpu: false,
   terminalSolid: false,
+  terminalScheme: 'davish',
   terminalScrollback: DEFAULT_SCROLLBACK,
   terminalPrompt: true,
   monoFont: 'jetbrains',
@@ -271,10 +281,19 @@ class Settings {
   }
   /**
    * Whether the terminal draws on a solid background rather than the glass.
-   * GPU drawing and the opaque performance setting (Light) always do.
+   * GPU drawing, the opaque performance setting and any scheme with a
+   * background of its own always do.
    */
   get terminalOpaque() {
-    return this.terminalGpu || this.terminalSolid || this.knobs.opaque
+    return (
+      this.terminalGpu ||
+      this.terminalSolid ||
+      this.knobs.opaque ||
+      this.terminalScheme !== 'davish'
+    )
+  }
+  get terminalScheme(): TerminalScheme {
+    return clampScheme(this.#data.terminalScheme)
   }
   get terminalScrollback(): TerminalScrollback {
     return clampScrollback(this.#data.terminalScrollback)
