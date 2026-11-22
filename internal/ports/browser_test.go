@@ -48,16 +48,42 @@ func TestInjectNav(t *testing.T) {
 
 func TestMapLocationSamePort(t *testing.T) {
 	b := NewBrowser(nil, nil)
-	s := &site{Site: Site{ServerID: "s", RemotePort: 3000, LocalPort: 5000}}
+	s := &site{Site: Site{ServerID: "s", RemotePort: 3000, LocalPort: 5000, Token: "tok"}}
 	for in, want := range map[string]string{
-		"http://localhost:3000/login?x=1": "http://127.0.0.1:5000/login?x=1",
-		"http://127.0.0.1:3000/":          "http://127.0.0.1:5000/",
-		"/relative":                       "/relative",
-		"https://github.com/login":        "https://github.com/login",
+		// The server's own address goes to the listener, with its token.
+		"http://localhost:3000/login?x=1": "http://127.0.0.1:5000/login?x=1&__davish=tok",
+		"http://127.0.0.1:3000/":          "http://127.0.0.1:5000/?__davish=tok",
+		// A relative redirect (fastify's "/" to "/ui/") stays here, with the token.
+		"/ui/":     "/ui/?__davish=tok",
+		"/a/b?c=d": "/a/b?c=d&__davish=tok",
+		"login":    "login?__davish=tok",
+		"/ui/#top": "/ui/?__davish=tok#top",
+		// Other sites are left alone and never get the token.
+		"https://github.com/login": "https://github.com/login",
+		"http://example.com/x":     "http://example.com/x",
+		"//evil.example/x":         "//evil.example/x",
 	} {
 		if got := b.mapLocation(s, in); got != want {
 			t.Errorf("%s -> %s, want %s", in, got, want)
 		}
+	}
+}
+
+// The request after a redirect has a Referer from the frame's parent, not the
+// proxy, so the token in Location is what lets it through.
+func TestRedirectKeepsRequestAllowed(t *testing.T) {
+	b := NewBrowser(nil, nil)
+	s := &site{Site: Site{ServerID: "s", RemotePort: 12103, LocalPort: 5000, Token: "tok"}}
+	next := b.mapLocation(s, "/ui/")
+	r := httptest.NewRequest("GET", next, nil)
+	r.Host = "127.0.0.1:5000"
+	r.Header.Set("Referer", "http://wails.localhost/")
+	if !s.allowed(r) {
+		t.Errorf("redirect target %s refused", next)
+	}
+	other := &site{Site: Site{LocalPort: 5000, Token: "other"}}
+	if other.allowed(r) {
+		t.Error("a token from another listener was accepted")
 	}
 }
 

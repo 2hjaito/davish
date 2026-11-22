@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Sửa
+- Trình duyệt: trang chuyển hướng bằng đường dẫn tương đối (ví dụ `/` sang `/ui/`, hay thêm dấu `/` cuối) không còn báo "this address only opens inside Davish" (403).
+
 ## [1.14.11] - 2026-11-21
 
 ### Thêm

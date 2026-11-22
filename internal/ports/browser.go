@@ -255,11 +255,27 @@ func injectNav(body []byte) []byte {
 	return slices.Concat(tag, body)
 }
 
-// mapLocation turns a redirect to the server's own localhost into the
-// listener for that port, so the page stays on the VPS.
+// mapLocation keeps a redirect on the listener that sent it. A redirect to
+// the server's own localhost goes to the listener for that port, so the page
+// stays on the VPS; a relative one stays where it is. Either way it carries
+// that listener's token: the request that follows a redirect has no Referer
+// from the proxy (the frame's parent sent it), so without the token it would
+// be refused.
 func (b *Browser) mapLocation(s *site, loc string) string {
 	u, err := url.Parse(loc)
-	if err != nil || !u.IsAbs() || u.Scheme != "http" {
+	if err != nil {
+		return loc
+	}
+	if !u.IsAbs() {
+		// "//host/path" names another site; only a path, query or fragment
+		// stays on this listener.
+		if u.Host != "" {
+			return loc
+		}
+		u.RawQuery = withToken(u.RawQuery, s.Token)
+		return u.String()
+	}
+	if u.Scheme != "http" {
 		return loc
 	}
 	switch u.Hostname() {
@@ -281,10 +297,16 @@ func (b *Browser) mapLocation(s *site, loc string) string {
 		if err != nil {
 			return loc
 		}
-		q := u.Query()
-		q.Set(tokenParam, target.Token)
-		u.RawQuery = q.Encode()
 	}
 	u.Host = "127.0.0.1:" + strconv.Itoa(target.LocalPort)
+	u.RawQuery = withToken(u.RawQuery, target.Token)
 	return u.String()
+}
+
+// withToken is query with the token added, the rest left as it was.
+func withToken(query, token string) string {
+	if query == "" {
+		return tokenParam + "=" + token
+	}
+	return query + "&" + tokenParam + "=" + token
 }
