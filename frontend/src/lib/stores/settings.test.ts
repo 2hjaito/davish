@@ -198,3 +198,16 @@ describe('editor settings', () => {
     settings.set('filesShowHidden', true)
   })
 })
+
+describe('the widgets knob in settings', () => {
+  it('follows the preset and can be set on its own', () => {
+    settings.usePreset('beautiful')
+    expect(settings.knobs.widgets).toBe(true)
+    settings.usePreset('light')
+    expect(settings.knobs.widgets).toBe(false)
+    settings.setKnob('widgets', true)
+    expect(settings.knobs.widgets).toBe(true)
+    expect(settings.perfPreset).toBe('custom')
+    settings.usePreset('beautiful')
+  })
+})

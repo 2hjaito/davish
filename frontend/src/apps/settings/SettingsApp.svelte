@@ -195,12 +195,14 @@
     { key: 'alertDisk', label: t.settings.alertDisk, hint: t.settings.alertDiskHint },
   ] as const
 
-  type BoolKnob = 'blur' | 'opaque' | 'wallpaper' | 'motion' | 'noDmabuf' | 'noCompositing'
+  type BoolKnob =
+    'blur' | 'opaque' | 'wallpaper' | 'motion' | 'widgets' | 'noDmabuf' | 'noCompositing'
   const perfKnobs: { key: BoolKnob; label: string; hint: string }[] = [
     { key: 'blur', label: t.settings.perfBlur, hint: t.settings.perfBlurHint },
     { key: 'opaque', label: t.settings.perfOpaque, hint: t.settings.perfOpaqueHint },
     { key: 'wallpaper', label: t.settings.perfWallpaper, hint: t.settings.perfWallpaperHint },
     { key: 'motion', label: t.settings.perfMotion, hint: t.settings.perfMotionHint },
+    { key: 'widgets', label: t.settings.perfWidgets, hint: t.settings.perfWidgetsHint },
   ]
   // WebKitGTK workarounds, only on Linux.
   if (isLinux)

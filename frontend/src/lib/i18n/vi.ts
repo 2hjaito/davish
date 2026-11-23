@@ -2055,6 +2055,8 @@ const vi = {
     perfWallpaperHint: 'Tắt để chỉ còn một màu nền.',
     perfMotion: 'Chuyển động',
     perfMotionHint: 'Hiệu ứng mở, đóng và thu nhỏ cửa sổ.',
+    perfWidgets: 'Widget',
+    perfWidgetsHint: 'Các widget trên desktop. Tắt thì ẩn và ngừng đọc dữ liệu cho chúng.',
     perfNoDmabuf: 'Tắt DMA-BUF',
     perfNoDmabufHint: 'Cách vẽ của WebKitGTK trên Linux. Có hiệu lực sau khi khởi động lại.',
     perfNoCompositing: 'Tắt compositing',

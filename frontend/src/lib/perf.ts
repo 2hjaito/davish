@@ -19,6 +19,8 @@ export interface Knobs {
   wallpaper: boolean
   /** Open, close and minimize animations. */
   motion: boolean
+  /** The widgets on the desktop (ADR 0026). */
+  widgets: boolean
   /** Linux: set WEBKIT_DISABLE_DMABUF_RENDERER on the next launch. */
   noDmabuf: boolean
   /** Linux: set WEBKIT_DISABLE_COMPOSITING_MODE on the next launch. */
@@ -32,6 +34,7 @@ export const PRESET_KNOBS: Record<Exclude<NamedPreset, 'auto'>, Knobs> = {
     opaque: false,
     wallpaper: true,
     motion: true,
+    widgets: true,
     noDmabuf: false,
     noCompositing: false,
   },
@@ -41,6 +44,7 @@ export const PRESET_KNOBS: Record<Exclude<NamedPreset, 'auto'>, Knobs> = {
     opaque: true,
     wallpaper: true,
     motion: true,
+    widgets: true,
     noDmabuf: false,
     noCompositing: false,
   },
@@ -50,6 +54,7 @@ export const PRESET_KNOBS: Record<Exclude<NamedPreset, 'auto'>, Knobs> = {
     opaque: true,
     wallpaper: false,
     motion: false,
+    widgets: false,
     noDmabuf: false,
     noCompositing: false,
   },
@@ -74,6 +79,7 @@ export function knobsEqual(a: Knobs, b: Knobs): boolean {
     a.opaque === b.opaque &&
     a.wallpaper === b.wallpaper &&
     a.motion === b.motion &&
+    a.widgets === b.widgets &&
     a.noDmabuf === b.noDmabuf &&
     a.noCompositing === b.noCompositing
   )
@@ -102,6 +108,7 @@ export interface StoredPerf {
   perfOpaque?: unknown
   perfWallpaper?: unknown
   perfMotion?: unknown
+  perfWidgets?: unknown
   perfNoDmabuf?: unknown
   perfNoCompositing?: unknown
   /** Previous Reduce glass toggle, before presets. */
@@ -120,6 +127,7 @@ export function knobsFromStored(raw: StoredPerf): Knobs {
     opaque: flag(raw.perfOpaque, false),
     wallpaper: flag(raw.perfWallpaper, true),
     motion: flag(raw.perfMotion, true),
+    widgets: flag(raw.perfWidgets, true),
     noDmabuf: flag(raw.perfNoDmabuf, false),
     noCompositing: flag(raw.perfNoCompositing, false),
   }
@@ -155,6 +163,7 @@ export function migratePerf(raw: StoredPerf | null): ResolvedPerf {
       opaque: raw.reduceGlass === true,
       wallpaper: true,
       motion: raw.reduceMotion !== true,
+      widgets: true,
       noDmabuf: false,
       noCompositing: false,
     }

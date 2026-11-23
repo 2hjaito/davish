@@ -2125,6 +2125,8 @@ const es = {
     perfWallpaperHint: 'Desactívalo para dejar un solo color.',
     perfMotion: 'Animación',
     perfMotionHint: 'Las animaciones de abrir, cerrar y minimizar.',
+    perfWidgets: 'Widgets',
+    perfWidgetsHint: 'Los widgets del escritorio. Desactivados, se ocultan y dejan de leer datos.',
     perfNoDmabuf: 'Desactivar DMA-BUF',
     perfNoDmabufHint: 'Un ajuste de WebKitGTK en Linux. Se aplica al reiniciar.',
     perfNoCompositing: 'Desactivar la composición',

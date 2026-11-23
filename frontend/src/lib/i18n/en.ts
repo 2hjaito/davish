@@ -2082,6 +2082,8 @@ const en = {
     perfWallpaperHint: 'Turn off for a single flat color.',
     perfMotion: 'Motion',
     perfMotionHint: 'The open, close and minimize animations.',
+    perfWidgets: 'Widgets',
+    perfWidgetsHint: 'The widgets on the desktop. Off hides them and stops what they read.',
     perfNoDmabuf: 'Disable DMA-BUF',
     perfNoDmabufHint: 'A WebKitGTK workaround on Linux. Applies after a restart.',
     perfNoCompositing: 'Disable compositing',

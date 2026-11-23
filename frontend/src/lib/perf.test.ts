@@ -4,6 +4,7 @@ import {
   frameP95,
   framesPerSecond,
   knobsEqual,
+  knobsFromStored,
   machineIsSlow,
   migratePerf,
   PRESET_KNOBS,
@@ -23,6 +24,32 @@ describe('presetMatching', () => {
   it('is custom when one knob leaves the preset', () => {
     expect(presetMatching({ ...PRESET_KNOBS.light, wallpaper: true })).toBe('custom')
     expect(presetMatching({ ...PRESET_KNOBS.beautiful, noDmabuf: true })).toBe('custom')
+  })
+})
+
+describe('the widgets knob', () => {
+  it('is on in Beautiful and Balanced and off in Light', () => {
+    expect(PRESET_KNOBS.beautiful.widgets).toBe(true)
+    expect(PRESET_KNOBS.balanced.widgets).toBe(true)
+    expect(PRESET_KNOBS.light.widgets).toBe(false)
+  })
+
+  it('is part of what makes a preset: Light with widgets on is custom', () => {
+    expect(presetMatching({ ...PRESET_KNOBS.light, widgets: true })).toBe('custom')
+    expect(presetMatching({ ...PRESET_KNOBS.beautiful, widgets: false })).toBe('custom')
+    expect(knobsEqual(PRESET_KNOBS.light, { ...PRESET_KNOBS.light, widgets: true })).toBe(false)
+  })
+
+  it('is on for a file written before widgets existed, and read back when stored', () => {
+    expect(knobsFromStored({}).widgets).toBe(true)
+    expect(knobsFromStored({ perfWidgets: false }).widgets).toBe(false)
+    expect(knobsFromStored({ perfWidgets: 'no' }).widgets).toBe(true)
+  })
+
+  it('keeps a saved named preset as it is', () => {
+    expect(migratePerf({ perfPreset: 'light' }).knobs.widgets).toBe(false)
+    expect(migratePerf({ perfPreset: 'balanced' }).knobs.widgets).toBe(true)
+    expect(migratePerf({ reduceGlass: true }).knobs.widgets).toBe(true)
   })
 })
 

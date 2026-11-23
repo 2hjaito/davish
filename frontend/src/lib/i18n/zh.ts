@@ -2019,6 +2019,8 @@ const zh = {
     perfWallpaperHint: '关闭后只保留一种底色。',
     perfMotion: '动画',
     perfMotionHint: '窗口打开、关闭和最小化的动画。',
+    perfWidgets: '小组件',
+    perfWidgetsHint: '桌面上的小组件。关闭后隐藏它们，并停止为它们读取数据。',
     perfNoDmabuf: '关闭 DMA-BUF',
     perfNoDmabufHint: 'Linux 上 WebKitGTK 的一种变通。重启后生效。',
     perfNoCompositing: '关闭合成',
