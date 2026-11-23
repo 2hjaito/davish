@@ -2115,7 +2115,12 @@ const vi = {
     termCursors: { bar: 'Thanh', block: 'Khối', underline: 'Gạch chân' },
     termBlink: 'Con trỏ nhấp nháy',
     termBlinkHint: 'Con trỏ nhấp nháy khi terminal đang được chọn.',
-    termSchemes: { davish: 'Davish', hacker: 'Hacker', solarized: 'Solarized', dracula: 'Dracula' },
+    termSchemes: {
+      davish: 'Davish',
+      phosphor: 'Phosphor',
+      solarized: 'Solarized',
+      dracula: 'Dracula',
+    },
     fontSmaller: 'Giảm cỡ chữ',
     fontLarger: 'Tăng cỡ chữ',
     prompt: 'Prompt Davish',

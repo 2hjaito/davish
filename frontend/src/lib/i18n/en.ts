@@ -2144,7 +2144,12 @@ const en = {
     termCursors: { bar: 'Bar', block: 'Block', underline: 'Underline' },
     termBlink: 'Blinking cursor',
     termBlinkHint: 'The cursor blinks while the terminal has focus.',
-    termSchemes: { davish: 'Davish', hacker: 'Hacker', solarized: 'Solarized', dracula: 'Dracula' },
+    termSchemes: {
+      davish: 'Davish',
+      phosphor: 'Phosphor',
+      solarized: 'Solarized',
+      dracula: 'Dracula',
+    },
     fontSmaller: 'Smaller font',
     fontLarger: 'Larger font',
     prompt: 'Davish prompt',

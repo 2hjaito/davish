@@ -2190,7 +2190,12 @@ const es = {
     termCursors: { bar: 'Barra', block: 'Bloque', underline: 'Subrayado' },
     termBlink: 'Cursor parpadeante',
     termBlinkHint: 'El cursor parpadea mientras el terminal tiene el foco.',
-    termSchemes: { davish: 'Davish', hacker: 'Hacker', solarized: 'Solarized', dracula: 'Dracula' },
+    termSchemes: {
+      davish: 'Davish',
+      phosphor: 'Phosphor',
+      solarized: 'Solarized',
+      dracula: 'Dracula',
+    },
     fontSmaller: 'Letra más pequeña',
     fontLarger: 'Letra más grande',
     prompt: 'Prompt de Davish',

@@ -35,7 +35,7 @@ export interface Scheme {
 
 /** The schemes that bring their own colors. */
 export const SCHEMES: Record<Exclude<TerminalScheme, 'davish'>, Scheme> = {
-  hacker: {
+  phosphor: {
     background: '#050805',
     foreground: '#35e06b',
     cursor: '#5dff8f',

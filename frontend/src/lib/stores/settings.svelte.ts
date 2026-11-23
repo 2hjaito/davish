@@ -46,7 +46,7 @@ export function clampScrollback(lines: unknown): TerminalScrollback {
 }
 
 /** The color schemes of Terminal; their colors are in apps/terminal/schemes.ts. */
-export const TERMINAL_SCHEMES = ['davish', 'hacker', 'solarized', 'dracula'] as const
+export const TERMINAL_SCHEMES = ['davish', 'phosphor', 'solarized', 'dracula'] as const
 export type TerminalScheme = (typeof TERMINAL_SCHEMES)[number]
 
 export function clampScheme(id: unknown): TerminalScheme {

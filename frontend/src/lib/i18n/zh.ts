@@ -2077,7 +2077,12 @@ const zh = {
     termCursors: { bar: '竖线', block: '方块', underline: '下划线' },
     termBlink: '光标闪烁',
     termBlinkHint: '终端获得焦点时光标闪烁。',
-    termSchemes: { davish: 'Davish', hacker: '黑客', solarized: 'Solarized', dracula: 'Dracula' },
+    termSchemes: {
+      davish: 'Davish',
+      phosphor: 'Phosphor',
+      solarized: 'Solarized',
+      dracula: 'Dracula',
+    },
     fontSmaller: '缩小字号',
     fontLarger: '放大字号',
     prompt: 'Davish 提示符',
