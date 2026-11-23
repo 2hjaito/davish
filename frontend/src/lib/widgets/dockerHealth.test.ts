@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest'
 
 import type { Container } from '../api/docker'
-import { hasProblem, healthOf, LIST_MAX, problemCount, summarize } from './dockerHealth'
+import {
+  DOT_MAX,
+  dotOf,
+  hasProblem,
+  healthOf,
+  LIST_MAX,
+  problemCount,
+  summarize,
+} from './dockerHealth'
 
 const c = (name: string, state: string, status: string): Container => ({
   id: name,
@@ -66,6 +74,7 @@ describe('summarize', () => {
 
   it('is empty for no containers', () => {
     expect(summarize([])).toEqual({
+      dots: [],
       total: 0,
       running: 0,
       unhealthy: [],
@@ -73,5 +82,41 @@ describe('summarize', () => {
       starting: 0,
       more: 0,
     })
+  })
+})
+
+describe('dotOf', () => {
+  it.each([
+    ['running', 'Up 1 hour', 'ok'],
+    ['running', 'Up 1 hour (healthy)', 'ok'],
+    ['running', 'Up 5 seconds (health: starting)', 'starting'],
+    ['running', 'Up 1 hour (unhealthy)', 'bad'],
+    ['restarting', 'Restarting (1) 5 seconds ago', 'bad'],
+    ['exited', 'Exited (0) 2 days ago', 'stopped'],
+    ['created', 'Created', 'stopped'],
+    ['paused', 'Up 1 hour (Paused)', 'stopped'],
+    ['dead', '', 'stopped'],
+  ])('%s with %j is %s', (state, status, want) => {
+    expect(dotOf({ state, status })).toBe(want)
+  })
+})
+
+describe('the dots of a summary', () => {
+  it("keep docker's order, so a dot stays where it was as states change", () => {
+    const s = summarize([
+      c('a', 'running', 'Up 1 hour'),
+      c('b', 'exited', 'Exited (0) 1 hour ago'),
+      c('c', 'running', 'Up 1 hour (unhealthy)'),
+      c('d', 'running', 'Up 5 seconds (health: starting)'),
+    ])
+    expect(s.dots).toEqual(['ok', 'stopped', 'bad', 'starting'])
+  })
+
+  it('stop at DOT_MAX while the counts go on', () => {
+    const many = Array.from({ length: DOT_MAX + 9 }, (_, i) => c(`c${i}`, 'running', 'Up 1 hour'))
+    const s = summarize(many)
+    expect(s.dots).toHaveLength(DOT_MAX)
+    expect(s.total).toBe(DOT_MAX + 9)
+    expect(s.running).toBe(DOT_MAX + 9)
   })
 })

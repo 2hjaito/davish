@@ -5,8 +5,10 @@
   import { t } from '../i18n'
   import { dockerHealth } from '../stores/dockerHealth.svelte'
   import { servers } from '../stores/servers.svelte'
+  import Dots from './Dots.svelte'
   import { hasProblem, problemCount } from './dockerHealth'
   import type { WidgetProps } from './registry'
+  import WidgetCard, { type Tone } from './WidgetCard.svelte'
 
   let { serverID, size }: WidgetProps = $props()
 
@@ -36,76 +38,124 @@
   })
 
   const bad = $derived(s ? hasProblem(s) : false)
-  const level = $derived(bad ? 'danger' : s && s.starting > 0 ? 'warn' : 'ok')
+  const tone = $derived<Tone>(
+    !s || message ? 'neutral' : bad ? 'danger' : s.starting > 0 ? 'warn' : 'ok',
+  )
 
-  /** One line on the state: what is wrong, else what is starting, else that all is well. */
+  /** A short word for the state: how many problems, else what is starting, else that all is well. */
   const line = $derived.by(() => {
     if (!s) return ''
     if (s.total === 0) return d.none
-    const parts: string[] = []
-    if (s.unhealthy.length + s.more > 0 && s.restarting.length === 0)
-      parts.push(d.unhealthy(problemCount(s)))
-    else {
-      if (s.unhealthy.length > 0) parts.push(d.unhealthy(s.unhealthy.length))
-      if (s.restarting.length > 0) parts.push(d.restarting(s.restarting.length + s.more))
-    }
-    if (parts.length === 0 && s.starting > 0) parts.push(d.starting(s.starting))
-    return parts.length > 0 ? parts.join(' · ') : d.allHealthy
+    if (bad && s) return d.problems(problemCount(s))
+    if (s.starting > 0) return d.starting(s.starting)
+    return d.allHealthy
   })
 
+  const COLORS = {
+    ok: 'var(--ok-on-dark)',
+    bad: 'var(--danger-on-dark)',
+    starting: 'var(--warn-on-dark)',
+    stopped: 'var(--widget-stopped)',
+  }
+
+  /** One row of dots in the small widget, a grid in the medium one. */
+  const COLS = $derived(size === 'M' ? 12 : 14)
+  const dots = $derived(s ? s.dots.slice(0, size === 'M' ? 60 : COLS) : [])
+
   /** The containers to name in the medium widget: the failing ones first. */
-  const NAMED = 4
+  const NAMED = 3
   const names = $derived(
     s
       ? [
-          ...s.unhealthy.map((name) => ({ name, kind: 'unhealthy' })),
-          ...s.restarting.map((name) => ({ name, kind: 'restarting' })),
+          ...s.unhealthy.map((name) => ({ name, kind: 'unhealthy' as const })),
+          ...s.restarting.map((name) => ({ name, kind: 'restarting' as const })),
         ]
       : [],
   )
 </script>
 
-<div class="docker">
-  <div class="head">
-    <span class="label">{t.apps.docker}</span>
-    {#if r.problem === 'failed' && s}<span class="stale" title={d.failed}>!</span>{/if}
-  </div>
-  {#if message}
-    <p class="message">{message}</p>
-  {:else if s}
-    <div class="big">
-      {s.running}<small>/{s.total} {d.running}</small>
+<WidgetCard {tone}>
+  <div class="docker">
+    <div class="head">
+      <span class="label">{t.apps.docker}</span>
+      {#if s && !message}
+        <span class="state {tone}">{line}</span>
+      {:else if r.problem === 'failed' && s}
+        <span class="stale" title={d.failed}>!</span>
+      {/if}
     </div>
-    <div class="line {level}"><span class="dot"></span>{line}</div>
-    {#if size === 'M' && names.length > 0}
-      <ul>
-        {#each names.slice(0, NAMED) as n (n.kind + n.name)}
-          <li class={n.kind}><span class="dot"></span><span class="name">{n.name}</span></li>
-        {/each}
-        {#if names.length + s.more > NAMED}
-          <li class="more">{d.more(names.length + s.more - NAMED)}</li>
-        {/if}
-      </ul>
+    {#if message}
+      <p class="message">{message}</p>
+    {:else if s}
+      <div class="big">
+        {s.running}<small>/{s.total} {d.running}</small>
+      </div>
+      <div class="dots">
+        <Dots cells={dots} cols={COLS} size={9} gap={3} colors={COLORS} />
+        {#if size === 'S' && s.total > COLS}<span class="more">+{s.total - COLS}</span>{/if}
+      </div>
+      {#if size === 'M' && names.length > 0}
+        <ul>
+          {#each names.slice(0, NAMED) as n (n.kind + n.name)}
+            <li>
+              <span class="dot"></span><span class="name">{n.name}</span>
+              <span class="why">{d.states[n.kind]}</span>
+            </li>
+          {/each}
+          {#if names.length + s.more > NAMED}
+            <li class="more">{d.more(names.length + s.more - NAMED)}</li>
+          {/if}
+        </ul>
+      {/if}
     {/if}
-  {/if}
-</div>
+  </div>
+</WidgetCard>
 
 <style>
   .docker {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
     height: 100%;
     min-height: 0;
-    overflow: hidden;
   }
 
   .head {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     justify-content: space-between;
-    color: var(--fg-muted);
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .label {
+    flex: none;
+    color: var(--fg-on-dark-muted);
+    font-size: var(--text-xxs);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .state {
+    overflow: hidden;
+    color: var(--fg-on-dark-muted);
     font-size: var(--text-xs);
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .state.ok {
+    color: var(--ok-on-dark);
+  }
+
+  .state.warn {
+    color: var(--warn-on-dark);
+  }
+
+  .state.danger {
+    color: var(--danger-on-dark);
   }
 
   .stale {
@@ -115,59 +165,37 @@
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background: var(--warn);
-    color: var(--fg-on-accent);
+    background: var(--warn-on-dark);
+    color: var(--widget-base);
     font-size: var(--text-xxs);
     font-weight: 700;
   }
 
   .big {
-    color: var(--fg);
-    font-size: 24px;
+    color: var(--fg-on-dark);
+    font-size: 30px;
     font-variant-numeric: tabular-nums;
-    font-weight: 600;
-    line-height: 1.15;
+    font-weight: 650;
+    line-height: 1.1;
   }
 
   .big small {
-    margin-left: 2px;
-    color: var(--fg-muted);
+    margin-left: 3px;
+    color: var(--fg-on-dark-muted);
     font-size: var(--text-xs);
-    font-weight: 400;
+    font-weight: 500;
   }
 
-  .line {
+  .dots {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     gap: 6px;
-    overflow: hidden;
+    margin-top: 2px;
+  }
+
+  .more {
+    color: var(--fg-on-dark-muted);
     font-size: var(--text-xs);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .dot {
-    flex: none;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--fg-muted);
-  }
-
-  .ok .dot {
-    background: var(--ok);
-  }
-
-  .warn .dot {
-    background: var(--warn);
-  }
-
-  .danger {
-    color: var(--danger);
-  }
-
-  .danger .dot {
-    background: var(--danger);
   }
 
   ul {
@@ -187,24 +215,34 @@
     min-width: 0;
   }
 
-  li.unhealthy .dot,
-  li.restarting .dot {
-    background: var(--danger);
+  li .dot {
+    flex: none;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--danger-on-dark);
   }
 
   .name {
     overflow: hidden;
+    color: var(--fg-on-dark);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .more {
-    color: var(--fg-muted);
+  .why {
+    margin-left: auto;
+    color: var(--fg-on-dark-muted);
+    white-space: nowrap;
+  }
+
+  li.more {
+    color: var(--fg-on-dark-muted);
   }
 
   .message {
     margin: auto 0;
-    color: var(--fg-muted);
+    color: var(--fg-on-dark-muted);
     font-size: var(--text-xs);
   }
 </style>

@@ -35,8 +35,8 @@ const en = {
     docker: {
       running: 'running',
       allHealthy: 'All healthy',
-      unhealthy: (n: number) => `${n} unhealthy`,
-      restarting: (n: number) => `${n} restarting`,
+      problems: (n: number) => `${n} ${n === 1 ? 'problem' : 'problems'}`,
+      states: { unhealthy: 'unhealthy', restarting: 'restarting' },
       starting: (n: number) => `${n} starting`,
       more: (n: number) => `+${n} more`,
       none: 'No containers',

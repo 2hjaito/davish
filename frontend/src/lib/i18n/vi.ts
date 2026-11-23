@@ -48,8 +48,8 @@ const vi = {
     docker: {
       running: 'đang chạy',
       allHealthy: 'Tất cả ổn',
-      unhealthy: (n: number) => `${n} lỗi health`,
-      restarting: (n: number) => `${n} khởi động lặp`,
+      problems: (n: number) => `${n} lỗi`,
+      states: { unhealthy: 'lỗi health', restarting: 'khởi động lặp' },
       starting: (n: number) => `${n} đang khởi động`,
       more: (n: number) => `+${n} nữa`,
       none: 'Không có container',
