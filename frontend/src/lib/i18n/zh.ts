@@ -42,6 +42,14 @@ const zh = {
       `服务器数量不限，每台都是一个工作区（${mod}1…${mod}9）。按 ${mod}K 打开 Spotlight，查找应用、服务、容器和文件夹。`,
   },
   widgets: {
+    disk: {
+      of: (used: string, size: string) => `${used} / ${size}`,
+      ofTotal: (size: string) => `共 ${size}`,
+      almostFull: '快满了',
+      filling: '逐渐变满',
+      more: (n: number) => `还有 ${n} 个`,
+      none: '未读取到磁盘',
+    },
     services: {
       running: '运行中',
       allRunning: '全部运行中',
@@ -71,6 +79,7 @@ const zh = {
     },
     intro: '显示在此服务器桌面上的小型实时视图，位于窗口后面。每台服务器各有自己的小组件。',
     about: {
+      disk: '每个磁盘用了多少，来自监控的读数。接近和超过“设置”中的磁盘告警阈值时变为黄色和红色。',
       services: 'Davish 在前台时每分钟读取一次：有多少服务在运行，哪些失败或反复重启。',
       docker: 'Davish 在前台时每分钟读取一次：有多少容器在运行，哪些健康检查失败或反复重启。',
       monitor: 'CPU、内存和网络，附 15 分钟图表，数据来自菜单栏已在读取的读数。',
@@ -1092,7 +1101,7 @@ const zh = {
         ],
         keys: [],
         runs: [
-          '监控：与监控和菜单栏相同的 /proc 读数，不增加任何命令',
+          '监控和磁盘：与监控和菜单栏相同的读数，不增加任何命令',
           'Docker 和服务：Davish 在前台时每分钟读取一次只读列表（docker ps、systemctl list-units），回到前台时再读一次，从不询问 sudo 密码',
         ],
       },
