@@ -6,6 +6,7 @@
   import Bar from './Bar.svelte'
   import { type DiskLevel, summarizeMounts } from './diskUsage'
   import { LOOK } from './look'
+  import { splitUnit } from './gauge'
   import type { WidgetProps } from './registry'
   import Ring from './Ring.svelte'
   import WidgetBadge from './WidgetBadge.svelte'
@@ -37,6 +38,8 @@
   const rows = $derived(s ? s.rows.slice(0, NAMED) : [])
   const more = $derived(s ? s.rows.length - rows.length : 0)
   const top = $derived(s?.fullest ?? null)
+  /** The used size, its number large and its unit small. */
+  const used = $derived(top ? splitUnit(formatBytes(top.used)) : { value: '', unit: '' })
 </script>
 
 <WidgetCard {tone} accent={LOOK.disk.accent}>
@@ -49,12 +52,14 @@
           <WidgetBadge kind="disk" />
           <span class="label">{t.apps.disk} <span class="path">{top.path}</span></span>
         </span>
-        <span class="hero">{formatPct(top.pct)}</span>
+        <span class="hero">{used.value}<small>{used.unit}</small></span>
         <span class="sub" title={d.of(formatBytes(top.used), formatBytes(top.size))}>
           {d.ofTotal(formatBytes(top.size))}
         </span>
       </div>
-      <Ring value={top.pct / 100} size={60} stroke={7} color={COLOR[top.level]} />
+      <Ring value={top.pct / 100} size={60} stroke={7} color={COLOR[top.level]}>
+        <span class="inner">{formatPct(top.pct)}</span>
+      </Ring>
     </div>
   {:else}
     <div class="m">
@@ -134,6 +139,19 @@
     font-weight: 650;
     line-height: 1.1;
     white-space: nowrap;
+  }
+
+  .hero small {
+    margin-left: 3px;
+    color: var(--fg-on-dark-muted);
+    font-size: var(--text-sm);
+    font-weight: 500;
+  }
+
+  .inner {
+    color: var(--fg-on-dark);
+    font-size: var(--text-xs);
+    font-weight: 650;
   }
 
   .sub {

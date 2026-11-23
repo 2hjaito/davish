@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { cellsFor, dotCells, ringDash } from './gauge'
+import { cellsFor, dotCells, ringDash, splitUnit } from './gauge'
 
 describe('ringDash', () => {
   const r = 20
@@ -53,5 +53,18 @@ describe('dotCells', () => {
     expect(dotCells(2, [{ kind: 'a', count: 5 }])).toEqual(['a', 'a'])
     expect(dotCells(3, [])).toEqual(['empty', 'empty', 'empty'])
     expect(dotCells(0, [{ kind: 'a', count: 1 }])).toEqual([])
+  })
+})
+
+describe('splitUnit', () => {
+  it('splits a size into its number and its unit', () => {
+    expect(splitUnit('42,4 GB')).toEqual({ value: '42,4', unit: 'GB' })
+    expect(splitUnit('431 GB')).toEqual({ value: '431', unit: 'GB' })
+    expect(splitUnit('6 MB')).toEqual({ value: '6', unit: 'MB' })
+  })
+
+  it('keeps a text with no unit as the number, and does not fail on an empty one', () => {
+    expect(splitUnit('12')).toEqual({ value: '12', unit: '' })
+    expect(splitUnit('')).toEqual({ value: '', unit: '' })
   })
 })

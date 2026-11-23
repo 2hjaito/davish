@@ -37,3 +37,12 @@ export function dotCells<K extends string>(n: number, parts: readonly Part<K>[])
   while (out.length < n) out.push('empty')
   return out.slice(0, Math.max(0, n))
 }
+
+/**
+ * A size as formatBytes writes it ("42,4 GB") in its number and its unit, so
+ * the number can be set large and the unit small. Without a space it is all number.
+ */
+export function splitUnit(text: string): { value: string; unit: string } {
+  const i = text.lastIndexOf(' ')
+  return i < 0 ? { value: text, unit: '' } : { value: text.slice(0, i), unit: text.slice(i + 1) }
+}
