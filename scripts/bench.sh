@@ -4,9 +4,11 @@
 #
 #   scripts/bench.sh [binary]            start with an empty HOME (no saved
 #                                        server), report start time and idle use
-#   scripts/bench.sh --attach [seconds]  attach to a running Davish and sample
+#   scripts/bench.sh --attach [seconds] [pid]
+#                                        attach to a running Davish and sample
 #                                        it (default 30s) while you set up a
-#                                        scenario by hand, on the test sshd only
+#                                        scenario by hand, on the test sshd only.
+#                                        Pass the pid when several are running.
 #
 # Totals count the app and every child it spawned (WebKitWebProcess on Linux).
 # On macOS the WebKit WebContent, Networking and GPU services are not children,
@@ -48,6 +50,7 @@ report() {
   before_cpu=$(echo "$4" | cut -d' ' -f2)
   sleep "$3"
   after=$(snapshot "$2")
+  [ "$(echo "$after" | cut -d' ' -f3)" -gt 0 ] || { echo "pid $2 exited while sampling; no result" >&2; exit 1; }
   rss=$(echo "$after" | cut -d' ' -f1)
   after_cpu=$(echo "$after" | cut -d' ' -f2)
   procs=$(echo "$after" | cut -d' ' -f3)
@@ -62,7 +65,10 @@ if [ "${1:-}" = "--attach" ]; then
     *) pids=$(pgrep -x Davish || true) ;;
   esac
   [ -n "$pids" ] || { echo "no running Davish found" >&2; exit 1; }
-  if [ "$(echo "$pids" | wc -l)" -ne 1 ]; then
+  if [ -n "${3:-}" ]; then
+    echo "$pids" | grep -qx "$3" || { echo "pid $3 is not a running Davish" >&2; exit 1; }
+    pids=$3
+  elif [ "$(echo "$pids" | wc -l)" -ne 1 ]; then
     echo "more than one Davish is running; quit the others so the numbers are the app's own:" >&2
     for p in $pids; do ps -o pid=,command= -p "$p" >&2; done
     exit 1
