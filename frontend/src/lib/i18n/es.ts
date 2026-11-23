@@ -43,6 +43,20 @@ const es = {
       `Añade tantos servidores como quieras; cada uno es un espacio de trabajo (${mod}1…${mod}9). ${mod}K abre Spotlight para buscar apps, servicios, contenedores y carpetas.`,
   },
   widgets: {
+    services: {
+      running: 'en marcha',
+      allRunning: 'Todo en marcha',
+      problems: (n: number) => `${n} ${n === 1 ? 'problema' : 'problemas'}`,
+      starting: (n: number) => `${n} arrancando`,
+      others: (exited: number, inactive: number) => `${exited} terminados · ${inactive} inactivos`,
+      why: { failed: 'fallido', restarting: 'reiniciando' },
+      more: (n: number) => `+${n} más`,
+      none: 'Sin servicios',
+      notConnected: 'Sin conexión',
+      missing: 'systemd no está disponible en este servidor',
+      needsRoot: 'Necesita sudo: abre Servicios',
+      failed: 'No se pudieron leer los servicios',
+    },
     docker: {
       running: 'en marcha',
       allHealthy: 'Todo bien',
@@ -59,6 +73,8 @@ const es = {
     intro:
       'Pequeñas vistas en vivo que viven en el escritorio de este servidor, detrás de tus ventanas. Cada servidor tiene las suyas.',
     about: {
+      services:
+        'Cuántos servicios funcionan y cuáles han fallado o se reinician sin parar. Se lee una vez por minuto mientras Davish está delante.',
       docker:
         'Cuántos contenedores funcionan y cuáles fallan su comprobación de salud o se reinician sin parar. Se lee una vez por minuto mientras Davish está delante.',
       monitor:
@@ -1134,7 +1150,8 @@ const es = {
         ],
         keys: [],
         runs: [
-          'Nada propio: el widget Monitor muestra la misma lectura de /proc que Monitor y la barra de menús, sin añadir ningún comando',
+          'Monitor: la misma lectura de /proc que Monitor y la barra de menús, sin añadir ningún comando',
+          'Docker y Servicios: una lista de solo lectura (docker ps, systemctl list-units) por minuto mientras Davish está delante y otra al volver, nunca una contraseña de sudo',
         ],
       },
       settings: {

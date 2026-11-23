@@ -42,6 +42,20 @@ const zh = {
       `服务器数量不限，每台都是一个工作区（${mod}1…${mod}9）。按 ${mod}K 打开 Spotlight，查找应用、服务、容器和文件夹。`,
   },
   widgets: {
+    services: {
+      running: '运行中',
+      allRunning: '全部运行中',
+      problems: (n: number) => `${n} 个问题`,
+      starting: (n: number) => `${n} 个正在启动`,
+      others: (exited: number, inactive: number) => `${exited} 个已结束 · ${inactive} 个未运行`,
+      why: { failed: '失败', restarting: '反复重启' },
+      more: (n: number) => `还有 ${n} 个`,
+      none: '没有服务',
+      notConnected: '未连接',
+      missing: '此服务器没有 systemd',
+      needsRoot: '需要 sudo：请打开服务',
+      failed: '无法读取服务',
+    },
     docker: {
       running: '运行中',
       allHealthy: '全部正常',
@@ -57,6 +71,7 @@ const zh = {
     },
     intro: '显示在此服务器桌面上的小型实时视图，位于窗口后面。每台服务器各有自己的小组件。',
     about: {
+      services: 'Davish 在前台时每分钟读取一次：有多少服务在运行，哪些失败或反复重启。',
       docker: 'Davish 在前台时每分钟读取一次：有多少容器在运行，哪些健康检查失败或反复重启。',
       monitor: 'CPU、内存和网络，附 15 分钟图表，数据来自菜单栏已在读取的读数。',
     },
@@ -1076,7 +1091,10 @@ const zh = {
           '在“设置 → 性能”中全部关闭，或使用“轻量”预设',
         ],
         keys: [],
-        runs: ['自身不运行命令：监控小组件显示与监控和菜单栏相同的 /proc 读数，不增加任何命令'],
+        runs: [
+          '监控：与监控和菜单栏相同的 /proc 读数，不增加任何命令',
+          'Docker 和服务：Davish 在前台时每分钟读取一次只读列表（docker ps、systemctl list-units），回到前台时再读一次，从不询问 sudo 密码',
+        ],
       },
       settings: {
         does: '语言、浅色或深色主题、外观、字体、警报阈值、应用锁、终端提示符。',

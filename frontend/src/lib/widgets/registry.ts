@@ -36,6 +36,12 @@ export const widgetDefs: Record<WidgetKind, WidgetDef> = {
     opens: 'docker',
     load: () => import('./DockerWidget.svelte'),
   },
+  services: {
+    label: () => t.apps.services,
+    sizes: ['S', 'M'],
+    opens: 'services',
+    load: () => import('./ServicesWidget.svelte'),
+  },
 }
 
 /** Does this kind of widget work on a server running os: the app it opens does. */

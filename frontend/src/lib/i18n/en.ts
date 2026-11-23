@@ -32,6 +32,20 @@ const en = {
       `Add as many servers as you like; each one is a workspace (${mod}1…${mod}9). ${mod}K opens Spotlight to find apps, services, containers and folders.`,
   },
   widgets: {
+    services: {
+      running: 'running',
+      allRunning: 'All running',
+      problems: (n: number) => `${n} ${n === 1 ? 'problem' : 'problems'}`,
+      starting: (n: number) => `${n} starting`,
+      others: (exited: number, inactive: number) => `${exited} exited · ${inactive} inactive`,
+      why: { failed: 'failed', restarting: 'restarting' },
+      more: (n: number) => `+${n} more`,
+      none: 'No services',
+      notConnected: 'Not connected',
+      missing: 'systemd is not available on this server',
+      needsRoot: 'Needs sudo: open Services',
+      failed: 'Could not read services',
+    },
     docker: {
       running: 'running',
       allHealthy: 'All healthy',
@@ -48,6 +62,8 @@ const en = {
     intro:
       'Small live views that sit on the desktop of this server, behind your windows. Each server has its own.',
     about: {
+      services:
+        'How many services run, and which ones failed or keep restarting. Read once a minute while Davish is in front.',
       docker:
         'How many containers run, and which ones fail their healthcheck or keep restarting. Read once a minute while Davish is in front.',
       monitor:
@@ -1111,7 +1127,8 @@ const en = {
         ],
         keys: [],
         runs: [
-          'Nothing of its own: the Monitor widget shows the same /proc reading as Monitor and the menu bar, with no command added',
+          'Monitor: the same /proc reading as Monitor and the menu bar, with no command added',
+          'Docker and Services: one read-only list (docker ps, systemctl list-units) a minute while Davish is in front and again when you come back, never a sudo password',
         ],
       },
       settings: {

@@ -45,6 +45,20 @@ const vi = {
       `Có thể thêm nhiều server; mỗi server là một workspace (${mod}1…${mod}9). ${mod}K mở Spotlight để tìm app, dịch vụ, container, thư mục.`,
   },
   widgets: {
+    services: {
+      running: 'đang chạy',
+      allRunning: 'Tất cả đang chạy',
+      problems: (n: number) => `${n} lỗi`,
+      starting: (n: number) => `${n} đang khởi động`,
+      others: (exited: number, inactive: number) => `${exited} đã xong · ${inactive} không chạy`,
+      why: { failed: 'lỗi', restarting: 'khởi động lặp' },
+      more: (n: number) => `+${n} nữa`,
+      none: 'Không có service',
+      notConnected: 'Chưa kết nối',
+      missing: 'Server này không có systemd',
+      needsRoot: 'Cần sudo: mở Services',
+      failed: 'Không đọc được service',
+    },
     docker: {
       running: 'đang chạy',
       allHealthy: 'Tất cả ổn',
@@ -61,6 +75,8 @@ const vi = {
     intro:
       'Các khung xem trực tiếp nhỏ nằm trên desktop của server này, sau cửa sổ. Mỗi server có widget riêng.',
     about: {
+      services:
+        'Bao nhiêu service đang chạy, và cái nào lỗi hoặc khởi động lặp. Đọc mỗi phút một lần khi Davish đang ở phía trước.',
       docker:
         'Bao nhiêu container đang chạy, và cái nào lỗi health hoặc khởi động lặp. Đọc mỗi phút một lần khi Davish đang ở phía trước.',
       monitor: 'CPU, RAM và mạng kèm biểu đồ 15 phút, từ số đọc mà thanh menu đã lấy.',
@@ -1091,7 +1107,8 @@ const vi = {
         ],
         keys: [],
         runs: [
-          'Không có lệnh riêng: widget Monitor hiện cùng số đọc từ /proc với Monitor và thanh menu, không thêm lệnh nào',
+          'Monitor: cùng số đọc từ /proc với Monitor và thanh menu, không thêm lệnh nào',
+          'Docker và Services: mỗi phút một lần một danh sách chỉ đọc (docker ps, systemctl list-units) khi Davish đang ở phía trước và đọc lại khi bạn quay lại, không bao giờ hỏi mật khẩu sudo',
         ],
       },
       settings: {
