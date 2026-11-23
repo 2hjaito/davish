@@ -4,6 +4,8 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.15.0] - 2026-11-23
+
 ### Added
 - The **Widgets** app (Launchpad, Spotlight, Dock if you pin it): a gallery of the widgets with a live preview, how many of each are on the desktop of the server in use, and buttons to add one small or medium. Its icon is three white cards on green.
 - A **Docker** widget: how many containers run, and which ones fail their healthcheck or keep restarting (small, or medium with their names). It reads `docker ps` once a minute while Davish is in front and again when you come back to it, for each server that has one, and never asks for a sudo password; a server that has no Docker or wants sudo is left alone until you come back. It is the only widget that runs a command. Not offered on a Windows server.
@@ -16,6 +18,8 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 - Monitor stops asking the server for the process list while its window is not on screen (minimized, on another server, or Davish hidden).
 
 ### Fixed
+- Widgets start right under the menu bar and sit the same distance from the right edge and from the bar, whatever the window width. Before, a row was kept empty at the top and the gap on the right changed with the window.
+- Terminal: the grey of stack traces, timestamps and hints (ANSI bright black) is readable on the dark glass; the Davish color scheme sets every ANSI color now.
 - Terminal: the progress of a deploy or a script now sits in the title bar, beside the tabs, instead of floating over the output, where it hid the right end of the first lines.
 - Shortcut labels read `Ctrl+Shift+U` and `Ctrl+Alt+L` outside the Mac, Touch ID is only mentioned on macOS, the ⋮ buttons in the Git and Docker toolbars match the buttons beside them, and a few layout slips (the Map button in All servers, Disk's legend) are gone.
 - Browser: a page that redirects with a relative path (such as `/` to `/ui/`, or adding a trailing `/`) no longer ends on "this address only opens inside Davish" (403).
