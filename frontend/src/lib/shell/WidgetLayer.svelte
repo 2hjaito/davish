@@ -17,7 +17,7 @@
   } from '../widgets/layout'
   import { widgetDefs } from '../widgets/registry'
   import { wm } from '../wm/windowManager.svelte'
-  import { CELL_H, CELL_W, cellAt, gridOf } from './iconGrid'
+  import { CELL_H, CELL_W, cellAt, gridOf, slackX } from './iconGrid'
 
   interface Props {
     /** A click on a widget opens the app it shows. */
@@ -98,7 +98,8 @@
   /** The cell a dragged widget's top left is over, for dropping it and for the outline. */
   function dropCell(boxX: number, boxY: number, dx: number, dy: number) {
     // The cell under the middle of the first cell of the dragged box.
-    return cellAt(boxX + dx + CELL_W / 2, boxY + dy + CELL_H / 2, wm.area, grid)
+    // Boxes sit slackX to the right of their cells (footprintBox); undo that to find the cell.
+    return cellAt(boxX + dx - slackX(wm.area) + CELL_W / 2, boxY + dy + CELL_H / 2, wm.area, grid)
   }
 
   /** Where the widget being dragged would land, drawn as an outline. */

@@ -2,7 +2,15 @@
 // cells as the desktop icons but count from the right edge, so the icons fill
 // from the top left and the widgets from the top right, and neither moves the
 // other until the window is too narrow for both. All pure.
-import { type Area, type Cell, cellPosition, CELL_H, CELL_W, type Grid } from '../shell/iconGrid'
+import {
+  type Area,
+  type Cell,
+  cellPosition,
+  CELL_H,
+  CELL_W,
+  type Grid,
+  slackX,
+} from '../shell/iconGrid'
 import { isWidgetKind, WIDGET_KINDS, type WidgetKind } from './kinds'
 
 export type WidgetSize = 'S' | 'M'
@@ -12,8 +20,11 @@ export const WIDGET_SIZES: Record<WidgetSize, { cols: number; rows: number }> = 
   M: { cols: 2, rows: 2 },
 }
 
-/** Rows kept clear at the top: notifications land there (see iconGrid.ts). */
-export const TOP_ROWS = 1
+/**
+ * Rows kept clear at the top. None: notifications float over the desktop and
+ * go again, as on macOS, so widgets start right under the menu bar.
+ */
+export const TOP_ROWS = 0
 
 /** More than this on one desktop is a clutter, and a file with more is cut. */
 export const MAX_WIDGETS = 12
@@ -137,14 +148,24 @@ export function wantFor(cell: Cell, size: WidgetSize, grid: Grid): Cell {
   return { col: Math.max(0, grid.cols - cell.col - cols), row: Math.max(0, cell.row - TOP_ROWS) }
 }
 
-/** Pixel box of a footprint, with a small gap so neighbours do not touch. */
+/**
+ * Pixel box of a footprint, with a small gap so neighbours do not touch.
+ * Widgets count from the right edge, so the box moves over by the slack the
+ * column grid leaves there: the margin to the right edge and to the menu bar
+ * is the same, whatever the window width.
+ */
 export function footprintBox(
   f: Footprint,
   area: Area,
   gap = 8,
 ): { x: number; y: number; w: number; h: number } {
   const p = cellPosition(f, area)
-  return { x: p.x + gap / 2, y: p.y + gap / 2, w: f.cols * CELL_W - gap, h: f.rows * CELL_H - gap }
+  return {
+    x: p.x + gap / 2 + slackX(area),
+    y: p.y + gap / 2,
+    w: f.cols * CELL_W - gap,
+    h: f.rows * CELL_H - gap,
+  }
 }
 
 /** How many widgets of each kind are on a desktop. */
