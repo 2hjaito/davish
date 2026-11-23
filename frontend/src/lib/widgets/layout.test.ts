@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import type { Grid } from '../shell/iconGrid'
+import { type Grid, gridOf } from '../shell/iconGrid'
 import {
   cellsOf,
   countKinds,
   footprint,
+  footprintBox,
   footprintAt,
   layoutWidgets,
   MAX_WIDGETS,
@@ -39,10 +40,10 @@ describe('footprint', () => {
 
   it('lists every cell it covers', () => {
     expect(cellsOf(footprintAt(0, 0, 'M', grid))).toEqual([
-      { col: 8, row: 1 },
-      { col: 8, row: 2 },
-      { col: 9, row: 1 },
-      { col: 9, row: 2 },
+      { col: 8, row: TOP_ROWS },
+      { col: 8, row: TOP_ROWS + 1 },
+      { col: 9, row: TOP_ROWS },
+      { col: 9, row: TOP_ROWS + 1 },
     ])
   })
 })
@@ -68,7 +69,7 @@ describe('placeWidget', () => {
 
   it('gives null when there is no room', () => {
     expect(placeWidget({ col: 0, row: 0 }, 'M', new Set(), { cols: 1, rows: 6 })).toBeNull()
-    expect(placeWidget({ col: 0, row: 0 }, 'M', new Set(), { cols: 10, rows: 2 })).toBeNull()
+    expect(placeWidget({ col: 0, row: 0 }, 'M', new Set(), { cols: 10, rows: 1 })).toBeNull()
   })
 })
 
@@ -99,7 +100,7 @@ describe('layoutWidgets', () => {
   })
 
   it('hides a widget when the grid is full', () => {
-    const tiny: Grid = { cols: 2, rows: 2 } // one row under the top rows: one S widget
+    const tiny: Grid = { cols: 2, rows: 1 } // one S widget fits
     const placed = layoutWidgets([w('a', 0, 0), w('b', 0, 0)], tiny)
     expect(placed[0]?.at).not.toBeNull()
     expect(placed[1]?.at).toBeNull()
@@ -122,7 +123,7 @@ describe('layoutWidgets', () => {
 describe('reservedCells', () => {
   it('lists the cells of the widgets that show, none for a hidden one', () => {
     expect(reservedCells([w('a', 0, 0)], grid)).toHaveLength(2)
-    expect(reservedCells([w('a', 0, 0), w('b', 0, 0)], { cols: 2, rows: 2 })).toHaveLength(2)
+    expect(reservedCells([w('a', 0, 0), w('b', 0, 0)], { cols: 2, rows: 1 })).toHaveLength(2)
     expect(reservedCells([], grid)).toEqual([])
   })
 })
@@ -193,4 +194,18 @@ describe('countKinds', () => {
       disk: 0,
     })
   })
+})
+
+describe('footprintBox margins', () => {
+  // The top right widget keeps the same distance from the right edge and from the menu bar,
+  // however wide the window is: the grid's leftover width does not show on the right.
+  it.each([1000, 1033, 1440, 1517])(
+    'is as far from the right edge as from the top at %ipx',
+    (width) => {
+      const area = { x: 0, y: 30, w: width, h: 700 }
+      const g = gridOf(area)
+      const box = footprintBox(footprintAt(0, 0, 'S', g), area)
+      expect(area.w - (box.x + box.w)).toBe(box.y - area.y)
+    },
+  )
 })
