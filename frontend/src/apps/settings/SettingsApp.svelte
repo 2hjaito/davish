@@ -22,11 +22,14 @@
     TERMINAL_SCROLLBACK,
     THEMES,
     WALLPAPER_ACCENTS,
+    WALLPAPER_DIM,
   } from '../../lib/stores/settings.svelte'
   import DavishMark from '../../lib/ui/DavishMark.svelte'
   import ProfileAvatar from '../../lib/ui/ProfileAvatar.svelte'
   import { MAX_NAME, profile } from '../../lib/stores/profile.svelte'
   import { avatarImage, IMAGE_ACCEPT } from '../../lib/shell/shortcutLook'
+  import { wallpaperImage } from '../../lib/stores/wallpaperImage.svelte'
+  import { WALLPAPER_ACCEPT, wallpaperFromFile } from '../../lib/wallpaperFile'
   import Icon from '../../lib/ui/Icon.svelte'
   import PopupMenu from '../../lib/ui/PopupMenu.svelte'
   import { getWindowContext } from '../../lib/wm/context'
@@ -150,6 +153,39 @@
       avatarMsg = t.settings.avatarBad
     }
   }
+  // The wallpaper picture: scaled in the browser, kept by Go in a file of its own.
+  let pictureMsg = $state('')
+  let pictureBusy = $state(false)
+  let pictureInput = $state<HTMLInputElement>()
+  $effect(() => {
+    void wallpaperImage.ensure()
+  })
+  async function pickPicture(e: Event) {
+    const input = e.currentTarget as HTMLInputElement
+    const file = input.files?.[0]
+    input.value = ''
+    if (!file) return
+    pictureBusy = true
+    try {
+      await wallpaperImage.set(await wallpaperFromFile(file))
+      pictureMsg = ''
+    } catch {
+      pictureMsg = t.settings.wallpaperBad
+    } finally {
+      pictureBusy = false
+    }
+  }
+  async function removePicture() {
+    pictureBusy = true
+    try {
+      await wallpaperImage.clear()
+      pictureMsg = ''
+    } catch {
+      pictureMsg = t.settings.wallpaperBad
+    } finally {
+      pictureBusy = false
+    }
+  }
   // Lock password forms: one at a time (set, change or turn off).
   let lockForm = $state<'change' | 'disable' | null>(null)
   let current = $state('')
@@ -196,11 +232,23 @@
   ] as const
 
   type BoolKnob =
-    'blur' | 'opaque' | 'wallpaper' | 'motion' | 'widgets' | 'noDmabuf' | 'noCompositing'
+    | 'blur'
+    | 'opaque'
+    | 'wallpaper'
+    | 'wallpaperImage'
+    | 'motion'
+    | 'widgets'
+    | 'noDmabuf'
+    | 'noCompositing'
   const perfKnobs: { key: BoolKnob; label: string; hint: string }[] = [
     { key: 'blur', label: t.settings.perfBlur, hint: t.settings.perfBlurHint },
     { key: 'opaque', label: t.settings.perfOpaque, hint: t.settings.perfOpaqueHint },
     { key: 'wallpaper', label: t.settings.perfWallpaper, hint: t.settings.perfWallpaperHint },
+    {
+      key: 'wallpaperImage',
+      label: t.settings.perfWallpaperImage,
+      hint: t.settings.perfWallpaperImageHint,
+    },
     { key: 'motion', label: t.settings.perfMotion, hint: t.settings.perfMotionHint },
     { key: 'widgets', label: t.settings.perfWidgets, hint: t.settings.perfWidgetsHint },
   ]
@@ -637,6 +685,66 @@
               {/each}
             </div>
           </div>
+          <div class="row">
+            {@render head(t.settings.wallpaperPicture, t.settings.wallpaperPictureHint)}
+            <div class="actions">
+              <input
+                bind:this={pictureInput}
+                type="file"
+                accept={WALLPAPER_ACCEPT}
+                hidden
+                onchange={pickPicture}
+              />
+              <button
+                type="button"
+                class="btn"
+                disabled={pictureBusy}
+                onclick={() => pictureInput?.click()}
+                >{wallpaperImage.has
+                  ? t.settings.wallpaperChange
+                  : t.settings.wallpaperChoose}</button
+              >
+              {#if wallpaperImage.has}
+                <button type="button" class="btn" disabled={pictureBusy} onclick={removePicture}
+                  >{t.settings.wallpaperRemove}</button
+                >
+              {/if}
+            </div>
+          </div>
+          {#if wallpaperImage.has}
+            <div class="row">
+              {@render head(t.settings.wallpaperDim, t.settings.wallpaperDimHint)}
+              <div class="stepper">
+                <button
+                  aria-label="{t.settings.lower} {t.settings.wallpaperDim}"
+                  disabled={settings.wallpaperDim <= WALLPAPER_DIM.min}
+                  onclick={() =>
+                    settings.set(
+                      'wallpaperDim',
+                      Math.max(WALLPAPER_DIM.min, settings.wallpaperDim - WALLPAPER_DIM.step),
+                    )}
+                >
+                  <Icon name="minus" size={12} strokeWidth={2.2} />
+                </button>
+                <output aria-live="polite">{settings.wallpaperDim}%</output>
+                <button
+                  aria-label="{t.settings.higher} {t.settings.wallpaperDim}"
+                  disabled={settings.wallpaperDim >= WALLPAPER_DIM.max}
+                  onclick={() =>
+                    settings.set(
+                      'wallpaperDim',
+                      Math.min(WALLPAPER_DIM.max, settings.wallpaperDim + WALLPAPER_DIM.step),
+                    )}
+                >
+                  <Icon name="plus" size={12} strokeWidth={2.2} />
+                </button>
+              </div>
+            </div>
+            {#if !settings.knobs.wallpaperImage}
+              <div class="row"><small class="msg">{t.settings.wallpaperHidden}</small></div>
+            {/if}
+          {/if}
+          {#if pictureMsg}<div class="row"><small class="msg">{pictureMsg}</small></div>{/if}
         </div>
 
         <h3>{t.settings.monoFont}</h3>
@@ -1504,6 +1612,12 @@
   }
 
   /* Segmented − value + control, like the macOS font size stepper. */
+  .actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
   .stepper {
     flex-shrink: 0;
     display: flex;

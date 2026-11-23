@@ -441,3 +441,9 @@ export function UpdateInstall(arg1:string):Promise<void>;
 export function UpdateRestart():Promise<void>;
 
 export function UpdateVersion():Promise<string>;
+
+export function WallpaperClear():Promise<void>;
+
+export function WallpaperGet():Promise<string>;
+
+export function WallpaperSet(arg1:string):Promise<void>;

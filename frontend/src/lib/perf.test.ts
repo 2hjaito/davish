@@ -27,6 +27,25 @@ describe('presetMatching', () => {
   })
 })
 
+describe('the wallpaperImage knob', () => {
+  it('is on in Beautiful and Balanced and off in Light', () => {
+    expect(PRESET_KNOBS.beautiful.wallpaperImage).toBe(true)
+    expect(PRESET_KNOBS.balanced.wallpaperImage).toBe(true)
+    expect(PRESET_KNOBS.light.wallpaperImage).toBe(false)
+  })
+
+  it('is part of what makes a preset', () => {
+    expect(presetMatching({ ...PRESET_KNOBS.light, wallpaperImage: true })).toBe('custom')
+    expect(presetMatching({ ...PRESET_KNOBS.balanced, wallpaperImage: false })).toBe('custom')
+  })
+
+  it('is on for a file written before pictures existed, and read back when stored', () => {
+    expect(knobsFromStored({}).wallpaperImage).toBe(true)
+    expect(knobsFromStored({ perfWallpaperImage: false }).wallpaperImage).toBe(false)
+    expect(knobsFromStored({ perfWallpaperImage: 'no' }).wallpaperImage).toBe(true)
+  })
+})
+
 describe('the widgets knob', () => {
   it('is on in Beautiful and Balanced and off in Light', () => {
     expect(PRESET_KNOBS.beautiful.widgets).toBe(true)

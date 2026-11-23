@@ -9,7 +9,8 @@
   import { perfCheck } from './lib/shell/perfCheck.svelte'
   import { appLock } from './lib/stores/lock.svelte'
   import { resolveTheme, settings } from './lib/stores/settings.svelte'
-  import { mixWallpaper } from './lib/wallpaper'
+  import { wallpaperImage } from './lib/stores/wallpaperImage.svelte'
+  import { mixWallpaper, wallpaperMode } from './lib/wallpaper'
 
   const systemDark = new MediaQuery('prefers-color-scheme: dark')
 
@@ -20,7 +21,10 @@
     root.dataset.perfBlur = String(knobs.blur)
     root.dataset.perfOpaque = String(knobs.opaque)
     root.dataset.perfShadow = knobs.shadow
-    root.dataset.perfWallpaper = knobs.wallpaper ? 'blobs' : 'flat'
+    // The picture is read from disk only when the preset lets it show.
+    if (knobs.wallpaperImage) void wallpaperImage.ensure()
+    const mode = wallpaperMode(knobs, wallpaperImage.has)
+    root.dataset.perfWallpaper = mode
     root.dataset.reduceMotion = String(!knobs.motion)
     const accent = settings.wallpaperAccent
     root.style.setProperty('--wallpaper-accent', accent)
@@ -29,7 +33,7 @@
     const mix = Number.parseFloat(style.getPropertyValue('--wallpaper-mix'))
     const flat = mixWallpaper(accent, base, Number.isFinite(mix) ? mix : 100)
     if (flat) root.style.setProperty('--wallpaper-flat', flat)
-    setWindowBackground(!knobs.wallpaper && flat ? flat : base)
+    setWindowBackground(mode === 'flat' && flat ? flat : base)
     if (!root.dataset.wallpaperReady)
       requestAnimationFrame(() => (root.dataset.wallpaperReady = 'true'))
   })

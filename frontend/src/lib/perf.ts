@@ -21,6 +21,8 @@ export interface Knobs {
   motion: boolean
   /** The widgets on the desktop (ADR 0026). */
   widgets: boolean
+  /** The picture the person chose as wallpaper. False paints the blobs or the flat color. */
+  wallpaperImage: boolean
   /** Linux: set WEBKIT_DISABLE_DMABUF_RENDERER on the next launch. */
   noDmabuf: boolean
   /** Linux: set WEBKIT_DISABLE_COMPOSITING_MODE on the next launch. */
@@ -35,6 +37,7 @@ export const PRESET_KNOBS: Record<Exclude<NamedPreset, 'auto'>, Knobs> = {
     wallpaper: true,
     motion: true,
     widgets: true,
+    wallpaperImage: true,
     noDmabuf: false,
     noCompositing: false,
   },
@@ -45,6 +48,7 @@ export const PRESET_KNOBS: Record<Exclude<NamedPreset, 'auto'>, Knobs> = {
     wallpaper: true,
     motion: true,
     widgets: true,
+    wallpaperImage: true,
     noDmabuf: false,
     noCompositing: false,
   },
@@ -55,6 +59,7 @@ export const PRESET_KNOBS: Record<Exclude<NamedPreset, 'auto'>, Knobs> = {
     wallpaper: false,
     motion: false,
     widgets: false,
+    wallpaperImage: false,
     noDmabuf: false,
     noCompositing: false,
   },
@@ -80,6 +85,7 @@ export function knobsEqual(a: Knobs, b: Knobs): boolean {
     a.wallpaper === b.wallpaper &&
     a.motion === b.motion &&
     a.widgets === b.widgets &&
+    a.wallpaperImage === b.wallpaperImage &&
     a.noDmabuf === b.noDmabuf &&
     a.noCompositing === b.noCompositing
   )
@@ -109,6 +115,7 @@ export interface StoredPerf {
   perfWallpaper?: unknown
   perfMotion?: unknown
   perfWidgets?: unknown
+  perfWallpaperImage?: unknown
   perfNoDmabuf?: unknown
   perfNoCompositing?: unknown
   /** Previous Reduce glass toggle, before presets. */
@@ -128,6 +135,7 @@ export function knobsFromStored(raw: StoredPerf): Knobs {
     wallpaper: flag(raw.perfWallpaper, true),
     motion: flag(raw.perfMotion, true),
     widgets: flag(raw.perfWidgets, true),
+    wallpaperImage: flag(raw.perfWallpaperImage, true),
     noDmabuf: flag(raw.perfNoDmabuf, false),
     noCompositing: flag(raw.perfNoCompositing, false),
   }
@@ -164,6 +172,7 @@ export function migratePerf(raw: StoredPerf | null): ResolvedPerf {
       wallpaper: true,
       motion: raw.reduceMotion !== true,
       widgets: true,
+      wallpaperImage: true,
       noDmabuf: false,
       noCompositing: false,
     }

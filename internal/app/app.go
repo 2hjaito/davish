@@ -40,6 +40,7 @@ import (
 	"davish/internal/term"
 	"davish/internal/transfer"
 	"davish/internal/update"
+	"davish/internal/wallpaper"
 )
 
 // App is bound to the frontend; every exported method becomes a binding.
@@ -51,6 +52,7 @@ type App struct {
 
 	store     *store.Store
 	settings  *store.Settings
+	wallpaper *wallpaper.Store
 	secrets   *store.Secrets
 	conns     *conn.Manager
 	terms     *term.Service
@@ -108,6 +110,7 @@ func New(version string) (*App, error) {
 			return a.store.ForgetSecrets(context.Background())
 		}, lock.Options{})
 	a.settings = store.NewSettings(dir, log)
+	a.wallpaper = wallpaper.New(dir)
 	hostKeys := conn.NewHostKeys(filepath.Join(dir, "known_hosts"))
 	a.conns = conn.NewManager(a.store, a.secrets, hostKeys, emitter{a}, log, conn.Options{})
 	a.terms = term.New(a.conns, emitter{a}, log)

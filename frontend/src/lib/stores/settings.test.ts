@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  clampDim,
+  WALLPAPER_DIM,
   clampFontSize,
   cleanFontName,
   clampCursor,
@@ -209,5 +211,30 @@ describe('the widgets knob in settings', () => {
     expect(settings.knobs.widgets).toBe(true)
     expect(settings.perfPreset).toBe('custom')
     settings.usePreset('beautiful')
+  })
+})
+
+describe('the wallpaper picture in settings', () => {
+  it('follows the preset: shown in Beautiful, hidden in Light, and can be set on its own', () => {
+    settings.usePreset('beautiful')
+    expect(settings.knobs.wallpaperImage).toBe(true)
+    settings.usePreset('light')
+    expect(settings.knobs.wallpaperImage).toBe(false)
+    settings.setKnob('wallpaperImage', true)
+    expect(settings.knobs.wallpaperImage).toBe(true)
+    expect(settings.perfPreset).toBe('custom')
+    settings.usePreset('beautiful')
+  })
+
+  it('keeps the dim level in range and treats junk as none', () => {
+    settings.set('wallpaperDim', 40)
+    expect(settings.wallpaperDim).toBe(40)
+    settings.set('wallpaperDim', 500)
+    expect(settings.wallpaperDim).toBe(WALLPAPER_DIM.max)
+    settings.set('wallpaperDim', -5)
+    expect(settings.wallpaperDim).toBe(0)
+    expect(clampDim('x')).toBe(0)
+    expect(clampDim(Number.NaN)).toBe(0)
+    settings.set('wallpaperDim', 0)
   })
 })

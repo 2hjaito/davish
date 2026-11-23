@@ -33,7 +33,14 @@ function words(p: Pane): string[] {
     case 'general':
       return [s.language]
     case 'appearance':
-      return [s.theme, ...Object.values(s.themes), s.wallpaper, s.monoFont]
+      return [
+        s.theme,
+        ...Object.values(s.themes),
+        s.wallpaper,
+        s.wallpaperPicture,
+        s.wallpaperDim,
+        s.monoFont,
+      ]
     case 'performance':
       return [
         s.perfPreset,
@@ -42,6 +49,7 @@ function words(p: Pane): string[] {
         s.perfShadow,
         s.perfOpaque,
         s.perfWallpaper,
+        s.perfWallpaperImage,
         s.perfMotion,
         s.perfNoDmabuf,
         s.perfNoCompositing,

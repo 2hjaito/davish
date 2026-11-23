@@ -19,3 +19,29 @@ export function mixWallpaper(accent: string, base: string, mixPercent: number): 
   const hex = (n: number) => Math.round(n).toString(16).padStart(2, '0')
   return `#${hex(a[0] * t + b[0] * (1 - t))}${hex(a[1] * t + b[1] * (1 - t))}${hex(a[2] * t + b[2] * (1 - t))}`
 }
+
+/** What the desktop paints behind everything: the picture, the colored blobs, or one flat color. */
+export type WallpaperMode = 'image' | 'blobs' | 'flat'
+
+/**
+ * The picture wins when the person chose one and the preset allows it. Without
+ * it the wallpaper knob decides, as it did before pictures. A preset that turns
+ * the picture off (Light) falls back to a flat color, not to blobs it also turns off.
+ */
+export function wallpaperMode(
+  knobs: { wallpaper: boolean; wallpaperImage: boolean },
+  hasImage: boolean,
+): WallpaperMode {
+  if (hasImage && knobs.wallpaperImage) return 'image'
+  return knobs.wallpaper ? 'blobs' : 'flat'
+}
+
+/** Longest side of a stored picture: sharp on a 2560px display, small enough to keep and to decode. */
+export const WALLPAPER_MAX_PX = 2560
+
+/** The size to draw a picture at so neither side passes max. Never enlarges. */
+export function fitWithin(width: number, height: number, max: number): { w: number; h: number } {
+  if (!(width > 0) || !(height > 0)) return { w: 0, h: 0 }
+  const scale = Math.min(1, max / Math.max(width, height))
+  return { w: Math.max(1, Math.round(width * scale)), h: Math.max(1, Math.round(height * scale)) }
+}
