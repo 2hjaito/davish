@@ -6,8 +6,11 @@
   import { widgets } from '../stores/widgets.svelte'
   import Icon from '../ui/Icon.svelte'
   import {
+    cellsOf,
+    footprintAt,
     footprintBox,
     layoutWidgets,
+    placeWidget,
     wantFor,
     type WidgetItem,
     type WidgetSize,
@@ -41,32 +44,79 @@
     }
   })
 
-  let press = $state<{ id: string; x: number; y: number; pointer: number } | null>(null)
+  let press = $state<{
+    id: string
+    x: number
+    y: number
+    /** Where the widget's box was when pressed. */
+    boxX: number
+    boxY: number
+  } | null>(null)
   let drag = $state<{ id: string; dx: number; dy: number } | null>(null)
 
-  function onPointerDown(ev: PointerEvent, item: WidgetItem) {
-    if (!editing || ev.button !== 0) return
-    press = { id: item.id, x: ev.clientX, y: ev.clientY, pointer: ev.pointerId }
+  /** Set for the moment after a drag ends: the click that follows it is not a click on the widget. */
+  let justDragged = false
+
+  function onPointerDown(ev: PointerEvent, item: WidgetItem, box: { x: number; y: number }) {
+    // A widget drags as a desktop icon does, in or out of edit mode: a press that
+    // moves a few pixels is a drag, one that does not is a click.
+    if (ev.button !== 0) return
+    press = { id: item.id, x: ev.clientX, y: ev.clientY, boxX: box.x, boxY: box.y }
   }
 
+  // The move and the release are heard on the window, not on the widget: the
+  // pointer leaves a widget as soon as it is dragged, and capturing it is not
+  // something every input path honours.
   function onPointerMove(ev: PointerEvent) {
-    if (!press || ev.pointerId !== press.pointer) return
+    if (!press) return
     const dx = ev.clientX - press.x
     const dy = ev.clientY - press.y
     if (!drag && Math.hypot(dx, dy) < DRAG_START) return
-    ;(ev.currentTarget as HTMLElement).setPointerCapture(ev.pointerId)
     drag = { id: press.id, dx, dy }
   }
 
-  function onPointerUp(item: WidgetItem, boxX: number, boxY: number) {
-    if (drag?.id === item.id) {
-      // The cell under the middle of the first cell of the dragged box.
-      const cell = cellAt(boxX + drag.dx + CELL_W / 2, boxY + drag.dy + CELL_H / 2, wm.area, grid)
+  function onPointerUp() {
+    const item =
+      press && drag?.id === press.id
+        ? widgets.of(serverID).find((w) => w.id === press!.id)
+        : undefined
+    if (item && press && drag) {
+      const cell = dropCell(press.boxX, press.boxY, drag.dx, drag.dy)
       widgets.move(serverID, item.id, wantFor(cell, item.size, grid), grid)
+      justDragged = true
+      setTimeout(() => (justDragged = false), 0)
     }
     drag = null
     press = null
   }
+
+  function cancelDrag() {
+    drag = null
+    press = null
+  }
+
+  /** The cell a dragged widget's top left is over, for dropping it and for the outline. */
+  function dropCell(boxX: number, boxY: number, dx: number, dy: number) {
+    // The cell under the middle of the first cell of the dragged box.
+    return cellAt(boxX + dx + CELL_W / 2, boxY + dy + CELL_H / 2, wm.area, grid)
+  }
+
+  /** Where the widget being dragged would land, drawn as an outline. */
+  const ghost = $derived.by(() => {
+    if (!drag || !press) return null
+    const item = widgets.of(serverID).find((w) => w.id === drag!.id)
+    if (!item) return null
+    const cell = dropCell(press.boxX, press.boxY, drag.dx, drag.dy)
+    const others = layoutWidgets(
+      widgets.of(serverID).filter((w) => w.id !== item.id),
+      grid,
+    )
+    const taken = new Set(
+      others.flatMap((p) => (p.at ? cellsOf(p.at).map((c) => `${c.col}:${c.row}`) : [])),
+    )
+    const spot = placeWidget(wantFor(cell, item.size, grid), item.size, taken, grid)
+    return spot ? footprintBox(footprintAt(spot.col, spot.row, item.size, grid), wm.area) : null
+  })
 
   const SIZES: WidgetSize[] = ['S', 'M']
   const sizeLabel = (s: WidgetSize) => (s === 'S' ? t.widgets.small : t.widgets.medium)
@@ -76,7 +126,12 @@
   }
 </script>
 
-<svelte:window onkeydown={onKeyDown} />
+<svelte:window
+  onkeydown={onKeyDown}
+  onpointermove={onPointerMove}
+  onpointerup={onPointerUp}
+  onpointercancel={cancelDrag}
+/>
 
 {#if placed.length > 0}
   <div class="surface" role="group" aria-label={t.widgets.edit}>
@@ -96,13 +151,10 @@
           style:width="{box.w}px"
           style:height="{box.h}px"
           style:transform={moving && drag ? `translate(${drag.dx}px, ${drag.dy}px)` : undefined}
-          onpointerdown={(ev) => onPointerDown(ev, p.item)}
-          onpointermove={onPointerMove}
-          onpointerup={() => onPointerUp(p.item, box.x, box.y)}
-          onpointercancel={() => ((drag = null), (press = null))}
+          onpointerdown={(ev) => onPointerDown(ev, p.item, box)}
         >
           {#if def.opens && !editing}
-            <button class="body" onclick={() => def.opens && onopen(def.opens)}>
+            <button class="body" onclick={() => !justDragged && def.opens && onopen(def.opens)}>
               {#await def.load() then W}<W.default {serverID} size={p.item.size} />{/await}
             </button>
           {:else}
@@ -143,6 +195,15 @@
         </section>
       {/if}
     {/each}
+    {#if ghost}
+      <div
+        class="ghost"
+        style:left="{ghost.x}px"
+        style:top="{ghost.y}px"
+        style:width="{ghost.w}px"
+        style:height="{ghost.h}px"
+      ></div>
+    {/if}
     {#if editing && doneAt}
       <button
         class="finish"
@@ -176,11 +237,25 @@
     pointer-events: auto;
   }
 
+  .widget {
+    touch-action: none;
+    user-select: none;
+  }
+
   .widget.editing {
     outline: 2px dashed var(--accent);
     outline-offset: 3px;
     cursor: grab;
-    touch-action: none;
+  }
+
+  /* Where the widget being dragged will land. */
+  .ghost {
+    position: absolute;
+    box-sizing: border-box;
+    border: 2px dashed var(--accent);
+    border-radius: var(--widget-radius);
+    background: var(--accent-soft);
+    pointer-events: none;
   }
 
   .widget.moving {

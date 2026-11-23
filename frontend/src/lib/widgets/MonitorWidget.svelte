@@ -1,13 +1,15 @@
 <script lang="ts">
   import { t } from '../i18n'
-  import { statView, type StatId, type StatView } from '../shell/menuStats'
+  import { loadFormat, statView, type StatId, type StatView } from '../shell/menuStats'
   import { metrics } from '../stores/metrics.svelte'
   import { niceMax } from '../ui/charts/scale'
   import Dots from './Dots.svelte'
-  import { cellsFor, dotCells } from './gauge'
+  import { cellsFor, dotCells, splitUnit } from './gauge'
   import type { WidgetProps } from './registry'
   import Ring from './Ring.svelte'
+  import { LOOK } from './look'
   import Spark from './Spark.svelte'
+  import WidgetBadge from './WidgetBadge.svelte'
   import WidgetCard, { type Tone } from './WidgetCard.svelte'
 
   let { serverID, size }: WidgetProps = $props()
@@ -21,6 +23,9 @@
 
   const view = (id: StatId): StatView | null => (latest ? statView(id, latest) : null)
   const cpu = $derived(view('cpu'))
+  /** The cores, their number large and the word small; the CPU share is in the ring. */
+  const cores = $derived(splitUnit(t.monitor.cores(latest?.cores.length ?? 0)))
+  const load = $derived(latest ? `${t.menubar.stats.names.load} ${loadFormat(latest.load1)}` : '')
   const mem = $derived(view('mem'))
   const net = $derived(view('net'))
 
@@ -64,7 +69,7 @@
   )
 </script>
 
-<WidgetCard {tone}>
+<WidgetCard {tone} accent={LOOK.monitor.accent}>
   {#if !cpu}
     <p class="wait">{t.widgets.waiting}</p>
   {:else if size === 'S'}
@@ -77,22 +82,29 @@
     </div>
     <div class="s">
       <div class="text">
-        <span class="label">{cpu.label}</span>
-        <span class="hero big">{cpu.hero}</span>
+        <span class="title"
+          ><WidgetBadge kind="monitor" /><span class="label">{cpu.label}</span></span
+        >
+        <span class="hero big">{cores.value}<small>{cores.unit}</small></span>
+        <span class="sub">{load}</span>
       </div>
       <Ring value={cpu.ring ?? 0} size={60} stroke={7} color={COLOR[cpu.level]}>
-        <span class="inner">{cpu.inner}</span>
+        <span class="inner">{cpu.hero}</span>
       </Ring>
     </div>
   {:else}
     <div class="m">
       <div class="top">
         <div class="text">
-          <span class="label">{cpu.label}</span>
-          <span class="hero">{cpu.hero}</span>
-          <span class="sub">{cpu.sub}</span>
+          <span class="title"
+            ><WidgetBadge kind="monitor" /><span class="label">{cpu.label}</span></span
+          >
+          <span class="hero">{cores.value}<small>{cores.unit}</small></span>
+          <span class="sub">{load}</span>
         </div>
-        <Ring value={cpu.ring ?? 0} size={46} stroke={6} color={COLOR[cpu.level]} />
+        <Ring value={cpu.ring ?? 0} size={54} stroke={6} color={COLOR[cpu.level]}>
+          <span class="inner">{cpu.hero}</span>
+        </Ring>
       </div>
       {#if mem}
         <div class="block" title={mem.sub}>
@@ -146,6 +158,13 @@
     min-width: 0;
   }
 
+  .title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
+  }
+
   .label {
     color: var(--fg-on-dark-muted);
     font-size: var(--text-xxs);
@@ -161,6 +180,19 @@
     font-weight: 650;
     line-height: 1.1;
     white-space: nowrap;
+  }
+
+  .hero small {
+    margin-left: 3px;
+    color: var(--fg-on-dark-muted);
+    font-size: var(--text-sm);
+    font-weight: 500;
+  }
+
+  .inner {
+    color: var(--fg-on-dark);
+    font-size: var(--text-xs);
+    font-weight: 650;
   }
 
   .hero.big {
@@ -179,20 +211,14 @@
     white-space: nowrap;
   }
 
-  .inner {
-    color: var(--fg-on-dark);
-    font-size: var(--text-xs);
-    font-weight: 600;
-  }
-
-  /* The history, faint, along the bottom of the small widget. */
+  /* The history, faint, along the bottom of the small widget, below the figure. */
   .chart {
     position: absolute;
     right: 0;
     bottom: 0;
     left: 0;
-    height: 34px;
-    opacity: 0.6;
+    height: 22px;
+    opacity: 0.55;
     pointer-events: none;
   }
 

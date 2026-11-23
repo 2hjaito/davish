@@ -10,6 +10,7 @@
   import { countKinds, type WidgetSize } from '../../lib/widgets/layout'
   import { servers } from '../../lib/stores/servers.svelte'
   import { widgetAvailable, widgetDefs } from '../../lib/widgets/registry'
+  import WidgetBadge from '../../lib/widgets/WidgetBadge.svelte'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import { wm } from '../../lib/wm/windowManager.svelte'
   import type { AppProps } from '../types'
@@ -55,7 +56,7 @@
           <div class="preview">
             {#await def.load() then W}<W.default serverID={win.serverID} size="S" />{/await}
           </div>
-          <h3>{def.label()}</h3>
+          <h3><WidgetBadge {kind} size={20} />{def.label()}</h3>
           <p class="about">{w.about[kind]}</p>
           <p class="count">{w.onDesktop(counts[kind])}</p>
           <div class="add">
@@ -130,6 +131,9 @@
   }
 
   h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     margin: 0;
     font-size: var(--text-md);
   }

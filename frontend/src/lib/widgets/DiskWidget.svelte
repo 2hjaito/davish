@@ -5,8 +5,11 @@
   import { settings } from '../stores/settings.svelte'
   import Bar from './Bar.svelte'
   import { type DiskLevel, summarizeMounts } from './diskUsage'
+  import { LOOK } from './look'
+  import { splitUnit } from './gauge'
   import type { WidgetProps } from './registry'
   import Ring from './Ring.svelte'
+  import WidgetBadge from './WidgetBadge.svelte'
   import WidgetCard, { type Tone } from './WidgetCard.svelte'
 
   let { serverID, size }: WidgetProps = $props()
@@ -21,7 +24,7 @@
 
   const TONE: Record<DiskLevel, Tone> = { '': 'neutral', warn: 'warn', danger: 'danger' }
   const COLOR: Record<DiskLevel, string> = {
-    '': 'var(--widget-blue)',
+    '': 'var(--widget-disk)',
     warn: 'var(--warn-on-dark)',
     danger: 'var(--danger-on-dark)',
   }
@@ -35,26 +38,35 @@
   const rows = $derived(s ? s.rows.slice(0, NAMED) : [])
   const more = $derived(s ? s.rows.length - rows.length : 0)
   const top = $derived(s?.fullest ?? null)
+  /** The used size, its number large and its unit small. */
+  const used = $derived(top ? splitUnit(formatBytes(top.used)) : { value: '', unit: '' })
 </script>
 
-<WidgetCard {tone}>
+<WidgetCard {tone} accent={LOOK.disk.accent}>
   {#if !s || !top}
     <p class="wait">{s ? d.none : t.widgets.waiting}</p>
   {:else if size === 'S'}
     <div class="s">
       <div class="text">
-        <span class="label">{t.apps.disk} <span class="path">{top.path}</span></span>
-        <span class="hero">{formatPct(top.pct)}</span>
+        <span class="title">
+          <WidgetBadge kind="disk" />
+          <span class="label">{t.apps.disk} <span class="path">{top.path}</span></span>
+        </span>
+        <span class="hero">{used.value}<small>{used.unit}</small></span>
         <span class="sub" title={d.of(formatBytes(top.used), formatBytes(top.size))}>
           {d.ofTotal(formatBytes(top.size))}
         </span>
       </div>
-      <Ring value={top.pct / 100} size={60} stroke={7} color={COLOR[top.level]} />
+      <Ring value={top.pct / 100} size={60} stroke={7} color={COLOR[top.level]}>
+        <span class="inner">{formatPct(top.pct)}</span>
+      </Ring>
     </div>
   {:else}
     <div class="m">
       <div class="head">
-        <span class="label">{t.apps.disk}</span>
+        <span class="title"
+          ><WidgetBadge kind="disk" /><span class="label">{t.apps.disk}</span></span
+        >
         {#if state}<span class="state {tone}">{state}</span>{/if}
       </div>
       <ul>
@@ -95,6 +107,14 @@
     min-width: 0;
   }
 
+  .title {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
+  }
+
   .label {
     overflow: hidden;
     color: var(--fg-on-dark-muted);
@@ -119,6 +139,19 @@
     font-weight: 650;
     line-height: 1.1;
     white-space: nowrap;
+  }
+
+  .hero small {
+    margin-left: 3px;
+    color: var(--fg-on-dark-muted);
+    font-size: var(--text-sm);
+    font-weight: 500;
+  }
+
+  .inner {
+    color: var(--fg-on-dark);
+    font-size: var(--text-xs);
+    font-weight: 650;
   }
 
   .sub {
