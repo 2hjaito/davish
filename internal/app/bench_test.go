@@ -42,8 +42,24 @@ func TestBenchConfigOff(t *testing.T) {
 func TestBenchConfigRender(t *testing.T) {
 	t.Setenv("DAVISH_BENCH", "render")
 	t.Setenv("DAVISH_BENCH_PRESET", "light")
+	t.Setenv("DAVISH_BENCH_WIDGETS", "3")
 	got := (&App{}).BenchConfig()
-	if !got.Render || got.Preset != "light" {
+	if !got.Render || got.Preset != "light" || got.Widgets != 3 {
 		t.Errorf("BenchConfig() = %+v", got)
+	}
+}
+
+func TestBenchWidgets(t *testing.T) {
+	cases := []struct {
+		in   string
+		want int
+	}{
+		{"", 0}, {"0", 0}, {"1", 1}, {"3", 3}, {"12", 12},
+		{"13", 0}, {"-1", 0}, {"x", 0}, {"2.5", 0}, {" 3", 0},
+	}
+	for _, c := range cases {
+		if got := benchWidgets(c.in); got != c.want {
+			t.Errorf("benchWidgets(%q) = %d, want %d", c.in, got, c.want)
+		}
 	}
 }

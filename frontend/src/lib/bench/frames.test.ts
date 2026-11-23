@@ -43,12 +43,12 @@ describe('resultLine', () => {
   const s = { frames: 180, meanMs: 16.7, p95Ms: 18.2, maxMs: 40.04, overMs: 12.34 }
 
   it('is key=value pairs on one line', () => {
-    expect(resultLine('scroll', 'light', s, 2)).toBe(
-      'scenario=scroll preset=light frames=180 mean_ms=16.7 p95_ms=18.2 max_ms=40.0 over_ms=12.3 long_tasks=2',
+    expect(resultLine('scroll', 'light', 3, s, 2)).toBe(
+      'scenario=scroll preset=light widgets=3 frames=180 mean_ms=16.7 p95_ms=18.2 max_ms=40.0 over_ms=12.3 long_tasks=2',
     )
   })
 
   it('says na where long tasks cannot be seen', () => {
-    expect(resultLine('idle', 'balanced', s, null)).toContain('long_tasks=na')
+    expect(resultLine('idle', 'balanced', 0, s, null)).toContain('long_tasks=na')
   })
 })
