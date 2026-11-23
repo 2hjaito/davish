@@ -5,6 +5,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Thêm
+- Widget trên desktop: **Xem → Thêm widget: Monitor** đặt CPU, hoặc CPU, RAM và mạng kèm biểu đồ 15 phút, lên desktop của server đang dùng; **Xem → Chỉnh sửa widget** để di chuyển, đổi cỡ nhỏ hoặc vừa, và xóa. Mỗi server có widget riêng. Tắt ở mức hiệu năng Nhẹ, hoặc tắt riêng trong Cài đặt → Hiệu năng → Nâng cao.
 - Cài đặt theo từng app. Terminal: bảng màu (Davish, Phosphor, Solarized, Dracula), font riêng, kiểu con trỏ và nhấp nháy, nền đặc và số dòng cuộn lại (1.000, 5.000 hoặc 20.000). Editor: cỡ chữ, xuống dòng, số dòng, dấu cho khoảng trắng và tab, và phím Tab chèn gì. Files: hiện hoặc ẩn các tên bắt đầu bằng dấu chấm.
 
 ### Đổi
