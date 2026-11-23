@@ -4,6 +4,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Fixed
+- Browser: a page that redirects with a relative path (such as `/` to `/ui/`, or adding a trailing `/`) no longer ends on "this address only opens inside Davish" (403).
+
 ## [1.14.11] - 2026-11-21
 
 ### Added
