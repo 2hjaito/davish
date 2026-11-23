@@ -32,9 +32,24 @@ const en = {
       `Add as many servers as you like; each one is a workspace (${mod}1…${mod}9). ${mod}K opens Spotlight to find apps, services, containers and folders.`,
   },
   widgets: {
+    docker: {
+      running: 'running',
+      allHealthy: 'All healthy',
+      unhealthy: (n: number) => `${n} unhealthy`,
+      restarting: (n: number) => `${n} restarting`,
+      starting: (n: number) => `${n} starting`,
+      more: (n: number) => `+${n} more`,
+      none: 'No containers',
+      notConnected: 'Not connected',
+      missing: 'Docker is not installed on this server',
+      needsRoot: 'Needs sudo: open Docker',
+      failed: 'Could not read Docker',
+    },
     intro:
       'Small live views that sit on the desktop of this server, behind your windows. Each server has its own.',
     about: {
+      docker:
+        'How many containers run, and which ones fail their healthcheck or keep restarting. Read once a minute while Davish is in front.',
       monitor:
         'CPU, RAM and network with a 15 minute chart, from the reading the menu bar already takes.',
     },

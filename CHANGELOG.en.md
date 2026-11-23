@@ -6,6 +6,7 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ### Added
 - The **Widgets** app (Launchpad, Spotlight, Dock if you pin it): a gallery of the widgets with a live preview, how many of each are on the desktop of the server in use, and buttons to add one small or medium. Its icon is three white cards on green.
+- A **Docker** widget: how many containers run, and which ones fail their healthcheck or keep restarting (small, or medium with their names). It reads `docker ps` once a minute while Davish is in front and again when you come back to it, for each server that has one, and never asks for a sudo password; a server that has no Docker or wants sudo is left alone until you come back. It is the only widget that runs a command. Not offered on a Windows server.
 - Widgets on the desktop: **View → Add widget: Monitor** puts CPU, or CPU, RAM and network with a 15 minute chart, on the desktop of the server in use; **View → Edit widgets** moves them, makes them small or medium and removes them. Each server has its own. Off in the Light performance preset, or on its own in Settings → Performance → Advanced.
 - Settings per app. Terminal: color schemes (Davish, Phosphor, Solarized, Dracula), a font of its own, cursor shape and blinking, a solid background and the length of the scrollback (1,000, 5,000 or 20,000 lines). Editor: font size, wrapping, line numbers, marks for spaces and tabs, and what the Tab key inserts. Files: show or hide names that start with a dot.
 
