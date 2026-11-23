@@ -223,6 +223,7 @@ function fields(
   | 'perfOpaque'
   | 'perfWallpaper'
   | 'perfMotion'
+  | 'perfWidgets'
   | 'perfNoDmabuf'
   | 'perfNoCompositing'
   | 'reduceGlass'
@@ -234,6 +235,7 @@ function fields(
     perfOpaque: knobs.opaque,
     perfWallpaper: knobs.wallpaper,
     perfMotion: knobs.motion,
+    perfWidgets: knobs.widgets,
     perfNoDmabuf: knobs.noDmabuf,
     perfNoCompositing: knobs.noCompositing,
     // The old toggles stay in the file so an older build still sees them.
@@ -291,6 +293,7 @@ class Settings {
       opaque: this.#data.perfOpaque === true,
       wallpaper: this.#data.perfWallpaper !== false,
       motion: this.#data.perfMotion !== false,
+      widgets: this.#data.perfWidgets !== false,
       noDmabuf: this.#data.perfNoDmabuf === true,
       noCompositing: this.#data.perfNoCompositing === true,
     })

@@ -44,6 +44,19 @@ const vi = {
     foot: (mod: string) =>
       `Có thể thêm nhiều server; mỗi server là một workspace (${mod}1…${mod}9). ${mod}K mở Spotlight để tìm app, dịch vụ, container, thư mục.`,
   },
+  widgets: {
+    edit: 'Chỉnh sửa widget',
+    done: 'Xong chỉnh sửa widget',
+    add: (name: string) => `Thêm widget: ${name}`,
+    remove: 'Xóa widget',
+    small: 'Nhỏ',
+    medium: 'Vừa',
+    resize: 'Kích thước',
+    finish: 'Xong',
+    waiting: 'Đang chờ dữ liệu…',
+    noRoom: 'Hết chỗ cho widget',
+    noRoomBody: 'Xóa bớt một widget hoặc phóng to cửa sổ rồi thêm lại.',
+  },
   spotlight: {
     label: 'Spotlight',
     placeholder: 'Mở app, dịch vụ, container, thư mục… hoặc /đường/dẫn, > lệnh',
@@ -2055,6 +2068,8 @@ const vi = {
     perfWallpaperHint: 'Tắt để chỉ còn một màu nền.',
     perfMotion: 'Chuyển động',
     perfMotionHint: 'Hiệu ứng mở, đóng và thu nhỏ cửa sổ.',
+    perfWidgets: 'Widget',
+    perfWidgetsHint: 'Các widget trên desktop. Tắt thì ẩn và ngừng đọc dữ liệu cho chúng.',
     perfNoDmabuf: 'Tắt DMA-BUF',
     perfNoDmabufHint: 'Cách vẽ của WebKitGTK trên Linux. Có hiệu lực sau khi khởi động lại.',
     perfNoCompositing: 'Tắt compositing',

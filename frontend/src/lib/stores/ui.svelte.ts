@@ -11,6 +11,8 @@ class Ui {
   importDialog = $state(false)
   help = $state<HelpTopic | null>(null)
   tour = $state(false)
+  /** The desktop's widgets can be moved, resized and removed. */
+  widgetEdit = $state(false)
   /** Text Spotlight starts with the next time it opens. */
   spotlightSeed = $state('')
 

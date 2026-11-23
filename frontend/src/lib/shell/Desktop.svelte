@@ -32,6 +32,7 @@
   import { wm } from '../wm/windowManager.svelte'
   import Spotlight from '../spotlight/Spotlight.svelte'
   import DesktopIcons from './DesktopIcons.svelte'
+  import { widgets } from '../stores/widgets.svelte'
   import Dock from './Dock.svelte'
   import { dockItems } from './dockItems'
   import Launchpad from './Launchpad.svelte'
@@ -48,7 +49,7 @@
   import SleepScreen from './SleepScreen.svelte'
   import { fadeOut } from '../motion'
   import { hasPrimaryModifier, isMac } from './platform'
-  import { buildMenus } from './menuModel.svelte'
+  import { buildMenus, openApp } from './menuModel.svelte'
   import { findShortcut } from './menus.svelte'
 
   // The bar's height lives in tokens.css; windows start under it.
@@ -305,6 +306,12 @@
 
   {#if servers.ready && servers.list.length > 0}
     <DesktopIcons />
+    {#if settings.knobs.widgets && widgets.of(serverID).length > 0}
+      <!-- Loaded once the desktop has a widget, so it is not in the first bundle. -->
+      {#await import('./WidgetLayer.svelte') then m}
+        <m.default onopen={(id) => openApp(id)} />
+      {/await}
+    {/if}
   {/if}
 
   {#if wm.snapPreview}

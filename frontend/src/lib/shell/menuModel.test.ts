@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
+import { settings } from '../stores/settings.svelte'
+import { ui } from '../stores/ui.svelte'
+import { WIDGET_KINDS } from '../widgets/kinds'
 import { buildMenus } from './menuModel.svelte'
 
 describe('buildMenus', () => {
@@ -56,4 +59,34 @@ describe('buildMenus', () => {
       expect(taken).toEqual([])
     })
   }
+})
+
+describe('widgets in the View menu', () => {
+  const view = () =>
+    buildMenus()
+      .find((m) => m.id === 'view')!
+      .items.filter((it) => it !== null)
+
+  it('has an edit switch and one add item per kind of widget', () => {
+    settings.usePreset('beautiful')
+    ui.widgetEdit = false
+    const labels = view().map((it) => it.label)
+    expect(labels).toContain('Chỉnh sửa widget')
+    expect(labels.filter((l) => l.startsWith('Thêm widget')).length).toBe(WIDGET_KINDS.length)
+  })
+
+  it('says Done while editing', () => {
+    settings.usePreset('beautiful')
+    ui.widgetEdit = true
+    expect(view().map((it) => it.label)).toContain('Xong chỉnh sửa widget')
+    ui.widgetEdit = false
+  })
+
+  it('is disabled when widgets are off in the performance preset', () => {
+    settings.usePreset('light')
+    const items = view().filter((it) => /widget/i.test(it.label))
+    expect(items.length).toBeGreaterThan(1)
+    expect(items.every((it) => it.disabled)).toBe(true)
+    settings.usePreset('beautiful')
+  })
 })

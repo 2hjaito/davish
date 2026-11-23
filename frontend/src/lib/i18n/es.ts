@@ -42,6 +42,19 @@ const es = {
     foot: (mod: string) =>
       `Añade tantos servidores como quieras; cada uno es un espacio de trabajo (${mod}1…${mod}9). ${mod}K abre Spotlight para buscar apps, servicios, contenedores y carpetas.`,
   },
+  widgets: {
+    edit: 'Editar widgets',
+    done: 'Terminar de editar widgets',
+    add: (name: string) => `Añadir widget: ${name}`,
+    remove: 'Quitar widget',
+    small: 'Pequeño',
+    medium: 'Mediano',
+    resize: 'Tamaño',
+    finish: 'Listo',
+    waiting: 'Esperando datos…',
+    noRoom: 'No hay sitio para otro widget',
+    noRoomBody: 'Quita un widget o agranda la ventana y vuelve a añadirlo.',
+  },
   spotlight: {
     label: 'Spotlight',
     placeholder: 'Abre una app, servicio, contenedor, carpeta… o /una/ruta, > comando',
@@ -2125,6 +2138,8 @@ const es = {
     perfWallpaperHint: 'Desactívalo para dejar un solo color.',
     perfMotion: 'Animación',
     perfMotionHint: 'Las animaciones de abrir, cerrar y minimizar.',
+    perfWidgets: 'Widgets',
+    perfWidgetsHint: 'Los widgets del escritorio. Desactivados, se ocultan y dejan de leer datos.',
     perfNoDmabuf: 'Desactivar DMA-BUF',
     perfNoDmabufHint: 'Un ajuste de WebKitGTK en Linux. Se aplica al reiniciar.',
     perfNoCompositing: 'Desactivar la composición',

@@ -69,3 +69,31 @@ describe('layout', () => {
     expect(cells[0]).toEqual({ col: 0, row: 0 })
   })
 })
+
+describe('layout with reserved cells', () => {
+  const grid = { cols: 3, rows: 3 }
+
+  it('moves an icon off a reserved cell and keeps the rest', () => {
+    const items = [
+      { col: 0, row: 0 },
+      { col: 2, row: 0 },
+    ]
+    const cells = layout(items, grid, [{ col: 2, row: 0 }])
+    expect(cells[0]).toEqual({ col: 0, row: 0 })
+    expect(cells[1]).not.toEqual({ col: 2, row: 0 })
+  })
+
+  it('does not put a moved icon on another reserved cell', () => {
+    const reserved = [
+      { col: 2, row: 0 },
+      { col: 2, row: 1 },
+    ]
+    const [moved] = layout([{ col: 2, row: 0 }], grid, reserved)
+    expect(reserved).not.toContainEqual(moved)
+  })
+
+  it('is the old layout when nothing is reserved', () => {
+    const items = [{ col: 5, row: 5 }]
+    expect(layout(items, grid, [])).toEqual(layout(items, grid))
+  })
+})

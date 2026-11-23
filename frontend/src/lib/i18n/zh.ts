@@ -41,6 +41,19 @@ const zh = {
     foot: (mod: string) =>
       `服务器数量不限，每台都是一个工作区（${mod}1…${mod}9）。按 ${mod}K 打开 Spotlight，查找应用、服务、容器和文件夹。`,
   },
+  widgets: {
+    edit: '编辑小组件',
+    done: '完成编辑小组件',
+    add: (name: string) => `添加小组件：${name}`,
+    remove: '移除小组件',
+    small: '小',
+    medium: '中',
+    resize: '大小',
+    finish: '完成',
+    waiting: '等待数据…',
+    noRoom: '没有空间再放小组件',
+    noRoomBody: '移除一个小组件或放大窗口，然后重新添加。',
+  },
   spotlight: {
     label: 'Spotlight',
     placeholder: '打开应用、服务、容器、文件夹…或输入 /路径、> 命令',
@@ -2019,6 +2032,8 @@ const zh = {
     perfWallpaperHint: '关闭后只保留一种底色。',
     perfMotion: '动画',
     perfMotionHint: '窗口打开、关闭和最小化的动画。',
+    perfWidgets: '小组件',
+    perfWidgetsHint: '桌面上的小组件。关闭后隐藏它们，并停止为它们读取数据。',
     perfNoDmabuf: '关闭 DMA-BUF',
     perfNoDmabufHint: 'Linux 上 WebKitGTK 的一种变通。重启后生效。',
     perfNoCompositing: '关闭合成',
