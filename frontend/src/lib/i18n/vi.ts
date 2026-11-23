@@ -45,6 +45,14 @@ const vi = {
       `Có thể thêm nhiều server; mỗi server là một workspace (${mod}1…${mod}9). ${mod}K mở Spotlight để tìm app, dịch vụ, container, thư mục.`,
   },
   widgets: {
+    disk: {
+      of: (used: string, size: string) => `${used} / ${size}`,
+      ofTotal: (size: string) => `trên ${size}`,
+      almostFull: 'Gần đầy',
+      filling: 'Đang đầy dần',
+      more: (n: number) => `+${n} nữa`,
+      none: 'Chưa đọc được ổ đĩa',
+    },
     services: {
       running: 'đang chạy',
       allRunning: 'Tất cả đang chạy',
@@ -75,6 +83,7 @@ const vi = {
     intro:
       'Các khung xem trực tiếp nhỏ nằm trên desktop của server này, sau cửa sổ. Mỗi server có widget riêng.',
     about: {
+      disk: 'Mỗi ổ đĩa đầy bao nhiêu, theo số đọc của Monitor. Đổi sang vàng và đỏ khi gần tới và vượt ngưỡng cảnh báo ổ đĩa trong Cài đặt.',
       services:
         'Bao nhiêu service đang chạy, và cái nào lỗi hoặc khởi động lặp. Đọc mỗi phút một lần khi Davish đang ở phía trước.',
       docker:
@@ -1107,7 +1116,7 @@ const vi = {
         ],
         keys: [],
         runs: [
-          'Monitor: cùng số đọc từ /proc với Monitor và thanh menu, không thêm lệnh nào',
+          'Monitor và Ổ đĩa: cùng số đọc với Monitor và thanh menu, không thêm lệnh nào',
           'Docker và Services: mỗi phút một lần một danh sách chỉ đọc (docker ps, systemctl list-units) khi Davish đang ở phía trước và đọc lại khi bạn quay lại, không bao giờ hỏi mật khẩu sudo',
         ],
       },

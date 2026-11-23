@@ -43,6 +43,14 @@ const es = {
       `Añade tantos servidores como quieras; cada uno es un espacio de trabajo (${mod}1…${mod}9). ${mod}K abre Spotlight para buscar apps, servicios, contenedores y carpetas.`,
   },
   widgets: {
+    disk: {
+      of: (used: string, size: string) => `${used} de ${size}`,
+      ofTotal: (size: string) => `de ${size}`,
+      almostFull: 'Casi lleno',
+      filling: 'Llenándose',
+      more: (n: number) => `+${n} más`,
+      none: 'No se leyeron discos',
+    },
     services: {
       running: 'en marcha',
       allRunning: 'Todo en marcha',
@@ -73,6 +81,7 @@ const es = {
     intro:
       'Pequeñas vistas en vivo que viven en el escritorio de este servidor, detrás de tus ventanas. Cada servidor tiene las suyas.',
     about: {
+      disk: 'Cuánto se ha llenado cada disco, según la lectura de Monitor. Se pone ámbar y rojo al acercarse y superar el umbral de alerta de disco de Ajustes.',
       services:
         'Cuántos servicios funcionan y cuáles han fallado o se reinician sin parar. Se lee una vez por minuto mientras Davish está delante.',
       docker:
@@ -1150,7 +1159,7 @@ const es = {
         ],
         keys: [],
         runs: [
-          'Monitor: la misma lectura de /proc que Monitor y la barra de menús, sin añadir ningún comando',
+          'Monitor y Disco: la misma lectura que Monitor y la barra de menús, sin añadir ningún comando',
           'Docker y Servicios: una lista de solo lectura (docker ps, systemctl list-units) por minuto mientras Davish está delante y otra al volver, nunca una contraseña de sudo',
         ],
       },

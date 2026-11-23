@@ -42,6 +42,12 @@ export const widgetDefs: Record<WidgetKind, WidgetDef> = {
     opens: 'services',
     load: () => import('./ServicesWidget.svelte'),
   },
+  disk: {
+    label: () => t.apps.disk,
+    sizes: ['S', 'M'],
+    opens: 'disk',
+    load: () => import('./DiskWidget.svelte'),
+  },
 }
 
 /** Does this kind of widget work on a server running os: the app it opens does. */
