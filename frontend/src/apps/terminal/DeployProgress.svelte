@@ -70,7 +70,7 @@
   }
 </script>
 
-<div class="progress glass-dark {run.state}" role="status" aria-label={d.progress}>
+<div class="progress {run.state}" role="status" aria-label={d.progress}>
   <span class="icon"><Icon name={icon} size={13} /></span>
   <span class="label">{label}</span>
   {#if step && run.state !== 'ok' && !script}
@@ -102,20 +102,31 @@
 </div>
 
 <style>
+  /*
+   * It sits in the title bar, beside the tabs, so it never covers the output.
+   * The tabs and the step name give way first when the window is narrow.
+   */
   .progress {
-    position: absolute;
-    top: 10px;
-    right: 14px;
-    z-index: 1;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 60%;
     display: flex;
     align-items: center;
     gap: 8px;
-    max-width: calc(100% - 28px);
-    padding: 6px 10px;
+    padding: 3px 4px 3px 10px;
     border-radius: var(--control-radius);
+    background: var(--tab-active-dark);
     color: var(--fg-on-dark);
     font-size: 12px;
     white-space: nowrap;
+  }
+
+  .progress > * {
+    flex-shrink: 0;
+  }
+
+  .progress > .step {
+    flex-shrink: 1;
   }
 
   .icon {
