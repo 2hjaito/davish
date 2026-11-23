@@ -10,7 +10,7 @@
   import { isMac } from '../../lib/shell/platform'
   import { settings } from '../../lib/stores/settings.svelte'
   import PopupMenu from '../../lib/ui/PopupMenu.svelte'
-  import { schemeFor, schemeTheme } from './schemes'
+  import { DAVISH_ANSI, schemeFor, schemeTheme } from './schemes'
 
   interface Props {
     /** Whether this terminal is the visible tab; hidden ones keep their buffer. */
@@ -47,6 +47,7 @@
       scrollbarSliderBackground: token('--term-scrollbar'),
       scrollbarSliderHoverBackground: token('--term-scrollbar-hover'),
       scrollbarSliderActiveBackground: token('--term-scrollbar-hover'),
+      ...DAVISH_ANSI,
       green: token('--term-user'),
       brightGreen: token('--term-user'),
       blue: token('--term-path'),
