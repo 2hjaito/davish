@@ -4,6 +4,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.15.0] - 2026-11-23
+
 ### Thêm
 - App **Widget** (Launchpad, Spotlight, Dock nếu bạn ghim): thư viện các widget có xem trước trực tiếp, số lượng mỗi loại đang có trên desktop của server đang dùng, và nút thêm cỡ nhỏ hoặc vừa. Icon là ba thẻ trắng trên nền xanh lá.
 - Widget **Docker**: bao nhiêu container đang chạy, và cái nào lỗi health hoặc khởi động lặp (cỡ nhỏ, hoặc cỡ vừa kèm tên). Nó đọc `docker ps` mỗi phút một lần khi Davish đang ở phía trước và đọc lại khi bạn quay lại, cho từng server có widget này, và không bao giờ hỏi mật khẩu sudo; server không có Docker hoặc cần sudo thì bị bỏ qua cho đến khi bạn quay lại. Đây là widget duy nhất chạy lệnh. Không có trên server Windows.
@@ -16,6 +18,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 - Monitor không hỏi server danh sách tiến trình khi cửa sổ không hiện trên màn hình (đã thu nhỏ, ở server khác, hoặc Davish bị ẩn).
 
 ### Sửa
+- Widget nằm ngay dưới menu bar và cách mép phải, cách thanh menu một khoảng bằng nhau, dù cửa sổ rộng bao nhiêu. Trước đây một hàng phía trên bị để trống và khoảng cách bên phải đổi theo cửa sổ.
+- Terminal: màu xám của stack trace, mốc thời gian và gợi ý (ANSI bright black) đọc được trên nền kính tối; bảng màu Davish giờ đặt đủ mọi màu ANSI.
 - Terminal: tiến trình của deploy hoặc script nằm trên thanh tiêu đề, cạnh các tab, thay vì nổi lên trên output và che đầu bên phải của những dòng đầu.
 - Nhãn phím tắt ghi `Ctrl+Shift+U` và `Ctrl+Alt+L` ngoài Mac, Touch ID chỉ được nhắc trên macOS, nút ⋮ trên thanh công cụ Git và Docker giống các nút bên cạnh, và vài chỗ lệch bố cục (nút Bản đồ ở Tất cả server, chú thích của Disk) đã hết.
 - Trình duyệt: trang chuyển hướng bằng đường dẫn tương đối (ví dụ `/` sang `/ui/`, hay thêm dấu `/` cuối) không còn báo "this address only opens inside Davish" (403).
