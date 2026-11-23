@@ -44,6 +44,19 @@ const vi = {
     foot: (mod: string) =>
       `Có thể thêm nhiều server; mỗi server là một workspace (${mod}1…${mod}9). ${mod}K mở Spotlight để tìm app, dịch vụ, container, thư mục.`,
   },
+  widgets: {
+    edit: 'Chỉnh sửa widget',
+    done: 'Xong chỉnh sửa widget',
+    add: (name: string) => `Thêm widget: ${name}`,
+    remove: 'Xóa widget',
+    small: 'Nhỏ',
+    medium: 'Vừa',
+    resize: 'Kích thước',
+    finish: 'Xong',
+    waiting: 'Đang chờ dữ liệu…',
+    noRoom: 'Hết chỗ cho widget',
+    noRoomBody: 'Xóa bớt một widget hoặc phóng to cửa sổ rồi thêm lại.',
+  },
   spotlight: {
     label: 'Spotlight',
     placeholder: 'Mở app, dịch vụ, container, thư mục… hoặc /đường/dẫn, > lệnh',

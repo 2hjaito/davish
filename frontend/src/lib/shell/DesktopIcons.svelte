@@ -16,6 +16,7 @@
     openTerminalAt,
   } from '../wm/intents.svelte'
   import { wm } from '../wm/windowManager.svelte'
+  import { reservedFor } from '../widgets/actions'
   import { cellAt, cellPosition, gridOf, layout } from './iconGrid'
   import { hasChanged, needsConfirm, simulateRun } from './shortcutActions'
   import ShortcutCustomize from './ShortcutCustomize.svelte'
@@ -34,7 +35,9 @@
   const online = $derived(server?.state === 'connected')
   const items = $derived(shortcuts.of(serverID))
   const grid = $derived(gridOf(wm.area))
-  const cells = $derived(layout(items, grid))
+  // Icons keep clear of the cells under the widgets.
+  const reserved = $derived(reservedFor(serverID, grid))
+  const cells = $derived(layout(items, grid, reserved))
 
   let selected = $state<string | null>(null)
   let drag = $state<{ path: string; dx: number; dy: number } | null>(null)
@@ -163,7 +166,13 @@
 
   function onPointerUp(ev: PointerEvent) {
     if (drag) {
-      shortcuts.move(serverID, drag.path, cellAt(ev.clientX, ev.clientY, wm.area, grid), grid)
+      shortcuts.move(
+        serverID,
+        drag.path,
+        cellAt(ev.clientX, ev.clientY, wm.area, grid),
+        grid,
+        reserved,
+      )
     }
     drag = null
     press = null

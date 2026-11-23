@@ -128,6 +128,15 @@ export function reservedCells(items: readonly WidgetItem[], grid: Grid): Cell[] 
   return layoutWidgets(items, grid).flatMap((p) => (p.at ? cellsOf(p.at) : []))
 }
 
+/**
+ * The position (col from the right, row below the top rows) of a widget of
+ * this size whose top left corner sits on grid cell: what a drop means.
+ */
+export function wantFor(cell: Cell, size: WidgetSize, grid: Grid): Cell {
+  const { cols } = WIDGET_SIZES[size]
+  return { col: Math.max(0, grid.cols - cell.col - cols), row: Math.max(0, cell.row - TOP_ROWS) }
+}
+
 /** Pixel box of a footprint, with a small gap so neighbours do not touch. */
 export function footprintBox(
   f: Footprint,

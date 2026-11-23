@@ -40,16 +40,22 @@ class Shortcuts {
     return this.of(serverID).find((s) => s.path === path)
   }
 
-  add(serverID: string, s: Omit<Shortcut, 'col' | 'row'>, want: Cell, grid: Grid) {
-    const cell = freeCell(want, this.of(serverID), grid)
+  add(
+    serverID: string,
+    s: Omit<Shortcut, 'col' | 'row'>,
+    want: Cell,
+    grid: Grid,
+    reserved: readonly Cell[] = [],
+  ) {
+    const cell = freeCell(want, [...this.of(serverID), ...reserved], grid)
     this.byServer[serverID] = [...this.of(serverID), { ...s, ...cell }]
     save(KEY, this.byServer)
   }
 
   /** Moves an icon to the free cell nearest want. */
-  move(serverID: string, path: string, want: Cell, grid: Grid) {
+  move(serverID: string, path: string, want: Cell, grid: Grid, reserved: readonly Cell[] = []) {
     const others = this.of(serverID).filter((s) => s.path !== path)
-    this.#update(serverID, path, freeCell(want, others, grid))
+    this.#update(serverID, path, freeCell(want, [...others, ...reserved], grid))
   }
 
   /** Lets the script with this hash run without asking; no hash takes that back. */

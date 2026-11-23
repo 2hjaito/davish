@@ -8,8 +8,12 @@ import { t } from '../i18n'
 import { notifications } from '../stores/notifications.svelte'
 import { appLock } from '../stores/lock.svelte'
 import { servers } from '../stores/servers.svelte'
+import { settings } from '../stores/settings.svelte'
 import { ui } from '../stores/ui.svelte'
 import { updates } from '../stores/updates.svelte'
+import { addWidget } from '../widgets/actions'
+import { WIDGET_KINDS } from '../widgets/kinds'
+import { widgetDefs } from '../widgets/registry'
 import { openAudit, openServers, openTerminalAt, openTransfers } from '../wm/intents.svelte'
 import { wm } from '../wm/windowManager.svelte'
 import { appMenus, type Menu, type MenuEntry } from './menus.svelte'
@@ -149,6 +153,17 @@ export function buildMenus(): Menu[] {
         null,
         { label: m.audit, run: () => openAudit(id) },
         { label: m.transfers, run: () => openTransfers(id) },
+        null,
+        {
+          label: ui.widgetEdit ? t.widgets.done : t.widgets.edit,
+          disabled: !server || !settings.knobs.widgets,
+          run: () => (ui.widgetEdit = !ui.widgetEdit),
+        },
+        ...WIDGET_KINDS.map((kind) => ({
+          label: t.widgets.add(widgetDefs[kind].label()),
+          disabled: !server || !settings.knobs.widgets,
+          run: () => addWidget(id, kind),
+        })),
       ],
     },
     {

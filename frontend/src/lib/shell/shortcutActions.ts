@@ -3,6 +3,7 @@ import { hasRuntime } from '../api/runtime'
 import { shortcutInspect, type ShortcutTarget } from '../api/shortcuts'
 import { deploys } from '../stores/deploys.svelte'
 import { type Shortcut, shortcuts } from '../stores/shortcuts.svelte'
+import { reservedFor } from '../widgets/actions'
 import { wm } from '../wm/windowManager.svelte'
 import { cellAt, gridOf } from './iconGrid'
 
@@ -21,7 +22,7 @@ export async function addShortcut(
   const { name, kind } = await shortcutInspect(serverID, path)
   const grid = gridOf(wm.area)
   const want = at ? cellAt(at.x, at.y, wm.area, grid) : { col: 0, row: 0 }
-  shortcuts.add(serverID, { path, name, kind }, want, grid)
+  shortcuts.add(serverID, { path, name, kind }, want, grid, reservedFor(serverID, grid))
   return true
 }
 

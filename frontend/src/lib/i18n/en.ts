@@ -31,6 +31,19 @@ const en = {
     foot: (mod: string) =>
       `Add as many servers as you like; each one is a workspace (${mod}1…${mod}9). ${mod}K opens Spotlight to find apps, services, containers and folders.`,
   },
+  widgets: {
+    edit: 'Edit widgets',
+    done: 'Done editing widgets',
+    add: (name: string) => `Add widget: ${name}`,
+    remove: 'Remove widget',
+    small: 'Small',
+    medium: 'Medium',
+    resize: 'Size',
+    finish: 'Done',
+    waiting: 'Waiting for data…',
+    noRoom: 'No room for another widget',
+    noRoomBody: 'Remove a widget or make the window larger, then add it again.',
+  },
   spotlight: {
     label: 'Spotlight',
     placeholder: 'Open an app, service, container, folder… or /a/path, > command',

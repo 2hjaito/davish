@@ -11,6 +11,7 @@ import {
   reservedCells,
   sanitizeWidgets,
   TOP_ROWS,
+  wantFor,
   type WidgetItem,
 } from './layout'
 
@@ -161,5 +162,22 @@ describe('sanitizeWidgets', () => {
   it('leaves out a server whose widgets are all invalid', () => {
     expect(sanitizeWidgets({ srv: [{ ...ok, kind: 'x' }], other: [ok] })).toEqual({ other: [ok] })
     expect(sanitizeWidgets({ srv: 'nope' })).toEqual({})
+  })
+})
+
+describe('wantFor', () => {
+  it('is the inverse of footprint for the top left cell of a widget', () => {
+    for (const item of [w('a', 0, 0), w('b', 3, 2, 'M'), w('c', 1, 1)]) {
+      const f = footprint(item, grid)
+      expect(wantFor({ col: f.col, row: f.row }, item.size, grid)).toEqual({
+        col: item.col,
+        row: item.row,
+      })
+    }
+  })
+
+  it('never goes negative, whatever the drop', () => {
+    expect(wantFor({ col: 9, row: 0 }, 'S', grid)).toEqual({ col: 0, row: 0 })
+    expect(wantFor({ col: 0, row: 0 }, 'S', grid).row).toBe(0)
   })
 })
