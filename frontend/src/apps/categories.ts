@@ -37,6 +37,7 @@ export const CATEGORY: Record<AppId, Category> = {
   packages: 'system',
   cron: 'system',
   settings: 'system',
+  widgets: 'system',
 }
 
 /** The apps of each group that has any, groups and apps in their order. */

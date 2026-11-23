@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import type { Grid } from '../shell/iconGrid'
 import {
   cellsOf,
+  countKinds,
   footprint,
   footprintAt,
   layoutWidgets,
@@ -179,5 +180,12 @@ describe('wantFor', () => {
   it('never goes negative, whatever the drop', () => {
     expect(wantFor({ col: 9, row: 0 }, 'S', grid)).toEqual({ col: 0, row: 0 })
     expect(wantFor({ col: 0, row: 0 }, 'S', grid).row).toBe(0)
+  })
+})
+
+describe('countKinds', () => {
+  it('counts each kind, zero for one that is not there', () => {
+    expect(countKinds([])).toEqual({ monitor: 0 })
+    expect(countKinds([w('a', 0, 0), w('b', 0, 1), w('c', 2, 0, 'M')])).toEqual({ monitor: 3 })
   })
 })

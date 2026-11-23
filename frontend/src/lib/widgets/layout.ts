@@ -3,7 +3,7 @@
 // from the top left and the widgets from the top right, and neither moves the
 // other until the window is too narrow for both. All pure.
 import { type Area, type Cell, cellPosition, CELL_H, CELL_W, type Grid } from '../shell/iconGrid'
-import { isWidgetKind, type WidgetKind } from './kinds'
+import { isWidgetKind, WIDGET_KINDS, type WidgetKind } from './kinds'
 
 export type WidgetSize = 'S' | 'M'
 
@@ -145,6 +145,13 @@ export function footprintBox(
 ): { x: number; y: number; w: number; h: number } {
   const p = cellPosition(f, area)
   return { x: p.x + gap / 2, y: p.y + gap / 2, w: f.cols * CELL_W - gap, h: f.rows * CELL_H - gap }
+}
+
+/** How many widgets of each kind are on a desktop. */
+export function countKinds(items: readonly WidgetItem[]): Record<WidgetKind, number> {
+  const counts = Object.fromEntries(WIDGET_KINDS.map((k) => [k, 0])) as Record<WidgetKind, number>
+  for (const item of items) counts[item.kind]++
+  return counts
 }
 
 const INT = /^\d{1,2}$/

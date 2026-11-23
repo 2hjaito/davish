@@ -45,6 +45,17 @@ const vi = {
       `Có thể thêm nhiều server; mỗi server là một workspace (${mod}1…${mod}9). ${mod}K mở Spotlight để tìm app, dịch vụ, container, thư mục.`,
   },
   widgets: {
+    intro:
+      'Các khung xem trực tiếp nhỏ nằm trên desktop của server này, sau cửa sổ. Mỗi server có widget riêng.',
+    about: {
+      monitor: 'CPU, RAM và mạng kèm biểu đồ 15 phút, từ số đọc mà thanh menu đã lấy.',
+    },
+    onDesktop: (n: number) => (n === 0 ? 'Chưa có trên desktop' : `${n} trên desktop`),
+    addSmall: 'Thêm cỡ nhỏ',
+    addMedium: 'Thêm cỡ vừa',
+    offTitle: 'Widget đang tắt',
+    offHint: 'Mức hiệu năng Nhẹ ẩn chúng. Bật lại trong Cài đặt → Hiệu năng → Nâng cao.',
+    openSettings: 'Mở Cài đặt',
     edit: 'Chỉnh sửa widget',
     done: 'Xong chỉnh sửa widget',
     add: (name: string) => `Thêm widget: ${name}`,
@@ -125,6 +136,7 @@ const vi = {
     browser: 'Trình duyệt',
     servers: 'Tất cả server',
     snippets: 'Lệnh hay dùng',
+    widgets: 'Widget',
   },
   browser: {
     back: 'Lùi',
@@ -1054,6 +1066,18 @@ const vi = {
         ],
         keys: [],
         runs: [],
+      },
+      widgets: {
+        does: 'Các khung xem trực tiếp nhỏ trên desktop của từng server, nằm sau cửa sổ.',
+        actions: [
+          'Thêm widget từ thư viện này hoặc từ Xem → Thêm widget',
+          'Chỉnh sửa: kéo một widget tới chỗ trống, đổi cỡ nhỏ hoặc vừa, hoặc xóa (Esc hoặc Xong để thoát)',
+          'Tắt hết trong Cài đặt → Hiệu năng, hoặc dùng mức Nhẹ',
+        ],
+        keys: [],
+        runs: [
+          'Không có lệnh riêng: widget Monitor hiện cùng số đọc từ /proc với Monitor và thanh menu, không thêm lệnh nào',
+        ],
       },
       settings: {
         does: 'Ngôn ngữ, chế độ sáng tối, giao diện, phông, ngưỡng cảnh báo, khóa app, prompt Terminal.',

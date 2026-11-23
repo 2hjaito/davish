@@ -43,6 +43,18 @@ const es = {
       `Añade tantos servidores como quieras; cada uno es un espacio de trabajo (${mod}1…${mod}9). ${mod}K abre Spotlight para buscar apps, servicios, contenedores y carpetas.`,
   },
   widgets: {
+    intro:
+      'Pequeñas vistas en vivo que viven en el escritorio de este servidor, detrás de tus ventanas. Cada servidor tiene las suyas.',
+    about: {
+      monitor:
+        'CPU, RAM y red con un gráfico de 15 minutos, de la lectura que ya toma la barra de menús.',
+    },
+    onDesktop: (n: number) => (n === 0 ? 'No está en el escritorio' : `${n} en el escritorio`),
+    addSmall: 'Añadir pequeño',
+    addMedium: 'Añadir mediano',
+    offTitle: 'Los widgets están desactivados',
+    offHint: 'El preajuste Ligero los oculta. Actívalos en Ajustes → Rendimiento → Avanzado.',
+    openSettings: 'Abrir Ajustes',
     edit: 'Editar widgets',
     done: 'Terminar de editar widgets',
     add: (name: string) => `Añadir widget: ${name}`,
@@ -123,6 +135,7 @@ const es = {
     browser: 'Navegador',
     servers: 'Todos los servidores',
     snippets: 'Comandos guardados',
+    widgets: 'Widgets',
   },
   browser: {
     back: 'Atrás',
@@ -1096,6 +1109,18 @@ const es = {
         ],
         keys: [],
         runs: [],
+      },
+      widgets: {
+        does: 'Pequeñas vistas en vivo en el escritorio de cada servidor, detrás de tus ventanas.',
+        actions: [
+          'Añade un widget desde esta galería o desde Ver → Añadir widget',
+          'Editar widgets: arrastra uno a un hueco libre, hazlo pequeño o mediano, o quítalo (Esc o Listo para salir)',
+          'Desactívalos todos en Ajustes → Rendimiento, o con el preajuste Ligero',
+        ],
+        keys: [],
+        runs: [
+          'Nada propio: el widget Monitor muestra la misma lectura de /proc que Monitor y la barra de menús, sin añadir ningún comando',
+        ],
       },
       settings: {
         does: 'Idioma, tema claro u oscuro, apariencia, fuentes, umbrales de alerta, bloqueo de la app, prompt de Terminal.',

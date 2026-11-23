@@ -14,8 +14,16 @@ export function reservedFor(serverID: string, grid = gridOf(wm.area)): Cell[] {
   return settings.knobs.widgets ? widgets.reserved(serverID, grid) : []
 }
 
-/** Adds a widget to serverID's desktop and opens editing; says so when there is no room. */
-export function addWidget(serverID: string, kind: WidgetKind, size: WidgetSize = 'S'): boolean {
+/**
+ * Adds a widget to serverID's desktop, and opens editing unless edit is false;
+ * says so when there is no room.
+ */
+export function addWidget(
+  serverID: string,
+  kind: WidgetKind,
+  size: WidgetSize = 'S',
+  edit = true,
+): boolean {
   const made = widgets.add(serverID, kind, size, gridOf(wm.area))
   if (!made) {
     notifications.add({
@@ -28,6 +36,6 @@ export function addWidget(serverID: string, kind: WidgetKind, size: WidgetSize =
     })
     return false
   }
-  ui.widgetEdit = true
+  if (edit) ui.widgetEdit = true
   return true
 }

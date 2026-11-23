@@ -32,6 +32,19 @@ const en = {
       `Add as many servers as you like; each one is a workspace (${mod}1…${mod}9). ${mod}K opens Spotlight to find apps, services, containers and folders.`,
   },
   widgets: {
+    intro:
+      'Small live views that sit on the desktop of this server, behind your windows. Each server has its own.',
+    about: {
+      monitor:
+        'CPU, RAM and network with a 15 minute chart, from the reading the menu bar already takes.',
+    },
+    onDesktop: (n: number) => (n === 0 ? 'Not on the desktop' : `${n} on the desktop`),
+    addSmall: 'Add small',
+    addMedium: 'Add medium',
+    offTitle: 'Widgets are off',
+    offHint:
+      'The Light performance preset hides them. Turn them on in Settings → Performance → Advanced.',
+    openSettings: 'Open Settings',
     edit: 'Edit widgets',
     done: 'Done editing widgets',
     add: (name: string) => `Add widget: ${name}`,
@@ -112,6 +125,7 @@ const en = {
     browser: 'Browser',
     servers: 'All servers',
     snippets: 'Saved commands',
+    widgets: 'Widgets',
   },
   browser: {
     back: 'Back',
@@ -1072,6 +1086,18 @@ const en = {
         ],
         keys: [],
         runs: [],
+      },
+      widgets: {
+        does: 'Small live views on the desktop of each server, behind your windows.',
+        actions: [
+          'Add a widget from this gallery or from View → Add widget',
+          'Edit widgets: drag one to a free place, make it small or medium, or remove it (Esc or Done to leave)',
+          'Turn them all off in Settings → Performance, or with the Light preset',
+        ],
+        keys: [],
+        runs: [
+          'Nothing of its own: the Monitor widget shows the same /proc reading as Monitor and the menu bar, with no command added',
+        ],
       },
       settings: {
         does: 'Language, light or dark theme, appearance, fonts, alert thresholds, app lock, Terminal prompt.',
