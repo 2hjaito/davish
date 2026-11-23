@@ -1706,6 +1706,9 @@ const es = {
     jump: 'Pasar por un servidor (ProxyJump)',
     jumpNone: 'No, conectar directamente',
     jumpHint: 'Se conecta primero a un servidor de salto y luego a este, como el ProxyJump de ssh.',
+    control: 'Avanzado: usar un control socket de ssh',
+    controlHint:
+      'Úsalo cuando tu inicio de sesión solo funcione con OpenSSH (por ejemplo, un agente que emite certificados, como authentik). Inicia tú mismo el master con: ssh -M -S <path> -fN user@host. Davish usará esa conexión y nunca verá tus credenciales. Solo en Linux y macOS.',
     save: 'Guardar y conectar',
     cancel: 'Cancelar',
     delete: 'Eliminar servidor',
@@ -3471,6 +3474,7 @@ const es = {
     CONN_PASSPHRASE_WRONG:
       'La frase de contraseña guardada no abre esta clave privada. Edita el servidor y escríbela de nuevo.',
     CONN_NOT_CONNECTED: 'El servidor no está conectado.',
+    CONN_CONTROL_SOCKET: 'No se pudo usar el control socket.',
     TERM_CLOSED: 'La sesión de terminal está cerrada.',
     FS_PERMISSION_DENIED: 'Permiso denegado.',
     FS_EXISTS: 'Ya existe un archivo o carpeta con ese nombre.',

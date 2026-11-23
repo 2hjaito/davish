@@ -194,6 +194,7 @@ export namespace app {
 	    keyPath?: string;
 	    color?: string;
 	    jumpID?: string;
+	    controlPath?: string;
 	    password: string;
 	    passphrase: string;
 	
@@ -212,6 +213,7 @@ export namespace app {
 	        this.keyPath = source["keyPath"];
 	        this.color = source["color"];
 	        this.jumpID = source["jumpID"];
+	        this.controlPath = source["controlPath"];
 	        this.password = source["password"];
 	        this.passphrase = source["passphrase"];
 	    }
@@ -226,6 +228,7 @@ export namespace app {
 	    keyPath?: string;
 	    color?: string;
 	    jumpID?: string;
+	    controlPath?: string;
 	    hasPassword: boolean;
 	    hasPassphrase: boolean;
 	    state: string;
@@ -245,6 +248,7 @@ export namespace app {
 	        this.keyPath = source["keyPath"];
 	        this.color = source["color"];
 	        this.jumpID = source["jumpID"];
+	        this.controlPath = source["controlPath"];
 	        this.hasPassword = source["hasPassword"];
 	        this.hasPassphrase = source["hasPassphrase"];
 	        this.state = source["state"];

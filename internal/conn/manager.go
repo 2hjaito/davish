@@ -574,6 +574,9 @@ func (m *Manager) dialVia(ctx context.Context, target, id string, depth int) (*s
 	if err != nil {
 		return nil, err
 	}
+	if srv.ControlPath != "" {
+		return m.dialControl(ctx, srv)
+	}
 	auth, release, err := m.authMethods(srv)
 	if err != nil {
 		return nil, err

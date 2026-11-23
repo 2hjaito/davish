@@ -118,6 +118,8 @@ func TestValidate(t *testing.T) {
 		{"unknown auth", func(s *Server) { s.Auth = "magic" }},
 		{"key without path", func(s *Server) { s.Auth = AuthKey }},
 		{"bad color", func(s *Server) { s.Color = "red" }},
+		{"relative control path", func(s *Server) { s.ControlPath = "mux.sock" }},
+		{"control path with jump", func(s *Server) { s.ControlPath = "/tmp/m.sock"; s.JumpID = "other" }},
 	}
 	s, _, _ := newTestStore(t)
 	for _, tt := range tests {

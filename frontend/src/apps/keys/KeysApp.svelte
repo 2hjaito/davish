@@ -298,6 +298,7 @@
         keyPath: k.path,
         color: server.color ?? '',
         jumpID: server.jumpID ?? '',
+        controlPath: server.controlPath ?? '',
         password: '',
         passphrase: pass,
       })

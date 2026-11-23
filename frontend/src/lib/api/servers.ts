@@ -19,6 +19,7 @@ export interface ServerInfo {
   keyPath?: string
   color?: string
   jumpID?: string
+  controlPath?: string
   hasPassword: boolean
   hasPassphrase: boolean
   state: ConnState
@@ -35,6 +36,7 @@ export interface ServerDraft {
   keyPath: string
   color: string
   jumpID: string
+  controlPath: string
   password: string
   passphrase: string
 }
