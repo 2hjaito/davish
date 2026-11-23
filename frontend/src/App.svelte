@@ -2,6 +2,7 @@
   import { untrack } from 'svelte'
   import { MediaQuery } from 'svelte/reactivity'
 
+  import { startBench } from './lib/api/bench'
   import { setWindowBackground } from './lib/api/runtime'
   import Desktop from './lib/shell/Desktop.svelte'
   import LockScreen from './lib/shell/LockScreen.svelte'
@@ -31,6 +32,11 @@
     setWindowBackground(!knobs.wallpaper && flat ? flat : base)
     if (!root.dataset.wallpaperReady)
       requestAnimationFrame(() => (root.dataset.wallpaperReady = 'true'))
+  })
+
+  // Only when scripts/bench.sh --render started this process.
+  $effect(() => {
+    void startBench()
   })
 
   // WebKit can keep the menu bar's, Dock's and desktop icons' blur of the old wallpaper until
