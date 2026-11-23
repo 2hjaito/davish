@@ -11,6 +11,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 - Monitor không hỏi server danh sách tiến trình khi cửa sổ không hiện trên màn hình (đã thu nhỏ, ở server khác, hoặc Davish bị ẩn).
 
 ### Sửa
+- Terminal: tiến trình của deploy hoặc script nằm trên thanh tiêu đề, cạnh các tab, thay vì nổi lên trên output và che đầu bên phải của những dòng đầu.
 - Nhãn phím tắt ghi `Ctrl+Shift+U` và `Ctrl+Alt+L` ngoài Mac, Touch ID chỉ được nhắc trên macOS, nút ⋮ trên thanh công cụ Git và Docker giống các nút bên cạnh, và vài chỗ lệch bố cục (nút Bản đồ ở Tất cả server, chú thích của Disk) đã hết.
 - Trình duyệt: trang chuyển hướng bằng đường dẫn tương đối (ví dụ `/` sang `/ui/`, hay thêm dấu `/` cuối) không còn báo "this address only opens inside Davish" (403).
 

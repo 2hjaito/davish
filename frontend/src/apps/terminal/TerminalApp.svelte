@@ -67,6 +67,7 @@
   const asked = untrack(() => terminalRequests.take(win.serverID))
   let tabs = $state<Tab[]>(asked.length > 0 ? asked.map(tabAt) : [tabAt()])
   let activeId = $state(1)
+  const activeTab = $derived(tabs.find((x) => x.id === activeId))
   // Component and xterm instances stay out of $state, which would proxy them.
   const views: Record<number, XTerm> = {}
   // eslint-disable-next-line svelte/prefer-svelte-reactivity -- holds xterm instances; Tab.ready carries the reactivity
@@ -293,6 +294,16 @@
       <Icon name="plus" size={12} strokeWidth={2.2} />
     </button>
   </div>
+  {#if activeTab?.deploy && deploys.runs[activeTab.deploy]}
+    <DeployProgress
+      run={deploys.runs[activeTab.deploy]!}
+      onstop={() => interrupt(activeTab!)}
+      onhide={() => {
+        if (activeTab?.deploy) deploys.forget(activeTab.deploy)
+        if (activeTab) activeTab.deploy = undefined
+      }}
+    />
+  {/if}
   <span class="spacer">
     <button
       class="add"
@@ -317,16 +328,6 @@
       active={tab.id === activeId}
       onready={(term) => connect(tab, term)}
     />
-    {#if tab.deploy && tab.id === activeId && deploys.runs[tab.deploy]}
-      <DeployProgress
-        run={deploys.runs[tab.deploy]!}
-        onstop={() => interrupt(tab)}
-        onhide={() => {
-          if (tab.deploy) deploys.forget(tab.deploy)
-          tab.deploy = undefined
-        }}
-      />
-    {/if}
     {#if tab.lost && tab.id === activeId}
       <div class="lost glass-dark" role="status">
         <Icon name="warning" size={13} />

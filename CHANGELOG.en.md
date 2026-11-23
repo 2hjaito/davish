@@ -11,6 +11,7 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 - Monitor stops asking the server for the process list while its window is not on screen (minimized, on another server, or Davish hidden).
 
 ### Fixed
+- Terminal: the progress of a deploy or a script now sits in the title bar, beside the tabs, instead of floating over the output, where it hid the right end of the first lines.
 - Shortcut labels read `Ctrl+Shift+U` and `Ctrl+Alt+L` outside the Mac, Touch ID is only mentioned on macOS, the ⋮ buttons in the Git and Docker toolbars match the buttons beside them, and a few layout slips (the Map button in All servers, Disk's legend) are gone.
 - Browser: a page that redirects with a relative path (such as `/` to `/ui/`, or adding a trailing `/`) no longer ends on "this address only opens inside Davish" (403).
 
