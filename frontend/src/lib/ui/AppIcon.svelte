@@ -346,6 +346,37 @@
       />
       <rect x="22" y={y + 3.5} width={w} height="3" rx="1.5" fill="#fff" opacity="0.85" />
     {/each}
+  {:else if id === 'widgets'}
+    <defs>
+      <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#c9f25a" />
+        <stop offset="1" stop-color="#3f9a1a" />
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" fill={url('bg')} />
+    <g fill="#1d5a0a" opacity="0.25">
+      <rect x="10" y="12" width="26" height="23" rx="6" />
+      <rect x="40" y="12" width="14" height="23" rx="6" />
+      <rect x="10" y="39" width="44" height="17" rx="6" />
+    </g>
+    <g fill="#fff">
+      <rect x="10" y="10" width="26" height="23" rx="6" />
+      <rect x="40" y="10" width="14" height="23" rx="6" />
+      <rect x="10" y="37" width="44" height="17" rx="6" />
+    </g>
+    <path
+      d="M15 27 21 21 26 24 31 16"
+      fill="none"
+      stroke="#2a8a2e"
+      stroke-width="2.6"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <circle cx="31" cy="16" r="2.6" fill="#ffc83d" />
+    <rect x="44" y="15" width="6" height="13" rx="3" fill="#d8efc4" />
+    <rect x="44" y="21" width="6" height="7" rx="3" fill="#2a8a2e" />
+    <rect x="15" y="43" width="34" height="5" rx="2.5" fill="#d8efc4" />
+    <rect x="15" y="43" width="22" height="5" rx="2.5" fill="#2a8a2e" />
   {:else if id === 'audit'}
     <defs>
       <linearGradient id={ref('bg')} x1="0" y1="0" x2="0" y2="1">

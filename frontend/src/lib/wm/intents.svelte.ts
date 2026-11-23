@@ -18,6 +18,7 @@ export const DISK_SIZE = { w: 900, h: 580 }
 export const SERVICES_SIZE = { w: 900, h: 580 }
 export const SERVERS_SIZE = { w: 980, h: 620 }
 export const SNIPPETS_SIZE = { w: 640, h: 520 }
+export const WIDGETS_SIZE = { w: 600, h: 500 }
 export const DATABASE_SIZE = { w: 640, h: 560 }
 
 /** Shows the Transfers window in serverID's workspace. */

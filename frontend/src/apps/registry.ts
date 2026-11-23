@@ -11,6 +11,7 @@ import {
   SERVERS_SIZE,
   SERVICES_SIZE,
   SNIPPETS_SIZE,
+  WIDGETS_SIZE,
   DATABASE_SIZE,
   TERMINAL_SIZE,
   TRANSFERS_SIZE,
@@ -204,6 +205,15 @@ export const apps: AppDef[] = [
     theme: 'light',
     size: SNIPPETS_SIZE,
     load: () => import('./snippets/SnippetsApp.svelte'),
+  },
+  {
+    id: 'widgets',
+    platforms: EVERYWHERE,
+    label: t.apps.widgets,
+    icon: 'widgets',
+    theme: 'light',
+    size: WIDGETS_SIZE,
+    load: () => import('./widgets/WidgetsApp.svelte'),
   },
   {
     id: 'audit',
