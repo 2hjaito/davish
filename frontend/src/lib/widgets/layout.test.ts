@@ -185,10 +185,11 @@ describe('wantFor', () => {
 
 describe('countKinds', () => {
   it('counts each kind, zero for one that is not there', () => {
-    expect(countKinds([])).toEqual({ monitor: 0, docker: 0 })
+    expect(countKinds([])).toEqual({ monitor: 0, docker: 0, services: 0 })
     expect(countKinds([w('a', 0, 0), w('b', 0, 1), w('c', 2, 0, 'M')])).toEqual({
       monitor: 3,
       docker: 0,
+      services: 0,
     })
   })
 })
