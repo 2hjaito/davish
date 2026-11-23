@@ -41,11 +41,11 @@ Nothing to install on the server.
 
 **On the server**
 
-- [Terminal](FEATURES.md#terminal): tabs, GPU rendering, an optional powerline prompt
+- [Terminal](FEATURES.md#terminal): tabs, GPU rendering, color schemes, an optional powerline prompt
 - [Saved commands](FEATURES.md#saved-commands): your frequent commands, typed into Terminal in one click
 - [Command log](FEATURES.md#command-log): every command Davish ran, exported as a script that runs the changes again over ssh
 - [Files](FEATURES.md#files): Finder-style SFTP, drag and drop, copy between servers, search names and contents on the server, hold a file for a ring of actions
-- [Editor](FEATURES.md#editor): CodeMirror with atomic saves and backups
+- [Editor](FEATURES.md#editor): CodeMirror with atomic saves, backups and options
 - [Logs](FEATURES.md#logs): journal, files and containers, live, and search their whole history on the server
 - [Monitor](FEATURES.md#monitor): CPU, memory, disks, network, GPUs, processes, on Linux and Windows servers
 - [All servers](FEATURES.md#all-servers): every server's health and alerts in one window, a map of what each one serves, and one command run on several servers, a terminal tab each

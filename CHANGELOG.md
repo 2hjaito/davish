@@ -4,7 +4,14 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Cài đặt theo từng app. Terminal: bảng màu (Davish, Phosphor, Solarized, Dracula), font riêng, kiểu con trỏ và nhấp nháy, nền đặc và số dòng cuộn lại (1.000, 5.000 hoặc 20.000). Editor: cỡ chữ, xuống dòng, số dòng, dấu cho khoảng trắng và tab, và phím Tab chèn gì. Files: hiện hoặc ẩn các tên bắt đầu bằng dấu chấm.
+
+### Đổi
+- Monitor không hỏi server danh sách tiến trình khi cửa sổ không hiện trên màn hình (đã thu nhỏ, ở server khác, hoặc Davish bị ẩn).
+
 ### Sửa
+- Nhãn phím tắt ghi `Ctrl+Shift+U` và `Ctrl+Alt+L` ngoài Mac, Touch ID chỉ được nhắc trên macOS, nút ⋮ trên thanh công cụ Git và Docker giống các nút bên cạnh, và vài chỗ lệch bố cục (nút Bản đồ ở Tất cả server, chú thích của Disk) đã hết.
 - Trình duyệt: trang chuyển hướng bằng đường dẫn tương đối (ví dụ `/` sang `/ui/`, hay thêm dấu `/` cuối) không còn báo "this address only opens inside Davish" (403).
 
 ## [1.14.11] - 2026-11-21

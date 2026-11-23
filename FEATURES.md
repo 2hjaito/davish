@@ -8,7 +8,11 @@ Every app in Davish, what it does and what it runs on the server. The interface 
 
 xterm.js with tabs, copy/paste, GPU rendering, and an optional powerline prompt injected into bash at login, with nothing written on the server.
 
+Settings → Terminal changes how it looks and what it keeps: a **color scheme** (Davish, Phosphor for green on black like an old CRT, Solarized or Dracula; any scheme but Davish draws on a solid background), a **font** installed on your computer (left empty, it uses the app's monospace font), the **cursor** (bar, block or underline, blinking or not), a **solid background** in place of the frosted glass (always on with GPU rendering, Performance → Solid fills or a color scheme) and how many lines of **scrollback** each tab keeps (1,000, 5,000 or 20,000). Every change reaches open tabs at once.
+
 <img src="assets/screenshots/en/desktop.png" alt="Terminal, Git, Monitor and Files" width="100%">
+
+<img src="assets/screenshots/en/settings-terminal.jpg" alt="Settings → Terminal with the Phosphor color scheme" width="100%">
 
 ## Saved commands
 
@@ -26,6 +30,8 @@ Every command Davish ran on a server, with its exit code and how long it took; a
 
 Finder-style browser over SFTP: upload, download, drag and drop from your OS, rename, delete, compress, and copy between servers through your machine. Hold a file and drag a little: a ring of actions opens around the pointer (open in Editor or Terminal, rename, delete, compress, copy the path, add to desktop); drop on a slice to pick it, in the middle or with Esc to cancel. Right-click empty space to create a file or folder in the folder on screen; Davish never overwrites an existing file.
 
+Settings → Files can hide names that start with a dot (they show by default); it only tidies the list, the files stay on the server.
+
 The search box filters the folder on screen. Pick **Subfolders** or **Contents** and press Enter to search the server instead: `find` by name across the whole tree, or `grep` through the files for a line (binary files, `.git` and `node_modules` are skipped). Up to 500 results arrive in a few seconds with the exact command that ran; a content result opens in the Editor at its line, and the folder button shows it in its folder. Places the account cannot read are counted, not retried as root, and **Stop** ends a long search.
 
 ![Searching file contents on the server](assets/screenshots/en/files-search.jpg)
@@ -41,6 +47,8 @@ The first time a script runs, Davish shows the server name and the exact command
 ## Editor
 
 CodeMirror 6 with highlighting for nginx, YAML, JSON, shell, env and config files. Atomic saves that keep mode and owner, backups under `/etc`, and a warning if the file changed on the server. A file you cannot write opens read-only, with **Edit with sudo…**: saving then shows the exact command and writes the file as root, or use `sudoedit` in a terminal.
+
+Settings → Editor sets the font size, wrapping of long lines, line numbers, marks for spaces and tabs (to spot a tab in a YAML file) and what the Tab key inserts (2 spaces, 4 spaces or a tab), next to the backup choice.
 
 ## Logs
 
