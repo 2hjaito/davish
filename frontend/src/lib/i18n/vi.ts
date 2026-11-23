@@ -1045,7 +1045,7 @@ const vi = {
       settings: {
         does: 'Ngôn ngữ, chế độ sáng tối, giao diện, phông, ngưỡng cảnh báo, khóa app, prompt Terminal.',
         actions: [
-          'Tài khoản (đầu sidebar): họ tên, ảnh đại diện, mật khẩu khóa app và Touch ID; tên và ảnh hiện ở màn hình khóa, chỉ lưu trên máy này',
+          `Tài khoản (đầu sidebar): họ tên, ảnh đại diện, mật khẩu khóa app${isMac ? ' và Touch ID' : ''}; tên và ảnh hiện ở màn hình khóa, chỉ lưu trên máy này`,
           'Bảo mật: chọn thời gian giữ mật khẩu sudo khi không dùng (mặc định 15 phút, theo từng server)',
           'Về Davish (cuối sidebar): phiên bản, giấy phép, tự kiểm tra cập nhật',
         ],
@@ -1245,7 +1245,7 @@ const vi = {
     steps: [
       {
         title: 'Chọn server',
-        body: 'Mỗi server là một workspace riêng. Đổi server ở đây hoặc bằng ⌘1…⌘9.',
+        body: `Mỗi server là một workspace riêng. Đổi server ở đây hoặc bằng ${isMac ? '⌘1…⌘9' : 'Ctrl+1…Ctrl+9'}.`,
       },
       { title: 'Chỉ số', body: 'CPU, RAM, ổ đĩa và mạng của server đang chọn, cập nhật mỗi giây.' },
       {
@@ -1792,7 +1792,7 @@ const vi = {
     paste: 'Dán',
     selectAll: 'Chọn tất cả',
     mockBanner:
-      '\x1b[33mPhiên mô phỏng:\x1b[0m chưa kết nối SSH thật (có từ M2/M3). Gõ \x1b[1mhelp\x1b[0m để xem lệnh.',
+      '\x1b[33mPhiên mô phỏng:\x1b[0m không có kết nối SSH thật. Gõ \x1b[1mhelp\x1b[0m để xem lệnh.',
   },
   files: {
     places: 'Vị trí',
@@ -2015,7 +2015,9 @@ const vi = {
       'Tên và ảnh chỉ lưu trên máy này, hiện ở Cài đặt và màn hình khóa. Không gửi đi đâu.',
     about: 'Về Davish',
     license: 'Mã nguồn mở, giấy phép GPL-3.0.',
-    lockMoved: 'Mật khẩu khóa app và Touch ID nằm ở Tài khoản.',
+    lockMoved: isMac
+      ? 'Mật khẩu khóa app và Touch ID nằm ở Tài khoản.'
+      : 'Mật khẩu khóa app nằm ở Tài khoản.',
     openAccount: 'Mở Tài khoản',
     search: 'Tìm kiếm',
     noResults: 'Không có kết quả',

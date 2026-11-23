@@ -355,6 +355,7 @@
       <Icon name="download" size={15} strokeWidth={2.2} />
     </button>
     <ActionMenu
+      tool
       label={t.git.clone.more}
       actions={[
         { label: t.git.clone.title.init, disabled: !connected, run: () => (cloneMode = 'init') },

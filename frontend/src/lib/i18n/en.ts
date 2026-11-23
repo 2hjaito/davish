@@ -1063,7 +1063,7 @@ const en = {
       settings: {
         does: 'Language, light or dark theme, appearance, fonts, alert thresholds, app lock, Terminal prompt.',
         actions: [
-          'Account (top of the sidebar): name, picture, app lock password and Touch ID; the name and picture show on the lock screen and stay on this computer',
+          `Account (top of the sidebar): name, picture, app lock password${isMac ? ' and Touch ID' : ''}; the name and picture show on the lock screen and stay on this computer`,
           'Security: choose how long an unused sudo password is kept (15 minutes by default, per server)',
           'About Davish (bottom of the sidebar): version, license, update checks',
         ],
@@ -1259,7 +1259,7 @@ const en = {
     steps: [
       {
         title: 'Pick a server',
-        body: 'Each server is its own workspace. Switch servers here or with ⌘1…⌘9.',
+        body: `Each server is its own workspace. Switch servers here or with ${isMac ? '⌘1…⌘9' : 'Ctrl+1…Ctrl+9'}.`,
       },
       {
         title: 'Metrics',
@@ -2041,7 +2041,9 @@ const en = {
       'Your name and picture stay on this computer and show in Settings and on the lock screen. Nothing is sent anywhere.',
     about: 'About Davish',
     license: 'Open source under the GPL-3.0 license.',
-    lockMoved: 'The app lock password and Touch ID are under Account.',
+    lockMoved: isMac
+      ? 'The app lock password and Touch ID are under Account.'
+      : 'The app lock password is under Account.',
     openAccount: 'Open Account',
     search: 'Search',
     noResults: 'No results',

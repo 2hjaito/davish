@@ -313,7 +313,7 @@
 >
   {#each tabs as tab (tab.id)}
     <XTerm
-      bind:this={views[tab.id]}
+      bind:this={() => views[tab.id], (v) => (views[tab.id] = v)}
       active={tab.id === activeId}
       onready={(term) => connect(tab, term)}
     />

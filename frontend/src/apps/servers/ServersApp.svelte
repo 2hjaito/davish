@@ -269,7 +269,8 @@
             <footer>
               {#if srv.state === 'connected'}
                 <button class="btn" onclick={() => (mapOf = srv.id)}>
-                  <Icon name="globe" size={13} />{s.map.open}
+                  <Icon name="globe" size={13} />
+                  {s.map.open}
                 </button>
               {/if}
               {#if srv.state === 'disconnected'}
