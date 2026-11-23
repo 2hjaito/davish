@@ -62,6 +62,7 @@ export function measure(ms: number, step?: (elapsed: number) => void): Promise<n
 export function resultLine(
   scenario: string,
   preset: string,
+  widgets: number,
   s: FrameStats,
   longTasks: number | null,
 ): string {
@@ -69,6 +70,7 @@ export function resultLine(
   return [
     `scenario=${scenario}`,
     `preset=${preset}`,
+    `widgets=${widgets}`,
     `frames=${s.frames}`,
     `mean_ms=${n(s.meanMs)}`,
     `p95_ms=${n(s.p95Ms)}`,

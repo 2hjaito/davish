@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -14,6 +15,8 @@ type BenchConfig struct {
 	Render bool `json:"render"`
 	// Preset is the performance preset to measure: beautiful, balanced or light.
 	Preset string `json:"preset"`
+	// Widgets is how many widgets to put on the desktop before measuring.
+	Widgets int `json:"widgets"`
 }
 
 // BenchConfig reads the bench variables the script set for this process.
@@ -21,7 +24,24 @@ func (a *App) BenchConfig() BenchConfig {
 	if os.Getenv("DAVISH_BENCH") != "render" {
 		return BenchConfig{}
 	}
-	return BenchConfig{Render: true, Preset: os.Getenv("DAVISH_BENCH_PRESET")}
+	return BenchConfig{
+		Render:  true,
+		Preset:  os.Getenv("DAVISH_BENCH_PRESET"),
+		Widgets: benchWidgets(os.Getenv("DAVISH_BENCH_WIDGETS")),
+	}
+}
+
+// maxBenchWidgets is as many as one desktop holds.
+const maxBenchWidgets = 12
+
+// benchWidgets reads the number of widgets the script asked for: a whole
+// number from 0 to maxBenchWidgets, and 0 for anything else.
+func benchWidgets(v string) int {
+	n, err := strconv.Atoi(v)
+	if err != nil || n < 0 || n > maxBenchWidgets {
+		return 0
+	}
+	return n
 }
 
 // BenchReport writes one result line of the render bench to stderr, where the

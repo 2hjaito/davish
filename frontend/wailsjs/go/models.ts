@@ -139,6 +139,7 @@ export namespace app {
 	export class BenchConfig {
 	    render: boolean;
 	    preset: string;
+	    widgets: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new BenchConfig(source);
@@ -148,6 +149,7 @@ export namespace app {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.render = source["render"];
 	        this.preset = source["preset"];
+	        this.widgets = source["widgets"];
 	    }
 	}
 	export class FleetRun {

@@ -15,6 +15,10 @@
 #                                        timing idle, a long list scrolling and a
 #                                        window dragged on the demo's sample data;
 #                                        prints the median of [runs] (default 3)
+#   scripts/bench.sh --widgets [runs] [binary]
+#                                        the same, for what widgets cost: Beautiful
+#                                        and Balanced with 0, 1 and 3 widgets on the
+#                                        desktop, and Light with 0 and 3 (hidden)
 #
 # Totals count the app and every child it spawned (WebKitWebProcess on Linux).
 # On macOS the WebKit WebContent, Networking and GPU services are not children,
@@ -86,54 +90,73 @@ if [ "${1:-}" = "--attach" ]; then
   exit 0
 fi
 
-if [ "${1:-}" = "--render" ]; then
-  runs=${2:-3}
-  bin=${3:-}
-  if [ -z "$bin" ]; then
-    case "$(uname)" in
-      Darwin) bin=build/bin/Davish.app/Contents/MacOS/Davish ;;
-      *) bin=build/bin/Davish ;;
-    esac
-  fi
+# render_bench <runs> <binary> <preset:widgets>...: one fresh process per
+# combination and run, each on the demo's sample data, then the median of the
+# runs. The CPU of the app and its WebKit processes is read around each
+# scenario, from the marks the app prints, so what a widget costs is not lost
+# in a scroll or a drag.
+render_bench() {
+  runs=$1
+  bin=$2
+  shift 2
   [ -x "$bin" ] || { echo "build first: wails build" >&2; exit 1; }
   results=$(mktemp)
   envline=$(mktemp)
   pid=""
   trap 'kill "$pid" 2>/dev/null || true; rm -f "$results" "$envline"' EXIT
+  # read_marks: reads the marks of $log not yet seen and takes the CPU of the
+  # process tree at each: at a start for the baseline, at an end for the share.
+  read_marks() {
+    n=$(grep -c 'davish-bench mark ' "$log" || true)
+    while [ "$seen" -lt "$n" ]; do
+      seen=$((seen + 1))
+      mark=$(grep 'davish-bench mark ' "$log" | sed -n "${seen}p")
+      cpu=$(snapshot "$pid" | cut -d' ' -f2)
+      scen=$(echo "$mark" | sed -n 's/.*scenario=\([a-z]*\).*/\1/p')
+      case "$mark" in
+        *phase=start*) cpu0=$cpu ;;
+        *phase=end*)
+          ms=$(echo "$mark" | sed -n 's/.*ms=\([0-9]*\).*/\1/p')
+          echo "scenario=cpu_$scen preset=$preset widgets=$widgets cpu_pct=$(awk -v a="$cpu" -v b="$cpu0" -v ms="$ms" 'BEGIN { printf "%.1f", (a - b) / (ms / 1000) * 100 }')" >>"$results"
+          ;;
+      esac
+    done
+  }
   for run in $(seq 1 "$runs"); do
-    for preset in beautiful balanced light; do
+    for combo in "$@"; do
+      preset=${combo%%:*}
+      widgets=${combo##*:}
       home=$(mktemp -d)
       log=$(mktemp)
-      HOME=$home DAVISH_BENCH=render DAVISH_BENCH_PRESET=$preset "$bin" 2>"$log" &
+      HOME=$home DAVISH_BENCH=render DAVISH_BENCH_PRESET=$preset DAVISH_BENCH_WIDGETS=$widgets "$bin" 2>"$log" &
       pid=$!
-      i=0
-      until grep -q 'davish-bench env' "$log"; do
-        i=$((i + 1))
-        [ "$i" -lt 300 ] || break
-        sleep 0.1
-      done
-      before=$(snapshot "$pid" | cut -d' ' -f2)
+      seen=0
+      cpu0=0
       i=0
       until grep -q 'davish-bench \(done\|error=\)' "$log"; do
         i=$((i + 1))
-        [ "$i" -lt 900 ] || { echo "run $run, $preset: no result after 90s" >&2; break; }
+        [ "$i" -lt 1200 ] || { echo "run $run, $preset $widgets: no result after 120s" >&2; break; }
+        read_marks
         sleep 0.1
       done
-      after=$(snapshot "$pid" | cut -d' ' -f2)
-      echo "scenario=cpu preset=$preset cpu_s=$(awk -v a="$after" -v b="$before" 'BEGIN { printf "%.2f", a - b }')" >>"$results"
+      # The last scenario ends just before "done": its mark is read here, while
+      # the app still waits a second before it quits.
+      read_marks
       kill "$pid" 2>/dev/null || true
       wait "$pid" 2>/dev/null || true
       grep 'davish-bench scenario=' "$log" | sed 's/^davish-bench //' >>"$results" || true
-      grep -m1 'davish-bench env' "$log" | sed 's/^davish-bench env //' >"$envline" || true
-      grep 'davish-bench error=' "$log" | sed "s/^/run $run, $preset: /" >&2 || true
+      grep 'davish-bench env' "$log" | sed 's/^davish-bench env //' | tr '\n' ' ' >"$envline" || true
+      grep 'davish-bench error=' "$log" | sed "s/^/run $run, $preset $widgets: /" >&2 || true
+      placed=$(sed -n 's/.*davish-bench env placed=\([0-9]*\).*/\1/p' "$log" | head -n 1)
+      [ "$widgets" = 0 ] || [ "${placed:-0}" = "$widgets" ] || echo "run $run, $preset: only ${placed:-0} of $widgets widgets found room, so its numbers are not for $widgets" >&2
       rm -rf "$home" "$log"
-      echo "run $run/$runs, $preset done" >&2
+      echo "run $run/$runs, $preset with $widgets widget(s) done" >&2
     done
   done
   [ -s "$results" ] || { echo "no results" >&2; exit 1; }
   echo "$(cat "$envline")"
   echo "median of $runs run(s). over_ms: time past 16.7 ms of the frames over 25 ms, summed over 3 s."
-  echo "cpu_s: CPU seconds of the app and its WebKit processes over the whole run (about 11 s)."
+  echo "cpu_pct: CPU of the app and its WebKit processes over the scenario, % of one core; cpu_vs0: the same less the run with 0 widgets."
   awk '
     function med(key, n,  a, i, j, t) {
       for (i = 1; i <= n; i++) a[i] = v[key, i]
@@ -142,28 +165,53 @@ if [ "${1:-}" = "--render" ]; then
     }
     {
       for (f = 1; f <= NF; f++) { split($f, kv, "="); x[kv[1]] = kv[2] }
-      k = x["scenario"] SUBSEP x["preset"]
-      if (!(k in seen)) { seen[k] = 1; order[++m] = k; cnt[k] = 0 }
+      sc = x["scenario"]
+      isCpu = (sc ~ /^cpu_/)
+      if (isCpu) sc = substr(sc, 5)
+      k = sc SUBSEP x["preset"] SUBSEP x["widgets"]
+      if (!(k in seen)) { seen[k] = 1; order[++m] = k; cnt[k] = 0; ccnt[k] = 0 }
+      if (isCpu) { n = ++ccnt[k]; v[k SUBSEP "cpu", n] = x["cpu_pct"]; next }
       n = ++cnt[k]
       split("mean_ms p95_ms max_ms over_ms", names, " ")
       for (q = 1; q <= 4; q++) v[k SUBSEP names[q], n] = x[names[q]]
-      v[k SUBSEP "cpu_s", n] = x["cpu_s"]
       lt[k] = x["long_tasks"]
     }
     END {
-      printf "%-8s %-10s %5s %8s %7s %7s %8s %s\n", "scenario", "preset", "runs", "mean_ms", "p95_ms", "max_ms", "over_ms", "long_tasks"
-      for (o = 1; o <= m; o++) {
-        k = order[o]; split(k, kk, SUBSEP)
-        if (kk[1] == "cpu") continue
-        printf "%-8s %-10s %5d %8.1f %7.1f %7.1f %8.1f %s\n", kk[1], kk[2], cnt[k], med(k SUBSEP "mean_ms", cnt[k]), med(k SUBSEP "p95_ms", cnt[k]), med(k SUBSEP "max_ms", cnt[k]), med(k SUBSEP "over_ms", cnt[k]), lt[k]
-      }
-      printf "\n%-10s %5s %7s\n", "preset", "runs", "cpu_s"
-      for (o = 1; o <= m; o++) {
-        k = order[o]; split(k, kk, SUBSEP)
-        if (kk[1] != "cpu") continue
-        printf "%-10s %5d %7.2f\n", kk[2], cnt[k], med(k SUBSEP "cpu_s", cnt[k])
+      for (o = 1; o <= m; o++) { k = order[o]; if (ccnt[k] > 0) cpu[k] = med(k SUBSEP "cpu", ccnt[k]) }
+      printf "%-8s %-10s %7s %5s %8s %7s %7s %8s %8s %8s %s\n", "scenario", "preset", "widgets", "runs", "mean_ms", "p95_ms", "max_ms", "over_ms", "cpu_pct", "cpu_vs0", "long_tasks"
+      nsc = split("idle scroll drag", scs, " ")
+      for (si = 1; si <= nsc; si++) {
+        for (o = 1; o <= m; o++) {
+          k = order[o]; split(k, kk, SUBSEP)
+          if (kk[1] != scs[si] || cnt[k] == 0) continue
+          base = kk[1] SUBSEP kk[2] SUBSEP 0
+          vs = (kk[3] > 0 && (k in cpu) && (base in cpu)) ? sprintf("%+.1f", cpu[k] - cpu[base]) : "-"
+          c = (k in cpu) ? sprintf("%.1f", cpu[k]) : "-"
+          printf "%-8s %-10s %7s %5d %8.1f %7.1f %7.1f %8.1f %8s %8s %s\n", kk[1], kk[2], kk[3], cnt[k], med(k SUBSEP "mean_ms", cnt[k]), med(k SUBSEP "p95_ms", cnt[k]), med(k SUBSEP "max_ms", cnt[k]), med(k SUBSEP "over_ms", cnt[k]), c, vs, lt[k]
+        }
+        if (si < nsc) print ""
       }
     }' "$results"
+}
+
+# The default binary of this system.
+default_bin() {
+  case "$(uname)" in
+    Darwin) echo build/bin/Davish.app/Contents/MacOS/Davish ;;
+    *) echo build/bin/Davish ;;
+  esac
+}
+
+if [ "${1:-}" = "--render" ]; then
+  render_bench "${2:-3}" "${3:-$(default_bin)}" beautiful:0 balanced:0 light:0
+  exit 0
+fi
+
+if [ "${1:-}" = "--widgets" ]; then
+  echo "Docker widgets read sample data here, so no docker command runs. Light hides widgets:" >&2
+  echo "light 3 against light 0 shows what the knob removes." >&2
+  render_bench "${2:-3}" "${3:-$(default_bin)}" \
+    beautiful:0 beautiful:1 beautiful:3 balanced:0 balanced:1 balanced:3 light:0 light:3
   exit 0
 fi
 

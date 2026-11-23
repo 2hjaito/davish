@@ -7,15 +7,18 @@ import { Quit } from '../../../wailsjs/runtime/runtime'
 export interface BenchRequest {
   render: boolean
   preset: string
+  /** How many widgets to put on the desktop before measuring. */
+  widgets: number
 }
 
 /** What the script that started this process asked for; nothing in a normal run. */
 export async function benchConfig(): Promise<BenchRequest> {
-  if (typeof window === 'undefined' || !('go' in window)) return { render: false, preset: '' }
+  if (typeof window === 'undefined' || !('go' in window))
+    return { render: false, preset: '', widgets: 0 }
   try {
     return await BenchConfig()
   } catch {
-    return { render: false, preset: '' }
+    return { render: false, preset: '', widgets: 0 }
   }
 }
 
