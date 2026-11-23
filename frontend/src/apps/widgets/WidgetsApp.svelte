@@ -8,7 +8,8 @@
   import { addWidget } from '../../lib/widgets/actions'
   import { WIDGET_KINDS } from '../../lib/widgets/kinds'
   import { countKinds, type WidgetSize } from '../../lib/widgets/layout'
-  import { widgetDefs } from '../../lib/widgets/registry'
+  import { servers } from '../../lib/stores/servers.svelte'
+  import { widgetAvailable, widgetDefs } from '../../lib/widgets/registry'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import { wm } from '../../lib/wm/windowManager.svelte'
   import type { AppProps } from '../types'
@@ -48,7 +49,7 @@
       <button class="btn" disabled={total === 0} onclick={editOnDesktop}>{w.edit}</button>
     </div>
     <div class="gallery">
-      {#each WIDGET_KINDS as kind (kind)}
+      {#each WIDGET_KINDS.filter( (k) => widgetAvailable(k, servers.platformOf(win.serverID)) ) as kind (kind)}
         {@const def = widgetDefs[kind]}
         <section class="card" aria-label={def.label()}>
           <div class="preview">

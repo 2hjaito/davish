@@ -45,9 +45,24 @@ const vi = {
       `Có thể thêm nhiều server; mỗi server là một workspace (${mod}1…${mod}9). ${mod}K mở Spotlight để tìm app, dịch vụ, container, thư mục.`,
   },
   widgets: {
+    docker: {
+      running: 'đang chạy',
+      allHealthy: 'Tất cả ổn',
+      unhealthy: (n: number) => `${n} lỗi health`,
+      restarting: (n: number) => `${n} khởi động lặp`,
+      starting: (n: number) => `${n} đang khởi động`,
+      more: (n: number) => `+${n} nữa`,
+      none: 'Không có container',
+      notConnected: 'Chưa kết nối',
+      missing: 'Server này chưa cài Docker',
+      needsRoot: 'Cần sudo: mở Docker',
+      failed: 'Không đọc được Docker',
+    },
     intro:
       'Các khung xem trực tiếp nhỏ nằm trên desktop của server này, sau cửa sổ. Mỗi server có widget riêng.',
     about: {
+      docker:
+        'Bao nhiêu container đang chạy, và cái nào lỗi health hoặc khởi động lặp. Đọc mỗi phút một lần khi Davish đang ở phía trước.',
       monitor: 'CPU, RAM và mạng kèm biểu đồ 15 phút, từ số đọc mà thanh menu đã lấy.',
     },
     onDesktop: (n: number) => (n === 0 ? 'Chưa có trên desktop' : `${n} trên desktop`),

@@ -43,9 +43,24 @@ const es = {
       `Añade tantos servidores como quieras; cada uno es un espacio de trabajo (${mod}1…${mod}9). ${mod}K abre Spotlight para buscar apps, servicios, contenedores y carpetas.`,
   },
   widgets: {
+    docker: {
+      running: 'en marcha',
+      allHealthy: 'Todo bien',
+      unhealthy: (n: number) => `${n} con fallo de salud`,
+      restarting: (n: number) => `${n} reiniciando`,
+      starting: (n: number) => `${n} arrancando`,
+      more: (n: number) => `+${n} más`,
+      none: 'Sin contenedores',
+      notConnected: 'Sin conexión',
+      missing: 'Docker no está instalado en este servidor',
+      needsRoot: 'Necesita sudo: abre Docker',
+      failed: 'No se pudo leer Docker',
+    },
     intro:
       'Pequeñas vistas en vivo que viven en el escritorio de este servidor, detrás de tus ventanas. Cada servidor tiene las suyas.',
     about: {
+      docker:
+        'Cuántos contenedores funcionan y cuáles fallan su comprobación de salud o se reinician sin parar. Se lee una vez por minuto mientras Davish está delante.',
       monitor:
         'CPU, RAM y red con un gráfico de 15 minutos, de la lectura que ya toma la barra de menús.',
     },

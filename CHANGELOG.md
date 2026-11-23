@@ -6,6 +6,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ### Thêm
 - App **Widget** (Launchpad, Spotlight, Dock nếu bạn ghim): thư viện các widget có xem trước trực tiếp, số lượng mỗi loại đang có trên desktop của server đang dùng, và nút thêm cỡ nhỏ hoặc vừa. Icon là ba thẻ trắng trên nền xanh lá.
+- Widget **Docker**: bao nhiêu container đang chạy, và cái nào lỗi health hoặc khởi động lặp (cỡ nhỏ, hoặc cỡ vừa kèm tên). Nó đọc `docker ps` mỗi phút một lần khi Davish đang ở phía trước và đọc lại khi bạn quay lại, cho từng server có widget này, và không bao giờ hỏi mật khẩu sudo; server không có Docker hoặc cần sudo thì bị bỏ qua cho đến khi bạn quay lại. Đây là widget duy nhất chạy lệnh. Không có trên server Windows.
 - Widget trên desktop: **Xem → Thêm widget: Monitor** đặt CPU, hoặc CPU, RAM và mạng kèm biểu đồ 15 phút, lên desktop của server đang dùng; **Xem → Chỉnh sửa widget** để di chuyển, đổi cỡ nhỏ hoặc vừa, và xóa. Mỗi server có widget riêng. Tắt ở mức hiệu năng Nhẹ, hoặc tắt riêng trong Cài đặt → Hiệu năng → Nâng cao.
 - Cài đặt theo từng app. Terminal: bảng màu (Davish, Phosphor, Solarized, Dracula), font riêng, kiểu con trỏ và nhấp nháy, nền đặc và số dòng cuộn lại (1.000, 5.000 hoặc 20.000). Editor: cỡ chữ, xuống dòng, số dòng, dấu cho khoảng trắng và tab, và phím Tab chèn gì. Files: hiện hoặc ẩn các tên bắt đầu bằng dấu chấm.
 

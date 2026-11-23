@@ -3,7 +3,9 @@
 // them weighs on the first screen.
 import type { Component } from 'svelte'
 
+import { getApp, isAvailable } from '../../apps/registry'
 import type { AppId } from '../../apps/types'
+import type { Platform } from '../api/servers'
 import { t } from '../i18n'
 import type { WidgetKind } from './kinds'
 import type { WidgetSize } from './layout'
@@ -28,4 +30,16 @@ export const widgetDefs: Record<WidgetKind, WidgetDef> = {
     opens: 'monitor',
     load: () => import('./MonitorWidget.svelte'),
   },
+  docker: {
+    label: () => t.apps.docker,
+    sizes: ['S', 'M'],
+    opens: 'docker',
+    load: () => import('./DockerWidget.svelte'),
+  },
+}
+
+/** Does this kind of widget work on a server running os: the app it opens does. */
+export function widgetAvailable(kind: WidgetKind, os: Platform | undefined): boolean {
+  const opens = widgetDefs[kind].opens
+  return opens ? isAvailable(getApp(opens), os) : true
 }

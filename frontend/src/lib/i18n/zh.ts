@@ -42,8 +42,22 @@ const zh = {
       `服务器数量不限，每台都是一个工作区（${mod}1…${mod}9）。按 ${mod}K 打开 Spotlight，查找应用、服务、容器和文件夹。`,
   },
   widgets: {
+    docker: {
+      running: '运行中',
+      allHealthy: '全部正常',
+      unhealthy: (n: number) => `${n} 个健康检查失败`,
+      restarting: (n: number) => `${n} 个反复重启`,
+      starting: (n: number) => `${n} 个正在启动`,
+      more: (n: number) => `还有 ${n} 个`,
+      none: '没有容器',
+      notConnected: '未连接',
+      missing: '此服务器未安装 Docker',
+      needsRoot: '需要 sudo：请打开 Docker',
+      failed: '无法读取 Docker',
+    },
     intro: '显示在此服务器桌面上的小型实时视图，位于窗口后面。每台服务器各有自己的小组件。',
     about: {
+      docker: 'Davish 在前台时每分钟读取一次：有多少容器在运行，哪些健康检查失败或反复重启。',
       monitor: 'CPU、内存和网络，附 15 分钟图表，数据来自菜单栏已在读取的读数。',
     },
     onDesktop: (n: number) => (n === 0 ? '不在桌面上' : `桌面上有 ${n} 个`),
