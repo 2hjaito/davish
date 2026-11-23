@@ -9,6 +9,12 @@
 #                                        it (default 30s) while you set up a
 #                                        scenario by hand, on the test sshd only.
 #                                        Pass the pid when several are running.
+#   scripts/bench.sh --render [runs] [binary]
+#                                        the render bench: a fresh process per
+#                                        preset (Beautiful, Balanced, Light), each
+#                                        timing idle, a long list scrolling and a
+#                                        window dragged on the demo's sample data;
+#                                        prints the median of [runs] (default 3)
 #
 # Totals count the app and every child it spawned (WebKitWebProcess on Linux).
 # On macOS the WebKit WebContent, Networking and GPU services are not children,
@@ -77,6 +83,87 @@ if [ "${1:-}" = "--attach" ]; then
   ps -o command= -p "$pid" | sed 's/^/attached to: /'
   echo "leave the scenario untouched while sampling"
   report "scenario" "$pid" "$secs"
+  exit 0
+fi
+
+if [ "${1:-}" = "--render" ]; then
+  runs=${2:-3}
+  bin=${3:-}
+  if [ -z "$bin" ]; then
+    case "$(uname)" in
+      Darwin) bin=build/bin/Davish.app/Contents/MacOS/Davish ;;
+      *) bin=build/bin/Davish ;;
+    esac
+  fi
+  [ -x "$bin" ] || { echo "build first: wails build" >&2; exit 1; }
+  results=$(mktemp)
+  envline=$(mktemp)
+  pid=""
+  trap 'kill "$pid" 2>/dev/null || true; rm -f "$results" "$envline"' EXIT
+  for run in $(seq 1 "$runs"); do
+    for preset in beautiful balanced light; do
+      home=$(mktemp -d)
+      log=$(mktemp)
+      HOME=$home DAVISH_BENCH=render DAVISH_BENCH_PRESET=$preset "$bin" 2>"$log" &
+      pid=$!
+      i=0
+      until grep -q 'davish-bench env' "$log"; do
+        i=$((i + 1))
+        [ "$i" -lt 300 ] || break
+        sleep 0.1
+      done
+      before=$(snapshot "$pid" | cut -d' ' -f2)
+      i=0
+      until grep -q 'davish-bench \(done\|error=\)' "$log"; do
+        i=$((i + 1))
+        [ "$i" -lt 900 ] || { echo "run $run, $preset: no result after 90s" >&2; break; }
+        sleep 0.1
+      done
+      after=$(snapshot "$pid" | cut -d' ' -f2)
+      echo "scenario=cpu preset=$preset cpu_s=$(awk -v a="$after" -v b="$before" 'BEGIN { printf "%.2f", a - b }')" >>"$results"
+      kill "$pid" 2>/dev/null || true
+      wait "$pid" 2>/dev/null || true
+      grep 'davish-bench scenario=' "$log" | sed 's/^davish-bench //' >>"$results" || true
+      grep -m1 'davish-bench env' "$log" | sed 's/^davish-bench env //' >"$envline" || true
+      grep 'davish-bench error=' "$log" | sed "s/^/run $run, $preset: /" >&2 || true
+      rm -rf "$home" "$log"
+      echo "run $run/$runs, $preset done" >&2
+    done
+  done
+  [ -s "$results" ] || { echo "no results" >&2; exit 1; }
+  echo "$(cat "$envline")"
+  echo "median of $runs run(s). over_ms: time past 16.7 ms of the frames over 25 ms, summed over 3 s."
+  echo "cpu_s: CPU seconds of the app and its WebKit processes over the whole run (about 11 s)."
+  awk '
+    function med(key, n,  a, i, j, t) {
+      for (i = 1; i <= n; i++) a[i] = v[key, i]
+      for (i = 2; i <= n; i++) { t = a[i]; for (j = i - 1; j >= 1 && a[j] > t; j--) a[j + 1] = a[j]; a[j + 1] = t }
+      return (n % 2) ? a[(n + 1) / 2] : (a[n / 2] + a[n / 2 + 1]) / 2
+    }
+    {
+      for (f = 1; f <= NF; f++) { split($f, kv, "="); x[kv[1]] = kv[2] }
+      k = x["scenario"] SUBSEP x["preset"]
+      if (!(k in seen)) { seen[k] = 1; order[++m] = k; cnt[k] = 0 }
+      n = ++cnt[k]
+      split("mean_ms p95_ms max_ms over_ms", names, " ")
+      for (q = 1; q <= 4; q++) v[k SUBSEP names[q], n] = x[names[q]]
+      v[k SUBSEP "cpu_s", n] = x["cpu_s"]
+      lt[k] = x["long_tasks"]
+    }
+    END {
+      printf "%-8s %-10s %5s %8s %7s %7s %8s %s\n", "scenario", "preset", "runs", "mean_ms", "p95_ms", "max_ms", "over_ms", "long_tasks"
+      for (o = 1; o <= m; o++) {
+        k = order[o]; split(k, kk, SUBSEP)
+        if (kk[1] == "cpu") continue
+        printf "%-8s %-10s %5d %8.1f %7.1f %7.1f %8.1f %s\n", kk[1], kk[2], cnt[k], med(k SUBSEP "mean_ms", cnt[k]), med(k SUBSEP "p95_ms", cnt[k]), med(k SUBSEP "max_ms", cnt[k]), med(k SUBSEP "over_ms", cnt[k]), lt[k]
+      }
+      printf "\n%-10s %5s %7s\n", "preset", "runs", "cpu_s"
+      for (o = 1; o <= m; o++) {
+        k = order[o]; split(k, kk, SUBSEP)
+        if (kk[1] != "cpu") continue
+        printf "%-10s %5d %7.2f\n", kk[2], cnt[k], med(k SUBSEP "cpu_s", cnt[k])
+      }
+    }' "$results"
   exit 0
 fi
 

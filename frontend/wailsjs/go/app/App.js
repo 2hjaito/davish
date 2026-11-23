@@ -30,6 +30,14 @@ export function AuditScript(arg1, arg2) {
   return window['go']['app']['App']['AuditScript'](arg1, arg2);
 }
 
+export function BenchConfig() {
+  return window['go']['app']['App']['BenchConfig']();
+}
+
+export function BenchReport(arg1) {
+  return window['go']['app']['App']['BenchReport'](arg1);
+}
+
 export function BrowserOpen(arg1, arg2) {
   return window['go']['app']['App']['BrowserOpen'](arg1, arg2);
 }
