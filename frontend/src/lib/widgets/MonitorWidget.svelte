@@ -7,7 +7,9 @@
   import { cellsFor, dotCells } from './gauge'
   import type { WidgetProps } from './registry'
   import Ring from './Ring.svelte'
+  import { LOOK } from './look'
   import Spark from './Spark.svelte'
+  import WidgetBadge from './WidgetBadge.svelte'
   import WidgetCard, { type Tone } from './WidgetCard.svelte'
 
   let { serverID, size }: WidgetProps = $props()
@@ -64,7 +66,7 @@
   )
 </script>
 
-<WidgetCard {tone}>
+<WidgetCard {tone} accent={LOOK.monitor.accent}>
   {#if !cpu}
     <p class="wait">{t.widgets.waiting}</p>
   {:else if size === 'S'}
@@ -77,7 +79,9 @@
     </div>
     <div class="s">
       <div class="text">
-        <span class="label">{cpu.label}</span>
+        <span class="title"
+          ><WidgetBadge kind="monitor" /><span class="label">{cpu.label}</span></span
+        >
         <span class="hero big">{cpu.hero}</span>
       </div>
       <Ring value={cpu.ring ?? 0} size={60} stroke={7} color={COLOR[cpu.level]}>
@@ -88,7 +92,9 @@
     <div class="m">
       <div class="top">
         <div class="text">
-          <span class="label">{cpu.label}</span>
+          <span class="title"
+            ><WidgetBadge kind="monitor" /><span class="label">{cpu.label}</span></span
+          >
           <span class="hero">{cpu.hero}</span>
           <span class="sub">{cpu.sub}</span>
         </div>
@@ -144,6 +150,13 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
+  }
+
+  .title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
   }
 
   .label {

@@ -160,6 +160,11 @@
   --widget-track: rgba(255, 255, 255, 0.11);
   --widget-stopped: rgba(255, 255, 255, 0.27);
   --widget-blue: #5ab1ff;
+  /* What each kind of widget is: the badge and the tint of its card. The state colors are kept for the state. */
+  --widget-monitor: #5ab1ff;
+  --widget-docker: #38d2e6;
+  --widget-services: #b48cff;
+  --widget-disk: #f272d4;
   --widget-violet: #a98bff;
   --widget-pink: #ff7fb0;
   --widget-tint-ok: rgba(94, 240, 160, 0.13);

@@ -5,8 +5,10 @@
   import { settings } from '../stores/settings.svelte'
   import Bar from './Bar.svelte'
   import { type DiskLevel, summarizeMounts } from './diskUsage'
+  import { LOOK } from './look'
   import type { WidgetProps } from './registry'
   import Ring from './Ring.svelte'
+  import WidgetBadge from './WidgetBadge.svelte'
   import WidgetCard, { type Tone } from './WidgetCard.svelte'
 
   let { serverID, size }: WidgetProps = $props()
@@ -21,7 +23,7 @@
 
   const TONE: Record<DiskLevel, Tone> = { '': 'neutral', warn: 'warn', danger: 'danger' }
   const COLOR: Record<DiskLevel, string> = {
-    '': 'var(--widget-blue)',
+    '': 'var(--widget-disk)',
     warn: 'var(--warn-on-dark)',
     danger: 'var(--danger-on-dark)',
   }
@@ -37,13 +39,16 @@
   const top = $derived(s?.fullest ?? null)
 </script>
 
-<WidgetCard {tone}>
+<WidgetCard {tone} accent={LOOK.disk.accent}>
   {#if !s || !top}
     <p class="wait">{s ? d.none : t.widgets.waiting}</p>
   {:else if size === 'S'}
     <div class="s">
       <div class="text">
-        <span class="label">{t.apps.disk} <span class="path">{top.path}</span></span>
+        <span class="title">
+          <WidgetBadge kind="disk" />
+          <span class="label">{t.apps.disk} <span class="path">{top.path}</span></span>
+        </span>
         <span class="hero">{formatPct(top.pct)}</span>
         <span class="sub" title={d.of(formatBytes(top.used), formatBytes(top.size))}>
           {d.ofTotal(formatBytes(top.size))}
@@ -54,7 +59,9 @@
   {:else}
     <div class="m">
       <div class="head">
-        <span class="label">{t.apps.disk}</span>
+        <span class="title"
+          ><WidgetBadge kind="disk" /><span class="label">{t.apps.disk}</span></span
+        >
         {#if state}<span class="state {tone}">{state}</span>{/if}
       </div>
       <ul>
@@ -93,6 +100,14 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
+  }
+
+  .title {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
   }
 
   .label {

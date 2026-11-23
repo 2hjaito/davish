@@ -7,7 +7,9 @@
   import { servers } from '../stores/servers.svelte'
   import Dots from './Dots.svelte'
   import { hasProblem, problemCount } from './dockerHealth'
+  import { LOOK } from './look'
   import type { WidgetProps } from './registry'
+  import WidgetBadge from './WidgetBadge.svelte'
   import WidgetCard, { type Tone } from './WidgetCard.svelte'
 
   let { serverID, size }: WidgetProps = $props()
@@ -74,10 +76,12 @@
   )
 </script>
 
-<WidgetCard {tone}>
+<WidgetCard {tone} accent={LOOK.docker.accent}>
   <div class="docker">
     <div class="head">
-      <span class="label">{t.apps.docker}</span>
+      <span class="title"
+        ><WidgetBadge kind="docker" /><span class="label">{t.apps.docker}</span></span
+      >
       {#if s && !message}
         <span class="state {tone}">{line}</span>
       {:else if r.problem === 'failed' && s}
@@ -126,6 +130,13 @@
     justify-content: space-between;
     gap: 8px;
     min-width: 0;
+  }
+
+  .title {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 6px;
   }
 
   .label {

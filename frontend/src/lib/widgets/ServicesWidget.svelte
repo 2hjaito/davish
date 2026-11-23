@@ -6,8 +6,10 @@
   import { servers } from '../stores/servers.svelte'
   import { servicesHealth } from '../stores/servicesHealth.svelte'
   import Bar from './Bar.svelte'
+  import { LOOK } from './look'
   import type { WidgetProps } from './registry'
   import { hasProblem, type Group, problemCount } from './servicesHealth'
+  import WidgetBadge from './WidgetBadge.svelte'
   import WidgetCard, { type Tone } from './WidgetCard.svelte'
 
   let { serverID, size }: WidgetProps = $props()
@@ -68,10 +70,12 @@
   const rest = $derived(s ? s.problems.length + s.more - named.length : 0)
 </script>
 
-<WidgetCard {tone}>
+<WidgetCard {tone} accent={LOOK.services.accent}>
   <div class="services">
     <div class="head">
-      <span class="label">{t.apps.services}</span>
+      <span class="title"
+        ><WidgetBadge kind="services" /><span class="label">{t.apps.services}</span></span
+      >
       {#if s && !message}
         <span class="state {tone}">{line}</span>
       {:else if r.problem === 'failed' && s}
@@ -120,6 +124,13 @@
     justify-content: space-between;
     gap: 8px;
     min-width: 0;
+  }
+
+  .title {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 6px;
   }
 
   .label {
