@@ -8,7 +8,11 @@ Mọi app trong Davish, làm được gì và chạy gì trên server. Ảnh ch�
 
 xterm.js nhiều tab, copy/paste, vẽ bằng GPU, và prompt powerline tùy chọn được nạp vào bash lúc đăng nhập, không ghi gì lên server.
 
+Cài đặt → Terminal đổi giao diện và những gì terminal giữ lại: **bảng màu** (Davish, Phosphor xanh lá trên nền đen như màn hình CRT cũ, Solarized hoặc Dracula; mọi bảng màu trừ Davish đều vẽ trên nền đặc), **font** đã cài trên máy (để trống thì dùng font mono chung của app), **con trỏ** (thanh, khối hoặc gạch chân, nhấp nháy hoặc không), **nền đặc** thay cho kính mờ (luôn bật khi dùng GPU, Hiệu năng → Nền đặc hoặc một bảng màu) và số dòng **cuộn lại** mỗi tab giữ (1.000, 5.000 hoặc 20.000). Mọi thay đổi áp dụng ngay cho các tab đang mở.
+
 <img src="assets/screenshots/desktop.png" alt="Terminal, Git, Monitor và Files" width="100%">
+
+<img src="assets/screenshots/settings-terminal.jpg" alt="Cài đặt → Terminal với bảng màu Phosphor" width="100%">
 
 ## Lệnh hay dùng
 
@@ -26,6 +30,8 @@ Mọi lệnh Davish đã chạy trên server, kèm exit code và thời gian ch�
 
 Trình duyệt kiểu Finder qua SFTP: tải lên, tải xuống, kéo thả từ hệ điều hành, đổi tên, xóa, nén, và copy giữa các server qua máy bạn. Chuột phải trên file để thấy mọi thao tác. Giữ chuột trên file rồi kéo nhẹ: một vòng thao tác mở quanh con trỏ (mở trong Editor hoặc Terminal, đổi tên, xóa, nén, copy đường dẫn, thêm vào màn hình chính); thả vào ô nào là chọn ô đó, thả ở giữa hoặc nhấn Esc để hủy. Chuột phải vào khoảng trống để tạo tệp hoặc thư mục ngay trong thư mục đang xem; Davish không bao giờ ghi đè file đã có.
 
+Cài đặt → Files có thể ẩn các tên bắt đầu bằng dấu chấm (mặc định hiện); chỉ làm danh sách gọn hơn, file vẫn còn trên server.
+
 Ô tìm lọc thư mục đang xem. Chọn **Cả cây** hoặc **Nội dung** rồi nhấn Enter để tìm trên server: `find` theo tên trong cả cây thư mục, hoặc `grep` trong nội dung file (bỏ qua file nhị phân, `.git` và `node_modules`). Tối đa 500 kết quả, kèm đúng lệnh đã chạy; kết quả nội dung mở trong Editor đúng dòng, nút thư mục hiện file trong thư mục chứa nó. Chỗ không có quyền đọc chỉ được đếm, không thử lại bằng root; nút **Dừng** ngắt lần tìm lâu.
 
 ![Tìm nội dung file trên server](assets/screenshots/files-search.jpg)
@@ -41,6 +47,8 @@ Lần đầu chạy một script, Davish hiện tên server và đúng lệnh. C
 ## Editor
 
 CodeMirror 6, tô màu cho nginx, YAML, JSON, shell, env và file cấu hình. Lưu atomic giữ nguyên mode và chủ file, sao lưu file trong `/etc`, cảnh báo khi file đã đổi trên server. File bạn không ghi được mở ở chế độ chỉ đọc, có **Sửa bằng sudo…**: khi lưu, Davish hiện đúng lệnh rồi ghi file bằng root, hoặc dùng `sudoedit` trong Terminal.
+
+Cài đặt → Editor chọn cỡ chữ, xuống dòng khi dòng dài, số dòng, dấu cho khoảng trắng và tab (để thấy tab lẫn trong file YAML) và phím Tab chèn gì (2 dấu cách, 4 dấu cách hoặc Tab), cùng lựa chọn sao lưu.
 
 ## Logs
 

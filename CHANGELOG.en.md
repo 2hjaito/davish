@@ -4,7 +4,14 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Added
+- Settings per app. Terminal: color schemes (Davish, Phosphor, Solarized, Dracula), a font of its own, cursor shape and blinking, a solid background and the length of the scrollback (1,000, 5,000 or 20,000 lines). Editor: font size, wrapping, line numbers, marks for spaces and tabs, and what the Tab key inserts. Files: show or hide names that start with a dot.
+
+### Changed
+- Monitor stops asking the server for the process list while its window is not on screen (minimized, on another server, or Davish hidden).
+
 ### Fixed
+- Shortcut labels read `Ctrl+Shift+U` and `Ctrl+Alt+L` outside the Mac, Touch ID is only mentioned on macOS, the ⋮ buttons in the Git and Docker toolbars match the buttons beside them, and a few layout slips (the Map button in All servers, Disk's legend) are gone.
 - Browser: a page that redirects with a relative path (such as `/` to `/ui/`, or adding a trailing `/`) no longer ends on "this address only opens inside Davish" (403).
 
 ## [1.14.11] - 2026-11-21

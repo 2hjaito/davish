@@ -41,11 +41,11 @@ Không cài gì lên server.
 
 **Trên server**
 
-- [Terminal](FEATURES.vi.md#terminal): nhiều tab, vẽ bằng GPU, prompt powerline tùy chọn
+- [Terminal](FEATURES.vi.md#terminal): nhiều tab, vẽ bằng GPU, bảng màu, prompt powerline tùy chọn
 - [Lệnh hay dùng](FEATURES.vi.md#lệnh-hay-dùng): lệnh hay gõ, một cú bấm là gõ sẵn vào Terminal
 - [Nhật ký lệnh](FEATURES.vi.md#nhật-ký-lệnh): mọi lệnh Davish đã chạy, xuất thành script chạy lại các thay đổi qua ssh
 - [Files](FEATURES.vi.md#files): SFTP kiểu Finder, kéo thả, copy giữa server, tìm theo tên và nội dung trên server, giữ chuột trên file để mở vòng thao tác
-- [Editor](FEATURES.vi.md#editor): CodeMirror, lưu atomic, có sao lưu
+- [Editor](FEATURES.vi.md#editor): CodeMirror, lưu atomic, có sao lưu, tùy chỉnh được
 - [Logs](FEATURES.vi.md#logs): journal, file, container, theo dõi trực tiếp và tìm trong toàn bộ lịch sử trên server
 - [Monitor](FEATURES.vi.md#monitor): CPU, RAM, ổ đĩa, mạng, GPU, tiến trình, trên server Linux và Windows
 - [Tất cả server](FEATURES.vi.md#tất-cả-server): tình trạng và cảnh báo của mọi server trong một cửa sổ, bản đồ những gì mỗi server đang phục vụ, và chạy một lệnh trên nhiều server, mỗi server một tab terminal
