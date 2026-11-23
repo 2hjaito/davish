@@ -119,15 +119,14 @@
     background: var(--card-bg);
   }
 
-  /* The size and look of a widget on the desktop, so what is added is what shows. */
+  /* The size of a small widget on the desktop (two cells, less the gap), so what is added is what shows. */
   .preview {
     box-sizing: border-box;
+    width: 184px;
+    max-width: 100%;
     height: 92px;
     margin-bottom: 8px;
-    padding: 10px 12px;
-    border: 1px solid var(--divider);
-    border-radius: var(--card-radius);
-    background: var(--content-bg);
+    border-radius: var(--widget-radius);
   }
 
   h3 {

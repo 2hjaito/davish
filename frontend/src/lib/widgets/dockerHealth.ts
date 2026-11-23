@@ -16,7 +16,21 @@ export function healthOf(c: Pick<Container, 'status'>): Health {
   return m[1] === 'health: starting' ? 'starting' : (m[1] as 'healthy' | 'unhealthy')
 }
 
+/** What a container looks like as one dot: well, wrong, still starting, or not running. */
+export type Dot = 'ok' | 'bad' | 'starting' | 'stopped'
+
+export const DOT_MAX = 60
+
+/** The dot of a container: running and well, failing or restarting, within its first healthcheck, or stopped. */
+export function dotOf(c: Pick<Container, 'state' | 'status'>): Dot {
+  if (c.state === 'restarting' || healthOf(c) === 'unhealthy') return 'bad'
+  if (c.state !== 'running') return 'stopped'
+  return healthOf(c) === 'starting' ? 'starting' : 'ok'
+}
+
 export interface DockerSummary {
+  /** One per container in docker's order, up to DOT_MAX: a dot keeps its place as states change. */
+  dots: Dot[]
   total: number
   running: number
   /** Names of the containers whose healthcheck fails, up to LIST_MAX. */
@@ -35,10 +49,12 @@ export const LIST_MAX = 20
 export function summarize(list: readonly Container[]): DockerSummary {
   const unhealthy: string[] = []
   const restarting: string[] = []
+  const dots: Dot[] = []
   let running = 0
   let starting = 0
   let more = 0
   for (const c of list) {
+    if (dots.length < DOT_MAX) dots.push(dotOf(c))
     if (c.state === 'running') running++
     const bad =
       c.state === 'restarting' ? restarting : healthOf(c) === 'unhealthy' ? unhealthy : null
@@ -48,7 +64,7 @@ export function summarize(list: readonly Container[]): DockerSummary {
     }
     if (healthOf(c) === 'starting') starting++
   }
-  return { total: list.length, running, unhealthy, restarting, starting, more }
+  return { dots, total: list.length, running, unhealthy, restarting, starting, more }
 }
 
 /** Is anything wrong: a failing healthcheck or a container that keeps restarting. */

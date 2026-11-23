@@ -164,21 +164,21 @@
     pointer-events: none;
   }
 
-  /* A flat fill and a hairline, with no blur of its own: widgets are always on screen. */
+  /*
+   * Only the place and the shape: the face (a dark card, tinted by the state)
+   * is the widget's own, with no blur of its own since widgets are always on
+   * screen.
+   */
   .widget {
     position: absolute;
     box-sizing: border-box;
-    padding: 10px 12px;
-    border: 1px solid var(--divider);
-    border-radius: var(--card-radius);
-    background: var(--content-bg);
-    color: var(--fg);
+    border-radius: var(--widget-radius);
     pointer-events: auto;
   }
 
   .widget.editing {
-    border-style: dashed;
-    border-color: var(--accent);
+    outline: 2px dashed var(--accent);
+    outline-offset: 3px;
     cursor: grab;
     touch-action: none;
   }
@@ -208,8 +208,8 @@
 
   .tools {
     position: absolute;
-    top: -11px;
-    right: 8px;
+    top: -12px;
+    right: 10px;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -217,9 +217,9 @@
 
   .sizes {
     display: flex;
-    border: 1px solid var(--divider);
+    border: 1px solid var(--widget-edge);
     border-radius: 999px;
-    background: var(--content-bg);
+    background: var(--widget-base);
   }
 
   .size,
@@ -233,7 +233,7 @@
     border: 0;
     border-radius: 999px;
     background: none;
-    color: var(--fg-muted);
+    color: var(--fg-on-dark-muted);
     font-size: var(--text-xxs);
     font-weight: 600;
     cursor: pointer;
@@ -246,12 +246,12 @@
 
   .remove {
     padding: 0;
-    border: 1px solid var(--divider);
-    background: var(--content-bg);
+    border: 1px solid var(--widget-edge);
+    background: var(--widget-base);
   }
 
   .remove:hover {
-    color: var(--danger);
+    color: var(--danger-on-dark);
   }
 
   .finish {

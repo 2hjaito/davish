@@ -1,10 +1,14 @@
 <script lang="ts">
   import { t } from '../i18n'
-  import { statView, type StatId } from '../shell/menuStats'
+  import { statView, type StatId, type StatView } from '../shell/menuStats'
   import { metrics } from '../stores/metrics.svelte'
   import { niceMax } from '../ui/charts/scale'
+  import Dots from './Dots.svelte'
+  import { cellsFor, dotCells } from './gauge'
   import type { WidgetProps } from './registry'
+  import Ring from './Ring.svelte'
   import Spark from './Spark.svelte'
+  import WidgetCard, { type Tone } from './WidgetCard.svelte'
 
   let { serverID, size }: WidgetProps = $props()
 
@@ -13,96 +17,223 @@
 
   const latest = $derived(metrics.latest(serverID))
   const history = $derived(metrics.history(serverID))
-  const ids: StatId[] = $derived(size === 'M' ? ['cpu', 'mem', 'net'] : ['cpu'])
+  const times = $derived(history.map((s) => s.at))
 
-  const rows = $derived(
-    latest
-      ? ids.flatMap((id) => {
-          const v = statView(id, latest)
-          if (!v?.chart) return []
-          const series = v.chart.series[0]
-          if (!series) return []
-          const values = history.map((s) => series.value(s))
-          const max = v.chart.max ?? niceMax(Math.max(...values, 0), { binary: v.chart.binary })
-          return [{ v, values, max, color: series.color, times: history.map((s) => s.at) }]
-        })
-      : [],
+  const view = (id: StatId): StatView | null => (latest ? statView(id, latest) : null)
+  const cpu = $derived(view('cpu'))
+  const mem = $derived(view('mem'))
+  const net = $derived(view('net'))
+
+  const COLOR = {
+    '': 'var(--widget-blue)',
+    warn: 'var(--warn-on-dark)',
+    danger: 'var(--danger-on-dark)',
+  }
+  const MEM_COLOR = {
+    '': 'var(--widget-violet)',
+    warn: 'var(--warn-on-dark)',
+    danger: 'var(--danger-on-dark)',
+  }
+
+  /** The values of series i of a reading's chart over the history. */
+  const values = (v: StatView | null, i: number) => {
+    const series = v?.chart?.series[i]
+    return series ? history.map((s) => series.value(s)) : []
+  }
+
+  const cpuValues = $derived(values(cpu, 0))
+  const rxValues = $derived(values(net, 0))
+  const txValues = $derived(values(net, 1))
+  const netMax = $derived(niceMax(Math.max(...rxValues, ...txValues, 0), { binary: true }))
+
+  const tone = $derived<Tone>(
+    cpu?.level === 'danger' || mem?.level === 'danger'
+      ? 'danger'
+      : cpu?.level === 'warn' || mem?.level === 'warn'
+        ? 'warn'
+        : 'neutral',
+  )
+
+  // Memory as a grid of dots: the used share lit, the rest dim.
+  const COLS = 15
+  const ROWS = 3
+  const memCells = $derived(
+    mem?.ring == null
+      ? []
+      : dotCells(COLS * ROWS, [{ kind: 'used', count: cellsFor(mem.ring, COLS * ROWS) }]),
   )
 </script>
 
-<div class="monitor" class:big={size === 'M'}>
-  {#each rows as r (r.v.id)}
-    <div class="row {r.v.level}">
+<WidgetCard {tone}>
+  {#if !cpu}
+    <p class="wait">{t.widgets.waiting}</p>
+  {:else if size === 'S'}
+    <div class="chart">
+      <Spark
+        series={[{ values: cpuValues, color: COLOR[cpu.level], area: true }]}
+        {times}
+        max={100}
+      />
+    </div>
+    <div class="s">
       <div class="text">
-        <span class="label">{r.v.label}</span>
-        <span class="hero">{r.v.hero}</span>
+        <span class="label">{cpu.label}</span>
+        <span class="hero big">{cpu.hero}</span>
       </div>
-      <div class="spark">
-        <Spark values={r.values} times={r.times} max={r.max} color={r.color} />
-      </div>
+      <Ring value={cpu.ring ?? 0} size={60} stroke={7} color={COLOR[cpu.level]}>
+        <span class="inner">{cpu.inner}</span>
+      </Ring>
     </div>
   {:else}
-    <p class="wait">{t.widgets.waiting}</p>
-  {/each}
-</div>
+    <div class="m">
+      <div class="top">
+        <div class="text">
+          <span class="label">{cpu.label}</span>
+          <span class="hero">{cpu.hero}</span>
+          <span class="sub">{cpu.sub}</span>
+        </div>
+        <Ring value={cpu.ring ?? 0} size={46} stroke={6} color={COLOR[cpu.level]} />
+      </div>
+      {#if mem}
+        <div class="block" title={mem.sub}>
+          <div class="line">
+            <span class="label">{mem.label}</span>
+            <span class="hero small">{mem.hero}</span>
+          </div>
+          <Dots
+            cells={memCells}
+            cols={COLS}
+            size={7}
+            gap={2.4}
+            colors={{ used: MEM_COLOR[mem.level] }}
+          />
+        </div>
+      {/if}
+      {#if net}
+        <div class="block" title={net.sub}>
+          <div class="line">
+            <span class="label">{net.label}</span>
+            <span class="hero small">↓ {net.hero}</span>
+          </div>
+          <div class="chart inline">
+            <Spark
+              series={[
+                { values: rxValues, color: 'var(--widget-blue)', area: true },
+                { values: txValues, color: 'var(--widget-pink)' },
+              ]}
+              {times}
+              max={netMax}
+            />
+          </div>
+        </div>
+      {/if}
+    </div>
+  {/if}
+</WidgetCard>
 
 <style>
-  .monitor {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    height: 100%;
-    min-height: 0;
-  }
-
-  .row {
+  .s {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 10px;
-    min-height: 0;
-    flex: 1;
+    justify-content: space-between;
+    height: 100%;
   }
 
   .text {
     display: flex;
     flex-direction: column;
     min-width: 0;
-    flex: 0 0 auto;
-    width: 72px;
   }
 
   .label {
-    color: var(--fg-muted);
-    font-size: var(--text-xs);
+    color: var(--fg-on-dark-muted);
+    font-size: var(--text-xxs);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
 
   .hero {
-    overflow: hidden;
-    color: var(--fg);
-    font-size: var(--text-lg);
+    color: var(--fg-on-dark);
+    font-size: 24px;
     font-variant-numeric: tabular-nums;
-    font-weight: 600;
+    font-weight: 650;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+
+  .hero.big {
+    font-size: 30px;
+  }
+
+  .hero.small {
+    font-size: 17px;
+  }
+
+  .sub {
+    overflow: hidden;
+    color: var(--fg-on-dark-muted);
+    font-size: var(--text-xs);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .warn .hero {
-    color: var(--warn);
+  .inner {
+    color: var(--fg-on-dark);
+    font-size: var(--text-xs);
+    font-weight: 600;
   }
 
-  .danger .hero {
-    color: var(--danger);
+  /* The history, faint, along the bottom of the small widget. */
+  .chart {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 34px;
+    opacity: 0.6;
+    pointer-events: none;
   }
 
-  .spark {
-    flex: 1;
+  .chart.inline {
+    position: static;
+    height: 24px;
+    margin-top: 1px;
+    opacity: 1;
+  }
+
+  .m {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .block {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
     min-width: 0;
-    height: 26px;
+  }
+
+  .line {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
   }
 
   .wait {
-    margin: auto;
-    color: var(--fg-muted);
+    margin: auto 0;
+    color: var(--fg-on-dark-muted);
     font-size: var(--text-xs);
   }
 </style>

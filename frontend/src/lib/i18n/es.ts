@@ -46,8 +46,8 @@ const es = {
     docker: {
       running: 'en marcha',
       allHealthy: 'Todo bien',
-      unhealthy: (n: number) => `${n} con fallo de salud`,
-      restarting: (n: number) => `${n} reiniciando`,
+      problems: (n: number) => `${n} ${n === 1 ? 'problema' : 'problemas'}`,
+      states: { unhealthy: 'con fallo de salud', restarting: 'reiniciando' },
       starting: (n: number) => `${n} arrancando`,
       more: (n: number) => `+${n} más`,
       none: 'Sin contenedores',

@@ -151,6 +151,21 @@
   --term-scrollbar-hover: rgba(255, 255, 255, 0.45);
   --tab-hover-dark: rgba(255, 255, 255, 0.06);
 
+  /* Widgets: dark in both themes, like Terminal. The tint is how the state
+     shows: green for well, amber for starting or close, red for wrong. */
+  --widget-radius: 18px;
+  --widget-base: #191a20;
+  --widget-top: #272933;
+  --widget-edge: rgba(255, 255, 255, 0.09);
+  --widget-track: rgba(255, 255, 255, 0.11);
+  --widget-stopped: rgba(255, 255, 255, 0.27);
+  --widget-blue: #5ab1ff;
+  --widget-violet: #a98bff;
+  --widget-pink: #ff7fb0;
+  --widget-tint-ok: rgba(94, 240, 160, 0.13);
+  --widget-tint-warn: rgba(255, 190, 70, 0.2);
+  --widget-tint-danger: rgba(255, 90, 82, 0.26);
+
   /* Editor syntax, on the near-white content pane; every color keeps at
      least 4.5:1 contrast. Text the grammar does not color stays --fg. */
   --code-comment: #6b7180;

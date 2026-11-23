@@ -45,8 +45,8 @@ const zh = {
     docker: {
       running: '运行中',
       allHealthy: '全部正常',
-      unhealthy: (n: number) => `${n} 个健康检查失败`,
-      restarting: (n: number) => `${n} 个反复重启`,
+      problems: (n: number) => `${n} 个问题`,
+      states: { unhealthy: '健康检查失败', restarting: '反复重启' },
       starting: (n: number) => `${n} 个正在启动`,
       more: (n: number) => `还有 ${n} 个`,
       none: '没有容器',
