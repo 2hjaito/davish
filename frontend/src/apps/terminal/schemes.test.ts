@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { TERMINAL_SCHEMES } from '../../lib/stores/settings.svelte'
-import { schemeFor, SCHEMES, schemeTheme, swatch } from './schemes'
+import { DAVISH_ANSI, schemeFor, SCHEMES, schemeTheme, swatch } from './schemes'
 
 const COLOR = /^(#[0-9a-f]{6}|rgba\(\d+, \d+, \d+, [\d.]+\))$/i
 
@@ -35,5 +35,34 @@ describe('schemes', () => {
       expect(sw.bg).toMatch(COLOR)
       expect(sw.fg).toMatch(COLOR)
     }
+  })
+})
+
+describe('the Davish ANSI colors', () => {
+  const lum = (hex: string) => {
+    const [r, g, b] = [1, 3, 5].map((i) => {
+      const c = Number.parseInt(hex.slice(i, i + 2), 16) / 255
+      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+    }) as [number, number, number]
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+  }
+  const contrast = (a: string, b: string) => {
+    const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x) as [number, number]
+    return (hi + 0.05) / (lo + 0.05)
+  }
+  const BG = '#1d1f25' // --term-bg-solid
+
+  it('keeps the grey of stack traces and hints readable on the dark background', () => {
+    expect(contrast(DAVISH_ANSI.brightBlack, BG)).toBeGreaterThanOrEqual(7)
+  })
+
+  it('keeps every color legible, even plain black (used for dim text)', () => {
+    for (const [name, hex] of Object.entries(DAVISH_ANSI))
+      expect(contrast(hex, BG), name).toBeGreaterThanOrEqual(3.5)
+  })
+
+  it('keeps brights at least as light as their normal color', () => {
+    expect(lum(DAVISH_ANSI.brightBlack)).toBeGreaterThan(lum(DAVISH_ANSI.black))
+    expect(lum(DAVISH_ANSI.brightRed)).toBeGreaterThan(lum(DAVISH_ANSI.red))
   })
 })
