@@ -76,15 +76,21 @@ export function freeCell(want: Cell, taken: readonly Cell[], grid: Grid): Cell {
 
 /**
  * Where icons show in a grid that may be smaller than when they were
- * placed: each keeps its cell if it fits, the rest move to a free one.
+ * placed: each keeps its cell if it fits, the rest move to a free one. The
+ * reserved cells (under widgets) count as taken.
  * The stored cells stay, so widening the window brings them back.
  */
-export function layout<T extends Cell>(items: readonly T[], grid: Grid): Cell[] {
-  const inside = (c: Cell) => c.col < grid.cols && c.row < grid.rows
+export function layout<T extends Cell>(
+  items: readonly T[],
+  grid: Grid,
+  reserved: readonly Cell[] = [],
+): Cell[] {
+  const blocked = new Set(reserved.map(key))
+  const inside = (c: Cell) => c.col < grid.cols && c.row < grid.rows && !blocked.has(key(c))
   const placed: Cell[] = items.filter(inside)
   return items.map((item) => {
     if (inside(item)) return item
-    const cell = freeCell(item, placed, grid)
+    const cell = freeCell(item, [...placed, ...reserved], grid)
     placed.push(cell)
     return cell
   })
