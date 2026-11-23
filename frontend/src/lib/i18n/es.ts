@@ -1708,7 +1708,7 @@ const es = {
     jumpHint: 'Se conecta primero a un servidor de salto y luego a este, como el ProxyJump de ssh.',
     control: 'Avanzado: usar un control socket de ssh',
     controlHint:
-      'Úsalo cuando tu inicio de sesión solo funcione con OpenSSH (por ejemplo, un agente que emite certificados, como authentik). Inicia tú mismo el master con: ssh -M -S <path> -fN user@host. Davish usará esa conexión y nunca verá tus credenciales. Solo en Linux y macOS.',
+      'Para inicios de sesión que solo funcionan con OpenSSH, como un agente que emite certificados (authentik). Sustituye a la autenticación de arriba. Inicia tú mismo el master: ssh -M -S <path> -fN user@host. Davish nunca ve tus credenciales. Solo en Linux y macOS.',
     save: 'Guardar y conectar',
     cancel: 'Cancelar',
     delete: 'Eliminar servidor',

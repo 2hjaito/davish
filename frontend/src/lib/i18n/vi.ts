@@ -1662,7 +1662,7 @@ const vi = {
     jumpHint: 'Kết nối tới server trung gian trước rồi mới vào server này, như ProxyJump của ssh.',
     control: 'Nâng cao: dùng ssh control socket',
     controlHint:
-      'Dùng khi đăng nhập của bạn chỉ chạy được qua OpenSSH (ví dụ agent cấp chứng chỉ như authentik). Bạn tự mở master bằng: ssh -M -S <path> -fN user@host. Davish sẽ dùng kết nối đó và không bao giờ thấy thông tin đăng nhập của bạn. Chỉ có trên Linux và macOS.',
+      'Dùng khi đăng nhập chỉ chạy được qua OpenSSH, như agent cấp chứng chỉ (authentik). Thay thế phần xác thực ở trên. Tự mở master: ssh -M -S <path> -fN user@host. Davish không bao giờ thấy thông tin đăng nhập của bạn. Chỉ có trên Linux và macOS.',
     save: 'Lưu và kết nối',
     cancel: 'Hủy',
     delete: 'Xóa server',

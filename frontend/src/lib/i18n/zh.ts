@@ -1634,7 +1634,7 @@ const zh = {
     jumpHint: '先连接跳板服务器，再连接这台，和 ssh 的 ProxyJump 一样。',
     control: '高级：使用 ssh control socket',
     controlHint:
-      '当你的登录只能通过 OpenSSH 完成时使用（例如 authentik 这类签发证书的 agent）。请自己先启动 master：ssh -M -S <path> -fN user@host。之后 Davish 会使用这条连接，并且不会接触你的凭据。仅支持 Linux 和 macOS。',
+      '适用于只能通过 OpenSSH 登录的情况，例如签发证书的 agent（authentik）。会替代上面的认证方式。请自己先启动 master：ssh -M -S <path> -fN user@host。Davish 不会接触你的凭据。仅支持 Linux 和 macOS。',
     save: '保存并连接',
     cancel: '取消',
     delete: '删除服务器',
