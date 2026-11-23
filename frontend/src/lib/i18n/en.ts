@@ -2121,6 +2121,35 @@ const en = {
     terminal: 'Terminal',
     fontSize: 'Font size',
     fontSizeHint: 'Applies to every Terminal window.',
+    termScheme: 'Color scheme',
+    termSchemeHint:
+      'The colors of text and background. Every scheme but Davish draws on a solid background.',
+    editorFont: 'Font size',
+    editorFontHint:
+      'The text size in every Editor window. The font is the monospace font of the whole app.',
+    editorWrap: 'Wrap long lines',
+    editorWrapHint: 'Long lines continue on the next row instead of scrolling sideways.',
+    editorLineNumbers: 'Line numbers',
+    editorLineNumbersHint: 'Show the line number beside each line.',
+    editorWhitespace: 'Show spaces and tabs',
+    editorWhitespaceHint: 'Draws a mark for each space and tab, to spot a tab in a YAML file.',
+    editorIndent: 'Indent with',
+    editorIndentHint: 'What the Tab key and auto-indent insert.',
+    editorIndents: { '2': '2 spaces', '4': '4 spaces', tab: 'Tab' },
+    termFont: 'Font',
+    termFontHint:
+      'A font installed on this computer, for Terminal only. Leave empty to use the monospace font below.',
+    termFontPlaceholder: 'Default',
+    termCursor: 'Cursor',
+    termCursors: { bar: 'Bar', block: 'Block', underline: 'Underline' },
+    termBlink: 'Blinking cursor',
+    termBlinkHint: 'The cursor blinks while the terminal has focus.',
+    termSchemes: {
+      davish: 'Davish',
+      phosphor: 'Phosphor',
+      solarized: 'Solarized',
+      dracula: 'Dracula',
+    },
     fontSmaller: 'Smaller font',
     fontLarger: 'Larger font',
     prompt: 'Davish prompt',
@@ -2129,6 +2158,12 @@ const en = {
     gpu: 'GPU acceleration',
     gpuHint:
       'Draws with WebGL, faster on large output. The terminal background turns solid instead of frosted glass.',
+    termSolid: 'Solid background',
+    termSolidHint:
+      'Draws the terminal on a solid color instead of frosted glass. Always on with GPU acceleration, Performance → Solid fills or a color scheme other than Davish.',
+    scrollback: 'Scrollback',
+    scrollbackHint:
+      'Lines each tab keeps to scroll back through. Fewer lines use less memory; applies to every Terminal window.',
     monoFont: 'Monospace font',
     monoFontHint: 'Used by Terminal, Editor and Logs.',
     monoFonts: { jetbrains: 'JetBrains Mono', system: 'System font' },
@@ -2144,6 +2179,10 @@ const en = {
     lower: 'Lower',
     higher: 'Higher',
     editor: 'Editor',
+    files: 'Files',
+    filesHidden: 'Show hidden files',
+    filesHiddenHint:
+      'Names that start with a dot, such as .env or .ssh. Hiding them only tidies the list; the files are still there.',
     lock: 'App lock',
     lockIntro:
       'Covers Davish and blocks every action on servers while you are away. SSH sessions, logs and transfers keep running.',

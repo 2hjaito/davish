@@ -21,6 +21,7 @@
   import { absoluteCwd, cwdFromTitle, parseOsc7 } from './cwd'
   import DeployProgress from './DeployProgress.svelte'
   import { MockShell } from './mockShell'
+  import { schemeFor } from './schemes'
   import XTerm from './XTerm.svelte'
 
   let { win }: AppProps = $props()
@@ -305,7 +306,11 @@
   </span>
 </TitleBar>
 
-<div class="screen" class:solid={settings.terminalGpu}>
+<div
+  class="screen"
+  class:solid={settings.terminalOpaque}
+  style:background={schemeFor(settings.terminalScheme)?.background}
+>
   {#each tabs as tab (tab.id)}
     <XTerm
       bind:this={views[tab.id]}
@@ -428,7 +433,7 @@
     min-height: 0;
   }
 
-  /* GPU mode draws on a solid background; fill the margins around it too. */
+  /* A solid background (GPU mode, or chosen); fill the margins around it too. */
   .solid {
     background: var(--term-bg-solid);
   }

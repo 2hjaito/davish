@@ -8,15 +8,15 @@
     drawSelection,
     EditorView,
     highlightActiveLine,
-    highlightActiveLineGutter,
     highlightSpecialChars,
     keymap,
-    lineNumbers,
   } from '@codemirror/view'
   import { onMount, untrack } from 'svelte'
 
   import { t } from '../../lib/i18n'
+  import { settings } from '../../lib/stores/settings.svelte'
   import type { LanguageId } from './languages'
+  import { gutterExtension, indentExtension, whitespaceExtension, wrapExtension } from './options'
   import { highlighting, languageSupport } from './syntax'
 
   interface Props {
@@ -38,12 +38,16 @@
   let view: EditorView | undefined
   const lang = new Compartment()
   const ro = new Compartment()
+  const wrap = new Compartment()
+  const gutter = new Compartment()
+  const marks = new Compartment()
+  const indent = new Compartment()
 
   // Colors and sizes from tokens.css; CodeMirror injects this as a scoped style.
   const theme = EditorView.theme({
     '&': {
       height: '100%',
-      fontSize: 'var(--text-sm)',
+      fontSize: 'var(--editor-font-size, var(--text-sm))',
       color: 'var(--fg)',
       backgroundColor: 'transparent',
     },
@@ -103,8 +107,10 @@
         doc: untrack(() => doc),
         extensions: [
           EditorState.phrases.of(t.editor.phrases),
-          lineNumbers(),
-          highlightActiveLineGutter(),
+          gutter.of(untrack(() => gutterExtension(settings.editorLineNumbers))),
+          wrap.of(untrack(() => wrapExtension(settings.editorWrap))),
+          marks.of(untrack(() => whitespaceExtension(settings.editorWhitespace))),
+          indent.of(untrack(() => indentExtension(settings.editorIndent))),
           highlightSpecialChars(),
           history(),
           drawSelection(),
@@ -153,6 +159,33 @@
     view?.dispatch({ effects: ro.reconfigure(EditorState.readOnly.of(value)) })
   })
 
+  $effect(() => {
+    const on = settings.editorLineNumbers
+    view?.dispatch({ effects: gutter.reconfigure(gutterExtension(on)) })
+  })
+
+  $effect(() => {
+    const on = settings.editorWrap
+    view?.dispatch({ effects: wrap.reconfigure(wrapExtension(on)) })
+  })
+
+  $effect(() => {
+    const on = settings.editorWhitespace
+    view?.dispatch({ effects: marks.reconfigure(whitespaceExtension(on)) })
+  })
+
+  $effect(() => {
+    const i = settings.editorIndent
+    view?.dispatch({ effects: indent.reconfigure(indentExtension(i)) })
+  })
+
+  // The size comes through a CSS variable, which CodeMirror does not see
+  // change: measure again so the cursor and the lines stay where the text is.
+  $effect(() => {
+    void settings.editorFontSize
+    view?.requestMeasure()
+  })
+
   /** Moves the cursor to a 1-based line and shows it. */
   export function goToLine(n: number) {
     if (!view || n < 1 || n > view.state.doc.lines) return
@@ -170,7 +203,7 @@
   }
 </script>
 
-<div class="code" bind:this={host}></div>
+<div class="code" bind:this={host} style:--editor-font-size="{settings.editorFontSize}px"></div>
 
 <style>
   .code {

@@ -10,6 +10,7 @@
   import { isMac } from '../../lib/shell/platform'
   import { settings } from '../../lib/stores/settings.svelte'
   import PopupMenu from '../../lib/ui/PopupMenu.svelte'
+  import { schemeFor, schemeTheme } from './schemes'
 
   interface Props {
     /** Whether this terminal is the visible tab; hidden ones keep their buffer. */
@@ -32,7 +33,11 @@
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
   }
 
+  // Read without tracking: callers that must not rerun when the scheme changes
+  // (the effect that builds the terminal) call this too; its own effect follows it.
   function theme(solid: boolean): ITheme {
+    const scheme = schemeFor(untrack(() => settings.terminalScheme))
+    if (scheme) return schemeTheme(scheme, solid)
     return {
       background: solid ? token('--term-bg-solid') : '#00000000',
       foreground: token('--fg-on-dark'),
@@ -49,6 +54,12 @@
       yellow: token('--term-warn'),
       brightYellow: token('--term-warn'),
     }
+  }
+
+  /** The bar cursor is drawn by CSS, so it takes the scheme's cursor color from here. */
+  function paintCursor(id = untrack(() => settings.terminalScheme)) {
+    const color = schemeFor(id)?.cursor ?? token('--fg-on-dark')
+    host?.style.setProperty('--cursor-color', color)
   }
 
   function copy() {
@@ -158,17 +169,17 @@
     if (!host) return
     const t = new Terminal({
       allowTransparency: true,
-      // A steady bar, as in macOS Terminal: no blinking, and the same shape
-      // whether the terminal has focus or not.
-      cursorBlink: false,
-      cursorStyle: 'bar',
+      // A steady bar by default, as in macOS Terminal; the same shape whether
+      // the terminal has focus or not. Settings can change both.
+      cursorBlink: untrack(() => settings.terminalBlink),
+      cursorStyle: untrack(() => settings.terminalCursor),
       cursorWidth: 2,
-      cursorInactiveStyle: 'bar',
-      fontFamily: untrack(() => settings.monoFamily),
+      cursorInactiveStyle: untrack(() => settings.terminalCursor),
+      fontFamily: untrack(() => settings.terminalFontFamily),
       // Read once here; the effect below applies later changes in place.
       fontSize: untrack(() => settings.terminalFontSize),
       lineHeight: LINE_HEIGHT,
-      scrollback: 5000,
+      scrollback: untrack(() => settings.terminalScrollback),
       macOptionIsMeta: true,
       theme: theme(false),
     })
@@ -177,6 +188,7 @@
     t.attachCustomKeyEventHandler(clipboardKeys)
     t.open(host)
     keepCellColors(t)
+    paintCursor()
     t.onResize(() => requestAnimationFrame(() => reselect(t)))
     setRenderer(
       t,
@@ -216,7 +228,28 @@
   })
 
   $effect(() => {
-    const family = settings.monoFamily
+    const id = settings.terminalScheme
+    if (!term) return
+    term.options.theme = theme(Boolean(webgl))
+    paintCursor(id)
+  })
+
+  $effect(() => {
+    const lines = settings.terminalScrollback
+    if (term && term.options.scrollback !== lines) term.options.scrollback = lines
+  })
+
+  $effect(() => {
+    const shape = settings.terminalCursor
+    const blink = settings.terminalBlink
+    if (!term) return
+    term.options.cursorStyle = shape
+    term.options.cursorInactiveStyle = shape
+    term.options.cursorBlink = blink
+  })
+
+  $effect(() => {
+    const family = settings.terminalFontFamily
     if (!term || term.options.fontFamily === family) return
     term.options.fontFamily = family
     fit?.fit()
@@ -287,8 +320,11 @@
   /* The same for the bar: xterm draws it as an inset shadow as tall as the row. */
   .host :global(.xterm-rows .xterm-cursor.xterm-cursor-bar) {
     box-shadow: none !important;
-    background: linear-gradient(var(--fg-on-dark), var(--fg-on-dark)) no-repeat left center / 2px
-      var(--cursor-h);
+    background: linear-gradient(
+        var(--cursor-color, var(--fg-on-dark)),
+        var(--cursor-color, var(--fg-on-dark))
+      )
+      no-repeat left center / 2px var(--cursor-h);
   }
 
   /* The selection layer goes under the rows: cells with a background of their own stay on top. */

@@ -2165,6 +2165,37 @@ const es = {
     terminal: 'Terminal',
     fontSize: 'Tamaño de letra',
     fontSizeHint: 'Se aplica a todas las ventanas de Terminal.',
+    termScheme: 'Esquema de color',
+    termSchemeHint:
+      'Los colores del texto y del fondo. Todos los esquemas salvo Davish dibujan sobre un fondo sólido.',
+    editorFont: 'Tamaño de letra',
+    editorFontHint:
+      'El tamaño del texto en todas las ventanas del Editor. La fuente es la monoespaciada de toda la app.',
+    editorWrap: 'Ajustar líneas largas',
+    editorWrapHint:
+      'Las líneas largas continúan en la fila siguiente en lugar de desplazarse hacia los lados.',
+    editorLineNumbers: 'Números de línea',
+    editorLineNumbersHint: 'Muestra el número junto a cada línea.',
+    editorWhitespace: 'Mostrar espacios y tabulaciones',
+    editorWhitespaceHint:
+      'Dibuja una marca por cada espacio y tabulación, para detectar una tabulación en un archivo YAML.',
+    editorIndent: 'Sangrar con',
+    editorIndentHint: 'Lo que insertan la tecla Tab y la sangría automática.',
+    editorIndents: { '2': '2 espacios', '4': '4 espacios', tab: 'Tab' },
+    termFont: 'Fuente',
+    termFontHint:
+      'Una fuente instalada en este equipo, solo para Terminal. Déjalo vacío para usar la fuente monoespaciada de abajo.',
+    termFontPlaceholder: 'Predeterminada',
+    termCursor: 'Cursor',
+    termCursors: { bar: 'Barra', block: 'Bloque', underline: 'Subrayado' },
+    termBlink: 'Cursor parpadeante',
+    termBlinkHint: 'El cursor parpadea mientras el terminal tiene el foco.',
+    termSchemes: {
+      davish: 'Davish',
+      phosphor: 'Phosphor',
+      solarized: 'Solarized',
+      dracula: 'Dracula',
+    },
     fontSmaller: 'Letra más pequeña',
     fontLarger: 'Letra más grande',
     prompt: 'Prompt de Davish',
@@ -2173,6 +2204,12 @@ const es = {
     gpu: 'Aceleración por GPU',
     gpuHint:
       'Dibuja con WebGL, más rápido con salidas grandes. El fondo del terminal pasa a ser sólido en lugar de cristal esmerilado.',
+    termSolid: 'Fondo sólido',
+    termSolidHint:
+      'Dibuja el terminal sobre un color sólido en lugar de cristal esmerilado. Siempre activo con la aceleración por GPU, Rendimiento → Fondos sólidos o un esquema distinto de Davish.',
+    scrollback: 'Historial',
+    scrollbackHint:
+      'Líneas que cada pestaña conserva para desplazarse atrás. Menos líneas usan menos memoria; se aplica a todas las ventanas de Terminal.',
     monoFont: 'Fuente monoespaciada',
     monoFontHint: 'La usan Terminal, Editor y Registros.',
     monoFonts: { jetbrains: 'JetBrains Mono', system: 'Fuente del sistema' },
@@ -2188,6 +2225,10 @@ const es = {
     lower: 'Bajar',
     higher: 'Subir',
     editor: 'Editor',
+    files: 'Archivos',
+    filesHidden: 'Mostrar archivos ocultos',
+    filesHiddenHint:
+      'Los nombres que empiezan por punto, como .env o .ssh. Ocultarlos solo ordena la lista; los archivos siguen ahí.',
     lock: 'Bloqueo de la app',
     lockIntro:
       'Tapa Davish y bloquea cualquier acción en los servidores mientras no estás. Las sesiones SSH, los registros y las transferencias siguen funcionando.',

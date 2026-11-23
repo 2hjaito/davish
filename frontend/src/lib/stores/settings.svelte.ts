@@ -35,6 +35,64 @@ export function clampFontSize(size: number): number {
   return Math.min(TERMINAL_FONT.max, Math.max(TERMINAL_FONT.min, snapped))
 }
 
+/** How many lines a Terminal tab keeps to scroll back through, fewest first. */
+export const TERMINAL_SCROLLBACK = [1000, 5000, 20000] as const
+export type TerminalScrollback = (typeof TERMINAL_SCROLLBACK)[number]
+const DEFAULT_SCROLLBACK: TerminalScrollback = 5000
+
+/** One of the choices; anything else (junk from storage) is the default. */
+export function clampScrollback(lines: unknown): TerminalScrollback {
+  return TERMINAL_SCROLLBACK.find((n) => n === lines) ?? DEFAULT_SCROLLBACK
+}
+
+/** The color schemes of Terminal; their colors are in apps/terminal/schemes.ts. */
+export const TERMINAL_SCHEMES = ['davish', 'phosphor', 'solarized', 'dracula'] as const
+export type TerminalScheme = (typeof TERMINAL_SCHEMES)[number]
+
+export function clampScheme(id: unknown): TerminalScheme {
+  return TERMINAL_SCHEMES.find((s) => s === id) ?? 'davish'
+}
+
+/** The shapes of the terminal cursor. */
+export const TERMINAL_CURSORS = ['bar', 'block', 'underline'] as const
+export type TerminalCursor = (typeof TERMINAL_CURSORS)[number]
+
+export function clampCursor(shape: unknown): TerminalCursor {
+  return TERMINAL_CURSORS.find((c) => c === shape) ?? 'bar'
+}
+
+/**
+ * A font family name as typed, reduced to what a family name is made of
+ * (letters, digits, space, dot, hyphen, underscore) so it can sit inside
+ * quotes in a CSS font stack; anything else (a stray quote, a comma) is
+ * dropped. Empty means "the monospace font of the whole app".
+ */
+export function cleanFontName(name: unknown): string {
+  if (typeof name !== 'string') return ''
+  return name
+    .replace(/[^\p{L}\p{N} ._-]/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 60)
+}
+
+export const EDITOR_FONT = { min: 10, max: 22, step: 0.5, default: 12.5 } as const
+
+/** Keeps an editor font size in range and on the step grid; junk falls back to the default. */
+export function clampEditorFontSize(size: unknown): number {
+  if (typeof size !== 'number' || !Number.isFinite(size)) return EDITOR_FONT.default
+  const snapped = Math.round(size / EDITOR_FONT.step) * EDITOR_FONT.step
+  return Math.min(EDITOR_FONT.max, Math.max(EDITOR_FONT.min, snapped))
+}
+
+/** What the Tab key and auto-indent put in: two spaces, four spaces or a tab character. */
+export const EDITOR_INDENTS = ['2', '4', 'tab'] as const
+export type EditorIndent = (typeof EDITOR_INDENTS)[number]
+
+export function clampIndent(indent: unknown): EditorIndent {
+  return EDITOR_INDENTS.find((i) => i === indent) ?? '2'
+}
+
 /** The monospace font of Terminal, Editor and Logs. */
 export type MonoFont = 'jetbrains' | 'system'
 
@@ -90,6 +148,12 @@ interface SettingsData extends StoredPerf {
   wallpaperAccent: string
   terminalFontSize: number
   terminalGpu: boolean
+  terminalSolid: boolean
+  terminalScheme: TerminalScheme
+  terminalCursor: TerminalCursor
+  terminalBlink: boolean
+  terminalFont: string
+  terminalScrollback: TerminalScrollback
   terminalPrompt: boolean
   monoFont: MonoFont
   dockSize: DockSize
@@ -101,6 +165,12 @@ interface SettingsData extends StoredPerf {
   alertDisk: number
   alertHold: number
   editorBackup: BackupMode
+  editorFontSize: number
+  editorWrap: boolean
+  editorLineNumbers: boolean
+  editorWhitespace: boolean
+  editorIndent: EditorIndent
+  filesShowHidden: boolean
   lockAfter: number
   sudoForgetAfter: number
   autoUpdate: boolean
@@ -116,6 +186,12 @@ const defaults: SettingsData = {
   wallpaperAccent: WALLPAPER_ACCENTS[0],
   terminalFontSize: TERMINAL_FONT.default,
   terminalGpu: false,
+  terminalSolid: false,
+  terminalScheme: 'davish',
+  terminalCursor: 'bar',
+  terminalBlink: false,
+  terminalFont: '',
+  terminalScrollback: DEFAULT_SCROLLBACK,
   terminalPrompt: true,
   monoFont: 'jetbrains',
   dockSize: 'medium',
@@ -127,6 +203,12 @@ const defaults: SettingsData = {
   alertDisk: ALERTS.defaults.disk,
   alertHold: ALERTS.defaults.hold,
   editorBackup: 'etc',
+  editorFontSize: EDITOR_FONT.default,
+  editorWrap: false,
+  editorLineNumbers: true,
+  editorWhitespace: false,
+  editorIndent: '2',
+  filesShowHidden: true,
   lockAfter: 15,
   sudoForgetAfter: 15,
   autoUpdate: true,
@@ -252,6 +334,43 @@ class Settings {
   get terminalGpu() {
     return this.#data.terminalGpu === true
   }
+  get terminalSolid() {
+    return this.#data.terminalSolid === true
+  }
+  /**
+   * Whether the terminal draws on a solid background rather than the glass.
+   * GPU drawing, the opaque performance setting and any scheme with a
+   * background of its own always do.
+   */
+  get terminalOpaque() {
+    return (
+      this.terminalGpu ||
+      this.terminalSolid ||
+      this.knobs.opaque ||
+      this.terminalScheme !== 'davish'
+    )
+  }
+  get terminalScheme(): TerminalScheme {
+    return clampScheme(this.#data.terminalScheme)
+  }
+  get terminalCursor(): TerminalCursor {
+    return clampCursor(this.#data.terminalCursor)
+  }
+  get terminalBlink() {
+    return this.#data.terminalBlink === true
+  }
+  /** The family the person named for Terminal only; empty for the app's monospace font. */
+  get terminalFont() {
+    return cleanFontName(this.#data.terminalFont)
+  }
+  /** The CSS font-family of Terminal: the named font if installed, then monoFamily. */
+  get terminalFontFamily() {
+    const name = this.terminalFont
+    return name ? `'${name}', ${this.monoFamily}` : this.monoFamily
+  }
+  get terminalScrollback(): TerminalScrollback {
+    return clampScrollback(this.#data.terminalScrollback)
+  }
   get terminalFontSize() {
     return clampFontSize(this.#data.terminalFontSize)
   }
@@ -297,6 +416,27 @@ class Settings {
     return ['etc', 'always', 'never'].includes(this.#data.editorBackup)
       ? this.#data.editorBackup
       : 'etc'
+  }
+  get editorFontSize() {
+    return clampEditorFontSize(this.#data.editorFontSize)
+  }
+  /** Long lines continue on the next row instead of scrolling sideways. */
+  get editorWrap() {
+    return this.#data.editorWrap === true
+  }
+  get editorLineNumbers() {
+    return this.#data.editorLineNumbers !== false
+  }
+  /** Spaces and tabs drawn as marks. */
+  get editorWhitespace() {
+    return this.#data.editorWhitespace === true
+  }
+  get editorIndent(): EditorIndent {
+    return clampIndent(this.#data.editorIndent)
+  }
+  /** Files lists names that start with a dot. */
+  get filesShowHidden() {
+    return this.#data.filesShowHidden !== false
   }
 
   /** Look for a new Davish on GitHub on its own (ADR 0009). */

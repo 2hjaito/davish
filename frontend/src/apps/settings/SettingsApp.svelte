@@ -6,14 +6,20 @@
   import {
     ALERTS,
     type BackupMode,
+    cleanFontName,
     DOCK_POSITIONS,
     DOCK_SIZES,
     type DockSize,
+    EDITOR_FONT,
+    EDITOR_INDENTS,
     MONO_FAMILIES,
     type MonoFont,
     settings,
     SUDO_FORGET_AFTER,
     TERMINAL_FONT,
+    TERMINAL_CURSORS,
+    TERMINAL_SCHEMES,
+    TERMINAL_SCROLLBACK,
     THEMES,
     WALLPAPER_ACCENTS,
   } from '../../lib/stores/settings.svelte'
@@ -32,6 +38,7 @@
   import { isLinux } from '../../lib/shell/platform'
   import { perfCheck } from '../../lib/shell/perfCheck.svelte'
   import { updates } from '../../lib/stores/updates.svelte'
+  import { swatch } from '../terminal/schemes'
   import PaneIcon from './PaneIcon.svelte'
   import { type Pane, PANES, paneLabel, searchPanes } from './panes'
   import ThemePreview from './ThemePreview.svelte'
@@ -93,6 +100,9 @@
     if (first && !hits.includes(pane)) go(first)
   }
 
+  function stepEditorFont(dir: 1 | -1) {
+    settings.set('editorFontSize', settings.editorFontSize + dir * EDITOR_FONT.step)
+  }
   function stepFont(dir: 1 | -1) {
     settings.set('terminalFontSize', settings.terminalFontSize + dir * TERMINAL_FONT.step)
   }
@@ -222,6 +232,25 @@
       onchange={(e) => set(e.currentTarget.checked)}
     />
   </label>
+{/snippet}
+
+{#snippet stepper(
+  value: number,
+  atMin: boolean,
+  atMax: boolean,
+  smaller: string,
+  larger: string,
+  step: (dir: 1 | -1) => void,
+)}
+  <div class="stepper">
+    <button aria-label={smaller} disabled={atMin} onclick={() => step(-1)}>
+      <Icon name="minus" size={12} strokeWidth={2.2} />
+    </button>
+    <output aria-live="polite">{value.toLocaleString(locale)}</output>
+    <button aria-label={larger} disabled={atMax} onclick={() => step(1)}>
+      <Icon name="plus" size={12} strokeWidth={2.2} />
+    </button>
+  </div>
 {/snippet}
 
 {#snippet segmented<T extends string | number>(
@@ -756,33 +785,138 @@
         <div class="card">
           <div class="row">
             {@render head(t.settings.fontSize, t.settings.fontSizeHint)}
-            <div class="stepper">
-              <button
-                aria-label={t.settings.fontSmaller}
-                disabled={settings.terminalFontSize <= TERMINAL_FONT.min}
-                onclick={() => stepFont(-1)}
-              >
-                <Icon name="minus" size={12} strokeWidth={2.2} />
-              </button>
-              <output aria-live="polite">{settings.terminalFontSize.toLocaleString(locale)}</output>
-              <button
-                aria-label={t.settings.fontLarger}
-                disabled={settings.terminalFontSize >= TERMINAL_FONT.max}
-                onclick={() => stepFont(1)}
-              >
-                <Icon name="plus" size={12} strokeWidth={2.2} />
-              </button>
+            {@render stepper(
+              settings.terminalFontSize,
+              settings.terminalFontSize <= TERMINAL_FONT.min,
+              settings.terminalFontSize >= TERMINAL_FONT.max,
+              t.settings.fontSmaller,
+              t.settings.fontLarger,
+              stepFont,
+            )}
+          </div>
+          <div class="row stack">
+            {@render head(t.settings.termScheme, t.settings.termSchemeHint)}
+            <div class="themes" role="radiogroup" aria-label={t.settings.termScheme}>
+              {#each TERMINAL_SCHEMES as id (id)}
+                {@const sw = swatch(id)}
+                <button
+                  class="theme"
+                  role="radio"
+                  aria-checked={settings.terminalScheme === id}
+                  onclick={() => settings.set('terminalScheme', id)}
+                >
+                  <span class="preview">
+                    <span class="scheme" style:background={sw.bg} style:color={sw.fg}>
+                      <span>
+                        <span style:color={sw.accents[0]}>~</span>
+                        <span style:color={sw.accents[1]}>$</span> ls
+                      </span>
+                      <span class="dots">
+                        {#each sw.accents as c (c)}<i style:background={c}></i>{/each}
+                      </span>
+                    </span>
+                  </span>
+                  <span>{t.settings.termSchemes[id]}</span>
+                </button>
+              {/each}
             </div>
           </div>
+          <label class="row">
+            {@render head(t.settings.termFont, t.settings.termFontHint)}
+            <input
+              class="input fontname"
+              type="text"
+              spellcheck="false"
+              autocomplete="off"
+              maxlength="60"
+              placeholder={t.settings.termFontPlaceholder}
+              value={settings.terminalFont}
+              onchange={(e) => {
+                settings.set('terminalFont', cleanFontName(e.currentTarget.value))
+                e.currentTarget.value = settings.terminalFont
+              }}
+            />
+          </label>
+          <div class="row">
+            {@render head(t.settings.termCursor)}
+            {@render segmented(
+              t.settings.termCursor,
+              TERMINAL_CURSORS,
+              settings.terminalCursor,
+              (c) => t.settings.termCursors[c],
+              (c) => settings.set('terminalCursor', c),
+            )}
+          </div>
+          {@render toggle(
+            t.settings.termBlink,
+            t.settings.termBlinkHint,
+            settings.terminalBlink,
+            (on) => settings.set('terminalBlink', on),
+          )}
           {@render toggle(t.settings.prompt, t.settings.promptHint, settings.terminalPrompt, (on) =>
             settings.set('terminalPrompt', on),
           )}
           {@render toggle(t.settings.gpu, t.settings.gpuHint, settings.terminalGpu, (on) =>
             settings.set('terminalGpu', on),
           )}
+          {@render toggle(
+            t.settings.termSolid,
+            t.settings.termSolidHint,
+            settings.terminalOpaque,
+            (on) => settings.set('terminalSolid', on),
+          )}
+          <div class="row">
+            {@render head(t.settings.scrollback, t.settings.scrollbackHint)}
+            {@render segmented(
+              t.settings.scrollback,
+              TERMINAL_SCROLLBACK,
+              settings.terminalScrollback,
+              (n) => n.toLocaleString(locale),
+              (n) => settings.set('terminalScrollback', n),
+            )}
+          </div>
         </div>
       {:else if pane === 'editor'}
         <div class="card">
+          <div class="row">
+            {@render head(t.settings.editorFont, t.settings.editorFontHint)}
+            {@render stepper(
+              settings.editorFontSize,
+              settings.editorFontSize <= EDITOR_FONT.min,
+              settings.editorFontSize >= EDITOR_FONT.max,
+              t.settings.fontSmaller,
+              t.settings.fontLarger,
+              stepEditorFont,
+            )}
+          </div>
+          {@render toggle(
+            t.settings.editorWrap,
+            t.settings.editorWrapHint,
+            settings.editorWrap,
+            (on) => settings.set('editorWrap', on),
+          )}
+          {@render toggle(
+            t.settings.editorLineNumbers,
+            t.settings.editorLineNumbersHint,
+            settings.editorLineNumbers,
+            (on) => settings.set('editorLineNumbers', on),
+          )}
+          {@render toggle(
+            t.settings.editorWhitespace,
+            t.settings.editorWhitespaceHint,
+            settings.editorWhitespace,
+            (on) => settings.set('editorWhitespace', on),
+          )}
+          <div class="row">
+            {@render head(t.settings.editorIndent, t.settings.editorIndentHint)}
+            {@render segmented(
+              t.settings.editorIndent,
+              EDITOR_INDENTS,
+              settings.editorIndent,
+              (i) => t.settings.editorIndents[i],
+              (i) => settings.set('editorIndent', i),
+            )}
+          </div>
           <div class="row">
             {@render head(t.settings.backup, t.settings.backupHint)}
             {@render segmented(
@@ -793,6 +927,15 @@
               (b) => settings.set('editorBackup', b),
             )}
           </div>
+        </div>
+      {:else if pane === 'files'}
+        <div class="card">
+          {@render toggle(
+            t.settings.filesHidden,
+            t.settings.filesHiddenHint,
+            settings.filesShowHidden,
+            (on) => settings.set('filesShowHidden', on),
+          )}
         </div>
       {:else if pane === 'alerts'}
         <div class="card">
@@ -1264,6 +1407,36 @@
 
   .theme:hover:not([aria-checked='true']) .preview {
     border-color: var(--divider);
+  }
+
+  .fontname {
+    flex-shrink: 0;
+    width: 200px;
+  }
+
+  /* A tile of a terminal scheme: its background, a prompt and three accent dots. */
+  .scheme {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    width: 88px;
+    height: 56px;
+    padding: 8px 9px;
+    border-radius: 7px;
+    font: 600 11px/1.2 var(--font-mono, monospace);
+    text-align: left;
+  }
+
+  .scheme .dots {
+    display: flex;
+    gap: 4px;
+  }
+
+  .scheme .dots i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
   }
 
   /* A choice of a few, like macOS segmented controls. */

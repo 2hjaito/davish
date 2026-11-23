@@ -12,6 +12,7 @@ export const PANES = [
   'dock',
   'terminal',
   'editor',
+  'files',
   'alerts',
   'security',
   'about',
@@ -50,9 +51,28 @@ function words(p: Pane): string[] {
     case 'dock':
       return [s.dockSize, s.dockPosition, s.dockTransparent, s.dockAutohide]
     case 'terminal':
-      return [s.fontSize, s.prompt, s.gpu]
+      return [
+        s.fontSize,
+        s.termScheme,
+        s.termFont,
+        s.termCursor,
+        s.termBlink,
+        s.prompt,
+        s.gpu,
+        s.termSolid,
+        s.scrollback,
+      ]
     case 'editor':
-      return [s.backup]
+      return [
+        s.editorFont,
+        s.editorWrap,
+        s.editorLineNumbers,
+        s.editorWhitespace,
+        s.editorIndent,
+        s.backup,
+      ]
+    case 'files':
+      return [s.filesHidden]
     case 'alerts':
       return [s.alertMem, s.alertDisk, s.alertHold]
     case 'security':
