@@ -4,6 +4,7 @@ import { hasRuntime } from '../api/runtime'
 import * as api from '../api/servers'
 import { t } from '../i18n'
 import type { ConnState, Platform, ServerDraft, ServerInfo } from '../api/servers'
+import { displayOrder } from '../shell/groups'
 import { load, save } from './persist'
 import { shortcuts } from './shortcuts.svelte'
 
@@ -109,8 +110,9 @@ class Servers {
     void this.ensureConnected(id)
   }
 
+  /** `⌘1…⌘9`: by the order the server menu shows, which is folder by folder. */
   selectIndex(i: number) {
-    const s = this.list[i]
+    const s = displayOrder(this.list)[i]
     if (s) this.select(s.id)
   }
 

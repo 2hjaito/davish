@@ -25,7 +25,7 @@
     tagFilter,
     tagNames,
     ungroupedCount,
-  } from './groups'
+  } from '../../lib/shell/groups'
   import MultiRun from './MultiRun.svelte'
   import ServerMap from './ServerMap.svelte'
   import { alertsFor, memPct } from './summary'

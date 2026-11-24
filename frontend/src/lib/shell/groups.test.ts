@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   activeFilter,
+  displayOrder,
   groupNames,
   matches,
   sections,
@@ -117,5 +118,29 @@ describe('sections', () => {
 
   it('is empty-safe', () => {
     expect(sections([])).toEqual([{ name: '', servers: [] }])
+  })
+})
+
+describe('displayOrder', () => {
+  it('is the list itself when no server has a group', () => {
+    const list = [s(undefined), s(undefined), s(' ')]
+    expect(displayOrder(list)).toEqual(list)
+  })
+
+  it('numbers group A before group B, the ungrouped last', () => {
+    const a1 = s('A')
+    const b1 = s('B')
+    const none = s(undefined)
+    const a2 = s('a')
+    const b2 = s('B')
+    // Listed as a1, b1, none, a2, b2 → shown A (a1, a2), B (b1, b2), none.
+    expect(displayOrder([a1, b1, none, a2, b2])).toEqual([a1, a2, b1, b2, none])
+  })
+
+  it('keeps the order inside a folder', () => {
+    const x = s('A')
+    const y = s('A')
+    const z = s('A')
+    expect(displayOrder([x, y, z])).toEqual([x, y, z])
   })
 })

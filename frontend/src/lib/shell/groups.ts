@@ -108,3 +108,12 @@ export function sections<T extends Listed>(
   if (loose.length) out.push({ name: '', servers: loose })
   return out
 }
+
+/**
+ * The servers in the order they are shown and numbered: folder by folder,
+ * the ungrouped last. `⌘1…⌘9` follow this order, so group A reads 1, 2, 3 and
+ * group B 4, 5, 6. With no group it is the list itself, in its own order.
+ */
+export function displayOrder<T extends Listed>(list: readonly T[]): T[] {
+  return sections(list).flatMap((sec) => sec.servers)
+}

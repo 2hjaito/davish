@@ -5,7 +5,7 @@
   import { servers } from '../stores/servers.svelte'
   import { ui } from '../stores/ui.svelte'
   import Dialog from '../ui/Dialog.svelte'
-  import { groupNames } from '../../apps/servers/groups'
+  import { groupNames } from './groups'
   import { MAX_GROUP_LENGTH, MAX_TAG_LENGTH, TAG_PRESETS } from './tags'
 
   const COLORS = ['', '#2f7de1', '#16a067', '#e08a12', '#d6455a', '#7a52d6', '#6b7180']

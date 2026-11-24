@@ -5,7 +5,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Thêm
-- **Nhóm server** (#243): trong hộp thoại thêm/sửa server có ô **Nhóm** (một cấp, tối đa 40 ký tự, gợi ý các nhóm đang dùng). Cửa sổ **Tất cả server** giờ dùng bố cục như Docker: thanh bên lọc theo trạng thái kết nối (Tất cả, Đã kết nối, Bị lỗi, Chưa kết nối), theo nhóm và theo nhãn, mỗi mục có số đếm. Server cùng nhóm nằm dưới một tiêu đề thư mục gập được (nhớ lần gập gần nhất, kèm số server đang chạy và số cảnh báo), cả ở dạng thẻ lẫn dạng bảng. Tìm kiếm khớp cả nhóm. Không có server nào có nhóm thì danh sách trông như cũ.
+- **Nhóm server** (#243): trong hộp thoại thêm/sửa server có ô **Nhóm** (một cấp, tối đa 40 ký tự, gợi ý các nhóm đang dùng). Cửa sổ **Tất cả server** giờ dùng bố cục như Docker: thanh bên lọc theo trạng thái kết nối (Tất cả, Đã kết nối, Bị lỗi, Chưa kết nối), theo nhóm và theo nhãn, mỗi mục có số đếm. Server cùng nhóm nằm dưới một tiêu đề thư mục gập được (nhớ lần gập gần nhất, kèm số server đang chạy và số cảnh báo), cả ở dạng thẻ lẫn dạng bảng. Tìm kiếm khớp cả nhóm. Không có server nào có nhóm thì danh sách trông như cũ. Menu chọn server trên thanh menu cũng xếp theo nhóm, gập được, và phím `⌘1…⌘9` đánh số theo đúng thứ tự đang hiện (nhóm A là 1, 2, 3, nhóm B là 4, 5, 6); không dùng nhóm thì không đổi gì.
 
 ### Đổi
 - Trong Tất cả server, bộ lọc nhãn chuyển từ thanh nút sang thanh bên, các nút Thêm, Nhập và Chạy lệnh thành icon trên thanh công cụ, và nút Thẻ/Bảng thành hai icon như Docker.
