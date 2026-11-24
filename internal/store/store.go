@@ -48,6 +48,9 @@ type Server struct {
 	// Tag is a short label for the environment (local, staging, prod…), shown
 	// next to the name so the wrong server is harder to open by mistake.
 	Tag string `json:"tag,omitempty"`
+	// Group is the folder the server is listed under in All servers (one
+	// level, by name); servers with the same Group sit together.
+	Group string `json:"group,omitempty"`
 	// JumpID is the saved server to connect through (ProxyJump); that
 	// server may jump through another, forming a chain.
 	JumpID string `json:"jumpID,omitempty"`
@@ -64,6 +67,7 @@ const (
 	serversFile = "servers.json"
 	defaultPort = 22
 	maxTagLen   = 24
+	maxGroupLen = 40
 )
 
 // Store reads and writes servers.json in dir.
@@ -298,6 +302,7 @@ func normalize(srv Server) Server {
 	srv.KeyPath = strings.TrimSpace(srv.KeyPath)
 	srv.JumpID = strings.TrimSpace(srv.JumpID)
 	srv.Tag = strings.Join(strings.Fields(srv.Tag), " ")
+	srv.Group = strings.Join(strings.Fields(srv.Group), " ")
 	if srv.Port == 0 {
 		srv.Port = defaultPort
 	}
@@ -334,6 +339,8 @@ func validate(srv Server) error {
 		return invalid("color must be #rrggbb")
 	case utf8.RuneCountInString(srv.Tag) > maxTagLen || strings.ContainsFunc(srv.Tag, unicode.IsControl):
 		return invalid("tag must be at most 24 characters")
+	case utf8.RuneCountInString(srv.Group) > maxGroupLen || strings.ContainsFunc(srv.Group, unicode.IsControl):
+		return invalid("group must be at most 40 characters")
 	case srv.JumpID != "" && srv.JumpID == srv.ID:
 		return invalid("a server cannot jump through itself")
 	}
