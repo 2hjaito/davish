@@ -298,6 +298,7 @@
         keyPath: k.path,
         color: server.color ?? '',
         tag: server.tag ?? '',
+        group: server.group ?? '',
         jumpID: server.jumpID ?? '',
         password: '',
         passphrase: pass,

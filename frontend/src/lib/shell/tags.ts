@@ -17,6 +17,9 @@ export const TAG_PRESETS: readonly { tag: string; color: string }[] = [
 /** Longest tag the backend accepts (internal/store maxTagLen). */
 export const MAX_TAG_LENGTH = 24
 
+/** Longest group name the backend accepts (internal/store maxGroupLen). */
+export const MAX_GROUP_LENGTH = 40
+
 const key = (tag: string) => tag.trim().toLowerCase()
 
 export interface TagGroup {

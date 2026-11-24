@@ -118,6 +118,8 @@ func TestValidate(t *testing.T) {
 		{"unknown auth", func(s *Server) { s.Auth = "magic" }},
 		{"key without path", func(s *Server) { s.Auth = AuthKey }},
 		{"bad color", func(s *Server) { s.Color = "red" }},
+		{"group too long", func(s *Server) { s.Group = strings.Repeat("a", 41) }},
+		{"group with control char", func(s *Server) { s.Group = "my\x00app" }},
 		{"tag too long", func(s *Server) { s.Tag = strings.Repeat("a", 25) }},
 		{"tag with control char", func(s *Server) { s.Tag = "pr\x00od" }},
 	}
@@ -170,6 +172,37 @@ func TestTag(t *testing.T) {
 	}
 	if untagged.Tag != "" {
 		t.Errorf("tag = %q; want empty", untagged.Tag)
+	}
+}
+
+func TestGroup(t *testing.T) {
+	s, _, _ := newTestStore(t)
+	ctx := context.Background()
+
+	srv := vps()
+	srv.Group = "  my   amazing\tapp "
+	saved, err := s.Save(ctx, srv)
+	if err != nil {
+		t.Fatalf("save: %v", err)
+	}
+	if saved.Group != "my amazing app" {
+		t.Errorf("group = %q; want whitespace trimmed and collapsed", saved.Group)
+	}
+
+	// The limit counts characters, not bytes.
+	srv = vps()
+	srv.Group = strings.Repeat("é", maxGroupLen)
+	if _, err := s.Save(ctx, srv); err != nil {
+		t.Errorf("group at the limit rejected: %v", err)
+	}
+
+	// A server without a group stays without one.
+	got, err := s.Save(ctx, vps())
+	if err != nil {
+		t.Fatalf("save ungrouped: %v", err)
+	}
+	if got.Group != "" {
+		t.Errorf("group = %q; want empty", got.Group)
 	}
 }
 
