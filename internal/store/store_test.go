@@ -118,6 +118,8 @@ func TestValidate(t *testing.T) {
 		{"unknown auth", func(s *Server) { s.Auth = "magic" }},
 		{"key without path", func(s *Server) { s.Auth = AuthKey }},
 		{"bad color", func(s *Server) { s.Color = "red" }},
+		{"tag too long", func(s *Server) { s.Tag = strings.Repeat("a", 25) }},
+		{"tag with control char", func(s *Server) { s.Tag = "pr\x00od" }},
 	}
 	s, _, _ := newTestStore(t)
 	for _, tt := range tests {
@@ -136,6 +138,38 @@ func TestValidate(t *testing.T) {
 		if _, err := s.Save(context.Background(), srv); err != nil {
 			t.Errorf("host %q rejected: %v", host, err)
 		}
+	}
+}
+
+func TestTag(t *testing.T) {
+	s, _, _ := newTestStore(t)
+	ctx := context.Background()
+
+	srv := vps()
+	srv.Tag = "  my   prod \t"
+	saved, err := s.Save(ctx, srv)
+	if err != nil {
+		t.Fatalf("save: %v", err)
+	}
+	if saved.Tag != "my prod" {
+		t.Errorf("tag = %q; want whitespace trimmed and collapsed", saved.Tag)
+	}
+
+	// Exactly the limit passes, counted in characters rather than bytes.
+	srv = vps()
+	srv.Tag = strings.Repeat("é", maxTagLen)
+	if _, err := s.Save(ctx, srv); err != nil {
+		t.Errorf("tag at the limit rejected: %v", err)
+	}
+
+	// An untagged server leaves the field out of servers.json.
+	srv = vps()
+	untagged, err := s.Save(ctx, srv)
+	if err != nil {
+		t.Fatalf("save untagged: %v", err)
+	}
+	if untagged.Tag != "" {
+		t.Errorf("tag = %q; want empty", untagged.Tag)
 	}
 }
 

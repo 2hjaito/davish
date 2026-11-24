@@ -4,6 +4,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Added
+- **Server tags** (#243): give a server a short tag such as `local`, `staging`, `prod` or your own (up to 24 characters) in the add/edit server dialog; the tag takes the server's existing color. It shows next to the server name in the menu bar, the server menu, All servers and each window's title bar, with a thin colored line under the menu bar, so you can tell which environment you are in. The server menu and All servers can filter by tag once there are two or more. Servers without a tag look the same as before.
+
 ## [1.15.0] - 2026-11-23
 
 ### Added

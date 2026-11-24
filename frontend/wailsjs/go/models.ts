@@ -193,6 +193,7 @@ export namespace app {
 	    auth: string;
 	    keyPath?: string;
 	    color?: string;
+	    tag?: string;
 	    jumpID?: string;
 	    password: string;
 	    passphrase: string;
@@ -211,6 +212,7 @@ export namespace app {
 	        this.auth = source["auth"];
 	        this.keyPath = source["keyPath"];
 	        this.color = source["color"];
+	        this.tag = source["tag"];
 	        this.jumpID = source["jumpID"];
 	        this.password = source["password"];
 	        this.passphrase = source["passphrase"];
@@ -225,6 +227,7 @@ export namespace app {
 	    auth: string;
 	    keyPath?: string;
 	    color?: string;
+	    tag?: string;
 	    jumpID?: string;
 	    hasPassword: boolean;
 	    hasPassphrase: boolean;
@@ -244,6 +247,7 @@ export namespace app {
 	        this.auth = source["auth"];
 	        this.keyPath = source["keyPath"];
 	        this.color = source["color"];
+	        this.tag = source["tag"];
 	        this.jumpID = source["jumpID"];
 	        this.hasPassword = source["hasPassword"];
 	        this.hasPassphrase = source["hasPassphrase"];

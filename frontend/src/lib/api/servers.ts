@@ -18,6 +18,8 @@ export interface ServerInfo {
   auth: AuthMethod
   keyPath?: string
   color?: string
+  /** Short environment label (local, staging, prod…), tinted by `color`. */
+  tag?: string
   jumpID?: string
   hasPassword: boolean
   hasPassphrase: boolean
@@ -34,6 +36,7 @@ export interface ServerDraft {
   auth: AuthMethod
   keyPath: string
   color: string
+  tag: string
   jumpID: string
   password: string
   passphrase: string

@@ -4,11 +4,20 @@
   import { ui } from '../stores/ui.svelte'
   import { openServers } from '../wm/intents.svelte'
   import Icon from '../ui/Icon.svelte'
+  import TagChip from '../ui/TagChip.svelte'
   import { shortcut } from './platform'
   import Popover from './Popover.svelte'
+  import { activeFilter, matchesTag, tagGroups } from './tags'
 
   let open = $state(false)
   let dragging = $state<string | null>(null)
+
+  // Filter by tag only makes sense once there is more than one to choose from.
+  let tagFilter = $state('')
+  const groups = $derived(tagGroups(servers.list))
+  const filterable = $derived(groups.length > 1)
+  const filter = $derived(activeFilter(groups, tagFilter))
+  const shown = $derived(servers.list.filter((s) => matchesTag(s, filter)))
 
   const dotColor: Record<ConnState, string> = {
     connected: 'var(--ok)',
@@ -61,14 +70,38 @@
   >
     <span class="dot" style:background={dotColor[servers.active?.state ?? 'disconnected']}></span>
     <span class="name">{servers.active?.name ?? t.servers.none}</span>
+    {#if servers.active?.tag}
+      <TagChip tag={servers.active.tag} color={servers.active.color} solid />
+    {/if}
     <Icon name="chevronDown" size={10} strokeWidth={3} />
   </button>
 
   <Popover {open} onclose={() => (open = false)} label={t.servers.picker} width={300}>
     <div class="header">{t.servers.header}</div>
+    {#if filterable}
+      <div class="filters" role="group" aria-label={t.servers.tagFilter}>
+        <button
+          type="button"
+          class="fchip"
+          aria-pressed={filter === ''}
+          onclick={() => (tagFilter = '')}>{t.servers.tagAll}</button
+        >
+        {#each groups as g (g.tag)}
+          <button
+            type="button"
+            class="fchip"
+            aria-pressed={filter.toLowerCase() === g.tag.toLowerCase()}
+            onclick={() => (tagFilter = g.tag)}
+          >
+            {#if g.color}<span class="swatch" style:background={g.color}></span>{/if}{g.tag}
+          </button>
+        {/each}
+      </div>
+    {/if}
     <!-- Many servers scroll here, so the actions below stay in reach (#178). -->
     <div class="servers">
-      {#each servers.list as s, i (s.id)}
+      {#each shown as s (s.id)}
+        {@const i = servers.list.indexOf(s)}
         {@const active = s.id === servers.activeId}
         <div
           class="row"
@@ -97,6 +130,7 @@
               <span class="name">{s.name}</span>
               <span class="sub">{s.user}@{s.host} · {t.servers.status[s.state]}</span>
             </span>
+            {#if s.tag}<TagChip tag={s.tag} color={s.color} />{/if}
             {#if i < 9}<span class="sub key">{shortcut(String(i + 1))}</span>{/if}
           </button>
           {#if s.state === 'failed'}
@@ -201,6 +235,47 @@
   /* A custom server color keeps the state visible as a ring. */
   .dot.ring {
     box-shadow: 0 0 0 2px var(--ring);
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 2px 10px 6px;
+  }
+
+  .fchip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 9px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--fill-soft);
+    color: var(--fg);
+    font-size: var(--text-xs);
+    transition: background var(--dur-fast) var(--ease-out);
+  }
+
+  .fchip:hover {
+    background: var(--row-hover);
+  }
+
+  .fchip[aria-pressed='true'] {
+    background: var(--accent);
+    color: var(--fg-on-accent);
+  }
+
+  .swatch {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+  }
+
+  /* On the accent row a tinted chip would vanish; give it a light ground. */
+  .item.active :global(.tag) {
+    background: rgba(255, 255, 255, 0.92);
+    color: color-mix(in srgb, var(--c, #555) 85%, #000);
   }
 
   .header {
