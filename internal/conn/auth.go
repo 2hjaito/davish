@@ -96,6 +96,11 @@ func (m *Manager) agentSigners() ([]ssh.Signer, func()) {
 			}
 			return nil, release
 		}
+		if len(l.signers) == 0 && m.log != nil {
+			// Some agents (authentik) list nothing until the client sends
+			// session-bind@openssh.com, which x/crypto/ssh cannot do (#240).
+			m.log.Info("ssh agent is running but lists no keys")
+		}
 		return l.signers, release
 	case <-time.After(agentTimeout):
 		if m.log != nil {

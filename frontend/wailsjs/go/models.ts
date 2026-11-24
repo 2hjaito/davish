@@ -193,6 +193,8 @@ export namespace app {
 	    auth: string;
 	    keyPath?: string;
 	    color?: string;
+	    tag?: string;
+	    group?: string;
 	    jumpID?: string;
 	    controlPath?: string;
 	    password: string;
@@ -212,6 +214,8 @@ export namespace app {
 	        this.auth = source["auth"];
 	        this.keyPath = source["keyPath"];
 	        this.color = source["color"];
+	        this.tag = source["tag"];
+	        this.group = source["group"];
 	        this.jumpID = source["jumpID"];
 	        this.controlPath = source["controlPath"];
 	        this.password = source["password"];
@@ -227,6 +231,8 @@ export namespace app {
 	    auth: string;
 	    keyPath?: string;
 	    color?: string;
+	    tag?: string;
+	    group?: string;
 	    jumpID?: string;
 	    controlPath?: string;
 	    hasPassword: boolean;
@@ -247,6 +253,8 @@ export namespace app {
 	        this.auth = source["auth"];
 	        this.keyPath = source["keyPath"];
 	        this.color = source["color"];
+	        this.tag = source["tag"];
+	        this.group = source["group"];
 	        this.jumpID = source["jumpID"];
 	        this.controlPath = source["controlPath"];
 	        this.hasPassword = source["hasPassword"];

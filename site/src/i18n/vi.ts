@@ -156,6 +156,8 @@ export const vi: Dict = {
     title: 'Được làm cùng những người dùng nó',
     lead: 'Code, báo lỗi, thử trên máy của chính mình và góp ý: cảm ơn các bạn.',
     code: 'code',
+    issue: 'issue',
+    discussion: 'thảo luận',
     join: 'Cùng tham gia trên GitHub',
   },
   footer: {

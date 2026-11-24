@@ -5,8 +5,13 @@
   import { servers } from '../stores/servers.svelte'
   import { ui } from '../stores/ui.svelte'
   import Dialog from '../ui/Dialog.svelte'
+  import { groupNames } from './groups'
+  import { MAX_GROUP_LENGTH, MAX_TAG_LENGTH, TAG_PRESETS } from './tags'
 
   const COLORS = ['', '#2f7de1', '#16a067', '#e08a12', '#d6455a', '#7a52d6', '#6b7180']
+
+  // Folders already in use, offered while typing so a typo does not make a new one.
+  const knownGroups = $derived(groupNames(servers.list))
 
   const editing = $derived(
     ui.serverDialog?.mode === 'edit'
@@ -29,6 +34,8 @@
       auth: 'agent',
       keyPath: '~/.ssh/id_ed25519',
       color: '',
+      tag: '',
+      group: '',
       jumpID: '',
       controlPath: '',
       password: '',
@@ -46,6 +53,8 @@
           ...s,
           keyPath: s.keyPath ?? '~/.ssh/id_ed25519',
           color: s.color ?? '',
+          tag: s.tag ?? '',
+          group: s.group ?? '',
           jumpID: s.jumpID ?? '',
           controlPath: s.controlPath ?? '',
           password: '',
@@ -224,6 +233,54 @@
     {/if}
 
     <div class="field">
+      <span>{t.serverDialog.tag}</span>
+      <div class="presets" role="group" aria-label={t.serverDialog.tag}>
+        <button
+          type="button"
+          class="preset"
+          aria-pressed={draft.tag === ''}
+          onclick={() => (draft.tag = '')}>{t.serverDialog.tagNone}</button
+        >
+        {#each TAG_PRESETS as p (p.tag)}
+          <button
+            type="button"
+            class="preset"
+            aria-pressed={draft.tag.trim().toLowerCase() === p.tag}
+            onclick={() => {
+              draft.tag = p.tag
+              draft.color = p.color
+            }}
+          >
+            <span class="pdot" style:background={p.color}></span>{p.tag}
+          </button>
+        {/each}
+      </div>
+      <input
+        class="input"
+        bind:value={draft.tag}
+        maxlength={MAX_TAG_LENGTH}
+        placeholder={t.serverDialog.tagPlaceholder}
+        aria-label={t.serverDialog.tag}
+      />
+      <small>{t.serverDialog.tagHint}</small>
+    </div>
+
+    <label class="field">
+      <span>{t.serverDialog.group}</span>
+      <input
+        class="input"
+        bind:value={draft.group}
+        maxlength={MAX_GROUP_LENGTH}
+        list="server-groups"
+        placeholder={t.serverDialog.groupPlaceholder}
+      />
+      <datalist id="server-groups">
+        {#each knownGroups as g (g.name)}<option value={g.name}></option>{/each}
+      </datalist>
+      <small>{t.serverDialog.groupHint}</small>
+    </label>
+
+    <div class="field">
       <span>{t.serverDialog.color}</span>
       <div class="swatches" role="radiogroup" aria-label={t.serverDialog.color}>
         {#each COLORS as c (c)}
@@ -315,6 +372,36 @@
     background: var(--content-bg);
     box-shadow: var(--switch-knob-shadow);
     font-weight: 600;
+  }
+
+  .presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .preset {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 11px;
+    border: 1px solid var(--divider);
+    border-radius: 999px;
+    background: var(--fill-soft);
+    color: var(--fg);
+    font-size: var(--text-sm);
+  }
+
+  .preset[aria-pressed='true'] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    font-weight: 600;
+  }
+
+  .pdot {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
   }
 
   .swatches {

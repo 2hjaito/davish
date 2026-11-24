@@ -155,6 +155,8 @@ export const zh: Dict = {
     title: '与使用它的人一起打造',
     lead: '代码、问题反馈、在自己的机器上测试以及各种建议：谢谢你们。',
     code: '代码',
+    issue: '问题反馈',
+    discussion: '讨论',
     join: '在 GitHub 上加入他们',
   },
   footer: {

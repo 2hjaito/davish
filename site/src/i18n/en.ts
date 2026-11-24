@@ -155,6 +155,8 @@ export const en = {
     title: 'Made with people who use it',
     lead: 'Code, bug reports, testing on their own machines and ideas: thank you.',
     code: 'code',
+    issue: 'issue',
+    discussion: 'discussion',
     join: 'Join them on GitHub',
   },
   footer: {

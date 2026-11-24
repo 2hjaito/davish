@@ -16,6 +16,8 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"unicode"
+	"unicode/utf8"
 
 	"davish/internal/apperr"
 )
@@ -41,7 +43,14 @@ type Server struct {
 	Auth AuthMethod `json:"auth"`
 	// KeyPath points at the user's private key; the key itself is never copied.
 	KeyPath string `json:"keyPath,omitempty"`
-	Color   string `json:"color,omitempty"`
+	// Color tints the server's dot and its tag chip.
+	Color string `json:"color,omitempty"`
+	// Tag is a short label for the environment (local, staging, prod…), shown
+	// next to the name so the wrong server is harder to open by mistake.
+	Tag string `json:"tag,omitempty"`
+	// Group is the folder the server is listed under in All servers (one
+	// level, by name); servers with the same Group sit together.
+	Group string `json:"group,omitempty"`
 	// JumpID is the saved server to connect through (ProxyJump); that
 	// server may jump through another, forming a chain.
 	JumpID string `json:"jumpID,omitempty"`
@@ -62,6 +71,8 @@ const (
 	fileVersion = 1
 	serversFile = "servers.json"
 	defaultPort = 22
+	maxTagLen   = 24
+	maxGroupLen = 40
 )
 
 // Store reads and writes servers.json in dir.
@@ -296,6 +307,8 @@ func normalize(srv Server) Server {
 	srv.KeyPath = strings.TrimSpace(srv.KeyPath)
 	srv.JumpID = strings.TrimSpace(srv.JumpID)
 	srv.ControlPath = strings.TrimSpace(srv.ControlPath)
+	srv.Tag = strings.Join(strings.Fields(srv.Tag), " ")
+	srv.Group = strings.Join(strings.Fields(srv.Group), " ")
 	if srv.Port == 0 {
 		srv.Port = defaultPort
 	}
@@ -308,8 +321,10 @@ func normalize(srv Server) Server {
 var (
 	// hostname follows RFC 1123 labels; IP literals are checked separately.
 	hostname = regexp.MustCompile(`^[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*$`)
-	// username is a portable POSIX login name.
-	username = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_.-]{0,31}$`)
+	// username is a login name: portable POSIX, plus "@" for directory
+	// accounts such as macOS or SSSD logins named after an email address.
+	// The leading letter or "_" keeps it from ever reading as an option.
+	username = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_.@-]{0,63}$`)
 	hexColor = regexp.MustCompile(`^#[0-9a-fA-F]{6}$`)
 )
 
@@ -330,6 +345,10 @@ func validate(srv Server) error {
 		return invalid("key auth needs a key path")
 	case srv.Color != "" && !hexColor.MatchString(srv.Color):
 		return invalid("color must be #rrggbb")
+	case utf8.RuneCountInString(srv.Tag) > maxTagLen || strings.ContainsFunc(srv.Tag, unicode.IsControl):
+		return invalid("tag must be at most 24 characters")
+	case utf8.RuneCountInString(srv.Group) > maxGroupLen || strings.ContainsFunc(srv.Group, unicode.IsControl):
+		return invalid("group must be at most 40 characters")
 	case srv.JumpID != "" && srv.JumpID == srv.ID:
 		return invalid("a server cannot jump through itself")
 	case srv.ControlPath != "" && srv.JumpID != "":

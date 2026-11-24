@@ -18,6 +18,10 @@ export interface ServerInfo {
   auth: AuthMethod
   keyPath?: string
   color?: string
+  /** Short environment label (local, staging, prod…), tinted by `color`. */
+  tag?: string
+  /** The folder it is listed under in All servers (one level). */
+  group?: string
   jumpID?: string
   controlPath?: string
   hasPassword: boolean
@@ -35,6 +39,8 @@ export interface ServerDraft {
   auth: AuthMethod
   keyPath: string
   color: string
+  tag: string
+  group: string
   jumpID: string
   controlPath: string
   password: string

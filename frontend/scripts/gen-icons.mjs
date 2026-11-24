@@ -79,6 +79,7 @@ const ICONS = {
   brandGit: 'SiGit',
   viewCards: 'LuLayoutGrid',
   viewTable: 'LuTable2',
+  tag: 'FiTag',
   widgets: 'LuLayoutDashboard',
 }
 
