@@ -4,7 +4,6 @@
   import { ui } from '../stores/ui.svelte'
   import { openServers } from '../wm/intents.svelte'
   import Icon from '../ui/Icon.svelte'
-  import type { IconName } from '../ui/icons'
   import TagChip from '../ui/TagChip.svelte'
   import { shortcut } from './platform'
   import Popover from './Popover.svelte'
@@ -49,16 +48,6 @@
     reconnecting: 'var(--warn)',
     disconnected: 'var(--offline)',
     failed: 'var(--danger)',
-  }
-
-  // The state as an icon on the line under the name: a tick when connected, a
-  // clock while connecting, a power icon when idle, a cross when it failed.
-  const stateIcon: Record<ConnState, IconName> = {
-    connected: 'check',
-    connecting: 'clock',
-    reconnecting: 'clock',
-    disconnected: 'power',
-    failed: 'close',
   }
 
   function choose(id: string) {
@@ -117,9 +106,12 @@
     ondragend={drop}
   >
     <button role="menuitem" class="item" class:active onclick={() => choose(s.id)}>
-      <!-- The dot is the connection state and nothing else. -->
+      <!-- The dot is the connection state and nothing else; the word is its title. -->
       <span
         class="dot"
+        role="img"
+        aria-label={t.servers.status[s.state]}
+        title={t.servers.status[s.state]}
         style:background={active && s.state === 'connected'
           ? 'var(--ok-on-accent)'
           : dotColor[s.state]}
@@ -130,19 +122,7 @@
           <span class="name">{s.name}</span>
           {#if s.tag}<TagChip tag={s.tag} color={s.color} />{/if}
         </span>
-        <span class="sub"
-          >{s.user}@{s.host} ·
-          <!-- An icon says the state without the word; the title keeps it. -->
-          <span
-            class="st"
-            data-state={s.state}
-            role="img"
-            aria-label={t.servers.status[s.state]}
-            title={t.servers.status[s.state]}
-          >
-            <Icon name={stateIcon[s.state]} size={12} strokeWidth={3} />
-          </span></span
-        >
+        <span class="sub">{s.user}@{s.host}</span>
       </span>
       {#if i < 9}<span class="sub key">{shortcut(String(i + 1))}</span>{/if}
       <!-- The server's own color, when no tag chip is there to carry it. -->
@@ -497,34 +477,6 @@
     min-width: 2.2em;
     text-align: right;
     font-variant-numeric: tabular-nums;
-  }
-
-  .st {
-    display: inline-flex;
-    vertical-align: -2px;
-    color: var(--offline);
-  }
-
-  .st[data-state='connected'] {
-    color: var(--ok);
-  }
-
-  .st[data-state='connecting'],
-  .st[data-state='reconnecting'] {
-    color: var(--warn);
-  }
-
-  .st[data-state='failed'] {
-    color: var(--danger);
-  }
-
-  /* On the accent row only a connected server keeps its green; the rest go white. */
-  .item.active .st {
-    color: inherit;
-  }
-
-  .item.active .st[data-state='connected'] {
-    color: var(--ok-on-accent);
   }
 
   .active .sub {
