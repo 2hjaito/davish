@@ -127,10 +127,13 @@
               style:--ring={dotColor[s.state]}
             ></span>
             <span class="text">
-              <span class="name">{s.name}</span>
+              <!-- The tag sits by the name so the line below keeps its full width. -->
+              <span class="line">
+                <span class="name">{s.name}</span>
+                {#if s.tag}<TagChip tag={s.tag} color={s.color} />{/if}
+              </span>
               <span class="sub">{s.user}@{s.host} · {t.servers.status[s.state]}</span>
             </span>
-            {#if s.tag}<TagChip tag={s.tag} color={s.color} />{/if}
             {#if i < 9}<span class="sub key">{shortcut(String(i + 1))}</span>{/if}
           </button>
           {#if s.state === 'failed'}
@@ -328,7 +331,18 @@
 
   .name {
     display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     font-weight: 600;
+  }
+
+  .line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
   }
 
   .sub {
