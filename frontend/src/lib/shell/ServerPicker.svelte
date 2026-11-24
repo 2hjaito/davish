@@ -106,9 +106,12 @@
     ondragend={drop}
   >
     <button role="menuitem" class="item" class:active onclick={() => choose(s.id)}>
-      <!-- The dot is the connection state and nothing else. -->
+      <!-- The dot is the connection state and nothing else; the word is its title. -->
       <span
         class="dot"
+        role="img"
+        aria-label={t.servers.status[s.state]}
+        title={t.servers.status[s.state]}
         style:background={active && s.state === 'connected'
           ? 'var(--ok-on-accent)'
           : dotColor[s.state]}
@@ -119,48 +122,36 @@
           <span class="name">{s.name}</span>
           {#if s.tag}<TagChip tag={s.tag} color={s.color} />{/if}
         </span>
-        <span class="sub"
-          >{s.user}@{s.host} ·
-          {#if s.state === 'connected'}
-            <!-- A tick says "connected" without the word; the title keeps it. -->
-            <span
-              class="ok"
-              role="img"
-              aria-label={t.servers.status.connected}
-              title={t.servers.status.connected}
-            >
-              <Icon name="check" size={12} strokeWidth={3} />
-            </span>
-          {:else}
-            {t.servers.status[s.state]}
-          {/if}</span
-        >
+        <span class="sub">{s.user}@{s.host}</span>
       </span>
       {#if i < 9}<span class="sub key">{shortcut(String(i + 1))}</span>{/if}
       <!-- The server's own color, when no tag chip is there to carry it. -->
       {#if s.color && !s.tag}<span class="bar" style:background={s.color}></span>{/if}
     </button>
-    {#if s.state === 'failed'}
-      <button class="tool" aria-label={t.servers.reconnect} onclick={(e) => retry(e, s.id)}>
-        <Icon name="refresh" size={13} />
+    <!-- The tools sit over the row's right end on hover, so every row keeps one width. -->
+    <span class="tools">
+      {#if s.state === 'failed'}
+        <button class="tool" aria-label={t.servers.reconnect} onclick={(e) => retry(e, s.id)}>
+          <Icon name="refresh" size={13} />
+        </button>
+      {/if}
+      {#if s.state === 'connected' || s.state === 'connecting' || s.state === 'reconnecting'}
+        <button
+          class="tool"
+          aria-label={t.servers.overview.disconnect}
+          title={t.servers.overview.disconnect}
+          onclick={(e) => {
+            e.stopPropagation()
+            void servers.disconnect(s.id)
+          }}
+        >
+          <Icon name="power" size={13} />
+        </button>
+      {/if}
+      <button class="tool" aria-label={t.servers.edit} onclick={(e) => edit(e, s.id)}>
+        <Icon name="editor" size={13} />
       </button>
-    {/if}
-    {#if s.state === 'connected' || s.state === 'connecting' || s.state === 'reconnecting'}
-      <button
-        class="tool"
-        aria-label={t.servers.overview.disconnect}
-        title={t.servers.overview.disconnect}
-        onclick={(e) => {
-          e.stopPropagation()
-          void servers.disconnect(s.id)
-        }}
-      >
-        <Icon name="power" size={13} />
-      </button>
-    {/if}
-    <button class="tool" aria-label={t.servers.edit} onclick={(e) => edit(e, s.id)}>
-      <Icon name="editor" size={13} />
-    </button>
+    </span>
   </div>
 {/snippet}
 
@@ -400,8 +391,8 @@
     white-space: nowrap;
   }
 
+  /* The count sits right after the name, not at the far end. */
   .gcount {
-    margin-left: auto;
     font-weight: 400;
     font-variant-numeric: tabular-nums;
   }
@@ -480,18 +471,12 @@
     text-overflow: ellipsis;
   }
 
+  /* Shortcuts line up in one column at the row's right end. */
   .key {
     flex-shrink: 0;
-  }
-
-  .ok {
-    display: inline-flex;
-    vertical-align: -2px;
-    color: var(--ok);
-  }
-
-  .item.active .ok {
-    color: var(--ok-on-accent);
+    min-width: 2.2em;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
   }
 
   .active .sub {
@@ -500,10 +485,19 @@
   }
 
   /* Row tools appear on hover, over the shortcut hint. */
+  .tools {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    display: flex;
+    gap: 2px;
+    transform: translateY(-50%);
+  }
+
   .tool {
     display: flex;
     padding: 4px;
-    margin-left: 2px;
+    pointer-events: none;
     border: 0;
     border-radius: 6px;
     background: var(--content-bg);
@@ -515,6 +509,7 @@
   .row:hover .tool,
   .tool:focus-visible {
     opacity: 1;
+    pointer-events: auto;
   }
 
   .tool:hover {
