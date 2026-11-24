@@ -1519,6 +1519,8 @@ const en = {
     edit: 'Edit server',
     reconnect: 'Reconnect',
     dragToReorder: 'Drag to reorder',
+    tagFilter: 'Filter by tag',
+    tagAll: 'All',
     status: {
       connected: 'connected',
       connecting: 'connecting…',
@@ -1674,6 +1676,11 @@ const en = {
     password: 'Password',
     secretSaved: 'Saved in the keychain. Leave empty to keep it.',
     secretHint: 'Kept in the system keychain, never written to a file.',
+    tag: 'Tag',
+    tagNone: 'None',
+    tagPlaceholder: 'Or your own, e.g. qa',
+    tagHint:
+      'Shown next to the server name, so you can tell environments apart. The color below tints it.',
     color: 'Color',
     jump: 'Go through a server (ProxyJump)',
     jumpNone: 'No, connect directly',

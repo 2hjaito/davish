@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- **Nhãn server** (#243): gắn một nhãn ngắn như `local`, `staging`, `prod` hoặc tên bạn tự đặt (tối đa 24 ký tự) vào server, trong hộp thoại thêm/sửa server; màu của nhãn là màu server có sẵn. Nhãn hiện cạnh tên server trên menu bar, trong menu chọn server, ở Tất cả server và trên thanh tiêu đề của cửa sổ, kèm một vạch màu mảnh dưới menu bar, để biết mình đang ở môi trường nào. Menu chọn server và Tất cả server có thêm bộ lọc theo nhãn khi có từ hai nhãn trở lên. Server không có nhãn giữ nguyên như cũ.
+
 ## [1.15.0] - 2026-11-23
 
 ### Thêm

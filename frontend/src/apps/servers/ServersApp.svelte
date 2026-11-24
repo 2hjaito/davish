@@ -10,7 +10,9 @@
   import { ui } from '../../lib/stores/ui.svelte'
   import Meter from '../../lib/ui/charts/Meter.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
+  import { activeFilter, matchesTag, tagGroups } from '../../lib/shell/tags'
   import Icon from '../../lib/ui/Icon.svelte'
+  import TagChip from '../../lib/ui/TagChip.svelte'
   import TitleBar from '../../lib/wm/TitleBar.svelte'
   import type { AppProps } from '../types'
   import MultiRun from './MultiRun.svelte'
@@ -55,9 +57,17 @@
   let query = $state('')
   let sort = $state<'alerts' | 'name'>('alerts')
   const many = $derived(servers.list.length >= 4)
+  // Tag chips appear as soon as two tags exist; the search matches tags too.
+  let tagFilter = $state('')
+  const groups = $derived(tagGroups(servers.list))
+  const filter = $derived(activeFilter(groups, tagFilter))
   const shown = $derived.by(() => {
     const q = query.trim().toLowerCase()
-    const list = servers.list.filter((x) => !q || `${x.name} ${x.host}`.toLowerCase().includes(q))
+    const list = servers.list.filter(
+      (x) =>
+        matchesTag(x, filter) &&
+        (!q || `${x.name} ${x.host} ${x.tag ?? ''}`.toLowerCase().includes(q)),
+    )
     if (sort === 'name') return [...list].sort((a, b) => a.name.localeCompare(b.name))
     const weight = (id: string) => alertsFor(notifications.list, id).count
     return [...list].sort((a, b) => weight(b.id) - weight(a.id))
@@ -123,6 +133,20 @@
           {/each}
         </div>
       {/if}
+      {#if groups.length > 1}
+        <div class="segmented" role="group" aria-label={s.tagFilter}>
+          <button type="button" aria-pressed={filter === ''} onclick={() => (tagFilter = '')}
+            >{s.tagAll}</button
+          >
+          {#each groups as g (g.tag)}
+            <button
+              type="button"
+              aria-pressed={filter.toLowerCase() === g.tag.toLowerCase()}
+              onclick={() => (tagFilter = g.tag)}>{g.tag}</button
+            >
+          {/each}
+        </div>
+      {/if}
       <span class="grow"></span>
       <div class="segmented" role="group" aria-label={s.overview.view}>
         {#each ['cards', 'list'] as const as v (v)}
@@ -158,6 +182,7 @@
                     title={s.overview.switch}
                     onclick={() => servers.select(srv.id)}>{srv.name}</button
                   >
+                  {#if srv.tag}<TagChip tag={srv.tag} color={srv.color} />{/if}
                   <span class="host">{srv.user}@{srv.host}</span>
                   {#if al.count}
                     <span class="badge {al.level}" title={al.latest}>
@@ -220,6 +245,7 @@
             <header>
               <span class="dot" style:background={dotColor[srv.state]}></span>
               <span class="name">{srv.name}</span>
+              {#if srv.tag}<TagChip tag={srv.tag} color={srv.color} />{/if}
               {#if al.count}
                 <span class="badge {al.level}" title={al.latest}>
                   <Icon name="warning" size={11} strokeWidth={2.4} />{al.count}

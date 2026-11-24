@@ -1545,6 +1545,8 @@ const es = {
     edit: 'Editar servidor',
     reconnect: 'Volver a conectar',
     dragToReorder: 'Arrastra para reordenar',
+    tagFilter: 'Filtrar por etiqueta',
+    tagAll: 'Todas',
     status: {
       connected: 'conectado',
       connecting: 'conectando…',
@@ -1702,6 +1704,11 @@ const es = {
     password: 'Contraseña',
     secretSaved: 'Guardada en el llavero. Déjala vacía para conservarla.',
     secretHint: 'Se guarda en el llavero del sistema, nunca en un archivo.',
+    tag: 'Etiqueta',
+    tagNone: 'Ninguna',
+    tagPlaceholder: 'O la tuya, p. ej. qa',
+    tagHint:
+      'Se muestra junto al nombre del servidor para distinguir entornos. El color de abajo la tiñe.',
     color: 'Color',
     jump: 'Pasar por un servidor (ProxyJump)',
     jumpNone: 'No, conectar directamente',
