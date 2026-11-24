@@ -106,13 +106,12 @@
     ondragend={drop}
   >
     <button role="menuitem" class="item" class:active onclick={() => choose(s.id)}>
+      <!-- The dot is the connection state and nothing else. -->
       <span
         class="dot"
         style:background={active && s.state === 'connected'
           ? 'var(--ok-on-accent)'
-          : (s.color ?? dotColor[s.state])}
-        class:ring={!!s.color}
-        style:--ring={dotColor[s.state]}
+          : dotColor[s.state]}
       ></span>
       <span class="text">
         <!-- The tag sits by the name so the line below keeps its full width. -->
@@ -123,6 +122,8 @@
         <span class="sub">{s.user}@{s.host} · {t.servers.status[s.state]}</span>
       </span>
       {#if i < 9}<span class="sub key">{shortcut(String(i + 1))}</span>{/if}
+      <!-- The server's own color, when no tag chip is there to carry it. -->
+      {#if s.color && !s.tag}<span class="bar" style:background={s.color}></span>{/if}
     </button>
     {#if s.state === 'failed'}
       <button class="tool" aria-label={t.servers.reconnect} onclick={(e) => retry(e, s.id)}>
@@ -290,9 +291,14 @@
     flex-shrink: 0;
   }
 
-  /* A custom server color keeps the state visible as a ring. */
-  .dot.ring {
-    box-shadow: 0 0 0 2px var(--ring);
+  /* A thin line at the row's edge in the server's color. */
+  .bar {
+    position: absolute;
+    left: 2px;
+    top: 8px;
+    bottom: 8px;
+    width: 3px;
+    border-radius: 2px;
   }
 
   .filters {
@@ -405,6 +411,7 @@
   }
 
   .item {
+    position: relative;
     flex: 1;
     min-width: 0;
     width: 100%;
