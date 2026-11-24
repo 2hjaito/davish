@@ -315,8 +315,10 @@ func normalize(srv Server) Server {
 var (
 	// hostname follows RFC 1123 labels; IP literals are checked separately.
 	hostname = regexp.MustCompile(`^[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*$`)
-	// username is a portable POSIX login name.
-	username = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_.-]{0,31}$`)
+	// username is a login name: portable POSIX, plus "@" for directory
+	// accounts such as macOS or SSSD logins named after an email address.
+	// The leading letter or "_" keeps it from ever reading as an option.
+	username = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_.@-]{0,63}$`)
 	hexColor = regexp.MustCompile(`^#[0-9a-fA-F]{6}$`)
 )
 

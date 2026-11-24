@@ -115,6 +115,9 @@ func TestValidate(t *testing.T) {
 		{"host with shell", func(s *Server) { s.Host = "$(reboot)" }},
 		{"port too big", func(s *Server) { s.Port = 70000 }},
 		{"bad user", func(s *Server) { s.User = "root; rm" }},
+		{"user starting with dash", func(s *Server) { s.User = "-oProxyCommand=x" }},
+		{"user starting with @", func(s *Server) { s.User = "@example.com" }},
+		{"user too long", func(s *Server) { s.User = strings.Repeat("a", 65) }},
 		{"unknown auth", func(s *Server) { s.Auth = "magic" }},
 		{"key without path", func(s *Server) { s.Auth = AuthKey }},
 		{"bad color", func(s *Server) { s.Color = "red" }},
@@ -132,6 +135,14 @@ func TestValidate(t *testing.T) {
 				t.Errorf("err = %v; want INVALID_INPUT", err)
 			}
 		})
+	}
+
+	for _, user := range []string{"root", "deploy-bot", "jane.doe@example.com", "jdoe@CORP.EXAMPLE.COM"} {
+		srv := vps()
+		srv.User = user
+		if _, err := s.Save(context.Background(), srv); err != nil {
+			t.Errorf("user %q rejected: %v", user, err)
+		}
 	}
 
 	for _, host := range []string{"10.0.0.5", "::1", "my-vps", "a.b.example.org"} {
