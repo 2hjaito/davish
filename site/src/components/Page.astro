@@ -20,6 +20,8 @@ const t = dicts[locale]
 const r = await release()
 const s = await stats()
 const people = await contributors()
+// One drawn icon per way of helping; the colors are in global.css.
+const ROLE_ICON = { code: 'code', issue: 'bug', discussion: 'messages' } as const
 const here = locales.find((l) => l.id === locale)!
 const docs = locale === 'en' ? '/docs/' : `/${locale}/docs/`
 const fmt = new Intl.NumberFormat(t.lang)
@@ -350,9 +352,13 @@ const platforms = [
           <ul class="people">
             {people.map((p) => (
               <li>
-                <a href={p.url} title={p.code ? `@${p.login} · ${t.thanks.code}` : `@${p.login}`}>
+                <a href={p.url} title={[`@${p.login}`, ...p.roles.map((r) => t.thanks[r])].join(' · ')}>
                   <img src={`${p.avatar}&s=96`} alt={`@${p.login}`} width="48" height="48" loading="lazy" decoding="async" />
-                  {p.code && <span class="badge-code" aria-hidden="true"><Icon name="code" size={11} stroke={2.4} /></span>}
+                  <span class="badges" aria-hidden="true">
+                    {p.roles.map((r) => (
+                      <span class={`role role-${r}`}><Icon name={ROLE_ICON[r]} size={11} stroke={2.4} /></span>
+                    ))}
+                  </span>
                 </a>
               </li>
             ))}

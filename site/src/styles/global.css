@@ -950,18 +950,46 @@ p {
   box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--line-strong);
 }
 
-.badge-code {
+/* One small disc per way of helping, overlapping at the avatar's corner. */
+.badges {
   position: absolute;
-  right: -2px;
+  right: -4px;
   bottom: -2px;
+  display: flex;
+}
+
+.role {
   display: grid;
   place-items: center;
+  /* A flex item would shrink into an oval as soon as two overlap. */
+  flex: none;
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
   box-shadow: 0 0 0 2px var(--bg);
+}
+
+/* The icon must not take the link's color. */
+.role .icon {
+  width: 11px;
+  height: 11px;
+  color: #fff;
+}
+
+.role + .role {
+  margin-left: -7px;
+}
+
+.role-code {
+  background: var(--accent);
+}
+
+.role-issue {
+  background: #c27400;
+}
+
+.role-discussion {
+  background: #7a52d6;
 }
 
 /* Footer */
