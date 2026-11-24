@@ -32,7 +32,7 @@ Không cài gì lên server.
 - **Thấy trước mọi lệnh.** Thao tác phá hủy (dừng dịch vụ, xóa file, khởi động lại container, thay crontab) hiện đúng lệnh sẽ chạy trước khi chạy. Nhật ký lệnh ghi lại mọi thứ Davish đã chạy thay bạn, và xuất các thay đổi thành shell script để đọc lại và chạy lại.
 - **Bí mật nằm trong keychain.** Mật khẩu và passphrase chỉ lưu trong keychain của hệ điều hành. Mật khẩu `sudo` không bao giờ được lưu: khi cần root, Davish hỏi một lần mỗi phiên, chỉ giữ trong bộ nhớ, quên sau 15 phút không dùng và đưa cho sudo qua stdin, hoặc bạn tự chạy lệnh trong Terminal.
 - **Tự khóa khi bạn rời máy.** Mật khẩu khóa riêng, Touch ID trên macOS; khóa khi máy ngủ dậy, sau thời gian không dùng, hoặc `⌘L`. Phiên SSH vẫn chạy sau màn khóa, nhưng không thao tác nào tới được server cho tới khi mở khóa.
-- **Nhiều server, một desktop.** Mỗi server là một workspace (`⌘1`…`⌘9`) nhớ cửa sổ riêng của nó. Kéo file để copy giữa các server.
+- **Nhiều server, một desktop.** Mỗi server là một workspace (`⌘1`…`⌘9`) nhớ cửa sổ riêng của nó. Kéo file để copy giữa các server. Gắn nhãn (`prod`, `staging`…) và nhóm cho server, để chữ `prod` đỏ luôn hiện trên màn hình và server xếp theo thư mục.
 - **Tự cập nhật.** Có bản mới thì hiện thay đổi kèm Cập nhật, Để sau, Bỏ qua bản này; Davish tự tải, kiểm chữ ký rồi khởi động lại vào bản mới. Không phải cài lại.
 - **Tiếng Việt, tiếng Anh, tiếng Trung giản thể hoặc tiếng Tây Ban Nha.** Chọn ngôn ngữ trong Cài đặt; lần đầu Davish theo ngôn ngữ của máy.
 - **Dùng luôn `~/.ssh/config` và Ansible inventory.** Nhập host một lần, kèm key và `ProxyJump`, cả một group Ansible một lúc; Davish chỉ đọc file. Server sau bastion kết nối qua nó, mỗi bậc kiểm tra host key riêng, cả chuỗi tự kết nối lại.
@@ -48,7 +48,7 @@ Không cài gì lên server.
 - [Editor](FEATURES.vi.md#editor): CodeMirror, lưu atomic, có sao lưu, tùy chỉnh được
 - [Logs](FEATURES.vi.md#logs): journal, file, container, theo dõi trực tiếp và tìm trong toàn bộ lịch sử trên server
 - [Monitor](FEATURES.vi.md#monitor): CPU, RAM, ổ đĩa, mạng, GPU, tiến trình, trên server Linux và Windows
-- [Tất cả server](FEATURES.vi.md#tất-cả-server): tình trạng và cảnh báo của mọi server trong một cửa sổ, bản đồ những gì mỗi server đang phục vụ, và chạy một lệnh trên nhiều server, mỗi server một tab terminal
+- [Tất cả server](FEATURES.vi.md#tất-cả-server): tình trạng và cảnh báo của mọi server trong một cửa sổ, xếp thư mục theo nhóm và lọc theo trạng thái, nhóm hoặc nhãn, bản đồ những gì mỗi server đang phục vụ, và chạy một lệnh trên nhiều server, mỗi server một tab terminal
 
 **Dịch vụ và ứng dụng**
 
