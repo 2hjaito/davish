@@ -2,11 +2,15 @@
 // people with commits (by count), then those who opened issues or pull
 // requests, then those who started or answered a discussion. Bots and the
 // team account are left out. Anything unreadable leaves the list empty.
+/** What someone did: commits, an issue or pull request, or a discussion. */
+export type Role = 'code' | 'issue' | 'discussion'
+
 export interface Person {
   login: string
   avatar: string
   url: string
-  code: boolean
+  /** Every way they helped, in the order the list ranks them. */
+  roles: Role[]
 }
 
 // The maintainer is listed, and always first; the team account is not.
@@ -108,21 +112,25 @@ export function contributors(): Promise<Person[]> {
     const api = 'https://api.github.com/repos/2hjaito/davish'
     const code = await get<User & { contributions: number }>(`${api}/contributors?per_page=100`)
     const people = new Map<string, Person>()
-    const add = (u: User, isCode: boolean) => {
-      if (u.type !== 'User' || LEFT_OUT.has(u.login) || people.has(u.login)) return
-      people.set(u.login, { login: u.login, avatar: u.avatar_url, url: u.html_url, code: isCode })
+    // A person keeps the place of their first role and gains the others.
+    const add = (u: User, role: Role) => {
+      if (u.type !== 'User' || LEFT_OUT.has(u.login)) return
+      const known = people.get(u.login)
+      if (!known) {
+        people.set(u.login, { login: u.login, avatar: u.avatar_url, url: u.html_url, roles: [role] })
+      } else if (!known.roles.includes(role)) known.roles.push(role)
     }
     // Commits first, by count, with the maintainer moved to the front.
     const byCount = code.sort((a, b) => b.contributions - a.contributions)
     const me = byCount.find((u) => u.login === MAINTAINER)
-    if (me) add(me, true)
-    for (const u of byCount) add(u, true)
+    if (me) add(me, 'code')
+    for (const u of byCount) add(u, 'code')
     for (let page = 1; page <= 5; page++) {
       const issues = await get<{ user: User }>(`${api}/issues?state=all&per_page=100&page=${page}`)
-      for (const i of issues) add(i.user, false)
+      for (const i of issues) add(i.user, 'issue')
       if (issues.length < 100) break
     }
-    for (const u of await discussionPeople()) add(u, false)
+    for (const u of await discussionPeople()) add(u, 'discussion')
     return [...people.values()]
   })()
   return cached
