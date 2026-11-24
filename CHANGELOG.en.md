@@ -5,6 +5,12 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Added
+- **Server groups** (#243): the add/edit server dialog has a **Group** field (one level, up to 40 characters, suggesting the groups already in use). **All servers** now uses the same layout as Docker: a sidebar filters by connection state (All, Connected, Failed, Not connected), by group and by tag, each with a count. Servers of one group sit under a folder heading that folds (it remembers how you left it, and shows how many are up and how many alerts), in both the cards and the table. The search matches groups too. With no group on any server, the list looks as before.
+
+### Changed
+- In All servers, the tag filter moves from a row of buttons to the sidebar, Add, Import and Run a command become icons in the toolbar, and Cards/Table are two icons like in Docker.
+
+### Added
 - **Server tags** (#243): give a server a short tag such as `local`, `staging`, `prod` or your own (up to 24 characters) in the add/edit server dialog; the tag takes the server's existing color. It shows next to the server name in the menu bar, the server menu, All servers and each window's title bar, with a thin colored line under the menu bar, so you can tell which environment you are in. The server menu and All servers can filter by tag once there are two or more. Servers without a tag look the same as before.
 
 ## [1.15.0] - 2026-11-23

@@ -20,6 +20,8 @@ export interface ServerInfo {
   color?: string
   /** Short environment label (local, staging, prod…), tinted by `color`. */
   tag?: string
+  /** The folder it is listed under in All servers (one level). */
+  group?: string
   jumpID?: string
   hasPassword: boolean
   hasPassphrase: boolean
@@ -37,6 +39,7 @@ export interface ServerDraft {
   keyPath: string
   color: string
   tag: string
+  group: string
   jumpID: string
   password: string
   passphrase: string

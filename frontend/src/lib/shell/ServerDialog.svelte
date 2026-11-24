@@ -5,9 +5,13 @@
   import { servers } from '../stores/servers.svelte'
   import { ui } from '../stores/ui.svelte'
   import Dialog from '../ui/Dialog.svelte'
-  import { MAX_TAG_LENGTH, TAG_PRESETS } from './tags'
+  import { groupNames } from '../../apps/servers/groups'
+  import { MAX_GROUP_LENGTH, MAX_TAG_LENGTH, TAG_PRESETS } from './tags'
 
   const COLORS = ['', '#2f7de1', '#16a067', '#e08a12', '#d6455a', '#7a52d6', '#6b7180']
+
+  // Folders already in use, offered while typing so a typo does not make a new one.
+  const knownGroups = $derived(groupNames(servers.list))
 
   const editing = $derived(
     ui.serverDialog?.mode === 'edit'
@@ -31,6 +35,7 @@
       keyPath: '~/.ssh/id_ed25519',
       color: '',
       tag: '',
+      group: '',
       jumpID: '',
       password: '',
       passphrase: '',
@@ -48,6 +53,7 @@
           keyPath: s.keyPath ?? '~/.ssh/id_ed25519',
           color: s.color ?? '',
           tag: s.tag ?? '',
+          group: s.group ?? '',
           jumpID: s.jumpID ?? '',
           password: '',
           passphrase: '',
@@ -243,6 +249,21 @@
       />
       <small>{t.serverDialog.tagHint}</small>
     </div>
+
+    <label class="field">
+      <span>{t.serverDialog.group}</span>
+      <input
+        class="input"
+        bind:value={draft.group}
+        maxlength={MAX_GROUP_LENGTH}
+        list="server-groups"
+        placeholder={t.serverDialog.groupPlaceholder}
+      />
+      <datalist id="server-groups">
+        {#each knownGroups as g (g.name)}<option value={g.name}></option>{/each}
+      </datalist>
+      <small>{t.serverDialog.groupHint}</small>
+    </label>
 
     <div class="field">
       <span>{t.serverDialog.color}</span>
