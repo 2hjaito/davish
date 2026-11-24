@@ -119,7 +119,22 @@
           <span class="name">{s.name}</span>
           {#if s.tag}<TagChip tag={s.tag} color={s.color} />{/if}
         </span>
-        <span class="sub">{s.user}@{s.host} · {t.servers.status[s.state]}</span>
+        <span class="sub"
+          >{s.user}@{s.host} ·
+          {#if s.state === 'connected'}
+            <!-- A tick says "connected" without the word; the title keeps it. -->
+            <span
+              class="ok"
+              role="img"
+              aria-label={t.servers.status.connected}
+              title={t.servers.status.connected}
+            >
+              <Icon name="check" size={12} strokeWidth={3} />
+            </span>
+          {:else}
+            {t.servers.status[s.state]}
+          {/if}</span
+        >
       </span>
       {#if i < 9}<span class="sub key">{shortcut(String(i + 1))}</span>{/if}
       <!-- The server's own color, when no tag chip is there to carry it. -->
@@ -467,6 +482,16 @@
 
   .key {
     flex-shrink: 0;
+  }
+
+  .ok {
+    display: inline-flex;
+    vertical-align: -2px;
+    color: var(--ok);
+  }
+
+  .item.active .ok {
+    color: var(--ok-on-accent);
   }
 
   .active .sub {
