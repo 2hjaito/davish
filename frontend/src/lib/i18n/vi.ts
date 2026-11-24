@@ -1681,6 +1681,9 @@ const vi = {
     jump: 'Đi qua server (ProxyJump)',
     jumpNone: 'Không, kết nối thẳng',
     jumpHint: 'Kết nối tới server trung gian trước rồi mới vào server này, như ProxyJump của ssh.',
+    control: 'Nâng cao: dùng ssh control socket',
+    controlHint:
+      'Dùng khi đăng nhập chỉ chạy được qua OpenSSH, như agent cấp chứng chỉ (authentik). Thay thế phần xác thực ở trên. Tự mở master: ssh -M -S <path> -fN user@host. Davish không bao giờ thấy thông tin đăng nhập của bạn. Chỉ có trên Linux và macOS.',
     save: 'Lưu và kết nối',
     cancel: 'Hủy',
     delete: 'Xóa server',
@@ -3376,6 +3379,7 @@ const vi = {
     CONN_PASSPHRASE_WRONG:
       'Passphrase đã lưu không mở được private key này. Hãy sửa server và nhập lại.',
     CONN_NOT_CONNECTED: 'Server chưa được kết nối.',
+    CONN_CONTROL_SOCKET: 'Không dùng được control socket.',
     TERM_CLOSED: 'Phiên terminal đã đóng.',
     FS_PERMISSION_DENIED: 'Không có quyền truy cập.',
     FS_EXISTS: 'Đã có file hoặc thư mục trùng tên.',

@@ -37,6 +37,7 @@
       tag: '',
       group: '',
       jumpID: '',
+      controlPath: '',
       password: '',
       passphrase: '',
     }
@@ -55,6 +56,7 @@
           tag: s.tag ?? '',
           group: s.group ?? '',
           jumpID: s.jumpID ?? '',
+          controlPath: s.controlPath ?? '',
           password: '',
           passphrase: '',
         }
@@ -215,6 +217,19 @@
         </select>
         <small>{t.serverDialog.jumpHint}</small>
       </label>
+    {/if}
+
+    {#if !draft.jumpID}
+      <details class="field" open={draft.controlPath !== ''}>
+        <summary>{t.serverDialog.control}</summary>
+        <input
+          class="input mono"
+          spellcheck="false"
+          placeholder="~/.ssh/davish-mux"
+          bind:value={draft.controlPath}
+        />
+        <small>{t.serverDialog.controlHint}</small>
+      </details>
     {/if}
 
     <div class="field">

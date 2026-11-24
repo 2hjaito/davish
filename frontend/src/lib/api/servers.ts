@@ -23,6 +23,7 @@ export interface ServerInfo {
   /** The folder it is listed under in All servers (one level). */
   group?: string
   jumpID?: string
+  controlPath?: string
   hasPassword: boolean
   hasPassphrase: boolean
   state: ConnState
@@ -41,6 +42,7 @@ export interface ServerDraft {
   tag: string
   group: string
   jumpID: string
+  controlPath: string
   password: string
   passphrase: string
 }

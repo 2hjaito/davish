@@ -54,6 +54,11 @@ type Server struct {
 	// JumpID is the saved server to connect through (ProxyJump); that
 	// server may jump through another, forming a chain.
 	JumpID string `json:"jumpID,omitempty"`
+	// ControlPath, when set, makes Davish attach to an OpenSSH ControlMaster
+	// socket the user started (ssh -M -S <path>) instead of logging in itself.
+	// OpenSSH then does the authentication and host key check. Empty is the
+	// normal login. Unix only.
+	ControlPath string `json:"controlPath,omitempty"`
 }
 
 // file is the on-disk layout of servers.json. Slice order is display order.
@@ -301,6 +306,7 @@ func normalize(srv Server) Server {
 	srv.User = strings.TrimSpace(srv.User)
 	srv.KeyPath = strings.TrimSpace(srv.KeyPath)
 	srv.JumpID = strings.TrimSpace(srv.JumpID)
+	srv.ControlPath = strings.TrimSpace(srv.ControlPath)
 	srv.Tag = strings.Join(strings.Fields(srv.Tag), " ")
 	srv.Group = strings.Join(strings.Fields(srv.Group), " ")
 	if srv.Port == 0 {
@@ -345,6 +351,12 @@ func validate(srv Server) error {
 		return invalid("group must be at most 40 characters")
 	case srv.JumpID != "" && srv.JumpID == srv.ID:
 		return invalid("a server cannot jump through itself")
+	case srv.ControlPath != "" && srv.JumpID != "":
+		return invalid("a control socket and a jump server cannot be combined")
+	case srv.ControlPath != "" && !strings.HasPrefix(srv.ControlPath, "/") && !strings.HasPrefix(srv.ControlPath, "~/"):
+		return invalid("control socket path must be absolute or start with ~/")
+	case len(srv.ControlPath) > 1024:
+		return invalid("control socket path is too long")
 	}
 	return nil
 }

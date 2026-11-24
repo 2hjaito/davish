@@ -19,6 +19,7 @@ const (
 	ConnKeyUnreadable    Code = "CONN_KEY_UNREADABLE"
 	ConnPassphraseWrong  Code = "CONN_PASSPHRASE_WRONG"
 	ConnNotConnected     Code = "CONN_NOT_CONNECTED"
+	ConnControlSocket    Code = "CONN_CONTROL_SOCKET"
 	TermClosed           Code = "TERM_CLOSED"
 	FSPermissionDenied   Code = "FS_PERMISSION_DENIED"
 	FSExists             Code = "FS_EXISTS"
