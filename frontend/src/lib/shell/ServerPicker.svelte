@@ -4,6 +4,7 @@
   import { ui } from '../stores/ui.svelte'
   import { openServers } from '../wm/intents.svelte'
   import Icon from '../ui/Icon.svelte'
+  import type { IconName } from '../ui/icons'
   import TagChip from '../ui/TagChip.svelte'
   import { shortcut } from './platform'
   import Popover from './Popover.svelte'
@@ -48,6 +49,16 @@
     reconnecting: 'var(--warn)',
     disconnected: 'var(--offline)',
     failed: 'var(--danger)',
+  }
+
+  // The state as an icon on the line under the name: a tick when connected, a
+  // clock while connecting, a power icon when idle, a cross when it failed.
+  const stateIcon: Record<ConnState, IconName> = {
+    connected: 'check',
+    connecting: 'clock',
+    reconnecting: 'clock',
+    disconnected: 'power',
+    failed: 'close',
   }
 
   function choose(id: string) {
@@ -121,46 +132,46 @@
         </span>
         <span class="sub"
           >{s.user}@{s.host} ·
-          {#if s.state === 'connected'}
-            <!-- A tick says "connected" without the word; the title keeps it. -->
-            <span
-              class="ok"
-              role="img"
-              aria-label={t.servers.status.connected}
-              title={t.servers.status.connected}
-            >
-              <Icon name="check" size={12} strokeWidth={3} />
-            </span>
-          {:else}
-            {t.servers.status[s.state]}
-          {/if}</span
+          <!-- An icon says the state without the word; the title keeps it. -->
+          <span
+            class="st"
+            data-state={s.state}
+            role="img"
+            aria-label={t.servers.status[s.state]}
+            title={t.servers.status[s.state]}
+          >
+            <Icon name={stateIcon[s.state]} size={12} strokeWidth={3} />
+          </span></span
         >
       </span>
       {#if i < 9}<span class="sub key">{shortcut(String(i + 1))}</span>{/if}
       <!-- The server's own color, when no tag chip is there to carry it. -->
       {#if s.color && !s.tag}<span class="bar" style:background={s.color}></span>{/if}
     </button>
-    {#if s.state === 'failed'}
-      <button class="tool" aria-label={t.servers.reconnect} onclick={(e) => retry(e, s.id)}>
-        <Icon name="refresh" size={13} />
+    <!-- The tools sit over the row's right end on hover, so every row keeps one width. -->
+    <span class="tools">
+      {#if s.state === 'failed'}
+        <button class="tool" aria-label={t.servers.reconnect} onclick={(e) => retry(e, s.id)}>
+          <Icon name="refresh" size={13} />
+        </button>
+      {/if}
+      {#if s.state === 'connected' || s.state === 'connecting' || s.state === 'reconnecting'}
+        <button
+          class="tool"
+          aria-label={t.servers.overview.disconnect}
+          title={t.servers.overview.disconnect}
+          onclick={(e) => {
+            e.stopPropagation()
+            void servers.disconnect(s.id)
+          }}
+        >
+          <Icon name="power" size={13} />
+        </button>
+      {/if}
+      <button class="tool" aria-label={t.servers.edit} onclick={(e) => edit(e, s.id)}>
+        <Icon name="editor" size={13} />
       </button>
-    {/if}
-    {#if s.state === 'connected' || s.state === 'connecting' || s.state === 'reconnecting'}
-      <button
-        class="tool"
-        aria-label={t.servers.overview.disconnect}
-        title={t.servers.overview.disconnect}
-        onclick={(e) => {
-          e.stopPropagation()
-          void servers.disconnect(s.id)
-        }}
-      >
-        <Icon name="power" size={13} />
-      </button>
-    {/if}
-    <button class="tool" aria-label={t.servers.edit} onclick={(e) => edit(e, s.id)}>
-      <Icon name="editor" size={13} />
-    </button>
+    </span>
   </div>
 {/snippet}
 
@@ -400,8 +411,8 @@
     white-space: nowrap;
   }
 
+  /* The count sits right after the name, not at the far end. */
   .gcount {
-    margin-left: auto;
     font-weight: 400;
     font-variant-numeric: tabular-nums;
   }
@@ -480,17 +491,39 @@
     text-overflow: ellipsis;
   }
 
+  /* Shortcuts line up in one column at the row's right end. */
   .key {
     flex-shrink: 0;
+    min-width: 2.2em;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
   }
 
-  .ok {
+  .st {
     display: inline-flex;
     vertical-align: -2px;
+    color: var(--offline);
+  }
+
+  .st[data-state='connected'] {
     color: var(--ok);
   }
 
-  .item.active .ok {
+  .st[data-state='connecting'],
+  .st[data-state='reconnecting'] {
+    color: var(--warn);
+  }
+
+  .st[data-state='failed'] {
+    color: var(--danger);
+  }
+
+  /* On the accent row only a connected server keeps its green; the rest go white. */
+  .item.active .st {
+    color: inherit;
+  }
+
+  .item.active .st[data-state='connected'] {
     color: var(--ok-on-accent);
   }
 
@@ -500,10 +533,19 @@
   }
 
   /* Row tools appear on hover, over the shortcut hint. */
+  .tools {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    display: flex;
+    gap: 2px;
+    transform: translateY(-50%);
+  }
+
   .tool {
     display: flex;
     padding: 4px;
-    margin-left: 2px;
+    pointer-events: none;
     border: 0;
     border-radius: 6px;
     background: var(--content-bg);
@@ -515,6 +557,7 @@
   .row:hover .tool,
   .tool:focus-visible {
     opacity: 1;
+    pointer-events: auto;
   }
 
   .tool:hover {
