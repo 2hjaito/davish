@@ -455,7 +455,11 @@
 </FilterShell>
 
 <style>
+  /* FilterShell's list does not scroll by itself; this is what scrolls, above its footer. */
   .content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
     padding: 16px 18px;
   }
 
