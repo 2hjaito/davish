@@ -74,6 +74,12 @@ var agentTimeout = 5 * time.Second
 func (m *Manager) agentSigners() ([]ssh.Signer, func()) {
 	c, err := agentDial()
 	if err != nil {
+		// Without this line a pipe that cannot be opened (busy, no right to it,
+		// nobody listening) looks like no agent at all, and the log of a person
+		// whose agent does not work says nothing (#168).
+		if m.log != nil {
+			m.log.Info("ssh agent not reachable", "err", err)
+		}
 		return nil, func() {}
 	}
 	// Closing may block while a read is pending on a Windows pipe, so it
