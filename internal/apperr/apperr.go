@@ -61,6 +61,10 @@ const (
 	DBAuthFailed         Code = "DB_AUTH_FAILED"
 	SudoPasswordRequired Code = "SUDO_PASSWORD_REQUIRED"
 	SudoPasswordWrong    Code = "SUDO_PASSWORD_WRONG"
+	// Turning password logins off (ADR 0029): the key could not log in
+	// before the change, or could not after it, which was then undone.
+	SecKeyLoginFailed Code = "SEC_KEY_LOGIN_FAILED"
+	SecKeyLoginLost   Code = "SEC_KEY_LOGIN_LOST"
 	// An Ansible inventory in YAML, or a script, which only INI import reads.
 	InventoryYAMLUnsupported   Code = "INVENTORY_YAML_UNSUPPORTED"
 	InventoryScriptUnsupported Code = "INVENTORY_SCRIPT_UNSUPPORTED"

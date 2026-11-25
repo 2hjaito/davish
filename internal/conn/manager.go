@@ -566,6 +566,29 @@ func (m *Manager) dial(ctx context.Context, id string) (*ssh.Client, error) {
 	return m.dialVia(ctx, id, id, 0)
 }
 
+// CheckKeyLogin logs in to server id over a new connection with its key
+// only, never a password (a key server's auth methods hold none), and closes it
+// at once. Turning password logins
+// off uses it before and after the change (ADR 0029). It does not touch
+// the open connection.
+func (m *Manager) CheckKeyLogin(ctx context.Context, id string) error {
+	srv, err := m.servers.Server(ctx, id)
+	if err != nil {
+		return err
+	}
+	if srv.Auth == store.AuthPassword {
+		return apperr.New(apperr.InvalidInput, "this server logs in with a password, not a key")
+	}
+	if srv.ControlPath != "" {
+		return apperr.New(apperr.InvalidInput, "a control socket reuses an open connection, so a key login cannot be tried")
+	}
+	c, err := m.dial(ctx, id)
+	if err != nil {
+		return err
+	}
+	return c.Close()
+}
+
 // dialVia connects to server id on behalf of target: a hop's unknown host
 // key is shown as target's prompt, and approving it reconnects target.
 // Every hop is a fresh connection with its own host key check and auth.

@@ -192,8 +192,30 @@ const zh = {
       on: '已开启：任何人都可以通过 SSH 尝试猜测密码。',
       unknown: '无法读取 sshd 配置；OpenSSH 默认开启。',
       useKeyFirst: 'Davish 用密码登录这台服务器。请先在 SSH 密钥应用中改用密钥，再关闭密码登录。',
-      how: '下面的命令会在 /etc/ssh/sshd_config.d 中添加一个文件，用 sshd -t 检查通过后才重载；检查失败就删除该文件。sshd_config 中需要有 Include sshd_config.d 这一行（Ubuntu 20.04+、Debian 11+）。',
-      keepOpen: '在确认能用密钥重新连接之前，请保持当前会话不要关闭（文件 → 断开连接，然后连接）。',
+      how: '此更改是 /etc/ssh/sshd_config.d 中的一个文件，不会修改你自己的 sshd 设置。sshd_config 必须有 Include sshd_config.d 这一行（Ubuntu 20.04+、Debian 11+）。',
+      allow: '允许密码登录',
+      offOwn: '此服务器已在它自己的 sshd 设置中关闭。Davish 只撤销它自己所做的更改。',
+      offByDavish: '已关闭：Davish 已在此服务器上关闭密码登录。',
+      undoHint: '重新开启只会删除 Davish 添加的文件，不会动你自己的 sshd 设置。',
+      turnOn: '重新开启密码登录',
+      turnOff: '关闭密码登录',
+      doneOff: '密码登录已关闭，密钥仍可登录。',
+      doneOn: '密码登录已重新开启。',
+      blocked: {
+        noInclude: '此处 sshd_config 不读取 /etc/ssh/sshd_config.d（OpenSSH 较旧）。',
+        match: 'sshd 设置中的 Match 块对部分用户开启了密码登录，全局更改不会对他们生效。',
+        methods: 'AuthenticationMethods 同时要求密码和密钥，关闭密码会把所有人锁在外面。',
+        control: 'Davish 通过 control socket 连接此服务器，无法单独测试密钥登录。',
+        password: 'Davish 正在用密码登录。',
+      },
+      blockedHint: 'Davish 不会从这里更改。请先在 sshd 设置中处理，然后再检查一次。',
+      checkAgain: '重新检查',
+      confirmOffTitle: '关闭密码登录？',
+      confirmOffBody:
+        'Davish 先用新连接确认密钥能登录，备份 sshd 设置，关闭密码登录并重新加载 sshd。之后如果密钥不能登录，就撤销更改。以 root 运行：',
+      confirmOffNote: '当前会话保持打开。请在用密钥成功新登录一次之前保留它。',
+      confirmOnTitle: '重新开启密码登录？',
+      confirmOnBody: '删除 Davish 添加的文件并重新加载 sshd：',
     },
     failed: {
       title: (n: number) => `失败登录（7 天）：${n}`,
@@ -3354,6 +3376,10 @@ const zh = {
     DB_AUTH_FAILED: 'MongoDB 拒绝了此用户或密码。',
     SUDO_PASSWORD_REQUIRED: '服务器需要 sudo 密码才能执行此操作。',
     SUDO_PASSWORD_WRONG: 'sudo 不接受此密码。',
+    SEC_KEY_LOGIN_FAILED:
+      '密钥无法通过新连接登录，所以没有做任何更改。请先在 SSH 密钥应用中检查密钥。',
+    SEC_KEY_LOGIN_LOST:
+      '更改后密钥无法登录，Davish 已撤销。如果密码登录仍是关闭的，请删除 /etc/ssh/sshd_config.d/00-davish-no-password.conf 并重新加载 sshd。',
     INVENTORY_YAML_UNSUPPORTED:
       '此 inventory 为 YAML（或 JSON）格式。Davish 目前只读取 INI 格式的 inventory。',
     INVENTORY_SCRIPT_UNSUPPORTED:

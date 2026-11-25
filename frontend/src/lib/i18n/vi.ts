@@ -201,9 +201,36 @@ const vi = {
       unknown: 'Không đọc được cấu hình sshd; mặc định của OpenSSH là bật.',
       useKeyFirst:
         'Davish đang đăng nhập server này bằng mật khẩu. Chuyển sang key trong app Khóa SSH trước, rồi mới tắt đăng nhập mật khẩu.',
-      how: 'Lệnh dưới thêm một file trong /etc/ssh/sshd_config.d, kiểm tra bằng sshd -t rồi mới reload; nếu kiểm tra lỗi thì tự gỡ file. Cần sshd_config có dòng Include sshd_config.d (Ubuntu 20.04+, Debian 11+).',
-      keepOpen:
-        'Giữ phiên hiện tại mở cho tới khi thử kết nối lại bằng key thành công (Tệp → Ngắt kết nối rồi Kết nối).',
+      how: 'Thay đổi là một file trong /etc/ssh/sshd_config.d; cấu hình sshd của bạn không bị sửa. sshd_config phải có dòng Include sshd_config.d (Ubuntu 20.04+, Debian 11+).',
+      allow: 'Cho phép đăng nhập bằng mật khẩu',
+      offOwn:
+        'Server này tự tắt trong cấu hình sshd của nó. Davish chỉ hoàn tác những thay đổi do chính nó làm.',
+      offByDavish: 'Đã tắt: Davish đã tắt đăng nhập bằng mật khẩu trên server này.',
+      undoHint: 'Bật lại chỉ gỡ file Davish đã thêm; cấu hình sshd của bạn không bị đụng tới.',
+      turnOn: 'Bật lại đăng nhập bằng mật khẩu',
+      turnOff: 'Tắt đăng nhập bằng mật khẩu',
+      doneOff: 'Đã tắt đăng nhập bằng mật khẩu, và key vẫn đăng nhập được.',
+      doneOn: 'Đã bật lại đăng nhập bằng mật khẩu.',
+      blocked: {
+        noInclude: 'sshd_config không đọc /etc/ssh/sshd_config.d ở đây (OpenSSH cũ).',
+        match:
+          'Một khối Match trong cấu hình sshd bật đăng nhập mật khẩu cho một số user, nên thay đổi chung sẽ không tới họ.',
+        methods:
+          'AuthenticationMethods đòi cả mật khẩu lẫn key, nên tắt mật khẩu sẽ khóa mọi người ra ngoài.',
+        control:
+          'Davish vào server này qua control socket nên không tự thử được đăng nhập bằng key.',
+        password: 'Davish đang đăng nhập bằng mật khẩu.',
+      },
+      blockedHint:
+        'Davish không đổi việc này từ đây. Hãy sửa trong cấu hình sshd trước, rồi kiểm tra lại.',
+      checkAgain: 'Kiểm tra lại',
+      confirmOffTitle: 'Tắt đăng nhập bằng mật khẩu?',
+      confirmOffBody:
+        'Davish thử key đăng nhập qua một kết nối mới, sao lưu cấu hình sshd, tắt đăng nhập mật khẩu rồi reload sshd. Nếu sau đó key không đăng nhập được thì hoàn tác. Chạy bằng quyền root:',
+      confirmOffNote:
+        'Phiên hiện tại vẫn mở. Giữ nó cho tới khi bạn đã thử đăng nhập mới bằng key.',
+      confirmOnTitle: 'Bật lại đăng nhập bằng mật khẩu?',
+      confirmOnBody: 'Gỡ file Davish đã thêm và reload sshd:',
     },
     failed: {
       title: (n: number) => `Thử đăng nhập sai (7 ngày): ${n}`,
@@ -3430,6 +3457,10 @@ const vi = {
     DB_AUTH_FAILED: 'MongoDB từ chối user hoặc mật khẩu này.',
     SUDO_PASSWORD_REQUIRED: 'Server cần mật khẩu sudo cho lệnh này.',
     SUDO_PASSWORD_WRONG: 'sudo không nhận mật khẩu này.',
+    SEC_KEY_LOGIN_FAILED:
+      'Key không đăng nhập được qua kết nối mới nên chưa đổi gì. Hãy kiểm tra key trong app Khóa SSH trước.',
+    SEC_KEY_LOGIN_LOST:
+      'Sau khi đổi, key không đăng nhập được nên Davish đã hoàn tác. Nếu đăng nhập mật khẩu vẫn đang tắt, hãy xóa /etc/ssh/sshd_config.d/00-davish-no-password.conf rồi reload sshd.',
     INVENTORY_YAML_UNSUPPORTED:
       'Inventory này là YAML (hoặc JSON). Hiện Davish chỉ đọc inventory dạng INI.',
     INVENTORY_SCRIPT_UNSUPPORTED:

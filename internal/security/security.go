@@ -30,6 +30,7 @@ type Runner interface {
 type Service struct {
 	run  Runner
 	root Root
+	keys KeyChecker
 }
 
 // New creates the service.
@@ -124,6 +125,9 @@ type Report struct {
 	// PasswordAuth is sshd's PasswordAuthentication: "yes", "no" or ""
 	// when it could not be read.
 	PasswordAuth string `json:"passwordAuth"`
+	// PasswordOurs is set when Davish's own drop-in turned it off, which
+	// Davish can undo (ADR 0029).
+	PasswordOurs bool `json:"passwordOurs"`
 	// DisablePassword is the sudo command that turns password logins off.
 	DisablePassword string `json:"disablePassword"`
 }
@@ -148,6 +152,7 @@ const reportLine = `id -u` +
 	`; echo --sudo--; sudo -n true 2>/dev/null && echo yes` +
 	`; echo --ufw--; command -v ufw >/dev/null && { echo INSTALLED; { sudo -n ufw status 2>/dev/null || ufw status 2>&1; } | head -n 1000; }` +
 	`; echo --f2b--; command -v fail2ban-client >/dev/null && { echo INSTALLED; { sudo -n fail2ban-client status sshd 2>/dev/null || fail2ban-client status sshd 2>&1; } | head -n 30; }` +
+	`; echo --ours--; [ -e ` + dropIn + ` ] && echo yes` +
 	`; echo --sshd--; { sshd -T 2>/dev/null || cat /etc/ssh/sshd_config.d/*.conf /etc/ssh/sshd_config 2>/dev/null; } | grep -iE '^[[:space:]]*passwordauthentication[[:space:]]' | head -n 1` +
 	`; true`
 
@@ -183,7 +188,7 @@ func (s *Service) Report(ctx context.Context, serverID string) (Report, error) {
 			}
 		}
 	}
-	r.DisablePassword = DisablePasswordCommand
+	r.DisablePassword = PlanPassword(false).Disable.Terminal
 	return r, nil
 }
 
@@ -239,6 +244,7 @@ func parseSections(sec map[string][]string) Report {
 	}
 	r.UFW = parseUFW(sec["ufw"])
 	r.Fail2ban = parseF2B(sec["f2b"])
+	r.PasswordOurs = first(sec["ours"]) == "yes"
 	if f := strings.Fields(first(sec["sshd"])); len(f) >= 2 {
 		r.PasswordAuth = strings.ToLower(f[1])
 	}
@@ -508,11 +514,3 @@ func parseF2B(lines []string) Firewall {
 	}
 	return f
 }
-
-// DisablePasswordCommand is what turns off password logins: a drop-in
-// that sshd checks with -t before reloading, removed again if the check
-// fails. The user runs it with sudo in a terminal.
-const DisablePasswordCommand = `sudo sh -c 'f=/etc/ssh/sshd_config.d/60-davish-no-password.conf;` +
-	` printf "PasswordAuthentication no\nKbdInteractiveAuthentication no\n" > "$f"` +
-	` && sshd -t && { systemctl reload ssh 2>/dev/null || systemctl reload sshd; }` +
-	` || { rm -f "$f"; echo "sshd -t failed: change reverted"; }'`

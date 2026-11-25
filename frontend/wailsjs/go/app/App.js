@@ -682,6 +682,22 @@ export function SecurityApply(arg1, arg2, arg3, arg4) {
   return window['go']['app']['App']['SecurityApply'](arg1, arg2, arg3, arg4);
 }
 
+export function SecurityDisablePassword(arg1, arg2) {
+  return window['go']['app']['App']['SecurityDisablePassword'](arg1, arg2);
+}
+
+export function SecurityEnablePassword(arg1, arg2) {
+  return window['go']['app']['App']['SecurityEnablePassword'](arg1, arg2);
+}
+
+export function SecurityPasswordPlan(arg1) {
+  return window['go']['app']['App']['SecurityPasswordPlan'](arg1);
+}
+
+export function SecurityPasswordStatus(arg1) {
+  return window['go']['app']['App']['SecurityPasswordStatus'](arg1);
+}
+
 export function SecurityPlan(arg1, arg2, arg3) {
   return window['go']['app']['App']['SecurityPlan'](arg1, arg2, arg3);
 }
