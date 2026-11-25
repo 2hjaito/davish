@@ -7,6 +7,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 ### Added
 - **Connect through an OpenSSH control socket** (#240): for logins that only work through OpenSSH, such as an agent that issues certificates on demand (authentik), the server dialog has an **Advanced: use an ssh control socket** field. Start a master yourself (`ssh -M -S <path> -fN user@host`) and give Davish its path: it attaches to that connection, so OpenSSH does the login and Davish never sees your credentials. It replaces the authentication of that server, and works on Linux and macOS only. Tried against authentik by @PlayerFann14.
 
+### Fixed
+- All servers: the list scrolls again when its servers are taller than the window, in both the cards and the table. In 1.15.1 it was cut off at the window's edge and the servers below could not be reached (#256).
+
 ## [1.15.1] - 2026-11-24
 
 ### Added
