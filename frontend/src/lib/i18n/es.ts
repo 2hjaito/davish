@@ -200,9 +200,37 @@ const es = {
       unknown: 'No se pudo leer la configuración de sshd; OpenSSH lo activa por defecto.',
       useKeyFirst:
         'Davish inicia sesión en este servidor con contraseña. Cambia primero a una clave en la app Claves SSH y luego desactiva el inicio con contraseña.',
-      how: 'El comando de abajo añade un archivo en /etc/ssh/sshd_config.d, lo comprueba con sshd -t y solo entonces recarga; si la comprobación falla, el archivo se elimina. sshd_config debe tener una línea Include sshd_config.d (Ubuntu 20.04+, Debian 11+).',
-      keepOpen:
-        'Mantén esta sesión abierta hasta que reconectar con la clave funcione (Archivo → Desconectar y luego Conectar).',
+      how: 'El cambio es un archivo en /etc/ssh/sshd_config.d; tus propios ajustes de sshd no se editan. sshd_config debe tener la línea Include sshd_config.d (Ubuntu 20.04+, Debian 11+).',
+      allow: 'Permitir acceso con contraseña',
+      offOwn:
+        'Este servidor lo desactivó en sus propios ajustes de sshd. Davish solo deshace los cambios que hizo él mismo.',
+      offByDavish: 'Desactivado: Davish desactivó el acceso con contraseña en este servidor.',
+      undoHint:
+        'Volver a activarlo solo elimina el archivo que añadió Davish; tus ajustes de sshd no se tocan.',
+      turnOn: 'Volver a activar el acceso con contraseña',
+      turnOff: 'Desactivar el acceso con contraseña',
+      doneOff: 'El acceso con contraseña está desactivado y la clave sigue entrando.',
+      doneOn: 'El acceso con contraseña está activado de nuevo.',
+      blocked: {
+        noInclude: 'Aquí sshd_config no lee /etc/ssh/sshd_config.d (OpenSSH antiguo).',
+        match:
+          'Un bloque Match en los ajustes de sshd activa el acceso con contraseña para algunos usuarios, así que un cambio global no les llegaría.',
+        methods:
+          'AuthenticationMethods pide contraseña además de clave, así que desactivarla dejaría fuera a todos.',
+        control:
+          'Davish llega a este servidor por un control socket, así que no puede probar por sí solo un acceso con clave.',
+        password: 'Davish entra con contraseña.',
+      },
+      blockedHint:
+        'Davish no lo cambiará desde aquí. Arréglalo primero en los ajustes de sshd y vuelve a comprobar.',
+      checkAgain: 'Comprobar de nuevo',
+      confirmOffTitle: '¿Desactivar el acceso con contraseña?',
+      confirmOffBody:
+        'Davish comprueba que tu clave entra por una conexión nueva, hace una copia de los ajustes de sshd, desactiva el acceso con contraseña y recarga sshd. Si después la clave no entra, deshace el cambio. Se ejecuta como root:',
+      confirmOffNote:
+        'Tu sesión actual sigue abierta. Mantenla hasta que hayas probado un acceso nuevo con la clave.',
+      confirmOnTitle: '¿Volver a activar el acceso con contraseña?',
+      confirmOnBody: 'Elimina el archivo que añadió Davish y recarga sshd:',
     },
     failed: {
       title: (n: number) => `Inicios de sesión fallidos (7 días): ${n}`,
@@ -3550,6 +3578,10 @@ const es = {
     DB_AUTH_FAILED: 'MongoDB ha rechazado este usuario o contraseña.',
     SUDO_PASSWORD_REQUIRED: 'El servidor necesita la contraseña de sudo para esto.',
     SUDO_PASSWORD_WRONG: 'sudo no ha aceptado esta contraseña.',
+    SEC_KEY_LOGIN_FAILED:
+      'La clave no pudo entrar por una conexión nueva, así que no se cambió nada. Revisa primero la clave en la app Claves SSH.',
+    SEC_KEY_LOGIN_LOST:
+      'Tras el cambio la clave no pudo entrar, así que Davish lo deshizo. Si el acceso con contraseña sigue desactivado, elimina /etc/ssh/sshd_config.d/00-davish-no-password.conf y recarga sshd.',
     INVENTORY_YAML_UNSUPPORTED:
       'Este inventario es YAML (o JSON). Por ahora Davish solo lee inventarios INI.',
     INVENTORY_SCRIPT_UNSUPPORTED:

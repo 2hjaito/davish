@@ -5,7 +5,13 @@
 
   import { copyText } from '../../lib/api/clipboard'
   import { toUserError } from '../../lib/api/errors'
-  import type { SecurityAction, SecurityPlan, SecurityReport } from '../../lib/api/security'
+  import type {
+    PasswordPlan,
+    PasswordStatus,
+    SecurityAction,
+    SecurityPlan,
+    SecurityReport,
+  } from '../../lib/api/security'
   import { t } from '../../lib/i18n'
   import { useAppMenu } from '../../lib/shell/menus.svelte'
   import { servers } from '../../lib/stores/servers.svelte'
@@ -337,6 +343,69 @@
     return ''
   })
 
+  // Password logins, turned off or back on from here (ADR 0029): the
+  // dialog shows the whole script, and Davish then checks that the key
+  // still logs in, and undoes the change if it does not.
+  let pw = $state.raw<{ kind: 'disable' | 'enable'; plan: PasswordPlan } | null>(null)
+  let pwStatus = $state.raw<PasswordStatus | null>(null)
+  let pwBusy = $state(false)
+
+  /** Reads what sshd does now, then asks to confirm when it is safe. */
+  async function passwordStart(kind: 'disable' | 'enable') {
+    actionError = null
+    flash = ''
+    pwBusy = true
+    try {
+      const plan = await backend.passwordPlan(report?.root ?? false)
+      if (kind === 'disable') {
+        const got: { st?: PasswordStatus } = {}
+        const read = async () => {
+          got.st = await backend.passwordStatus(win.serverID)
+        }
+        pwStatus = null
+        if (!(await withSudo(win.serverID, plan.status.terminal, read))) return
+        pwStatus = got.st ?? null
+        if (!pwStatus || pwStatus.blocked.length) return
+      }
+      pw = { kind, plan }
+    } catch (e) {
+      actionError = { message: toUserError(e).message, terminal: '' }
+    } finally {
+      pwBusy = false
+    }
+  }
+
+  function passwordToTerminal() {
+    if (pw) sudo(pw.plan[pw.kind].terminal)
+    pw = null
+  }
+
+  async function passwordRun() {
+    const c = pw
+    if (!c) return
+    pwBusy = true
+    const step = c.plan[c.kind]
+    try {
+      const act = () =>
+        c.kind === 'disable'
+          ? backend.disablePassword(win.serverID, step.command)
+          : backend.enablePassword(win.serverID, step.command)
+      if (!(await withSudo(win.serverID, step.terminal, act))) return
+      flash = c.kind === 'disable' ? s.password.doneOff : s.password.doneOn
+      pw = null
+      await refresh()
+    } catch (e) {
+      const u = toUserError(e)
+      pw = null
+      actionError = {
+        message: u.code === 'CMD_FAILED' ? `${u.message} ${u.detail}` : u.message,
+        terminal: '',
+      }
+    } finally {
+      pwBusy = false
+    }
+  }
+
   const confirmTitle = $derived.by(() => {
     const c = confirm
     if (!c) return ''
@@ -503,6 +572,7 @@
         {:else if view === 'firewall'}
           {@render firewall(r)}
         {:else if view === 'password'}
+          {@render banner()}
           {@render password(r)}
         {/if}
       </div>
@@ -762,25 +832,75 @@
 {/snippet}
 
 {#snippet password(r: SecurityReport)}
-  <section class="card" class:warn={r.passwordAuth !== 'no'}>
-    <h3>{s.password.title}</h3>
-    {#if r.passwordAuth === 'no'}
-      <p>{s.password.off}</p>
-    {:else}
-      <p>{r.passwordAuth === 'yes' ? s.password.on : s.password.unknown}</p>
-      {#if server?.auth === 'password'}
-        <p class="hint">{s.password.useKeyFirst}</p>
-      {:else}
-        <p class="hint">{s.password.how}</p>
-        <pre class="raw selectable">{r.disablePassword}</pre>
-        <p class="hint strong">{s.password.keepOpen}</p>
-        <button class="btn btn-primary" onclick={() => sudo(r.disablePassword)}
-          >{t.common.runInTerminal}</button
-        >
+  {@const on = r.passwordAuth !== 'no'}
+  {@const byKey = server?.auth !== 'password'}
+  <div class="pw">
+    <div class="group">
+      <label class="item">
+        <span class="head">
+          <span class="label">{s.password.allow}</span>
+          <small>
+            {#if on}
+              {r.passwordAuth === 'yes' ? s.password.on : s.password.unknown}
+            {:else}
+              {r.passwordOurs ? s.password.offByDavish : s.password.off}
+            {/if}
+          </small>
+        </span>
+        <input
+          type="checkbox"
+          class="switch"
+          role="switch"
+          checked={on}
+          disabled={pwBusy || (on ? !byKey : !r.passwordOurs)}
+          onchange={(e) => {
+            // The server decides: the switch follows what sshd does, and
+            // flips only once the change has run.
+            e.currentTarget.checked = on
+            void passwordStart(on ? 'disable' : 'enable')
+          }}
+        />
+      </label>
+      {#each pwStatus?.blocked ?? [] as b (b)}
+        <div class="item why">
+          <Icon name="warning" size={14} />
+          <span>{s.password.blocked[b as keyof typeof s.password.blocked] ?? b}</span>
+        </div>
+      {/each}
+      {#if pwStatus?.blocked.length}
+        <div class="item">
+          <span class="head"><small>{s.password.blockedHint}</small></span>
+          <button class="btn" disabled={pwBusy} onclick={() => void passwordStart('disable')}
+            >{s.password.checkAgain}</button
+          >
+        </div>
       {/if}
-    {/if}
-  </section>
+    </div>
+    <p class="foot">
+      {#if on && !byKey}
+        {s.password.useKeyFirst}
+      {:else if !on && !r.passwordOurs}
+        {s.password.offOwn}
+      {:else}
+        {r.passwordOurs ? s.password.undoHint : s.password.how}
+      {/if}
+    </p>
+  </div>
 {/snippet}
+
+<ConfirmCommand
+  command={pw ? (report?.root ? pw.plan[pw.kind].command : pw.plan[pw.kind].terminal) : null}
+  title={pw?.kind === 'enable' ? s.password.confirmOnTitle : s.password.confirmOffTitle}
+  body={pw?.kind === 'enable' ? s.password.confirmOnBody : s.password.confirmOffBody}
+  action={pwBusy ? s.working : pw?.kind === 'enable' ? s.password.turnOn : s.password.turnOff}
+  tone="primary"
+  note={pw?.kind === 'enable' ? '' : s.password.confirmOffNote}
+  onterminal={pw ? () => passwordToTerminal() : undefined}
+  terminalLabel={s.confirm.inTerminal}
+  busy={pwBusy}
+  onclose={() => !pwBusy && (pw = null)}
+  onconfirm={() => void passwordRun()}
+/>
 
 <ConfirmCommand
   command={confirm
@@ -1090,11 +1210,63 @@
     color: var(--fg-muted);
   }
 
-  .strong {
-    color: var(--fg);
-    font-weight: 600;
+  .pw {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 640px;
   }
 
+  .group {
+    display: flex;
+    flex-direction: column;
+    padding: 0 14px;
+    border-radius: 10px;
+    background: var(--fill-soft);
+  }
+
+  .item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 40px;
+    padding: 9px 0;
+  }
+
+  .item + .item {
+    border-top: 1px solid var(--divider-soft);
+  }
+
+  .item.why {
+    justify-content: flex-start;
+    gap: 8px;
+    font-size: var(--text-sm);
+    color: var(--warn);
+  }
+
+  .item.why span {
+    color: var(--fg);
+  }
+
+  .head {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .head small {
+    color: var(--fg-muted);
+    font-size: var(--text-xs);
+  }
+
+  .foot {
+    margin: 0;
+    padding: 0 14px;
+    font-size: var(--text-xs);
+    color: var(--fg-muted);
+  }
   .raw {
     margin: 0 0 8px;
     padding: 8px 10px;

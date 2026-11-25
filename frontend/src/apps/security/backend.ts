@@ -2,9 +2,15 @@
 import { hasRuntime } from '../../lib/api/runtime'
 import {
   securityApply,
+  securityDisablePassword,
+  securityEnablePassword,
+  securityPasswordPlan,
+  securityPasswordStatus,
   securityPlan,
   securityReport,
   type HourCount,
+  type PasswordPlan,
+  type PasswordStatus,
   type SecurityAction,
   type SecurityReport,
 } from '../../lib/api/security'
@@ -104,6 +110,7 @@ const demo: SecurityReport = {
     banned: ['45.148.10.92', '193.32.162.77'],
   },
   passwordAuth: 'yes',
+  passwordOurs: false,
   disablePassword: `sudo sh -c 'f=/etc/ssh/sshd_config.d/60-davish-no-password.conf; printf "PasswordAuthentication no\\nKbdInteractiveAuthentication no\\n" > "$f" && sshd -t && { systemctl reload ssh 2>/dev/null || systemctl reload sshd; } || { rm -f "$f"; echo "sshd -t failed: change reverted"; }'`,
 }
 
@@ -130,12 +137,57 @@ function demoApply(action: SecurityAction, ip: string) {
   return new Promise<void>((r) => setTimeout(r, 300))
 }
 
+// The preview's password change shows the scripts of internal/security/password.go.
+const demoPasswordPlan = (): PasswordPlan => ({
+  status: {
+    command:
+      'sudo -n sh -c \'echo --eff--; sshd -T 2>/dev/null | grep -iE "^(passwordauthentication|kbdinteractiveauthentication|authenticationmethods) "; echo --include--; [ -d /etc/ssh/sshd_config.d ] && grep -qiE "^[[:space:]]*include[[:space:]].*sshd_config\\.d" /etc/ssh/sshd_config && echo yes; echo --ours--; [ -e /etc/ssh/sshd_config.d/00-davish-no-password.conf ] && echo yes; echo --cfg--; cat /etc/ssh/sshd_config /etc/ssh/sshd_config.d/*.conf 2>/dev/null; true\'',
+    terminal:
+      'sudo sh -c \'echo --eff--; sshd -T 2>/dev/null | grep -iE "^(passwordauthentication|kbdinteractiveauthentication|authenticationmethods) "; echo --include--; [ -d /etc/ssh/sshd_config.d ] && grep -qiE "^[[:space:]]*include[[:space:]].*sshd_config\\.d" /etc/ssh/sshd_config && echo yes; echo --ours--; [ -e /etc/ssh/sshd_config.d/00-davish-no-password.conf ] && echo yes; echo --cfg--; cat /etc/ssh/sshd_config /etc/ssh/sshd_config.d/*.conf 2>/dev/null; true\'',
+  },
+  disable: {
+    command:
+      'sudo -n sh -c \'f=/etc/ssh/sshd_config.d/00-davish-no-password.conf\n[ -d /etc/ssh/sshd_config.d ] && grep -qiE "^[[:space:]]*include[[:space:]].*sshd_config\\.d" /etc/ssh/sshd_config || { echo DAVISH_NO_INCLUDE; exit 3; }\nb=/var/backups/davish-sshd-$(date +%Y%m%d-%H%M%S)\nmkdir -p "$b" && cp -a /etc/ssh/sshd_config /etc/ssh/sshd_config.d "$b"/ || { echo DAVISH_BACKUP; exit 3; }\nprintf "PasswordAuthentication no\\nKbdInteractiveAuthentication no\\n" > "$f"\nsshd -t || { rm -f "$f"; echo DAVISH_SSHD_T; exit 4; }\nt=$(sshd -T) && echo "$t" | grep -qix "passwordauthentication no" && ! echo "$t" | grep -qixE "kbdinteractiveauthentication yes" || { rm -f "$f"; echo DAVISH_OVERRIDDEN; exit 5; }\n{ systemctl reload ssh 2>/dev/null || systemctl reload sshd 2>/dev/null; } || { rm -f "$f"; echo DAVISH_RELOAD; exit 6; }\necho "backup in $b"\'',
+    terminal:
+      'sudo sh -c \'f=/etc/ssh/sshd_config.d/00-davish-no-password.conf\n[ -d /etc/ssh/sshd_config.d ] && grep -qiE "^[[:space:]]*include[[:space:]].*sshd_config\\.d" /etc/ssh/sshd_config || { echo DAVISH_NO_INCLUDE; exit 3; }\nb=/var/backups/davish-sshd-$(date +%Y%m%d-%H%M%S)\nmkdir -p "$b" && cp -a /etc/ssh/sshd_config /etc/ssh/sshd_config.d "$b"/ || { echo DAVISH_BACKUP; exit 3; }\nprintf "PasswordAuthentication no\\nKbdInteractiveAuthentication no\\n" > "$f"\nsshd -t || { rm -f "$f"; echo DAVISH_SSHD_T; exit 4; }\nt=$(sshd -T) && echo "$t" | grep -qix "passwordauthentication no" && ! echo "$t" | grep -qixE "kbdinteractiveauthentication yes" || { rm -f "$f"; echo DAVISH_OVERRIDDEN; exit 5; }\n{ systemctl reload ssh 2>/dev/null || systemctl reload sshd 2>/dev/null; } || { rm -f "$f"; echo DAVISH_RELOAD; exit 6; }\necho "backup in $b"\'',
+  },
+  enable: {
+    command:
+      "sudo -n sh -c 'rm -f /etc/ssh/sshd_config.d/00-davish-no-password.conf\nsshd -t && { systemctl reload ssh 2>/dev/null || systemctl reload sshd 2>/dev/null; }'",
+    terminal:
+      "sudo sh -c 'rm -f /etc/ssh/sshd_config.d/00-davish-no-password.conf\nsshd -t && { systemctl reload ssh 2>/dev/null || systemctl reload sshd 2>/dev/null; }'",
+  },
+})
+const demoPasswordStatus = (): PasswordStatus => ({
+  password: demo.passwordAuth,
+  kbdInteractive: 'no',
+  ours: demo.passwordOurs,
+  blocked: [],
+})
+function demoSetPassword(off: boolean) {
+  demo.passwordAuth = off ? 'no' : 'yes'
+  demo.passwordOurs = off
+  return new Promise<void>((r) => setTimeout(r, 600))
+}
+
 export const backend = hasRuntime
-  ? { report: securityReport, plan: securityPlan, apply: securityApply }
+  ? {
+      report: securityReport,
+      plan: securityPlan,
+      apply: securityApply,
+      passwordStatus: securityPasswordStatus,
+      passwordPlan: securityPasswordPlan,
+      disablePassword: securityDisablePassword,
+      enablePassword: securityEnablePassword,
+    }
   : {
       report: (_serverID: string) =>
         new Promise<SecurityReport>((r) => setTimeout(() => r({ ...demo }), 300)),
       plan: (action: SecurityAction, ip: string, _root: boolean) => demoPlan(action, ip),
       apply: (_serverID: string, action: SecurityAction, ip: string, _command: string) =>
         demoApply(action, ip),
+      passwordStatus: (_serverID: string) => Promise.resolve(demoPasswordStatus()),
+      passwordPlan: (_root: boolean) => Promise.resolve(demoPasswordPlan()),
+      disablePassword: (_serverID: string, _command: string) => demoSetPassword(true),
+      enablePassword: (_serverID: string, _command: string) => demoSetPassword(false),
     }
