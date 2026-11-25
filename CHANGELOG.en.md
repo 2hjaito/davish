@@ -8,6 +8,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 - **Duplicate a server** (#257): the copy icon on a card or a row in All servers opens the add dialog filled in from that server, with the name as `name (copy)`, so only what differs is typed. Nothing is created until you save. Passwords, key passphrases and the control socket are not copied.
 - **Connect through an OpenSSH control socket** (#240): for logins that only work through OpenSSH, such as an agent that issues certificates on demand (authentik), the server dialog has an **Advanced: use an ssh control socket** field. Start a master yourself (`ssh -M -S <path> -fN user@host`) and give Davish its path: it attaches to that connection, so OpenSSH does the login and Davish never sees your credentials. It replaces the authentication of that server, and works on Linux and macOS only. Tried against authentik by @PlayerFann14.
 
+### Changed
+- The log now says when the SSH agent could not be reached, and why (for example a Windows pipe that is busy or not there), so a support log can tell "no agent" from "an agent that would not open", and how long the agent took to answer. An agent that waits for you to unlock or confirm, such as Bitwarden's, may need more than the 5 seconds Davish waits: start Davish with `DAVISH_AGENT_WAIT=60` (seconds, 1 to 300) to wait longer (#168).
+
 ### Fixed
 - All servers: the list scrolls again when its servers are taller than the window, in both the cards and the table. In 1.15.1 it was cut off at the window's edge and the servers below could not be reached (#256).
 
