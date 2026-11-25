@@ -12,7 +12,7 @@ Only the latest release is supported.
 
 - **Passwords and passphrases** are stored only in the OS keychain (macOS Keychain, Windows Credential Manager, Secret Service on Linux). They are never written to files or logs and never sent to the UI.
 - **Private keys** stay where they are. Davish stores the path to your key (usually in `~/.ssh/`), never a copy. An SSH agent is used when available.
-- **`sudo` passwords** are never stored or typed by Davish. When root is needed, it opens a terminal with the command typed in and you press Enter.
+- **`sudo` passwords** are never saved. When a command needs root and `sudo` asks for a password, Davish asks for it once per server and session and keeps it in memory only: never on disk, in the keychain, in a log or in the command log. It hands the password to `sudo` on its standard input, never on the command line. It is forgotten after 15 minutes unused (5 minutes, 1 hour or the whole session, in Settings → Security), when you disconnect or the connection drops, when the app locks, or when you choose "Forget sudo password". You can always run the command in a terminal yourself and type the password there instead.
 - **The lock password** is hashed with argon2id; only the hash is kept, in the keychain.
 - Removing a server also removes its secrets from the keychain.
 - **Saved commands** are kept in plain text in Davish's settings on your computer. When one looks like it holds a password, token or key, Davish warns you before you save it; leave the secret out and type it when you run the command.
@@ -22,6 +22,7 @@ Only the latest release is supported.
 - Nothing is installed or left behind. Davish needs only `sshd` and SFTP and runs everything from your machine over SSH.
 - No new port is opened on the server.
 - Every argument in a command is shell-quoted; user input is never pasted into a command line.
+- Commands that need root run through `sudo`, after you confirm the exact command. What could lock you out of the server stays in a terminal, with one exception: turning password login off from Security. It first checks that your key logs in over a new connection, backs up the sshd settings, adds one drop-in file, checks the key again after reloading sshd, and undoes the change if the key stops working. The confirmation shows the whole script.
 - Destructive actions (removing files, stopping services, removing containers, replacing a crontab…) show the exact command and wait for your confirmation.
 - The command log records everything Davish ran on your behalf.
 - Saved commands, Spotlight's `> command` and the command log's "Type into Terminal again" type a command at the prompt; you press Enter.
