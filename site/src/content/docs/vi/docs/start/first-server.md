@@ -15,6 +15,8 @@ Bấm **Thêm server…** (ở màn hình chào, menu server trên menu bar, ho�
 - **Private key**: file key bạn chọn, kèm passphrase nếu có.
 - **Mật khẩu**.
 
+Với kiểu đăng nhập chỉ chạy được qua OpenSSH, như agent cấp chứng chỉ, còn có **Nâng cao: dùng ssh control socket**; xem [Đăng nhập chỉ chạy được qua OpenSSH](/vi/docs/network-and-security/ssh-control-socket/).
+
 Mật khẩu và passphrase được giữ trong keychain của hệ điều hành, không bao giờ ghi ra file.
 
 ## Kiểm tra host key
