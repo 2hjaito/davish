@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -69,11 +70,28 @@ var agentDial = dialAgent
 // not leave the connection stuck before it even dials (#168).
 var agentTimeout = 5 * time.Second
 
+// agentWait is how long to wait for the agent: agentTimeout, or DAVISH_AGENT_WAIT
+// seconds (1 to 300) when that is set. An agent that waits for the person to
+// unlock a vault or confirm a key, such as Bitwarden's, may need longer than
+// agentTimeout, and the person can raise it without a new build (#168).
+func agentWait() time.Duration {
+	if n, err := strconv.Atoi(os.Getenv("DAVISH_AGENT_WAIT")); err == nil && n >= 1 && n <= 300 {
+		return time.Duration(n) * time.Second
+	}
+	return agentTimeout
+}
+
 // agentSigners returns the keys loaded in the SSH agent, if one is running
 // and answers in time.
 func (m *Manager) agentSigners() ([]ssh.Signer, func()) {
 	c, err := agentDial()
 	if err != nil {
+		// Without this line a pipe that cannot be opened (busy, no right to it,
+		// nobody listening) looks like no agent at all, and the log of a person
+		// whose agent does not work says nothing (#168).
+		if m.log != nil {
+			m.log.Info("ssh agent not reachable", "err", err)
+		}
 		return nil, func() {}
 	}
 	// Closing may block while a read is pending on a Windows pipe, so it
@@ -84,12 +102,18 @@ func (m *Manager) agentSigners() ([]ssh.Signer, func()) {
 		err     error
 	}
 	done := make(chan listed, 1)
+	start := time.Now()
 	go func() {
 		s, err := agent.NewClient(c).Signers()
 		done <- listed{s, err}
 	}()
+	wait := agentWait()
 	select {
 	case l := <-done:
+		if m.log != nil && l.err == nil {
+			// How long the agent took says whether waiting longer would help (#168).
+			m.log.Info("ssh agent answered", "keys", len(l.signers), "took", time.Since(start).Round(time.Millisecond).String())
+		}
 		if l.err != nil {
 			if m.log != nil {
 				m.log.Warn("ssh agent did not list its keys", "err", l.err)
@@ -102,9 +126,9 @@ func (m *Manager) agentSigners() ([]ssh.Signer, func()) {
 			m.log.Info("ssh agent is running but lists no keys")
 		}
 		return l.signers, release
-	case <-time.After(agentTimeout):
+	case <-time.After(wait):
 		if m.log != nil {
-			m.log.Warn("ssh agent did not answer in time; trying key files")
+			m.log.Warn("ssh agent did not answer in time; trying key files", "waited", wait.String())
 		}
 		release()
 		return nil, func() {}

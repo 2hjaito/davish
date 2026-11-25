@@ -1,11 +1,13 @@
 package conn
 
 import (
+	"bytes"
 	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/pem"
 	"errors"
 	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -98,6 +100,56 @@ func TestAgentSignersTimeout(t *testing.T) {
 	case <-agent.closed:
 	case <-time.After(2 * time.Second):
 		t.Fatal("the stuck agent was not closed")
+	}
+}
+
+// An agent that cannot be reached leaves a line in the log, with why, so a
+// support log can tell "no agent" from "an agent we could not open" (#168).
+func TestAgentSignersLogsWhenUnreachable(t *testing.T) {
+	oldDial := agentDial
+	agentDial = func() (io.ReadWriteCloser, error) {
+		return nil, errors.New(`open \\.\pipe\openssh-ssh-agent: All pipe instances are busy`)
+	}
+	t.Cleanup(func() { agentDial = oldDial })
+
+	var buf bytes.Buffer
+	m := &Manager{log: slog.New(slog.NewJSONHandler(&buf, nil))}
+	signers, release := m.agentSigners()
+	release()
+
+	if len(signers) != 0 {
+		t.Fatalf("signers = %d; want none", len(signers))
+	}
+	out := buf.String()
+	if !strings.Contains(out, "ssh agent not reachable") || !strings.Contains(out, "All pipe instances are busy") {
+		t.Errorf("log = %q; want the line and the cause", out)
+	}
+	// And with no logger, as in other tests, it must not panic.
+	if _, release := (&Manager{}).agentSigners(); release != nil {
+		release()
+	}
+}
+
+// DAVISH_AGENT_WAIT raises how long the agent is waited for; a bad value is
+// ignored (#168).
+func TestAgentWait(t *testing.T) {
+	for _, tt := range []struct {
+		env  string
+		want time.Duration
+	}{
+		{"", agentTimeout},
+		{"60", 60 * time.Second},
+		{"1", time.Second},
+		{"300", 300 * time.Second},
+		{"0", agentTimeout},
+		{"301", agentTimeout},
+		{"-5", agentTimeout},
+		{"soon", agentTimeout},
+	} {
+		t.Setenv("DAVISH_AGENT_WAIT", tt.env)
+		if got := agentWait(); got != tt.want {
+			t.Errorf("DAVISH_AGENT_WAIT=%q: wait = %v; want %v", tt.env, got, tt.want)
+		}
 	}
 }
 
