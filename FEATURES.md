@@ -78,6 +78,8 @@ Every server in one window, from the server menu, Launchpad or Spotlight: connec
 
 **Tags** tell environments apart. In the add or edit server dialog, pick `local`, `staging` or `prod`, or type your own (up to 24 characters); the tag takes the server's color. It shows next to the server's name in the menu bar, the server menu, this window and every window's title bar, and a thin line in that color runs under the menu bar, so a red `prod` stays visible whichever app is open. With two tags or more, the server menu and this window filter by tag, and the search here matches tags too. Servers without a tag look exactly as before.
 
+**Duplicate** (the copy icon on a card or a row) opens the add dialog filled in from that server: host, port, user, how it logs in, key path, jump server, group, tag and color, with the name as `name (copy)`. Change what differs and save; nothing is created until you do. Passwords and key passphrases are not copied, and neither is an ssh control socket, which belongs to one server.
+
 <img src="assets/screenshots/en/servers.jpg" alt="All servers in folders by group, with tags" width="100%">
 
 <img src="assets/screenshots/en/server-menu.jpg" alt="The server menu, grouped, with tags and the ⌘1…⌘9 numbers" width="100%">

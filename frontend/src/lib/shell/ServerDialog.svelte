@@ -5,6 +5,7 @@
   import { servers } from '../stores/servers.svelte'
   import { ui } from '../stores/ui.svelte'
   import Dialog from '../ui/Dialog.svelte'
+  import { duplicateDraft } from './duplicate'
   import { groupNames } from './groups'
   import { MAX_GROUP_LENGTH, MAX_TAG_LENGTH, TAG_PRESETS } from './tags'
 
@@ -16,6 +17,13 @@
   const editing = $derived(
     ui.serverDialog?.mode === 'edit'
       ? servers.list.find((s) => s.id === (ui.serverDialog as { id: string }).id)
+      : undefined,
+  )
+
+  // Set when the add form was opened from "Duplicate": the server it copies.
+  const source = $derived(
+    ui.serverDialog?.mode === 'add' && ui.serverDialog.from
+      ? servers.list.find((s) => s.id === (ui.serverDialog as { from: string }).from)
       : undefined,
   )
 
@@ -60,7 +68,12 @@
           password: '',
           passphrase: '',
         }
-      : blank()
+      : source
+        ? duplicateDraft(
+            source,
+            servers.list.map((x) => x.name),
+          )
+        : blank()
     error = ''
     confirmingDelete = false
   })
@@ -116,7 +129,11 @@
 
 <Dialog
   open={ui.serverDialog !== null}
-  title={editing ? t.serverDialog.editTitle : t.serverDialog.addTitle}
+  title={editing
+    ? t.serverDialog.editTitle
+    : source
+      ? t.serverDialog.duplicateTitle
+      : t.serverDialog.addTitle}
   onclose={() => ui.closeServerDialog()}
   width={440}
 >

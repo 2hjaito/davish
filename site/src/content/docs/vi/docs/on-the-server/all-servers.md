@@ -13,6 +13,8 @@ Nút **Bản đồ** trên thẻ server đã kết nối cho thấy request nào
 
 **Nhãn** giúp phân biệt môi trường. Trong hộp thoại thêm hoặc sửa server, chọn `local`, `staging`, `prod` hoặc tự gõ nhãn (tối đa 24 ký tự); nhãn lấy màu của server. Nhãn hiện cạnh tên server trên menu bar, trong menu server, trong cửa sổ này và trên thanh tiêu đề của mọi cửa sổ, và một vạch mảnh cùng màu chạy dưới menu bar, nên chữ `prod` màu đỏ luôn thấy dù đang mở app nào. Từ hai nhãn trở lên, menu server và cửa sổ này lọc được theo nhãn, ô tìm kiếm ở đây cũng khớp nhãn. Server không có nhãn trông y như trước.
 
+**Nhân bản** (icon sao chép trên thẻ hoặc hàng) mở hộp thoại thêm server đã điền sẵn từ server đó: host, cổng, user, cách đăng nhập, đường dẫn key, server nhảy, nhóm, nhãn và màu, tên thành `tên (copy)`. Sửa chỗ khác biệt rồi lưu; chưa lưu thì chưa có gì được tạo. Mật khẩu và passphrase của key không được sao chép, control socket của ssh cũng không (nó thuộc về một server).
+
 ![Mọi server theo thư mục nhóm, kèm nhãn](../../../../../../../assets/screenshots/servers.jpg)
 
 ![Menu server chia nhóm, kèm nhãn và số ⌘1…⌘9](../../../../../../../assets/screenshots/server-menu.jpg)

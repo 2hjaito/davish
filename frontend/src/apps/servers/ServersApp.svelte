@@ -224,6 +224,12 @@
           onclick={() => void servers.reconnect(srv.id)}><Icon name="refresh" size={13} /></button
         >
       {/if}
+      <button
+        class="icon"
+        title={s.duplicate}
+        aria-label={s.duplicate}
+        onclick={() => ui.duplicateServer(srv.id)}><Icon name="copy" size={13} /></button
+      >
       <button class="icon" title={s.edit} aria-label={s.edit} onclick={() => ui.editServer(srv.id)}
         ><Icon name="editor" size={13} /></button
       >
@@ -303,6 +309,14 @@
           >{s.overview.disconnect}</button
         >
       {/if}
+      <button
+        class="btn"
+        title={s.duplicate}
+        aria-label={s.duplicate}
+        onclick={() => ui.duplicateServer(srv.id)}
+      >
+        <Icon name="copy" size={13} />
+      </button>
       <button class="btn" onclick={() => ui.editServer(srv.id)}>{s.edit}</button>
       {#if srv.id !== servers.activeId}
         <button class="btn btn-primary" onclick={() => servers.select(srv.id)}

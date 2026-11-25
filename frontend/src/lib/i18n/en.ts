@@ -1517,6 +1517,7 @@ const en = {
     import: 'Import from ~/.ssh/config or Ansible…',
     none: 'No servers yet',
     edit: 'Edit server',
+    duplicate: 'Duplicate',
     reconnect: 'Reconnect',
     dragToReorder: 'Drag to reorder',
     tagFilter: 'Filter by tag',
@@ -1670,6 +1671,7 @@ const en = {
   serverDialog: {
     addTitle: 'Add a server over SSH',
     editTitle: 'Edit server',
+    duplicateTitle: 'Duplicate a server',
     name: 'Display name',
     namePlaceholder: 'e.g. my-vps',
     host: 'Host',
