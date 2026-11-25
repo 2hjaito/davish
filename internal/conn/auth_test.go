@@ -129,6 +129,29 @@ func TestAgentSignersLogsWhenUnreachable(t *testing.T) {
 	}
 }
 
+// DAVISH_AGENT_WAIT raises how long the agent is waited for; a bad value is
+// ignored (#168).
+func TestAgentWait(t *testing.T) {
+	for _, tt := range []struct {
+		env  string
+		want time.Duration
+	}{
+		{"", agentTimeout},
+		{"60", 60 * time.Second},
+		{"1", time.Second},
+		{"300", 300 * time.Second},
+		{"0", agentTimeout},
+		{"301", agentTimeout},
+		{"-5", agentTimeout},
+		{"soon", agentTimeout},
+	} {
+		t.Setenv("DAVISH_AGENT_WAIT", tt.env)
+		if got := agentWait(); got != tt.want {
+			t.Errorf("DAVISH_AGENT_WAIT=%q: wait = %v; want %v", tt.env, got, tt.want)
+		}
+	}
+}
+
 func TestLoadKeyFolder(t *testing.T) {
 	dir := t.TempDir()
 	_, err := (&Manager{secrets: passphraseOnly("")}).loadKey(store.Server{KeyPath: dir})
