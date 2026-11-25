@@ -22,6 +22,7 @@
     TERMINAL_SCROLLBACK,
     THEMES,
     WALLPAPER_ACCENTS,
+    WINDOW_DRAGS,
   } from '../../lib/stores/settings.svelte'
   import DavishMark from '../../lib/ui/DavishMark.svelte'
   import ProfileAvatar from '../../lib/ui/ProfileAvatar.svelte'
@@ -703,6 +704,20 @@
             {:else if perfCheck.last === 'fine'}
               <small>{t.settings.perfFine}</small>
             {/if}
+          </div>
+        </div>
+
+        <h3>{t.settings.dragTitle}</h3>
+        <div class="card">
+          <div class="row">
+            {@render head(t.settings.dragLabel, t.settings.dragHint)}
+            {@render segmented(
+              t.settings.dragLabel,
+              WINDOW_DRAGS,
+              settings.windowDrag,
+              (m) => t.settings.dragModes[m],
+              (m) => settings.set('windowDrag', m),
+            )}
           </div>
         </div>
 

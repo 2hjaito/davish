@@ -4,6 +4,8 @@ import {
   clampFontSize,
   cleanFontName,
   clampCursor,
+  clampDrag,
+  WINDOW_DRAGS,
   clampEditorFontSize,
   clampIndent,
   clampScheme,
@@ -209,5 +211,19 @@ describe('the widgets knob in settings', () => {
     expect(settings.knobs.widgets).toBe(true)
     expect(settings.perfPreset).toBe('custom')
     settings.usePreset('beautiful')
+  })
+})
+
+describe('clampDrag', () => {
+  it.each([...WINDOW_DRAGS])('keeps %s', (mode) => {
+    expect(clampDrag(mode)).toBe(mode)
+  })
+
+  it.each(['fast', '', 0, null, undefined])('falls back to live for %s', (junk) => {
+    expect(clampDrag(junk)).toBe('live')
+  })
+
+  it('is live by default, so nothing changes until someone picks another', () => {
+    expect(settings.windowDrag).toBe('live')
   })
 })

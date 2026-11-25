@@ -2153,6 +2153,11 @@ const vi = {
     perfBlurHint: 'Làm mờ những gì nằm sau cửa sổ.',
     perfShadow: 'Bóng cửa sổ ngắn',
     perfShadowHint: 'Bóng ngắn vẽ lại nhanh hơn khi cuộn và kéo cửa sổ.',
+    dragTitle: 'Kéo cửa sổ',
+    dragLabel: 'Khi kéo',
+    dragHint:
+      'Trực tiếp: cả cửa sổ di chuyển theo chuột. Đơn giản: cửa sổ vẫn di chuyển nhưng tắt kính cho tới khi thả. Viền: chỉ một đường viền di chuyển, thả ra thì cửa sổ mới nhảy tới đó. Chọn mức nhẹ hơn nếu kéo thấy chậm.',
+    dragModes: { live: 'Trực tiếp', simple: 'Đơn giản', outline: 'Viền' },
     perfOpaque: 'Nền đặc',
     perfOpaqueHint: 'Cửa sổ không trộn với hình nền.',
     perfWallpaper: 'Hình nền loang màu',

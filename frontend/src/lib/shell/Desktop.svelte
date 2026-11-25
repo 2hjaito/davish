@@ -325,6 +325,16 @@
     ></div>
   {/if}
 
+  {#if wm.dragOutline}
+    {@const o = wm.dragOutline}
+    <div
+      class="drag-outline"
+      style:transform="translate({o.x}px, {o.y}px)"
+      style:width="{o.w}px"
+      style:height="{o.h}px"
+    ></div>
+  {/if}
+
   {#each wm.windows as win (win.id)}
     {@const app = getApp(win.appId)}
     {#if app}
@@ -419,6 +429,19 @@
 
   .workspace.hidden {
     display: none;
+  }
+
+  /* The outline of a window being dragged in the outline mode. It moves instead of the window, so
+     it is plain: no blur, no shadow, nothing to composite but a border. */
+  .drag-outline {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 900;
+    box-sizing: border-box;
+    border-radius: var(--window-radius);
+    border: 2px solid var(--accent);
+    pointer-events: none;
   }
 
   .snap-preview {

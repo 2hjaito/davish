@@ -53,6 +53,19 @@ export function clampScheme(id: unknown): TerminalScheme {
   return TERMINAL_SCHEMES.find((s) => s === id) ?? 'davish'
 }
 
+/**
+ * How a window follows the pointer while it is dragged. Live moves the whole
+ * window. Simple does too, but paints the light look (no blur, a short shadow,
+ * opaque fills) only until it is let go. Outline moves just an outline and puts
+ * the window there on release, for machines that paint the window on the CPU.
+ */
+export const WINDOW_DRAGS = ['live', 'simple', 'outline'] as const
+export type WindowDrag = (typeof WINDOW_DRAGS)[number]
+
+export function clampDrag(mode: unknown): WindowDrag {
+  return WINDOW_DRAGS.find((m) => m === mode) ?? 'live'
+}
+
 /** The shapes of the terminal cursor. */
 export const TERMINAL_CURSORS = ['bar', 'block', 'underline'] as const
 export type TerminalCursor = (typeof TERMINAL_CURSORS)[number]
@@ -151,6 +164,7 @@ interface SettingsData extends StoredPerf {
   terminalSolid: boolean
   terminalScheme: TerminalScheme
   terminalCursor: TerminalCursor
+  windowDrag: WindowDrag
   terminalBlink: boolean
   terminalFont: string
   terminalScrollback: TerminalScrollback
@@ -189,6 +203,7 @@ const defaults: SettingsData = {
   terminalSolid: false,
   terminalScheme: 'davish',
   terminalCursor: 'bar',
+  windowDrag: 'live',
   terminalBlink: false,
   terminalFont: '',
   terminalScrollback: DEFAULT_SCROLLBACK,
@@ -358,6 +373,9 @@ class Settings {
   }
   get terminalCursor(): TerminalCursor {
     return clampCursor(this.#data.terminalCursor)
+  }
+  get windowDrag(): WindowDrag {
+    return clampDrag(this.#data.windowDrag)
   }
   get terminalBlink() {
     return this.#data.terminalBlink === true

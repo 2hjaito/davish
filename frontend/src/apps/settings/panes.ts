@@ -37,6 +37,8 @@ function words(p: Pane): string[] {
     case 'performance':
       return [
         s.perfPreset,
+        s.dragTitle,
+        s.dragHint,
         s.perfAdvanced,
         s.perfBlur,
         s.perfShadow,

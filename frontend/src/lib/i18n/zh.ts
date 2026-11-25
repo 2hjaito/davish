@@ -2114,6 +2114,11 @@ const zh = {
     perfBlurHint: '模糊窗口后面的内容。',
     perfShadow: '短窗口阴影',
     perfShadowHint: '短阴影在滚动和拖动时重绘更快。',
+    dragTitle: '拖动窗口',
+    dragLabel: '拖动时',
+    dragHint:
+      '实时：整个窗口跟随鼠标。简化：窗口同样跟随，但在松开前关闭玻璃效果。轮廓：只移动一个轮廓，松开后窗口才移到那里。如果拖动感觉卡顿，请选择更轻的模式。',
+    dragModes: { live: '实时', simple: '简化', outline: '轮廓' },
     perfOpaque: '纯色填充',
     perfOpaqueHint: '窗口不再和壁纸混合。',
     perfWallpaper: '壁纸色块',
