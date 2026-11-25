@@ -3308,6 +3308,8 @@ const zh = {
     CONN_AGENT_UNAVAILABLE:
       '没有找到密钥：SSH agent 是空的或未运行，~/.ssh 中也没有默认密钥。在 Windows 上，请启动“OpenSSH Authentication Agent”服务并用 ssh-add 添加密钥，或选择“私钥”。仅在连接过程中才签发证书的 agent（例如 authentik）暂不支持。',
     CONN_KEY_UNREADABLE: '无法读取私钥文件。',
+    CONN_KEY_PPK:
+      '这是 PuTTY 的 .ppk 密钥，Davish 暂时无法读取。请在 PuTTYgen 中选择 Conversions → Export OpenSSH key，然后使用导出的文件。',
     CONN_PASSPHRASE_WRONG: '已保存的密码短语无法解开此私钥。请编辑服务器并重新输入。',
     CONN_NOT_CONNECTED: '服务器未连接。',
     CONN_CONTROL_SOCKET: '无法使用 control socket。',

@@ -152,6 +152,9 @@ func (m *Manager) loadKey(srv store.Server) (ssh.Signer, error) {
 		}
 		signer, err = keyfile.Parse(data, []byte(pass))
 	}
+	if errors.Is(err, keyfile.ErrPPK) {
+		return nil, apperr.New(apperr.ConnKeyPPK, "the key is in PuTTY .ppk format; in PuTTYgen use Conversions > Export OpenSSH key and choose that file")
+	}
 	if errors.Is(err, keyfile.ErrWrongPassphrase) {
 		return nil, apperr.Wrap(apperr.ConnPassphraseWrong, "the saved passphrase does not open the key", err)
 	}

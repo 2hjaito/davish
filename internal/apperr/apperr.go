@@ -17,6 +17,7 @@ const (
 	ConnSecretMissing    Code = "CONN_SECRET_MISSING"
 	ConnAgentUnavailable Code = "CONN_AGENT_UNAVAILABLE"
 	ConnKeyUnreadable    Code = "CONN_KEY_UNREADABLE"
+	ConnKeyPPK           Code = "CONN_KEY_PPK"
 	ConnPassphraseWrong  Code = "CONN_PASSPHRASE_WRONG"
 	ConnNotConnected     Code = "CONN_NOT_CONNECTED"
 	ConnControlSocket    Code = "CONN_CONTROL_SOCKET"

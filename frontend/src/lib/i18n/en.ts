@@ -3416,6 +3416,8 @@ const en = {
     CONN_AGENT_UNAVAILABLE:
       'No key found: the SSH agent is empty or not running, and there is no default key in ~/.ssh. On Windows, start the “OpenSSH Authentication Agent” service and add your key with ssh-add, or choose Private key. Agents that only issue a certificate during the connection (such as authentik) are not supported yet.',
     CONN_KEY_UNREADABLE: 'Could not read the private key file.',
+    CONN_KEY_PPK:
+      'This is a PuTTY .ppk key, which Davish cannot read. In PuTTYgen choose Conversions → Export OpenSSH key, then use the exported file.',
     CONN_PASSPHRASE_WRONG:
       'The saved passphrase does not open this private key. Edit the server and type it again.',
     CONN_NOT_CONNECTED: 'The server is not connected.',

@@ -10,6 +10,7 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ### Fixed
 - All servers: the list scrolls again when its servers are taller than the window, in both the cards and the table. In 1.15.1 it was cut off at the window's edge and the servers below could not be reached (#256).
+- A PuTTY `.ppk` key used as a server's private key now gets a clear message with how to convert it (PuTTYgen → Conversions → Export OpenSSH key), instead of a generic "cannot read the private key" (#264). Davish still cannot read `.ppk` itself.
 
 ## [1.15.1] - 2026-11-24
 

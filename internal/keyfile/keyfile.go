@@ -25,6 +25,14 @@ const magic = "openssh-key-v1\x00"
 // ErrWrongPassphrase means the passphrase does not open the key.
 var ErrWrongPassphrase = x509.IncorrectPasswordError
 
+// ErrPPK means the file is a PuTTY private key (.ppk), a format x/crypto/ssh
+// does not read. It is told apart from a broken key so the person is told how
+// to convert it (#264).
+var ErrPPK = errors.New("PuTTY .ppk key")
+
+// ppkHeader starts every PuTTY private key file ("PuTTY-User-Key-File-2:" or "-3:").
+const ppkHeader = "PuTTY-User-Key-File-"
+
 // maxRounds caps the bcrypt rounds read from the file, as x/crypto does,
 // so a crafted key cannot keep the CPU busy for hours.
 const maxRounds = 1 << 11
@@ -64,6 +72,9 @@ var ciphers = map[string]spec{
 func Parse(data, passphrase []byte) (ssh.Signer, error) {
 	// Notepad saves with a byte order mark, which the PEM reader rejects.
 	data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
+	if bytes.HasPrefix(bytes.TrimSpace(data), []byte(ppkHeader)) {
+		return nil, ErrPPK
+	}
 	if passphrase == nil {
 		return ssh.ParsePrivateKey(data)
 	}
