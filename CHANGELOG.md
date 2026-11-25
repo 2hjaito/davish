@@ -5,6 +5,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Thêm
+- **Nhân bản server** (#257): icon sao chép trên thẻ hoặc hàng trong Tất cả server mở hộp thoại thêm server đã điền sẵn từ server đó, tên thành `tên (copy)`, nên chỉ gõ chỗ khác biệt. Chưa lưu thì chưa tạo gì. Mật khẩu, passphrase của key và control socket không được sao chép.
 - **Kết nối qua control socket của OpenSSH** (#240): với kiểu đăng nhập chỉ chạy được qua OpenSSH, như agent cấp chứng chỉ theo yêu cầu (authentik), hộp thoại server có ô **Nâng cao: dùng control socket của ssh**. Bạn tự chạy một master (`ssh -M -S <đường dẫn> -fN user@host`) rồi đưa đường dẫn của nó cho Davish: Davish gắn vào kết nối đó, nên OpenSSH lo việc đăng nhập và Davish không bao giờ thấy thông tin đăng nhập của bạn. Nó thay thế phần xác thực của server đó, và chỉ có trên Linux và macOS. Đã thử với authentik bởi @PlayerFann14.
 
 ### Sửa

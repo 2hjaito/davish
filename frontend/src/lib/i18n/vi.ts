@@ -1499,6 +1499,7 @@ const vi = {
     import: 'Nhập từ ~/.ssh/config hoặc Ansible…',
     none: 'Chưa có server nào',
     edit: 'Sửa server',
+    duplicate: 'Nhân bản',
     reconnect: 'Kết nối lại',
     dragToReorder: 'Kéo để sắp xếp',
     tagFilter: 'Lọc theo nhãn',
@@ -1652,6 +1653,7 @@ const vi = {
   serverDialog: {
     addTitle: 'Thêm server qua SSH',
     editTitle: 'Sửa server',
+    duplicateTitle: 'Nhân bản server',
     name: 'Tên hiển thị',
     namePlaceholder: 'ví dụ: dangth-vps',
     host: 'Host',

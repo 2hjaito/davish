@@ -1543,6 +1543,7 @@ const es = {
     import: 'Importar desde ~/.ssh/config o Ansible…',
     none: 'Todavía no hay servidores',
     edit: 'Editar servidor',
+    duplicate: 'Duplicar',
     reconnect: 'Volver a conectar',
     dragToReorder: 'Arrastra para reordenar',
     tagFilter: 'Filtrar por etiqueta',
@@ -1698,6 +1699,7 @@ const es = {
   serverDialog: {
     addTitle: 'Añadir un servidor por SSH',
     editTitle: 'Editar servidor',
+    duplicateTitle: 'Duplicar un servidor',
     name: 'Nombre visible',
     namePlaceholder: 'p. ej. mi-vps',
     host: 'Host',

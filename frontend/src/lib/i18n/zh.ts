@@ -1475,6 +1475,7 @@ const zh = {
     import: '从 ~/.ssh/config 或 Ansible 导入…',
     none: '还没有服务器',
     edit: '编辑服务器',
+    duplicate: '复制',
     reconnect: '重新连接',
     dragToReorder: '拖动以排序',
     tagFilter: '按标签筛选',
@@ -1624,6 +1625,7 @@ const zh = {
   serverDialog: {
     addTitle: '通过 SSH 添加服务器',
     editTitle: '编辑服务器',
+    duplicateTitle: '复制服务器',
     name: '显示名称',
     namePlaceholder: '例如 my-vps',
     host: '主机',
