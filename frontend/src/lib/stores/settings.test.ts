@@ -226,4 +226,8 @@ describe('clampDrag', () => {
   it('is live by default, so nothing changes until someone picks another', () => {
     expect(settings.windowDrag).toBe('live')
   })
+
+  it('fills the outline by default; only an explicit false draws the border alone', () => {
+    expect(settings.outlineFill).toBe(true)
+  })
 })

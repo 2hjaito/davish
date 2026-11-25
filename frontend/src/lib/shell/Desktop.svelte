@@ -329,6 +329,7 @@
     {@const o = wm.dragOutline}
     <div
       class="drag-outline"
+      class:filled={settings.outlineFill}
       style:transform="translate({o.x}px, {o.y}px)"
       style:width="{o.w}px"
       style:height="{o.h}px"
@@ -432,7 +433,8 @@
   }
 
   /* The outline of a window being dragged in the outline mode. It moves instead of the window, so
-     it is plain: no blur, no shadow, nothing to composite but a border. */
+     it is plain: no blur, no shadow, a border and at most a light tint. Its own layer (will-change)
+     and contained, so moving it only re-composites it instead of repainting what it passes over. */
   .drag-outline {
     position: absolute;
     top: 0;
@@ -442,6 +444,12 @@
     border-radius: var(--window-radius);
     border: 2px solid var(--accent);
     pointer-events: none;
+    will-change: transform;
+    contain: strict;
+  }
+
+  .drag-outline.filled {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
   }
 
   .snap-preview {

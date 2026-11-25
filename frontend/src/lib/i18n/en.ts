@@ -2185,6 +2185,9 @@ const en = {
     perfShadowHint: 'A short shadow repaints faster while scrolling and dragging.',
     dragTitle: 'Dragging windows',
     dragLabel: 'While dragging',
+    dragFill: 'Fill the outline',
+    dragFillHint:
+      'A light tint inside the outline makes the window easier to see. Turn it off on a very slow computer for the lightest drag.',
     dragHint:
       'Live moves the whole window. Simple moves it too, but turns the glass off until you let go. Outline moves only an outline and puts the window there when you let go. Pick a lighter one if dragging feels slow.',
     dragModes: { live: 'Live', simple: 'Simple', outline: 'Outline' },

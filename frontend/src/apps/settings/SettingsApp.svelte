@@ -719,6 +719,14 @@
               (m) => settings.set('windowDrag', m),
             )}
           </div>
+          {#if settings.windowDrag === 'outline'}
+            {@render toggle(
+              t.settings.dragFill,
+              t.settings.dragFillHint,
+              settings.outlineFill,
+              (on) => settings.set('outlineFill', on),
+            )}
+          {/if}
         </div>
 
         <h3>{t.settings.perfAdvanced}</h3>

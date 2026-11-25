@@ -165,6 +165,7 @@ interface SettingsData extends StoredPerf {
   terminalScheme: TerminalScheme
   terminalCursor: TerminalCursor
   windowDrag: WindowDrag
+  outlineFill: boolean
   terminalBlink: boolean
   terminalFont: string
   terminalScrollback: TerminalScrollback
@@ -204,6 +205,7 @@ const defaults: SettingsData = {
   terminalScheme: 'davish',
   terminalCursor: 'bar',
   windowDrag: 'live',
+  outlineFill: true,
   terminalBlink: false,
   terminalFont: '',
   terminalScrollback: DEFAULT_SCROLLBACK,
@@ -376,6 +378,10 @@ class Settings {
   }
   get windowDrag(): WindowDrag {
     return clampDrag(this.#data.windowDrag)
+  }
+  /** Outline mode: a light tint inside the outline. Off draws the border alone, the lightest. */
+  get outlineFill() {
+    return this.#data.outlineFill !== false
   }
   get terminalBlink() {
     return this.#data.terminalBlink === true

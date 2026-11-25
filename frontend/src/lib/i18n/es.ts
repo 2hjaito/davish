@@ -2227,6 +2227,9 @@ const es = {
     perfShadowHint: 'Una sombra corta se redibuja más rápido al desplazarse y al arrastrar.',
     dragTitle: 'Arrastrar ventanas',
     dragLabel: 'Al arrastrar',
+    dragFill: 'Rellenar el contorno',
+    dragFillHint:
+      'Un tinte suave dentro del contorno facilita ver la ventana. Desactívalo en un equipo muy lento para el arrastre más ligero.',
     dragHint:
       'En vivo mueve toda la ventana. Sencillo también, pero apaga el cristal hasta que sueltas. Contorno mueve solo un contorno y coloca la ventana allí al soltar. Elige uno más ligero si arrastrar va lento.',
     dragModes: { live: 'En vivo', simple: 'Sencillo', outline: 'Contorno' },

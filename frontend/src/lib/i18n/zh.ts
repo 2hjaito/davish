@@ -2116,6 +2116,8 @@ const zh = {
     perfShadowHint: '短阴影在滚动和拖动时重绘更快。',
     dragTitle: '拖动窗口',
     dragLabel: '拖动时',
+    dragFill: '填充轮廓',
+    dragFillHint: '轮廓内加一层淡色，更容易看清窗口。在非常慢的电脑上关闭它，拖动最轻。',
     dragHint:
       '实时：整个窗口跟随鼠标。简化：窗口同样跟随，但在松开前关闭玻璃效果。轮廓：只移动一个轮廓，松开后窗口才移到那里。如果拖动感觉卡顿，请选择更轻的模式。',
     dragModes: { live: '实时', simple: '简化', outline: '轮廓' },
