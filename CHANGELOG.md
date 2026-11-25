@@ -13,6 +13,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ### Sửa
 - Tất cả server: danh sách cuộn lại được khi các server cao hơn cửa sổ, ở cả dạng thẻ và dạng bảng. Ở bản 1.15.1 nó bị cắt ở mép cửa sổ và không tới được các server bên dưới (#256).
+- Key `.ppk` của PuTTY dùng làm private key của server giờ được báo rõ cách chuyển đổi (PuTTYgen → Conversions → Export OpenSSH key), thay vì "không đọc được private key" chung chung (#264). Davish vẫn chưa tự đọc được `.ppk`.
 
 ## [1.15.1] - 2026-11-24
 

@@ -16,6 +16,7 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
+	"davish/internal/apperr"
 	"davish/internal/store"
 )
 
@@ -149,6 +150,19 @@ func TestAgentWait(t *testing.T) {
 		if got := agentWait(); got != tt.want {
 			t.Errorf("DAVISH_AGENT_WAIT=%q: wait = %v; want %v", tt.env, got, tt.want)
 		}
+	}
+}
+
+// A PuTTY key file gets its own error code and says how to convert it (#264).
+func TestLoadKeyPPK(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "test.ppk")
+	if err := os.WriteFile(path, []byte("PuTTY-User-Key-File-3: ssh-ed25519\nEncryption: none\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	_, err := (&Manager{secrets: passphraseOnly("")}).loadKey(store.Server{KeyPath: path})
+	var ae *apperr.Error
+	if !errors.As(err, &ae) || ae.Code != apperr.ConnKeyPPK || !strings.Contains(ae.Message, "Export OpenSSH key") {
+		t.Fatalf("err = %v; want CONN_KEY_PPK with the way to convert", err)
 	}
 }
 
