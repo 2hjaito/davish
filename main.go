@@ -61,6 +61,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	app.InitAgentEnv(a)
 	if runtime.GOOS == "linux" {
 		// A blank-window report starts from this line in the app log.
 		app.LogInfo(a, "linux webview gpu", "policy", gpu.Policy, "reason", gpu.Reason)

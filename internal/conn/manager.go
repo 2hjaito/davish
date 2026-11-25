@@ -644,8 +644,16 @@ func (m *Manager) dialVia(ctx context.Context, target, id string, depth int) (*s
 		}
 	}
 	// Bound the handshake too; a silent server must not hang the UI. A
-	// tunneled conn has no deadlines, so close it instead.
-	timer := time.AfterFunc(m.opts.DialTimeout, func() { nc.Close() }) //nolint:errcheck,gosec // aborting
+	// tunneled conn has no deadlines, so close it instead. If the user
+	// raised DAVISH_AGENT_WAIT for a vault or Touch ID prompt, let the
+	// handshake wait at least that long too.
+	handshakeTimeout := m.opts.DialTimeout
+	if srv.Auth == store.AuthAgent || srv.Auth == store.AuthKey {
+		if wait, ok := agentWaitOverride(); ok && wait > handshakeTimeout {
+			handshakeTimeout = wait
+		}
+	}
+	timer := time.AfterFunc(handshakeTimeout, func() { nc.Close() }) //nolint:errcheck,gosec // aborting
 	c, chans, reqs, err := ssh.NewClientConn(nc, addr, cfg)
 	if !timer.Stop() && err == nil { // timed out just as the handshake finished
 		c.Close() //nolint:errcheck,gosec // already closed underneath
