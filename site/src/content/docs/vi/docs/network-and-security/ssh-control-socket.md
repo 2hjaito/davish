@@ -55,10 +55,11 @@ ssh -S "$XDG_RUNTIME_DIR/davish-myserver.sock" -O check user@host.example.com
 
 Lệnh cuối nên in `Master running`. Trong Davish, dùng đường dẫn `$XDG_RUNTIME_DIR/davish-myserver.sock` viết đầy đủ (`echo $XDG_RUNTIME_DIR` cho biết, dạng như `/run/user/1000`). Thư mục đó chỉ riêng bạn vào được.
 
-Hai chi tiết quan trọng:
+Ba chi tiết quan trọng:
 
 - `ExecStartPre` xóa socket cũ. Nếu master bị kill, socket của nó còn sót lại, và `ssh -M` sẽ in "ControlSocket ... already exists, disabling multiplexing" rồi chạy như một kết nối thường, không có master, nên Davish không gắn vào được.
 - Service không có terminal, nên `ssh` không hỏi được có tin host mới không. Chạy `ssh user@host.example.com` bằng tay một lần trước, để host key nằm trong `~/.ssh/known_hosts`, và chắc rằng agent trả lời được mà không cần bạn ngồi ở terminal (với authentik là hộp thoại trên desktop).
+- Nếu agent hỏi sự đồng ý của bạn qua một hộp thoại trên desktop (authentik làm vậy, qua polkit), nó chỉ hiện được khi bạn đang đăng nhập phiên đồ họa. Lúc khởi động máy, trước khi đăng nhập, yêu cầu bị từ chối ("user denied"), và unit có `WantedBy=default.target` cùng `Restart=always` sẽ cứ lỗi lặp lại cho tới khi bạn đăng nhập. Hãy gắn unit vào phiên đồ họa: trong `[Unit]` thêm `After=graphical-session.target` và `PartOf=graphical-session.target`, còn trong `[Install]` dùng `WantedBy=graphical-session.target`. Agent vẫn sẽ hỏi lại mỗi lần master khởi động lại sau khi mạng rớt. Điều này đến từ lần thử với authentik của @PlayerFann14.
 
 Trên macOS, chạy cùng lệnh `ssh` đó từ công cụ bạn dùng để khởi động việc khi đăng nhập.
 
