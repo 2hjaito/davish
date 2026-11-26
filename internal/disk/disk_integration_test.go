@@ -110,11 +110,14 @@ sleep 1`)
 	}
 }
 
+// tmpCommand is what the tmp cleanup runs, as the user confirmed it.
+const tmpCommand = `find /tmp /var/tmp -xdev -type f ! -path '/tmp/systemd-private-*' ! -path '/var/tmp/systemd-private-*' -atime +7 -mtime +7 -delete`
+
 func TestCleanupsSeeCachesAndOldTmp(t *testing.T) {
 	m, id := testsshd.Connect(t)
 	s := newDisk(m)
 	testsshd.Run(t, m, id, `mkdir -p ~/.cache/davish-test && head -c 3000000 /dev/zero > ~/.cache/davish-test/blob
-head -c 2000000 /dev/zero > /tmp/davish-old && touch -a -d '10 days ago' /tmp/davish-old`)
+head -c 2000000 /dev/zero > /tmp/davish-old && touch -d '10 days ago' /tmp/davish-old`)
 	t.Cleanup(func() { testsshd.Run(t, m, id, `rm -rf ~/.cache/davish-test /tmp/davish-old`) })
 
 	cs, err := s.Cleanups(context.Background(), id)
@@ -130,6 +133,24 @@ head -c 2000000 /dev/zero > /tmp/davish-old && touch -a -d '10 days ago' /tmp/da
 	}
 	if c := got["tmp"]; c.Bytes < 2000000 || !c.Root {
 		t.Errorf("tmp = %+v", c)
+	}
+	// What the confirmation lists is what a cleanup would remove: the old
+	// file is in the tmp listing, and the cache blob heads the cache one.
+	if !got["tmp"].Listable || !got["home-cache"].Listable {
+		t.Errorf("tmp and home-cache must be listable: %+v %+v", got["tmp"], got["home-cache"])
+	}
+	for id2, want := range map[string]string{"tmp": "/tmp/davish-old", "home-cache": "davish-test"} {
+		p, err := s.Preview(context.Background(), id, id2)
+		if err != nil {
+			t.Fatalf("preview %s: %v", id2, err)
+		}
+		found := false
+		for _, f := range p.Files {
+			found = found || strings.Contains(f.Path, want)
+		}
+		if !found {
+			t.Errorf("preview %s lacks %s: %+v", id2, want, p.Files)
+		}
 	}
 	// Davish runs a cleanup the user may run, and only the one confirmed.
 	if err := s.Clean(context.Background(), id, "home-cache", got["home-cache"].Command); err != nil {
@@ -192,7 +213,7 @@ func TestSudoerCleansThroughSudo(t *testing.T) {
 	if o.Root || !o.AskSudo || !strings.HasPrefix(o.SudoScan, "sudo sh -c ") {
 		t.Fatalf("before the password: root %v, ask %v, scan %q", o.Root, o.AskSudo, o.SudoScan)
 	}
-	if err := s.Clean(ctx, id, "tmp", "find /tmp /var/tmp -xdev -type f -atime +7 -delete"); errCode(err) != apperr.SudoPasswordRequired {
+	if err := s.Clean(ctx, id, "tmp", tmpCommand); errCode(err) != apperr.SudoPasswordRequired {
 		t.Fatalf("clean before the password: %v", err)
 	}
 	if err := k.SetPassword(ctx, id, []byte(testsshd.SudoPassword)); err != nil {
@@ -206,7 +227,7 @@ func TestSudoerCleansThroughSudo(t *testing.T) {
 		return string(res.Stdout)
 	}
 	old, log := "/tmp/davish-sudo-old", "/var/log/davish-sudo.log"
-	root("printf x > " + old + " && chmod 600 " + old + " && touch -a -d '30 days ago' " + old +
+	root("printf x > " + old + " && chmod 600 " + old + " && touch -d '30 days ago' " + old +
 		" && head -c 4096 /dev/zero > " + log + " && chmod 600 " + log)
 	t.Cleanup(func() { root("rm -f " + old + " " + log) })
 

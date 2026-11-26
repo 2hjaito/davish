@@ -82,3 +82,19 @@ func TestSQL(t *testing.T) {
 		t.Errorf("password %q", pw)
 	}
 }
+
+func TestDropSQLRefusesSystemDatabases(t *testing.T) {
+	for kind, names := range systemDatabases {
+		for _, n := range names {
+			if _, err := DropSQL(kind, n); err == nil {
+				t.Errorf("%s %s: dropping a system database was allowed", kind, n)
+			}
+		}
+	}
+	if _, err := DropSQL(MySQL, "MySQL"); err == nil {
+		t.Error("the check must ignore case")
+	}
+	if sql, err := DropSQL(MySQL, "shop"); err != nil || sql != "DROP DATABASE `shop`;" {
+		t.Errorf("shop: %q, %v", sql, err)
+	}
+}

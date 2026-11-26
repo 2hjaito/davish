@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strings"
 	"testing"
+	"time"
 
 	"davish/internal/apperr"
 	"davish/internal/audit"
@@ -107,5 +108,68 @@ func TestPreviewRunsReadOnlyAsRootWhenItNeedsNoPrompt(t *testing.T) {
 	}
 	if _, err := s.Preview(context.Background(), "srv", "docker-images"); err == nil {
 		t.Error("a prune has no listing")
+	}
+}
+
+// TestTmpSelectorSparesWhatIsInUse runs the tmp selector on a temp tree:
+// old, untouched files match; recent ones, files only read long ago but
+// written lately, and a service's private /tmp do not.
+func TestTmpSelectorSparesWhatIsInUse(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("needs a POSIX find")
+	}
+	dir := t.TempDir()
+	old := time.Now().Add(-30 * 24 * time.Hour)
+	recent := time.Now().Add(-1 * time.Hour)
+	// name -> (atime, mtime, matches)
+	cases := map[string]struct {
+		atime, mtime time.Time
+		want         bool
+	}{
+		"tmp/old.dat":                          {old, old, true},
+		"var/tmp/old.dat":                      {old, old, true},
+		"tmp/fresh.dat":                        {recent, recent, false},
+		"tmp/written-lately.db":                {old, recent, false},
+		"tmp/systemd-private-x/tmp/old.sock.f": {old, old, false},
+	}
+	var want []string
+	for name, c := range cases {
+		p := filepath.Join(dir, name)
+		if err := os.MkdirAll(filepath.Dir(p), 0o750); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(p, []byte("x"), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Chtimes(p, c.atime, c.mtime); err != nil {
+			t.Fatal(err)
+		}
+		if c.want {
+			want = append(want, name)
+		}
+	}
+	line := strings.ReplaceAll(selTmp, "/var/tmp", "@VARTMP@")
+	line = strings.ReplaceAll(line, "/tmp", dir+"/tmp")
+	line = strings.ReplaceAll(line, "@VARTMP@", dir+"/var/tmp") + " -print"
+	out, err := exec.Command("sh", "-c", line).Output() //nolint:gosec // a fixed selector run on a temp tree
+	if err != nil {
+		t.Fatalf("find: %v", err)
+	}
+	var got []string
+	for _, l := range strings.Fields(string(out)) {
+		rel, _ := filepath.Rel(dir, l)
+		got = append(got, rel)
+	}
+	sort.Strings(got)
+	sort.Strings(want)
+	if strings.Join(got, ",") != strings.Join(want, ",") {
+		t.Errorf("matched %v, want %v", got, want)
+	}
+}
+
+func TestParsePreviewKeepsUnknownSizes(t *testing.T) {
+	got := parsePreview([]byte("-1\tdb_data\n"))
+	if len(got) != 1 || got[0].Path != "db_data" || got[0].Size != -1 {
+		t.Errorf("got %+v", got)
 	}
 }

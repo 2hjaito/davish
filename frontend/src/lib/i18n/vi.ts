@@ -457,11 +457,11 @@ const vi = {
     cleanups: {
       'docker-images': {
         title: 'Docker: image không container nào dùng',
-        body: 'Xóa mọi image không có container nào dùng, kể cả image có tag; lần chạy sau sẽ tải lại. Lệnh sẽ chạy:',
+        body: 'Xóa mọi image không có container nào dùng, kể cả image có tag. Image từ registry tải lại được, nhưng image bạn tự build trên server này thì mất hẳn. Lệnh sẽ chạy:',
       },
       'docker-containers': {
         title: 'Docker: container đã dừng',
-        body: 'Xóa các container đã dừng cùng lớp ghi của chúng. Lệnh sẽ chạy:',
+        body: 'Xóa các container đã dừng cùng lớp ghi của chúng: những gì chúng ghi ngoài volume sẽ mất. Xem danh sách bên dưới. Lệnh sẽ chạy:',
       },
       'docker-cache': {
         title: 'Docker: cache build',
@@ -469,11 +469,11 @@ const vi = {
       },
       'docker-volumes': {
         title: 'Docker: volume không container nào dùng',
-        body: 'Cẩn thận: volume có thể chứa dữ liệu (database, file tải lên) của container đã xóa. Xóa là mất hẳn. Lệnh sẽ chạy:',
+        body: 'Cẩn thận: volume có thể chứa dữ liệu (database, file tải lên) của container đã xóa. Xóa là mất hẳn. Danh sách bên dưới là các volume hiện không container nào dùng; volume của container bạn sẽ chạy sau này cũng nằm trong đó. Lệnh sẽ chạy:',
       },
       'docker-logs': {
         title: 'Docker: log container quá 10 MB',
-        body: 'Làm rỗng file log JSON của container trong /var/lib/docker/containers; container vẫn chạy và ghi tiếp. Lệnh sẽ chạy:',
+        body: 'Làm rỗng file log JSON của container trong /var/lib/docker/containers; container vẫn chạy và ghi tiếp, nhưng nội dung log cũ mất hẳn. Lệnh sẽ chạy:',
       },
       journal: {
         title: 'Journal của systemd',
@@ -491,7 +491,7 @@ const vi = {
       },
       tmp: {
         title: 'File tạm cũ hơn 7 ngày',
-        body: 'Xóa file trong /tmp và /var/tmp không ai đọc suốt 7 ngày. Lệnh sẽ chạy:',
+        body: 'Xóa file trong /tmp và /var/tmp không ai đọc hay sửa suốt 7 ngày, trừ /tmp riêng của các dịch vụ. Chương trình vẫn có thể để thứ nó cần trong đó: xem danh sách bên dưới. Lệnh sẽ chạy:',
       },
       snap: {
         title: 'Bản snap cũ',
@@ -499,7 +499,7 @@ const vi = {
       },
       'home-cache': {
         title: 'Cache trong ~/.cache',
-        body: 'Xóa cache của các chương trình (pip, yarn, trình build…); chúng tự tạo lại khi cần. Lệnh sẽ chạy:',
+        body: 'Xóa mọi thứ trong ~/.cache. Chương trình tự tạo lại phần lớn, nhưng có phần tải lại rất chậm hoặc rất nặng (model đã tải, trình duyệt để test). Xem danh sách bên dưới. Lệnh sẽ chạy:',
       },
       npm: {
         title: 'Cache npm',
@@ -2897,6 +2897,8 @@ const vi = {
     noDumps: 'Chưa có bản dump trong ~/db-backups: gõ đường dẫn file .sql hoặc .sql.gz.',
     restoreBody:
       'Bản dump chạy trên database hiện tại: các bảng có trong dump thường bị thay thế. Nếu không chắc, hãy dump trước. Sẽ chạy:',
+    restoreBodyMongo:
+      'Mỗi collection trong bản lưu sẽ thay thế collection cùng tên (mongorestore --drop), và dữ liệu hiện có của collection đó mất hẳn. Collection không có trong bản lưu được giữ nguyên. Nếu không chắc, hãy dump trước. Sẽ chạy:',
     restored: (n: string) => `Đã khôi phục ${n}.`,
     tunnel: 'Mở tunnel',
     tunnelOpen: (remote: number, local: number) =>
@@ -3282,7 +3284,7 @@ const vi = {
       'File cấu hình và link trong sites-enabled bị xóa. Không hoàn tác được. nginx vẫn phục vụ site cho tới khi reload.',
     removeCerts: (names: string) => `Xóa luôn chứng chỉ Let's Encrypt: ${names}`,
     removeCertsHint:
-      'Chạy certbot delete: certbot thôi gia hạn tên miền này, hết báo lỗi gia hạn. Chỉ site này dùng chứng chỉ.',
+      'Chạy certbot delete: certbot thôi gia hạn tên miền này, hết báo lỗi gia hạn. Không site nginx nào khác dùng nó, nhưng Davish không thấy được mail server hay chương trình khác có thể đang dùng. Không chắc thì để tắt.',
     sharedCerts: (names: string) => `Giữ lại chứng chỉ ${names} vì site khác cũng dùng.`,
     commandIntro: 'Lệnh sẽ chạy:',
     edit: {
@@ -3489,11 +3491,14 @@ const vi = {
     UPDATE_DEV_BUILD: 'Bản dev không tự cập nhật. Hãy tải bản mới từ trang phát hành.',
     DB_AUTH_REQUIRED:
       'MongoDB này bật xác thực: cần user và mật khẩu của MongoDB (khác tài khoản SSH).',
+    DB_SYSTEM: 'Engine cần database hệ thống này nên Davish không xóa nó.',
     DB_AUTH_FAILED: 'MongoDB từ chối user hoặc mật khẩu này.',
     SUDO_PASSWORD_REQUIRED: 'Server cần mật khẩu sudo cho lệnh này.',
     SUDO_PASSWORD_WRONG: 'sudo không nhận mật khẩu này.',
     SEC_KEY_LOGIN_FAILED:
       'Key không đăng nhập được qua kết nối mới nên chưa đổi gì. Hãy kiểm tra key trong app Khóa SSH trước.',
+    SEC_WOULD_LOCK_OUT:
+      'Địa chỉ hoặc dải này có thể khóa bạn ra ngoài: dải quá rộng, hoặc là địa chỉ Davish đang dùng để kết nối. Hãy chặn một máy hoặc dải hẹp hơn, hoặc chạy trong Terminal nếu bạn chắc chắn.',
     SEC_KEY_LOGIN_LOST:
       'Sau khi đổi, key không đăng nhập được nên Davish đã hoàn tác. Nếu đăng nhập mật khẩu vẫn đang tắt, hãy xóa /etc/ssh/sshd_config.d/00-davish-no-password.conf rồi reload sshd.',
     INVENTORY_YAML_UNSUPPORTED:

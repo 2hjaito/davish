@@ -43,11 +43,14 @@ const journalKeep = 100 << 20
 //
 // The logs selector wants a letter before the number, so syslog.1 and
 // auth.log.2 match but a data volume such as PCP's 20261125.00.10.0 does not.
+// The tmp selector wants a file neither read nor written for 7 days (atime
+// alone is unreliable under relatime) and leaves the private /tmp of
+// systemd services alone.
 const (
 	selLogs       = `find /var/log -xdev -type f \( -name '*.gz' -o -name '*[[:alpha:]].[0-9]' -o -name '*[[:alpha:]].[0-9][0-9]' -o -name '*.old' \)`
 	selDockerLogs = `find /var/lib/docker/containers -name '*-json.log' -size +10M`
 	selCoredumps  = `find /var/lib/systemd/coredump /var/crash -xdev -type f`
-	selTmp        = `find /tmp /var/tmp -xdev -type f -atime +7`
+	selTmp        = `find /tmp /var/tmp -xdev -type f ! -path '/tmp/systemd-private-*' ! -path '/var/tmp/systemd-private-*' -atime +7 -mtime +7`
 )
 
 // The cleanups, by ID. Each command is fixed text.
@@ -147,7 +150,7 @@ func parseCleanups(out []byte) []Cleanup {
 		}
 		c := Cleanup{
 			ID: id, Bytes: bytes, Count: count, Command: commands[id],
-			Root: slices.Contains(rootCleanups, id) && !root, Danger: id == "docker-volumes", Listable: HasPreview(id),
+			Root: slices.Contains(rootCleanups, id) && !root, Danger: id == "docker-volumes" || id == "docker-images", Listable: HasPreview(id),
 		}
 		if c.Root {
 			c.SudoCommand = withSudo(c.Command)

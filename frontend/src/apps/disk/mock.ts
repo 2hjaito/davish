@@ -83,7 +83,13 @@ let cleaned = new Set<string>()
 
 export function mockCleanups(): Promise<Cleanup[]> {
   const all: Cleanup[] = [
-    { id: 'docker-images', bytes: 6.4 * GB, command: 'docker image prune -a -f', root: false },
+    {
+      id: 'docker-images',
+      danger: true,
+      bytes: 6.4 * GB,
+      command: 'docker image prune -a -f',
+      root: false,
+    },
     {
       id: 'docker-logs',
       listable: true,
@@ -112,6 +118,7 @@ export function mockCleanups(): Promise<Cleanup[]> {
     },
     {
       id: 'docker-volumes',
+      listable: true,
       bytes: 0.8 * GB,
       command: 'docker volume prune -a -f',
       root: false,
@@ -143,7 +150,12 @@ export function mockPreview(id: string): Promise<Preview> {
           { path: '/var/log/nginx/access.log.3', size: 18 * 1024 * 1024 },
           { path: '/var/log/dpkg.log.old', size: 2 * 1024 * 1024 },
         ]
-      : [{ path: '/var/lib/docker/containers/3f9a…/3f9a…-json.log', size: 2.1 * GB }]
+      : id === 'docker-volumes'
+        ? [
+            { path: 'shop_db_data', size: -1 },
+            { path: 'old_uploads', size: -1 },
+          ]
+        : [{ path: '/var/lib/docker/containers/3f9a…/3f9a…-json.log', size: 2.1 * GB }]
   return delay({ files, root: false }, 500)
 }
 

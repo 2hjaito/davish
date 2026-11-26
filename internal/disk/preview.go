@@ -30,6 +30,12 @@ var previews = map[string]string{
 	"docker-logs": listBySize(selDockerLogs),
 	"coredumps":   listBySize(selCoredumps),
 	"tmp":         listBySize(selTmp),
+	// Docker decides what its prune removes; these list the same things by
+	// the filter prune uses, without sizes (-1: unknown).
+	"docker-containers": `docker container ls -a --filter status=exited --filter status=created --filter status=dead` +
+		` --format '{{.Names}}  ({{.Image}}, {{.Status}})' 2>/dev/null | head -n ` + strconv.Itoa(previewLimit) + ` | awk '{print "-1\t" $0}'`,
+	"docker-volumes": `docker volume ls --filter dangling=true --format '{{.Name}}' 2>/dev/null | head -n ` +
+		strconv.Itoa(previewLimit) + ` | awk '{print "-1\t" $0}'`,
 	// The whole folder goes, so list what is in it, by size.
 	"home-cache": `export LC_ALL=C; du -sk "$HOME/.cache"/* "$HOME/.cache"/.[!.]* 2>/dev/null | sort -rn | head -n ` +
 		strconv.Itoa(previewLimit) + ` | awk -F'\t' '{printf "%d\t%s\n", $1*1024, $2}'`,

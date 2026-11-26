@@ -435,11 +435,11 @@ const zh = {
     cleanups: {
       'docker-images': {
         title: 'Docker：没有容器使用的镜像',
-        body: '删除所有没有容器使用的镜像，包括带标签的；下次运行时会重新拉取。将运行的命令：',
+        body: '删除所有没有容器使用的镜像，包括带标签的。来自镜像仓库的可以重新拉取，但你在这台服务器上自己构建的镜像会永久丢失。将运行的命令：',
       },
       'docker-containers': {
         title: 'Docker：已停止的容器',
-        body: '删除已停止的容器及其可写层。将运行的命令：',
+        body: '删除已停止的容器及其可写层：它们写在数据卷之外的内容会丢失。请查看下面的列表。将运行的命令：',
       },
       'docker-cache': {
         title: 'Docker：构建缓存',
@@ -447,11 +447,11 @@ const zh = {
       },
       'docker-volumes': {
         title: 'Docker：没有容器使用的数据卷',
-        body: '注意：数据卷可能保存着已删除容器的数据（数据库、上传文件）。删除后数据将永久丢失。将运行的命令：',
+        body: '注意：数据卷可能保存着已删除容器的数据（数据库、上传文件）。删除后数据将永久丢失。下面的列表是目前没有容器使用的数据卷；你之后要启动的容器的数据卷也在其中。将运行的命令：',
       },
       'docker-logs': {
         title: 'Docker：超过 10 MB 的容器日志',
-        body: '清空 /var/lib/docker/containers 中容器的 JSON 日志文件；容器会继续运行并写日志。将运行的命令：',
+        body: '清空 /var/lib/docker/containers 中容器的 JSON 日志文件；容器会继续运行并写日志，但这些日志里原有的内容会丢失。将运行的命令：',
       },
       journal: {
         title: 'systemd 日志（journal）',
@@ -475,7 +475,7 @@ const zh = {
       },
       tmp: {
         title: '超过 7 天的临时文件',
-        body: '删除 /tmp 和 /var/tmp 中 7 天内没人读取过的文件。将运行的命令：',
+        body: '删除 /tmp 和 /var/tmp 中 7 天内没有被读取或修改过的文件，服务私有的 /tmp 除外。程序仍可能把需要的东西放在里面：请查看下面的列表。将运行的命令：',
       },
       snap: {
         title: '旧的 snap 版本',
@@ -483,7 +483,7 @@ const zh = {
       },
       'home-cache': {
         title: '~/.cache 中的缓存',
-        body: '删除程序的缓存（pip、yarn、构建工具…）；需要时会自动重建。将运行的命令：',
+        body: '删除 ~/.cache 中的所有内容。程序会重建其中大部分，但有些很慢或很大（下载的模型、测试用浏览器）。请查看下面的列表。将运行的命令：',
       },
       npm: {
         title: 'npm 缓存',
@@ -2838,6 +2838,8 @@ const zh = {
     noDumps: '~/db-backups 中还没有备份：请输入 .sql 或 .sql.gz 文件的路径。',
     restoreBody:
       '备份会直接在当前数据库上执行：其中包含的表通常会被替换。不确定的话请先导出。将运行：',
+    restoreBodyMongo:
+      '归档中的每个集合都会替换同名的现有集合（mongorestore --drop），现有集合里的数据会丢失。不在归档中的集合保持不变。不确定的话请先导出。将运行：',
     restored: (n: string) => `已恢复 ${n}。`,
     tunnel: '打开隧道',
     tunnelOpen: (remote: number, local: number) =>
@@ -3208,7 +3210,7 @@ const zh = {
       '配置文件及其在 sites-enabled 中的链接都会被删除。此操作无法撤销。nginx 重载前仍会继续提供该站点。',
     removeCerts: (names: string) => `同时删除 Let's Encrypt 证书：${names}`,
     removeCertsHint:
-      '运行 certbot delete：certbot 不再续期这个域名，续期报错也会随之停止。只有这个站点使用该证书。',
+      '运行 certbot delete：certbot 不再续期这个域名，续期报错也会随之停止。没有其他 nginx 站点使用它，但 Davish 看不到可能在使用它的邮件服务器或其他程序。不确定时请保持关闭。',
     sharedCerts: (names: string) => `保留证书 ${names}，因为其他站点也在使用。`,
     commandIntro: '将运行的命令：',
     edit: {
@@ -3406,11 +3408,14 @@ const zh = {
       'Davish 运行期间，这台电脑上的文件被替换或删除了（重新构建、重新安装）。请退出 Davish 后重新打开，或从发布页面下载新版本。',
     UPDATE_DEV_BUILD: '开发版不会自动更新。请从发布页面下载新版本。',
     DB_AUTH_REQUIRED: '此 MongoDB 已启用身份验证：需要 MongoDB 的用户和密码（不是 SSH 账户）。',
+    DB_SYSTEM: '数据库引擎需要这个系统数据库，所以 Davish 不会删除它。',
     DB_AUTH_FAILED: 'MongoDB 拒绝了此用户或密码。',
     SUDO_PASSWORD_REQUIRED: '服务器需要 sudo 密码才能执行此操作。',
     SUDO_PASSWORD_WRONG: 'sudo 不接受此密码。',
     SEC_KEY_LOGIN_FAILED:
       '密钥无法通过新连接登录，所以没有做任何更改。请先在 SSH 密钥应用中检查密钥。',
+    SEC_WOULD_LOCK_OUT:
+      '这个地址或范围可能会把你挡在外面：范围过大，或者就是 Davish 连接所用的地址。请只封禁单个主机或更小的范围，确定的话请在终端中运行。',
     SEC_KEY_LOGIN_LOST:
       '更改后密钥无法登录，Davish 已撤销。如果密码登录仍是关闭的，请删除 /etc/ssh/sshd_config.d/00-davish-no-password.conf 并重新加载 sshd。',
     INVENTORY_YAML_UNSUPPORTED:

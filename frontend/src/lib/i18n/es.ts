@@ -465,11 +465,11 @@ const es = {
     cleanups: {
       'docker-images': {
         title: 'Docker: imágenes que ningún contenedor usa',
-        body: 'Elimina todas las imágenes que ningún contenedor usa, también las etiquetadas; la próxima ejecución las vuelve a descargar. Comando que se ejecutará:',
+        body: 'Elimina todas las imágenes que ningún contenedor usa, también las etiquetadas. Las de un registro se pueden volver a descargar, pero una que construiste en este servidor se pierde para siempre. Comando que se ejecutará:',
       },
       'docker-containers': {
         title: 'Docker: contenedores detenidos',
-        body: 'Elimina los contenedores detenidos y sus capas de escritura. Comando que se ejecutará:',
+        body: 'Elimina los contenedores detenidos y sus capas de escritura: lo que escribieron fuera de un volumen se pierde. Revisa la lista de abajo. Comando que se ejecutará:',
       },
       'docker-cache': {
         title: 'Docker: caché de compilación',
@@ -477,11 +477,11 @@ const es = {
       },
       'docker-volumes': {
         title: 'Docker: volúmenes que ningún contenedor usa',
-        body: 'Cuidado: un volumen puede guardar los datos (bases de datos, archivos subidos) de un contenedor eliminado. Eliminarlo los pierde para siempre. Comando que se ejecutará:',
+        body: 'Cuidado: un volumen puede guardar los datos (bases de datos, archivos subidos) de un contenedor eliminado. Eliminarlo los pierde para siempre. La lista de abajo muestra los volúmenes que ningún contenedor usa ahora; el de un contenedor que iniciarás más tarde también está en ella. Comando que se ejecutará:',
       },
       'docker-logs': {
         title: 'Docker: registros de contenedores de más de 10 MB',
-        body: 'Vacía los archivos de registro JSON de los contenedores en /var/lib/docker/containers; los contenedores siguen en marcha y registrando. Comando que se ejecutará:',
+        body: 'Vacía los archivos de registro JSON de los contenedores en /var/lib/docker/containers; los contenedores siguen en marcha y registrando, pero lo que esos registros contenían se pierde. Comando que se ejecutará:',
       },
       journal: {
         title: 'Journal de systemd',
@@ -505,7 +505,7 @@ const es = {
       },
       tmp: {
         title: 'Archivos temporales de más de 7 días',
-        body: 'Elimina los archivos de /tmp y /var/tmp que nadie ha leído en 7 días. Comando que se ejecutará:',
+        body: 'Elimina los archivos de /tmp y /var/tmp que nadie ha leído ni cambiado en 7 días, salvo el /tmp privado de los servicios. Un programa aún puede guardar algo que necesita allí: revisa la lista de abajo. Comando que se ejecutará:',
       },
       snap: {
         title: 'Revisiones antiguas de snap',
@@ -513,7 +513,7 @@ const es = {
       },
       'home-cache': {
         title: 'Cachés en ~/.cache',
-        body: 'Elimina las cachés de los programas (pip, yarn, herramientas de compilación…); se regeneran cuando hacen falta. Comando que se ejecutará:',
+        body: 'Elimina todo lo que hay en ~/.cache. Los programas recrean la mayor parte, pero algo es lento o pesado de volver a obtener (modelos descargados, navegadores de pruebas). Revisa la lista de abajo. Comando que se ejecutará:',
       },
       npm: {
         title: 'Caché de npm',
@@ -2998,6 +2998,8 @@ const es = {
       'Todavía no hay volcados en ~/db-backups: escribe la ruta de un archivo .sql o .sql.gz.',
     restoreBody:
       'El volcado se aplica sobre la base de datos tal como está: las tablas que contiene suelen reemplazarse. Si no estás seguro, haz antes un volcado. Ejecuta:',
+    restoreBodyMongo:
+      'Cada colección del archivo reemplaza a la colección del mismo nombre (mongorestore --drop) y lo que tenía la actual se pierde. Las colecciones que no están en el archivo se conservan. Si no estás seguro, haz antes un volcado. Ejecuta:',
     restored: (n: string) => `${n} restaurada.`,
     tunnel: 'Abrir túnel',
     tunnelOpen: (remote: number, local: number) =>
@@ -3395,7 +3397,7 @@ const es = {
       'Se borran el archivo de configuración y su enlace en sites-enabled. No se puede deshacer. nginx sigue sirviendo el sitio hasta que se recargue.',
     removeCerts: (names: string) => `Eliminar también el certificado de Let's Encrypt: ${names}`,
     removeCertsHint:
-      'Ejecuta certbot delete: certbot deja de renovar este dominio, así que también cesan los errores de renovación. Solo este sitio usa el certificado.',
+      'Ejecuta certbot delete: certbot deja de renovar este dominio, así que también cesan los errores de renovación. Ningún otro sitio de nginx lo usa, pero Davish no puede ver un servidor de correo u otro programa que quizá lo use. Si dudas, déjalo desactivado.',
     sharedCerts: (names: string) =>
       `Se conserva el certificado ${names} porque otros sitios también lo usan.`,
     commandIntro: 'Comando que se ejecutará:',
@@ -3612,11 +3614,14 @@ const es = {
       'Una versión de desarrollo no se actualiza sola. Descarga la versión nueva desde la página de la versión.',
     DB_AUTH_REQUIRED:
       'Este MongoDB tiene la autenticación activada: necesita un usuario y una contraseña de MongoDB (no tu acceso SSH).',
+    DB_SYSTEM: 'El motor necesita esta base de datos del sistema, así que Davish no la elimina.',
     DB_AUTH_FAILED: 'MongoDB ha rechazado este usuario o contraseña.',
     SUDO_PASSWORD_REQUIRED: 'El servidor necesita la contraseña de sudo para esto.',
     SUDO_PASSWORD_WRONG: 'sudo no ha aceptado esta contraseña.',
     SEC_KEY_LOGIN_FAILED:
       'La clave no pudo entrar por una conexión nueva, así que no se cambió nada. Revisa primero la clave en la app Claves SSH.',
+    SEC_WOULD_LOCK_OUT:
+      'Esta dirección o rango podría dejarte fuera: es demasiado amplio, o es la dirección desde la que Davish se conecta. Bloquea un solo equipo o un rango más estrecho, o ejecútalo en Terminal si estás seguro.',
     SEC_KEY_LOGIN_LOST:
       'Tras el cambio la clave no pudo entrar, así que Davish lo deshizo. Si el acceso con contraseña sigue desactivado, elimina /etc/ssh/sshd_config.d/00-davish-no-password.conf y recarga sshd.',
     INVENTORY_YAML_UNSUPPORTED:

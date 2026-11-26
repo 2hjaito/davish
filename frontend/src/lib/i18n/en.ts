@@ -450,11 +450,11 @@ const en = {
     cleanups: {
       'docker-images': {
         title: 'Docker: images no container uses',
-        body: 'Removes every image no container uses, tagged ones too; the next run pulls them again. Command to run:',
+        body: 'Removes every image no container uses, tagged ones too. Images from a registry can be pulled again, but one you built on this server cannot: it is gone. Command to run:',
       },
       'docker-containers': {
         title: 'Docker: stopped containers',
-        body: 'Removes stopped containers and their writable layers. Command to run:',
+        body: 'Removes stopped containers and their writable layers: anything they wrote outside a volume is lost. Check the list below. Command to run:',
       },
       'docker-cache': {
         title: 'Docker: build cache',
@@ -462,11 +462,11 @@ const en = {
       },
       'docker-volumes': {
         title: 'Docker: volumes no container uses',
-        body: 'Careful: a volume may hold the data (databases, uploads) of a removed container. Removing it loses that for good. Command to run:',
+        body: 'Careful: a volume may hold the data (databases, uploads) of a removed container. Removing it loses that for good. The list below shows the volumes no container uses now; one for a container you will start later is on it too. Command to run:',
       },
       'docker-logs': {
         title: 'Docker: container logs over 10 MB',
-        body: 'Empties the containers’ JSON log files in /var/lib/docker/containers; the containers keep running and logging. Command to run:',
+        body: 'Empties the containers’ JSON log files in /var/lib/docker/containers; the containers keep running and logging, but what those logs held is lost. Command to run:',
       },
       journal: {
         title: 'systemd journal',
@@ -490,7 +490,7 @@ const en = {
       },
       tmp: {
         title: 'Temporary files older than 7 days',
-        body: 'Removes files in /tmp and /var/tmp nobody has read for 7 days. Command to run:',
+        body: 'Removes files in /tmp and /var/tmp neither read nor changed for 7 days, except the private /tmp of services. A program may still keep something it needs in them: check the list below. Command to run:',
       },
       snap: {
         title: 'Old snap revisions',
@@ -498,7 +498,7 @@ const en = {
       },
       'home-cache': {
         title: 'Caches in ~/.cache',
-        body: 'Removes programs’ caches (pip, yarn, build tools…); they rebuild them when needed. Command to run:',
+        body: 'Removes everything in ~/.cache. Programs recreate most of it, but some of it is slow or large to get again (downloaded models, browsers for testing). Check the list below. Command to run:',
       },
       npm: {
         title: 'npm cache',
@@ -2940,6 +2940,8 @@ const en = {
     noDumps: 'No dump in ~/db-backups yet: type the path of a .sql or .sql.gz file.',
     restoreBody:
       'The dump runs against the database as it is: tables it contains are usually replaced. Dump first if unsure. Runs:',
+    restoreBodyMongo:
+      'Every collection in the archive replaces the collection of the same name (mongorestore --drop), and what the current one held is lost. Collections not in the archive are kept. Dump first if unsure. Runs:',
     restored: (n: string) => `Restored ${n}.`,
     tunnel: 'Open tunnel',
     tunnelOpen: (remote: number, local: number) =>
@@ -3321,7 +3323,7 @@ const en = {
       'The config file and its link in sites-enabled are deleted. This cannot be undone. nginx keeps serving the site until it reloads.',
     removeCerts: (names: string) => `Also delete the Let's Encrypt certificate: ${names}`,
     removeCertsHint:
-      'Runs certbot delete: certbot stops renewing this domain, so renewal errors stop too. Only this site uses the certificate.',
+      'Runs certbot delete: certbot stops renewing this domain, so renewal errors stop too. No other nginx site uses it, but Davish cannot see a mail server or another program that might. Leave this off if unsure.',
     sharedCerts: (names: string) => `Keeping certificate ${names} since other sites use it too.`,
     commandIntro: 'Command to run:',
     edit: {
@@ -3531,11 +3533,14 @@ const en = {
       'A development build does not update itself. Download the new version from the release page.',
     DB_AUTH_REQUIRED:
       'This MongoDB has authentication on: it needs a MongoDB user and password (not your SSH login).',
+    DB_SYSTEM: 'The engine needs this system database, so Davish does not drop it.',
     DB_AUTH_FAILED: 'MongoDB refused this user or password.',
     SUDO_PASSWORD_REQUIRED: 'The server needs the sudo password for this.',
     SUDO_PASSWORD_WRONG: 'sudo did not accept this password.',
     SEC_KEY_LOGIN_FAILED:
       'The key could not log in over a new connection, so nothing was changed. Check the key in the SSH keys app first.',
+    SEC_WOULD_LOCK_OUT:
+      'This address or range could cut you off: it is too wide, or it is the address Davish connects from. Block one host or a narrower range, or run it in Terminal if you are sure.',
     SEC_KEY_LOGIN_LOST:
       'After the change the key could not log in, so Davish undid it. If password login is still off, remove /etc/ssh/sshd_config.d/00-davish-no-password.conf and reload sshd.',
     INVENTORY_YAML_UNSUPPORTED:

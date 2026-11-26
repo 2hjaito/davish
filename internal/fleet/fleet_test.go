@@ -298,11 +298,20 @@ func TestDestructive(t *testing.T) {
 		"systemctl restart nginx", "sudo systemctl --now disable ufw", "service nginx stop",
 		"docker rm web", "docker system prune -a", "docker volume rm data", "echo hi > /etc/motd",
 		"kill -9 1", "mkfs.ext4 /dev/sdb", "crontab -r", "truncate -s0 log",
+		// Gaps found in the audit after #296.
+		"apt-get remove nginx", "sudo apt purge -y foo", "apt autoremove", "dnf remove httpd", "apk del curl",
+		"find /var/log -name '*.1' -delete", "find /tmp -type f -exec rm {} +", "ls | xargs rm",
+		"mv a b", "cp a b", "cp -r a b", "sed -i 's/a/b/' /etc/x", "echo x | tee /etc/motd", "docker compose down",
+		"docker-compose down -v", "ufw disable", "ufw deny from 1.2.3.4", "iptables -F", "nft flush ruleset",
+		"git reset --hard", "git clean -fd", "git push --force", "psql -c 'DROP TABLE users'", "umount /mnt",
 	}
 	no := []string{
 		"uptime", "df -h", "systemctl status nginx", "docker ps", "ls 2>/dev/null",
 		"echo hi >> log", "cat x > /dev/null", "grep rm file", "apt-get update", "echo 1 2>&1",
 		"journalctl -u rmate", "docker logs web",
+		"apt-get install nginx", "apt list", "dnf upgrade", "find /var/log -name '*.log'", "git status", "git pull --ff-only",
+		"git push", "mv -n a b", "cp --no-clobber a b", "echo x | tee -a log", "sed 's/a/b/' file", "ufw status",
+		"iptables -L", "docker compose ps", "docker compose up -d",
 	}
 	for _, c := range yes {
 		if !Destructive(c) {
