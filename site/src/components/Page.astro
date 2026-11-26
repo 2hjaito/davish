@@ -11,6 +11,7 @@ import AppIcon from './AppIcon.astro'
 import Flag from './Flag.astro'
 import Icon from './Icon.astro'
 import Shot from './Shot.astro'
+import Voices from './Voices.astro'
 
 interface Props {
   locale: Locale
@@ -335,6 +336,8 @@ const platforms = [
         <a href={r.notes}>{t.download.notes}</a> · <a href={r.files.sums}>{t.download.checksums}</a>
       </p>
     </section>
+
+    <Voices locale={locale} />
 
     <section class="community">
       <a class="discord" href={links.discord} data-reveal>
