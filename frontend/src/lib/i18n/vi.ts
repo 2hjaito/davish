@@ -2897,6 +2897,8 @@ const vi = {
     noDumps: 'Chưa có bản dump trong ~/db-backups: gõ đường dẫn file .sql hoặc .sql.gz.',
     restoreBody:
       'Bản dump chạy trên database hiện tại: các bảng có trong dump thường bị thay thế. Nếu không chắc, hãy dump trước. Sẽ chạy:',
+    restoreBodyMongo:
+      'Mỗi collection trong bản lưu sẽ thay thế collection cùng tên (mongorestore --drop), và dữ liệu hiện có của collection đó mất hẳn. Collection không có trong bản lưu được giữ nguyên. Nếu không chắc, hãy dump trước. Sẽ chạy:',
     restored: (n: string) => `Đã khôi phục ${n}.`,
     tunnel: 'Mở tunnel',
     tunnelOpen: (remote: number, local: number) =>
@@ -3489,11 +3491,14 @@ const vi = {
     UPDATE_DEV_BUILD: 'Bản dev không tự cập nhật. Hãy tải bản mới từ trang phát hành.',
     DB_AUTH_REQUIRED:
       'MongoDB này bật xác thực: cần user và mật khẩu của MongoDB (khác tài khoản SSH).',
+    DB_SYSTEM: 'Engine cần database hệ thống này nên Davish không xóa nó.',
     DB_AUTH_FAILED: 'MongoDB từ chối user hoặc mật khẩu này.',
     SUDO_PASSWORD_REQUIRED: 'Server cần mật khẩu sudo cho lệnh này.',
     SUDO_PASSWORD_WRONG: 'sudo không nhận mật khẩu này.',
     SEC_KEY_LOGIN_FAILED:
       'Key không đăng nhập được qua kết nối mới nên chưa đổi gì. Hãy kiểm tra key trong app Khóa SSH trước.',
+    SEC_WOULD_LOCK_OUT:
+      'Địa chỉ hoặc dải này có thể khóa bạn ra ngoài: dải quá rộng, hoặc là địa chỉ Davish đang dùng để kết nối. Hãy chặn một máy hoặc dải hẹp hơn, hoặc chạy trong Terminal nếu bạn chắc chắn.',
     SEC_KEY_LOGIN_LOST:
       'Sau khi đổi, key không đăng nhập được nên Davish đã hoàn tác. Nếu đăng nhập mật khẩu vẫn đang tắt, hãy xóa /etc/ssh/sshd_config.d/00-davish-no-password.conf rồi reload sshd.',
     INVENTORY_YAML_UNSUPPORTED:

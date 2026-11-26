@@ -2940,6 +2940,8 @@ const en = {
     noDumps: 'No dump in ~/db-backups yet: type the path of a .sql or .sql.gz file.',
     restoreBody:
       'The dump runs against the database as it is: tables it contains are usually replaced. Dump first if unsure. Runs:',
+    restoreBodyMongo:
+      'Every collection in the archive replaces the collection of the same name (mongorestore --drop), and what the current one held is lost. Collections not in the archive are kept. Dump first if unsure. Runs:',
     restored: (n: string) => `Restored ${n}.`,
     tunnel: 'Open tunnel',
     tunnelOpen: (remote: number, local: number) =>
@@ -3531,11 +3533,14 @@ const en = {
       'A development build does not update itself. Download the new version from the release page.',
     DB_AUTH_REQUIRED:
       'This MongoDB has authentication on: it needs a MongoDB user and password (not your SSH login).',
+    DB_SYSTEM: 'The engine needs this system database, so Davish does not drop it.',
     DB_AUTH_FAILED: 'MongoDB refused this user or password.',
     SUDO_PASSWORD_REQUIRED: 'The server needs the sudo password for this.',
     SUDO_PASSWORD_WRONG: 'sudo did not accept this password.',
     SEC_KEY_LOGIN_FAILED:
       'The key could not log in over a new connection, so nothing was changed. Check the key in the SSH keys app first.',
+    SEC_WOULD_LOCK_OUT:
+      'This address or range could cut you off: it is too wide, or it is the address Davish connects from. Block one host or a narrower range, or run it in Terminal if you are sure.',
     SEC_KEY_LOGIN_LOST:
       'After the change the key could not log in, so Davish undid it. If password login is still off, remove /etc/ssh/sshd_config.d/00-davish-no-password.conf and reload sshd.',
     INVENTORY_YAML_UNSUPPORTED:

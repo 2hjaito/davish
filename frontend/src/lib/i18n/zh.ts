@@ -2838,6 +2838,8 @@ const zh = {
     noDumps: '~/db-backups 中还没有备份：请输入 .sql 或 .sql.gz 文件的路径。',
     restoreBody:
       '备份会直接在当前数据库上执行：其中包含的表通常会被替换。不确定的话请先导出。将运行：',
+    restoreBodyMongo:
+      '归档中的每个集合都会替换同名的现有集合（mongorestore --drop），现有集合里的数据会丢失。不在归档中的集合保持不变。不确定的话请先导出。将运行：',
     restored: (n: string) => `已恢复 ${n}。`,
     tunnel: '打开隧道',
     tunnelOpen: (remote: number, local: number) =>
@@ -3406,11 +3408,14 @@ const zh = {
       'Davish 运行期间，这台电脑上的文件被替换或删除了（重新构建、重新安装）。请退出 Davish 后重新打开，或从发布页面下载新版本。',
     UPDATE_DEV_BUILD: '开发版不会自动更新。请从发布页面下载新版本。',
     DB_AUTH_REQUIRED: '此 MongoDB 已启用身份验证：需要 MongoDB 的用户和密码（不是 SSH 账户）。',
+    DB_SYSTEM: '数据库引擎需要这个系统数据库，所以 Davish 不会删除它。',
     DB_AUTH_FAILED: 'MongoDB 拒绝了此用户或密码。',
     SUDO_PASSWORD_REQUIRED: '服务器需要 sudo 密码才能执行此操作。',
     SUDO_PASSWORD_WRONG: 'sudo 不接受此密码。',
     SEC_KEY_LOGIN_FAILED:
       '密钥无法通过新连接登录，所以没有做任何更改。请先在 SSH 密钥应用中检查密钥。',
+    SEC_WOULD_LOCK_OUT:
+      '这个地址或范围可能会把你挡在外面：范围过大，或者就是 Davish 连接所用的地址。请只封禁单个主机或更小的范围，确定的话请在终端中运行。',
     SEC_KEY_LOGIN_LOST:
       '更改后密钥无法登录，Davish 已撤销。如果密码登录仍是关闭的，请删除 /etc/ssh/sshd_config.d/00-davish-no-password.conf 并重新加载 sshd。',
     INVENTORY_YAML_UNSUPPORTED:

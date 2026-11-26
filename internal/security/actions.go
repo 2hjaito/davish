@@ -40,6 +40,52 @@ func address(s string) (string, error) {
 	return "", apperr.New(apperr.InvalidInput, "not an IP address or range")
 }
 
+// Narrowest range a block or ban may name: wider ones cut off whole
+// networks, and 0.0.0.0/0 cuts off every login, SSH included.
+const (
+	minBits4 = 8
+	minBits6 = 32
+)
+
+// checkBlockable refuses an address or range that would lock out more than
+// the one host it is meant for: the unspecified and loopback addresses and
+// ranges wider than minBits4 / minBits6.
+func checkBlockable(addr string) error {
+	var p netip.Prefix
+	if pp, err := netip.ParsePrefix(addr); err == nil {
+		p = pp
+	} else if a, err := netip.ParseAddr(addr); err == nil {
+		p = netip.PrefixFrom(a, a.BitLen())
+	} else {
+		return apperr.New(apperr.InvalidInput, "not an IP address or range")
+	}
+	a := p.Addr()
+	floor := minBits4
+	if a.Is6() {
+		floor = minBits6
+	}
+	if a.IsUnspecified() || a.IsLoopback() || p.Bits() < floor {
+		return apperr.New(apperr.SecWouldLockOut, "this address or range would lock out more than it should")
+	}
+	return nil
+}
+
+// covers tells whether the address or range target holds client.
+func covers(target, client string) bool {
+	c, err := netip.ParseAddr(client)
+	if err != nil {
+		return false
+	}
+	if p, err := netip.ParsePrefix(target); err == nil {
+		return p.Contains(c)
+	}
+	a, err := netip.ParseAddr(target)
+	return err == nil && a == c
+}
+
+// clientLine prints the address sshd saw this connection come from.
+const clientLine = `printf '%s' "${SSH_CLIENT%% *}"`
+
 // script is the action's shell line, without sudo. A ufw insert at 1
 // fails while there is no rule yet, so the deny is then appended.
 func script(action, ip string) (string, error) {
@@ -73,6 +119,11 @@ func PlanAction(action, ip string, root bool) (Plan, error) {
 	if err != nil {
 		return Plan{}, err
 	}
+	if action == Block || action == Ban {
+		if err := checkBlockable(addr); err != nil {
+			return Plan{}, err
+		}
+	}
 	line, err := script(action, addr)
 	if err != nil {
 		return Plan{}, err
@@ -95,6 +146,15 @@ func (s *Service) Apply(ctx context.Context, serverID, action, ip, command strin
 	withSudo, _ := PlanAction(action, ip, false)
 	if command != asRoot.Command && command != withSudo.Command {
 		return apperr.New(apperr.FSStale, "the command changed since it was confirmed")
+	}
+	if action == Block || action == Ban {
+		// Never cut off the address Davish itself comes from: a typo in a
+		// login or a tick on "block all" could otherwise lock it out.
+		if cr, err := s.run.RunLine(ctx, serverID, app, clientLine); err == nil && cr.Exit == 0 {
+			if addr, aerr := address(ip); aerr == nil && covers(addr, strings.TrimSpace(string(cr.Stdout))) {
+				return apperr.New(apperr.SecWouldLockOut, "this is the address Davish connects from")
+			}
+		}
 	}
 	var res audit.Result
 	if command == withSudo.Command && s.root != nil {

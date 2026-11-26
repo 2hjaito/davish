@@ -16,6 +16,11 @@ type lineRunner struct {
 }
 
 func (r *lineRunner) RunLine(_ context.Context, _, _, line string) (audit.Result, error) {
+	if line == clientLine {
+		// Where the connection comes from: not an action, and not an address
+		// the tests block.
+		return audit.Result{Stdout: []byte("192.0.2.1")}, nil
+	}
 	r.ran = append(r.ran, line)
 	return audit.Result{Stdout: []byte(r.out)}, nil
 }

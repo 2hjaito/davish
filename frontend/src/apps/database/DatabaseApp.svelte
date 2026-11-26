@@ -958,7 +958,10 @@
       {/if}
     </label>
     {#if restoreCmd}
-      <p class="warn"><Icon name="warning" size={14} /> {d.restoreBody}</p>
+      <p class="warn">
+        <Icon name="warning" size={14} />
+        {restoring.kind === 'mongo' ? d.restoreBodyMongo : d.restoreBody}
+      </p>
       <pre class="code">{restoreCmd}</pre>
       <label class="field">
         <span>{d.typeName(restoring.name)}</span>

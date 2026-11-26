@@ -2998,6 +2998,8 @@ const es = {
       'Todavía no hay volcados en ~/db-backups: escribe la ruta de un archivo .sql o .sql.gz.',
     restoreBody:
       'El volcado se aplica sobre la base de datos tal como está: las tablas que contiene suelen reemplazarse. Si no estás seguro, haz antes un volcado. Ejecuta:',
+    restoreBodyMongo:
+      'Cada colección del archivo reemplaza a la colección del mismo nombre (mongorestore --drop) y lo que tenía la actual se pierde. Las colecciones que no están en el archivo se conservan. Si no estás seguro, haz antes un volcado. Ejecuta:',
     restored: (n: string) => `${n} restaurada.`,
     tunnel: 'Abrir túnel',
     tunnelOpen: (remote: number, local: number) =>
@@ -3612,11 +3614,14 @@ const es = {
       'Una versión de desarrollo no se actualiza sola. Descarga la versión nueva desde la página de la versión.',
     DB_AUTH_REQUIRED:
       'Este MongoDB tiene la autenticación activada: necesita un usuario y una contraseña de MongoDB (no tu acceso SSH).',
+    DB_SYSTEM: 'El motor necesita esta base de datos del sistema, así que Davish no la elimina.',
     DB_AUTH_FAILED: 'MongoDB ha rechazado este usuario o contraseña.',
     SUDO_PASSWORD_REQUIRED: 'El servidor necesita la contraseña de sudo para esto.',
     SUDO_PASSWORD_WRONG: 'sudo no ha aceptado esta contraseña.',
     SEC_KEY_LOGIN_FAILED:
       'La clave no pudo entrar por una conexión nueva, así que no se cambió nada. Revisa primero la clave en la app Claves SSH.',
+    SEC_WOULD_LOCK_OUT:
+      'Esta dirección o rango podría dejarte fuera: es demasiado amplio, o es la dirección desde la que Davish se conecta. Bloquea un solo equipo o un rango más estrecho, o ejecútalo en Terminal si estás seguro.',
     SEC_KEY_LOGIN_LOST:
       'Tras el cambio la clave no pudo entrar, así que Davish lo deshizo. Si el acceso con contraseña sigue desactivado, elimina /etc/ssh/sshd_config.d/00-davish-no-password.conf y recarga sshd.',
     INVENTORY_YAML_UNSUPPORTED:

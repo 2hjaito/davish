@@ -59,12 +59,16 @@ const (
 	UpdateDownloadFailed Code = "UPDATE_DOWNLOAD_FAILED"
 	DBAuthRequired       Code = "DB_AUTH_REQUIRED"
 	DBAuthFailed         Code = "DB_AUTH_FAILED"
+	DBSystem             Code = "DB_SYSTEM"
 	SudoPasswordRequired Code = "SUDO_PASSWORD_REQUIRED"
 	SudoPasswordWrong    Code = "SUDO_PASSWORD_WRONG"
 	// Turning password logins off (ADR 0029): the key could not log in
 	// before the change, or could not after it, which was then undone.
 	SecKeyLoginFailed Code = "SEC_KEY_LOGIN_FAILED"
 	SecKeyLoginLost   Code = "SEC_KEY_LOGIN_LOST"
+	// Blocking or banning an address that would cut Davish off: too wide a
+	// range, or the address Davish connects from.
+	SecWouldLockOut Code = "SEC_WOULD_LOCK_OUT"
 	// An Ansible inventory in YAML, or a script, which only INI import reads.
 	InventoryYAMLUnsupported   Code = "INVENTORY_YAML_UNSUPPORTED"
 	InventoryScriptUnsupported Code = "INVENTORY_SCRIPT_UNSUPPORTED"

@@ -10,6 +10,7 @@ import (
 	"errors"
 	"math/big"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -344,10 +345,21 @@ func (s *Service) Create(ctx context.Context, serverID, kind, db, user string) (
 // safely: Davish may not have created it, so it is less strict than ident.
 var safeName = regexp.MustCompile(`^[A-Za-z0-9_$-][A-Za-z0-9_$.-]{0,63}$`)
 
+// systemDatabases are the ones the lists hide: the engine needs them to
+// run, so a drop of one is refused even if a caller asks for it.
+var systemDatabases = map[string][]string{
+	MySQL:    {"information_schema", "performance_schema", "mysql", "sys"},
+	Postgres: {"postgres", "template0", "template1"},
+	Mongo:    {"admin", "config", "local"},
+}
+
 // DropSQL is the statement that deletes db, for the confirmation.
 func DropSQL(kind, db string) (string, error) {
 	if !safeName.MatchString(db) {
 		return "", apperr.New(apperr.InvalidInput, "not a database name")
+	}
+	if slices.Contains(systemDatabases[kind], strings.ToLower(db)) {
+		return "", apperr.New(apperr.DBSystem, "a system database cannot be dropped")
 	}
 	switch kind {
 	case MySQL:
