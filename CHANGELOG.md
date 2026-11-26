@@ -5,11 +5,13 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Thêm
+- **Chọn cái gì mở khi Davish khởi động** (#273, #281): Cài đặt → Chung có mục **Khi mở Davish**: **Tất cả server** hiện danh sách server, **Server cuối** mở và kết nối server bạn dùng lần trước (như Davish vẫn làm), còn **Không gì** mở workspace của server cuối mà không kết nối, cho server sau VPN hoặc đang chạy thật. Bản cài mới mở Tất cả server; nếu bạn đã có server thì giữ Server cuối.
 - **Tắt đăng nhập bằng mật khẩu từ An ninh**: Đăng nhập bằng mật khẩu ở An ninh giờ là một công tắc thay vì một lệnh gõ trong terminal. Tắt thì thử key đăng nhập được qua một kết nối mới, sao lưu cấu hình sshd, thêm một file, kiểm tra bằng `sshd -t` và `sshd -T`, reload sshd rồi thử lại key, và hoàn tác nếu key không còn đăng nhập được. Không cho tắt khi một khối `Match` hoặc `AuthenticationMethods` sẽ khiến người ta bị khóa hoặc thay đổi không có tác dụng, hoặc khi Davish đang đăng nhập bằng mật khẩu. Hộp thoại hiện cả script trước, và cùng công tắc đó bật lại
 - **Nhân bản server** (#257): icon sao chép trên thẻ hoặc hàng trong Tất cả server mở hộp thoại thêm server đã điền sẵn từ server đó, tên thành `tên (copy)`, nên chỉ gõ chỗ khác biệt. Chưa lưu thì chưa tạo gì. Mật khẩu, passphrase của key và control socket không được sao chép.
 - **Kết nối qua control socket của OpenSSH** (#240): với kiểu đăng nhập chỉ chạy được qua OpenSSH, như agent cấp chứng chỉ theo yêu cầu (authentik), hộp thoại server có ô **Nâng cao: dùng control socket của ssh**. Bạn tự chạy một master (`ssh -M -S <đường dẫn> -fN user@host`) rồi đưa đường dẫn của nó cho Davish: Davish gắn vào kết nối đó, nên OpenSSH lo việc đăng nhập và Davish không bao giờ thấy thông tin đăng nhập của bạn. Nó thay thế phần xác thực của server đó, và chỉ có trên Linux và macOS. Đã thử với authentik bởi @PlayerFann14.
 
 ### Đổi
+- Các chỉ số trên thanh menu (CPU, RAM, Ổ đĩa, mạng) to hơn: vòng, số trong vòng và tên tăng khoảng một phần mười, dễ đọc hơn (#288).
 - Nhật ký giờ ghi lại khi không kết nối được SSH agent và vì sao (ví dụ pipe của Windows đang bận hoặc không có), để nhìn log biết được "không có agent" khác "có agent nhưng không mở được", và agent trả lời sau bao lâu. Agent chờ bạn mở khóa hoặc xác nhận, như của Bitwarden, có thể cần hơn 5 giây Davish chờ: chạy Davish với `DAVISH_AGENT_WAIT=60` (giây, từ 1 đến 300) để chờ lâu hơn (#168).
 
 ### Sửa

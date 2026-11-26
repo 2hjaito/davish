@@ -5,11 +5,13 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Added
+- **Choose what opens when Davish starts** (#273, #281): Settings → General has **When Davish opens**: **All servers** shows the list of servers, **Last server** opens and connects to the one you used last (what Davish always did), and **Nothing** opens the last server's workspace without connecting, for servers behind a VPN or in production. A new install opens on All servers; if you already have servers, you keep Last server.
 - **Turn off password login from Security**: Password login in Security is now a switch instead of a command to type in a terminal. Turning it off checks that your key logs in over a new connection, backs up the sshd settings, adds a drop-in file, checks it with `sshd -t` and `sshd -T`, reloads sshd and checks the key again, and undoes the change if the key no longer logs in. It is not offered when a `Match` block or `AuthenticationMethods` would make it lock people out or not apply, or when Davish logs in with a password. The dialog shows the whole script first, and the same switch turns password login back on
 - **Duplicate a server** (#257): the copy icon on a card or a row in All servers opens the add dialog filled in from that server, with the name as `name (copy)`, so only what differs is typed. Nothing is created until you save. Passwords, key passphrases and the control socket are not copied.
 - **Connect through an OpenSSH control socket** (#240): for logins that only work through OpenSSH, such as an agent that issues certificates on demand (authentik), the server dialog has an **Advanced: use an ssh control socket** field. Start a master yourself (`ssh -M -S <path> -fN user@host`) and give Davish its path: it attaches to that connection, so OpenSSH does the login and Davish never sees your credentials. It replaces the authentication of that server, and works on Linux and macOS only. Tried against authentik by @PlayerFann14.
 
 ### Changed
+- The readings in the menu bar (CPU, RAM, Disk, network) are bigger: the ring, its number and its name grow by about a tenth, so they are easier to read (#288).
 - The log now says when the SSH agent could not be reached, and why (for example a Windows pipe that is busy or not there), so a support log can tell "no agent" from "an agent that would not open", and how long the agent took to answer. An agent that waits for you to unlock or confirm, such as Bitwarden's, may need more than the 5 seconds Davish waits: start Davish with `DAVISH_AGENT_WAIT=60` (seconds, 1 to 300) to wait longer (#168).
 
 ### Fixed

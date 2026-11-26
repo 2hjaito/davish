@@ -2191,6 +2191,10 @@ const en = {
     themes: { system: 'Auto', light: 'Light', dark: 'Dark' },
     language: 'Language',
     languageHint: 'The language of the interface.',
+    startup: 'When Davish opens',
+    startupHint:
+      'All servers shows the list. Last server opens and connects to the one you used last. Nothing opens the last server without connecting, for servers behind a VPN or in production.',
+    startups: { all: 'All servers', last: 'Last server', none: 'Nothing' },
     langs: { vi: 'Tiếng Việt', en: 'English', zh: '简体中文', es: 'Español' },
     langRestart:
       'Davish will restart: running terminals and transfers stop, and servers reconnect on their own.',
