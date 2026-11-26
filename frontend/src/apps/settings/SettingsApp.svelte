@@ -1497,6 +1497,9 @@
   }
 
   .head {
+    /* Takes what the control beside it leaves and wraps there, instead of
+       asking for the width of its longest line (#304). */
+    flex: 1 1 0;
     min-width: 0;
     display: flex;
     flex-direction: column;
