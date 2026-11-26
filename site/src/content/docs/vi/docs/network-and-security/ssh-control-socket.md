@@ -60,6 +60,34 @@ Ba chi tiết quan trọng:
 - `ExecStartPre` xóa socket cũ. Nếu master bị kill, socket của nó còn sót lại, và `ssh -M` sẽ in "ControlSocket ... already exists, disabling multiplexing" rồi chạy như một kết nối thường, không có master, nên Davish không gắn vào được.
 - Service không có terminal, nên `ssh` không hỏi được có tin host mới không. Chạy `ssh user@host.example.com` bằng tay một lần trước, để host key nằm trong `~/.ssh/known_hosts`, và chắc rằng agent trả lời được mà không cần bạn ngồi ở terminal (với authentik là hộp thoại trên desktop).
 - Nếu agent hỏi sự đồng ý của bạn qua một hộp thoại trên desktop (authentik làm vậy, qua polkit), nó chỉ hiện được khi bạn đang đăng nhập phiên đồ họa. Lúc khởi động máy, trước khi đăng nhập, yêu cầu bị từ chối ("user denied"), và unit có `WantedBy=default.target` cùng `Restart=always` sẽ cứ lỗi lặp lại cho tới khi bạn đăng nhập. Hãy gắn unit vào phiên đồ họa: trong `[Unit]` thêm `After=graphical-session.target` và `PartOf=graphical-session.target`, còn trong `[Install]` dùng `WantedBy=graphical-session.target`. Agent vẫn sẽ hỏi lại mỗi lần master khởi động lại sau khi mạng rớt. Điều này đến từ lần thử với authentik của @PlayerFann14.
+- **Unit `systemd --user` vẫn có thể bị từ chối, kể cả khi đã gắn vào phiên đồ họa.** Với agent của authentik (v0.73.0), unit lỗi ngay với `Permission denied (publickey)`, và agent ghi log `failed to get host token: failed to resolve authorization UID`, trong khi đúng lệnh `ssh -M` đó chạy được từ terminal trong phiên desktop. Có vẻ agent muốn tiến trình gọi nó là con cháu của chính phiên đồ họa, điều mà dịch vụ `systemd --user` không có. Nếu unit của bạn lỗi như vậy, hãy chạy master từ mục tự khởi động của desktop (phần kế tiếp).
+
+### Khi unit systemd bị từ chối: chạy từ phiên desktop
+
+Mục tự khởi động chạy ngay trong phiên đồ họa của bạn, nên agent hiện được hộp thoại. Lưu một script vòng lặp nhỏ ở `~/.local/bin/davish-master-myserver.sh` rồi cho phép chạy (`chmod +x`):
+
+```sh
+#!/bin/sh
+sock="$XDG_RUNTIME_DIR/davish-myserver.sock"
+while true; do
+  rm -f "$sock"
+  ssh -M -S "$sock" -N \
+    -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o ExitOnForwardFailure=yes \
+    user@host.example.com
+  sleep 30
+done
+```
+
+Rồi tạo `~/.config/autostart/davish-master-myserver.desktop`:
+
+```ini
+[Desktop Entry]
+Type=Application
+Name=ssh master for Davish (myserver)
+Exec=sh -c 'exec "$HOME/.local/bin/davish-master-myserver.sh"'
+```
+
+Master khởi động sau khi bạn đăng nhập, agent hỏi một lần cho mỗi host, và master tự chạy lại sau khi mạng rớt. Mỗi host một script và một mục. Cách này đến từ @PlayerFann14.
 
 Trên macOS, chạy cùng lệnh `ssh` đó từ công cụ bạn dùng để khởi động việc khi đăng nhập.
 
