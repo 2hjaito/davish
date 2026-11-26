@@ -2,7 +2,11 @@ package sysmon
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
+	"io"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -12,6 +16,11 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
+
+	"golang.org/x/crypto/ssh"
+
+	"davish/internal/platform"
 )
 
 // fakeNvidiaSMI answers the three queries gpuprocs.sh makes: one compute
@@ -264,5 +273,33 @@ func TestGPUProcsScriptsPrintTheSameSections(t *testing.T) {
 	windows := sections.FindAllString(gpuProcsWinScript, -1)
 	if !slices.Equal(linux, windows) {
 		t.Errorf("gpuprocs.sh prints %v; gpuprocs.ps1 prints %v", linux, windows)
+	}
+}
+
+// deadlineClients notes how long a call has left and stops it before any
+// SSH session is opened.
+type deadlineClients struct{ left *time.Duration }
+
+func (d deadlineClients) Client(string) (*ssh.Client, error) { return nil, errors.New("offline") }
+
+func (d deadlineClients) WaitPlatform(ctx context.Context, _ string) platform.OS {
+	if dl, ok := ctx.Deadline(); ok {
+		*d.left = time.Until(dl)
+	}
+	return platform.Linux
+}
+
+// A wedged driver can block nvidia-smi for good: the call must give up, so
+// the table shows an error and its SSH session is closed, instead of
+// piling up sessions on every visit to the GPU tab.
+func TestGPUProcessesGiveUpOnAHungNvidiaSMI(t *testing.T) {
+	var left time.Duration
+	svc := New(deadlineClients{&left}, nil, slog.New(slog.NewTextHandler(io.Discard, nil)), Options{})
+	t.Cleanup(svc.Close)
+	if _, err := svc.GPUProcesses(context.Background(), "s1"); err == nil {
+		t.Fatal("offline client accepted")
+	}
+	if left <= 0 || left > 30*time.Second {
+		t.Errorf("time left = %v; want a deadline of at most 30s", left)
 	}
 }

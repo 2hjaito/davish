@@ -8,12 +8,19 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"davish/internal/apperr"
 )
 
 //go:embed gpuprocs.sh
 var gpuProcsScript string
+
+// gpuProcsTimeout bounds one reading. A wedged driver (an Xid error) can
+// block nvidia-smi for good; without a limit each visit to the GPU tab would
+// leave another SSH session hanging. Generous, as nvidia-smi without
+// persistence mode can take seconds per call on a many-GPU server.
+const gpuProcsTimeout = 30 * time.Second
 
 // GPUProcess is one row of the Monitor's GPU process table, like a row of
 // nvtop: a process on one GPU, as nvidia-smi sees it, with what /proc says
@@ -43,6 +50,8 @@ type GPUProcessList struct {
 // from the Processes tab's; the first call falls back to each process's
 // average over its life. A server without nvidia-smi has an empty list.
 func (s *Service) GPUProcesses(ctx context.Context, serverID string) (GPUProcessList, error) {
+	ctx, cancel := context.WithTimeout(ctx, gpuProcsTimeout)
+	defer cancel()
 	os := s.clients.WaitPlatform(ctx, serverID)
 	client, err := s.clients.Client(serverID)
 	if err != nil {

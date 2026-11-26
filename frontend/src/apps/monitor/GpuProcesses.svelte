@@ -59,7 +59,7 @@
     }
   })
 
-  // opt columns give way to the command in a narrow window.
+  // opt columns give way to the command in a narrow window, as in Processes.
   const allColumns: { key: GpuProcColumn; label: string; num: boolean; opt: boolean }[] = [
     { key: 'pid', label: t.monitor.pid, num: true, opt: false },
     { key: 'user', label: t.monitor.procUser, num: false, opt: false },
@@ -132,8 +132,11 @@
               <td class="num opt">{known(p.cpu, formatPct)}</td>
               <td class="num opt">{known(p.mem, formatBytes)}</td>
               <td class="cmd" title={command(p)}>
-                <span class="name">{p.name}</span>
-                {#if command(p) !== p.name}<span class="muted">{command(p)}</span>{/if}
+                <span class="floor"></span>
+                <span class="clip">
+                  <span class="name">{p.name}</span>
+                  {#if command(p) !== p.name}<span class="muted">{command(p)}</span>{/if}
+                </span>
               </td>
             </tr>
           {:else}
@@ -209,10 +212,26 @@
     width: 100%;
   }
 
+  /* The floor keeps the command readable (past it the table scrolls
+     sideways); the text sits on top and ends in an ellipsis, so a long
+     command never widens the table. min-width on a cell is not reliable. */
   .cmd {
-    max-width: 0;
+    position: relative;
+  }
+
+  .floor {
+    display: block;
+    width: 14em;
+    height: 0;
+  }
+
+  .clip {
+    position: absolute;
+    inset: 0 10px;
+    line-height: 30px;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .name {
@@ -225,7 +244,8 @@
     color: var(--fg-subtle);
   }
 
-  @container window (max-width: 1000px) {
+  /* The Processes table's narrow-window breakpoint. */
+  @container window (max-width: 680px) {
     .opt {
       display: none;
     }
