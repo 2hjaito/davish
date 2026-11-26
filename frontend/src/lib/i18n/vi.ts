@@ -3282,7 +3282,7 @@ const vi = {
       'File cấu hình và link trong sites-enabled bị xóa. Không hoàn tác được. nginx vẫn phục vụ site cho tới khi reload.',
     removeCerts: (names: string) => `Xóa luôn chứng chỉ Let's Encrypt: ${names}`,
     removeCertsHint:
-      'Chạy certbot delete: certbot thôi gia hạn tên miền này, hết báo lỗi gia hạn. Chỉ site này dùng chứng chỉ.',
+      'Chạy certbot delete: certbot thôi gia hạn tên miền này, hết báo lỗi gia hạn. Không site nginx nào khác dùng nó, nhưng Davish không thấy được mail server hay chương trình khác có thể đang dùng. Không chắc thì để tắt.',
     sharedCerts: (names: string) => `Giữ lại chứng chỉ ${names} vì site khác cũng dùng.`,
     commandIntro: 'Lệnh sẽ chạy:',
     edit: {

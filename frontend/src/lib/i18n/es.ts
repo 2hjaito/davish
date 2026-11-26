@@ -3395,7 +3395,7 @@ const es = {
       'Se borran el archivo de configuración y su enlace en sites-enabled. No se puede deshacer. nginx sigue sirviendo el sitio hasta que se recargue.',
     removeCerts: (names: string) => `Eliminar también el certificado de Let's Encrypt: ${names}`,
     removeCertsHint:
-      'Ejecuta certbot delete: certbot deja de renovar este dominio, así que también cesan los errores de renovación. Solo este sitio usa el certificado.',
+      'Ejecuta certbot delete: certbot deja de renovar este dominio, así que también cesan los errores de renovación. Ningún otro sitio de nginx lo usa, pero Davish no puede ver un servidor de correo u otro programa que quizá lo use. Si dudas, déjalo desactivado.',
     sharedCerts: (names: string) =>
       `Se conserva el certificado ${names} porque otros sitios también lo usan.`,
     commandIntro: 'Comando que se ejecutará:',

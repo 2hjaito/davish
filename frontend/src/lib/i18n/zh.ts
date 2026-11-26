@@ -3208,7 +3208,7 @@ const zh = {
       '配置文件及其在 sites-enabled 中的链接都会被删除。此操作无法撤销。nginx 重载前仍会继续提供该站点。',
     removeCerts: (names: string) => `同时删除 Let's Encrypt 证书：${names}`,
     removeCertsHint:
-      '运行 certbot delete：certbot 不再续期这个域名，续期报错也会随之停止。只有这个站点使用该证书。',
+      '运行 certbot delete：certbot 不再续期这个域名，续期报错也会随之停止。没有其他 nginx 站点使用它，但 Davish 看不到可能在使用它的邮件服务器或其他程序。不确定时请保持关闭。',
     sharedCerts: (names: string) => `保留证书 ${names}，因为其他站点也在使用。`,
     commandIntro: '将运行的命令：',
     edit: {

@@ -3321,7 +3321,7 @@ const en = {
       'The config file and its link in sites-enabled are deleted. This cannot be undone. nginx keeps serving the site until it reloads.',
     removeCerts: (names: string) => `Also delete the Let's Encrypt certificate: ${names}`,
     removeCertsHint:
-      'Runs certbot delete: certbot stops renewing this domain, so renewal errors stop too. Only this site uses the certificate.',
+      'Runs certbot delete: certbot stops renewing this domain, so renewal errors stop too. No other nginx site uses it, but Davish cannot see a mail server or another program that might. Leave this off if unsure.',
     sharedCerts: (names: string) => `Keeping certificate ${names} since other sites use it too.`,
     commandIntro: 'Command to run:',
     edit: {
