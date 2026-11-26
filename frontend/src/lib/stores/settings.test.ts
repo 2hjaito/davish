@@ -6,10 +6,13 @@ import {
   clampFontSize,
   cleanFontName,
   clampCursor,
+  clampDrag,
+  WINDOW_DRAGS,
   clampEditorFontSize,
   clampIndent,
   clampScheme,
   clampScrollback,
+  defaultStartup,
   resolveTheme,
   settings,
   EDITOR_FONT,
@@ -236,5 +239,39 @@ describe('the wallpaper picture in settings', () => {
     expect(clampDim('x')).toBe(0)
     expect(clampDim(Number.NaN)).toBe(0)
     settings.set('wallpaperDim', 0)
+  })
+})
+
+describe('clampDrag', () => {
+  it.each([...WINDOW_DRAGS])('keeps %s', (mode) => {
+    expect(clampDrag(mode)).toBe(mode)
+  })
+
+  it.each(['fast', '', 0, null, undefined])('falls back to live for %s', (junk) => {
+    expect(clampDrag(junk)).toBe('live')
+  })
+
+  it('is live by default, so nothing changes until someone picks another', () => {
+    expect(settings.windowDrag).toBe('live')
+  })
+
+  it('fills the outline by default; only an explicit false draws the border alone', () => {
+    expect(settings.outlineFill).toBe(true)
+  })
+})
+
+describe('startup view', () => {
+  it('opens All servers on a new install and keeps the last server for people who have some', () => {
+    expect(defaultStartup(false)).toBe('all')
+    expect(defaultStartup(true)).toBe('last')
+  })
+
+  it('settles once: the first launch decides, later launches keep it', () => {
+    expect(settings.startup).toBeNull()
+    expect(settings.settleStartup(true)).toBe('last')
+    expect(settings.settleStartup(false)).toBe('last')
+    settings.set('startup', 'none')
+    expect(settings.settleStartup(false)).toBe('none')
+    expect(settings.startup).toBe('none')
   })
 })

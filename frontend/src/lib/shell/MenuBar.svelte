@@ -54,6 +54,10 @@
   class:native-lights={hasNativeTrafficLights}
   ondblclick={onDoubleClick}
 >
+  {#if servers.active?.tag && servers.active.color}
+    <!-- A thin line in the server's color, so the environment shows with any window open. -->
+    <span class="env" style:background={servers.active.color} aria-hidden="true"></span>
+  {/if}
   <nav class="left" aria-label={t.menubar.label}>
     <SystemMenu />
     <ServerPicker />
@@ -132,6 +136,15 @@
     backdrop-filter: var(--glass-blur);
     /* App.svelte flips this after a wallpaper change: WebKit keeps a stale blur otherwise. */
     opacity: var(--backdrop-nudge, 1);
+  }
+
+  .env {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 3px;
+    pointer-events: none;
   }
 
   /* Room for the macOS close/minimize/zoom buttons drawn by the OS. */

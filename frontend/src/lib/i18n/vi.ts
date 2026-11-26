@@ -201,9 +201,36 @@ const vi = {
       unknown: 'Không đọc được cấu hình sshd; mặc định của OpenSSH là bật.',
       useKeyFirst:
         'Davish đang đăng nhập server này bằng mật khẩu. Chuyển sang key trong app Khóa SSH trước, rồi mới tắt đăng nhập mật khẩu.',
-      how: 'Lệnh dưới thêm một file trong /etc/ssh/sshd_config.d, kiểm tra bằng sshd -t rồi mới reload; nếu kiểm tra lỗi thì tự gỡ file. Cần sshd_config có dòng Include sshd_config.d (Ubuntu 20.04+, Debian 11+).',
-      keepOpen:
-        'Giữ phiên hiện tại mở cho tới khi thử kết nối lại bằng key thành công (Tệp → Ngắt kết nối rồi Kết nối).',
+      how: 'Thay đổi là một file trong /etc/ssh/sshd_config.d; cấu hình sshd của bạn không bị sửa. sshd_config phải có dòng Include sshd_config.d (Ubuntu 20.04+, Debian 11+).',
+      allow: 'Cho phép đăng nhập bằng mật khẩu',
+      offOwn:
+        'Server này tự tắt trong cấu hình sshd của nó. Davish chỉ hoàn tác những thay đổi do chính nó làm.',
+      offByDavish: 'Đã tắt: Davish đã tắt đăng nhập bằng mật khẩu trên server này.',
+      undoHint: 'Bật lại chỉ gỡ file Davish đã thêm; cấu hình sshd của bạn không bị đụng tới.',
+      turnOn: 'Bật lại đăng nhập bằng mật khẩu',
+      turnOff: 'Tắt đăng nhập bằng mật khẩu',
+      doneOff: 'Đã tắt đăng nhập bằng mật khẩu, và key vẫn đăng nhập được.',
+      doneOn: 'Đã bật lại đăng nhập bằng mật khẩu.',
+      blocked: {
+        noInclude: 'sshd_config không đọc /etc/ssh/sshd_config.d ở đây (OpenSSH cũ).',
+        match:
+          'Một khối Match trong cấu hình sshd bật đăng nhập mật khẩu cho một số user, nên thay đổi chung sẽ không tới họ.',
+        methods:
+          'AuthenticationMethods đòi cả mật khẩu lẫn key, nên tắt mật khẩu sẽ khóa mọi người ra ngoài.',
+        control:
+          'Davish vào server này qua control socket nên không tự thử được đăng nhập bằng key.',
+        password: 'Davish đang đăng nhập bằng mật khẩu.',
+      },
+      blockedHint:
+        'Davish không đổi việc này từ đây. Hãy sửa trong cấu hình sshd trước, rồi kiểm tra lại.',
+      checkAgain: 'Kiểm tra lại',
+      confirmOffTitle: 'Tắt đăng nhập bằng mật khẩu?',
+      confirmOffBody:
+        'Davish thử key đăng nhập qua một kết nối mới, sao lưu cấu hình sshd, tắt đăng nhập mật khẩu rồi reload sshd. Nếu sau đó key không đăng nhập được thì hoàn tác. Chạy bằng quyền root:',
+      confirmOffNote:
+        'Phiên hiện tại vẫn mở. Giữ nó cho tới khi bạn đã thử đăng nhập mới bằng key.',
+      confirmOnTitle: 'Bật lại đăng nhập bằng mật khẩu?',
+      confirmOnBody: 'Gỡ file Davish đã thêm và reload sshd:',
     },
     failed: {
       title: (n: number) => `Thử đăng nhập sai (7 ngày): ${n}`,
@@ -1499,8 +1526,11 @@ const vi = {
     import: 'Nhập từ ~/.ssh/config hoặc Ansible…',
     none: 'Chưa có server nào',
     edit: 'Sửa server',
+    duplicate: 'Nhân bản',
     reconnect: 'Kết nối lại',
     dragToReorder: 'Kéo để sắp xếp',
+    tagFilter: 'Lọc theo nhãn',
+    tagAll: 'Tất cả',
     status: {
       connected: 'đã kết nối',
       connecting: 'đang kết nối…',
@@ -1556,6 +1586,18 @@ const vi = {
       server: 'Server',
       view: 'Kiểu xem',
       views: { cards: 'Thẻ', list: 'Danh sách' },
+      filters: {
+        sidebar: 'Server',
+        all: 'Tất cả',
+        connected: 'Đã kết nối',
+        failed: 'Bị lỗi',
+        disconnected: 'Chưa kết nối',
+        groups: 'Nhóm',
+        tags: 'Nhãn',
+        noGroup: 'Chưa có nhóm',
+      },
+      fold: 'Thu gọn nhóm',
+      unfold: 'Mở rộng nhóm',
       open: 'Tất cả server…',
       connected: (up: number, all: number) => `${up}/${all} đã kết nối`,
       emptyHint: 'Thêm server từ menu server để thấy ở đây.',
@@ -1638,6 +1680,7 @@ const vi = {
   serverDialog: {
     addTitle: 'Thêm server qua SSH',
     editTitle: 'Sửa server',
+    duplicateTitle: 'Nhân bản server',
     name: 'Tên hiển thị',
     namePlaceholder: 'ví dụ: dangth-vps',
     host: 'Host',
@@ -1656,10 +1699,20 @@ const vi = {
     password: 'Mật khẩu',
     secretSaved: 'Đã lưu trong keychain. Để trống để giữ nguyên.',
     secretHint: 'Lưu trong keychain của hệ điều hành, không ghi ra file.',
+    tag: 'Nhãn',
+    tagNone: 'Không',
+    tagPlaceholder: 'Hoặc tự đặt, ví dụ qa',
+    tagHint: 'Hiện cạnh tên server để phân biệt môi trường. Màu bên dưới dùng để tô nhãn.',
+    group: 'Nhóm',
+    groupPlaceholder: 'ví dụ my-amazing-app',
+    groupHint: 'Các server cùng nhóm được xếp chung trong Tất cả server.',
     color: 'Màu',
     jump: 'Đi qua server (ProxyJump)',
     jumpNone: 'Không, kết nối thẳng',
     jumpHint: 'Kết nối tới server trung gian trước rồi mới vào server này, như ProxyJump của ssh.',
+    control: 'Nâng cao: dùng ssh control socket',
+    controlHint:
+      'Dùng khi đăng nhập chỉ chạy được qua OpenSSH, như agent cấp chứng chỉ (authentik). Thay thế phần xác thực ở trên. Tự mở master: ssh -M -S <path> -fN user@host. Davish không bao giờ thấy thông tin đăng nhập của bạn. Chỉ có trên Linux và macOS.',
     save: 'Lưu và kết nối',
     cancel: 'Hủy',
     delete: 'Xóa server',
@@ -2108,6 +2161,10 @@ const vi = {
     themes: { system: 'Tự động', light: 'Sáng', dark: 'Tối' },
     language: 'Ngôn ngữ',
     languageHint: 'Ngôn ngữ của giao diện.',
+    startup: 'Khi mở Davish',
+    startupHint:
+      'Tất cả server hiện danh sách. Server cuối mở và kết nối server bạn dùng lần trước. Không gì mở mà không kết nối, cho server sau VPN hoặc đang chạy thật.',
+    startups: { all: 'Tất cả server', last: 'Server cuối', none: 'Không gì' },
     langs: { vi: 'Tiếng Việt', en: 'English', zh: '简体中文', es: 'Español' },
     langRestart:
       'Davish sẽ khởi động lại: terminal và chuyển file đang chạy sẽ dừng, server tự kết nối lại.',
@@ -2127,6 +2184,14 @@ const vi = {
     perfBlurHint: 'Làm mờ những gì nằm sau cửa sổ.',
     perfShadow: 'Bóng cửa sổ ngắn',
     perfShadowHint: 'Bóng ngắn vẽ lại nhanh hơn khi cuộn và kéo cửa sổ.',
+    dragTitle: 'Kéo cửa sổ',
+    dragLabel: 'Khi kéo',
+    dragFill: 'Tô nền cho viền',
+    dragFillHint:
+      'Một lớp màu nhẹ bên trong viền giúp nhìn rõ cửa sổ hơn. Tắt đi trên máy rất yếu để kéo nhẹ nhất.',
+    dragHint:
+      'Trực tiếp: cả cửa sổ di chuyển theo chuột. Đơn giản: cửa sổ vẫn di chuyển nhưng tắt kính cho tới khi thả. Viền: chỉ một đường viền di chuyển, thả ra thì cửa sổ mới nhảy tới đó. Chọn mức nhẹ hơn nếu kéo thấy chậm.',
+    dragModes: { live: 'Trực tiếp', simple: 'Đơn giản', outline: 'Viền' },
     perfOpaque: 'Nền đặc',
     perfOpaqueHint: 'Cửa sổ không trộn với hình nền.',
     perfWallpaper: 'Hình nền loang màu',
@@ -3362,11 +3427,14 @@ const vi = {
     CONN_UNREACHABLE: 'Không kết nối được tới server. Kiểm tra host, port và mạng.',
     CONN_SECRET_MISSING: 'Chưa lưu mật khẩu hoặc passphrase cho server này.',
     CONN_AGENT_UNAVAILABLE:
-      'Không tìm thấy key nào: SSH agent trống hoặc chưa chạy, và không có key mặc định trong ~/.ssh. Trên Windows, hãy bật dịch vụ “OpenSSH Authentication Agent” rồi nạp key bằng ssh-add, hoặc chọn Private key.',
+      'Không tìm thấy key nào: SSH agent trống hoặc chưa chạy, và không có key mặc định trong ~/.ssh. Trên Windows, hãy bật dịch vụ “OpenSSH Authentication Agent” rồi nạp key bằng ssh-add, hoặc chọn Private key. Các agent chỉ cấp chứng chỉ trong lúc kết nối (như authentik) chưa được hỗ trợ.',
     CONN_KEY_UNREADABLE: 'Không đọc được file private key.',
+    CONN_KEY_PPK:
+      'Đây là key .ppk của PuTTY, Davish chưa đọc được. Trong PuTTYgen chọn Conversions → Export OpenSSH key rồi dùng file vừa xuất.',
     CONN_PASSPHRASE_WRONG:
       'Passphrase đã lưu không mở được private key này. Hãy sửa server và nhập lại.',
     CONN_NOT_CONNECTED: 'Server chưa được kết nối.',
+    CONN_CONTROL_SOCKET: 'Không dùng được control socket.',
     TERM_CLOSED: 'Phiên terminal đã đóng.',
     FS_PERMISSION_DENIED: 'Không có quyền truy cập.',
     FS_EXISTS: 'Đã có file hoặc thư mục trùng tên.',
@@ -3413,6 +3481,10 @@ const vi = {
     DB_AUTH_FAILED: 'MongoDB từ chối user hoặc mật khẩu này.',
     SUDO_PASSWORD_REQUIRED: 'Server cần mật khẩu sudo cho lệnh này.',
     SUDO_PASSWORD_WRONG: 'sudo không nhận mật khẩu này.',
+    SEC_KEY_LOGIN_FAILED:
+      'Key không đăng nhập được qua kết nối mới nên chưa đổi gì. Hãy kiểm tra key trong app Khóa SSH trước.',
+    SEC_KEY_LOGIN_LOST:
+      'Sau khi đổi, key không đăng nhập được nên Davish đã hoàn tác. Nếu đăng nhập mật khẩu vẫn đang tắt, hãy xóa /etc/ssh/sshd_config.d/00-davish-no-password.conf rồi reload sshd.',
     INVENTORY_YAML_UNSUPPORTED:
       'Inventory này là YAML (hoặc JSON). Hiện Davish chỉ đọc inventory dạng INI.',
     INVENTORY_SCRIPT_UNSUPPORTED:

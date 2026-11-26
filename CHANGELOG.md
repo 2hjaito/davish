@@ -5,6 +5,37 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Thêm
+- **Kéo cửa sổ** (#262): Cài đặt → Hiệu năng có thêm một cài đặt cho cách cửa sổ đi theo chuột khi kéo. **Trực tiếp** như trước. **Đơn giản** vẫn di chuyển cửa sổ nhưng tắt kính cho tới khi thả. **Viền** chỉ di chuyển một đường viền và đặt cửa sổ vào đó khi thả, cho máy vẽ cửa sổ bằng CPU, nơi kéo một cửa sổ mờ lớn thì chậm. Viền có nền mờ bên trong, **Tô nền viền** tắt nền đó để kéo nhẹ nhất. Mặc định là Trực tiếp nếu bạn không đổi, và các mức hiệu năng không đổi.
+- **Logo hệ điều hành cạnh tên server**: thẻ và danh sách trong Tất cả server, cùng menu chọn server, hiện logo hệ điều hành mà mỗi server chạy (Ubuntu, Debian, Fedora, Arch, Windows, macOS và nhiều hơn). Davish đọc từ `/etc/os-release` khi server kết nối rồi nhớ lại; server chưa biết hệ hoặc không có logo riêng thì hiện hình server đơn giản
+- **Chọn cái gì mở khi Davish khởi động** (#273, #281): Cài đặt → Chung có mục **Khi mở Davish**: **Tất cả server** hiện danh sách server, **Server cuối** mở và kết nối server bạn dùng lần trước (như Davish vẫn làm), còn **Không gì** mở workspace của server cuối mà không kết nối, cho server sau VPN hoặc đang chạy thật. Bản cài mới mở Tất cả server; nếu bạn đã có server thì giữ Server cuối.
+- **Tắt đăng nhập bằng mật khẩu từ An ninh**: Đăng nhập bằng mật khẩu ở An ninh giờ là một công tắc thay vì một lệnh gõ trong terminal. Tắt thì thử key đăng nhập được qua một kết nối mới, sao lưu cấu hình sshd, thêm một file, kiểm tra bằng `sshd -t` và `sshd -T`, reload sshd rồi thử lại key, và hoàn tác nếu key không còn đăng nhập được. Không cho tắt khi một khối `Match` hoặc `AuthenticationMethods` sẽ khiến người ta bị khóa hoặc thay đổi không có tác dụng, hoặc khi Davish đang đăng nhập bằng mật khẩu. Hộp thoại hiện cả script trước, và cùng công tắc đó bật lại
+- **Nhân bản server** (#257): icon sao chép trên thẻ hoặc hàng trong Tất cả server mở hộp thoại thêm server đã điền sẵn từ server đó, tên thành `tên (copy)`, nên chỉ gõ chỗ khác biệt. Chưa lưu thì chưa tạo gì. Mật khẩu, passphrase của key và control socket không được sao chép.
+- **Kết nối qua control socket của OpenSSH** (#240): với kiểu đăng nhập chỉ chạy được qua OpenSSH, như agent cấp chứng chỉ theo yêu cầu (authentik), hộp thoại server có ô **Nâng cao: dùng control socket của ssh**. Bạn tự chạy một master (`ssh -M -S <đường dẫn> -fN user@host`) rồi đưa đường dẫn của nó cho Davish: Davish gắn vào kết nối đó, nên OpenSSH lo việc đăng nhập và Davish không bao giờ thấy thông tin đăng nhập của bạn. Nó thay thế phần xác thực của server đó, và chỉ có trên Linux và macOS. Đã thử với authentik bởi @PlayerFann14.
+
+### Đổi
+- Các chỉ số trên thanh menu (CPU, RAM, Ổ đĩa, mạng) to hơn: vòng, số trong vòng và tên tăng khoảng một phần mười, dễ đọc hơn (#288).
+- Nhật ký giờ ghi lại khi không kết nối được SSH agent và vì sao (ví dụ pipe của Windows đang bận hoặc không có), để nhìn log biết được "không có agent" khác "có agent nhưng không mở được", và agent trả lời sau bao lâu. Agent chờ bạn mở khóa hoặc xác nhận, như của Bitwarden, có thể cần hơn 5 giây Davish chờ: chạy Davish với `DAVISH_AGENT_WAIT=60` (giây, từ 1 đến 300) để chờ lâu hơn (#168).
+
+### Sửa
+- Tất cả server: danh sách cuộn lại được khi các server cao hơn cửa sổ, ở cả dạng thẻ và dạng bảng. Ở bản 1.15.1 nó bị cắt ở mép cửa sổ và không tới được các server bên dưới (#256).
+- Key `.ppk` của PuTTY dùng làm private key của server giờ được báo rõ cách chuyển đổi (PuTTYgen → Conversions → Export OpenSSH key), thay vì "không đọc được private key" chung chung (#264). Davish vẫn chưa tự đọc được `.ppk`.
+
+## [1.15.1] - 2026-11-24
+
+### Thêm
+- **Nhãn server** (#243): gắn một nhãn ngắn như `local`, `staging`, `prod` hoặc tên bạn tự đặt (tối đa 24 ký tự) vào server, trong hộp thoại thêm/sửa server; màu của nhãn là màu server có sẵn. Nhãn hiện cạnh tên server trên menu bar, trong menu chọn server, ở Tất cả server và trên thanh tiêu đề của cửa sổ, kèm một vạch màu mảnh dưới menu bar, để biết mình đang ở môi trường nào. Menu chọn server và Tất cả server có thêm bộ lọc theo nhãn khi có từ hai nhãn trở lên. Server không có nhãn giữ nguyên như cũ.
+- **Nhóm server** (#243): trong hộp thoại thêm/sửa server có ô **Nhóm** (một cấp, tối đa 40 ký tự, gợi ý các nhóm đang dùng). Cửa sổ **Tất cả server** giờ dùng bố cục như Docker: thanh bên lọc theo trạng thái kết nối (Tất cả, Đã kết nối, Bị lỗi, Chưa kết nối), theo nhóm và theo nhãn, mỗi mục có số đếm. Server cùng nhóm nằm dưới một tiêu đề thư mục gập được (nhớ lần gập gần nhất, kèm số server đang chạy và số cảnh báo), cả ở dạng thẻ lẫn dạng bảng. Tìm kiếm khớp cả nhóm. Không có server nào có nhóm thì danh sách trông như cũ. Menu chọn server trên thanh menu cũng xếp theo nhóm, gập được, và phím `⌘1…⌘9` đánh số theo đúng thứ tự đang hiện (nhóm A là 1, 2, 3, nhóm B là 4, 5, 6); không dùng nhóm thì không đổi gì.
+
+### Đổi
+- Trong Tất cả server, bộ lọc nhãn chuyển từ thanh nút sang thanh bên, các nút Thêm, Nhập và Chạy lệnh thành icon trên thanh công cụ, và nút Thẻ/Bảng thành hai icon như Docker.
+- Chấm trạng thái trong menu chọn server giờ chỉ có một màu, là trạng thái kết nối, và chữ dưới tên server bỏ đi (rê chuột vào chấm để xem). Màu riêng của server, vốn đã có chip nhãn mang, hiện thành một vạch mảnh ở mép dòng khi server chưa có nhãn. Các phím `⌘1…⌘9` thẳng một cột, và số server của một nhóm nằm sát tên nhóm.
+
+### Sửa
+- Server có tên đăng nhập chứa `@` giờ lưu và nhập từ `~/.ssh/config` được: Mac gia nhập thư mục công ty (`whoami` ra `jane.doe@example.com`), đăng nhập `user@realm` của SSSD hoặc FreeIPA. Tên dài tối đa 64 ký tự (#249, cảm ơn @andre0xFF).
+
+## [1.15.0] - 2026-11-23
+
+### Thêm
 - App **Widget** (Launchpad, Spotlight, Dock nếu bạn ghim): thư viện các widget có xem trước trực tiếp, số lượng mỗi loại đang có trên desktop của server đang dùng, và nút thêm cỡ nhỏ hoặc vừa. Icon là ba thẻ trắng trên nền xanh lá.
 - Widget **Docker**: bao nhiêu container đang chạy, và cái nào lỗi health hoặc khởi động lặp (cỡ nhỏ, hoặc cỡ vừa kèm tên). Nó đọc `docker ps` mỗi phút một lần khi Davish đang ở phía trước và đọc lại khi bạn quay lại, cho từng server có widget này, và không bao giờ hỏi mật khẩu sudo; server không có Docker hoặc cần sudo thì bị bỏ qua cho đến khi bạn quay lại. Đây là widget duy nhất chạy lệnh. Không có trên server Windows.
 - Widget **Services**: bao nhiêu service đang chạy dưới dạng thanh màu, và cái nào lỗi hoặc khởi động lặp, cỡ nhỏ hoặc vừa. Nó đọc `systemctl list-units` mỗi phút một lần khi Davish đang ở phía trước và đọc lại khi bạn quay lại, cẩn thận như widget Docker (không bao giờ hỏi mật khẩu sudo, server không có systemd thì bị bỏ qua). Docker và Services dùng chung một đoạn mã đọc.
@@ -16,6 +47,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 - Monitor không hỏi server danh sách tiến trình khi cửa sổ không hiện trên màn hình (đã thu nhỏ, ở server khác, hoặc Davish bị ẩn).
 
 ### Sửa
+- Widget nằm ngay dưới menu bar và cách mép phải, cách thanh menu một khoảng bằng nhau, dù cửa sổ rộng bao nhiêu. Trước đây một hàng phía trên bị để trống và khoảng cách bên phải đổi theo cửa sổ.
+- Terminal: màu xám của stack trace, mốc thời gian và gợi ý (ANSI bright black) đọc được trên nền kính tối; bảng màu Davish giờ đặt đủ mọi màu ANSI.
 - Terminal: tiến trình của deploy hoặc script nằm trên thanh tiêu đề, cạnh các tab, thay vì nổi lên trên output và che đầu bên phải của những dòng đầu.
 - Nhãn phím tắt ghi `Ctrl+Shift+U` và `Ctrl+Alt+L` ngoài Mac, Touch ID chỉ được nhắc trên macOS, nút ⋮ trên thanh công cụ Git và Docker giống các nút bên cạnh, và vài chỗ lệch bố cục (nút Bản đồ ở Tất cả server, chú thích của Disk) đã hết.
 - Trình duyệt: trang chuyển hướng bằng đường dẫn tương đối (ví dụ `/` sang `/ui/`, hay thêm dấu `/` cuối) không còn báo "this address only opens inside Davish" (403).

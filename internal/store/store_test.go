@@ -115,9 +115,18 @@ func TestValidate(t *testing.T) {
 		{"host with shell", func(s *Server) { s.Host = "$(reboot)" }},
 		{"port too big", func(s *Server) { s.Port = 70000 }},
 		{"bad user", func(s *Server) { s.User = "root; rm" }},
+		{"user starting with dash", func(s *Server) { s.User = "-oProxyCommand=x" }},
+		{"user starting with @", func(s *Server) { s.User = "@example.com" }},
+		{"user too long", func(s *Server) { s.User = strings.Repeat("a", 65) }},
 		{"unknown auth", func(s *Server) { s.Auth = "magic" }},
 		{"key without path", func(s *Server) { s.Auth = AuthKey }},
 		{"bad color", func(s *Server) { s.Color = "red" }},
+		{"relative control path", func(s *Server) { s.ControlPath = "mux.sock" }},
+		{"control path with jump", func(s *Server) { s.ControlPath = "/tmp/m.sock"; s.JumpID = "other" }},
+		{"group too long", func(s *Server) { s.Group = strings.Repeat("a", 41) }},
+		{"group with control char", func(s *Server) { s.Group = "my\x00app" }},
+		{"tag too long", func(s *Server) { s.Tag = strings.Repeat("a", 25) }},
+		{"tag with control char", func(s *Server) { s.Tag = "pr\x00od" }},
 	}
 	s, _, _ := newTestStore(t)
 	for _, tt := range tests {
@@ -130,12 +139,83 @@ func TestValidate(t *testing.T) {
 		})
 	}
 
+	for _, user := range []string{"root", "deploy-bot", "jane.doe@example.com", "jdoe@CORP.EXAMPLE.COM"} {
+		srv := vps()
+		srv.User = user
+		if _, err := s.Save(context.Background(), srv); err != nil {
+			t.Errorf("user %q rejected: %v", user, err)
+		}
+	}
+
 	for _, host := range []string{"10.0.0.5", "::1", "my-vps", "a.b.example.org"} {
 		srv := vps()
 		srv.Host = host
 		if _, err := s.Save(context.Background(), srv); err != nil {
 			t.Errorf("host %q rejected: %v", host, err)
 		}
+	}
+}
+
+func TestTag(t *testing.T) {
+	s, _, _ := newTestStore(t)
+	ctx := context.Background()
+
+	srv := vps()
+	srv.Tag = "  my   prod \t"
+	saved, err := s.Save(ctx, srv)
+	if err != nil {
+		t.Fatalf("save: %v", err)
+	}
+	if saved.Tag != "my prod" {
+		t.Errorf("tag = %q; want whitespace trimmed and collapsed", saved.Tag)
+	}
+
+	// Exactly the limit passes, counted in characters rather than bytes.
+	srv = vps()
+	srv.Tag = strings.Repeat("é", maxTagLen)
+	if _, err := s.Save(ctx, srv); err != nil {
+		t.Errorf("tag at the limit rejected: %v", err)
+	}
+
+	// An untagged server leaves the field out of servers.json.
+	srv = vps()
+	untagged, err := s.Save(ctx, srv)
+	if err != nil {
+		t.Fatalf("save untagged: %v", err)
+	}
+	if untagged.Tag != "" {
+		t.Errorf("tag = %q; want empty", untagged.Tag)
+	}
+}
+
+func TestGroup(t *testing.T) {
+	s, _, _ := newTestStore(t)
+	ctx := context.Background()
+
+	srv := vps()
+	srv.Group = "  my   amazing\tapp "
+	saved, err := s.Save(ctx, srv)
+	if err != nil {
+		t.Fatalf("save: %v", err)
+	}
+	if saved.Group != "my amazing app" {
+		t.Errorf("group = %q; want whitespace trimmed and collapsed", saved.Group)
+	}
+
+	// The limit counts characters, not bytes.
+	srv = vps()
+	srv.Group = strings.Repeat("é", maxGroupLen)
+	if _, err := s.Save(ctx, srv); err != nil {
+		t.Errorf("group at the limit rejected: %v", err)
+	}
+
+	// A server without a group stays without one.
+	got, err := s.Save(ctx, vps())
+	if err != nil {
+		t.Fatalf("save ungrouped: %v", err)
+	}
+	if got.Group != "" {
+		t.Errorf("group = %q; want empty", got.Group)
 	}
 }
 
@@ -289,5 +369,50 @@ func TestCanceledContext(t *testing.T) {
 	cancel()
 	if _, err := s.Save(ctx, vps()); !errors.Is(err, context.Canceled) {
 		t.Errorf("err = %v; want context.Canceled", err)
+	}
+}
+
+func TestSetDistro(t *testing.T) {
+	ctx := context.Background()
+	s, _, _ := newTestStore(t)
+	saved, err := s.Save(ctx, vps())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.SetDistro(ctx, saved.ID, "ubuntu"); err != nil {
+		t.Fatal(err)
+	}
+	got, _ := s.Server(ctx, saved.ID)
+	if got.Distro != "ubuntu" {
+		t.Fatalf("distro = %q", got.Distro)
+	}
+	// A server that is gone is not an error.
+	if err := s.SetDistro(ctx, "gone", "debian"); err != nil {
+		t.Errorf("unknown server: %v", err)
+	}
+}
+
+// The edit dialog sends a whole server without the distribution; saving it
+// must not lose what the connection found, and must not take a value from
+// the caller either.
+func TestSaveKeepsDistro(t *testing.T) {
+	ctx := context.Background()
+	s, _, _ := newTestStore(t)
+	saved, _ := s.Save(ctx, vps())
+	if err := s.SetDistro(ctx, saved.ID, "debian"); err != nil {
+		t.Fatal(err)
+	}
+	edit := saved
+	edit.Name = "renamed"
+	edit.Distro = "windows"
+	out, err := s.Save(ctx, edit)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out.Distro != "debian" {
+		t.Errorf("distro after an edit = %q; want debian", out.Distro)
+	}
+	if got, _ := s.Server(ctx, saved.ID); got.Name != "renamed" || got.Distro != "debian" {
+		t.Errorf("stored = %+v", got)
 	}
 }

@@ -25,7 +25,7 @@
     transferNoticeId,
     transfers,
   } from '../stores/transfers.svelte'
-  import { openDisk, openFilesAt, openLogs, openTransfers } from '../wm/intents.svelte'
+  import { openDisk, openFilesAt, openLogs, openServers, openTransfers } from '../wm/intents.svelte'
   import Banners from './Banners.svelte'
   import { ui } from '../stores/ui.svelte'
   import Window from '../wm/Window.svelte'
@@ -117,6 +117,16 @@
     return () => {
       disposed = true
       stop()
+    }
+  })
+
+  // #281: when the setting says so, the overview is what opens first.
+  let launchShown = false
+  $effect(() => {
+    if (launchShown || !servers.ready || servers.launchView === null) return
+    launchShown = true
+    if (servers.launchView === 'all' && servers.list.length > 0) {
+      untrack(() => openServers(servers.activeId || (servers.list[0]?.id ?? '')))
     }
   })
 
@@ -333,6 +343,17 @@
     ></div>
   {/if}
 
+  {#if wm.dragOutline}
+    {@const o = wm.dragOutline}
+    <div
+      class="drag-outline"
+      class:filled={settings.outlineFill}
+      style:transform="translate({o.x}px, {o.y}px)"
+      style:width="{o.w}px"
+      style:height="{o.h}px"
+    ></div>
+  {/if}
+
   {#each wm.windows as win (win.id)}
     {@const app = getApp(win.appId)}
     {#if app}
@@ -450,6 +471,26 @@
 
   .workspace.hidden {
     display: none;
+  }
+
+  /* The outline of a window being dragged in the outline mode. It moves instead of the window, so
+     it is plain: no blur, no shadow, a border and at most a light tint. Its own layer (will-change)
+     and contained, so moving it only re-composites it instead of repainting what it passes over. */
+  .drag-outline {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 900;
+    box-sizing: border-box;
+    border-radius: var(--window-radius);
+    border: 2px solid var(--accent);
+    pointer-events: none;
+    will-change: transform;
+    contain: strict;
+  }
+
+  .drag-outline.filled {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
   }
 
   .snap-preview {

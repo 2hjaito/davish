@@ -366,6 +366,14 @@ export function SaveServer(arg1:app.ServerInput):Promise<app.ServerView>;
 
 export function SecurityApply(arg1:string,arg2:string,arg3:string,arg4:string):Promise<void>;
 
+export function SecurityDisablePassword(arg1:string,arg2:string):Promise<void>;
+
+export function SecurityEnablePassword(arg1:string,arg2:string):Promise<void>;
+
+export function SecurityPasswordPlan(arg1:boolean):Promise<security.PasswordPlan>;
+
+export function SecurityPasswordStatus(arg1:string):Promise<security.PasswordStatus>;
+
 export function SecurityPlan(arg1:string,arg2:string,arg3:boolean):Promise<security.Plan>;
 
 export function SecurityReport(arg1:string):Promise<security.Report>;

@@ -5,6 +5,37 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Added
+- **Dragging windows** (#262): Settings → Performance has a new setting for how a window follows the pointer while you drag it. **Live** is what it was. **Simple** moves the window too, but turns the glass off until you let go. **Outline** moves only an outline and puts the window there when you let go, for computers that paint the window on the CPU, where dragging a big translucent window is slow. Outline has a light tint inside, which **Fill the outline** turns off for the lightest drag. It is Live unless you change it, and the performance levels are unchanged.
+- **System logo beside a server's name**: the cards and the list in All servers and the server menu show the logo of the system each server runs (Ubuntu, Debian, Fedora, Arch, Windows, macOS and more). Davish reads it from `/etc/os-release` when the server connects and remembers it; a server whose system is not known yet, or has no logo of its own, shows a plain server glyph
+- **Choose what opens when Davish starts** (#273, #281): Settings → General has **When Davish opens**: **All servers** shows the list of servers, **Last server** opens and connects to the one you used last (what Davish always did), and **Nothing** opens the last server's workspace without connecting, for servers behind a VPN or in production. A new install opens on All servers; if you already have servers, you keep Last server.
+- **Turn off password login from Security**: Password login in Security is now a switch instead of a command to type in a terminal. Turning it off checks that your key logs in over a new connection, backs up the sshd settings, adds a drop-in file, checks it with `sshd -t` and `sshd -T`, reloads sshd and checks the key again, and undoes the change if the key no longer logs in. It is not offered when a `Match` block or `AuthenticationMethods` would make it lock people out or not apply, or when Davish logs in with a password. The dialog shows the whole script first, and the same switch turns password login back on
+- **Duplicate a server** (#257): the copy icon on a card or a row in All servers opens the add dialog filled in from that server, with the name as `name (copy)`, so only what differs is typed. Nothing is created until you save. Passwords, key passphrases and the control socket are not copied.
+- **Connect through an OpenSSH control socket** (#240): for logins that only work through OpenSSH, such as an agent that issues certificates on demand (authentik), the server dialog has an **Advanced: use an ssh control socket** field. Start a master yourself (`ssh -M -S <path> -fN user@host`) and give Davish its path: it attaches to that connection, so OpenSSH does the login and Davish never sees your credentials. It replaces the authentication of that server, and works on Linux and macOS only. Tried against authentik by @PlayerFann14.
+
+### Changed
+- The readings in the menu bar (CPU, RAM, Disk, network) are bigger: the ring, its number and its name grow by about a tenth, so they are easier to read (#288).
+- The log now says when the SSH agent could not be reached, and why (for example a Windows pipe that is busy or not there), so a support log can tell "no agent" from "an agent that would not open", and how long the agent took to answer. An agent that waits for you to unlock or confirm, such as Bitwarden's, may need more than the 5 seconds Davish waits: start Davish with `DAVISH_AGENT_WAIT=60` (seconds, 1 to 300) to wait longer (#168).
+
+### Fixed
+- All servers: the list scrolls again when its servers are taller than the window, in both the cards and the table. In 1.15.1 it was cut off at the window's edge and the servers below could not be reached (#256).
+- A PuTTY `.ppk` key used as a server's private key now gets a clear message with how to convert it (PuTTYgen → Conversions → Export OpenSSH key), instead of a generic "cannot read the private key" (#264). Davish still cannot read `.ppk` itself.
+
+## [1.15.1] - 2026-11-24
+
+### Added
+- **Server tags** (#243): give a server a short tag such as `local`, `staging`, `prod` or your own (up to 24 characters) in the add/edit server dialog; the tag takes the server's existing color. It shows next to the server name in the menu bar, the server menu, All servers and each window's title bar, with a thin colored line under the menu bar, so you can tell which environment you are in. The server menu and All servers can filter by tag once there are two or more. Servers without a tag look the same as before.
+- **Server groups** (#243): the add/edit server dialog has a **Group** field (one level, up to 40 characters, suggesting the groups already in use). **All servers** now uses the same layout as Docker: a sidebar filters by connection state (All, Connected, Failed, Not connected), by group and by tag, each with a count. Servers of one group sit under a folder heading that folds (it remembers how you left it, and shows how many are up and how many alerts), in both the cards and the table. The search matches groups too. With no group on any server, the list looks as before. The server menu in the menu bar is grouped and folds too, and `⌘1…⌘9` number the servers in the order shown (group A is 1, 2, 3, group B is 4, 5, 6); without groups nothing changes.
+
+### Changed
+- In All servers, the tag filter moves from a row of buttons to the sidebar, Add, Import and Run a command become icons in the toolbar, and Cards/Table are two icons like in Docker.
+- The status dot in the server menu is one color now, the connection state, with the word under each name gone (hover the dot for it). A server's own color, which a tag chip carries, shows as a thin line at the row's edge when it has no tag. The `⌘1…⌘9` hints line up in one column, and a folder's count sits next to its name.
+
+### Fixed
+- A server whose login contains `@` can now be saved and imported from `~/.ssh/config`: a Mac joined to a corporate directory (where `whoami` prints `jane.doe@example.com`), SSSD or FreeIPA `user@realm` logins. The name may be up to 64 characters (#249, thanks @andre0xFF).
+
+## [1.15.0] - 2026-11-23
+
+### Added
 - The **Widgets** app (Launchpad, Spotlight, Dock if you pin it): a gallery of the widgets with a live preview, how many of each are on the desktop of the server in use, and buttons to add one small or medium. Its icon is three white cards on green.
 - A **Docker** widget: how many containers run, and which ones fail their healthcheck or keep restarting (small, or medium with their names). It reads `docker ps` once a minute while Davish is in front and again when you come back to it, for each server that has one, and never asks for a sudo password; a server that has no Docker or wants sudo is left alone until you come back. It is the only widget that runs a command. Not offered on a Windows server.
 - A **Services** widget: how many services run as a coloured bar, and which ones failed or keep restarting, small or medium. It reads `systemctl list-units` once a minute while Davish is in front and again when you come back, with the same care as the Docker widget (never a sudo password, a server without systemd is left alone). Docker and Services share one reading code.
@@ -16,6 +47,8 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 - Monitor stops asking the server for the process list while its window is not on screen (minimized, on another server, or Davish hidden).
 
 ### Fixed
+- Widgets start right under the menu bar and sit the same distance from the right edge and from the bar, whatever the window width. Before, a row was kept empty at the top and the gap on the right changed with the window.
+- Terminal: the grey of stack traces, timestamps and hints (ANSI bright black) is readable on the dark glass; the Davish color scheme sets every ANSI color now.
 - Terminal: the progress of a deploy or a script now sits in the title bar, beside the tabs, instead of floating over the output, where it hid the right end of the first lines.
 - Shortcut labels read `Ctrl+Shift+U` and `Ctrl+Alt+L` outside the Mac, Touch ID is only mentioned on macOS, the ⋮ buttons in the Git and Docker toolbars match the buttons beside them, and a few layout slips (the Map button in All servers, Disk's legend) are gone.
 - Browser: a page that redirects with a relative path (such as `/` to `/ui/`, or adding a trailing `/`) no longer ends on "this address only opens inside Davish" (403).

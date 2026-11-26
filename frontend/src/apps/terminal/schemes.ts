@@ -109,6 +109,26 @@ export const SCHEMES: Record<Exclude<TerminalScheme, 'davish'>, Scheme> = {
   },
 }
 
+/**
+ * The ANSI colors of the Davish look. xterm's own defaults are dull: bright
+ * black is #666, which almost vanishes on the dark glass, and that is the
+ * grey that stack traces, timestamps and hints are printed in. These stay
+ * readable on --term-bg-solid and on the glass above it. Green, blue and
+ * yellow come from the tokens (--term-user, --term-path, --term-warn).
+ */
+export const DAVISH_ANSI = {
+  black: '#6f7788',
+  red: '#ff7a85',
+  magenta: '#d6a2ff',
+  cyan: '#7ee0e6',
+  white: '#d7dae0',
+  brightBlack: '#a3abbb',
+  brightRed: '#ff9aa3',
+  brightMagenta: '#e3bbff',
+  brightCyan: '#9aeff4',
+  brightWhite: '#ffffff',
+} as const
+
 /** The scheme's colors; undefined for Davish, whose colors come from tokens.css. */
 export function schemeFor(id: TerminalScheme): Scheme | undefined {
   return id === 'davish' ? undefined : SCHEMES[id]

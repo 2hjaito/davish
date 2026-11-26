@@ -65,12 +65,14 @@ export function resultLine(
   widgets: number,
   s: FrameStats,
   longTasks: number | null,
+  picture = false,
 ): string {
   const n = (v: number) => v.toFixed(1)
   return [
     `scenario=${scenario}`,
     `preset=${preset}`,
     `widgets=${widgets}`,
+    `picture=${picture ? 1 : 0}`,
     `frames=${s.frames}`,
     `mean_ms=${n(s.meanMs)}`,
     `p95_ms=${n(s.p95Ms)}`,

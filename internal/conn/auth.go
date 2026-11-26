@@ -1,10 +1,12 @@
 package conn
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -26,7 +28,7 @@ func (m *Manager) authMethods(srv store.Server) ([]ssh.AuthMethod, func(), error
 		// "Automatic", like the ssh command: agent keys first, then the
 		// default key files in ~/.ssh. Most users never load the agent.
 		signers, release := m.agentSigners()
-		signers = append(signers, m.defaultKeySigners(srv)...)
+		signers = appendUniqueSigners(signers, m.defaultKeySigners(srv))
 		if len(signers) == 0 {
 			release()
 			return nil, noop, apperr.New(apperr.ConnAgentUnavailable, "no SSH agent keys and no default key in ~/.ssh")
@@ -35,10 +37,19 @@ func (m *Manager) authMethods(srv store.Server) ([]ssh.AuthMethod, func(), error
 
 	case store.AuthKey:
 		signer, err := m.loadKey(srv)
-		if err != nil {
-			return nil, noop, err
+		if err == nil {
+			return []ssh.AuthMethod{ssh.PublicKeys(signer)}, noop, nil
 		}
-		return []ssh.AuthMethod{ssh.PublicKeys(signer)}, noop, nil
+		// Like OpenSSH's `ssh -i`: if the file needs a passphrase or is a .pub
+		// file (for example an imported IdentityFile or a key held only by an
+		// agent), use the matching key from the SSH agent when loaded.
+		var ae *apperr.Error
+		if errors.As(err, &ae) && (ae.Code == apperr.ConnSecretMissing || ae.Code == apperr.ConnPassphraseWrong || ae.Code == apperr.ConnKeyUnreadable) {
+			if agentSigner, release, ok := m.agentSignerForKey(srv.KeyPath); ok {
+				return []ssh.AuthMethod{ssh.PublicKeys(agentSigner)}, release, nil
+			}
+		}
+		return nil, noop, err
 
 	case store.AuthPassword:
 		pw, err := m.secrets.Get(srv.ID, store.SecretPassword)
@@ -69,11 +80,37 @@ var agentDial = dialAgent
 // not leave the connection stuck before it even dials (#168).
 var agentTimeout = 5 * time.Second
 
+// agentWaitOverride returns DAVISH_AGENT_WAIT when set to a valid number of
+// seconds (1 to 300).
+func agentWaitOverride() (time.Duration, bool) {
+	if n, err := strconv.Atoi(os.Getenv("DAVISH_AGENT_WAIT")); err == nil && n >= 1 && n <= 300 {
+		return time.Duration(n) * time.Second, true
+	}
+	return 0, false
+}
+
+// agentWait is how long to wait for the agent: agentTimeout, or DAVISH_AGENT_WAIT
+// seconds (1 to 300) when that is set. An agent that waits for the person to
+// unlock a vault or confirm a key, such as Bitwarden's, may need longer than
+// agentTimeout, and the person can raise it without a new build (#168).
+func agentWait() time.Duration {
+	if d, ok := agentWaitOverride(); ok {
+		return d
+	}
+	return agentTimeout
+}
+
 // agentSigners returns the keys loaded in the SSH agent, if one is running
 // and answers in time.
 func (m *Manager) agentSigners() ([]ssh.Signer, func()) {
 	c, err := agentDial()
 	if err != nil {
+		// Without this line a pipe that cannot be opened (busy, no right to it,
+		// nobody listening) looks like no agent at all, and the log of a person
+		// whose agent does not work says nothing (#168).
+		if m.log != nil {
+			m.log.Info("ssh agent not reachable", "err", err)
+		}
 		return nil, func() {}
 	}
 	// Closing may block while a read is pending on a Windows pipe, so it
@@ -84,22 +121,37 @@ func (m *Manager) agentSigners() ([]ssh.Signer, func()) {
 		err     error
 	}
 	done := make(chan listed, 1)
+	start := time.Now()
 	go func() {
 		s, err := agent.NewClient(c).Signers()
 		done <- listed{s, err}
 	}()
+	wait := agentWait()
 	select {
 	case l := <-done:
+		if m.log != nil && l.err == nil {
+			// How long the agent took says whether waiting longer would help (#168).
+			m.log.Info("ssh agent answered", "keys", len(l.signers), "took", time.Since(start).Round(time.Millisecond).String())
+		}
 		if l.err != nil {
 			if m.log != nil {
 				m.log.Warn("ssh agent did not list its keys", "err", l.err)
 			}
 			return nil, release
 		}
+		if len(l.signers) == 0 {
+			if m.log != nil {
+				// Some agents (authentik) list nothing until the client sends
+				// session-bind@openssh.com, which x/crypto/ssh cannot do (#240).
+				m.log.Info("ssh agent is running but lists no keys")
+			}
+			release()
+			return nil, func() {}
+		}
 		return l.signers, release
-	case <-time.After(agentTimeout):
+	case <-time.After(wait):
 		if m.log != nil {
-			m.log.Warn("ssh agent did not answer in time; trying key files")
+			m.log.Warn("ssh agent did not answer in time; trying key files", "waited", wait.String())
 		}
 		release()
 		return nil, func() {}
@@ -147,6 +199,9 @@ func (m *Manager) loadKey(srv store.Server) (ssh.Signer, error) {
 		}
 		signer, err = keyfile.Parse(data, []byte(pass))
 	}
+	if errors.Is(err, keyfile.ErrPPK) {
+		return nil, apperr.New(apperr.ConnKeyPPK, "the key is in PuTTY .ppk format; in PuTTYgen use Conversions > Export OpenSSH key and choose that file")
+	}
 	if errors.Is(err, keyfile.ErrWrongPassphrase) {
 		return nil, apperr.Wrap(apperr.ConnPassphraseWrong, "the saved passphrase does not open the key", err)
 	}
@@ -170,6 +225,74 @@ func expandHome(path string) string {
 	return filepath.Join(home, strings.TrimPrefix(path, "~"))
 }
 
+// appendUniqueSigners appends extra signers whose public key is not already
+// present in base, so a key loaded in the agent and also in ~/.ssh is not
+// offered twice against sshd's MaxAuthTries.
+func appendUniqueSigners(base, extra []ssh.Signer) []ssh.Signer {
+	if len(extra) == 0 {
+		return base
+	}
+	seen := make(map[string]struct{}, len(base))
+	for _, s := range base {
+		seen[string(s.PublicKey().Marshal())] = struct{}{}
+	}
+	for _, s := range extra {
+		k := string(s.PublicKey().Marshal())
+		if _, ok := seen[k]; ok {
+			continue
+		}
+		seen[k] = struct{}{}
+		base = append(base, s)
+	}
+	return base
+}
+
+// agentSignerForKey looks up keyPath's public key in the SSH agent. It checks
+// keyPath itself (when pointing at a .pub file) or keyPath+".pub", matching
+// OpenSSH's IdentityFile behavior.
+func (m *Manager) agentSignerForKey(keyPath string) (ssh.Signer, func(), bool) {
+	pub := readPublicKey(expandHome(keyPath))
+	if pub == nil {
+		return nil, nil, false
+	}
+	want := pub.Marshal()
+	signers, release := m.agentSigners()
+	for _, s := range signers {
+		if bytes.Equal(s.PublicKey().Marshal(), want) {
+			return s, release, true
+		}
+	}
+	release()
+	return nil, nil, false
+}
+
+// readPublicKey extracts the SSH public key for path: from path itself (as an
+// authorized public key or an encrypted OpenSSH private key's unencrypted
+// header), or from path+".pub". Returns nil if none yields a public key.
+func readPublicKey(path string) ssh.PublicKey {
+	for _, candidate := range []string{path, path + ".pub"} {
+		fi, err := os.Stat(candidate)
+		if err != nil || fi.IsDir() || fi.Size() > 64<<10 {
+			continue
+		}
+		data, err := os.ReadFile(candidate) //nolint:gosec // user-configured key path or its .pub sibling
+		if err != nil {
+			continue
+		}
+		if pub, _, _, _, err := ssh.ParseAuthorizedKey(data); err == nil {
+			return pub
+		}
+		if candidate == path {
+			_, perr := keyfile.Parse(data, nil)
+			var missing *ssh.PassphraseMissingError
+			if errors.As(perr, &missing) && missing.PublicKey != nil {
+				return missing.PublicKey
+			}
+		}
+	}
+	return nil
+}
+
 // LoginKeys are the SHA256 fingerprints of every public key Davish may log
 // in to the server with: the agent's, the default files and the chosen
 // key. Removing one of them from the server's authorized_keys may lock
@@ -179,20 +302,24 @@ func (m *Manager) LoginKeys(ctx context.Context, id string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	var signers []ssh.Signer
+	var pubs []ssh.PublicKey
 	switch srv.Auth {
 	case store.AuthAgent:
 		agentSigners, release := m.agentSigners()
 		defer release()
-		signers = append(agentSigners, m.defaultKeySigners(srv)...)
+		for _, s := range appendUniqueSigners(agentSigners, m.defaultKeySigners(srv)) {
+			pubs = append(pubs, s.PublicKey())
+		}
 	case store.AuthKey:
 		if s, err := m.loadKey(srv); err == nil {
-			signers = append(signers, s)
+			pubs = append(pubs, s.PublicKey())
+		} else if pub := readPublicKey(expandHome(srv.KeyPath)); pub != nil {
+			pubs = append(pubs, pub)
 		}
 	}
-	fps := make([]string, 0, len(signers))
-	for _, s := range signers {
-		fps = append(fps, ssh.FingerprintSHA256(s.PublicKey()))
+	fps := make([]string, 0, len(pubs))
+	for _, p := range pubs {
+		fps = append(fps, ssh.FingerprintSHA256(p))
 	}
 	return fps, nil
 }

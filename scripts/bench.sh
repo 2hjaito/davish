@@ -15,6 +15,11 @@
 #                                        timing idle, a long list scrolling and a
 #                                        window dragged on the demo's sample data;
 #                                        prints the median of [runs] (default 3)
+#   scripts/bench.sh --wallpaper [runs] [binary]
+#                                        the same, for what a picture as the wallpaper
+#                                        costs: Beautiful and Balanced with 0 widgets,
+#                                        and with 3 widgets without and with the
+#                                        picture, and Light with 3 without and with it
 #   scripts/bench.sh --widgets [runs] [binary]
 #                                        the same, for what widgets cost: Beautiful
 #                                        and Balanced with 0, 1 and 3 widgets on the
@@ -90,7 +95,7 @@ if [ "${1:-}" = "--attach" ]; then
   exit 0
 fi
 
-# render_bench <runs> <binary> <preset:widgets>...: one fresh process per
+# render_bench <runs> <binary> <preset:widgets[:picture]>...: one fresh process per
 # combination and run, each on the demo's sample data, then the median of the
 # runs. The CPU of the app and its WebKit processes is read around each
 # scenario, from the marks the app prints, so what a widget costs is not lost
@@ -117,7 +122,7 @@ render_bench() {
         *phase=start*) cpu0=$cpu ;;
         *phase=end*)
           ms=$(echo "$mark" | sed -n 's/.*ms=\([0-9]*\).*/\1/p')
-          echo "scenario=cpu_$scen preset=$preset widgets=$widgets cpu_pct=$(awk -v a="$cpu" -v b="$cpu0" -v ms="$ms" 'BEGIN { printf "%.1f", (a - b) / (ms / 1000) * 100 }')" >>"$results"
+          echo "scenario=cpu_$scen preset=$preset widgets=$widgets picture=$picture cpu_pct=$(awk -v a="$cpu" -v b="$cpu0" -v ms="$ms" 'BEGIN { printf "%.1f", (a - b) / (ms / 1000) * 100 }')" >>"$results"
           ;;
       esac
     done
@@ -125,17 +130,20 @@ render_bench() {
   for run in $(seq 1 "$runs"); do
     for combo in "$@"; do
       preset=${combo%%:*}
-      widgets=${combo##*:}
+      rest=${combo#*:}
+      widgets=${rest%%:*}
+      picture=0
+      case "$rest" in *:*) picture=${rest#*:} ;; esac
       home=$(mktemp -d)
       log=$(mktemp)
-      HOME=$home DAVISH_BENCH=render DAVISH_BENCH_PRESET=$preset DAVISH_BENCH_WIDGETS=$widgets "$bin" 2>"$log" &
+      HOME=$home DAVISH_BENCH=render DAVISH_BENCH_PRESET=$preset DAVISH_BENCH_WIDGETS=$widgets DAVISH_BENCH_PICTURE=$picture "$bin" 2>"$log" &
       pid=$!
       seen=0
       cpu0=0
       i=0
       until grep -q 'davish-bench \(done\|error=\)' "$log"; do
         i=$((i + 1))
-        [ "$i" -lt 1200 ] || { echo "run $run, $preset $widgets: no result after 120s" >&2; break; }
+        [ "$i" -lt 1200 ] || { echo "run $run, $preset $widgets picture=$picture: no result after 120s" >&2; break; }
         read_marks
         sleep 0.1
       done
@@ -150,13 +158,13 @@ render_bench() {
       placed=$(sed -n 's/.*davish-bench env placed=\([0-9]*\).*/\1/p' "$log" | head -n 1)
       [ "$widgets" = 0 ] || [ "${placed:-0}" = "$widgets" ] || echo "run $run, $preset: only ${placed:-0} of $widgets widgets found room, so its numbers are not for $widgets" >&2
       rm -rf "$home" "$log"
-      echo "run $run/$runs, $preset with $widgets widget(s) done" >&2
+      echo "run $run/$runs, $preset with $widgets widget(s), picture $picture, done" >&2
     done
   done
   [ -s "$results" ] || { echo "no results" >&2; exit 1; }
   echo "$(cat "$envline")"
   echo "median of $runs run(s). over_ms: time past 16.7 ms of the frames over 25 ms, summed over 3 s."
-  echo "cpu_pct: CPU of the app and its WebKit processes over the scenario, % of one core; cpu_vs0: the same less the run with 0 widgets."
+  echo "cpu_pct: CPU of the app and its WebKit processes over the scenario, % of one core; cpu_vs0: the same less the run with 0 widgets and no picture."
   awk '
     function med(key, n,  a, i, j, t) {
       for (i = 1; i <= n; i++) a[i] = v[key, i]
@@ -168,7 +176,8 @@ render_bench() {
       sc = x["scenario"]
       isCpu = (sc ~ /^cpu_/)
       if (isCpu) sc = substr(sc, 5)
-      k = sc SUBSEP x["preset"] SUBSEP x["widgets"]
+      pic = (x["picture"] == "") ? 0 : x["picture"]
+      k = sc SUBSEP x["preset"] SUBSEP x["widgets"] SUBSEP pic
       if (!(k in seen)) { seen[k] = 1; order[++m] = k; cnt[k] = 0; ccnt[k] = 0 }
       if (isCpu) { n = ++ccnt[k]; v[k SUBSEP "cpu", n] = x["cpu_pct"]; next }
       n = ++cnt[k]
@@ -178,16 +187,16 @@ render_bench() {
     }
     END {
       for (o = 1; o <= m; o++) { k = order[o]; if (ccnt[k] > 0) cpu[k] = med(k SUBSEP "cpu", ccnt[k]) }
-      printf "%-8s %-10s %7s %5s %8s %7s %7s %8s %8s %8s %s\n", "scenario", "preset", "widgets", "runs", "mean_ms", "p95_ms", "max_ms", "over_ms", "cpu_pct", "cpu_vs0", "long_tasks"
+      printf "%-8s %-10s %7s %7s %5s %8s %7s %7s %8s %8s %8s %s\n", "scenario", "preset", "widgets", "picture", "runs", "mean_ms", "p95_ms", "max_ms", "over_ms", "cpu_pct", "cpu_vs0", "long_tasks"
       nsc = split("idle scroll drag", scs, " ")
       for (si = 1; si <= nsc; si++) {
         for (o = 1; o <= m; o++) {
           k = order[o]; split(k, kk, SUBSEP)
           if (kk[1] != scs[si] || cnt[k] == 0) continue
-          base = kk[1] SUBSEP kk[2] SUBSEP 0
-          vs = (kk[3] > 0 && (k in cpu) && (base in cpu)) ? sprintf("%+.1f", cpu[k] - cpu[base]) : "-"
+          base = kk[1] SUBSEP kk[2] SUBSEP 0 SUBSEP 0
+          vs = ((kk[3] > 0 || kk[4] > 0) && (k in cpu) && (base in cpu)) ? sprintf("%+.1f", cpu[k] - cpu[base]) : "-"
           c = (k in cpu) ? sprintf("%.1f", cpu[k]) : "-"
-          printf "%-8s %-10s %7s %5d %8.1f %7.1f %7.1f %8.1f %8s %8s %s\n", kk[1], kk[2], kk[3], cnt[k], med(k SUBSEP "mean_ms", cnt[k]), med(k SUBSEP "p95_ms", cnt[k]), med(k SUBSEP "max_ms", cnt[k]), med(k SUBSEP "over_ms", cnt[k]), c, vs, lt[k]
+          printf "%-8s %-10s %7s %7s %5d %8.1f %7.1f %7.1f %8.1f %8s %8s %s\n", kk[1], kk[2], kk[3], kk[4], cnt[k], med(k SUBSEP "mean_ms", cnt[k]), med(k SUBSEP "p95_ms", cnt[k]), med(k SUBSEP "max_ms", cnt[k]), med(k SUBSEP "over_ms", cnt[k]), c, vs, lt[k]
         }
         if (si < nsc) print ""
       }
@@ -204,6 +213,14 @@ default_bin() {
 
 if [ "${1:-}" = "--render" ]; then
   render_bench "${2:-3}" "${3:-$(default_bin)}" beautiful:0 balanced:0 light:0
+  exit 0
+fi
+
+if [ "${1:-}" = "--wallpaper" ]; then
+  echo "A picture drawn by the bench (2560 x 1440, JPEG) is the wallpaper; Light hides it by its knob:" >&2
+  echo "light 3 with a picture against light 3 without shows nothing is drawn or kept there." >&2
+  render_bench "${2:-3}" "${3:-$(default_bin)}" \
+    beautiful:0:0 beautiful:3:0 beautiful:3:1 balanced:0:0 balanced:3:0 balanced:3:1 light:3:0 light:3:1
   exit 0
 fi
 

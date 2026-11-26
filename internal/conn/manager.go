@@ -46,6 +46,9 @@ type Status struct {
 	// Platform is the server's OS once it is known; the UI greys out the
 	// apps that do not run there.
 	Platform platform.OS `json:"platform,omitempty"`
+	// Distro is the logo key of the server's system ("ubuntu", "windows"…)
+	// once it is known (platform.Distro).
+	Distro string `json:"distro,omitempty"`
 }
 
 // HostKeyPrompt is the conn:hostkey-prompt payload: the UI shows it and
@@ -82,6 +85,9 @@ type Options struct {
 	// DetectPlatform asks a connected server what it runs; nil takes the
 	// real probe. Tests set it to make detection slow or instant.
 	DetectPlatform func(ctx context.Context, client *ssh.Client) platform.OS
+	// DetectDistro gives the logo key of a connected server whose OS is
+	// known; nil takes a read of /etc/os-release.
+	DetectDistro func(ctx context.Context, client *ssh.Client, os platform.OS) string
 }
 
 func (o Options) withDefaults() Options {
@@ -130,6 +136,8 @@ type link struct {
 	// the connection is reported up, and the answer survives reconnects,
 	// since the server stays the same machine.
 	plat *platform.Cell
+	// distro is the logo key found with plat; empty until it is known.
+	distro string
 }
 
 // pendingKey is a host key shown to the user and not yet accepted.
@@ -155,6 +163,9 @@ func NewManager(servers ServerSource, secrets SecretSource, hostKeys *HostKeys, 
 	}
 	if m.opts.DetectPlatform == nil {
 		m.opts.DetectPlatform = m.detectPlatform
+	}
+	if m.opts.DetectDistro == nil {
+		m.opts.DetectDistro = m.detectDistro
 	}
 	return m
 }
@@ -350,23 +361,62 @@ func (m *Manager) WaitPlatform(ctx context.Context, id string) platform.OS {
 	return cell.Wait(ctx)
 }
 
+// distroSaver is what a ServerSource may also do: remember the logo key, so
+// the lists show it before the server has connected again. store.Store does.
+type distroSaver interface {
+	SetDistro(ctx context.Context, id, distro string) error
+}
+
 // detect runs in the background after a connection is reported up. It
 // always answers the cell, so no waiter is left hanging, and announces the
-// OS in a second conn:status when the connection it asked about is still
-// the current one.
+// OS and the logo in a second conn:status when the connection it asked
+// about is still the current one.
 func (m *Manager) detect(ctx context.Context, id string, l *link, client *ssh.Client, cell *platform.Cell) {
 	defer m.wg.Done()
 	os := m.opts.DetectPlatform(ctx, client)
 	cell.Set(os)
+	if os == platform.Unknown {
+		return
+	}
+	distro := m.opts.DetectDistro(ctx, client, os)
 
 	m.mu.Lock()
 	current := m.conns[id] == l && l.client == client && l.plat == cell
+	if current {
+		l.distro = distro
+	}
 	m.mu.Unlock()
-	if !current || os == platform.Unknown {
+	if !current {
 		return
 	}
-	m.log.Info("platform detected", "server", id, "platform", os)
+	m.log.Info("platform detected", "server", id, "platform", os, "distro", distro)
+	if saver, ok := m.servers.(distroSaver); ok && distro != "" {
+		if err := saver.SetDistro(ctx, id, distro); err != nil {
+			m.log.Warn("could not save the distribution", "server", id, "err", err)
+		}
+	}
 	m.publish(id, StateConnected, nil)
+}
+
+// detectDistro gives the logo key: Windows and macOS are known from the OS,
+// and a Linux says its distribution in os-release. A server that does not
+// answer in time is plain Linux, and still usable.
+func (m *Manager) detectDistro(ctx context.Context, client *ssh.Client, os platform.OS) string {
+	switch os {
+	case platform.Windows:
+		return platform.DistroWindows
+	case platform.Darwin:
+		return platform.DistroMacOS
+	case platform.Linux:
+		ctx, cancel := context.WithTimeout(ctx, platform.DetectTimeout)
+		defer cancel()
+		out, err := execOutput(ctx, client, platform.DistroCommand)
+		if err != nil {
+			return platform.DistroLinux
+		}
+		return platform.Distro(out)
+	}
+	return ""
 }
 
 // detectPlatform asks the server what it runs. It never fails: a server
@@ -566,6 +616,29 @@ func (m *Manager) dial(ctx context.Context, id string) (*ssh.Client, error) {
 	return m.dialVia(ctx, id, id, 0)
 }
 
+// CheckKeyLogin logs in to server id over a new connection with its key
+// only, never a password (a key server's auth methods hold none), and closes it
+// at once. Turning password logins
+// off uses it before and after the change (ADR 0029). It does not touch
+// the open connection.
+func (m *Manager) CheckKeyLogin(ctx context.Context, id string) error {
+	srv, err := m.servers.Server(ctx, id)
+	if err != nil {
+		return err
+	}
+	if srv.Auth == store.AuthPassword {
+		return apperr.New(apperr.InvalidInput, "this server logs in with a password, not a key")
+	}
+	if srv.ControlPath != "" {
+		return apperr.New(apperr.InvalidInput, "a control socket reuses an open connection, so a key login cannot be tried")
+	}
+	c, err := m.dial(ctx, id)
+	if err != nil {
+		return err
+	}
+	return c.Close()
+}
+
 // dialVia connects to server id on behalf of target: a hop's unknown host
 // key is shown as target's prompt, and approving it reconnects target.
 // Every hop is a fresh connection with its own host key check and auth.
@@ -573,6 +646,9 @@ func (m *Manager) dialVia(ctx context.Context, target, id string, depth int) (*s
 	srv, err := m.servers.Server(ctx, id)
 	if err != nil {
 		return nil, err
+	}
+	if srv.ControlPath != "" {
+		return m.dialControl(ctx, srv)
 	}
 	auth, release, err := m.authMethods(srv)
 	if err != nil {
@@ -618,8 +694,16 @@ func (m *Manager) dialVia(ctx context.Context, target, id string, depth int) (*s
 		}
 	}
 	// Bound the handshake too; a silent server must not hang the UI. A
-	// tunneled conn has no deadlines, so close it instead.
-	timer := time.AfterFunc(m.opts.DialTimeout, func() { nc.Close() }) //nolint:errcheck,gosec // aborting
+	// tunneled conn has no deadlines, so close it instead. If the user
+	// raised DAVISH_AGENT_WAIT for a vault or Touch ID prompt, let the
+	// handshake wait at least that long too.
+	handshakeTimeout := m.opts.DialTimeout
+	if srv.Auth == store.AuthAgent || srv.Auth == store.AuthKey {
+		if wait, ok := agentWaitOverride(); ok && wait > handshakeTimeout {
+			handshakeTimeout = wait
+		}
+	}
+	timer := time.AfterFunc(handshakeTimeout, func() { nc.Close() }) //nolint:errcheck,gosec // aborting
 	c, chans, reqs, err := ssh.NewClientConn(nc, addr, cfg)
 	if !timer.Stop() && err == nil { // timed out just as the handshake finished
 		c.Close() //nolint:errcheck,gosec // already closed underneath
@@ -682,6 +766,11 @@ func (m *Manager) publish(id string, state State, err error) {
 		if os := m.Platform(id); os != platform.Unknown {
 			st.Platform = os
 		}
+		m.mu.Lock()
+		if l, ok := m.conns[id]; ok {
+			st.Distro = l.distro
+		}
+		m.mu.Unlock()
 	}
 	if err != nil {
 		if f, ok := apperr.Format(err).(*apperr.Error); ok {

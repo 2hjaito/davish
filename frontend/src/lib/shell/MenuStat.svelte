@@ -107,23 +107,24 @@
 {/if}
 
 <style>
-  /* The ring with its name under it, as on a phone's battery widget. */
+  /* The ring with its name under it, as on a phone's battery widget. Sized
+     to fill most of the bar: they were hard to read at 18px (#288). */
   /* A fixed width, so a value that grows or shrinks does not shift the
      readings beside it; wider where the value sits under the ring. */
   .stat {
-    width: 30px;
+    width: 34px;
     height: var(--menubar-h);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
+    gap: 1px;
     white-space: nowrap;
     border-radius: 6px;
   }
 
   .stat.wide {
-    width: 44px;
+    width: 48px;
   }
 
   /* The bar's readings are where a frameless window is grabbed to move it;
@@ -137,15 +138,15 @@
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 8.5px;
+    font-size: 9.5px;
     line-height: 1;
     color: var(--fg-label);
   }
 
   .ring {
     position: relative;
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     display: grid;
     place-items: center;
     flex-shrink: 0;
@@ -166,7 +167,7 @@
 
   .inner {
     position: relative;
-    font-size: 7.5px;
+    font-size: 8.5px;
     font-weight: 600;
     letter-spacing: -0.02em;
     line-height: 1;
@@ -174,7 +175,7 @@
 
   /* 100 and loads like 2.4 need a little less to stay inside the ring. */
   .inner.long {
-    font-size: 6px;
+    font-size: 7px;
     letter-spacing: -0.04em;
   }
 

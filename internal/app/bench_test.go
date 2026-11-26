@@ -43,8 +43,9 @@ func TestBenchConfigRender(t *testing.T) {
 	t.Setenv("DAVISH_BENCH", "render")
 	t.Setenv("DAVISH_BENCH_PRESET", "light")
 	t.Setenv("DAVISH_BENCH_WIDGETS", "3")
+	t.Setenv("DAVISH_BENCH_PICTURE", "1")
 	got := (&App{}).BenchConfig()
-	if !got.Render || got.Preset != "light" || got.Widgets != 3 {
+	if !got.Render || got.Preset != "light" || got.Widgets != 3 || !got.Picture {
 		t.Errorf("BenchConfig() = %+v", got)
 	}
 }

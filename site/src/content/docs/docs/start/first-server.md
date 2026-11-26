@@ -15,6 +15,8 @@ Click **Add server…** (from the welcome screen, the server menu in the menu ba
 - **Private key**: a key file you choose, with its passphrase if it has one.
 - **Password**.
 
+For a login that only works through OpenSSH, such as an agent that issues certificates, there is also **Advanced: use an ssh control socket**; see [Logins that only work through OpenSSH](/docs/network-and-security/ssh-control-socket/).
+
 Passwords and passphrases are kept in your system's keychain, never in a file.
 
 ## Check the host key

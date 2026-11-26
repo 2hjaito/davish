@@ -3,7 +3,9 @@
 
   import { t } from '../i18n'
   import { ui } from '../stores/ui.svelte'
+  import { servers } from '../stores/servers.svelte'
   import Icon from '../ui/Icon.svelte'
+  import TagChip from '../ui/TagChip.svelte'
   import { getWindowContext } from './context'
   import { wm } from './windowManager.svelte'
 
@@ -16,6 +18,10 @@
   let { children, bare = false }: Props = $props()
 
   const ctx = getWindowContext()
+
+  // Windows of these apps are not about one server, so no tag there.
+  const NOT_PER_SERVER = new Set(['servers', 'settings'])
+  const active = $derived(servers.active)
 </script>
 
 <!-- Pointer handlers here only add dragging; every action has a button or shortcut. -->
@@ -68,6 +74,9 @@
     </button>
   </div>
   {@render children?.()}
+  {#if active?.tag && !NOT_PER_SERVER.has(ctx.win.appId)}
+    <TagChip tag={active.tag} color={active.color} solid />
+  {/if}
   {#if t.help.apps[ctx.win.appId]}
     <button
       class="help"

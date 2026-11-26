@@ -17,8 +17,10 @@ const (
 	ConnSecretMissing    Code = "CONN_SECRET_MISSING"
 	ConnAgentUnavailable Code = "CONN_AGENT_UNAVAILABLE"
 	ConnKeyUnreadable    Code = "CONN_KEY_UNREADABLE"
+	ConnKeyPPK           Code = "CONN_KEY_PPK"
 	ConnPassphraseWrong  Code = "CONN_PASSPHRASE_WRONG"
 	ConnNotConnected     Code = "CONN_NOT_CONNECTED"
+	ConnControlSocket    Code = "CONN_CONTROL_SOCKET"
 	TermClosed           Code = "TERM_CLOSED"
 	FSPermissionDenied   Code = "FS_PERMISSION_DENIED"
 	FSExists             Code = "FS_EXISTS"
@@ -59,6 +61,10 @@ const (
 	DBAuthFailed         Code = "DB_AUTH_FAILED"
 	SudoPasswordRequired Code = "SUDO_PASSWORD_REQUIRED"
 	SudoPasswordWrong    Code = "SUDO_PASSWORD_WRONG"
+	// Turning password logins off (ADR 0029): the key could not log in
+	// before the change, or could not after it, which was then undone.
+	SecKeyLoginFailed Code = "SEC_KEY_LOGIN_FAILED"
+	SecKeyLoginLost   Code = "SEC_KEY_LOGIN_LOST"
 	// An Ansible inventory in YAML, or a script, which only INI import reads.
 	InventoryYAMLUnsupported   Code = "INVENTORY_YAML_UNSUPPORTED"
 	InventoryScriptUnsupported Code = "INVENTORY_SCRIPT_UNSUPPORTED"

@@ -11,7 +11,9 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -462,5 +464,77 @@ func TestPlatformIsDetectedAfterConnecting(t *testing.T) {
 	}
 	if got := e.m.WaitPlatform(context.Background(), e.id); got != platform.Linux {
 		t.Fatalf("WaitPlatform = %q; want linux", got)
+	}
+}
+
+// The test sshd is Ubuntu: the status carries its logo, and the store keeps
+// it, so the lists show it before the next connection.
+func TestDistroIsDetectedAndSaved(t *testing.T) {
+	e := setup(t, testServer(), conn.Options{})
+	pin(t, e.hostKeys, testsshd.HostKey(t))
+	if err := e.m.Connect(context.Background(), e.id); err != nil {
+		t.Fatal(err)
+	}
+	deadline := time.Now().Add(5 * time.Second)
+	for time.Now().Before(deadline) {
+		if c := e.rec.connected(); len(c) > 0 && c[len(c)-1].Distro != "" {
+			break
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	c := e.rec.connected()
+	if len(c) == 0 || c[len(c)-1].Distro != "ubuntu" {
+		t.Fatalf("connected events = %+v; want a last one with distro ubuntu", c)
+	}
+	srv, err := e.store.Server(context.Background(), e.id)
+	if err != nil || srv.Distro != "ubuntu" {
+		t.Fatalf("stored distro = %q, %v", srv.Distro, err)
+	}
+}
+
+// A ControlMaster the user started with the system ssh carries the login:
+// Davish attaches to its socket and never authenticates itself (#240).
+func TestConnectThroughControlMaster(t *testing.T) {
+	if _, err := exec.LookPath("ssh"); err != nil {
+		t.Skip("no ssh on PATH")
+	}
+	dir, err := os.MkdirTemp("", "dvmux") // short path: unix socket paths are limited
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(dir) })
+	sock := filepath.Join(dir, "m")
+
+	master := exec.Command("ssh", "-M", "-S", sock, "-fN", //nolint:gosec // fixed ssh arguments against the test sshd
+		"-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile="+os.DevNull,
+		"-o", "IdentitiesOnly=yes", "-i", testsshd.KeyPath(),
+		"-p", strconv.Itoa(testsshd.Port), testsshd.User+"@"+testsshd.Host)
+	if out, err := master.CombinedOutput(); err != nil {
+		t.Skipf("cannot start a ControlMaster here: %v: %s", err, out)
+	}
+	t.Cleanup(func() { _ = exec.Command("ssh", "-S", sock, "-O", "exit", "x").Run() }) //nolint:gosec // fixed ssh arguments against the test sshd
+
+	srv := testServer()
+	srv.Auth = store.AuthAgent // would find no key: the socket must be what logs in
+	srv.KeyPath = ""
+	srv.ControlPath = sock
+	e := setup(t, srv, conn.Options{})
+	t.Setenv("SSH_AUTH_SOCK", "")
+	t.Setenv("HOME", t.TempDir()) // no default keys either
+	if err := e.m.Connect(context.Background(), e.id); err != nil {
+		t.Fatalf("connect through control socket: %v", err)
+	}
+	if got := strings.TrimSpace(run(t, e.m, e.id, "echo mux-ok")); got != "mux-ok" {
+		t.Fatalf("command output = %q", got)
+	}
+	if len(e.rec.prompts()) != 0 {
+		t.Fatal("Davish asked about a host key; OpenSSH owns that check here")
+	}
+
+	// A master that is gone is an error about the socket, not a hang.
+	_ = exec.Command("ssh", "-S", sock, "-O", "exit", "x").Run() //nolint:gosec // fixed ssh arguments against the test sshd
+	e.m.Disconnect(e.id)
+	if err := e.m.Connect(context.Background(), e.id); code(err) != apperr.ConnControlSocket {
+		t.Fatalf("master gone: err = %v; want CONN_CONTROL_SOCKET", err)
 	}
 }

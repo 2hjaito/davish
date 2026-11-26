@@ -53,6 +53,19 @@ export function clampScheme(id: unknown): TerminalScheme {
   return TERMINAL_SCHEMES.find((s) => s === id) ?? 'davish'
 }
 
+/**
+ * How a window follows the pointer while it is dragged. Live moves the whole
+ * window. Simple does too, but paints the light look (no blur, a short shadow,
+ * opaque fills) only until it is let go. Outline moves just an outline and puts
+ * the window there on release, for machines that paint the window on the CPU.
+ */
+export const WINDOW_DRAGS = ['live', 'simple', 'outline'] as const
+export type WindowDrag = (typeof WINDOW_DRAGS)[number]
+
+export function clampDrag(mode: unknown): WindowDrag {
+  return WINDOW_DRAGS.find((m) => m === mode) ?? 'live'
+}
+
 /** The shapes of the terminal cursor. */
 export const TERMINAL_CURSORS = ['bar', 'block', 'underline'] as const
 export type TerminalCursor = (typeof TERMINAL_CURSORS)[number]
@@ -127,6 +140,21 @@ export const ALERTS = {
 export const DOCK_POSITIONS = ['bottom', 'left', 'right', 'top'] as const
 export type DockPosition = (typeof DOCK_POSITIONS)[number]
 
+/**
+ * What Davish does when it opens (#273, #281): show All servers, open the
+ * last server and connect to it, or open it without connecting.
+ */
+export const STARTUP_VIEWS = ['all', 'last', 'none'] as const
+export type StartupView = (typeof STARTUP_VIEWS)[number]
+
+/**
+ * The first value of the setting. People who already have servers keep what
+ * Davish always did; a new install opens on All servers.
+ */
+export function defaultStartup(hasServers: boolean): StartupView {
+  return hasServers ? 'last' : 'all'
+}
+
 /** The Dock's tile size, in px at rest. */
 export const DOCK_SIZES = { small: 44, medium: 56, large: 68 } as const
 
@@ -161,6 +189,8 @@ interface SettingsData extends StoredPerf {
   terminalSolid: boolean
   terminalScheme: TerminalScheme
   terminalCursor: TerminalCursor
+  windowDrag: WindowDrag
+  outlineFill: boolean
   terminalBlink: boolean
   terminalFont: string
   terminalScrollback: TerminalScrollback
@@ -170,6 +200,8 @@ interface SettingsData extends StoredPerf {
   dockAutohide: boolean
   dockPosition: DockPosition
   dockTransparent: boolean
+  /** Null until the first launch of a build that has the setting. */
+  startup: StartupView | null
   menubarStats: StatId[]
   alertMem: number
   alertDisk: number
@@ -200,6 +232,8 @@ const defaults: SettingsData = {
   terminalSolid: false,
   terminalScheme: 'davish',
   terminalCursor: 'bar',
+  windowDrag: 'live',
+  outlineFill: true,
   terminalBlink: false,
   terminalFont: '',
   terminalScrollback: DEFAULT_SCROLLBACK,
@@ -209,6 +243,7 @@ const defaults: SettingsData = {
   dockAutohide: false,
   dockPosition: 'bottom',
   dockTransparent: false,
+  startup: null,
   menubarStats: [...DEFAULT_STATS],
   alertMem: ALERTS.defaults.mem,
   alertDisk: ALERTS.defaults.disk,
@@ -376,6 +411,13 @@ class Settings {
   get terminalCursor(): TerminalCursor {
     return clampCursor(this.#data.terminalCursor)
   }
+  get windowDrag(): WindowDrag {
+    return clampDrag(this.#data.windowDrag)
+  }
+  /** Outline mode: a light tint inside the outline. Off draws the border alone, the lightest. */
+  get outlineFill() {
+    return this.#data.outlineFill !== false
+  }
   get terminalBlink() {
     return this.#data.terminalBlink === true
   }
@@ -411,6 +453,22 @@ class Settings {
   /** Which screen edge the Dock sits on. */
   get dockPosition(): DockPosition {
     return DOCK_POSITIONS.includes(this.#data.dockPosition) ? this.#data.dockPosition : 'bottom'
+  }
+  /** What opens at launch; null before the first launch has chosen one. */
+  get startup(): StartupView | null {
+    const v = this.#data.startup
+    return v !== null && STARTUP_VIEWS.includes(v) ? v : null
+  }
+  /**
+   * Picks the launch behavior once, on the first launch that has the setting:
+   * people who already have servers keep opening the last one.
+   */
+  settleStartup(hasServers: boolean): StartupView {
+    const current = this.startup
+    if (current) return current
+    const v = defaultStartup(hasServers)
+    this.set('startup', v)
+    return v
   }
   /** The Dock without its glass: only the icons float over the wallpaper. */
   get dockTransparent() {

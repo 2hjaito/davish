@@ -7,6 +7,7 @@
   import { type Edge, type Rect, resizeRect, snapZone, zoneRect } from './geometry'
   import { genieFrame } from './genie'
   import { servers } from '../stores/servers.svelte'
+  import { settings } from '../stores/settings.svelte'
   import { pageVisible } from './pageVisible.svelte'
   import { type WindowState, wm } from './windowManager.svelte'
 
@@ -115,6 +116,9 @@
     let start: Rect = win.rect
     let dragging = false
     let zone: ReturnType<typeof snapZone> = null
+    // Where the window would be now; in outline mode it is only put there on release.
+    let rect: Rect = win.rect
+    const mode = settings.windowDrag
 
     track(
       e,
@@ -124,21 +128,32 @@
         if (!dragging) {
           if (Math.hypot(dx, dy) < DRAG_SLOP) return
           dragging = true
-          moving = true
+          moving = mode !== 'outline'
+          wm.dragLite = mode === 'simple'
           start = wm.unsnapForDrag(win.id, ev.clientX) ?? win.rect
           origin = { x: ev.clientX, y: ev.clientY }
+          rect = start
+          if (mode === 'outline') wm.dragOutline = start
           return
         }
-        wm.setRect(win.id, { ...start, x: start.x + dx, y: start.y + dy })
+        rect = { ...start, x: start.x + dx, y: start.y + dy }
+        if (mode === 'outline') wm.dragOutline = rect
+        else wm.setRect(win.id, rect)
         zone = snapZone(ev.clientX, ev.clientY, wm.area)
         wm.snapPreview = zone ? zoneRect(zone, wm.area) : null
       },
       () => {
         wm.snapPreview = null
         moving = false
+        wm.dragLite = false
+        const outlined = wm.dragOutline !== null
+        wm.dragOutline = null
         if (!dragging) return
         if (zone) wm.snap(win.id, zone)
-        else wm.commit(win.id)
+        else {
+          if (outlined) wm.setRect(win.id, rect)
+          wm.commit(win.id)
+        }
       },
     )
   }

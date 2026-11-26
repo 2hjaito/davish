@@ -35,6 +35,8 @@ export interface ConnStatus {
   detail?: string
   /** Set once the server is connected. */
   platform?: Platform
+  /** Logo key of the server's system, once known. */
+  distro?: string
 }
 
 export interface HostKeyPrompt {

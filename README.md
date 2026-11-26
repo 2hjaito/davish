@@ -32,7 +32,7 @@ Nothing to install on the server.
 - **You see every command.** Anything destructive (stop a service, remove a file, restart a container, replace a crontab) shows the exact command before it runs. The command log records everything Davish ran on your behalf, and exports the changes as a shell script you can read and run again.
 - **Secrets stay in your keychain.** Passwords and passphrases live only in the OS keychain. A `sudo` password is never saved: when root is needed, Davish asks for it once per session, keeps it in memory only, forgets it after 15 minutes unused and hands it to sudo on stdin, or you run the command in a terminal yourself.
 - **Locks when you step away.** A lock password of its own, Touch ID on macOS; it locks when the machine wakes, after idle time or with `⌘L`. Sessions keep running behind the lock, but nothing reaches a server until you unlock.
-- **Many servers, one desktop.** Each server is a workspace (`⌘1`…`⌘9`) that remembers its own windows. Copy files between servers by dragging them.
+- **Many servers, one desktop.** Each server is a workspace (`⌘1`…`⌘9`) that remembers its own windows. Copy files between servers by dragging them. Give a server a tag (`prod`, `staging`…) and a group, so a red `prod` stays on screen and servers sit in folders.
 - **Updates itself.** A new version shows its changes with Update, Later and Skip this version; Davish downloads it, checks its signature and restarts into it. No reinstalling.
 - **English, Vietnamese, Simplified Chinese or Spanish.** Pick the language in Settings; the first time, Davish follows your system's. Spanish is new: corrections are welcome in [#124](https://github.com/2hjaito/davish/issues/124).
 - **Your `~/.ssh/config` works, and so does your Ansible inventory.** Import their hosts in one go, keys and `ProxyJump` included, a whole Ansible group at a time; Davish only reads the files. Servers behind a bastion connect through it, each hop with its own host key check, and the whole chain reconnects on its own.
@@ -48,7 +48,7 @@ Nothing to install on the server.
 - [Editor](FEATURES.md#editor): CodeMirror with atomic saves, backups and options
 - [Logs](FEATURES.md#logs): journal, files and containers, live, and search their whole history on the server
 - [Monitor](FEATURES.md#monitor): CPU, memory, disks, network, GPUs, processes, on Linux and Windows servers
-- [All servers](FEATURES.md#all-servers): every server's health and alerts in one window, a map of what each one serves, and one command run on several servers, a terminal tab each
+- [All servers](FEATURES.md#all-servers): every server's health and alerts in one window, in folders by group and filtered by state, group or tag, a map of what each one serves, and one command run on several servers, a terminal tab each
 
 **Services and apps**
 
@@ -73,7 +73,7 @@ Nothing to install on the server.
 **The desktop**
 
 - [Spotlight & Launchpad](FEATURES.md#spotlight--launchpad): open anything with `⌘K`, every app by group
-- [Menu bar and help](FEATURES.md#menu-bar-and-help): every command and shortcut, a `?` on each app
+- [Menu bar and help](FEATURES.md#menu-bar-and-help): every command and shortcut, a `?` on each app, and your choice of what opens at start
 - [App lock](FEATURES.md#app-lock): Touch ID or a password, locks on wake
 - [Updates](FEATURES.md#updates): one click to a new version, signature checked
 - [Light and dark](FEATURES.md#light-and-dark): follows your system, or pick one

@@ -190,9 +190,37 @@ const en = {
       unknown: 'Could not read the sshd configuration; OpenSSH defaults to on.',
       useKeyFirst:
         'Davish logs in to this server with a password. Switch to a key in the SSH keys app first, then turn off password login.',
-      how: 'The command below adds a file in /etc/ssh/sshd_config.d, checks it with sshd -t and only then reloads; if the check fails, the file is removed. sshd_config must have an Include sshd_config.d line (Ubuntu 20.04+, Debian 11+).',
-      keepOpen:
-        'Keep this session open until reconnecting with the key works (File → Disconnect, then Connect).',
+      how: 'The change is a file in /etc/ssh/sshd_config.d; your own sshd settings are not edited. sshd_config must have an Include sshd_config.d line (Ubuntu 20.04+, Debian 11+).',
+      allow: 'Allow password login',
+      offOwn:
+        'This server turned it off in its own sshd settings. Davish only undoes changes it made itself.',
+      offByDavish: 'Off: Davish turned password login off on this server.',
+      undoHint:
+        'Turning it back on only removes the file Davish added; your own sshd settings are not touched.',
+      turnOn: 'Turn password login back on',
+      turnOff: 'Turn off password login',
+      doneOff: 'Password login is off, and the key still logs in.',
+      doneOn: 'Password login is back on.',
+      blocked: {
+        noInclude: 'sshd_config does not read /etc/ssh/sshd_config.d here (older OpenSSH).',
+        match:
+          'A Match block in the sshd settings turns password login on for some users, so a global change would not reach them.',
+        methods:
+          'AuthenticationMethods asks for a password as well as a key, so turning it off would lock everyone out.',
+        control:
+          'Davish reaches this server through a control socket, so it cannot test a key login on its own.',
+        password: 'Davish logs in with a password.',
+      },
+      blockedHint:
+        'Davish will not change this from here. Fix it in the sshd settings first, then check again.',
+      checkAgain: 'Check again',
+      confirmOffTitle: 'Turn off password login?',
+      confirmOffBody:
+        'Davish checks that your key logs in over a new connection, backs up the sshd settings, turns password login off and reloads sshd. If the key then fails to log in, it undoes the change. Runs as root:',
+      confirmOffNote:
+        'Your current session stays open. Keep it until you have tried a new login with the key.',
+      confirmOnTitle: 'Turn password login back on?',
+      confirmOnBody: 'Removes the file Davish added and reloads sshd:',
     },
     failed: {
       title: (n: number) => `Failed logins (7 days): ${n}`,
@@ -1517,8 +1545,11 @@ const en = {
     import: 'Import from ~/.ssh/config or Ansible…',
     none: 'No servers yet',
     edit: 'Edit server',
+    duplicate: 'Duplicate',
     reconnect: 'Reconnect',
     dragToReorder: 'Drag to reorder',
+    tagFilter: 'Filter by tag',
+    tagAll: 'All',
     status: {
       connected: 'connected',
       connecting: 'connecting…',
@@ -1574,6 +1605,18 @@ const en = {
       server: 'Server',
       view: 'View',
       views: { cards: 'Cards', list: 'List' },
+      filters: {
+        sidebar: 'Servers',
+        all: 'All',
+        connected: 'Connected',
+        failed: 'Failed',
+        disconnected: 'Not connected',
+        groups: 'Groups',
+        tags: 'Tags',
+        noGroup: 'No group',
+      },
+      fold: 'Collapse group',
+      unfold: 'Expand group',
       open: 'All servers…',
       connected: (up: number, all: number) => `${up} of ${all} connected`,
       emptyHint: 'Add a server from the server menu to see it here.',
@@ -1656,6 +1699,7 @@ const en = {
   serverDialog: {
     addTitle: 'Add a server over SSH',
     editTitle: 'Edit server',
+    duplicateTitle: 'Duplicate a server',
     name: 'Display name',
     namePlaceholder: 'e.g. my-vps',
     host: 'Host',
@@ -1674,10 +1718,21 @@ const en = {
     password: 'Password',
     secretSaved: 'Saved in the keychain. Leave empty to keep it.',
     secretHint: 'Kept in the system keychain, never written to a file.',
+    tag: 'Tag',
+    tagNone: 'None',
+    tagPlaceholder: 'Or your own, e.g. qa',
+    tagHint:
+      'Shown next to the server name, so you can tell environments apart. The color below tints it.',
+    group: 'Group',
+    groupPlaceholder: 'e.g. my-amazing-app',
+    groupHint: 'Servers with the same group are listed together in All servers.',
     color: 'Color',
     jump: 'Go through a server (ProxyJump)',
     jumpNone: 'No, connect directly',
     jumpHint: 'Connects to a jump server first, then to this one, like ssh’s ProxyJump.',
+    control: 'Advanced: use an ssh control socket',
+    controlHint:
+      'For logins that only work through OpenSSH, such as an agent that issues certificates (authentik). Replaces the authentication above. Start the master yourself: ssh -M -S <path> -fN user@host. Davish never sees your credentials. Linux and macOS only.',
     save: 'Save and connect',
     cancel: 'Cancel',
     delete: 'Delete server',
@@ -2136,6 +2191,10 @@ const en = {
     themes: { system: 'Auto', light: 'Light', dark: 'Dark' },
     language: 'Language',
     languageHint: 'The language of the interface.',
+    startup: 'When Davish opens',
+    startupHint:
+      'All servers shows the list. Last server opens and connects to the one you used last. Nothing opens the last server without connecting, for servers behind a VPN or in production.',
+    startups: { all: 'All servers', last: 'Last server', none: 'Nothing' },
     langs: { vi: 'Tiếng Việt', en: 'English', zh: '简体中文', es: 'Español' },
     langRestart:
       'Davish will restart: running terminals and transfers stop, and servers reconnect on their own.',
@@ -2156,6 +2215,14 @@ const en = {
     perfBlurHint: 'Blurs whatever sits behind a window.',
     perfShadow: 'Short window shadow',
     perfShadowHint: 'A short shadow repaints faster while scrolling and dragging.',
+    dragTitle: 'Dragging windows',
+    dragLabel: 'While dragging',
+    dragFill: 'Fill the outline',
+    dragFillHint:
+      'A light tint inside the outline makes the window easier to see. Turn it off on a very slow computer for the lightest drag.',
+    dragHint:
+      'Live moves the whole window. Simple moves it too, but turns the glass off until you let go. Outline moves only an outline and puts the window there when you let go. Pick a lighter one if dragging feels slow.',
+    dragModes: { live: 'Live', simple: 'Simple', outline: 'Outline' },
     perfOpaque: 'Solid fills',
     perfOpaqueHint: 'Windows no longer blend with the wallpaper.',
     perfWallpaper: 'Wallpaper color blobs',
@@ -3400,11 +3467,14 @@ const en = {
     CONN_UNREACHABLE: 'Could not reach the server. Check the host, port and network.',
     CONN_SECRET_MISSING: 'No password or passphrase saved for this server.',
     CONN_AGENT_UNAVAILABLE:
-      'No key found: the SSH agent is empty or not running, and there is no default key in ~/.ssh. On Windows, start the “OpenSSH Authentication Agent” service and add your key with ssh-add, or choose Private key.',
+      'No key found: the SSH agent is empty or not running, and there is no default key in ~/.ssh. On Windows, start the “OpenSSH Authentication Agent” service and add your key with ssh-add, or choose Private key. Agents that only issue a certificate during the connection (such as authentik) are not supported yet.',
     CONN_KEY_UNREADABLE: 'Could not read the private key file.',
+    CONN_KEY_PPK:
+      'This is a PuTTY .ppk key, which Davish cannot read. In PuTTYgen choose Conversions → Export OpenSSH key, then use the exported file.',
     CONN_PASSPHRASE_WRONG:
       'The saved passphrase does not open this private key. Edit the server and type it again.',
     CONN_NOT_CONNECTED: 'The server is not connected.',
+    CONN_CONTROL_SOCKET: 'Control socket could not be used.',
     TERM_CLOSED: 'The terminal session is closed.',
     FS_PERMISSION_DENIED: 'Permission denied.',
     FS_EXISTS: 'A file or folder with that name already exists.',
@@ -3453,6 +3523,10 @@ const en = {
     DB_AUTH_FAILED: 'MongoDB refused this user or password.',
     SUDO_PASSWORD_REQUIRED: 'The server needs the sudo password for this.',
     SUDO_PASSWORD_WRONG: 'sudo did not accept this password.',
+    SEC_KEY_LOGIN_FAILED:
+      'The key could not log in over a new connection, so nothing was changed. Check the key in the SSH keys app first.',
+    SEC_KEY_LOGIN_LOST:
+      'After the change the key could not log in, so Davish undid it. If password login is still off, remove /etc/ssh/sshd_config.d/00-davish-no-password.conf and reload sshd.',
     INVENTORY_YAML_UNSUPPORTED:
       'This inventory is YAML (or JSON). Davish only reads INI inventories for now.',
     INVENTORY_SCRIPT_UNSUPPORTED:

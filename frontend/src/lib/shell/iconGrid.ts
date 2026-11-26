@@ -30,6 +30,15 @@ export function gridOf(area: Area): Grid {
 }
 
 /** Top left of a cell. */
+/**
+ * The width left over to the right of the last whole column. Icons start at
+ * the left so they never see it; widgets, which count from the right, shift
+ * by it to sit the same distance from the edge whatever the window width.
+ */
+export function slackX(area: Area): number {
+  return area.w - PAD * 2 - gridOf(area).cols * CELL_W
+}
+
 export function cellPosition(c: Cell, area: Area): { x: number; y: number } {
   return {
     x: area.x + PAD + CELL_W * c.col,

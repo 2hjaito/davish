@@ -1,0 +1,44 @@
+---
+// One quote, in the page's language, as on any page; the words as written
+// are under "Translated from …". A page in the language it was written in
+// just shows them. Then the face, who said it and where.
+import { dicts, type Locale } from '../i18n'
+import { avatar, handle, type Voice } from '../lib/voices'
+
+interface Props {
+  voice: Voice
+  locale: Locale
+}
+const { voice, locale } = Astro.props
+const from = voice.lang ?? 'en'
+const same = from === locale
+const own = same ? voice.text : (voice.tr[locale] ?? voice.text)
+const label = dicts[locale].voices.translated(from)
+---
+
+<figure class="voice">
+  <blockquote lang={locale === 'zh' ? 'zh-CN' : locale}>“{own}”</blockquote>
+  {
+    !same && (
+      <details class="voice-tr">
+        <summary>{label}</summary>
+        <p lang={from === 'zh' ? 'zh-CN' : from}>“{voice.text}”</p>
+      </details>
+    )
+  }
+  <figcaption>
+    <img src={avatar(voice)} alt="" width="44" height="44" loading="lazy" decoding="async" />
+    <span class="by">
+      {
+        voice.url ? (
+          <a class="who" href={voice.url} target="_blank" rel="noopener noreferrer">
+            {handle(voice)}
+          </a>
+        ) : (
+          <span class="who">{handle(voice)}</span>
+        )
+      }
+      <span class="src">{voice.source}</span>
+    </span>
+  </figcaption>
+</figure>

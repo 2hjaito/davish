@@ -18,7 +18,14 @@ export interface ServerInfo {
   auth: AuthMethod
   keyPath?: string
   color?: string
+  /** Short environment label (local, staging, prod…), tinted by `color`. */
+  tag?: string
+  /** The folder it is listed under in All servers (one level). */
+  group?: string
   jumpID?: string
+  controlPath?: string
+  /** Logo key of the system it runs, found when it connects (internal/platform/distro.go). */
+  distro?: string
   hasPassword: boolean
   hasPassphrase: boolean
   state: ConnState
@@ -34,7 +41,10 @@ export interface ServerDraft {
   auth: AuthMethod
   keyPath: string
   color: string
+  tag: string
+  group: string
   jumpID: string
+  controlPath: string
   password: string
   passphrase: string
 }

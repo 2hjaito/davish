@@ -200,9 +200,37 @@ const es = {
       unknown: 'No se pudo leer la configuración de sshd; OpenSSH lo activa por defecto.',
       useKeyFirst:
         'Davish inicia sesión en este servidor con contraseña. Cambia primero a una clave en la app Claves SSH y luego desactiva el inicio con contraseña.',
-      how: 'El comando de abajo añade un archivo en /etc/ssh/sshd_config.d, lo comprueba con sshd -t y solo entonces recarga; si la comprobación falla, el archivo se elimina. sshd_config debe tener una línea Include sshd_config.d (Ubuntu 20.04+, Debian 11+).',
-      keepOpen:
-        'Mantén esta sesión abierta hasta que reconectar con la clave funcione (Archivo → Desconectar y luego Conectar).',
+      how: 'El cambio es un archivo en /etc/ssh/sshd_config.d; tus propios ajustes de sshd no se editan. sshd_config debe tener la línea Include sshd_config.d (Ubuntu 20.04+, Debian 11+).',
+      allow: 'Permitir acceso con contraseña',
+      offOwn:
+        'Este servidor lo desactivó en sus propios ajustes de sshd. Davish solo deshace los cambios que hizo él mismo.',
+      offByDavish: 'Desactivado: Davish desactivó el acceso con contraseña en este servidor.',
+      undoHint:
+        'Volver a activarlo solo elimina el archivo que añadió Davish; tus ajustes de sshd no se tocan.',
+      turnOn: 'Volver a activar el acceso con contraseña',
+      turnOff: 'Desactivar el acceso con contraseña',
+      doneOff: 'El acceso con contraseña está desactivado y la clave sigue entrando.',
+      doneOn: 'El acceso con contraseña está activado de nuevo.',
+      blocked: {
+        noInclude: 'Aquí sshd_config no lee /etc/ssh/sshd_config.d (OpenSSH antiguo).',
+        match:
+          'Un bloque Match en los ajustes de sshd activa el acceso con contraseña para algunos usuarios, así que un cambio global no les llegaría.',
+        methods:
+          'AuthenticationMethods pide contraseña además de clave, así que desactivarla dejaría fuera a todos.',
+        control:
+          'Davish llega a este servidor por un control socket, así que no puede probar por sí solo un acceso con clave.',
+        password: 'Davish entra con contraseña.',
+      },
+      blockedHint:
+        'Davish no lo cambiará desde aquí. Arréglalo primero en los ajustes de sshd y vuelve a comprobar.',
+      checkAgain: 'Comprobar de nuevo',
+      confirmOffTitle: '¿Desactivar el acceso con contraseña?',
+      confirmOffBody:
+        'Davish comprueba que tu clave entra por una conexión nueva, hace una copia de los ajustes de sshd, desactiva el acceso con contraseña y recarga sshd. Si después la clave no entra, deshace el cambio. Se ejecuta como root:',
+      confirmOffNote:
+        'Tu sesión actual sigue abierta. Mantenla hasta que hayas probado un acceso nuevo con la clave.',
+      confirmOnTitle: '¿Volver a activar el acceso con contraseña?',
+      confirmOnBody: 'Elimina el archivo que añadió Davish y recarga sshd:',
     },
     failed: {
       title: (n: number) => `Inicios de sesión fallidos (7 días): ${n}`,
@@ -1543,8 +1571,11 @@ const es = {
     import: 'Importar desde ~/.ssh/config o Ansible…',
     none: 'Todavía no hay servidores',
     edit: 'Editar servidor',
+    duplicate: 'Duplicar',
     reconnect: 'Volver a conectar',
     dragToReorder: 'Arrastra para reordenar',
+    tagFilter: 'Filtrar por etiqueta',
+    tagAll: 'Todas',
     status: {
       connected: 'conectado',
       connecting: 'conectando…',
@@ -1601,6 +1632,18 @@ const es = {
       server: 'Servidor',
       view: 'Vista',
       views: { cards: 'Tarjetas', list: 'Lista' },
+      filters: {
+        sidebar: 'Servidores',
+        all: 'Todos',
+        connected: 'Conectados',
+        failed: 'Con error',
+        disconnected: 'Sin conectar',
+        groups: 'Grupos',
+        tags: 'Etiquetas',
+        noGroup: 'Sin grupo',
+      },
+      fold: 'Contraer grupo',
+      unfold: 'Expandir grupo',
       open: 'Todos los servidores…',
       connected: (up: number, all: number) => `${up} de ${all} conectados`,
       emptyHint: 'Añade un servidor desde el menú de servidores para verlo aquí.',
@@ -1684,6 +1727,7 @@ const es = {
   serverDialog: {
     addTitle: 'Añadir un servidor por SSH',
     editTitle: 'Editar servidor',
+    duplicateTitle: 'Duplicar un servidor',
     name: 'Nombre visible',
     namePlaceholder: 'p. ej. mi-vps',
     host: 'Host',
@@ -1702,10 +1746,21 @@ const es = {
     password: 'Contraseña',
     secretSaved: 'Guardada en el llavero. Déjala vacía para conservarla.',
     secretHint: 'Se guarda en el llavero del sistema, nunca en un archivo.',
+    tag: 'Etiqueta',
+    tagNone: 'Ninguna',
+    tagPlaceholder: 'O la tuya, p. ej. qa',
+    tagHint:
+      'Se muestra junto al nombre del servidor para distinguir entornos. El color de abajo la tiñe.',
+    group: 'Grupo',
+    groupPlaceholder: 'p. ej. my-amazing-app',
+    groupHint: 'Los servidores con el mismo grupo se muestran juntos en Todos los servidores.',
     color: 'Color',
     jump: 'Pasar por un servidor (ProxyJump)',
     jumpNone: 'No, conectar directamente',
     jumpHint: 'Se conecta primero a un servidor de salto y luego a este, como el ProxyJump de ssh.',
+    control: 'Avanzado: usar un control socket de ssh',
+    controlHint:
+      'Para inicios de sesión que solo funcionan con OpenSSH, como un agente que emite certificados (authentik). Sustituye a la autenticación de arriba. Inicia tú mismo el master: ssh -M -S <path> -fN user@host. Davish nunca ve tus credenciales. Solo en Linux y macOS.',
     save: 'Guardar y conectar',
     cancel: 'Cancelar',
     delete: 'Eliminar servidor',
@@ -2172,6 +2227,10 @@ const es = {
     themes: { system: 'Automático', light: 'Claro', dark: 'Oscuro' },
     language: 'Idioma',
     languageHint: 'El idioma de la interfaz.',
+    startup: 'Al abrir Davish',
+    startupHint:
+      'Todos los servidores muestra la lista. Último servidor abre y conecta el que usó por última vez. Nada abre sin conectar, para servidores tras una VPN o en producción.',
+    startups: { all: 'Todos los servidores', last: 'Último servidor', none: 'Nada' },
     langs: { vi: 'Tiếng Việt', en: 'English', zh: '简体中文', es: 'Español' },
     langRestart:
       'Davish se reiniciará: los terminales y transferencias en curso se detienen, y los servidores se vuelven a conectar solos.',
@@ -2198,6 +2257,14 @@ const es = {
     perfBlurHint: 'Desenfoca lo que hay detrás de una ventana.',
     perfShadow: 'Sombra corta',
     perfShadowHint: 'Una sombra corta se redibuja más rápido al desplazarse y al arrastrar.',
+    dragTitle: 'Arrastrar ventanas',
+    dragLabel: 'Al arrastrar',
+    dragFill: 'Rellenar el contorno',
+    dragFillHint:
+      'Un tinte suave dentro del contorno facilita ver la ventana. Desactívalo en un equipo muy lento para el arrastre más ligero.',
+    dragHint:
+      'En vivo mueve toda la ventana. Sencillo también, pero apaga el cristal hasta que sueltas. Contorno mueve solo un contorno y coloca la ventana allí al soltar. Elige uno más ligero si arrastrar va lento.',
+    dragModes: { live: 'En vivo', simple: 'Sencillo', outline: 'Contorno' },
     perfOpaque: 'Fondos sólidos',
     perfOpaqueHint: 'Las ventanas ya no se mezclan con el fondo.',
     perfWallpaper: 'Manchas del fondo',
@@ -3479,11 +3546,14 @@ const es = {
     CONN_UNREACHABLE: 'No se pudo llegar al servidor. Comprueba el host, el puerto y la red.',
     CONN_SECRET_MISSING: 'No hay ninguna contraseña ni frase de paso guardada para este servidor.',
     CONN_AGENT_UNAVAILABLE:
-      'No se ha encontrado ninguna clave: el agente SSH está vacío o no se está ejecutando, y no hay clave por defecto en ~/.ssh. En Windows, inicia el servicio “OpenSSH Authentication Agent” y añade tu clave con ssh-add, o elige Clave privada.',
+      'No se ha encontrado ninguna clave: el agente SSH está vacío o no se está ejecutando, y no hay clave por defecto en ~/.ssh. En Windows, inicia el servicio “OpenSSH Authentication Agent” y añade tu clave con ssh-add, o elige Clave privada. Los agentes que solo emiten un certificado durante la conexión (como authentik) aún no son compatibles.',
     CONN_KEY_UNREADABLE: 'No se pudo leer el archivo de la clave privada.',
+    CONN_KEY_PPK:
+      'Esta es una clave .ppk de PuTTY, que Davish no puede leer. En PuTTYgen elige Conversions → Export OpenSSH key y usa el archivo exportado.',
     CONN_PASSPHRASE_WRONG:
       'La frase de contraseña guardada no abre esta clave privada. Edita el servidor y escríbela de nuevo.',
     CONN_NOT_CONNECTED: 'El servidor no está conectado.',
+    CONN_CONTROL_SOCKET: 'No se pudo usar el control socket.',
     TERM_CLOSED: 'La sesión de terminal está cerrada.',
     FS_PERMISSION_DENIED: 'Permiso denegado.',
     FS_EXISTS: 'Ya existe un archivo o carpeta con ese nombre.',
@@ -3533,6 +3603,10 @@ const es = {
     DB_AUTH_FAILED: 'MongoDB ha rechazado este usuario o contraseña.',
     SUDO_PASSWORD_REQUIRED: 'El servidor necesita la contraseña de sudo para esto.',
     SUDO_PASSWORD_WRONG: 'sudo no ha aceptado esta contraseña.',
+    SEC_KEY_LOGIN_FAILED:
+      'La clave no pudo entrar por una conexión nueva, así que no se cambió nada. Revisa primero la clave en la app Claves SSH.',
+    SEC_KEY_LOGIN_LOST:
+      'Tras el cambio la clave no pudo entrar, así que Davish lo deshizo. Si el acceso con contraseña sigue desactivado, elimina /etc/ssh/sshd_config.d/00-davish-no-password.conf y recarga sshd.',
     INVENTORY_YAML_UNSUPPORTED:
       'Este inventario es YAML (o JSON). Por ahora Davish solo lee inventarios INI.',
     INVENTORY_SCRIPT_UNSUPPORTED:

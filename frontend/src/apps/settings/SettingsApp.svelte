@@ -8,6 +8,7 @@
     type BackupMode,
     cleanFontName,
     DOCK_POSITIONS,
+    STARTUP_VIEWS,
     DOCK_SIZES,
     type DockSize,
     EDITOR_FONT,
@@ -23,6 +24,7 @@
     THEMES,
     WALLPAPER_ACCENTS,
     WALLPAPER_DIM,
+    WINDOW_DRAGS,
   } from '../../lib/stores/settings.svelte'
   import DavishMark from '../../lib/ui/DavishMark.svelte'
   import ProfileAvatar from '../../lib/ui/ProfileAvatar.svelte'
@@ -420,6 +422,16 @@
               >
             </div>
           {/if}
+          <div class="row">
+            {@render head(t.settings.startup, t.settings.startupHint)}
+            {@render segmented(
+              t.settings.startup,
+              STARTUP_VIEWS,
+              settings.startup ?? 'last',
+              (v) => t.settings.startups[v],
+              (v) => settings.set('startup', v),
+            )}
+          </div>
         </div>
       {:else if pane === 'account'}
         <div class="profile">
@@ -812,6 +824,28 @@
               <small>{t.settings.perfFine}</small>
             {/if}
           </div>
+        </div>
+
+        <h3>{t.settings.dragTitle}</h3>
+        <div class="card">
+          <div class="row">
+            {@render head(t.settings.dragLabel, t.settings.dragHint)}
+            {@render segmented(
+              t.settings.dragLabel,
+              WINDOW_DRAGS,
+              settings.windowDrag,
+              (m) => t.settings.dragModes[m],
+              (m) => settings.set('windowDrag', m),
+            )}
+          </div>
+          {#if settings.windowDrag === 'outline'}
+            {@render toggle(
+              t.settings.dragFill,
+              t.settings.dragFillHint,
+              settings.outlineFill,
+              (on) => settings.set('outlineFill', on),
+            )}
+          {/if}
         </div>
 
         <h3>{t.settings.perfAdvanced}</h3>

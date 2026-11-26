@@ -54,6 +54,10 @@ export class WindowManager {
   windows = $state<WindowState[]>([])
   area = $state<Rect>({ x: 0, y: 30, w: 1280, h: 670 })
   snapPreview = $state<Rect | null>(null)
+  /** The outline that follows the pointer in the outline drag mode, until the window is put there. */
+  dragOutline = $state<Rect | null>(null)
+  /** True while a window is dragged in the simple mode: the desktop paints its light look. */
+  dragLite = $state(false)
 
   /**
    * Geometry by app ("files") and by server and app ("s1/files"): a server

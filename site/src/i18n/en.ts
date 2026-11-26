@@ -150,11 +150,27 @@ export const en = {
       { label: 'Keyboard shortcuts', href: 'start/shortcuts/' },
     ],
   },
+  changelog: {
+    title: 'Changelog · Davish',
+    description: 'What changed in each release of Davish, newest first.',
+    heading: 'Changelog',
+    lead: 'What changed in each release, newest first.',
+    englishOnly: 'The changelog is in English.',
+  },
+  voices: {
+    title: 'What people say',
+    note: 'Taken from public posts and issues.',
+    translated: (from: 'en' | 'zh') => (from === 'zh' ? 'Translated from Chinese' : 'Translated from English'),
+    more: (n: number) => `See ${n} more`,
+    less: 'Show fewer',
+  },
   community: { discord: 'Join us on Discord', discordNote: 'Questions, ideas and early builds.' },
   thanks: {
     title: 'Made with people who use it',
     lead: 'Code, bug reports, testing on their own machines and ideas: thank you.',
     code: 'code',
+    issue: 'issue',
+    discussion: 'discussion',
     join: 'Join them on GitHub',
   },
   footer: {
