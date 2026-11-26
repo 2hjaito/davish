@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { approach, magnify, MAX_SCALE, slotAt, slotCenter } from './magnify'
+import { approach, magnify, MAX_SCALE, nearestSlot, slotCenter, slotCenters } from './magnify'
 
 const step = 66
 
@@ -32,24 +32,53 @@ describe('approach', () => {
     expect(next).toBeLessThan(1.2)
     expect(approach(1.19999, 1.2, 16)).toBe(1.2)
   })
+
+  it('settles within a given tolerance', () => {
+    expect(approach(0.4, 0, 16, 0.5)).toBe(0)
+    expect(approach(40, 0, 16, 0.5)).toBeGreaterThan(0.5)
+  })
 })
 
-describe('slotAt', () => {
-  it('finds the slot whose resting center is nearest', () => {
-    expect(slotAt(0, 5, step)).toBe(2)
-    expect(slotAt(-2 * step, 5, step)).toBe(0)
-    expect(slotAt(0.4 * step, 5, step)).toBe(2)
-    expect(slotAt(0.6 * step, 5, step)).toBe(3)
-    // Even counts have no slot at the center.
-    expect(slotAt(-0.4 * step, 4, step)).toBe(1)
-    expect(slotAt(0.4 * step, 4, step)).toBe(2)
+describe('slotCenters', () => {
+  const tile = 56
+
+  it('matches the resting centers when nothing is magnified', () => {
+    const c = slotCenters(5, [1, 1, 1, 1, 1], step, tile)
+    c.forEach((x, i) => expect(x).toBeCloseTo(slotCenter(i, 5, step)))
   })
 
-  it('is the inverse of slotCenter', () => {
-    for (let i = 0; i < 6; i++) expect(slotAt(slotCenter(i, 6, step), 6, step)).toBe(i)
+  it('treats missing scales as 1', () => {
+    expect(slotCenters(3, [], step, tile)).toEqual([-step, 0, step])
   })
 
-  it('returns the first slot before the dock has laid out', () => {
-    expect(slotAt(10, 5, 0)).toBe(0)
+  it('pushes neighbours away from a magnified tile and keeps the dock centered', () => {
+    // The middle tile grows by 0.2 × 56 = 11.2px: half on each side.
+    const c = slotCenters(3, [1, 1.2, 1], step, tile)
+    expect(c[0]).toBeCloseTo(-step - 5.6)
+    expect(c[1]).toBeCloseTo(0)
+    expect(c[2]).toBeCloseTo(step + 5.6)
+  })
+
+  it('shifts every tile when the growth is off center', () => {
+    // The first tile grows by 11.2px; the dock grows 5.6px each way.
+    const c = slotCenters(2, [1.2, 1], step, tile)
+    expect(c[0]).toBeCloseTo(-step / 2)
+    expect(c[1]).toBeCloseTo(step / 2 + 5.6)
+  })
+})
+
+describe('nearestSlot', () => {
+  const c = [-100, -50, 0, 50, 100]
+
+  it('finds the slot whose center is nearest', () => {
+    expect(nearestSlot(c, -1, 0, 4)).toBe(2)
+    expect(nearestSlot(c, 24, 0, 4)).toBe(2)
+    expect(nearestSlot(c, 26, 0, 4)).toBe(3)
+    expect(nearestSlot(c, -76, 0, 4)).toBe(0)
+  })
+
+  it('stays within min and max', () => {
+    expect(nearestSlot(c, -500, 1, 3)).toBe(1)
+    expect(nearestSlot(c, 500, 1, 3)).toBe(3)
   })
 })

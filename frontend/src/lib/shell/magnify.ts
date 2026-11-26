@@ -26,13 +26,45 @@ export function slotCenter(i: number, count: number, step: number): number {
   return (i - (count - 1) / 2) * step
 }
 
-/** The slot whose resting center is nearest `x` px from the dock's center. */
-export function slotAt(x: number, count: number, step: number): number {
-  return step > 0 ? Math.round(x / step + (count - 1) / 2) : 0
+/**
+ * Where each of `count` tiles is centered, in px from the dock's center, with
+ * the tiles at `scales` (missing ones at 1). As in Dock.svelte's .slot, a tile
+ * of size `tile` grows by its margins, pushing its neighbours aside, and the
+ * dock stays centered while it grows.
+ */
+export function slotCenters(
+  count: number,
+  scales: readonly number[],
+  step: number,
+  tile: number,
+): number[] {
+  const extra = Array.from({ length: count }, (_, i) => ((scales[i] ?? 1) - 1) * tile)
+  const total = extra.reduce((a, b) => a + b, 0)
+  let before = 0
+  return extra.map((e, i) => {
+    const center = slotCenter(i, count, step) + before + e / 2 - total / 2
+    before += e
+    return center
+  })
 }
 
-/** Frame-rate independent exponential approach from `current` toward `target`. */
-export function approach(current: number, target: number, dtMs: number): number {
+/** The slot from min to max whose center (in ascending `centers`) is nearest x. */
+export function nearestSlot(
+  centers: readonly number[],
+  x: number,
+  min: number,
+  max: number,
+): number {
+  let i = min
+  while (i < max && x > ((centers[i] ?? 0) + (centers[i + 1] ?? 0)) / 2) i++
+  return i
+}
+
+/**
+ * Frame-rate independent exponential approach from `current` toward `target`,
+ * landing on it once within `settle` (a scale by default; pass ~0.5 for px).
+ */
+export function approach(current: number, target: number, dtMs: number, settle = 0.0005): number {
   const next = target + (current - target) * Math.exp(-dtMs / SMOOTH_MS)
-  return Math.abs(next - target) < 0.0005 ? target : next
+  return Math.abs(next - target) < settle ? target : next
 }
