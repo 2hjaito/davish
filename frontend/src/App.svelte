@@ -5,6 +5,7 @@
   import { startBench } from './lib/api/bench'
   import { setWindowBackground } from './lib/api/runtime'
   import Desktop from './lib/shell/Desktop.svelte'
+  import { wm } from './lib/wm/windowManager.svelte'
   import LockScreen from './lib/shell/LockScreen.svelte'
   import { perfCheck } from './lib/shell/perfCheck.svelte'
   import { appLock } from './lib/stores/lock.svelte'
@@ -17,9 +18,11 @@
     const root = document.documentElement
     const knobs = perfCheck.probing ?? settings.knobs
     root.dataset.theme = resolveTheme(settings.theme, systemDark.current)
-    root.dataset.perfBlur = String(knobs.blur)
-    root.dataset.perfOpaque = String(knobs.opaque)
-    root.dataset.perfShadow = knobs.shadow
+    // While a window is dragged in the simple mode, the light look is painted.
+    const lite = wm.dragLite
+    root.dataset.perfBlur = String(knobs.blur && !lite)
+    root.dataset.perfOpaque = String(knobs.opaque || lite)
+    root.dataset.perfShadow = lite ? 'short' : knobs.shadow
     root.dataset.perfWallpaper = knobs.wallpaper ? 'blobs' : 'flat'
     root.dataset.reduceMotion = String(!knobs.motion)
     const accent = settings.wallpaperAccent

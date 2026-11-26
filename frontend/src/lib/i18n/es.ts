@@ -2257,6 +2257,14 @@ const es = {
     perfBlurHint: 'Desenfoca lo que hay detrás de una ventana.',
     perfShadow: 'Sombra corta',
     perfShadowHint: 'Una sombra corta se redibuja más rápido al desplazarse y al arrastrar.',
+    dragTitle: 'Arrastrar ventanas',
+    dragLabel: 'Al arrastrar',
+    dragFill: 'Rellenar el contorno',
+    dragFillHint:
+      'Un tinte suave dentro del contorno facilita ver la ventana. Desactívalo en un equipo muy lento para el arrastre más ligero.',
+    dragHint:
+      'En vivo mueve toda la ventana. Sencillo también, pero apaga el cristal hasta que sueltas. Contorno mueve solo un contorno y coloca la ventana allí al soltar. Elige uno más ligero si arrastrar va lento.',
+    dragModes: { live: 'En vivo', simple: 'Sencillo', outline: 'Contorno' },
     perfOpaque: 'Fondos sólidos',
     perfOpaqueHint: 'Las ventanas ya no se mezclan con el fondo.',
     perfWallpaper: 'Manchas del fondo',
