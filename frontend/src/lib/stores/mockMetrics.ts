@@ -55,7 +55,17 @@ export function firstMockTick(): Metrics {
       { name: 'eth0', rxBps: 1.2 * MB, txBps: 0.2 * MB, rxTotal: 182 * GB, txTotal: 41 * GB },
       { name: 'wg0', rxBps: 0, txBps: 0, rxTotal: 3 * GB, txTotal: 2 * GB },
     ],
-    gpus: [],
+    gpus: [
+      {
+        index: 0,
+        name: 'NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition',
+        util: 12,
+        memUsed: 24.9 * GB,
+        memTotal: 95.6 * GB,
+        temp: 34,
+        power: 13,
+      },
+    ],
   }
 }
 
@@ -87,6 +97,7 @@ export function nextMockTick(c: Metrics): Metrics {
         ? { ...n, rxBps, txBps, rxTotal: n.rxTotal + rxBps * 2, txTotal: n.txTotal + txBps * 2 }
         : n,
     ),
+    gpus: c.gpus.map((g) => ({ ...g, util: Math.round(jitter(g.util, 8, 0, 100)) })),
     uptime: c.uptime + 2,
   }
 }

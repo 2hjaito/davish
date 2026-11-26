@@ -5,11 +5,18 @@
   import Meter from '../../lib/ui/charts/Meter.svelte'
   import TimeChart from '../../lib/ui/charts/TimeChart.svelte'
   import Card from './Card.svelte'
+  import GpuProcesses from './GpuProcesses.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
   import Stat from './Stat.svelte'
   import { chartColors, memPct, type ViewProps } from './types'
 
-  let { data, range, rangeLabel }: ViewProps = $props()
+  interface Props extends ViewProps {
+    serverID: string
+    /** Stops the process list from polling while Monitor is paused or hidden. */
+    paused: boolean
+  }
+
+  let { data, range, rangeLabel, serverID, paused }: Props = $props()
 
   const m = $derived(data.latest)
   const known = (v: number, show: (v: number) => string) => (v >= 0 ? show(v) : t.monitor.unknown)
@@ -65,6 +72,7 @@
         />
       </Card>
     {/each}
+    <GpuProcesses {serverID} {paused} gpuCount={m.gpus.length} />
   </div>
 {/if}
 
