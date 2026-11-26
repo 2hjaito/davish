@@ -150,6 +150,13 @@ export const en = {
       { label: 'Keyboard shortcuts', href: 'start/shortcuts/' },
     ],
   },
+  voices: {
+    title: 'What people say',
+    note: 'Taken from public posts and issues.',
+    translated: (from: 'en' | 'zh') => (from === 'zh' ? 'Translated from Chinese' : 'Translated from English'),
+    more: (n: number) => `See ${n} more`,
+    less: 'Show fewer',
+  },
   community: { discord: 'Join us on Discord', discordNote: 'Questions, ideas and early builds.' },
   thanks: {
     title: 'Made with people who use it',
