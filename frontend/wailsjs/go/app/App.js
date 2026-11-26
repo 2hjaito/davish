@@ -190,6 +190,10 @@ export function DiskPlanTruncate(arg1) {
   return window['go']['app']['App']['DiskPlanTruncate'](arg1);
 }
 
+export function DiskPreview(arg1, arg2) {
+  return window['go']['app']['App']['DiskPreview'](arg1, arg2);
+}
+
 export function DiskRemove(arg1, arg2, arg3) {
   return window['go']['app']['App']['DiskRemove'](arg1, arg2, arg3);
 }

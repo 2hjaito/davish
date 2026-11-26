@@ -2,7 +2,7 @@
   import { untrack } from 'svelte'
   import { SvelteSet } from 'svelte/reactivity'
 
-  import type { Cleanup, Mount, Overview, Usage } from '../../lib/api/disk'
+  import type { Cleanup, Mount, Overview, Preview, Usage } from '../../lib/api/disk'
   import { toUserError } from '../../lib/api/errors'
   import { withSudo } from '../../lib/stores/sudoPrompt.svelte'
   import { formatBytes } from '../../lib/format'
@@ -57,6 +57,14 @@
   let cleanups = $state.raw<Cleanup[] | null>(null)
   let confirming = $state<Cleanup | null>(null)
   let removing = $state<RemoveTarget | null>(null)
+  /** What the confirmed cleanup would remove: listed before the user decides. */
+  let preview = $state<{
+    for: string
+    files: Preview['files']
+    root: boolean
+    failed: boolean
+  } | null>(null)
+  let previewing = $state(false)
   let note = $state('')
 
   const server = $derived(servers.list.find((s) => s.id === win.serverID))
@@ -180,6 +188,23 @@
     if (expanded.has(r.path)) expanded.delete(r.path)
     else if (!r.known) void measureDir(r.path)
     else if (r.hasChildren) expanded.add(r.path)
+  }
+
+  async function confirm(c: Cleanup) {
+    confirming = c
+    preview = null
+    previewing = false
+    if (!c.listable) return
+    previewing = true
+    try {
+      const p = await backend.preview(win.serverID, c.id)
+      if (confirming?.id === c.id)
+        preview = { for: c.id, files: p.files ?? [], root: p.root, failed: false }
+    } catch {
+      if (confirming?.id === c.id) preview = { for: c.id, files: [], root: false, failed: true }
+    } finally {
+      if (confirming?.id === c.id) previewing = false
+    }
   }
 
   async function clean(c: Cleanup) {
@@ -392,7 +417,7 @@
         <pre class="command">{c.root ? c.sudoCommand : c.command}</pre>
         {#if c.root}<p class="hint">{d.rootRuns}</p>{/if}
         <div class="actions">
-          <button class="btn btn-danger" onclick={() => (confirming = c)}>{d.run}</button>
+          <button class="btn btn-danger" onclick={() => void confirm(c)}>{d.run}</button>
           {#if c.root}
             <button
               class="btn"
@@ -462,7 +487,41 @@
   {/snippet}
 </FilterShell>
 
+{#snippet willRemove()}
+  {#if confirming?.listable}
+    <div class="willremove">
+      {#if previewing}
+        <p class="muted">{d.preview.loading}</p>
+      {:else if preview?.failed}
+        <p class="warn">{d.preview.failed}</p>
+      {:else if preview}
+        <p class="head">
+          {preview.files.length === 0
+            ? d.preview.none
+            : d.preview.title(
+                preview.files.length,
+                confirming.count && confirming.count > preview.files.length ? confirming.count : 0,
+              )}
+        </p>
+        {#if preview.files.length > 0}
+          <ul>
+            {#each preview.files as f (f.path)}
+              <li>
+                <span class="mono path" title={f.path}>{f.path}</span><span class="size"
+                  >{formatBytes(f.size)}</span
+                >
+              </li>
+            {/each}
+          </ul>
+        {/if}
+        {#if confirming.root && !preview.root}<p class="warn">{d.preview.noRoot}</p>{/if}
+      {/if}
+    </div>
+  {/if}
+{/snippet}
+
 <ConfirmCommand
+  extra={willRemove}
   command={(confirming?.root ? confirming.sudoCommand : confirming?.command) ?? null}
   title={confirming ? (d.cleanups[confirming.id]?.title ?? '') : ''}
   body={confirming ? (d.cleanups[confirming.id]?.body ?? '') : ''}
@@ -625,6 +684,46 @@
   .hint {
     color: var(--fg-muted);
     font-size: var(--text-xs);
+  }
+
+  .willremove {
+    margin-top: 10px;
+  }
+  .willremove p {
+    margin: 0 0 6px;
+    font-size: var(--text-sm);
+  }
+  .willremove .head {
+    font-weight: 600;
+  }
+  .willremove .warn {
+    color: var(--warn);
+  }
+  .willremove ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 180px;
+    overflow: auto;
+    border-radius: var(--control-radius);
+    background: var(--fill-soft);
+  }
+  .willremove li {
+    display: flex;
+    gap: 10px;
+    padding: 3px 8px;
+    font-size: var(--text-sm);
+  }
+  .willremove .path {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .willremove .size {
+    color: var(--fg-muted);
+    font-variant-numeric: tabular-nums;
   }
 
   .danger {

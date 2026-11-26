@@ -120,6 +120,8 @@ export function DiskPlanRemove(arg1:string,arg2:string):Promise<fs.RemovePlan>;
 
 export function DiskPlanTruncate(arg1:string):Promise<disk.TruncatePlan>;
 
+export function DiskPreview(arg1:string,arg2:string):Promise<disk.Preview>;
+
 export function DiskRemove(arg1:string,arg2:string,arg3:string):Promise<void>;
 
 export function DiskTruncate(arg1:string,arg2:string,arg3:string):Promise<void>;

@@ -32,6 +32,16 @@ export interface Cleanup {
   sudoCommand?: string
   /** May delete data, not only caches and leftovers. */
   danger?: boolean
+  /** diskPreview can list what it would remove. */
+  listable?: boolean
+}
+
+/** What a cleanup would remove (internal/disk.Preview). */
+export interface Preview {
+  /** Largest first, at most 200. */
+  files: DiskEntry[]
+  /** Read as root; when false for a root cleanup, root-only folders are missing. */
+  root: boolean
 }
 
 export const diskMounts = (serverID: string): Promise<Mount[]> => App.DiskMounts(serverID)
@@ -86,5 +96,7 @@ export const diskUsage = (serverID: string, dir: string, token: string): Promise
   App.DiskUsage(serverID, dir, token)
 export const diskCancel = (token: string): Promise<void> => App.DiskCancel(token)
 export const diskCleanups = (serverID: string): Promise<Cleanup[]> => App.DiskCleanups(serverID)
+export const diskPreview = (serverID: string, id: string): Promise<Preview> =>
+  App.DiskPreview(serverID, id)
 export const diskClean = (serverID: string, id: string, command: string): Promise<void> =>
   App.DiskClean(serverID, id, command)

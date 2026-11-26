@@ -1,5 +1,5 @@
 // Demo disk for the browser preview: a VPS whose /var is filling up.
-import type { Cleanup, Mount, Overview, TruncatePlan, Usage } from '../../lib/api/disk'
+import type { Cleanup, Mount, Overview, Preview, TruncatePlan, Usage } from '../../lib/api/disk'
 import type { RemovePlan } from '../../lib/api/files'
 
 const GB = 1 << 30
@@ -86,6 +86,7 @@ export function mockCleanups(): Promise<Cleanup[]> {
     { id: 'docker-images', bytes: 6.4 * GB, command: 'docker image prune -a -f', root: false },
     {
       id: 'docker-logs',
+      listable: true,
       bytes: 4.2 * GB,
       count: 3,
       command: `find /var/lib/docker/containers -name '*-json.log' -size +10M -exec truncate -s 0 {} +`,
@@ -102,6 +103,7 @@ export function mockCleanups(): Promise<Cleanup[]> {
     { id: 'docker-cache', bytes: 1.7 * GB, command: 'docker builder prune -a -f', root: false },
     {
       id: 'logs',
+      listable: true,
       bytes: 0.9 * GB,
       count: 214,
       command: `find /var/log -xdev -type f \\( -name '*.gz' -o -name '*[[:alpha:]].[0-9]' -o -name '*[[:alpha:]].[0-9][0-9]' -o -name '*.old' \\) -delete`,
@@ -130,6 +132,19 @@ export function mockCleanups(): Promise<Cleanup[]> {
     },
   ]
   return delay(all.filter((c) => !cleaned.has(c.id)))
+}
+
+export function mockPreview(id: string): Promise<Preview> {
+  const files =
+    id === 'logs'
+      ? [
+          { path: '/var/log/syslog.1', size: 310 * 1024 * 1024 },
+          { path: '/var/log/auth.log.2.gz', size: 42 * 1024 * 1024 },
+          { path: '/var/log/nginx/access.log.3', size: 18 * 1024 * 1024 },
+          { path: '/var/log/dpkg.log.old', size: 2 * 1024 * 1024 },
+        ]
+      : [{ path: '/var/lib/docker/containers/3f9a…/3f9a…-json.log', size: 2.1 * GB }]
+  return delay({ files, root: false }, 500)
 }
 
 export function mockClean(id: string): Promise<void> {

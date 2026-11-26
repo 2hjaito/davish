@@ -368,6 +368,17 @@ const zh = {
     toTerminal: '在终端中打开命令',
     rootRuns: '需要 root：你确认后 Davish 通过 sudo 运行，如有需要每个会话只询问一次 sudo 密码。',
     dangerous: '这可能会删除真实数据，而不只是缓存。清理前请先检查。',
+    preview: {
+      loading: '正在列出将被删除的文件…',
+      none: '目前没有匹配的文件。',
+      title: (shown: number, total: number) =>
+        total > 0
+          ? `将删除这些文件：${total} 个中最大的 ${shown} 个。继续之前请先查看列表。`
+          : `将删除这 ${shown} 个文件。继续之前请先查看列表。`,
+      failed: '无法列出文件。只有在确定命令会删除什么时才运行。',
+      noRoot:
+        '未使用 root 列出：只有 root 能读取的文件夹不在列表中，实际删除的文件可能比显示的更多。',
+    },
     tabs: { dirs: '文件夹', files: '大文件' },
     scan: '重新扫描',
     scanning: '正在扫描整个磁盘，可能需要一两分钟…',
@@ -448,7 +459,7 @@ const zh = {
       },
       logs: {
         title: '/var/log 中轮转过的旧日志',
-        body: '删除轮转过的日志文件（*.gz、*.1、*.old）；不会动正在写入的日志。将运行的命令：',
+        body: '删除 /var/log 中名称像轮转日志的文件（syslog.1、auth.log.2、*.gz、*.old）。只按名称判断，所以请在下面的列表中检查有没有其他文件。将运行的命令：',
       },
       apt: {
         title: 'apt 软件包缓存',
