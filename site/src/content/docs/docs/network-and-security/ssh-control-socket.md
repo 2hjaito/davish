@@ -55,10 +55,11 @@ ssh -S "$XDG_RUNTIME_DIR/davish-myserver.sock" -O check user@host.example.com
 
 The last command should print `Master running`. In Davish, use the path `$XDG_RUNTIME_DIR/davish-myserver.sock` written out in full (`echo $XDG_RUNTIME_DIR` shows it, something like `/run/user/1000`). That folder is private to you.
 
-Two details matter:
+Three details matter:
 
 - `ExecStartPre` removes an old socket. If the master was killed, its socket stays behind, and `ssh -M` then prints "ControlSocket ... already exists, disabling multiplexing" and runs as a plain connection, without a master, so Davish cannot attach.
 - The service has no terminal, so `ssh` cannot ask whether to trust a new host. Run `ssh user@host.example.com` by hand once first, so the host key is in `~/.ssh/known_hosts`, and make sure the agent can answer without you at a terminal (for authentik, that is its desktop prompt).
+- If the agent asks for your consent through a desktop prompt (authentik does, through polkit), it can only show it while you are logged in to a graphical session. At boot, before you log in, the request is denied ("user denied"), and a unit with `WantedBy=default.target` and `Restart=always` keeps failing until you do. Tie the unit to the graphical session instead: in `[Unit]` add `After=graphical-session.target` and `PartOf=graphical-session.target`, and in `[Install]` use `WantedBy=graphical-session.target`. The agent will still ask for consent again each time the master restarts after a network drop. This comes from testing with authentik by @PlayerFann14.
 
 On macOS, run the same `ssh` command from whatever you use to start things at login.
 
