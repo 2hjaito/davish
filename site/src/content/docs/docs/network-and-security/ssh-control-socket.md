@@ -60,6 +60,34 @@ Three details matter:
 - `ExecStartPre` removes an old socket. If the master was killed, its socket stays behind, and `ssh -M` then prints "ControlSocket ... already exists, disabling multiplexing" and runs as a plain connection, without a master, so Davish cannot attach.
 - The service has no terminal, so `ssh` cannot ask whether to trust a new host. Run `ssh user@host.example.com` by hand once first, so the host key is in `~/.ssh/known_hosts`, and make sure the agent can answer without you at a terminal (for authentik, that is its desktop prompt).
 - If the agent asks for your consent through a desktop prompt (authentik does, through polkit), it can only show it while you are logged in to a graphical session. At boot, before you log in, the request is denied ("user denied"), and a unit with `WantedBy=default.target` and `Restart=always` keeps failing until you do. Tie the unit to the graphical session instead: in `[Unit]` add `After=graphical-session.target` and `PartOf=graphical-session.target`, and in `[Install]` use `WantedBy=graphical-session.target`. The agent will still ask for consent again each time the master restarts after a network drop. This comes from testing with authentik by @PlayerFann14.
+- **A `systemd --user` unit may still be refused, even tied to the graphical session.** With authentik's agent (v0.73.0) the unit failed at once with `Permission denied (publickey)`, and the agent logged `failed to get host token: failed to resolve authorization UID`, while the same `ssh -M` command worked from a terminal in the desktop session. The agent seems to want the caller to descend from the graphical session itself, which a `systemd --user` service does not. If your unit fails like this, start the master from a desktop autostart entry instead (next section).
+
+### If a systemd unit is refused: start it from the desktop session
+
+An autostart entry runs inside your graphical session, so the agent can show its prompt. Save a small loop script as `~/.local/bin/davish-master-myserver.sh` and make it executable (`chmod +x`):
+
+```sh
+#!/bin/sh
+sock="$XDG_RUNTIME_DIR/davish-myserver.sock"
+while true; do
+  rm -f "$sock"
+  ssh -M -S "$sock" -N \
+    -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o ExitOnForwardFailure=yes \
+    user@host.example.com
+  sleep 30
+done
+```
+
+Then `~/.config/autostart/davish-master-myserver.desktop`:
+
+```ini
+[Desktop Entry]
+Type=Application
+Name=ssh master for Davish (myserver)
+Exec=sh -c 'exec "$HOME/.local/bin/davish-master-myserver.sh"'
+```
+
+The master starts after you log in, with one prompt from the agent for each host, and starts again after a drop. Use one script and one entry per host. This workaround comes from @PlayerFann14.
 
 On macOS, run the same `ssh` command from whatever you use to start things at login.
 
