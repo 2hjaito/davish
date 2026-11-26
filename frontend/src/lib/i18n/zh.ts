@@ -1696,6 +1696,8 @@ const zh = {
     delete: '删除服务器',
     confirmDelete: (name: string) =>
       `从 Davish 中移除“${name}”？其保存的密码/口令也会被删除。服务器本身不受影响。`,
+    confirmDeleteJump: (names: string) =>
+      `这些服务器通过它跳转，之后将改为直接连接：${names}。请确认它们仍可连通。`,
     confirmDeleteButton: '删除',
   },
   connError: {

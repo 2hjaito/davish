@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Sửa
+- Xóa một server giờ nêu tên các server khác đang đi qua nó (jump host) và sẽ chuyển sang kết nối thẳng, để thấy điều đó trước khi xác nhận. Phần rà soát còn lại sau #296 không thấy gì cần đổi ở lối tắt script, bộ cập nhật (checksum có chữ ký, không hạ phiên bản) hay đặt lại khóa app.
+
 ## [1.15.2] - 2026-11-26
 
 ### Thêm

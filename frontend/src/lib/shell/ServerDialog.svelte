@@ -19,6 +19,11 @@
       ? servers.list.find((s) => s.id === (ui.serverDialog as { id: string }).id)
       : undefined,
   )
+  // Servers that reach this one through it as a jump host: deleting it makes
+  // them connect directly, which the confirmation must say.
+  const viaThis = $derived(
+    editing ? servers.list.filter((s) => s.jumpID === editing.id).map((s) => s.name) : [],
+  )
 
   // Set when the add form was opened from "Duplicate": the server it copies.
   const source = $derived(
@@ -320,6 +325,9 @@
     {#if confirmingDelete && editing}
       <div class="confirm">
         <p>{t.serverDialog.confirmDelete(editing.name)}</p>
+        {#if viaThis.length > 0}
+          <p class="warn">{t.serverDialog.confirmDeleteJump(viaThis.join(', '))}</p>
+        {/if}
         <div class="confirm-actions">
           <button type="button" class="btn" onclick={() => (confirmingDelete = false)}
             >{t.serverDialog.cancel}</button
@@ -464,6 +472,10 @@
 
   .confirm p {
     margin: 0 0 8px;
+  }
+
+  .confirm .warn {
+    color: var(--warn);
   }
 
   .confirm-actions {

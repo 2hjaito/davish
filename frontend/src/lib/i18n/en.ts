@@ -1749,6 +1749,8 @@ const en = {
     delete: 'Delete server',
     confirmDelete: (name: string) =>
       `Remove "${name}" from Davish? Its saved password/passphrase is deleted too. The server itself is not affected.`,
+    confirmDeleteJump: (names: string) =>
+      `These servers reach it through this one and will connect directly instead: ${names}. Check they can still be reached.`,
     confirmDeleteButton: 'Delete',
   },
   connError: {
