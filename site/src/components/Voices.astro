@@ -1,0 +1,41 @@
+---
+// What people said, word for word (the quotes are in lib/voices.ts). The
+// first three show; the rest fold. A quote not in the page's language has
+// its translation under it, folded.
+import { dicts, type Locale } from '../i18n'
+import { OPEN, voices } from '../lib/voices'
+import VoiceCard from './VoiceCard.astro'
+
+interface Props {
+  locale: Locale
+}
+const { locale } = Astro.props
+const v = dicts[locale].voices
+const first = voices.slice(0, OPEN)
+const rest = voices.slice(OPEN)
+---
+
+<section class="block voices">
+  <div class="voices-head" data-reveal>
+    <h2>{v.title}</h2>
+    <p>{v.note}</p>
+  </div>
+  <div class="voices-grid">
+    {first.map((q) => <VoiceCard voice={q} locale={locale} />)}
+  </div>
+  {
+    rest.length > 0 && (
+      <details class="voices-more">
+        <summary>
+          <span class="when-closed">{v.more(rest.length)}</span>
+          <span class="when-open">{v.less}</span>
+        </summary>
+        <div class="voices-grid">
+          {rest.map((q) => (
+            <VoiceCard voice={q} locale={locale} />
+          ))}
+        </div>
+      </details>
+    )
+  }
+</section>
