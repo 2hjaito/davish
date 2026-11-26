@@ -2227,6 +2227,10 @@ const es = {
     themes: { system: 'Automático', light: 'Claro', dark: 'Oscuro' },
     language: 'Idioma',
     languageHint: 'El idioma de la interfaz.',
+    startup: 'Al abrir Davish',
+    startupHint:
+      'Todos los servidores muestra la lista. Último servidor abre y conecta el que usó por última vez. Nada abre sin conectar, para servidores tras una VPN o en producción.',
+    startups: { all: 'Todos los servidores', last: 'Último servidor', none: 'Nada' },
     langs: { vi: 'Tiếng Việt', en: 'English', zh: '简体中文', es: 'Español' },
     langRestart:
       'Davish se reiniciará: los terminales y transferencias en curso se detienen, y los servidores se vuelven a conectar solos.',

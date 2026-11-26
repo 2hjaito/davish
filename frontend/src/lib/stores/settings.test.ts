@@ -8,6 +8,7 @@ import {
   clampIndent,
   clampScheme,
   clampScrollback,
+  defaultStartup,
   resolveTheme,
   settings,
   EDITOR_FONT,
@@ -209,5 +210,21 @@ describe('the widgets knob in settings', () => {
     expect(settings.knobs.widgets).toBe(true)
     expect(settings.perfPreset).toBe('custom')
     settings.usePreset('beautiful')
+  })
+})
+
+describe('startup view', () => {
+  it('opens All servers on a new install and keeps the last server for people who have some', () => {
+    expect(defaultStartup(false)).toBe('all')
+    expect(defaultStartup(true)).toBe('last')
+  })
+
+  it('settles once: the first launch decides, later launches keep it', () => {
+    expect(settings.startup).toBeNull()
+    expect(settings.settleStartup(true)).toBe('last')
+    expect(settings.settleStartup(false)).toBe('last')
+    settings.set('startup', 'none')
+    expect(settings.settleStartup(false)).toBe('none')
+    expect(settings.startup).toBe('none')
   })
 })
