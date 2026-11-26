@@ -234,6 +234,8 @@ Nhập server từ `~/.ssh/config` một lần, kèm key và `ProxyJump`; Davish
 
 Menu bar thật (Tệp, Xem, Đi tới, Cửa sổ, Trợ giúp và lệnh của app đang mở), mọi phím tắt trong `⌘/`, nút `?` trên mỗi app giải thích app làm gì và chạy lệnh nào trên server, hướng dẫn nhanh lần đầu và chế độ xem thử với dữ liệu mẫu.
 
+Menu bar còn hiện CPU, RAM, ổ đĩa và mạng của server đang dùng dưới dạng vòng nhỏ (rê chuột vào để xem 15 phút gần nhất). **Cài đặt → Chung → Khi mở Davish** chọn cái gì hiện lúc khởi động: **Tất cả server**, **server cuối** (mở và kết nối như Davish vẫn làm) hoặc **không gì** (mở workspace của server cuối mà không kết nối, cho server sau VPN hoặc đang chạy thật). Bản cài mới mở Tất cả server; nếu bạn đã có server thì giữ server cuối.
+
 <table><tr>
   <td><img src="assets/screenshots/menu.jpg" alt="Menu Đi tới với phím tắt"></td>
   <td><img src="assets/screenshots/help.jpg" alt="Trợ giúp của một app"></td>
