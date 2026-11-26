@@ -35,6 +35,9 @@ type Cleanup struct {
 // journalKeep is what vacuuming leaves of the journal.
 const journalKeep = 100 << 20
 
+// The logs pattern wants a letter before the number, so syslog.1 and
+// auth.log.2 match but a data volume such as PCP's 20261125.00.10.0 does not.
+
 // The cleanups, by ID. Each command is fixed text.
 var commands = map[string]string{
 	"docker-images":     "docker image prune -a -f",
@@ -43,7 +46,7 @@ var commands = map[string]string{
 	"docker-volumes":    "docker volume prune -a -f",
 	"docker-logs":       `find /var/lib/docker/containers -name '*-json.log' -size +10M -exec truncate -s 0 {} +`,
 	"journal":           "journalctl --vacuum-size=100M",
-	"logs":              `find /var/log -xdev -type f \( -name '*.gz' -o -name '*.[0-9]' -o -name '*.old' \) -delete`,
+	"logs":              `find /var/log -xdev -type f \( -name '*.gz' -o -name '*[[:alpha:]].[0-9]' -o -name '*[[:alpha:]].[0-9][0-9]' -o -name '*.old' \) -delete`,
 	"apt":               "apt-get clean",
 	"dnf":               "dnf clean all",
 	"coredumps":         "find /var/lib/systemd/coredump /var/crash -xdev -type f -delete",
@@ -68,7 +71,7 @@ const userProbe = `export LC_ALL=C; id -u; echo --docker--; docker system df --f
 // systemProbe measures the rest, as root when sudo needs no password so
 // that root-owned folders count; missing tools print nothing.
 const systemProbe = `export LC_ALL=C; echo --journal--; journalctl --disk-usage 2>/dev/null;` +
-	` echo --logs--; find /var/log -xdev -type f \( -name '*.gz' -o -name '*.[0-9]' -o -name '*.old' \)` + sumFiles + `;` +
+	` echo --logs--; find /var/log -xdev -type f \( -name '*.gz' -o -name '*[[:alpha:]].[0-9]' -o -name '*[[:alpha:]].[0-9][0-9]' -o -name '*.old' \)` + sumFiles + `;` +
 	` echo --docker-logs--; find /var/lib/docker/containers -name '*-json.log' -size +10M` + sumFiles + `;` +
 	` echo --coredumps--; find /var/lib/systemd/coredump /var/crash -xdev -type f` + sumFiles + `;` +
 	` echo --tmp--; find /tmp /var/tmp -xdev -type f -atime +7` + sumFiles + `;` +

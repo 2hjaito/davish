@@ -21,6 +21,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ### Sửa
 - Tất cả server: danh sách cuộn lại được khi các server cao hơn cửa sổ, ở cả dạng thẻ và dạng bảng. Ở bản 1.15.1 nó bị cắt ở mép cửa sổ và không tới được các server bên dưới (#256).
 - Key `.ppk` của PuTTY dùng làm private key của server giờ được báo rõ cách chuyển đổi (PuTTYgen → Conversions → Export OpenSSH key), thay vì "không đọc được private key" chung chung (#264). Davish vẫn chưa tự đọc được `.ppk`.
+- Disk: dọn "log đã xoay vòng" không còn xóa nhầm file như volume lưu trữ đang ghi của PCP (`20261125.00.10.0`). Trước đây mọi tên kết thúc bằng `.0`-`.9` đều khớp; giờ chữ số phải đứng sau một chữ cái, như `syslog.1` hay `auth.log.2` (#296).
 
 ## [1.15.1] - 2026-11-24
 

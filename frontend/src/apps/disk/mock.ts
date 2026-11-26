@@ -104,9 +104,9 @@ export function mockCleanups(): Promise<Cleanup[]> {
       id: 'logs',
       bytes: 0.9 * GB,
       count: 214,
-      command: `find /var/log -xdev -type f \\( -name '*.gz' -o -name '*.[0-9]' -o -name '*.old' \\) -delete`,
+      command: `find /var/log -xdev -type f \\( -name '*.gz' -o -name '*[[:alpha:]].[0-9]' -o -name '*[[:alpha:]].[0-9][0-9]' -o -name '*.old' \\) -delete`,
       root: true,
-      sudoCommand: `sudo find /var/log -xdev -type f \\( -name '*.gz' -o -name '*.[0-9]' -o -name '*.old' \\) -delete`,
+      sudoCommand: `sudo find /var/log -xdev -type f \\( -name '*.gz' -o -name '*[[:alpha:]].[0-9]' -o -name '*[[:alpha:]].[0-9][0-9]' -o -name '*.old' \\) -delete`,
     },
     {
       id: 'docker-volumes',
