@@ -197,6 +197,7 @@ export namespace app {
 	    group?: string;
 	    jumpID?: string;
 	    controlPath?: string;
+	    distro?: string;
 	    password: string;
 	    passphrase: string;
 	
@@ -218,6 +219,7 @@ export namespace app {
 	        this.group = source["group"];
 	        this.jumpID = source["jumpID"];
 	        this.controlPath = source["controlPath"];
+	        this.distro = source["distro"];
 	        this.password = source["password"];
 	        this.passphrase = source["passphrase"];
 	    }
@@ -235,6 +237,7 @@ export namespace app {
 	    group?: string;
 	    jumpID?: string;
 	    controlPath?: string;
+	    distro?: string;
 	    hasPassword: boolean;
 	    hasPassphrase: boolean;
 	    state: string;
@@ -257,6 +260,7 @@ export namespace app {
 	        this.group = source["group"];
 	        this.jumpID = source["jumpID"];
 	        this.controlPath = source["controlPath"];
+	        this.distro = source["distro"];
 	        this.hasPassword = source["hasPassword"];
 	        this.hasPassphrase = source["hasPassphrase"];
 	        this.state = source["state"];
