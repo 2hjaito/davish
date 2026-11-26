@@ -465,11 +465,11 @@ const es = {
     cleanups: {
       'docker-images': {
         title: 'Docker: imágenes que ningún contenedor usa',
-        body: 'Elimina todas las imágenes que ningún contenedor usa, también las etiquetadas; la próxima ejecución las vuelve a descargar. Comando que se ejecutará:',
+        body: 'Elimina todas las imágenes que ningún contenedor usa, también las etiquetadas. Las de un registro se pueden volver a descargar, pero una que construiste en este servidor se pierde para siempre. Comando que se ejecutará:',
       },
       'docker-containers': {
         title: 'Docker: contenedores detenidos',
-        body: 'Elimina los contenedores detenidos y sus capas de escritura. Comando que se ejecutará:',
+        body: 'Elimina los contenedores detenidos y sus capas de escritura: lo que escribieron fuera de un volumen se pierde. Revisa la lista de abajo. Comando que se ejecutará:',
       },
       'docker-cache': {
         title: 'Docker: caché de compilación',
@@ -477,11 +477,11 @@ const es = {
       },
       'docker-volumes': {
         title: 'Docker: volúmenes que ningún contenedor usa',
-        body: 'Cuidado: un volumen puede guardar los datos (bases de datos, archivos subidos) de un contenedor eliminado. Eliminarlo los pierde para siempre. Comando que se ejecutará:',
+        body: 'Cuidado: un volumen puede guardar los datos (bases de datos, archivos subidos) de un contenedor eliminado. Eliminarlo los pierde para siempre. La lista de abajo muestra los volúmenes que ningún contenedor usa ahora; el de un contenedor que iniciarás más tarde también está en ella. Comando que se ejecutará:',
       },
       'docker-logs': {
         title: 'Docker: registros de contenedores de más de 10 MB',
-        body: 'Vacía los archivos de registro JSON de los contenedores en /var/lib/docker/containers; los contenedores siguen en marcha y registrando. Comando que se ejecutará:',
+        body: 'Vacía los archivos de registro JSON de los contenedores en /var/lib/docker/containers; los contenedores siguen en marcha y registrando, pero lo que esos registros contenían se pierde. Comando que se ejecutará:',
       },
       journal: {
         title: 'Journal de systemd',
@@ -505,7 +505,7 @@ const es = {
       },
       tmp: {
         title: 'Archivos temporales de más de 7 días',
-        body: 'Elimina los archivos de /tmp y /var/tmp que nadie ha leído en 7 días. Comando que se ejecutará:',
+        body: 'Elimina los archivos de /tmp y /var/tmp que nadie ha leído ni cambiado en 7 días, salvo el /tmp privado de los servicios. Un programa aún puede guardar algo que necesita allí: revisa la lista de abajo. Comando que se ejecutará:',
       },
       snap: {
         title: 'Revisiones antiguas de snap',
@@ -513,7 +513,7 @@ const es = {
       },
       'home-cache': {
         title: 'Cachés en ~/.cache',
-        body: 'Elimina las cachés de los programas (pip, yarn, herramientas de compilación…); se regeneran cuando hacen falta. Comando que se ejecutará:',
+        body: 'Elimina todo lo que hay en ~/.cache. Los programas recrean la mayor parte, pero algo es lento o pesado de volver a obtener (modelos descargados, navegadores de pruebas). Revisa la lista de abajo. Comando que se ejecutará:',
       },
       npm: {
         title: 'Caché de npm',

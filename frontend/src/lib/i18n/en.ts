@@ -450,11 +450,11 @@ const en = {
     cleanups: {
       'docker-images': {
         title: 'Docker: images no container uses',
-        body: 'Removes every image no container uses, tagged ones too; the next run pulls them again. Command to run:',
+        body: 'Removes every image no container uses, tagged ones too. Images from a registry can be pulled again, but one you built on this server cannot: it is gone. Command to run:',
       },
       'docker-containers': {
         title: 'Docker: stopped containers',
-        body: 'Removes stopped containers and their writable layers. Command to run:',
+        body: 'Removes stopped containers and their writable layers: anything they wrote outside a volume is lost. Check the list below. Command to run:',
       },
       'docker-cache': {
         title: 'Docker: build cache',
@@ -462,11 +462,11 @@ const en = {
       },
       'docker-volumes': {
         title: 'Docker: volumes no container uses',
-        body: 'Careful: a volume may hold the data (databases, uploads) of a removed container. Removing it loses that for good. Command to run:',
+        body: 'Careful: a volume may hold the data (databases, uploads) of a removed container. Removing it loses that for good. The list below shows the volumes no container uses now; one for a container you will start later is on it too. Command to run:',
       },
       'docker-logs': {
         title: 'Docker: container logs over 10 MB',
-        body: 'Empties the containers’ JSON log files in /var/lib/docker/containers; the containers keep running and logging. Command to run:',
+        body: 'Empties the containers’ JSON log files in /var/lib/docker/containers; the containers keep running and logging, but what those logs held is lost. Command to run:',
       },
       journal: {
         title: 'systemd journal',
@@ -490,7 +490,7 @@ const en = {
       },
       tmp: {
         title: 'Temporary files older than 7 days',
-        body: 'Removes files in /tmp and /var/tmp nobody has read for 7 days. Command to run:',
+        body: 'Removes files in /tmp and /var/tmp neither read nor changed for 7 days, except the private /tmp of services. A program may still keep something it needs in them: check the list below. Command to run:',
       },
       snap: {
         title: 'Old snap revisions',
@@ -498,7 +498,7 @@ const en = {
       },
       'home-cache': {
         title: 'Caches in ~/.cache',
-        body: 'Removes programs’ caches (pip, yarn, build tools…); they rebuild them when needed. Command to run:',
+        body: 'Removes everything in ~/.cache. Programs recreate most of it, but some of it is slow or large to get again (downloaded models, browsers for testing). Check the list below. Command to run:',
       },
       npm: {
         title: 'npm cache',

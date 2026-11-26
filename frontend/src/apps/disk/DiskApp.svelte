@@ -508,7 +508,7 @@
             {#each preview.files as f (f.path)}
               <li>
                 <span class="mono path" title={f.path}>{f.path}</span><span class="size"
-                  >{formatBytes(f.size)}</span
+                  >{f.size >= 0 ? formatBytes(f.size) : ''}</span
                 >
               </li>
             {/each}

@@ -457,11 +457,11 @@ const vi = {
     cleanups: {
       'docker-images': {
         title: 'Docker: image không container nào dùng',
-        body: 'Xóa mọi image không có container nào dùng, kể cả image có tag; lần chạy sau sẽ tải lại. Lệnh sẽ chạy:',
+        body: 'Xóa mọi image không có container nào dùng, kể cả image có tag. Image từ registry tải lại được, nhưng image bạn tự build trên server này thì mất hẳn. Lệnh sẽ chạy:',
       },
       'docker-containers': {
         title: 'Docker: container đã dừng',
-        body: 'Xóa các container đã dừng cùng lớp ghi của chúng. Lệnh sẽ chạy:',
+        body: 'Xóa các container đã dừng cùng lớp ghi của chúng: những gì chúng ghi ngoài volume sẽ mất. Xem danh sách bên dưới. Lệnh sẽ chạy:',
       },
       'docker-cache': {
         title: 'Docker: cache build',
@@ -469,11 +469,11 @@ const vi = {
       },
       'docker-volumes': {
         title: 'Docker: volume không container nào dùng',
-        body: 'Cẩn thận: volume có thể chứa dữ liệu (database, file tải lên) của container đã xóa. Xóa là mất hẳn. Lệnh sẽ chạy:',
+        body: 'Cẩn thận: volume có thể chứa dữ liệu (database, file tải lên) của container đã xóa. Xóa là mất hẳn. Danh sách bên dưới là các volume hiện không container nào dùng; volume của container bạn sẽ chạy sau này cũng nằm trong đó. Lệnh sẽ chạy:',
       },
       'docker-logs': {
         title: 'Docker: log container quá 10 MB',
-        body: 'Làm rỗng file log JSON của container trong /var/lib/docker/containers; container vẫn chạy và ghi tiếp. Lệnh sẽ chạy:',
+        body: 'Làm rỗng file log JSON của container trong /var/lib/docker/containers; container vẫn chạy và ghi tiếp, nhưng nội dung log cũ mất hẳn. Lệnh sẽ chạy:',
       },
       journal: {
         title: 'Journal của systemd',
@@ -491,7 +491,7 @@ const vi = {
       },
       tmp: {
         title: 'File tạm cũ hơn 7 ngày',
-        body: 'Xóa file trong /tmp và /var/tmp không ai đọc suốt 7 ngày. Lệnh sẽ chạy:',
+        body: 'Xóa file trong /tmp và /var/tmp không ai đọc hay sửa suốt 7 ngày, trừ /tmp riêng của các dịch vụ. Chương trình vẫn có thể để thứ nó cần trong đó: xem danh sách bên dưới. Lệnh sẽ chạy:',
       },
       snap: {
         title: 'Bản snap cũ',
@@ -499,7 +499,7 @@ const vi = {
       },
       'home-cache': {
         title: 'Cache trong ~/.cache',
-        body: 'Xóa cache của các chương trình (pip, yarn, trình build…); chúng tự tạo lại khi cần. Lệnh sẽ chạy:',
+        body: 'Xóa mọi thứ trong ~/.cache. Chương trình tự tạo lại phần lớn, nhưng có phần tải lại rất chậm hoặc rất nặng (model đã tải, trình duyệt để test). Xem danh sách bên dưới. Lệnh sẽ chạy:',
       },
       npm: {
         title: 'Cache npm',
