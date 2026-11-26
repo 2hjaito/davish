@@ -120,6 +120,22 @@ func (p procSnapshot) sample() procSample {
 
 // top fills in CPU and memory shares and keeps the n highest by sortBy.
 func (p procSnapshot) top(prev procSample, sortBy string, n int) ProcessList {
+	out := p.rows(prev)
+	slices.SortFunc(out, func(a, b Process) int {
+		var c int
+		if sortBy == SortMem {
+			c = cmp.Compare(b.Mem, a.Mem)
+		} else {
+			c = cmp.Compare(b.CPU, a.CPU)
+		}
+		return cmp.Or(c, cmp.Compare(a.PID, b.PID))
+	})
+	return ProcessList{Total: len(out), Procs: out[:min(n, len(out))]}
+}
+
+// rows is every process with its age, CPU load since prev (or over its
+// life, on a first call) and share of memory, in /proc order.
+func (p procSnapshot) rows(prev procSample) []Process {
 	dt := p.uptime - prev.uptime
 	out := make([]Process, 0, len(p.procs))
 	for _, ps := range p.procs {
@@ -136,16 +152,7 @@ func (p procSnapshot) top(prev procSample, sortBy string, n int) ProcessList {
 		}
 		out = append(out, pr)
 	}
-	slices.SortFunc(out, func(a, b Process) int {
-		var c int
-		if sortBy == SortMem {
-			c = cmp.Compare(b.Mem, a.Mem)
-		} else {
-			c = cmp.Compare(b.CPU, a.CPU)
-		}
-		return cmp.Or(c, cmp.Compare(a.PID, b.PID))
-	})
-	return ProcessList{Total: len(out), Procs: out[:min(n, len(out))]}
+	return out
 }
 
 func parseProcs(s map[string][]string) (procSnapshot, error) {

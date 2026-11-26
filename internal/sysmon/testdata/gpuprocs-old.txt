@@ -1,0 +1,26 @@
+@@gpus
+0, GPU-a0a0a0a0-0000-4000-8000-000000000000, 24576
+1, GPU-a1a1a1a1-1111-4000-8000-111111111111, 24576
+@@apps
+GPU-a0a0a0a0-0000-4000-8000-000000000000, 5150, [N/A], /usr/bin/python3
+@@pmon
+# gpu        pid  type    sm   mem   enc   dec    fb   command
+# Idx          #   C/G     %     %     %     %    MB   name
+    0       5150     C    40    10     0     0   300   python3
+    1          -     -     -     -     -     -     -   -
+@@uptime
+5000.00 9000.00
+@@clk
+100
+@@pagesize
+4096
+@@meminfo
+MemTotal:        8125796 kB
+@@passwd
+root:0
+ml:1001
+@@ps
+ 5150  1001 python3 train.py --epochs 10
+@@stat
+5150 (python3) R 1 5150 5150 0 -1 4194560 0 0 0 0 20000 1000 0 0 20 0 6 0 100000 0 25600 18446744073709551615 1 1 0 0 0 0 0 0 0 0 0 0 17 2 0 0 0 0 0
+@@end
