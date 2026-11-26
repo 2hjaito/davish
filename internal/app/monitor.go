@@ -23,6 +23,11 @@ func (a *App) MonitorProcesses(serverID, sortBy string) (sysmon.ProcessList, err
 	return a.sysmon.Processes(a.ctx, serverID, sortBy)
 }
 
+// MonitorGPUProcesses lists the processes on the server's NVIDIA GPUs.
+func (a *App) MonitorGPUProcesses(serverID string) (sysmon.GPUProcessList, error) {
+	return a.sysmon.GPUProcesses(a.ctx, serverID)
+}
+
 // MonitorSystemInfo describes the server: OS, kernel, CPU model.
 func (a *App) MonitorSystemInfo(serverID string) (sysmon.SystemInfo, error) {
 	return a.sysmon.SystemInfo(a.ctx, serverID)

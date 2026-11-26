@@ -2,11 +2,18 @@ package sysmon
 
 import (
 	"cmp"
+	"context"
+	_ "embed"
 	"errors"
 	"slices"
 	"strconv"
 	"strings"
+
+	"davish/internal/apperr"
 )
+
+//go:embed gpuprocs.sh
+var gpuProcsScript string
 
 // GPUProcess is one row of the Monitor's GPU process table, like a row of
 // nvtop: a process on one GPU, as nvidia-smi sees it, with what /proc says
@@ -29,6 +36,37 @@ type GPUProcess struct {
 // memory first. A process on two GPUs has a row on each.
 type GPUProcessList struct {
 	Procs []GPUProcess `json:"procs"`
+}
+
+// GPUProcesses lists the processes on the server's NVIDIA GPUs, as nvtop
+// does. CPU load is measured since the previous call for the server, apart
+// from the Processes tab's; the first call falls back to each process's
+// average over its life. A server without nvidia-smi has an empty list.
+func (s *Service) GPUProcesses(ctx context.Context, serverID string) (GPUProcessList, error) {
+	os := s.clients.WaitPlatform(ctx, serverID)
+	client, err := s.clients.Client(serverID)
+	if err != nil {
+		return GPUProcessList{}, err
+	}
+	tg, ok := targetFor(os)
+	if !ok {
+		return GPUProcessList{}, apperr.New(apperr.PlatformUnsupported, "GPU processes are not available for this OS")
+	}
+	sections, err := runScript(ctx, client, tg, tg.gpuProcs)
+	if err != nil {
+		return GPUProcessList{}, apperr.Wrap(apperr.Internal, "could not read GPU processes", err)
+	}
+	snap, err := parseGPUProcs(sections)
+	if err != nil {
+		return GPUProcessList{}, apperr.Wrap(apperr.Internal, "could not read GPU processes", err)
+	}
+
+	s.procsMu.Lock()
+	prev := s.gpuProcs[serverID]
+	s.gpuProcs[serverID] = snap.sample()
+	s.procsMu.Unlock()
+
+	return snap.list(prev), nil
 }
 
 // gpuProcSnapshot is one parsed run of gpuprocs.sh: the rows nvidia-smi

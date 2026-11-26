@@ -1,10 +1,101 @@
 package sysmon
 
 import (
+	"bytes"
 	"encoding/json"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"regexp"
+	"runtime"
 	"slices"
+	"strconv"
+	"strings"
 	"testing"
 )
+
+// fakeNvidiaSMI answers the three queries gpuprocs.sh makes: one compute
+// process ($APP_PID) and, in pmon, a graphics one ($GFX_PID), the compute
+// one again and an idle GPU's placeholder.
+const fakeNvidiaSMI = `#!/bin/sh
+case "$*" in
+*query-gpu*) echo '0, GPU-test, 1024' ;;
+*query-compute-apps*) echo "GPU-test, $APP_PID, 100, /usr/bin/fake" ;;
+pmon*)
+	echo '# gpu        pid  type    sm   mem   enc   dec    fb   command'
+	echo '# Idx          #   C/G     %     %     %     %    MB   name'
+	echo "    0   $GFX_PID     G     1     0     -     -    10   Xorg"
+	echo "    0   $APP_PID     C     5     1     -     -   100   fake"
+	echo '    1          -     -     -     -     -     -     -   -'
+	;;
+esac
+`
+
+// The script asks ps and /proc about the GPU PIDs only, each once.
+func TestGPUProcsScriptReadsOnlyGPUPIDs(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("gpuprocs.sh needs sh")
+	}
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "nvidia-smi"), []byte(fakeNvidiaSMI), 0o755); err != nil { //nolint:gosec // an executable test double
+		t.Fatal(err)
+	}
+	app, gfx := os.Getpid(), os.Getppid()
+	cmd := exec.Command("sh", "-s")
+	cmd.Stdin = strings.NewReader(gpuProcsScript)
+	cmd.Env = append(os.Environ(),
+		"PATH="+dir+string(os.PathListSeparator)+os.Getenv("PATH"),
+		"APP_PID="+strconv.Itoa(app), "GFX_PID="+strconv.Itoa(gfx))
+	out, err := cmd.Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	s, err := NewReader(bytes.NewReader(out)).sections()
+	if err != nil {
+		t.Fatalf("%v in:\n%s", err, out)
+	}
+	if !slices.Equal(s["gpus"], []string{"0, GPU-test, 1024"}) || len(s["apps"]) != 1 || len(s["pmon"]) != 5 {
+		t.Errorf("nvidia-smi sections = %q, %q, %q", s["gpus"], s["apps"], s["pmon"])
+	}
+	var pids []int
+	for _, line := range s["ps"] {
+		if f := strings.Fields(line); len(f) > 0 {
+			pid, _ := strconv.Atoi(f[0])
+			pids = append(pids, pid)
+		}
+	}
+	slices.Sort(pids)
+	want := []int{min(app, gfx), max(app, gfx)}
+	if !slices.Equal(pids, want) {
+		t.Errorf("ps listed %v; want only the GPU PIDs %v", pids, want)
+	}
+}
+
+// Without nvidia-smi the script still ends, with nothing to list.
+func TestGPUProcsScriptWithoutNvidiaSMI(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("gpuprocs.sh needs sh")
+	}
+	for _, dir := range []string{"/usr/bin", "/bin"} {
+		if _, err := os.Stat(filepath.Join(dir, "nvidia-smi")); err == nil {
+			t.Skip("this machine has nvidia-smi")
+		}
+	}
+	cmd := exec.Command("sh", "-s")
+	cmd.Stdin = strings.NewReader(gpuProcsScript)
+	cmd.Env = append(os.Environ(), "PATH=/usr/bin:/bin")
+	out, err := cmd.Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	s, err := NewReader(bytes.NewReader(out)).sections()
+	if err != nil {
+		t.Fatalf("%v in:\n%s", err, out)
+	}
+	if len(s["apps"])+len(s["pmon"])+len(s["ps"])+len(s["stat"]) != 0 {
+		t.Errorf("sections = %q", s)
+	}
+}
 
 const mib = 1024 * 1024
 
@@ -162,5 +253,16 @@ func TestGPUProcsCPUSinceLastCall(t *testing.T) {
 		if got := gpuRow(t, list, gpu, 3324900).CPU; got != 100 {
 			t.Errorf("GPU %d llama CPU = %v; want 100", gpu, got)
 		}
+	}
+}
+
+// The Windows script cannot run here; it must at least print what the
+// parser reads from the Linux one, in the same order.
+func TestGPUProcsScriptsPrintTheSameSections(t *testing.T) {
+	sections := regexp.MustCompile(`@@[a-z]+`)
+	linux := sections.FindAllString(gpuProcsScript, -1)
+	windows := sections.FindAllString(gpuProcsWinScript, -1)
+	if !slices.Equal(linux, windows) {
+		t.Errorf("gpuprocs.sh prints %v; gpuprocs.ps1 prints %v", linux, windows)
 	}
 }

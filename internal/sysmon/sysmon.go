@@ -29,6 +29,9 @@ var collectWinScript string
 //go:embed procs.ps1
 var procsWinScript string
 
+//go:embed gpuprocs.ps1
+var gpuProcsWinScript string
+
 //go:embed info.ps1
 var infoWinScript string
 
@@ -67,9 +70,12 @@ type Service struct {
 	watchers map[string]*watcher
 	wg       sync.WaitGroup
 
-	// procsMu guards procs, the last process sample per server.
-	procsMu sync.Mutex
-	procs   map[string]procSample
+	// procsMu guards procs and gpuProcs, the last process sample per
+	// server for the Processes and GPU tabs. Each tab measures CPU load
+	// since its own previous call.
+	procsMu  sync.Mutex
+	procs    map[string]procSample
+	gpuProcs map[string]procSample
 
 	// alertsMu guards alerts and opts.Thresholds. Alerts outlive watchers
 	// so that watching a server again does not repeat a notification.
@@ -119,7 +125,8 @@ func New(clients ClientSource, emit Emitter, log *slog.Logger, opts Options) *Se
 	return &Service{
 		clients: clients, emit: emit, log: log, opts: opts,
 		watchers: map[string]*watcher{}, procs: map[string]procSample{},
-		alerts: map[string]*alerter{}, paced: make(chan struct{}),
+		gpuProcs: map[string]procSample{},
+		alerts:   map[string]*alerter{}, paced: make(chan struct{}),
 	}
 }
 
