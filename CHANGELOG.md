@@ -4,6 +4,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.15.2] - 2026-11-26
+
 ### Thêm
 - **Ảnh làm hình nền desktop** (M53): Cài đặt → Giao diện có mục **Ảnh** dưới màu nền: chọn một ảnh PNG, JPEG hoặc WebP (dưới 50 MB) từ máy bạn. Ảnh được thu nhỏ về 2560 px và giữ trên máy này, không tải lên đâu, còn **Làm tối ảnh** làm ảnh tối đi (tối đa 70%) để icon và chữ vẫn dễ đọc. **Cài đặt → Hiệu năng → Ảnh nền** tắt riêng được: Beautiful và Balanced hiện ảnh, Light thì không, và khi chưa chọn ảnh thì không đổi gì và không tốn gì. Trên máy Mac dùng để phát triển, một ảnh tốn thêm khoảng 30 MB bộ nhớ và không đo được thêm CPU hay rớt khung (bench render, 3 lần: `scripts/bench.sh --wallpaper`, ai cũng chạy được trên máy mình).
 - **Kéo cửa sổ** (#262): Cài đặt → Hiệu năng có thêm một cài đặt cho cách cửa sổ đi theo chuột khi kéo. **Trực tiếp** như trước. **Đơn giản** vẫn di chuyển cửa sổ nhưng tắt kính cho tới khi thả. **Viền** chỉ di chuyển một đường viền và đặt cửa sổ vào đó khi thả, cho máy vẽ cửa sổ bằng CPU, nơi kéo một cửa sổ mờ lớn thì chậm. Viền có nền mờ bên trong, **Tô nền viền** tắt nền đó để kéo nhẹ nhất. Mặc định là Trực tiếp nếu bạn không đổi, và các mức hiệu năng không đổi.
