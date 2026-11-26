@@ -388,6 +388,17 @@ const vi = {
     rootRuns:
       'Cần root: Davish chạy qua sudo sau khi bạn xác nhận, hỏi mật khẩu sudo một lần mỗi phiên nếu cần.',
     dangerous: 'Mục này có thể xóa dữ liệu thật, không chỉ cache. Kiểm tra kỹ trước khi dọn.',
+    preview: {
+      loading: 'Đang liệt kê các file sẽ bị xóa…',
+      none: 'Hiện không có file nào khớp.',
+      title: (shown: number, total: number) =>
+        total > 0
+          ? `Sẽ xóa các file này: ${shown} file lớn nhất trong ${total}. Đọc danh sách trước khi tiếp tục.`
+          : `Sẽ xóa ${shown} file này. Đọc danh sách trước khi tiếp tục.`,
+      failed: 'Không liệt kê được các file. Chỉ chạy khi bạn chắc câu lệnh xóa những gì.',
+      noRoot:
+        'Liệt kê khi chưa có quyền root: các thư mục chỉ root đọc được không có trong danh sách, nên có thể xóa nhiều file hơn số hiển thị.',
+    },
     tabs: { dirs: 'Thư mục', files: 'File lớn' },
     scan: 'Quét lại',
     scanning: 'Đang quét cả ổ đĩa, có thể mất một hai phút…',
@@ -470,7 +481,7 @@ const vi = {
       },
       logs: {
         title: 'Log xoay vòng cũ trong /var/log',
-        body: 'Xóa các file log đã xoay vòng (*.gz, *.1, *.old); log đang ghi không bị đụng. Lệnh sẽ chạy:',
+        body: 'Xóa các file trong /var/log có tên giống log xoay vòng (syslog.1, auth.log.2, *.gz, *.old). Chỉ dựa vào tên file, nên hãy xem danh sách bên dưới có file nào khác không. Lệnh sẽ chạy:',
       },
       apt: { title: 'Cache gói apt', body: 'Xóa các gói .deb đã tải về. Lệnh sẽ chạy:' },
       dnf: { title: 'Cache gói dnf', body: 'Xóa cache metadata và gói của dnf. Lệnh sẽ chạy:' },

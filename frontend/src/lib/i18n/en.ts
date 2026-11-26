@@ -381,6 +381,17 @@ const en = {
     rootRuns:
       'Needs root: Davish runs it through sudo once you confirm, asking for the sudo password once per session if needed.',
     dangerous: 'This may delete real data, not only caches. Check before you clean it.',
+    preview: {
+      loading: 'Listing the files it would remove…',
+      none: 'No files match right now.',
+      title: (shown: number, total: number) =>
+        total > 0
+          ? `It would remove these files: the largest ${shown} of ${total}. Read the list before you continue.`
+          : `It would remove these ${shown} ${shown === 1 ? 'file' : 'files'}. Read the list before you continue.`,
+      failed: 'Could not list the files. Run it only if you are sure of what the command removes.',
+      noRoot:
+        'Listed without root: folders only root can read are missing, so more files than shown may be removed.',
+    },
     tabs: { dirs: 'Folders', files: 'Large files' },
     scan: 'Scan again',
     scanning: 'Scanning the whole disk, this can take a minute or two…',
@@ -463,7 +474,7 @@ const en = {
       },
       logs: {
         title: 'Old rotated logs in /var/log',
-        body: 'Removes rotated log files (*.gz, *.1, *.old); logs being written are not touched. Command to run:',
+        body: 'Removes files in /var/log named like rotated logs (syslog.1, auth.log.2, *.gz, *.old). It goes by the name only, so check the list below for anything else. Command to run:',
       },
       apt: {
         title: 'apt package cache',

@@ -395,6 +395,18 @@ const es = {
     rootRuns:
       'Necesita root: Davish lo ejecuta con sudo cuando confirmas, pidiendo la contraseña de sudo una vez por sesión si hace falta.',
     dangerous: 'Esto puede borrar datos reales, no solo cachés. Revísalo antes de limpiar.',
+    preview: {
+      loading: 'Listando los archivos que borraría…',
+      none: 'Ahora mismo no coincide ningún archivo.',
+      title: (shown: number, total: number) =>
+        total > 0
+          ? `Borraría estos archivos: los ${shown} más grandes de ${total}. Lee la lista antes de continuar.`
+          : `Borraría estos ${shown} archivos. Lee la lista antes de continuar.`,
+      failed:
+        'No se pudieron listar los archivos. Ejecútalo solo si sabes seguro lo que borra el comando.',
+      noRoot:
+        'Listado sin root: faltan las carpetas que solo root puede leer, así que podrían borrarse más archivos de los mostrados.',
+    },
     tabs: { dirs: 'Carpetas', files: 'Archivos grandes' },
     scan: 'Volver a analizar',
     scanning: 'Analizando todo el disco, puede tardar uno o dos minutos…',
@@ -477,7 +489,7 @@ const es = {
       },
       logs: {
         title: 'Registros rotados antiguos en /var/log',
-        body: 'Elimina archivos de registro rotados (*.gz, *.1, *.old); los registros en uso no se tocan. Comando que se ejecutará:',
+        body: 'Elimina archivos de /var/log con nombre de registro rotado (syslog.1, auth.log.2, *.gz, *.old). Solo se guía por el nombre, así que revisa en la lista de abajo si hay algo más. Comando que se ejecutará:',
       },
       apt: {
         title: 'Caché de paquetes de apt',

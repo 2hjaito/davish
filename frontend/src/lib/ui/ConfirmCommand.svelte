@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { Snippet } from 'svelte'
+
   import { t } from '../i18n'
   import Dialog from './Dialog.svelte'
   import Icon from './Icon.svelte'
@@ -15,6 +17,8 @@
     tone?: 'danger' | 'primary'
     /** A note under the command, such as a warning. */
     note?: string
+    /** More under the command, such as the files it would remove. */
+    extra?: Snippet
     /** Set to offer a small button that types the command into Terminal instead. */
     onterminal?: () => void
     terminalLabel?: string
@@ -31,6 +35,7 @@
     action,
     tone = 'danger',
     note = '',
+    extra,
     onterminal,
     terminalLabel = t.common.runInTerminal,
     busy = false,
@@ -43,6 +48,7 @@
 <Dialog open={command !== null} {title} width={480} {onclose}>
   <p>{body}</p>
   <pre class="command">{command}</pre>
+  {@render extra?.()}
   {#if note}<p class="note">{note}</p>{/if}
 
   {#snippet footer()}

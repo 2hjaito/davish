@@ -65,3 +65,8 @@ func (a *App) DiskTruncate(serverID, path, command string) error {
 	}
 	return a.disk.Truncate(a.change(), serverID, path, command)
 }
+
+// DiskPreview lists, without removing anything, what a cleanup would remove.
+func (a *App) DiskPreview(serverID, id string) (disk.Preview, error) {
+	return a.disk.Preview(a.ctx, serverID, id)
+}

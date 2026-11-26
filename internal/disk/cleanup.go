@@ -30,10 +30,25 @@ type Cleanup struct {
 	SudoCommand string `json:"sudoCommand,omitempty"`
 	// Danger is set when it may delete data, not only caches and leftovers.
 	Danger bool `json:"danger,omitempty"`
+	// Listable is set when Preview can list what it would remove.
+	Listable bool `json:"listable,omitempty"`
 }
 
 // journalKeep is what vacuuming leaves of the journal.
 const journalKeep = 100 << 20
+
+// What each find-based cleanup selects. The command that deletes, the probe
+// that measures and the preview that lists all start from the same text, so
+// what the user sees listed is what is removed.
+//
+// The logs selector wants a letter before the number, so syslog.1 and
+// auth.log.2 match but a data volume such as PCP's 20261125.00.10.0 does not.
+const (
+	selLogs       = `find /var/log -xdev -type f \( -name '*.gz' -o -name '*[[:alpha:]].[0-9]' -o -name '*[[:alpha:]].[0-9][0-9]' -o -name '*.old' \)`
+	selDockerLogs = `find /var/lib/docker/containers -name '*-json.log' -size +10M`
+	selCoredumps  = `find /var/lib/systemd/coredump /var/crash -xdev -type f`
+	selTmp        = `find /tmp /var/tmp -xdev -type f -atime +7`
+)
 
 // The cleanups, by ID. Each command is fixed text.
 var commands = map[string]string{
@@ -41,13 +56,13 @@ var commands = map[string]string{
 	"docker-containers": "docker container prune -f",
 	"docker-cache":      "docker builder prune -a -f",
 	"docker-volumes":    "docker volume prune -a -f",
-	"docker-logs":       `find /var/lib/docker/containers -name '*-json.log' -size +10M -exec truncate -s 0 {} +`,
+	"docker-logs":       selDockerLogs + ` -exec truncate -s 0 {} +`,
 	"journal":           "journalctl --vacuum-size=100M",
-	"logs":              `find /var/log -xdev -type f \( -name '*.gz' -o -name '*.[0-9]' -o -name '*.old' \) -delete`,
+	"logs":              selLogs + " -delete",
 	"apt":               "apt-get clean",
 	"dnf":               "dnf clean all",
-	"coredumps":         "find /var/lib/systemd/coredump /var/crash -xdev -type f -delete",
-	"tmp":               "find /tmp /var/tmp -xdev -type f -atime +7 -delete",
+	"coredumps":         selCoredumps + " -delete",
+	"tmp":               selTmp + " -delete",
 	"snap":              `snap list --all | awk '$6 ~ /disabled/ {print $1, $3}' | while read -r n r; do snap remove "$n" --revision="$r"; done`,
 	"home-cache":        `find "$HOME/.cache" -mindepth 1 -delete`,
 	"npm":               "npm cache clean --force",
@@ -68,10 +83,10 @@ const userProbe = `export LC_ALL=C; id -u; echo --docker--; docker system df --f
 // systemProbe measures the rest, as root when sudo needs no password so
 // that root-owned folders count; missing tools print nothing.
 const systemProbe = `export LC_ALL=C; echo --journal--; journalctl --disk-usage 2>/dev/null;` +
-	` echo --logs--; find /var/log -xdev -type f \( -name '*.gz' -o -name '*.[0-9]' -o -name '*.old' \)` + sumFiles + `;` +
-	` echo --docker-logs--; find /var/lib/docker/containers -name '*-json.log' -size +10M` + sumFiles + `;` +
-	` echo --coredumps--; find /var/lib/systemd/coredump /var/crash -xdev -type f` + sumFiles + `;` +
-	` echo --tmp--; find /tmp /var/tmp -xdev -type f -atime +7` + sumFiles + `;` +
+	` echo --logs--; ` + selLogs + sumFiles + `;` +
+	` echo --docker-logs--; ` + selDockerLogs + sumFiles + `;` +
+	` echo --coredumps--; ` + selCoredumps + sumFiles + `;` +
+	` echo --tmp--; ` + selTmp + sumFiles + `;` +
 	` echo --apt--; [ -d /var/cache/apt/archives ] && du -sk /var/cache/apt/archives 2>/dev/null;` +
 	` echo --dnf--; [ -d /var/cache/dnf ] && du -sk /var/cache/dnf 2>/dev/null;` +
 	` echo --snap--; command -v snap >/dev/null && snap list --all 2>/dev/null | awk '$6 ~ /disabled/ {print "/var/lib/snapd/snaps/" $1 "_" $3 ".snap"}' | xargs -r du -ck 2>/dev/null | tail -n 1; true`
@@ -132,7 +147,7 @@ func parseCleanups(out []byte) []Cleanup {
 		}
 		c := Cleanup{
 			ID: id, Bytes: bytes, Count: count, Command: commands[id],
-			Root: slices.Contains(rootCleanups, id) && !root, Danger: id == "docker-volumes",
+			Root: slices.Contains(rootCleanups, id) && !root, Danger: id == "docker-volumes", Listable: HasPreview(id),
 		}
 		if c.Root {
 			c.SudoCommand = withSudo(c.Command)

@@ -14,6 +14,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 - **Kết nối qua control socket của OpenSSH** (#240): với kiểu đăng nhập chỉ chạy được qua OpenSSH, như agent cấp chứng chỉ theo yêu cầu (authentik), hộp thoại server có ô **Nâng cao: dùng control socket của ssh**. Bạn tự chạy một master (`ssh -M -S <đường dẫn> -fN user@host`) rồi đưa đường dẫn của nó cho Davish: Davish gắn vào kết nối đó, nên OpenSSH lo việc đăng nhập và Davish không bao giờ thấy thông tin đăng nhập của bạn. Nó thay thế phần xác thực của server đó, và chỉ có trên Linux và macOS. Đã thử với authentik bởi @PlayerFann14.
 
 ### Đổi
+- Disk → Dọn dẹp: trước khi chạy, hộp xác nhận liệt kê các file sẽ bị xóa (200 file lớn nhất, kèm dung lượng) cho log cũ, log container, core dump, file tạm và `~/.cache`. Danh sách lấy từ đúng cách chọn file của lệnh xóa, chỉ đọc. Khi đọc mà chưa có quyền root, hộp báo rõ. Câu cũ nói log đang ghi không bị đụng tới là sai nên đã bỏ (#296).
 - Khi dùng ảnh làm hình nền, menu bar giờ theo độ sáng của ảnh chứ không theo giao diện sáng/tối: chữ sáng trên kính khói khi ảnh tối, chữ tối trên kính sáng khi ảnh sáng, để nhãn, icon và đồng hồ luôn dễ đọc (như macOS). Độ sáng được tính một lần lúc chọn ảnh, từ dải trên cùng và mức làm tối, và chỉ khi kính còn trong suốt.
 - Các chỉ số trên thanh menu (CPU, RAM, Ổ đĩa, mạng) to hơn: vòng, số trong vòng và tên tăng khoảng một phần mười, dễ đọc hơn (#288).
 - Nhật ký giờ ghi lại khi không kết nối được SSH agent và vì sao (ví dụ pipe của Windows đang bận hoặc không có), để nhìn log biết được "không có agent" khác "có agent nhưng không mở được", và agent trả lời sau bao lâu. Agent chờ bạn mở khóa hoặc xác nhận, như của Bitwarden, có thể cần hơn 5 giây Davish chờ: chạy Davish với `DAVISH_AGENT_WAIT=60` (giây, từ 1 đến 300) để chờ lâu hơn (#168).
@@ -21,6 +22,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ### Sửa
 - Tất cả server: danh sách cuộn lại được khi các server cao hơn cửa sổ, ở cả dạng thẻ và dạng bảng. Ở bản 1.15.1 nó bị cắt ở mép cửa sổ và không tới được các server bên dưới (#256).
 - Key `.ppk` của PuTTY dùng làm private key của server giờ được báo rõ cách chuyển đổi (PuTTYgen → Conversions → Export OpenSSH key), thay vì "không đọc được private key" chung chung (#264). Davish vẫn chưa tự đọc được `.ppk`.
+- Disk: dọn "log đã xoay vòng" không còn xóa nhầm file như volume lưu trữ đang ghi của PCP (`20261125.00.10.0`). Trước đây mọi tên kết thúc bằng `.0`-`.9` đều khớp; giờ chữ số phải đứng sau một chữ cái, như `syslog.1` hay `auth.log.2` (#296).
 
 ## [1.15.1] - 2026-11-24
 

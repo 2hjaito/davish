@@ -14,6 +14,7 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 - **Connect through an OpenSSH control socket** (#240): for logins that only work through OpenSSH, such as an agent that issues certificates on demand (authentik), the server dialog has an **Advanced: use an ssh control socket** field. Start a master yourself (`ssh -M -S <path> -fN user@host`) and give Davish its path: it attaches to that connection, so OpenSSH does the login and Davish never sees your credentials. It replaces the authentication of that server, and works on Linux and macOS only. Tried against authentik by @PlayerFann14.
 
 ### Changed
+- Disk → Clean up: before a cleanup runs, the confirmation lists the files it would remove (the largest 200, with sizes) for old logs, container logs, core dumps, temporary files and `~/.cache`. The list comes from the same selection as the delete command, read-only. When it is read without root, it says so. The old text claiming that logs being written are not touched was wrong and is gone (#296).
 - With a picture as the wallpaper, the menu bar now follows the picture's brightness instead of the theme: light text on smoky glass over a dark picture, dark text on light glass over a bright one, so its labels, icons and clock stay readable (as on macOS). It is worked out once, when the picture is chosen, from the strip at the top and the dim level, and only while the glass is see-through.
 - The readings in the menu bar (CPU, RAM, Disk, network) are bigger: the ring, its number and its name grow by about a tenth, so they are easier to read (#288).
 - The log now says when the SSH agent could not be reached, and why (for example a Windows pipe that is busy or not there), so a support log can tell "no agent" from "an agent that would not open", and how long the agent took to answer. An agent that waits for you to unlock or confirm, such as Bitwarden's, may need more than the 5 seconds Davish waits: start Davish with `DAVISH_AGENT_WAIT=60` (seconds, 1 to 300) to wait longer (#168).
@@ -21,6 +22,7 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 ### Fixed
 - All servers: the list scrolls again when its servers are taller than the window, in both the cards and the table. In 1.15.1 it was cut off at the window's edge and the servers below could not be reached (#256).
 - A PuTTY `.ppk` key used as a server's private key now gets a clear message with how to convert it (PuTTYgen → Conversions → Export OpenSSH key), instead of a generic "cannot read the private key" (#264). Davish still cannot read `.ppk` itself.
+- Disk: the "Old rotated logs" cleanup no longer deletes files like PCP's live archive volumes (`20261125.00.10.0`). It matched any name ending in `.0`-`.9`; now the number must follow a letter, as in `syslog.1` or `auth.log.2` (#296).
 
 ## [1.15.1] - 2026-11-24
 
