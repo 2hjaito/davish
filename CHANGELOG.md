@@ -14,6 +14,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 - **Kết nối qua control socket của OpenSSH** (#240): với kiểu đăng nhập chỉ chạy được qua OpenSSH, như agent cấp chứng chỉ theo yêu cầu (authentik), hộp thoại server có ô **Nâng cao: dùng control socket của ssh**. Bạn tự chạy một master (`ssh -M -S <đường dẫn> -fN user@host`) rồi đưa đường dẫn của nó cho Davish: Davish gắn vào kết nối đó, nên OpenSSH lo việc đăng nhập và Davish không bao giờ thấy thông tin đăng nhập của bạn. Nó thay thế phần xác thực của server đó, và chỉ có trên Linux và macOS. Đã thử với authentik bởi @PlayerFann14.
 
 ### Đổi
+- Khi dùng ảnh làm hình nền, menu bar giờ theo độ sáng của ảnh chứ không theo giao diện sáng/tối: chữ sáng trên kính khói khi ảnh tối, chữ tối trên kính sáng khi ảnh sáng, để nhãn, icon và đồng hồ luôn dễ đọc (như macOS). Độ sáng được tính một lần lúc chọn ảnh, từ dải trên cùng và mức làm tối, và chỉ khi kính còn trong suốt.
 - Các chỉ số trên thanh menu (CPU, RAM, Ổ đĩa, mạng) to hơn: vòng, số trong vòng và tên tăng khoảng một phần mười, dễ đọc hơn (#288).
 - Nhật ký giờ ghi lại khi không kết nối được SSH agent và vì sao (ví dụ pipe của Windows đang bận hoặc không có), để nhìn log biết được "không có agent" khác "có agent nhưng không mở được", và agent trả lời sau bao lâu. Agent chờ bạn mở khóa hoặc xác nhận, như của Bitwarden, có thể cần hơn 5 giây Davish chờ: chạy Davish với `DAVISH_AGENT_WAIT=60` (giây, từ 1 đến 300) để chờ lâu hơn (#168).
 

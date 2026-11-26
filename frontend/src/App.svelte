@@ -12,6 +12,7 @@
   import { resolveTheme, settings } from './lib/stores/settings.svelte'
   import { wallpaperImage } from './lib/stores/wallpaperImage.svelte'
   import { mixWallpaper, wallpaperMode } from './lib/wallpaper'
+  import { toneOf } from './lib/wallpaperTone'
 
   const systemDark = new MediaQuery('prefers-color-scheme: dark')
 
@@ -28,6 +29,12 @@
     if (knobs.wallpaperImage) void wallpaperImage.ensure()
     const mode = wallpaperMode(knobs, wallpaperImage.has)
     root.dataset.perfWallpaper = mode
+    // Over a picture the menu bar follows the picture, not the theme: light
+    // text for a dark one, dark text for a bright one (tokens.css).
+    const luma = wallpaperImage.luma
+    if (mode === 'image' && luma !== null)
+      root.dataset.barTone = toneOf(luma, settings.wallpaperDim)
+    else delete root.dataset.barTone
     root.dataset.reduceMotion = String(!knobs.motion)
     const accent = settings.wallpaperAccent
     root.style.setProperty('--wallpaper-accent', accent)
