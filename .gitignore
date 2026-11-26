@@ -95,6 +95,7 @@ CLAUDE.local.md
 
 # Landing page build (site/, ADR 0025)
 site/dist/
+site/src/generated/
 site/.astro/
 
 promo

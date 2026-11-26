@@ -150,6 +150,13 @@ export const en = {
       { label: 'Keyboard shortcuts', href: 'start/shortcuts/' },
     ],
   },
+  changelog: {
+    title: 'Changelog · Davish',
+    description: 'What changed in each release of Davish, newest first.',
+    heading: 'Changelog',
+    lead: 'What changed in each release, newest first.',
+    englishOnly: 'The changelog is in English.',
+  },
   community: { discord: 'Join us on Discord', discordNote: 'Questions, ideas and early builds.' },
   thanks: {
     title: 'Made with people who use it',

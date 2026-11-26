@@ -150,6 +150,13 @@ export const zh: Dict = {
       { label: '键盘快捷键', href: 'start/shortcuts/' },
     ],
   },
+  changelog: {
+    title: '更新日志 · Davish',
+    description: 'Davish 每个版本的变化，最新的在最上面。',
+    heading: '更新日志',
+    lead: '每个版本的变化，最新的在最上面。',
+    englishOnly: '更新日志目前只有英文。',
+  },
   community: { discord: '加入 Discord', discordNote: '提问、建议和抢先体验版本。' },
   thanks: {
     title: '与使用它的人一起打造',

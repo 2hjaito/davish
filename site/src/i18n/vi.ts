@@ -151,6 +151,13 @@ export const vi: Dict = {
       { label: 'Phím tắt', href: 'start/shortcuts/' },
     ],
   },
+  changelog: {
+    title: 'Nhật ký thay đổi · Davish',
+    description: 'Mỗi bản phát hành của Davish có gì mới, bản mới nhất ở trên.',
+    heading: 'Nhật ký thay đổi',
+    lead: 'Mỗi bản phát hành có gì mới, bản mới nhất ở trên.',
+    englishOnly: '',
+  },
   community: { discord: 'Tham gia Discord', discordNote: 'Hỏi đáp, góp ý và bản dùng thử sớm.' },
   thanks: {
     title: 'Được làm cùng những người dùng nó',

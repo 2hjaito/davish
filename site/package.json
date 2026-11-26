@@ -4,7 +4,9 @@
   "type": "module",
   "description": "davish.app: the landing page and the docs (ADR 0025). Built apart from the app.",
   "scripts": {
+    "predev": "node scripts/changelog.mjs",
     "dev": "astro dev",
+    "prebuild": "node scripts/changelog.mjs",
     "build": "astro build",
     "preview": "astro preview"
   },
