@@ -4,6 +4,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Added
+- **GPU processes, like nvtop**: Monitor → GPU now lists the processes on each NVIDIA GPU below the cards: PID, user, GPU, type, utilization, GPU memory and its share of the card, CPU, host memory and the command, sorted by any column. It runs `nvidia-smi` and reads `/proc` for those processes every 3 seconds, only while the GPU tab is open. Where the driver has no `pmon` only compute processes show, without utilization; Windows in WDDM mode shows no GPU memory per process.
+
 ### Fixed
 - Deleting a server now names the other servers that go through it as a jump host and will connect directly afterwards, so that is seen before you confirm. The rest of the audit after #296 found nothing else to change in the script shortcuts, the updater (signed checksums, no downgrades) or the app lock reset.
 

@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- **Tiến trình GPU, giống nvtop**: Monitor → GPU giờ liệt kê các tiến trình trên mỗi GPU NVIDIA bên dưới các thẻ: PID, người dùng, GPU, loại, mức sử dụng, bộ nhớ GPU và tỉ lệ trên card, CPU, bộ nhớ máy và lệnh, sắp xếp được theo mọi cột. Davish chạy `nvidia-smi` và đọc `/proc` của các tiến trình đó mỗi 3 giây, chỉ khi đang mở tab GPU. Driver không có `pmon` thì chỉ hiện tiến trình tính toán, không có mức sử dụng; Windows ở chế độ WDDM không có bộ nhớ GPU theo từng tiến trình.
+
 ### Sửa
 - Xóa một server giờ nêu tên các server khác đang đi qua nó (jump host) và sẽ chuyển sang kết nối thẳng, để thấy điều đó trước khi xác nhận. Phần rà soát còn lại sau #296 không thấy gì cần đổi ở lối tắt script, bộ cập nhật (checksum có chữ ký, không hạ phiên bản) hay đặt lại khóa app.
 
