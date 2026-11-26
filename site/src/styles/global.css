@@ -1082,3 +1082,186 @@ p {
 :root[data-theme='dark'] .theme .moon {
   display: block;
 }
+
+/* What people say: three open, the rest folded; translations folded too. */
+.voices-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.voices-head > p {
+  color: var(--fg-subtle);
+  font-size: 15px;
+}
+
+.block.voices > .voices-head {
+  text-align: left;
+}
+
+.voices-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 40px;
+}
+
+.voice {
+  margin: 0;
+  padding: 28px;
+  border-radius: 18px;
+  background: var(--panel);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.voice blockquote {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.voice-tr summary {
+  cursor: pointer;
+  color: var(--fg-subtle);
+  font-size: 14px;
+}
+
+.voice-tr p {
+  margin-top: 8px;
+  color: var(--fg-muted);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.voice figcaption {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+}
+
+.voice figcaption img {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--raise);
+  flex-shrink: 0;
+}
+
+.voice .by {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.voice .who {
+  color: var(--fg);
+  font-weight: 500;
+}
+
+.voice a.who:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.voice .src {
+  color: var(--fg-subtle);
+}
+
+.voices-more > summary {
+  display: inline-block;
+  margin-top: 32px;
+  cursor: pointer;
+  color: var(--fg);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  list-style: none;
+}
+
+.voices-more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.voices-more:not([open]) .when-open,
+.voices-more[open] .when-closed {
+  display: none;
+}
+
+.voices-more[open] > summary {
+  margin-top: 24px;
+}
+
+.voices-more[open] .voices-grid {
+  margin-top: 24px;
+}
+
+/* The changelog page: the repo's markdown, set in the page's own type. */
+.changelog {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 96px 24px 40px;
+}
+
+.changelog > p {
+  margin-top: 12px;
+}
+
+.changelog .note {
+  margin-top: 8px;
+  color: var(--fg-subtle);
+  font-size: 15px;
+}
+
+.log {
+  margin-top: 48px;
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.log h2 {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  font-size: 28px;
+}
+
+.log h3 {
+  margin-top: 28px;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.log ul {
+  margin-top: 12px;
+  padding-left: 20px;
+  list-style: disc;
+}
+
+.log li {
+  margin-top: 10px;
+}
+
+.log a {
+  color: var(--accent);
+}
+
+.log a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.log code {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--raise);
+  font-family: var(--mono);
+  font-size: 0.9em;
+}

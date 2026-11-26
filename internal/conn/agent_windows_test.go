@@ -8,6 +8,8 @@ func TestIsPipe(t *testing.T) {
 	for path, want := range map[string]bool{
 		`\\.\pipe\openssh-ssh-agent`: true,
 		`//./pipe/openssh-ssh-agent`: true,
+		`\\?\pipe\openssh-ssh-agent`: true,
+		`//?/pipe/openssh-ssh-agent`: true,
 		`C:\Users\x\.ssh\agent.sock`: false,
 		`/tmp/ssh-x/agent.1`:         false,
 	} {

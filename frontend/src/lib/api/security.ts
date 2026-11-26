@@ -74,6 +74,8 @@ export interface SecurityReport {
   fail2ban: Firewall
   /** sshd's PasswordAuthentication: 'yes', 'no' or '' when unknown. */
   passwordAuth: string
+  /** Davish's own drop-in turned it off, so Davish can undo it (ADR 0029). */
+  passwordOurs: boolean
   disablePassword: string
 }
 
@@ -102,3 +104,31 @@ export const securityApply = (
   ip: string,
   command: string,
 ): Promise<void> => App.SecurityApply(serverID, action, ip, command)
+
+/** What sshd does about password logins, and why turning them off is not offered. */
+export interface PasswordStatus {
+  password: string
+  kbdInteractive: string
+  ours: boolean
+  /** noInclude, match, methods, control or password (internal/security/password.go). */
+  blocked: string[]
+}
+
+export interface PasswordPlan {
+  status: SecurityPlan
+  disable: SecurityPlan
+  /** Undoes disable: removes the drop-in and reloads sshd. */
+  enable: SecurityPlan
+}
+
+export const securityPasswordStatus = (serverID: string): Promise<PasswordStatus> =>
+  App.SecurityPasswordStatus(serverID)
+
+export const securityPasswordPlan = (root: boolean): Promise<PasswordPlan> =>
+  App.SecurityPasswordPlan(root)
+
+export const securityDisablePassword = (serverID: string, command: string): Promise<void> =>
+  App.SecurityDisablePassword(serverID, command)
+
+export const securityEnablePassword = (serverID: string, command: string): Promise<void> =>
+  App.SecurityEnablePassword(serverID, command)

@@ -8,6 +8,7 @@
     type BackupMode,
     cleanFontName,
     DOCK_POSITIONS,
+    STARTUP_VIEWS,
     DOCK_SIZES,
     type DockSize,
     EDITOR_FONT,
@@ -373,6 +374,16 @@
               >
             </div>
           {/if}
+          <div class="row">
+            {@render head(t.settings.startup, t.settings.startupHint)}
+            {@render segmented(
+              t.settings.startup,
+              STARTUP_VIEWS,
+              settings.startup ?? 'last',
+              (v) => t.settings.startups[v],
+              (v) => settings.set('startup', v),
+            )}
+          </div>
         </div>
       {:else if pane === 'account'}
         <div class="profile">

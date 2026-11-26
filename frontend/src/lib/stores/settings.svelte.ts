@@ -140,6 +140,21 @@ export const ALERTS = {
 export const DOCK_POSITIONS = ['bottom', 'left', 'right', 'top'] as const
 export type DockPosition = (typeof DOCK_POSITIONS)[number]
 
+/**
+ * What Davish does when it opens (#273, #281): show All servers, open the
+ * last server and connect to it, or open it without connecting.
+ */
+export const STARTUP_VIEWS = ['all', 'last', 'none'] as const
+export type StartupView = (typeof STARTUP_VIEWS)[number]
+
+/**
+ * The first value of the setting. People who already have servers keep what
+ * Davish always did; a new install opens on All servers.
+ */
+export function defaultStartup(hasServers: boolean): StartupView {
+  return hasServers ? 'last' : 'all'
+}
+
 /** The Dock's tile size, in px at rest. */
 export const DOCK_SIZES = { small: 44, medium: 56, large: 68 } as const
 
@@ -175,6 +190,8 @@ interface SettingsData extends StoredPerf {
   dockAutohide: boolean
   dockPosition: DockPosition
   dockTransparent: boolean
+  /** Null until the first launch of a build that has the setting. */
+  startup: StartupView | null
   menubarStats: StatId[]
   alertMem: number
   alertDisk: number
@@ -215,6 +232,7 @@ const defaults: SettingsData = {
   dockAutohide: false,
   dockPosition: 'bottom',
   dockTransparent: false,
+  startup: null,
   menubarStats: [...DEFAULT_STATS],
   alertMem: ALERTS.defaults.mem,
   alertDisk: ALERTS.defaults.disk,
@@ -418,6 +436,22 @@ class Settings {
   /** Which screen edge the Dock sits on. */
   get dockPosition(): DockPosition {
     return DOCK_POSITIONS.includes(this.#data.dockPosition) ? this.#data.dockPosition : 'bottom'
+  }
+  /** What opens at launch; null before the first launch has chosen one. */
+  get startup(): StartupView | null {
+    const v = this.#data.startup
+    return v !== null && STARTUP_VIEWS.includes(v) ? v : null
+  }
+  /**
+   * Picks the launch behavior once, on the first launch that has the setting:
+   * people who already have servers keep opening the last one.
+   */
+  settleStartup(hasServers: boolean): StartupView {
+    const current = this.startup
+    if (current) return current
+    const v = defaultStartup(hasServers)
+    this.set('startup', v)
+    return v
   }
   /** The Dock without its glass: only the icons float over the wallpaper. */
   get dockTransparent() {

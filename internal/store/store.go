@@ -59,6 +59,11 @@ type Server struct {
 	// OpenSSH then does the authentication and host key check. Empty is the
 	// normal login. Unix only.
 	ControlPath string `json:"controlPath,omitempty"`
+	// Distro is which logo the server gets: "ubuntu", "debian", "windows",
+	// "macos"… or "linux" for a distribution without its own. Davish finds
+	// it when the server connects (SetDistro); Save never takes it from the
+	// caller, so editing a server keeps it.
+	Distro string `json:"distro,omitempty"`
 }
 
 // file is the on-disk layout of servers.json. Slice order is display order.
@@ -152,12 +157,34 @@ func (s *Store) Save(ctx context.Context, srv Server) (Server, error) {
 		if i < 0 {
 			return Server{}, apperr.New(apperr.NotFound, "server not found")
 		}
+		srv.Distro = f.Servers[i].Distro
 		f.Servers[i] = srv
 	}
 	if err := s.write(f); err != nil {
 		return Server{}, err
 	}
 	return srv, nil
+}
+
+// SetDistro records which logo server id gets. It rewrites the file only
+// when the value changed, and a server that is gone is not an error: the
+// connection that found the distribution may outlive the server.
+func (s *Store) SetDistro(ctx context.Context, id, distro string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	f, err := s.load()
+	if err != nil {
+		return err
+	}
+	i := slices.IndexFunc(f.Servers, func(x Server) bool { return x.ID == id })
+	if i < 0 || f.Servers[i].Distro == distro {
+		return nil
+	}
+	f.Servers[i].Distro = distro
+	return s.write(f)
 }
 
 // Delete removes the server and every secret stored for it.

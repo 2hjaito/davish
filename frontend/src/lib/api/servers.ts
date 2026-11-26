@@ -24,6 +24,8 @@ export interface ServerInfo {
   group?: string
   jumpID?: string
   controlPath?: string
+  /** Logo key of the system it runs, found when it connects (internal/platform/distro.go). */
+  distro?: string
   hasPassword: boolean
   hasPassphrase: boolean
   state: ConnState

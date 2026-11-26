@@ -467,6 +467,31 @@ func TestPlatformIsDetectedAfterConnecting(t *testing.T) {
 	}
 }
 
+// The test sshd is Ubuntu: the status carries its logo, and the store keeps
+// it, so the lists show it before the next connection.
+func TestDistroIsDetectedAndSaved(t *testing.T) {
+	e := setup(t, testServer(), conn.Options{})
+	pin(t, e.hostKeys, testsshd.HostKey(t))
+	if err := e.m.Connect(context.Background(), e.id); err != nil {
+		t.Fatal(err)
+	}
+	deadline := time.Now().Add(5 * time.Second)
+	for time.Now().Before(deadline) {
+		if c := e.rec.connected(); len(c) > 0 && c[len(c)-1].Distro != "" {
+			break
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	c := e.rec.connected()
+	if len(c) == 0 || c[len(c)-1].Distro != "ubuntu" {
+		t.Fatalf("connected events = %+v; want a last one with distro ubuntu", c)
+	}
+	srv, err := e.store.Server(context.Background(), e.id)
+	if err != nil || srv.Distro != "ubuntu" {
+		t.Fatalf("stored distro = %q, %v", srv.Distro, err)
+	}
+}
+
 // A ControlMaster the user started with the system ssh carries the login:
 // Davish attaches to its socket and never authenticates itself (#240).
 func TestConnectThroughControlMaster(t *testing.T) {

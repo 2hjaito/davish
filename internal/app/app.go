@@ -145,6 +145,7 @@ func New(version string) (*App, error) {
 	a.disk.UseRoot(a.sudo)
 	a.security = security.New(runner)
 	a.security.UseRoot(a.sudo)
+	a.security.UseKeys(a.conns)
 	a.diag = diag.New(runner, a.conns)
 	a.tunnels = ports.NewTunnels(a.conns, emitter{a}, log)
 	a.browser = ports.NewBrowser(a.conns, log)
@@ -216,4 +217,11 @@ func (a *App) change() context.Context { return audit.Changing(a.ctx) }
 // not a method, so Wails does not bind it.
 func LogInfo(a *App, msg string, args ...any) {
 	a.log.Info(msg, args...)
+}
+
+// InitAgentEnv resolves SSH_AUTH_SOCK from the user's login shell when
+// launched as a desktop GUI app outside a terminal. A plain function, not a
+// method, so Wails does not bind it.
+func InitAgentEnv(a *App) {
+	conn.InitAgentEnv(a.log)
 }

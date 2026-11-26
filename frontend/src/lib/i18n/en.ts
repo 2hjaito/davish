@@ -190,9 +190,37 @@ const en = {
       unknown: 'Could not read the sshd configuration; OpenSSH defaults to on.',
       useKeyFirst:
         'Davish logs in to this server with a password. Switch to a key in the SSH keys app first, then turn off password login.',
-      how: 'The command below adds a file in /etc/ssh/sshd_config.d, checks it with sshd -t and only then reloads; if the check fails, the file is removed. sshd_config must have an Include sshd_config.d line (Ubuntu 20.04+, Debian 11+).',
-      keepOpen:
-        'Keep this session open until reconnecting with the key works (File → Disconnect, then Connect).',
+      how: 'The change is a file in /etc/ssh/sshd_config.d; your own sshd settings are not edited. sshd_config must have an Include sshd_config.d line (Ubuntu 20.04+, Debian 11+).',
+      allow: 'Allow password login',
+      offOwn:
+        'This server turned it off in its own sshd settings. Davish only undoes changes it made itself.',
+      offByDavish: 'Off: Davish turned password login off on this server.',
+      undoHint:
+        'Turning it back on only removes the file Davish added; your own sshd settings are not touched.',
+      turnOn: 'Turn password login back on',
+      turnOff: 'Turn off password login',
+      doneOff: 'Password login is off, and the key still logs in.',
+      doneOn: 'Password login is back on.',
+      blocked: {
+        noInclude: 'sshd_config does not read /etc/ssh/sshd_config.d here (older OpenSSH).',
+        match:
+          'A Match block in the sshd settings turns password login on for some users, so a global change would not reach them.',
+        methods:
+          'AuthenticationMethods asks for a password as well as a key, so turning it off would lock everyone out.',
+        control:
+          'Davish reaches this server through a control socket, so it cannot test a key login on its own.',
+        password: 'Davish logs in with a password.',
+      },
+      blockedHint:
+        'Davish will not change this from here. Fix it in the sshd settings first, then check again.',
+      checkAgain: 'Check again',
+      confirmOffTitle: 'Turn off password login?',
+      confirmOffBody:
+        'Davish checks that your key logs in over a new connection, backs up the sshd settings, turns password login off and reloads sshd. If the key then fails to log in, it undoes the change. Runs as root:',
+      confirmOffNote:
+        'Your current session stays open. Keep it until you have tried a new login with the key.',
+      confirmOnTitle: 'Turn password login back on?',
+      confirmOnBody: 'Removes the file Davish added and reloads sshd:',
     },
     failed: {
       title: (n: number) => `Failed logins (7 days): ${n}`,
@@ -2163,6 +2191,10 @@ const en = {
     themes: { system: 'Auto', light: 'Light', dark: 'Dark' },
     language: 'Language',
     languageHint: 'The language of the interface.',
+    startup: 'When Davish opens',
+    startupHint:
+      'All servers shows the list. Last server opens and connects to the one you used last. Nothing opens the last server without connecting, for servers behind a VPN or in production.',
+    startups: { all: 'All servers', last: 'Last server', none: 'Nothing' },
     langs: { vi: 'Tiếng Việt', en: 'English', zh: '简体中文', es: 'Español' },
     langRestart:
       'Davish will restart: running terminals and transfers stop, and servers reconnect on their own.',
@@ -3478,6 +3510,10 @@ const en = {
     DB_AUTH_FAILED: 'MongoDB refused this user or password.',
     SUDO_PASSWORD_REQUIRED: 'The server needs the sudo password for this.',
     SUDO_PASSWORD_WRONG: 'sudo did not accept this password.',
+    SEC_KEY_LOGIN_FAILED:
+      'The key could not log in over a new connection, so nothing was changed. Check the key in the SSH keys app first.',
+    SEC_KEY_LOGIN_LOST:
+      'After the change the key could not log in, so Davish undid it. If password login is still off, remove /etc/ssh/sshd_config.d/00-davish-no-password.conf and reload sshd.',
     INVENTORY_YAML_UNSUPPORTED:
       'This inventory is YAML (or JSON). Davish only reads INI inventories for now.',
     INVENTORY_SCRIPT_UNSUPPORTED:

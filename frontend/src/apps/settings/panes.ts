@@ -31,7 +31,7 @@ function words(p: Pane): string[] {
     case 'account':
       return [s.profileName, s.avatarPick, s.lock, s.lockAfter, s.lockChange]
     case 'general':
-      return [s.language]
+      return [s.language, s.startup, ...Object.values(s.startups)]
     case 'appearance':
       return [s.theme, ...Object.values(s.themes), s.wallpaper, s.monoFont]
     case 'performance':
