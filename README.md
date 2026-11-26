@@ -73,7 +73,7 @@ Nothing to install on the server.
 **The desktop**
 
 - [Spotlight & Launchpad](FEATURES.md#spotlight--launchpad): open anything with `⌘K`, every app by group
-- [Menu bar and help](FEATURES.md#menu-bar-and-help): every command and shortcut, a `?` on each app
+- [Menu bar and help](FEATURES.md#menu-bar-and-help): every command and shortcut, a `?` on each app, and your choice of what opens at start
 - [App lock](FEATURES.md#app-lock): Touch ID or a password, locks on wake
 - [Updates](FEATURES.md#updates): one click to a new version, signature checked
 - [Light and dark](FEATURES.md#light-and-dark): follows your system, or pick one

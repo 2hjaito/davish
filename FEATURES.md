@@ -234,6 +234,8 @@ A real menu bar (File, View, Go, Window, Help and the focused app's own commands
 
 A real menu bar (File, View, Go, Window, Help and the focused app's own commands), every shortcut under `⌘/`, a `?` on each app explaining what it does and which commands it runs on the server, a first-run tour and a demo mode with sample data.
 
+The menu bar also shows the CPU, RAM, disk and network of the server in use as small rings (hover one for its last 15 minutes). **Settings → General → When Davish opens** picks what appears at start: **All servers**, the **last server** (it opens and connects to it, as Davish always did) or **nothing** (it opens the last server's workspace without connecting, for servers behind a VPN or in production). A new install opens on All servers; if you already have servers you keep the last server.
+
 <table><tr>
   <td><img src="assets/screenshots/menu.jpg" alt="The Go menu with its shortcuts"></td>
   <td><img src="assets/screenshots/help.jpg" alt="An app's help"></td>

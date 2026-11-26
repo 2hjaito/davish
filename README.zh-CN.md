@@ -73,7 +73,7 @@
 **桌面**
 
 - [Spotlight 与 Launchpad](FEATURES.md#spotlight--launchpad)：按 `⌘K` 打开任何东西，所有应用按分组排列
-- [菜单栏与帮助](FEATURES.md#menu-bar-and-help)：所有命令和快捷键，每个应用都有 `?` 帮助
+- [菜单栏与帮助](FEATURES.md#menu-bar-and-help)：所有命令和快捷键，每个应用都有 `?` 帮助，以及可选择启动时打开什么
 - [应用锁](FEATURES.md#app-lock)：Touch ID 或密码，唤醒时锁定
 - [更新](FEATURES.md#updates)：一键更新到新版本，校验签名
 - [浅色与深色](FEATURES.md#light-and-dark)：跟随系统，或手动选择
