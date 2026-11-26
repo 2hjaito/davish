@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { approach, magnify, MAX_SCALE } from './magnify'
+import { approach, magnify, MAX_SCALE, slotAt, slotCenter } from './magnify'
 
 const step = 66
 
@@ -31,5 +31,25 @@ describe('approach', () => {
     expect(next).toBeGreaterThan(1)
     expect(next).toBeLessThan(1.2)
     expect(approach(1.19999, 1.2, 16)).toBe(1.2)
+  })
+})
+
+describe('slotAt', () => {
+  it('finds the slot whose resting center is nearest', () => {
+    expect(slotAt(0, 5, step)).toBe(2)
+    expect(slotAt(-2 * step, 5, step)).toBe(0)
+    expect(slotAt(0.4 * step, 5, step)).toBe(2)
+    expect(slotAt(0.6 * step, 5, step)).toBe(3)
+    // Even counts have no slot at the center.
+    expect(slotAt(-0.4 * step, 4, step)).toBe(1)
+    expect(slotAt(0.4 * step, 4, step)).toBe(2)
+  })
+
+  it('is the inverse of slotCenter', () => {
+    for (let i = 0; i < 6; i++) expect(slotAt(slotCenter(i, 6, step), 6, step)).toBe(i)
+  })
+
+  it('returns the first slot before the dock has laid out', () => {
+    expect(slotAt(10, 5, 0)).toBe(0)
   })
 })

@@ -15,10 +15,20 @@ const SMOOTH_MS = 70
 export function magnify(x: number, count: number, step: number): number[] {
   const reach = REACH * step
   return Array.from({ length: count }, (_, i) => {
-    const d = Math.abs(x - (i - (count - 1) / 2) * step)
+    const d = Math.abs(x - slotCenter(i, count, step))
     if (d >= reach) return 1
     return 1 + ((MAX_SCALE - 1) * (Math.cos((Math.PI * d) / reach) + 1)) / 2
   })
+}
+
+/** Resting center of slot `i` of `count`, in px from the dock's center. */
+export function slotCenter(i: number, count: number, step: number): number {
+  return (i - (count - 1) / 2) * step
+}
+
+/** The slot whose resting center is nearest `x` px from the dock's center. */
+export function slotAt(x: number, count: number, step: number): number {
+  return step > 0 ? Math.round(x / step + (count - 1) / 2) : 0
 }
 
 /** Frame-rate independent exponential approach from `current` toward `target`. */

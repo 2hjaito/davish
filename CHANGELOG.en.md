@@ -4,6 +4,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Added
+- **Reorder the Dock**: drag a pinned icon along the Dock to move it, as on macOS. The other icons step aside to show where it lands, and the new order is kept when you let go. It stays between Launchpad and the open apps that are not kept in the Dock, Escape while dragging puts it back, and a click still opens the app. Pins for apps another server's system has keep their places.
+
 ### Fixed
 - Deleting a server now names the other servers that go through it as a jump host and will connect directly afterwards, so that is seen before you confirm. The rest of the audit after #296 found nothing else to change in the script shortcuts, the updater (signed checksums, no downgrades) or the app lock reset.
 

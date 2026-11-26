@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- **Sắp xếp lại Dock**: kéo một icon đã ghim dọc theo Dock để đổi chỗ, như macOS. Các icon khác dịch ra để cho thấy chỗ nó sẽ nằm, và thứ tự mới được giữ khi thả chuột. Icon chỉ đi trong khoảng giữa Launchpad và các app đang mở mà không ghim, nhấn Esc khi đang kéo để trả về chỗ cũ, còn bấm một cái vẫn mở app như trước. Các app được ghim nhưng chỉ có trên hệ điều hành của server khác vẫn giữ nguyên chỗ.
+
 ### Sửa
 - Xóa một server giờ nêu tên các server khác đang đi qua nó (jump host) và sẽ chuyển sang kết nối thẳng, để thấy điều đó trước khi xác nhận. Phần rà soát còn lại sau #296 không thấy gì cần đổi ở lối tắt script, bộ cập nhật (checksum có chữ ký, không hạ phiên bản) hay đặt lại khóa app.
 
