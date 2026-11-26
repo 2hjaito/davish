@@ -25,7 +25,7 @@
     transferNoticeId,
     transfers,
   } from '../stores/transfers.svelte'
-  import { openDisk, openFilesAt, openLogs, openTransfers } from '../wm/intents.svelte'
+  import { openDisk, openFilesAt, openLogs, openServers, openTransfers } from '../wm/intents.svelte'
   import Banners from './Banners.svelte'
   import { ui } from '../stores/ui.svelte'
   import Window from '../wm/Window.svelte'
@@ -116,6 +116,16 @@
     return () => {
       disposed = true
       stop()
+    }
+  })
+
+  // #281: when the setting says so, the overview is what opens first.
+  let launchShown = false
+  $effect(() => {
+    if (launchShown || !servers.ready || servers.launchView === null) return
+    launchShown = true
+    if (servers.launchView === 'all' && servers.list.length > 0) {
+      untrack(() => openServers(servers.activeId || (servers.list[0]?.id ?? '')))
     }
   })
 

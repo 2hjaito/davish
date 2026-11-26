@@ -1,0 +1,26 @@
+---
+// The page's foot, shared by the landing page and the changelog.
+import { dicts, locales, type Locale } from '../i18n'
+import { links } from '../lib/release'
+
+interface Props {
+  locale: Locale
+}
+const { locale } = Astro.props
+const t = dicts[locale]
+const here = locales.find((l) => l.id === locale)!
+const docs = locale === 'en' ? '/docs/' : `/${locale}/docs/`
+const changelog = locale === 'en' ? '/changelog/' : `/${locale}/changelog/`
+---
+
+<footer class="foot">
+  <a class="brand" href={here.path}><img src="/favicon.svg" alt="" width="22" height="22" /><span>Davish</span></a>
+  <p>{t.footer.license}</p>
+  <nav aria-label="Footer">
+    <a href={docs}>{t.nav.docs}</a>
+    <a href={links.repo}>GitHub</a>
+    <a href={links.discord}>Discord</a>
+    <a href={changelog}>{t.footer.changelog}</a>
+    <a href={links.issues}>{t.footer.issues}</a>
+  </nav>
+</footer>

@@ -218,3 +218,10 @@ func (a *App) change() context.Context { return audit.Changing(a.ctx) }
 func LogInfo(a *App, msg string, args ...any) {
 	a.log.Info(msg, args...)
 }
+
+// InitAgentEnv resolves SSH_AUTH_SOCK from the user's login shell when
+// launched as a desktop GUI app outside a terminal. A plain function, not a
+// method, so Wails does not bind it.
+func InitAgentEnv(a *App) {
+	conn.InitAgentEnv(a.log)
+}

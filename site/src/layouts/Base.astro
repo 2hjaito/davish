@@ -13,9 +13,15 @@ import { dicts, locales, type Locale } from '../i18n'
 
 interface Props {
   locale: Locale
+  /** The page's own path under the locale (empty for the landing page). */
+  suffix?: string
+  title?: string
+  description?: string
 }
-const { locale } = Astro.props
+const { locale, suffix = '', title, description } = Astro.props
 const t = dicts[locale]
+const pageTitle = title ?? t.title
+const pageDescription = description ?? t.description
 const site = Astro.site ?? new URL('https://davish.app')
 const here = locales.find((l) => l.id === locale)!
 const image = new URL({ en: og, vi: ogVi, zh: ogZh }[locale].src, site).href
@@ -26,8 +32,8 @@ const image = new URL({ en: og, vi: ogVi, zh: ogZh }[locale].src, site).href
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{t.title}</title>
-    <meta name="description" content={t.description} />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
     <meta name="color-scheme" content="dark light" />
     <script is:inline>
       // Before paint: JavaScript is on, and the theme the visitor chose
@@ -54,13 +60,13 @@ const image = new URL({ en: og, vi: ogVi, zh: ogZh }[locale].src, site).href
       })()
     </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="canonical" href={new URL(here.path, site).href} />
-    {locales.map((l) => <link rel="alternate" hreflang={l.hreflang} href={new URL(l.path, site).href} />)}
-    <link rel="alternate" hreflang="x-default" href={new URL('/', site).href} />
+    <link rel="canonical" href={new URL(here.path + suffix, site).href} />
+    {locales.map((l) => <link rel="alternate" hreflang={l.hreflang} href={new URL(l.path + suffix, site).href} />)}
+    <link rel="alternate" hreflang="x-default" href={new URL('/' + suffix, site).href} />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content={t.title} />
-    <meta property="og:description" content={t.description} />
-    <meta property="og:url" content={new URL(here.path, site).href} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={new URL(here.path + suffix, site).href} />
     <meta property="og:image" content={image} />
     <meta name="twitter:card" content="summary_large_image" />
   </head>

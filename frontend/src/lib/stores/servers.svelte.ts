@@ -6,6 +6,7 @@ import { t } from '../i18n'
 import type { ConnState, Platform, ServerDraft, ServerInfo } from '../api/servers'
 import { displayOrder } from '../shell/groups'
 import { load, save } from './persist'
+import { settings, type StartupView } from './settings.svelte'
 import { shortcuts } from './shortcuts.svelte'
 
 export type { ConnState, Platform }
@@ -74,6 +75,9 @@ class Servers {
     return this.list.find((s) => s.id === id)?.platform ?? 'unknown'
   }
 
+  /** What the app opened with, once init has read the setting. */
+  launchView = $state<StartupView | null>(null)
+
   /** Loads the saved servers and starts listening to connection events. */
   async init(): Promise<() => void> {
     if (!hasRuntime) return () => {}
@@ -95,7 +99,10 @@ class Servers {
     await this.reload()
     this.ready = true
     if (!this.active) this.activeId = this.list[0]?.id ?? ''
-    void this.ensureConnected(this.activeId)
+    // #273, #281: only "last" connects on its own; "all" opens the overview
+    // (Desktop does that) and "none" waits for a click.
+    this.launchView = settings.settleStartup(this.list.length > 0)
+    if (this.launchView === 'last') void this.ensureConnected(this.activeId)
     return () => {
       offStatus()
       offPrompt()

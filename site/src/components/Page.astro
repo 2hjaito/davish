@@ -8,9 +8,11 @@ import { links, release } from '../lib/release'
 import { contributors } from '../lib/contributors'
 import { stats } from '../lib/stats'
 import AppIcon from './AppIcon.astro'
-import Flag from './Flag.astro'
+import Footer from './Footer.astro'
 import Icon from './Icon.astro'
+import Nav from './Nav.astro'
 import Shot from './Shot.astro'
+import Voices from './Voices.astro'
 
 interface Props {
   locale: Locale
@@ -78,49 +80,7 @@ const platforms = [
 
 <Base locale={locale}>
   <div class="frame">
-    <header class="nav">
-      <a class="brand" href={here.path}>
-        <img src="/favicon.svg" alt="" width="30" height="30" />
-        <span>Davish</span>
-      </a>
-      <nav class="links" aria-label="Main">
-        <a href="#features">{t.nav.features}</a>
-        <a href={docs}>{t.nav.docs}</a>
-        <a href="#download">{t.nav.download}</a>
-        <a href={links.changelog(t.lang)}>{t.nav.changelog}</a>
-      </nav>
-      <div class="actions">
-        <div class="lang">
-          <button type="button" class="nav-btn" aria-haspopup="true" aria-label={t.footer.language}>
-            <Flag id={locale} />
-            <span>{here.name}</span>
-            <Icon name="chevron-down" size={14} />
-          </button>
-          <ul>
-            {
-              locales.map((l) => (
-                <li>
-                  <a href={l.path} hreflang={l.hreflang} aria-current={l.id === locale ? 'page' : undefined}>
-                    <Flag id={l.id} />
-                    {l.name}
-                  </a>
-                </li>
-              ))
-            }
-          </ul>
-        </div>
-        <button class="nav-btn theme" type="button" aria-label={t.nav.theme} title={t.nav.theme} data-theme-toggle>
-          <span class="sun"><Icon name="sun" size={17} /></span>
-          <span class="moon"><Icon name="moon" size={17} /></span>
-        </button>
-        <a class="nav-btn" href={links.discord} aria-label="Discord"><Icon name="brand-discord" /></a>
-        <a class="nav-btn" href={links.repo} aria-label="GitHub">
-          <Icon name="brand-github" />
-          {s.stars !== undefined && <span class="mono">{fmt.format(s.stars)}</span>}
-        </a>
-        <a class="nav-btn get" href="#download"><Icon name="download" size={17} /><span>{t.nav.download}</span></a>
-      </div>
-    </header>
+    <Nav locale={locale} />
 
     <section class="hero">
       <div class="hero-text" data-reveal>
@@ -336,6 +296,8 @@ const platforms = [
       </p>
     </section>
 
+    <Voices locale={locale} />
+
     <section class="community">
       <a class="discord" href={links.discord} data-reveal>
         <Icon name="brand-discord" size={26} />
@@ -368,17 +330,7 @@ const platforms = [
       )
     }
 
-    <footer class="foot">
-      <a class="brand" href={here.path}><img src="/favicon.svg" alt="" width="22" height="22" /><span>Davish</span></a>
-      <p>{t.footer.license}</p>
-      <nav aria-label="Footer">
-        <a href={docs}>{t.nav.docs}</a>
-        <a href={links.repo}>GitHub</a>
-        <a href={links.discord}>Discord</a>
-        <a href={links.changelog(t.lang)}>{t.footer.changelog}</a>
-        <a href={links.issues}>{t.footer.issues}</a>
-      </nav>
-    </footer>
+    <Footer locale={locale} />
   </div>
 
   <script is:inline>

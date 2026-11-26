@@ -2118,6 +2118,10 @@ const zh = {
     themes: { system: '自动', light: '浅色', dark: '深色' },
     language: '语言',
     languageHint: '界面的语言。',
+    startup: '打开 Davish 时',
+    startupHint:
+      '“所有服务器”显示列表；“上次的服务器”会打开并连接上次使用的服务器；“不打开”则不连接，适合 VPN 后面或生产环境的服务器。',
+    startups: { all: '所有服务器', last: '上次的服务器', none: '不打开' },
     langs: { vi: 'Tiếng Việt', en: 'English', zh: '简体中文', es: 'Español' },
     langRestart: 'Davish 会重启：正在运行的终端和传输会停止，服务器会自动重新连接。',
     langApply: '重启',
