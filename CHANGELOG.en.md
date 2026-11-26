@@ -5,6 +5,7 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Fixed
+- Docker: **‹ Containers** on a container's page goes back to the table again; the click did nothing (#310). The app menu read the page's container after going back had dropped it, and the error stopped the page from closing. Items an app adds to the menu bar now also leave it when their part of the window closes; before, they stayed behind.
 - Deleting a server now names the other servers that go through it as a jump host and will connect directly afterwards, so that is seen before you confirm. The rest of the audit after #296 found nothing else to change in the script shortcuts, the updater (signed checksums, no downgrades) or the app lock reset.
 
 ## [1.15.2] - 2026-11-26
