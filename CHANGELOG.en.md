@@ -4,6 +4,9 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Added
+- German interface: pick Deutsch in Settings → General → Language; the first time, Davish follows a system set to German.
+
 ### Fixed
 - Deleting a server now names the other servers that go through it as a jump host and will connect directly afterwards, so that is seen before you confirm. The rest of the audit after #296 found nothing else to change in the script shortcuts, the updater (signed checksums, no downgrades) or the app lock reset.
 

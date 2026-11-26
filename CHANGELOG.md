@@ -4,6 +4,9 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Giao diện tiếng Đức: chọn Deutsch trong Cài đặt → Chung → Ngôn ngữ; lần đầu Davish theo máy đặt tiếng Đức.
+
 ### Sửa
 - Xóa một server giờ nêu tên các server khác đang đi qua nó (jump host) và sẽ chuyển sang kết nối thẳng, để thấy điều đó trước khi xác nhận. Phần rà soát còn lại sau #296 không thấy gì cần đổi ở lối tắt script, bộ cập nhật (checksum có chữ ký, không hạ phiên bản) hay đặt lại khóa app.
 
