@@ -151,6 +151,13 @@ export const vi: Dict = {
       { label: 'Phím tắt', href: 'start/shortcuts/' },
     ],
   },
+  changelog: {
+    title: 'Nhật ký thay đổi · Davish',
+    description: 'Mỗi bản phát hành của Davish có gì mới, bản mới nhất ở trên.',
+    heading: 'Nhật ký thay đổi',
+    lead: 'Mỗi bản phát hành có gì mới, bản mới nhất ở trên.',
+    englishOnly: '',
+  },
   voices: {
     title: 'Mọi người nói gì',
     note: 'Trích từ các bài đăng và issue công khai.',

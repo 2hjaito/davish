@@ -1,0 +1,63 @@
+---
+// The top bar, shared by the landing page and the changelog.
+import { dicts, locales, type Locale } from '../i18n'
+import { links } from '../lib/release'
+import { stats } from '../lib/stats'
+import Flag from './Flag.astro'
+import Icon from './Icon.astro'
+
+interface Props {
+  locale: Locale
+}
+const { locale } = Astro.props
+const t = dicts[locale]
+const s = await stats()
+const here = locales.find((l) => l.id === locale)!
+const docs = locale === 'en' ? '/docs/' : `/${locale}/docs/`
+const changelog = locale === 'en' ? '/changelog/' : `/${locale}/changelog/`
+const fmt = new Intl.NumberFormat(t.lang)
+---
+
+<header class="nav">
+  <a class="brand" href={here.path}>
+    <img src="/favicon.svg" alt="" width="30" height="30" />
+    <span>Davish</span>
+  </a>
+  <nav class="links" aria-label="Main">
+    <a href="#features">{t.nav.features}</a>
+    <a href={docs}>{t.nav.docs}</a>
+    <a href="#download">{t.nav.download}</a>
+    <a href={changelog}>{t.nav.changelog}</a>
+  </nav>
+  <div class="actions">
+    <div class="lang">
+      <button type="button" class="nav-btn" aria-haspopup="true" aria-label={t.footer.language}>
+        <Flag id={locale} />
+        <span>{here.name}</span>
+        <Icon name="chevron-down" size={14} />
+      </button>
+      <ul>
+        {
+          locales.map((l) => (
+            <li>
+              <a href={l.path} hreflang={l.hreflang} aria-current={l.id === locale ? 'page' : undefined}>
+                <Flag id={l.id} />
+                {l.name}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <button class="nav-btn theme" type="button" aria-label={t.nav.theme} title={t.nav.theme} data-theme-toggle>
+      <span class="sun"><Icon name="sun" size={17} /></span>
+      <span class="moon"><Icon name="moon" size={17} /></span>
+    </button>
+    <a class="nav-btn" href={links.discord} aria-label="Discord"><Icon name="brand-discord" /></a>
+    <a class="nav-btn" href={links.repo} aria-label="GitHub">
+      <Icon name="brand-github" />
+      {s.stars !== undefined && <span class="mono">{fmt.format(s.stars)}</span>}
+    </a>
+    <a class="nav-btn get" href="#download"><Icon name="download" size={17} /><span>{t.nav.download}</span></a>
+  </div>
+</header>

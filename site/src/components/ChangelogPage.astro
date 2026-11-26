@@ -1,0 +1,39 @@
+---
+// The changelog on the site: the repo's own CHANGELOG files (made ready by
+// scripts/changelog.mjs), so a release is written once. Vietnamese has its own (back to the first version);
+// English also serves Chinese, which has none.
+import { Content as English } from '../generated/changelog.en.md'
+import { Content as Vietnamese } from '../generated/changelog.vi.md'
+import { dicts, type Locale } from '../i18n'
+import Base from '../layouts/Base.astro'
+import Footer from './Footer.astro'
+import Nav from './Nav.astro'
+
+interface Props {
+  locale: Locale
+}
+const { locale } = Astro.props
+const t = dicts[locale]
+const c = t.changelog
+const Log = locale === 'vi' ? Vietnamese : English
+---
+
+<Base locale={locale} suffix="changelog/" title={c.title} description={c.description}>
+  <div class="frame">
+    <Nav locale={locale} />
+    <main class="changelog">
+      <h1>{c.heading}</h1>
+      <p class="muted">{c.lead}</p>
+      {locale === 'zh' && <p class="note">{c.englishOnly}</p>}
+      <article class="log">
+        <Log />
+      </article>
+    </main>
+    <Footer locale={locale} />
+  </div>
+  <script is:inline>
+    document.querySelector('[data-theme-toggle]')?.addEventListener('click', () =>
+      window.__setTheme?.(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'),
+    )
+  </script>
+</Base>
