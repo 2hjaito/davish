@@ -150,6 +150,13 @@ export const zh: Dict = {
       { label: '键盘快捷键', href: 'start/shortcuts/' },
     ],
   },
+  voices: {
+    title: '大家怎么说',
+    note: '摘自公开的帖子和 issue。',
+    translated: (from: 'en' | 'zh') => (from === 'en' ? '译自英文' : '译自中文'),
+    more: (n: number) => `再看 ${n} 条`,
+    less: '收起',
+  },
   community: { discord: '加入 Discord', discordNote: '提问、建议和抢先体验版本。' },
   thanks: {
     title: '与使用它的人一起打造',
