@@ -4,6 +4,7 @@
   import { ui } from '../stores/ui.svelte'
   import { openServers } from '../wm/intents.svelte'
   import Icon from '../ui/Icon.svelte'
+  import OsIcon from '../ui/OsIcon.svelte'
   import TagChip from '../ui/TagChip.svelte'
   import { shortcut } from './platform'
   import Popover from './Popover.svelte'
@@ -116,6 +117,7 @@
           ? 'var(--ok-on-accent)'
           : dotColor[s.state]}
       ></span>
+      <OsIcon distro={s.distro} size={30} mono={active} tile />
       <span class="text">
         <!-- The tag sits by the name so the line below keeps its full width. -->
         <span class="line">

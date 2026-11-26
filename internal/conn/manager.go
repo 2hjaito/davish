@@ -46,6 +46,9 @@ type Status struct {
 	// Platform is the server's OS once it is known; the UI greys out the
 	// apps that do not run there.
 	Platform platform.OS `json:"platform,omitempty"`
+	// Distro is the logo key of the server's system ("ubuntu", "windows"…)
+	// once it is known (platform.Distro).
+	Distro string `json:"distro,omitempty"`
 }
 
 // HostKeyPrompt is the conn:hostkey-prompt payload: the UI shows it and
@@ -82,6 +85,9 @@ type Options struct {
 	// DetectPlatform asks a connected server what it runs; nil takes the
 	// real probe. Tests set it to make detection slow or instant.
 	DetectPlatform func(ctx context.Context, client *ssh.Client) platform.OS
+	// DetectDistro gives the logo key of a connected server whose OS is
+	// known; nil takes a read of /etc/os-release.
+	DetectDistro func(ctx context.Context, client *ssh.Client, os platform.OS) string
 }
 
 func (o Options) withDefaults() Options {
@@ -130,6 +136,8 @@ type link struct {
 	// the connection is reported up, and the answer survives reconnects,
 	// since the server stays the same machine.
 	plat *platform.Cell
+	// distro is the logo key found with plat; empty until it is known.
+	distro string
 }
 
 // pendingKey is a host key shown to the user and not yet accepted.
@@ -155,6 +163,9 @@ func NewManager(servers ServerSource, secrets SecretSource, hostKeys *HostKeys, 
 	}
 	if m.opts.DetectPlatform == nil {
 		m.opts.DetectPlatform = m.detectPlatform
+	}
+	if m.opts.DetectDistro == nil {
+		m.opts.DetectDistro = m.detectDistro
 	}
 	return m
 }
@@ -350,23 +361,62 @@ func (m *Manager) WaitPlatform(ctx context.Context, id string) platform.OS {
 	return cell.Wait(ctx)
 }
 
+// distroSaver is what a ServerSource may also do: remember the logo key, so
+// the lists show it before the server has connected again. store.Store does.
+type distroSaver interface {
+	SetDistro(ctx context.Context, id, distro string) error
+}
+
 // detect runs in the background after a connection is reported up. It
 // always answers the cell, so no waiter is left hanging, and announces the
-// OS in a second conn:status when the connection it asked about is still
-// the current one.
+// OS and the logo in a second conn:status when the connection it asked
+// about is still the current one.
 func (m *Manager) detect(ctx context.Context, id string, l *link, client *ssh.Client, cell *platform.Cell) {
 	defer m.wg.Done()
 	os := m.opts.DetectPlatform(ctx, client)
 	cell.Set(os)
+	if os == platform.Unknown {
+		return
+	}
+	distro := m.opts.DetectDistro(ctx, client, os)
 
 	m.mu.Lock()
 	current := m.conns[id] == l && l.client == client && l.plat == cell
+	if current {
+		l.distro = distro
+	}
 	m.mu.Unlock()
-	if !current || os == platform.Unknown {
+	if !current {
 		return
 	}
-	m.log.Info("platform detected", "server", id, "platform", os)
+	m.log.Info("platform detected", "server", id, "platform", os, "distro", distro)
+	if saver, ok := m.servers.(distroSaver); ok && distro != "" {
+		if err := saver.SetDistro(ctx, id, distro); err != nil {
+			m.log.Warn("could not save the distribution", "server", id, "err", err)
+		}
+	}
 	m.publish(id, StateConnected, nil)
+}
+
+// detectDistro gives the logo key: Windows and macOS are known from the OS,
+// and a Linux says its distribution in os-release. A server that does not
+// answer in time is plain Linux, and still usable.
+func (m *Manager) detectDistro(ctx context.Context, client *ssh.Client, os platform.OS) string {
+	switch os {
+	case platform.Windows:
+		return platform.DistroWindows
+	case platform.Darwin:
+		return platform.DistroMacOS
+	case platform.Linux:
+		ctx, cancel := context.WithTimeout(ctx, platform.DetectTimeout)
+		defer cancel()
+		out, err := execOutput(ctx, client, platform.DistroCommand)
+		if err != nil {
+			return platform.DistroLinux
+		}
+		return platform.Distro(out)
+	}
+	return ""
 }
 
 // detectPlatform asks the server what it runs. It never fails: a server
@@ -716,6 +766,11 @@ func (m *Manager) publish(id string, state State, err error) {
 		if os := m.Platform(id); os != platform.Unknown {
 			st.Platform = os
 		}
+		m.mu.Lock()
+		if l, ok := m.conns[id]; ok {
+			st.Distro = l.distro
+		}
+		m.mu.Unlock()
 	}
 	if err != nil {
 		if f, ok := apperr.Format(err).(*apperr.Error); ok {

@@ -26,6 +26,7 @@ const demoServers: Server[] = [
   {
     id: 'dangth-vps',
     name: 'dangth-vps',
+    distro: 'ubuntu',
     host: 'vps.dangth.dev',
     port: 22,
     user: 'dangth',
@@ -39,6 +40,7 @@ const demoServers: Server[] = [
   {
     id: 'nas',
     name: t.demo.nas,
+    distro: 'linux',
     host: '192.168.1.20',
     port: 22,
     user: 'dangth',
@@ -84,6 +86,7 @@ class Servers {
       if (!s) return
       s.state = st.state
       if (st.platform) s.platform = st.platform
+      if (st.distro) s.distro = st.distro
       s.error = st.error ? toUserError(st.error).code : undefined
       s.errorMessage = st.error?.message
       s.errorDetail = st.detail

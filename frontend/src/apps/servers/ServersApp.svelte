@@ -13,6 +13,7 @@
   import Empty from '../../lib/ui/Empty.svelte'
   import FilterShell, { type FilterItem } from '../../lib/ui/FilterShell.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
+  import OsIcon from '../../lib/ui/OsIcon.svelte'
   import TagChip from '../../lib/ui/TagChip.svelte'
   import {
     activeFilter,
@@ -179,17 +180,24 @@
   <tr class:active={srv.id === servers.activeId}>
     <td
       ><div class="who">
-        <span class="dot" style:background={dotColor[srv.state]}></span>
-        <button class="link sname" title={s.overview.switch} onclick={() => servers.select(srv.id)}
-          >{srv.name}</button
-        >
-        {#if srv.tag}<TagChip tag={srv.tag} color={srv.color} />{/if}
-        <span class="host">{srv.user}@{srv.host}</span>
-        {#if al.count}
-          <span class="badge {al.level}" title={al.latest}>
-            <Icon name="warning" size={11} strokeWidth={2.4} />{al.count}
-          </span>
-        {/if}
+        <OsIcon distro={srv.distro} size={34} tile />
+        <div class="whotext">
+          <div class="nameline">
+            <span class="dot" style:background={dotColor[srv.state]}></span>
+            <button
+              class="link sname"
+              title={s.overview.switch}
+              onclick={() => servers.select(srv.id)}>{srv.name}</button
+            >
+            {#if srv.tag}<TagChip tag={srv.tag} color={srv.color} />{/if}
+            {#if al.count}
+              <span class="badge {al.level}" title={al.latest}>
+                <Icon name="warning" size={11} strokeWidth={2.4} />{al.count}
+              </span>
+            {/if}
+          </div>
+          <span class="host">{srv.user}@{srv.host}</span>
+        </div>
       </div></td
     >
     {#if live}
@@ -241,17 +249,23 @@
   {@const m = metrics.latest(srv.id)}
   {@const al = alertsFor(notifications.list, srv.id)}
   <article class="card" class:active={srv.id === servers.activeId}>
-    <header>
-      <span class="dot" style:background={dotColor[srv.state]}></span>
-      <span class="name">{srv.name}</span>
-      {#if srv.tag}<TagChip tag={srv.tag} color={srv.color} />{/if}
-      {#if al.count}
-        <span class="badge {al.level}" title={al.latest}>
-          <Icon name="warning" size={11} strokeWidth={2.4} />{al.count}
-        </span>
-      {/if}
-    </header>
-    <p class="host">{srv.user}@{srv.host}</p>
+    <div class="ident">
+      <!-- The logo is as tall as the two lines beside it: name, then login. -->
+      <OsIcon distro={srv.distro} size={38} tile />
+      <div class="idtext">
+        <header>
+          <span class="dot" style:background={dotColor[srv.state]}></span>
+          <span class="name">{srv.name}</span>
+          {#if srv.tag}<TagChip tag={srv.tag} color={srv.color} />{/if}
+          {#if al.count}
+            <span class="badge {al.level}" title={al.latest}>
+              <Icon name="warning" size={11} strokeWidth={2.4} />{al.count}
+            </span>
+          {/if}
+        </header>
+        <p class="host">{srv.user}@{srv.host}</p>
+      </div>
+    </div>
 
     {#if srv.state === 'connected' && m}
       <dl>
@@ -540,7 +554,7 @@
   }
 
   .list th {
-    padding: 4px 8px;
+    padding: 6px 8px;
     white-space: nowrap;
     text-align: left;
     font-size: var(--text-xs);
@@ -550,7 +564,7 @@
   }
 
   .list td {
-    padding: 5px 8px;
+    padding: 9px 8px;
     border-bottom: 1px solid var(--divider-soft);
     white-space: nowrap;
   }
@@ -562,16 +576,35 @@
   .list .who {
     display: flex;
     align-items: center;
+    gap: 10px;
+  }
+
+  .list .whotext {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .list .nameline {
+    display: flex;
+    align-items: center;
     gap: 8px;
   }
 
+  /* The name takes the room, and the four readings share the rest evenly,
+     so the gap between them is not one wide hole. */
   .list th:first-child,
   .list td:first-child {
-    width: 100%;
+    width: 44%;
+  }
+
+  .list th:nth-child(n + 2):nth-child(-n + 5),
+  .list td.num {
+    width: 11%;
   }
 
   .list .sname {
-    min-width: 120px;
     text-align: left;
   }
 
@@ -715,8 +748,23 @@
     color: var(--danger);
   }
 
+  .ident {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .idtext {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
   .host {
-    margin: -6px 0 0 16px;
+    margin: 0 0 0 16px;
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     color: var(--fg-muted);

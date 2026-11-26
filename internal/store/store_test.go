@@ -371,3 +371,48 @@ func TestCanceledContext(t *testing.T) {
 		t.Errorf("err = %v; want context.Canceled", err)
 	}
 }
+
+func TestSetDistro(t *testing.T) {
+	ctx := context.Background()
+	s, _, _ := newTestStore(t)
+	saved, err := s.Save(ctx, vps())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.SetDistro(ctx, saved.ID, "ubuntu"); err != nil {
+		t.Fatal(err)
+	}
+	got, _ := s.Server(ctx, saved.ID)
+	if got.Distro != "ubuntu" {
+		t.Fatalf("distro = %q", got.Distro)
+	}
+	// A server that is gone is not an error.
+	if err := s.SetDistro(ctx, "gone", "debian"); err != nil {
+		t.Errorf("unknown server: %v", err)
+	}
+}
+
+// The edit dialog sends a whole server without the distribution; saving it
+// must not lose what the connection found, and must not take a value from
+// the caller either.
+func TestSaveKeepsDistro(t *testing.T) {
+	ctx := context.Background()
+	s, _, _ := newTestStore(t)
+	saved, _ := s.Save(ctx, vps())
+	if err := s.SetDistro(ctx, saved.ID, "debian"); err != nil {
+		t.Fatal(err)
+	}
+	edit := saved
+	edit.Name = "renamed"
+	edit.Distro = "windows"
+	out, err := s.Save(ctx, edit)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out.Distro != "debian" {
+		t.Errorf("distro after an edit = %q; want debian", out.Distro)
+	}
+	if got, _ := s.Server(ctx, saved.ID); got.Name != "renamed" || got.Distro != "debian" {
+		t.Errorf("stored = %+v", got)
+	}
+}

@@ -4,3 +4,4 @@ wailsjs/
 package-lock.json
 src/lib/ui/icons.ts
 src/lib/ui/techIcons.ts
+src/lib/ui/osIcons.ts
