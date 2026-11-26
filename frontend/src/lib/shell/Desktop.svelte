@@ -33,6 +33,7 @@
   import Spotlight from '../spotlight/Spotlight.svelte'
   import DesktopIcons from './DesktopIcons.svelte'
   import { widgets } from '../stores/widgets.svelte'
+  import { wallpaperImage } from '../stores/wallpaperImage.svelte'
   import Dock from './Dock.svelte'
   import { dockItems } from './dockItems'
   import Launchpad from './Launchpad.svelte'
@@ -305,6 +306,13 @@
 <svelte:document onvisibilitychange={() => (hidden = document.hidden)} />
 
 <div class="desktop">
+  {#if wallpaperImage.has && settings.knobs.wallpaperImage}
+    <!-- Under everything; the glass above blurs it like the blobs. -->
+    <img class="picture" src={wallpaperImage.url} alt="" draggable="false" decoding="async" />
+    {#if settings.wallpaperDim > 0}
+      <div class="picture-dim" style:opacity={settings.wallpaperDim / 100}></div>
+    {/if}
+  {/if}
   <MenuBar />
   <Spotlight open={ui.spotlight} onclose={() => (ui.spotlight = false)} />
   <Launchpad
@@ -430,6 +438,29 @@
         color-mix(in srgb, var(--wallpaper-gold) var(--wallpaper-mix), var(--wallpaper-base)) 0,
         transparent 30%
       );
+  }
+
+  /* A chosen picture replaces the blobs; the base color shows while it decodes. */
+  :global(:root[data-perf-wallpaper='image']) .desktop {
+    background-image: none;
+  }
+
+  .picture,
+  .picture-dim {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .picture {
+    object-fit: cover;
+  }
+
+  .picture-dim {
+    background: #000;
   }
 
   /* Light preset: one solid color, still the swatch mixed into the base. */

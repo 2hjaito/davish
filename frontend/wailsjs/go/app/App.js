@@ -849,3 +849,15 @@ export function UpdateRestart() {
 export function UpdateVersion() {
   return window['go']['app']['App']['UpdateVersion']();
 }
+
+export function WallpaperClear() {
+  return window['go']['app']['App']['WallpaperClear']();
+}
+
+export function WallpaperGet() {
+  return window['go']['app']['App']['WallpaperGet']();
+}
+
+export function WallpaperSet(arg1) {
+  return window['go']['app']['App']['WallpaperSet'](arg1);
+}

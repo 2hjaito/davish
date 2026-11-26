@@ -2273,6 +2273,9 @@ const es = {
     perfMotionHint: 'Las animaciones de abrir, cerrar y minimizar.',
     perfWidgets: 'Widgets',
     perfWidgetsHint: 'Los widgets del escritorio. Desactivados, se ocultan y dejan de leer datos.',
+    perfWallpaperImage: 'Imagen de fondo',
+    perfWallpaperImageHint:
+      'Muestra la imagen que elegiste. Desactivada, vuelve al fondo de color.',
     perfNoDmabuf: 'Desactivar DMA-BUF',
     perfNoDmabufHint: 'Un ajuste de WebKitGTK en Linux. Se aplica al reiniciar.',
     perfNoCompositing: 'Desactivar la composición',
@@ -2295,6 +2298,16 @@ const es = {
     wallpaper: 'Color del fondo de escritorio',
     wallpaperCustom: 'Elegir cualquier color',
     wallpaperColor: (c: string) => `Color ${c}`,
+    wallpaperPicture: 'Imagen',
+    wallpaperPictureHint:
+      'Usa una imagen de este equipo. Se reduce y se guarda aquí, nunca se sube.',
+    wallpaperChoose: 'Elegir…',
+    wallpaperChange: 'Cambiar…',
+    wallpaperRemove: 'Quitar',
+    wallpaperBad: 'Solo imágenes PNG, JPEG o WebP de menos de 50 MB.',
+    wallpaperDim: 'Oscurecer imagen',
+    wallpaperDimHint: 'Oscurece la imagen para que los iconos y el texto se lean bien.',
+    wallpaperHidden: 'El perfil actual oculta la imagen. Activa Imagen de fondo en Rendimiento.',
     menubar: 'Barra de menús',
     menubarStats: 'Lecturas en la barra de menús',
     menubarStatsHint:

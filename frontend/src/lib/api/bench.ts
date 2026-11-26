@@ -9,16 +9,18 @@ export interface BenchRequest {
   preset: string
   /** How many widgets to put on the desktop before measuring. */
   widgets: number
+  /** A picture is the wallpaper while measuring. */
+  picture: boolean
 }
 
 /** What the script that started this process asked for; nothing in a normal run. */
 export async function benchConfig(): Promise<BenchRequest> {
   if (typeof window === 'undefined' || !('go' in window))
-    return { render: false, preset: '', widgets: 0 }
+    return { render: false, preset: '', widgets: 0, picture: false }
   try {
     return await BenchConfig()
   } catch {
-    return { render: false, preset: '', widgets: 0 }
+    return { render: false, preset: '', widgets: 0, picture: false }
   }
 }
 

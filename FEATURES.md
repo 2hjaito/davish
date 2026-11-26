@@ -256,7 +256,7 @@ Davish looks for a new release on GitHub when it starts and every six hours (you
 
 ## Light and dark
 
-Davish comes in a light and a dark look. By default it follows your computer and switches when the system does; pick Light or Dark in Settings → Appearance → Theme to keep one. Terminal and Logs stay dark either way, and the wallpaper color you chose carries over, dimmed for the night.
+Davish comes in a light and a dark look. By default it follows your computer and switches when the system does; pick Light or Dark in Settings → Appearance → Theme to keep one. Terminal and Logs stay dark either way, and the wallpaper color you chose carries over, dimmed for the night. Settings → Appearance can also use a **picture** from your computer as the wallpaper (PNG, JPEG or WebP, scaled down and kept on this computer, never uploaded) with a dim level so icons stay readable; the Light performance preset hides it, and without a picture nothing changes.
 
 Settings → Performance picks how much Davish spends on its own look: **Beautiful** (frosted glass), **Balanced** (no blur), **Light** (solid fills, short shadow, flat wallpaper, no motion), or **Auto**, which keeps the full look and suggests Light when this computer renders slowly. **Advanced** sets each effect on its own. Contributed by @tian2992. **Dragging windows** picks how a window follows the pointer: **Live** (the whole window), **Simple** (the same, but the glass is switched off until you let go) or **Outline** (only an outline moves, and the window goes there when you let go), for computers where dragging feels slow. Outline has a light tint inside by default; **Fill the outline** turns it off for the lightest drag.
 

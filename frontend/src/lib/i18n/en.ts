@@ -2231,6 +2231,8 @@ const en = {
     perfMotionHint: 'The open, close and minimize animations.',
     perfWidgets: 'Widgets',
     perfWidgetsHint: 'The widgets on the desktop. Off hides them and stops what they read.',
+    perfWallpaperImage: 'Wallpaper picture',
+    perfWallpaperImageHint: 'Show the picture you chose. Off falls back to the colored wallpaper.',
     perfNoDmabuf: 'Disable DMA-BUF',
     perfNoDmabufHint: 'A WebKitGTK workaround on Linux. Applies after a restart.',
     perfNoCompositing: 'Disable compositing',
@@ -2253,6 +2255,17 @@ const en = {
     wallpaper: 'Wallpaper color',
     wallpaperCustom: 'Pick any color',
     wallpaperColor: (c: string) => `Color ${c}`,
+    wallpaperPicture: 'Picture',
+    wallpaperPictureHint:
+      'Use a picture from this computer. It is scaled down and kept here, never uploaded.',
+    wallpaperChoose: 'Choose…',
+    wallpaperChange: 'Change…',
+    wallpaperRemove: 'Remove',
+    wallpaperBad: 'Only PNG, JPEG or WebP pictures under 50 MB.',
+    wallpaperDim: 'Dim picture',
+    wallpaperDimHint: 'Darkens the picture so icons and text stay readable.',
+    wallpaperHidden:
+      'The current preset hides the picture. Turn on Wallpaper picture in Performance.',
     menubar: 'Menu bar',
     menubarStats: 'Readings in the menu bar',
     menubarStatsHint:

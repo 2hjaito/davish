@@ -44,8 +44,12 @@ describe('resultLine', () => {
 
   it('is key=value pairs on one line', () => {
     expect(resultLine('scroll', 'light', 3, s, 2)).toBe(
-      'scenario=scroll preset=light widgets=3 frames=180 mean_ms=16.7 p95_ms=18.2 max_ms=40.0 over_ms=12.3 long_tasks=2',
+      'scenario=scroll preset=light widgets=3 picture=0 frames=180 mean_ms=16.7 p95_ms=18.2 max_ms=40.0 over_ms=12.3 long_tasks=2',
     )
+  })
+
+  it('says when a picture was the wallpaper', () => {
+    expect(resultLine('idle', 'beautiful', 3, s, 0, true)).toContain('widgets=3 picture=1 ')
   })
 
   it('says na where long tasks cannot be seen', () => {

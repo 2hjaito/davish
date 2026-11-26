@@ -17,6 +17,7 @@ import { addWidget } from '../widgets/actions'
 import { measure, resultLine, summarize, watchLongTasks } from './frames'
 import { widgetMix } from './mix'
 import { widgets } from '../stores/widgets.svelte'
+import { wallpaperImage } from '../stores/wallpaperImage.svelte'
 
 const SCENARIO_MS = 3000
 /** Time for the look to settle after a preset is applied. */
@@ -38,10 +39,11 @@ async function waitFor<T>(what: string, get: () => T | null | undefined | false)
   throw new Error(`timed out waiting for ${what}`)
 }
 
-/** What one process measures: a preset, with this many widgets on the desktop. */
+/** What one process measures: a preset, with this many widgets on the desktop, with or without a picture as the wallpaper. */
 interface Run {
   preset: Preset
   widgets: number
+  picture: boolean
 }
 
 /**
@@ -56,7 +58,7 @@ async function scenario(run: Run, name: string, go: () => Promise<number[]>) {
   const gaps = await go()
   const ms = Math.round(performance.now() - t0)
   await benchReport(`mark phase=end scenario=${name} ms=${ms}`)
-  await benchReport(resultLine(name, run.preset, run.widgets, summarize(gaps), stop()))
+  await benchReport(resultLine(name, run.preset, run.widgets, summarize(gaps), stop(), run.picture))
 }
 
 /**
@@ -108,6 +110,34 @@ async function drag(run: Run, serverID: string) {
   wm.setRect(win.id, base)
 }
 
+/**
+ * A busy 2560 x 1440 picture, drawn here so the bench needs no file: soft
+ * gradients with many small shapes, which a JPEG keeps at the size of a photo.
+ */
+async function makePicture(): Promise<string> {
+  const c = document.createElement('canvas')
+  c.width = 2560
+  c.height = 1440
+  const g = c.getContext('2d')
+  if (!g) throw new Error('no canvas')
+  const sky = g.createLinearGradient(0, 0, 2560, 1440)
+  sky.addColorStop(0, '#1f3b73')
+  sky.addColorStop(0.5, '#c46a8f')
+  sky.addColorStop(1, '#f3b562')
+  g.fillStyle = sky
+  g.fillRect(0, 0, 2560, 1440)
+  // A fixed sequence, so every run decodes the same picture.
+  let seed = 7
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647
+  for (let i = 0; i < 1500; i++) {
+    g.fillStyle = `hsla(${Math.round(rnd() * 360)}, 60%, ${30 + Math.round(rnd() * 40)}%, 0.25)`
+    g.beginPath()
+    g.arc(rnd() * 2560, rnd() * 1440, 6 + rnd() * 90, 0, Math.PI * 2)
+    g.fill()
+  }
+  return c.toDataURL('image/jpeg', 0.85)
+}
+
 export async function runRenderBench(request: BenchRequest) {
   // The demo is where the sample data is; this restarts the page in it, and
   // the app comes back here with isDemo set.
@@ -118,7 +148,7 @@ export async function runRenderBench(request: BenchRequest) {
   const preset = PRESETS.find((p) => p === request.preset) ?? 'beautiful'
   try {
     await benchReport(
-      `env preset=${preset} widgets=${request.widgets} ` +
+      `env preset=${preset} widgets=${request.widgets} picture=${request.picture ? 1 : 0} ` +
         `renderer=${(rendererName() || 'none').replaceAll(' ', '_')} ` +
         `dpr=${window.devicePixelRatio} size=${innerWidth}x${innerHeight}`,
     )
@@ -131,7 +161,14 @@ export async function runRenderBench(request: BenchRequest) {
     clearWidgets()
     // Placed even when the preset hides them (Light): the knob is what is measured then.
     const placed = addWidgets(request.widgets, serverID)
-    const run: Run = { preset, widgets: request.widgets }
+    if (request.picture) {
+      await wallpaperImage.set(await makePicture())
+      // Light hides the picture by its knob; the others show it.
+      await waitFor('the wallpaper', () =>
+        preset === 'light' ? true : document.documentElement.dataset.perfWallpaper === 'image',
+      )
+    }
+    const run: Run = { preset, widgets: request.widgets, picture: request.picture }
     const grid = gridOf(wm.area)
     await benchReport(
       `env placed=${placed} grid=${grid.cols}x${grid.rows} server=${serverID || 'none'}`,
@@ -147,6 +184,7 @@ export async function runRenderBench(request: BenchRequest) {
     // The preview keeps its state in localStorage, which the app's webview
     // shares: a bench must not leave its preset or widgets behind.
     try {
+      if (request.picture) await wallpaperImage.clear()
       localStorage.clear()
     } catch {
       // Nothing to clear.

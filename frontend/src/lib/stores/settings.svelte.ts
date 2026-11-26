@@ -163,6 +163,15 @@ export type DockSize = keyof typeof DOCK_SIZES
 /** Which files the Editor backs up before saving over them. */
 export type BackupMode = 'etc' | 'always' | 'never'
 
+/** How much a chosen wallpaper picture is darkened so icons and text stay readable, in percent. */
+export const WALLPAPER_DIM = { min: 0, max: 70, step: 10, default: 0 } as const
+
+/** A dim level kept in range; junk is none. */
+export function clampDim(v: unknown): number {
+  if (typeof v !== 'number' || !Number.isFinite(v)) return WALLPAPER_DIM.default
+  return Math.min(WALLPAPER_DIM.max, Math.max(WALLPAPER_DIM.min, Math.round(v)))
+}
+
 /** A percent threshold kept in range; junk falls back to fallback. */
 export function clampPct(v: number, fallback: number): number {
   if (!Number.isFinite(v)) return fallback
@@ -174,6 +183,7 @@ interface SettingsData extends StoredPerf {
   reduceGlass: boolean
   reduceMotion: boolean
   wallpaperAccent: string
+  wallpaperDim: number
   terminalFontSize: number
   terminalGpu: boolean
   terminalSolid: boolean
@@ -216,6 +226,7 @@ const defaults: SettingsData = {
   reduceGlass: false,
   reduceMotion: false,
   wallpaperAccent: WALLPAPER_ACCENTS[0],
+  wallpaperDim: WALLPAPER_DIM.default,
   terminalFontSize: TERMINAL_FONT.default,
   terminalGpu: false,
   terminalSolid: false,
@@ -259,6 +270,7 @@ function fields(
   | 'perfWallpaper'
   | 'perfMotion'
   | 'perfWidgets'
+  | 'perfWallpaperImage'
   | 'perfNoDmabuf'
   | 'perfNoCompositing'
   | 'reduceGlass'
@@ -271,6 +283,7 @@ function fields(
     perfWallpaper: knobs.wallpaper,
     perfMotion: knobs.motion,
     perfWidgets: knobs.widgets,
+    perfWallpaperImage: knobs.wallpaperImage,
     perfNoDmabuf: knobs.noDmabuf,
     perfNoCompositing: knobs.noCompositing,
     // The old toggles stay in the file so an older build still sees them.
@@ -329,6 +342,7 @@ class Settings {
       wallpaper: this.#data.perfWallpaper !== false,
       motion: this.#data.perfMotion !== false,
       widgets: this.#data.perfWidgets !== false,
+      wallpaperImage: this.#data.perfWallpaperImage !== false,
       noDmabuf: this.#data.perfNoDmabuf === true,
       noCompositing: this.#data.perfNoCompositing === true,
     })
@@ -365,6 +379,9 @@ class Settings {
   get wallpaperAccent() {
     const c = this.#data.wallpaperAccent
     return typeof c === 'string' && HEX_COLOR.test(c) ? c.toLowerCase() : WALLPAPER_ACCENTS[0]
+  }
+  get wallpaperDim() {
+    return clampDim(this.#data.wallpaperDim)
   }
   get terminalPrompt() {
     return this.#data.terminalPrompt !== false

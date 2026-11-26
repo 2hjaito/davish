@@ -17,6 +17,8 @@ type BenchConfig struct {
 	Preset string `json:"preset"`
 	// Widgets is how many widgets to put on the desktop before measuring.
 	Widgets int `json:"widgets"`
+	// Picture is true when a picture should be the desktop wallpaper while measuring.
+	Picture bool `json:"picture"`
 }
 
 // BenchConfig reads the bench variables the script set for this process.
@@ -28,6 +30,7 @@ func (a *App) BenchConfig() BenchConfig {
 		Render:  true,
 		Preset:  os.Getenv("DAVISH_BENCH_PRESET"),
 		Widgets: benchWidgets(os.Getenv("DAVISH_BENCH_WIDGETS")),
+		Picture: os.Getenv("DAVISH_BENCH_PICTURE") == "1",
 	}
 }
 

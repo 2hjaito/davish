@@ -140,6 +140,7 @@ export namespace app {
 	    render: boolean;
 	    preset: string;
 	    widgets: number;
+	    picture: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new BenchConfig(source);
@@ -150,6 +151,7 @@ export namespace app {
 	        this.render = source["render"];
 	        this.preset = source["preset"];
 	        this.widgets = source["widgets"];
+	        this.picture = source["picture"];
 	    }
 	}
 	export class FleetRun {

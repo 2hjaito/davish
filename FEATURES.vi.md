@@ -256,7 +256,7 @@ Davish tìm bản mới trên GitHub lúc mở và mỗi 6 giờ (tắt được
 
 ## Sáng và tối
 
-Davish có giao diện sáng và tối. Mặc định theo máy và tự đổi khi hệ điều hành đổi; muốn giữ một kiểu thì chọn Sáng hoặc Tối trong Cài đặt → Giao diện → Chế độ. Terminal và Logs vẫn tối như cũ, màu hình nền đã chọn được giữ và dịu đi cho nền tối.
+Davish có giao diện sáng và tối. Mặc định theo máy và tự đổi khi hệ điều hành đổi; muốn giữ một kiểu thì chọn Sáng hoặc Tối trong Cài đặt → Giao diện → Chế độ. Terminal và Logs vẫn tối như cũ, màu hình nền đã chọn được giữ và dịu đi cho nền tối. Cài đặt → Giao diện còn cho dùng một **ảnh** từ máy bạn làm hình nền (PNG, JPEG hoặc WebP, thu nhỏ và giữ trên máy này, không tải lên đâu) kèm mức làm tối để icon vẫn dễ đọc; mức hiệu năng Light ẩn ảnh, và khi chưa chọn ảnh thì không đổi gì.
 
 Cài đặt → Hiệu năng chọn mức Davish dành cho hiệu ứng của chính nó: **Đẹp** (kính mờ), **Cân bằng** (bỏ độ mờ), **Nhẹ** (nền đặc, bóng ngắn, hình nền phẳng, không chuyển động), hoặc **Tự động**: giữ giao diện đầy đủ và gợi ý Nhẹ khi máy vẽ chậm. **Nâng cao** chỉnh từng hiệu ứng riêng. Đóng góp bởi @tian2992. **Kéo cửa sổ** chọn cách cửa sổ đi theo chuột: **Trực tiếp** (cả cửa sổ), **Đơn giản** (cũng vậy, nhưng tắt kính cho tới khi thả) hoặc **Viền** (chỉ một đường viền di chuyển, thả ra thì cửa sổ mới nhảy tới đó), cho máy kéo thấy chậm. Viền mặc định có nền mờ bên trong; **Tô nền viền** tắt nền đó để kéo nhẹ nhất.
 
