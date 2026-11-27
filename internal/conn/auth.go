@@ -21,13 +21,13 @@ import (
 // authMethods builds the ssh auth for srv. The returned cleanup releases the
 // agent connection once the handshake is over. Errors never include the key
 // path or a secret.
-func (m *Manager) authMethods(srv store.Server) ([]ssh.AuthMethod, func(), error) {
+func (m *Manager) authMethods(srv store.Server, w *signWatch) ([]ssh.AuthMethod, func(), error) {
 	noop := func() {}
 	switch srv.Auth {
 	case store.AuthAgent:
 		// "Automatic", like the ssh command: agent keys first, then the
 		// default key files in ~/.ssh. Most users never load the agent.
-		signers, release := m.agentSigners()
+		signers, release := m.agentSigners(w)
 		signers = appendUniqueSigners(signers, m.defaultKeySigners(srv))
 		if len(signers) == 0 {
 			release()
@@ -45,7 +45,7 @@ func (m *Manager) authMethods(srv store.Server) ([]ssh.AuthMethod, func(), error
 		// agent), use the matching key from the SSH agent when loaded.
 		var ae *apperr.Error
 		if errors.As(err, &ae) && (ae.Code == apperr.ConnSecretMissing || ae.Code == apperr.ConnPassphraseWrong || ae.Code == apperr.ConnKeyUnreadable) {
-			if agentSigner, release, ok := m.agentSignerForKey(srv.KeyPath); ok {
+			if agentSigner, release, ok := m.agentSignerForKey(srv.KeyPath, w); ok {
 				return []ssh.AuthMethod{ssh.PublicKeys(agentSigner)}, release, nil
 			}
 		}
@@ -102,7 +102,7 @@ func agentWait() time.Duration {
 
 // agentSigners returns the keys loaded in the SSH agent, if one is running
 // and answers in time.
-func (m *Manager) agentSigners() ([]ssh.Signer, func()) {
+func (m *Manager) agentSigners(w *signWatch) ([]ssh.Signer, func()) {
 	c, err := agentDial()
 	if err != nil {
 		// Without this line a pipe that cannot be opened (busy, no right to it,
@@ -148,7 +148,7 @@ func (m *Manager) agentSigners() ([]ssh.Signer, func()) {
 			release()
 			return nil, func() {}
 		}
-		return l.signers, release
+		return m.logSigning(l.signers, w), release
 	case <-time.After(wait):
 		if m.log != nil {
 			m.log.Warn("ssh agent did not answer in time; trying key files", "waited", wait.String())
@@ -156,6 +156,22 @@ func (m *Manager) agentSigners() ([]ssh.Signer, func()) {
 		release()
 		return nil, func() {}
 	}
+}
+
+// logSigning wraps the agent's keys so that signing is logged and the
+// handshake's clock knows when the agent is signing. A signer that is not an
+// ssh.AlgorithmSigner is left as it is: wrapping it would change which
+// signature algorithm is used.
+func (m *Manager) logSigning(signers []ssh.Signer, w *signWatch) []ssh.Signer {
+	out := make([]ssh.Signer, len(signers))
+	for i, s := range signers {
+		if as, ok := s.(ssh.AlgorithmSigner); ok {
+			out[i] = loggedSigner{AlgorithmSigner: as, log: m.log, watch: w}
+		} else {
+			out[i] = s
+		}
+	}
+	return out
 }
 
 // defaultKeyFiles are tried in the same order as OpenSSH.
@@ -250,13 +266,13 @@ func appendUniqueSigners(base, extra []ssh.Signer) []ssh.Signer {
 // agentSignerForKey looks up keyPath's public key in the SSH agent. It checks
 // keyPath itself (when pointing at a .pub file) or keyPath+".pub", matching
 // OpenSSH's IdentityFile behavior.
-func (m *Manager) agentSignerForKey(keyPath string) (ssh.Signer, func(), bool) {
+func (m *Manager) agentSignerForKey(keyPath string, w *signWatch) (ssh.Signer, func(), bool) {
 	pub := readPublicKey(expandHome(keyPath))
 	if pub == nil {
 		return nil, nil, false
 	}
 	want := pub.Marshal()
-	signers, release := m.agentSigners()
+	signers, release := m.agentSigners(w)
 	for _, s := range signers {
 		if bytes.Equal(s.PublicKey().Marshal(), want) {
 			return s, release, true
@@ -305,7 +321,7 @@ func (m *Manager) LoginKeys(ctx context.Context, id string) ([]string, error) {
 	var pubs []ssh.PublicKey
 	switch srv.Auth {
 	case store.AuthAgent:
-		agentSigners, release := m.agentSigners()
+		agentSigners, release := m.agentSigners(nil)
 		defer release()
 		for _, s := range appendUniqueSigners(agentSigners, m.defaultKeySigners(srv)) {
 			pubs = append(pubs, s.PublicKey())

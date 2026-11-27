@@ -3625,6 +3625,8 @@ const de = {
       'Die gespeicherte Passphrase öffnet diesen privaten Schlüssel nicht. Bearbeite den Server und gib sie erneut ein.',
     CONN_NOT_CONNECTED: 'Der Server ist nicht verbunden.',
     CONN_CONTROL_SOCKET: 'Der Control-Socket konnte nicht verwendet werden.',
+    CONN_AGENT_SIGN_TIMEOUT:
+      'Der SSH-Agent hat die Anmeldung nicht rechtzeitig signiert. Fragt er, ob der Schlüssel verwendet werden darf (Bitwarden zeigt „Confirm SSH key usage“), such sein Fenster, bestätige und verbinde dich erneut.',
     CONN_PROXY_UNCONFIRMED: 'Der Proxy-Befehl wurde noch nicht bestätigt.',
     TERM_CLOSED: 'Die Terminal-Sitzung ist geschlossen.',
     FS_PERMISSION_DENIED: 'Zugriff verweigert.',

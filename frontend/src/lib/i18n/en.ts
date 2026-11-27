@@ -3506,6 +3506,8 @@ const en = {
       'The saved passphrase does not open this private key. Edit the server and type it again.',
     CONN_NOT_CONNECTED: 'The server is not connected.',
     CONN_CONTROL_SOCKET: 'Control socket could not be used.',
+    CONN_AGENT_SIGN_TIMEOUT:
+      'The SSH agent did not sign the login in time. If it asks you to confirm using the key (Bitwarden shows "Confirm SSH key usage"), find its window, approve it and connect again.',
     CONN_PROXY_UNCONFIRMED: 'The proxy command has not been confirmed yet.',
     TERM_CLOSED: 'The terminal session is closed.',
     FS_PERMISSION_DENIED: 'Permission denied.',

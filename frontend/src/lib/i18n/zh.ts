@@ -3388,6 +3388,8 @@ const zh = {
     CONN_PASSPHRASE_WRONG: '已保存的密码短语无法解开此私钥。请编辑服务器并重新输入。',
     CONN_NOT_CONNECTED: '服务器未连接。',
     CONN_CONTROL_SOCKET: '无法使用 control socket。',
+    CONN_AGENT_SIGN_TIMEOUT:
+      'SSH 代理未能及时为登录签名。如果它请你确认使用密钥（Bitwarden 会显示“Confirm SSH key usage”），请找到它的窗口，批准后再重新连接。',
     CONN_PROXY_UNCONFIRMED: '代理命令尚未确认。',
     TERM_CLOSED: '终端会话已关闭。',
     FS_PERMISSION_DENIED: '权限不足。',
