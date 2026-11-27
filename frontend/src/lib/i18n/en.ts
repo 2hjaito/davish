@@ -2208,7 +2208,7 @@ const en = {
     startupHint:
       'All servers shows the list. Last server opens and connects to the one you used last. Nothing opens the last server without connecting, for servers behind a VPN or in production.',
     startups: { all: 'All servers', last: 'Last server', none: 'Nothing' },
-    langs: { vi: 'Tiếng Việt', en: 'English', zh: '简体中文', es: 'Español' },
+    langs: { vi: 'Tiếng Việt', en: 'English', zh: '简体中文', es: 'Español', de: 'Deutsch' },
     langRestart:
       'Davish will restart: running terminals and transfers stop, and servers reconnect on their own.',
     langApply: 'Restart',

@@ -2178,7 +2178,7 @@ const vi = {
     startupHint:
       'Tất cả server hiện danh sách. Server cuối mở và kết nối server bạn dùng lần trước. Không gì mở mà không kết nối, cho server sau VPN hoặc đang chạy thật.',
     startups: { all: 'Tất cả server', last: 'Server cuối', none: 'Không gì' },
-    langs: { vi: 'Tiếng Việt', en: 'English', zh: '简体中文', es: 'Español' },
+    langs: { vi: 'Tiếng Việt', en: 'English', zh: '简体中文', es: 'Español', de: 'Deutsch' },
     langRestart:
       'Davish sẽ khởi động lại: terminal và chuyển file đang chạy sẽ dừng, server tự kết nối lại.',
     langApply: 'Khởi động lại',
