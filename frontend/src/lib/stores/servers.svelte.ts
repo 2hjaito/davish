@@ -63,6 +63,10 @@ class Servers {
   activeId = $state(load('activeServer', { id: '' }).id || (hasRuntime ? '' : 'dangth-vps'))
   /** A host key waiting for the user to accept it. */
   hostKeyPrompt = $state<HostKeyPrompt | null>(null)
+  /** A proxy command waiting for the user to see it before it runs (ADR 0031). */
+  proxyPrompt = $state<{ serverID: string; name: string; command: string; hash: string } | null>(
+    null,
+  )
   /** The server whose failed connection the error dialog shows. */
   failureOf = $state<string | null>(null)
   /** True once the list has been loaded from Go (always true in a browser). */
@@ -90,9 +94,11 @@ class Servers {
       s.error = st.error ? toUserError(st.error).code : undefined
       s.errorMessage = st.error?.message
       s.errorDetail = st.detail
-      // A new host key has its own dialog; every other failure opens the
-      // error dialog, so the cause can be read and copied.
-      if (st.state === 'failed' && s.error !== 'CONN_HOSTKEY_UNKNOWN') this.failureOf = s.id
+      // A new host key and a proxy command nobody confirmed have their own
+      // dialogs; every other failure opens the error dialog, so the cause can
+      // be read and copied.
+      if (st.state === 'failed' && s.error === 'CONN_PROXY_UNCONFIRMED') void this.askProxy(s.id)
+      else if (st.state === 'failed' && s.error !== 'CONN_HOSTKEY_UNKNOWN') this.failureOf = s.id
       else if (this.failureOf === s.id && st.state !== 'failed') this.failureOf = null
     })
     const offPrompt = onHostKeyPrompt((p) => (this.hostKeyPrompt = p))
@@ -212,6 +218,32 @@ class Servers {
 
   rejectHostKey() {
     this.hostKeyPrompt = null
+  }
+
+  /** Shows the command a server would run on this computer and asks first. */
+  async askProxy(id: string) {
+    const s = this.list.find((x) => x.id === id)
+    if (!s) return
+    try {
+      const plan = await api.serverProxyPlan(id)
+      this.proxyPrompt = { serverID: id, name: s.name, command: plan.command, hash: plan.hash }
+    } catch {
+      // No plan can be made (an unsafe host name, say): the error dialog says why.
+      this.failureOf = id
+    }
+  }
+
+  /** Confirms the command that was shown, then connects. The dialog stays open if saving fails. */
+  async confirmProxy() {
+    const p = this.proxyPrompt
+    if (!p) return
+    await api.confirmServerProxy(p.serverID, p.hash)
+    this.proxyPrompt = null
+    await this.ensureConnected(p.serverID)
+  }
+
+  rejectProxy() {
+    this.proxyPrompt = null
   }
 
   /** Opens the error dialog for a failed server. */

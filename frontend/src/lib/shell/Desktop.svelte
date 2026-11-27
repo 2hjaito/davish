@@ -41,6 +41,7 @@
   import MenuBar from './MenuBar.svelte'
   import ConnErrorDialog from './ConnErrorDialog.svelte'
   import HostKeyDialog from './HostKeyDialog.svelte'
+  import ProxyConfirmDialog from './ProxyConfirmDialog.svelte'
   import SudoDialog from './SudoDialog.svelte'
   import ServerDialog from './ServerDialog.svelte'
   import HelpDialog from './HelpDialog.svelte'
@@ -403,6 +404,7 @@
     </div>
   {/if}
   <HostKeyDialog />
+  <ProxyConfirmDialog />
   <ConnErrorDialog />
   <SudoDialog />
   <SleepScreen />

@@ -1726,6 +1726,12 @@ const zh = {
     accept: '信任并连接',
     reject: '取消',
   },
+  proxyConfirm: {
+    title: (name: string) => `运行此命令以连接 ${name}？`,
+    body: '此服务器通过一条在本机上运行的命令连接，和 ssh 处理 ProxyCommand 的方式一样。该命令不是在这里输入的（例如来自导入），所以 Davish 会先询问一次。将运行的命令行如下：',
+    action: '运行并记住',
+    note: '如果命令发生变化，Davish 会再次询问。',
+  },
   notifications: {
     showDisk: '查看磁盘',
     title: '通知',
@@ -3382,6 +3388,7 @@ const zh = {
     CONN_PASSPHRASE_WRONG: '已保存的密码短语无法解开此私钥。请编辑服务器并重新输入。',
     CONN_NOT_CONNECTED: '服务器未连接。',
     CONN_CONTROL_SOCKET: '无法使用 control socket。',
+    CONN_PROXY_UNCONFIRMED: '代理命令尚未确认。',
     TERM_CLOSED: '终端会话已关闭。',
     FS_PERMISSION_DENIED: '权限不足。',
     FS_EXISTS: '已存在同名的文件或文件夹。',

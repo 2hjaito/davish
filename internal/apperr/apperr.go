@@ -21,6 +21,9 @@ const (
 	ConnPassphraseWrong  Code = "CONN_PASSPHRASE_WRONG"
 	ConnNotConnected     Code = "CONN_NOT_CONNECTED"
 	ConnControlSocket    Code = "CONN_CONTROL_SOCKET"
+	// ConnProxyUnconfirmed: the server reaches its host through a command
+	// that runs on this computer and the user has not confirmed it (ADR 0031).
+	ConnProxyUnconfirmed Code = "CONN_PROXY_UNCONFIRMED"
 	TermClosed           Code = "TERM_CLOSED"
 	FSPermissionDenied   Code = "FS_PERMISSION_DENIED"
 	FSExists             Code = "FS_EXISTS"

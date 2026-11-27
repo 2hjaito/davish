@@ -717,6 +717,12 @@ func (m *Manager) dialVia(ctx context.Context, target, id string, depth int) (*s
 		// The command owns how the server is reached; the handshake that
 		// follows is the normal one, over its stdin and stdout.
 		if proxy, err = dialProxy(srv); err != nil {
+			// A refusal keeps its own code (unconfirmed, unsafe value); only
+			// a command that could not start is "unreachable".
+			var ae *apperr.Error
+			if errors.As(err, &ae) {
+				return nil, err
+			}
 			return nil, apperr.Wrap(apperr.ConnUnreachable, "cannot start the proxy command", err)
 		}
 		nc = proxy

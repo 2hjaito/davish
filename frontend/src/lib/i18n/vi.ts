@@ -1759,6 +1759,12 @@ const vi = {
     accept: 'Tin tưởng và kết nối',
     reject: 'Hủy',
   },
+  proxyConfirm: {
+    title: (name: string) => `Chạy lệnh này để kết nối tới ${name}?`,
+    body: 'Server này được kết nối qua một lệnh chạy trên máy này, như ssh làm với ProxyCommand. Lệnh không được gõ ở đây (ví dụ nhập từ file cấu hình), nên Davish hỏi một lần. Đây là dòng sẽ chạy:',
+    action: 'Chạy và nhớ',
+    note: 'Davish sẽ hỏi lại nếu lệnh thay đổi.',
+  },
   notifications: {
     showDisk: 'Xem ổ đĩa',
     title: 'Thông báo',
@@ -3460,6 +3466,7 @@ const vi = {
       'Passphrase đã lưu không mở được private key này. Hãy sửa server và nhập lại.',
     CONN_NOT_CONNECTED: 'Server chưa được kết nối.',
     CONN_CONTROL_SOCKET: 'Không dùng được control socket.',
+    CONN_PROXY_UNCONFIRMED: 'Lệnh proxy chưa được xác nhận.',
     TERM_CLOSED: 'Phiên terminal đã đóng.',
     FS_PERMISSION_DENIED: 'Không có quyền truy cập.',
     FS_EXISTS: 'Đã có file hoặc thư mục trùng tên.',

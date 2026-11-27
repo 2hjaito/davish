@@ -1808,6 +1808,12 @@ const es = {
     accept: 'Confiar y conectar',
     reject: 'Cancelar',
   },
+  proxyConfirm: {
+    title: (name: string) => `¿Ejecutar este comando para llegar a ${name}?`,
+    body: 'A este servidor se llega mediante un comando que se ejecuta en este equipo, como hace ssh con un ProxyCommand. No se escribió aquí (por ejemplo, vino de una importación), así que Davish pregunta una vez. Esta es la línea que ejecutará:',
+    action: 'Ejecutar y recordar',
+    note: 'Davish vuelve a preguntar si el comando cambia.',
+  },
   notifications: {
     showDisk: 'Mostrar disco',
     title: 'Notificaciones',
@@ -3580,6 +3586,7 @@ const es = {
       'La frase de contraseña guardada no abre esta clave privada. Edita el servidor y escríbela de nuevo.',
     CONN_NOT_CONNECTED: 'El servidor no está conectado.',
     CONN_CONTROL_SOCKET: 'No se pudo usar el control socket.',
+    CONN_PROXY_UNCONFIRMED: 'El comando proxy aún no se ha confirmado.',
     TERM_CLOSED: 'La sesión de terminal está cerrada.',
     FS_PERMISSION_DENIED: 'Permiso denegado.',
     FS_EXISTS: 'Ya existe un archivo o carpeta con ese nombre.',

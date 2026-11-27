@@ -108,7 +108,12 @@
     busy = true
     error = ''
     try {
-      const saved = await servers.save($state.snapshot(draft))
+      // A command typed or changed here is the user's to run (ADR 0031); one
+      // left as it was keeps what it had, and an import never counts.
+      const was = (editing ?? source)?.proxyCommand ?? ''
+      const now = draft.proxyCommand.trim()
+      const proxyTyped = now !== '' && now !== was.trim()
+      const saved = await servers.save({ ...$state.snapshot(draft), proxyTyped })
       ui.closeServerDialog()
       // Reconnect so edited credentials take effect at once.
       if (editing) await servers.reconnect(saved.id)

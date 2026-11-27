@@ -4,6 +4,7 @@ package store
 import (
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -59,6 +60,11 @@ type Server struct {
 	// reached through a WebSocket, a jump with no direct route and the like.
 	// Davish runs it with the same %h/%p/%r token expansion as OpenSSH.
 	ProxyCommand string `json:"proxyCommand,omitempty"`
+	// ProxyTrust is the ProxyHash of the proxy command the user typed or
+	// confirmed. A command whose hash is not this one does not run (ADR 0031):
+	// it came from an import or a file, not from the user. Save sets it; a
+	// value arriving with the server is never believed.
+	ProxyTrust string `json:"proxyTrust,omitempty"`
 	// ControlPath, when set, makes Davish attach to an OpenSSH ControlMaster
 	// socket the user started (ssh -M -S <path>) instead of logging in itself.
 	// OpenSSH then does the authentication and host key check. Empty is the
@@ -141,6 +147,41 @@ func (s *Store) Server(ctx context.Context, id string) (Server, error) {
 // Save adds srv, or replaces the server with the same ID. A new server gets
 // an ID and goes to the end of the list. It returns the stored server.
 func (s *Store) Save(ctx context.Context, srv Server) (Server, error) {
+	return s.SaveWith(ctx, srv, SaveOptions{})
+}
+
+// SaveOptions says where a save comes from.
+type SaveOptions struct {
+	// ProxyTyped is set when the user typed or changed the proxy command in
+	// the dialog, which is what makes it theirs to run (ADR 0031). An import
+	// or an untouched field leaves it unset.
+	ProxyTyped bool
+}
+
+// ProxyHash is the SHA-256 of a proxy command, in hex: what ProxyTrust holds
+// and what the user confirms.
+func ProxyHash(command string) string {
+	sum := sha256.Sum256([]byte(command))
+	return hex.EncodeToString(sum[:])
+}
+
+// proxyTrust works out the ProxyTrust of srv, replacing whatever came with
+// it: the hash of a command the user typed, the trust it already had when
+// the command is unchanged, nothing otherwise.
+func proxyTrust(old *Server, srv Server, typed bool) string {
+	switch {
+	case srv.ProxyCommand == "":
+		return ""
+	case typed:
+		return ProxyHash(srv.ProxyCommand)
+	case old != nil && old.ProxyCommand == srv.ProxyCommand:
+		return old.ProxyTrust
+	}
+	return ""
+}
+
+// SaveWith is Save with where it comes from; see SaveOptions.
+func (s *Store) SaveWith(ctx context.Context, srv Server, opts SaveOptions) (Server, error) {
 	if err := ctx.Err(); err != nil {
 		return Server{}, err
 	}
@@ -159,6 +200,7 @@ func (s *Store) Save(ctx context.Context, srv Server) (Server, error) {
 		if srv.ID, err = newID(); err != nil {
 			return Server{}, err
 		}
+		srv.ProxyTrust = proxyTrust(nil, srv, opts.ProxyTyped)
 		f.Servers = append(f.Servers, srv)
 	} else {
 		i := slices.IndexFunc(f.Servers, func(x Server) bool { return x.ID == srv.ID })
@@ -166,12 +208,37 @@ func (s *Store) Save(ctx context.Context, srv Server) (Server, error) {
 			return Server{}, apperr.New(apperr.NotFound, "server not found")
 		}
 		srv.Distro = f.Servers[i].Distro
+		srv.ProxyTrust = proxyTrust(&f.Servers[i], srv, opts.ProxyTyped)
 		f.Servers[i] = srv
 	}
 	if err := s.write(f); err != nil {
 		return Server{}, err
 	}
 	return srv, nil
+}
+
+// ConfirmProxy records that the user confirmed the proxy command of server
+// id, whose ProxyHash is hash. It refuses when the command is not the one
+// that was shown, so a confirmation cannot cover another command.
+func (s *Store) ConfirmProxy(ctx context.Context, id, hash string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	f, err := s.load()
+	if err != nil {
+		return err
+	}
+	i := slices.IndexFunc(f.Servers, func(x Server) bool { return x.ID == id })
+	if i < 0 {
+		return apperr.New(apperr.NotFound, "server not found")
+	}
+	if f.Servers[i].ProxyCommand == "" || ProxyHash(f.Servers[i].ProxyCommand) != hash {
+		return apperr.New(apperr.FSStale, "the proxy command changed since it was shown")
+	}
+	f.Servers[i].ProxyTrust = hash
+	return s.write(f)
 }
 
 // SetDistro records which logo server id gets. It rewrites the file only

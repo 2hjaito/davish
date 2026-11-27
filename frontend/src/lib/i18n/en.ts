@@ -1779,6 +1779,12 @@ const en = {
     accept: 'Trust and connect',
     reject: 'Cancel',
   },
+  proxyConfirm: {
+    title: (name: string) => `Run this command to reach ${name}?`,
+    body: 'This server is reached through a command that runs on this computer, as ssh does with a ProxyCommand. It was not typed here (it came from an import, say), so Davish asks once. This is the line it will run:',
+    action: 'Run and remember',
+    note: 'Davish asks again if the command changes.',
+  },
   notifications: {
     showDisk: 'Show disk',
     title: 'Notifications',
@@ -3500,6 +3506,7 @@ const en = {
       'The saved passphrase does not open this private key. Edit the server and type it again.',
     CONN_NOT_CONNECTED: 'The server is not connected.',
     CONN_CONTROL_SOCKET: 'Control socket could not be used.',
+    CONN_PROXY_UNCONFIRMED: 'The proxy command has not been confirmed yet.',
     TERM_CLOSED: 'The terminal session is closed.',
     FS_PERMISSION_DENIED: 'Permission denied.',
     FS_EXISTS: 'A file or folder with that name already exists.',

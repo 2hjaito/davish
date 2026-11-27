@@ -436,3 +436,95 @@ func TestSaveKeepsDistro(t *testing.T) {
 		t.Errorf("stored = %+v", got)
 	}
 }
+
+// A proxy command runs on this computer, so only one the user typed or
+// confirmed runs (ADR 0031). Save decides that; what arrives with the server
+// is never believed.
+func TestProxyTrust(t *testing.T) {
+	ctx := context.Background()
+	s, _, _ := newTestStore(t)
+	cmd := "websocat -b - ws://relay/tunnel"
+
+	// An import saves the command as it is: not confirmed.
+	srv := vps()
+	srv.ProxyCommand = cmd
+	imported, err := s.Save(ctx, srv)
+	if err != nil || imported.ProxyTrust != "" {
+		t.Fatalf("imported: trust %q, %v", imported.ProxyTrust, err)
+	}
+
+	// A trust that came with the server is ignored, typed or not.
+	forged := vps()
+	forged.ProxyCommand = cmd
+	forged.ProxyTrust = ProxyHash(cmd)
+	got, err := s.Save(ctx, forged)
+	if err != nil || got.ProxyTrust != "" {
+		t.Fatalf("a trust that came with the server was believed: %q, %v", got.ProxyTrust, err)
+	}
+
+	// Typed in the dialog: confirmed.
+	typed, err := s.SaveWith(ctx, forged, SaveOptions{ProxyTyped: true})
+	if err != nil || typed.ProxyTrust != ProxyHash(cmd) {
+		t.Fatalf("typed: trust %q, %v", typed.ProxyTrust, err)
+	}
+
+	// Saved again with the command untouched: the trust stays.
+	again := typed
+	again.Name = "renamed"
+	kept, err := s.Save(ctx, again)
+	if err != nil || kept.ProxyTrust != ProxyHash(cmd) {
+		t.Fatalf("unchanged command lost its trust: %q, %v", kept.ProxyTrust, err)
+	}
+
+	// Changed, and not typed (a file rewrote it): no longer confirmed.
+	changed := kept
+	changed.ProxyCommand = cmd + " --evil"
+	lost, err := s.Save(ctx, changed)
+	if err != nil || lost.ProxyTrust != "" {
+		t.Fatalf("a changed command kept the old trust: %q, %v", lost.ProxyTrust, err)
+	}
+
+	// Removing the command removes the trust.
+	none := lost
+	none.ProxyCommand = ""
+	cleared, err := s.SaveWith(ctx, none, SaveOptions{ProxyTyped: true})
+	if err != nil || cleared.ProxyTrust != "" {
+		t.Fatalf("no command, trust %q, %v", cleared.ProxyTrust, err)
+	}
+}
+
+func TestConfirmProxy(t *testing.T) {
+	ctx := context.Background()
+	s, _, _ := newTestStore(t)
+	cmd := "cloudflared access ssh --hostname %h"
+	srv := vps()
+	srv.ProxyCommand = cmd
+	saved, err := s.Save(ctx, srv)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// A confirmation of another command does not count.
+	if err := s.ConfirmProxy(ctx, saved.ID, ProxyHash("nc evil 22")); codeOf(err) != apperr.FSStale {
+		t.Fatalf("another command: err = %v; want FS_STALE", err)
+	}
+	if got, _ := s.Server(ctx, saved.ID); got.ProxyTrust != "" {
+		t.Fatalf("a wrong hash confirmed it: %q", got.ProxyTrust)
+	}
+
+	if err := s.ConfirmProxy(ctx, saved.ID, ProxyHash(cmd)); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := s.Server(ctx, saved.ID); got.ProxyTrust != ProxyHash(cmd) {
+		t.Fatalf("trust = %q", got.ProxyTrust)
+	}
+
+	// A server without a command, or one that is gone, cannot be confirmed.
+	plain, _ := s.Save(ctx, vps())
+	if err := s.ConfirmProxy(ctx, plain.ID, ProxyHash("")); codeOf(err) != apperr.FSStale {
+		t.Errorf("no command: err = %v", err)
+	}
+	if err := s.ConfirmProxy(ctx, "gone", ProxyHash(cmd)); codeOf(err) != apperr.NotFound {
+		t.Errorf("unknown server: err = %v", err)
+	}
+}

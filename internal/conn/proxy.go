@@ -15,36 +15,94 @@ import (
 	"sync"
 	"time"
 
+	"davish/internal/apperr"
 	"davish/internal/store"
 )
+
+// safeProxyValue tells whether a host, login or port may be put into a shell
+// command as it is: letters, digits and . _ : @ - only. store.validate already
+// holds the host and login to a hostname or IP and a plain login, but this is
+// the place that builds the shell line, so it does not rely on that: OpenSSH
+// had to add the same check (CVE-2023-51385).
+func safeProxyValue(v string) bool {
+	if v == "" {
+		return false
+	}
+	for _, r := range v {
+		switch {
+		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9':
+		case r == '.', r == '_', r == ':', r == '@', r == '-':
+		default:
+			return false
+		}
+	}
+	return true
+}
 
 // expandProxyTokens applies the substitution OpenSSH does on a ProxyCommand:
 // %h and %n are the host, %r the login, %p the port and %% a literal percent.
 // A token this build cannot compute yet is left as typed: the command then
 // fails in the user's own shell, visibly, instead of connecting elsewhere.
-func expandProxyTokens(cmd string, srv store.Server) string {
+// It refuses a host or login that is not safe to put in a shell command.
+func expandProxyTokens(cmd string, srv store.Server) (string, error) {
 	var b strings.Builder
+	put := func(v string) error {
+		if !safeProxyValue(v) {
+			return apperr.New(apperr.InvalidInput, "the host or login has a character that is not safe in a proxy command")
+		}
+		b.WriteString(v)
+		return nil
+	}
 	for i := 0; i < len(cmd); i++ {
 		if cmd[i] != '%' || i+1 >= len(cmd) {
 			b.WriteByte(cmd[i])
 			continue
 		}
 		i++
+		var err error
 		switch cmd[i] {
 		case '%':
 			b.WriteByte('%')
 		case 'h', 'n':
-			b.WriteString(srv.Host)
+			err = put(srv.Host)
 		case 'r':
-			b.WriteString(srv.User)
+			err = put(srv.User)
 		case 'p':
-			b.WriteString(strconv.Itoa(srv.Port))
+			err = put(strconv.Itoa(srv.Port))
 		default:
 			b.WriteByte('%')
 			b.WriteByte(cmd[i])
 		}
+		if err != nil {
+			return "", err
+		}
 	}
-	return b.String()
+	return b.String(), nil
+}
+
+// ProxyPlan is what a server's proxy command will run, for the user to
+// confirm before it does (ADR 0031).
+type ProxyPlan struct {
+	// Command is the line the shell gets, tokens expanded.
+	Command string `json:"command"`
+	// Hash is store.ProxyHash of the command as stored: what a confirmation
+	// covers, so a command that changed afterwards is asked about again.
+	Hash string `json:"hash"`
+}
+
+// PlanProxy works out what srv's proxy command runs.
+func PlanProxy(srv store.Server) (ProxyPlan, error) {
+	line, err := expandProxyTokens(srv.ProxyCommand, srv)
+	if err != nil {
+		return ProxyPlan{}, err
+	}
+	return ProxyPlan{Command: line, Hash: store.ProxyHash(srv.ProxyCommand)}, nil
+}
+
+// ProxyConfirmed tells whether srv may run its proxy command: it has none,
+// or the user typed or confirmed this very command.
+func ProxyConfirmed(srv store.Server) bool {
+	return srv.ProxyCommand == "" || srv.ProxyTrust == store.ProxyHash(srv.ProxyCommand)
 }
 
 // maxStderr keeps a proxy's dying words small; tunnel clients rarely say
@@ -57,8 +115,17 @@ const maxStderr = 2048
 // lives until Close, which is how the handshake timeout and every
 // reconnect end a tunnel nobody needs any more.
 func dialProxy(srv store.Server) (*proxyConn, error) {
+	// Never run a command the user has not typed or confirmed (ADR 0031),
+	// whoever calls this.
+	if !ProxyConfirmed(srv) {
+		return nil, apperr.New(apperr.ConnProxyUnconfirmed, "the proxy command has not been confirmed")
+	}
+	line, err := expandProxyTokens(srv.ProxyCommand, srv)
+	if err != nil {
+		return nil, err
+	}
 	name, flag := proxyShell()
-	cmd := exec.Command(name, flag, expandProxyTokens(srv.ProxyCommand, srv)) //nolint:gosec // the user's own ProxyCommand, as ssh runs it
+	cmd := exec.Command(name, flag, line) //nolint:gosec // the user's own or confirmed ProxyCommand, as ssh runs it
 	pc := &proxyConn{target: net.JoinHostPort(srv.Host, strconv.Itoa(srv.Port))}
 
 	// Handled pipes, not StdinPipe/StdoutPipe: those are closed by Wait,
