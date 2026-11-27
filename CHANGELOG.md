@@ -4,8 +4,12 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+### Thêm
+- Giao diện tiếng Đức: chọn Deutsch trong Cài đặt → Chung → Ngôn ngữ; lần đầu Davish theo máy đặt tiếng Đức.
+
 ### Sửa
 - Linux: gói tải về giờ có icon và `install-desktop.sh`, thêm Davish vào menu ứng dụng. Trên Wayland (KDE, GNOME) icon của cửa sổ lấy từ một mục desktop, nên trước đây cửa sổ không có icon (#305). Chưa thử trên desktop Wayland thật.
+- Cài đặt: một mục có lời giải thích dài và hàng nút bên cạnh làm chữ bị ép thành cột hẹp (mục "Kéo cửa sổ" dài tới 13 dòng ở tiếng Việt). Kéo cửa sổ, Khi mở Davish, Số dòng cuộn, Giữ cảnh báo và Quên mật khẩu sudo giờ đặt nút bên dưới chữ, giống mục Mức hiệu năng phía trên (#304).
 - Tất cả server → Bản đồ: bản đồ không có lề nên các thẻ dính sát mép sidebar và mép cửa sổ. Giờ có lề giống danh sách server. Tiêu đề từng hiện hai lần và có hai nút làm mới; giờ tiêu đề là "tên map" ở thanh trên của cửa sổ, và nút làm mới ở đó đọc lại bản đồ (trước đây nó chỉ tải lại danh sách server).
 - Xóa một server giờ nêu tên các server khác đang đi qua nó (jump host) và sẽ chuyển sang kết nối thẳng, để thấy điều đó trước khi xác nhận. Phần rà soát còn lại sau #296 không thấy gì cần đổi ở lối tắt script, bộ cập nhật (checksum có chữ ký, không hạ phiên bản) hay đặt lại khóa app.
 

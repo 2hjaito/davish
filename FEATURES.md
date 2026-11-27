@@ -2,7 +2,7 @@
 
 **English** · [Tiếng Việt](FEATURES.vi.md) · [Back to README](README.md)
 
-Every app in Davish, what it does and what it runs on the server. The interface is in English, Vietnamese, Simplified Chinese or Spanish; screenshots show demo data from the browser preview, and some are still of the Vietnamese interface.
+Every app in Davish, what it does and what it runs on the server. The interface is in English, Vietnamese, Simplified Chinese, Spanish or German; screenshots show demo data from the browser preview, and some are still of the Vietnamese interface.
 
 ## Terminal
 
@@ -274,4 +274,4 @@ The Dock sits at the bottom by default; Settings → Dock moves it to the left, 
 
 ## Language
 
-The whole interface comes in English, Vietnamese, Simplified Chinese and Spanish (Spain): menus, dialogs, help, error messages, the dates and numbers. The first time, Davish follows your system's language; after that, pick one in Settings → General → Language. Davish restarts to switch, and your servers reconnect on their own.
+The whole interface comes in English, Vietnamese, Simplified Chinese, Spanish (Spain) and German: menus, dialogs, help, error messages, the dates and numbers. The first time, Davish follows your system's language; after that, pick one in Settings → General → Language. Davish restarts to switch, and your servers reconnect on their own.
