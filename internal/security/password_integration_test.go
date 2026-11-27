@@ -7,6 +7,7 @@ import (
 	"errors"
 	"strings"
 	"testing"
+	"time"
 
 	"davish/internal/apperr"
 	"davish/internal/audit"
@@ -90,8 +91,14 @@ func TestDisableAndEnablePassword(t *testing.T) {
 // change is undone, not reported as done.
 func TestDisablePasswordUndoesWhenAnotherFileWins(t *testing.T) {
 	ctx := context.Background()
-	s, id, _ := ready(t)
+	s, id, m := ready(t)
 	testsshd.Exec(t, "sh", "-c", "printf 'PasswordAuthentication yes\\n' > /etc/ssh/sshd_config.d/00-aaa-yes.conf; kill -HUP $(cat /run/sshd.pid)")
+	// The HUP restarts sshd, which refuses connections for a moment, and
+	// DisablePassword begins by logging in with the key over a new
+	// connection. Wait until sshd takes it, as the code waits after its own
+	// reload; without this the test failed now and then ("the key could not
+	// log in before the change").
+	waitForKeyLogin(t, m, id)
 
 	err := s.DisablePassword(ctx, id, security.PlanPassword(false).Disable.Command)
 	var ae *apperr.Error
@@ -158,5 +165,22 @@ func TestDisablePasswordWhenItIsOn(t *testing.T) {
 	}
 	if st, err := s.ReadPasswordStatus(ctx, id, true, false); err != nil || st.Password != "yes" || st.Ours {
 		t.Fatalf("after undo: %+v, %v", st, err)
+	}
+}
+
+// waitForKeyLogin returns once the key logs in over a new connection, which
+// it does not while sshd re-executes after a reload.
+func waitForKeyLogin(t *testing.T, m *conn.Manager, id string) {
+	t.Helper()
+	deadline := time.Now().Add(10 * time.Second)
+	for {
+		err := m.CheckKeyLogin(context.Background(), id)
+		if err == nil {
+			return
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("sshd did not take the key login again after its reload: %v", err)
+		}
+		time.Sleep(100 * time.Millisecond)
 	}
 }
