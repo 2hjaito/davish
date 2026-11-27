@@ -274,4 +274,4 @@ Dock mặc định nằm dưới; Cài đặt → Dock cho chuyển sang cạnh 
 
 ## Ngôn ngữ
 
-Toàn bộ giao diện có tiếng Việt, tiếng Anh, tiếng Trung giản thể và tiếng Tây Ban Nha (Tây Ban Nha): menu, hộp thoại, trợ giúp, thông báo lỗi, ngày tháng và số. Lần đầu Davish theo ngôn ngữ của máy; sau đó chọn trong Cài đặt → Chung → Ngôn ngữ. Davish khởi động lại để đổi, server tự kết nối lại.
+Toàn bộ giao diện có tiếng Việt, tiếng Anh, tiếng Trung giản thể, tiếng Tây Ban Nha (Tây Ban Nha) và tiếng Đức: menu, hộp thoại, trợ giúp, thông báo lỗi, ngày tháng và số. Lần đầu Davish theo ngôn ngữ của máy; sau đó chọn trong Cài đặt → Chung → Ngôn ngữ. Davish khởi động lại để đổi, server tự kết nối lại.
