@@ -2148,7 +2148,14 @@ const zh = {
     startupHint:
       '“所有服务器”显示列表；“上次的服务器”会打开并连接上次使用的服务器；“不打开”则不连接，适合 VPN 后面或生产环境的服务器。',
     startups: { all: '所有服务器', last: '上次的服务器', none: '不打开' },
-    langs: { vi: 'Tiếng Việt', en: 'English', zh: '简体中文', es: 'Español', de: 'Deutsch' },
+    langs: {
+      vi: 'Tiếng Việt',
+      en: 'English',
+      zh: '简体中文',
+      es: 'Español',
+      de: 'Deutsch',
+      ko: '한국어',
+    },
     langRestart: 'Davish 会重启：正在运行的终端和传输会停止，服务器会自动重新连接。',
     langApply: '重启',
     reduceGlass: '减弱玻璃效果',
@@ -3081,7 +3088,6 @@ const zh = {
   },
   cron: {
     and: '和',
-    atWord: '在',
     at: (times: string) => times,
     atBoot: '服务器启动时',
     everyMinute: '每分钟',

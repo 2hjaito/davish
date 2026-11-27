@@ -2286,7 +2286,14 @@ const de = {
     startupHint:
       '„Alle Server“ zeigt die Liste. „Letzter Server“ öffnet den zuletzt benutzten Server und verbindet ihn. „Nichts“ öffnet den letzten Server, ohne zu verbinden, etwa für Server hinter einem VPN oder in Produktion.',
     startups: { all: 'Alle Server', last: 'Letzter Server', none: 'Nichts' },
-    langs: { vi: 'Tiếng Việt', en: 'English', zh: '简体中文', es: 'Español', de: 'Deutsch' },
+    langs: {
+      vi: 'Tiếng Việt',
+      en: 'English',
+      zh: '简体中文',
+      es: 'Español',
+      de: 'Deutsch',
+      ko: '한국어',
+    },
     langRestart:
       'Davish wird neu gestartet: Laufende Terminals und Übertragungen werden beendet, und die Server verbinden sich von selbst neu.',
     langApply: 'Neu starten',
@@ -3291,7 +3298,6 @@ const de = {
   },
   cron: {
     and: 'und',
-    atWord: 'um',
     at: (times: string) => `um ${times}`,
     atBoot: 'Beim Hochfahren des Servers',
     everyMinute: 'jede Minute',
