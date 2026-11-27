@@ -422,15 +422,17 @@
               >
             </div>
           {/if}
-          <div class="row">
+          <div class="row stack">
             {@render head(t.settings.startup, t.settings.startupHint)}
-            {@render segmented(
-              t.settings.startup,
-              STARTUP_VIEWS,
-              settings.startup ?? 'last',
-              (v) => t.settings.startups[v],
-              (v) => settings.set('startup', v),
-            )}
+            <div class="preset-line">
+              {@render segmented(
+                t.settings.startup,
+                STARTUP_VIEWS,
+                settings.startup ?? 'last',
+                (v) => t.settings.startups[v],
+                (v) => settings.set('startup', v),
+              )}
+            </div>
           </div>
         </div>
       {:else if pane === 'account'}
@@ -828,15 +830,17 @@
 
         <h3>{t.settings.dragTitle}</h3>
         <div class="card">
-          <div class="row">
+          <div class="row stack">
             {@render head(t.settings.dragLabel, t.settings.dragHint)}
-            {@render segmented(
-              t.settings.dragLabel,
-              WINDOW_DRAGS,
-              settings.windowDrag,
-              (m) => t.settings.dragModes[m],
-              (m) => settings.set('windowDrag', m),
-            )}
+            <div class="preset-line">
+              {@render segmented(
+                t.settings.dragLabel,
+                WINDOW_DRAGS,
+                settings.windowDrag,
+                (m) => t.settings.dragModes[m],
+                (m) => settings.set('windowDrag', m),
+              )}
+            </div>
           </div>
           {#if settings.windowDrag === 'outline'}
             {@render toggle(
@@ -1009,15 +1013,17 @@
             settings.terminalOpaque,
             (on) => settings.set('terminalSolid', on),
           )}
-          <div class="row">
+          <div class="row stack">
             {@render head(t.settings.scrollback, t.settings.scrollbackHint)}
-            {@render segmented(
-              t.settings.scrollback,
-              TERMINAL_SCROLLBACK,
-              settings.terminalScrollback,
-              (n) => n.toLocaleString(locale),
-              (n) => settings.set('terminalScrollback', n),
-            )}
+            <div class="preset-line">
+              {@render segmented(
+                t.settings.scrollback,
+                TERMINAL_SCROLLBACK,
+                settings.terminalScrollback,
+                (n) => n.toLocaleString(locale),
+                (n) => settings.set('terminalScrollback', n),
+              )}
+            </div>
           </div>
         </div>
       {:else if pane === 'editor'}
@@ -1113,15 +1119,17 @@
               </div>
             </div>
           {/each}
-          <div class="row">
+          <div class="row stack">
             {@render head(t.settings.alertHold, t.settings.alertHoldHint)}
-            {@render segmented(
-              t.settings.alertHold,
-              ALERTS.holds,
-              settings.alertHold,
-              (h) => t.settings.holds[h] ?? '',
-              (h) => settings.set('alertHold', h),
-            )}
+            <div class="preset-line">
+              {@render segmented(
+                t.settings.alertHold,
+                ALERTS.holds,
+                settings.alertHold,
+                (h) => t.settings.holds[h] ?? '',
+                (h) => settings.set('alertHold', h),
+              )}
+            </div>
           </div>
         </div>
       {:else if pane === 'security'}
@@ -1133,15 +1141,17 @@
         </div>
 
         <div class="card">
-          <div class="row">
+          <div class="row stack">
             {@render head(t.settings.sudoForget, t.settings.sudoForgetHint)}
-            {@render segmented(
-              t.settings.sudoForget,
-              SUDO_FORGET_AFTER,
-              settings.sudoForgetAfter,
-              (m) => t.settings.sudoForgets[m] ?? '',
-              (m) => settings.set('sudoForgetAfter', m),
-            )}
+            <div class="preset-line">
+              {@render segmented(
+                t.settings.sudoForget,
+                SUDO_FORGET_AFTER,
+                settings.sudoForgetAfter,
+                (m) => t.settings.sudoForgets[m] ?? '',
+                (m) => settings.set('sudoForgetAfter', m),
+              )}
+            </div>
           </div>
         </div>
       {/if}

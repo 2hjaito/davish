@@ -53,6 +53,7 @@
 
   /** The server whose map is open over the grid. */
   let mapOf = $state<string | null>(null)
+  let mapView = $state<ServerMap>()
   const mapped = $derived(servers.list.find((x) => x.id === mapOf && x.state === 'connected'))
 
   // Cards show the readings; the list fits many servers on one screen (#178).
@@ -369,7 +370,7 @@
   {#if multi}
     <MultiRun onback={() => (multi = false)} />
   {:else if mapped}
-    <ServerMap serverID={mapped.id} name={mapped.name} onback={() => (mapOf = null)} />
+    <ServerMap bind:this={mapView} serverID={mapped.id} onback={() => (mapOf = null)} />
   {/if}
 {/snippet}
 
@@ -427,8 +428,8 @@
   ready={servers.list.length > 0}
   footer={s.overview.connected(up, servers.list.length)}
   page={multi || mapped ? pageView : undefined}
-  pageTitle={multi ? s.run.open : (mapped?.name ?? '')}
-  onrefresh={() => void servers.reload()}
+  pageTitle={multi ? s.run.open : mapped ? s.map.title(mapped.name) : ''}
+  onrefresh={() => (mapped && !multi ? mapView?.reload() : void servers.reload())}
   list={listView}
 >
   {#snippet actions()}

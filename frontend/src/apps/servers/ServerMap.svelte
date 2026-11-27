@@ -21,11 +21,10 @@
 
   interface Props {
     serverID: string
-    name: string
     onback: () => void
   }
 
-  let { serverID, name, onback }: Props = $props()
+  let { serverID, onback }: Props = $props()
 
   const m = t.servers.map
 
@@ -36,6 +35,11 @@
   let containers = $state.raw<Container[]>([])
   let mounts = $state.raw<Mount[]>([])
   let failed = $state.raw<{ source: Source; why: string }[]>([])
+
+  /** The window's refresh button reads the map again. */
+  export function reload() {
+    void load()
+  }
 
   async function load() {
     loading = true
@@ -98,10 +102,6 @@
     <button class="back" onclick={onback}>
       <span style:rotate="180deg" style:display="flex"><Icon name="chevronRight" size={13} /></span>
       {m.back}
-    </button>
-    <h2>{m.title(name)}</h2>
-    <button class="icon-btn" aria-label={t.common.refresh} title={t.common.refresh} onclick={load}>
-      <Icon name="refresh" size={14} />
     </button>
   </header>
 
@@ -236,20 +236,14 @@
     flex-direction: column;
     gap: 14px;
     min-width: 0;
+    /* The same margin as the list of servers beside it. */
+    padding: 16px 18px;
   }
 
   .bar {
     display: flex;
     align-items: center;
     gap: 10px;
-  }
-
-  .bar h2 {
-    flex: 1;
-    margin: 0;
-    font-size: var(--text-md);
-    font-weight: 600;
-    text-align: center;
   }
 
   .back {
