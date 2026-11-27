@@ -117,6 +117,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+:lang(ko) {
+  --display: 'Bricolage Grotesque Variable', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+  --text: 'Be Vietnam Pro', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', system-ui, sans-serif;
+}
+
 :lang(zh-CN) {
   --display: 'Bricolage Grotesque Variable', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   --text: 'Be Vietnam Pro', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;

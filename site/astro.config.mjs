@@ -3,9 +3,9 @@
 import starlight from '@astrojs/starlight'
 import { defineConfig } from 'astro/config'
 
-const group = (en, vi, zh, dir) => ({
+const group = (en, vi, zh, ko, fr, dir) => ({
   label: en,
-  translations: { vi, 'zh-CN': zh },
+  translations: { vi, 'zh-CN': zh, ko, fr },
   items: [{ autogenerate: { directory: `docs/${dir}` } }],
 })
 
@@ -15,13 +15,15 @@ export default defineConfig({
   vite: { server: { fs: { allow: ['..'] } } },
   integrations: [
     starlight({
-      title: { en: 'Davish Docs', vi: 'Tài liệu Davish', 'zh-CN': 'Davish 文档' },
+      title: { en: 'Davish Docs', vi: 'Tài liệu Davish', 'zh-CN': 'Davish 文档', ko: 'Davish 문서', fr: 'Documentation Davish' },
       favicon: '/favicon.svg',
       defaultLocale: 'root',
       locales: {
         root: { label: 'English', lang: 'en' },
         vi: { label: 'Tiếng Việt', lang: 'vi' },
         zh: { label: '简体中文', lang: 'zh-CN' },
+        ko: { label: '한국어', lang: 'ko' },
+        fr: { label: 'Français', lang: 'fr' },
       },
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/2hjaito/davish' },
@@ -37,11 +39,11 @@ export default defineConfig({
         LanguageSelect: './src/components/docs/LanguageSelect.astro',
       },
       sidebar: [
-        group('Get started', 'Bắt đầu', '入门', 'start'),
-        group('On the server', 'Trên server', '服务器上', 'on-the-server'),
-        group('Services and apps', 'Dịch vụ và ứng dụng', '服务与应用', 'services-and-apps'),
-        group('Network and security', 'Mạng và bảo mật', '网络与安全', 'network-and-security'),
-        group('The desktop', 'Desktop', '桌面', 'the-desktop'),
+        group('Get started', 'Bắt đầu', '入门', '시작하기', 'Prise en main', 'start'),
+        group('On the server', 'Trên server', '服务器上', '서버에서', 'Sur le serveur', 'on-the-server'),
+        group('Services and apps', 'Dịch vụ và ứng dụng', '服务与应用', '서비스와 앱', 'Services et apps', 'services-and-apps'),
+        group('Network and security', 'Mạng và bảo mật', '网络与安全', '네트워크와 보안', 'Réseau et sécurité', 'network-and-security'),
+        group('The desktop', 'Desktop', '桌面', '데스크톱', 'Le bureau', 'the-desktop'),
       ],
     }),
   ],
