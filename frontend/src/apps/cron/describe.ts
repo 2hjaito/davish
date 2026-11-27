@@ -20,19 +20,21 @@ function list(values: readonly number[], name: (v: number) => string): string {
     : `${names.slice(0, -1).join(', ')} ${t.cron.and} ${names[names.length - 1]}`
 }
 
-function timePart(s: Schedule): string | null {
+/** When in the day; clock is set for times such as 03:00, which read as daily on their own. */
+function timePart(s: Schedule): { text: string; clock?: boolean } | null {
   const everyMinute = s.minute.length === 60
   const everyHour = s.hour.length === 24
-  if (everyMinute && everyHour) return t.cron.everyMinute
+  if (everyMinute && everyHour) return { text: t.cron.everyMinute }
   const m = step(s.minute, 0, 60)
-  if (m > 1 && everyHour) return t.cron.everyNMinutes(m)
+  if (m > 1 && everyHour) return { text: t.cron.everyNMinutes(m) }
   if (s.minute.length !== 1) return null
   const mm = s.minute[0]!
-  if (everyHour) return t.cron.everyHourAt(pad(mm))
+  if (everyHour) return { text: t.cron.everyHourAt(pad(mm)) }
   const h = step(s.hour, 0, 24)
-  if (h > 1) return t.cron.everyNHoursAt(h, pad(mm))
-  if (s.hour.length <= 4) return t.cron.at(s.hour.map((hh) => `${pad(hh)}:${pad(mm)}`).join(', '))
-  return null
+  if (h > 1) return { text: t.cron.everyNHoursAt(h, pad(mm)) }
+  if (s.hour.length > 4) return null
+  const times = s.hour.map((hh) => `${pad(hh)}:${pad(mm)}`).join(', ')
+  return { text: t.cron.at(times), clock: true }
 }
 
 function dayPart(s: Schedule): string | null {
@@ -59,7 +61,8 @@ export function describe(s: Schedule): string {
   if (time === null) return s.raw
   const day = dayPart(s)
   const months = s.month.length === 12 ? '' : ` ${t.cron.inMonths(list(s.month, String))}`
-  const daily = time.startsWith(t.cron.atWord) && day === null
-  const sentence = [day ?? (daily ? t.cron.everyDay : ''), time].filter(Boolean).join(' ') + months
+  const daily = time.clock && day === null
+  const sentence =
+    [day ?? (daily ? t.cron.everyDay : ''), time.text].filter(Boolean).join(' ') + months
   return sentence.charAt(0).toUpperCase() + sentence.slice(1)
 }

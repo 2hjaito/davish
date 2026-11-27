@@ -2218,7 +2218,14 @@ const en = {
     startupHint:
       'All servers shows the list. Last server opens and connects to the one you used last. Nothing opens the last server without connecting, for servers behind a VPN or in production.',
     startups: { all: 'All servers', last: 'Last server', none: 'Nothing' },
-    langs: { vi: 'Tiếng Việt', en: 'English', zh: '简体中文', es: 'Español', de: 'Deutsch' },
+    langs: {
+      vi: 'Tiếng Việt',
+      en: 'English',
+      zh: '简体中文',
+      es: 'Español',
+      de: 'Deutsch',
+      ko: '한국어',
+    },
     langRestart:
       'Davish will restart: running terminals and transfers stop, and servers reconnect on their own.',
     langApply: 'Restart',
@@ -3188,7 +3195,6 @@ const en = {
   },
   cron: {
     and: 'and',
-    atWord: 'at',
     at: (times: string) => `at ${times}`,
     atBoot: 'When the server boots',
     everyMinute: 'every minute',

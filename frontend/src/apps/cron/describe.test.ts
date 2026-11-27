@@ -93,3 +93,22 @@ group('in English', () => {
     ],
   ])('%s', (s, want) => expect(describe(s)).toBe(want))
 })
+
+group('in Korean', () => {
+  beforeAll(() => loadLang('ko'))
+  afterAll(() => loadLang('vi'))
+
+  it.each([
+    [sched('*/5 * * * *', { minute: range(0, 55, 5) }), '5분마다'],
+    [sched('0 9,18 * * *', { minute: [0], hour: [9, 18] }), '매일 09:00, 18:00에'],
+    [
+      sched('30 9 * * 1-5', { minute: [30], hour: [9], dow: [1, 2, 3, 4, 5], dowAny: false }),
+      '월요일~금요일 09:30에',
+    ],
+    [
+      sched('0 8 1,15 * *', { minute: [0], hour: [8], dom: [1, 15], domAny: false }),
+      '매월 1 및 15일 08:00에',
+    ],
+    [sched('0 12 * 1,7 *', { minute: [0], hour: [12], month: [1, 7] }), '매일 12:00에 (1 및 7월)'],
+  ])('%s', (s, want) => expect(describe(s)).toBe(want))
+})

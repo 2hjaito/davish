@@ -2255,7 +2255,14 @@ const es = {
     startupHint:
       'Todos los servidores muestra la lista. Último servidor abre y conecta el que usó por última vez. Nada abre sin conectar, para servidores tras una VPN o en producción.',
     startups: { all: 'Todos los servidores', last: 'Último servidor', none: 'Nada' },
-    langs: { vi: 'Tiếng Việt', en: 'English', zh: '简体中文', es: 'Español', de: 'Deutsch' },
+    langs: {
+      vi: 'Tiếng Việt',
+      en: 'English',
+      zh: '简体中文',
+      es: 'Español',
+      de: 'Deutsch',
+      ko: '한국어',
+    },
     langRestart:
       'Davish se reiniciará: los terminales y transferencias en curso se detienen, y los servidores se vuelven a conectar solos.',
     langApply: 'Reiniciar',
@@ -3256,7 +3263,6 @@ const es = {
   },
   cron: {
     and: 'y',
-    atWord: 'a las',
     at: (times: string) => `a las ${times}`,
     atBoot: 'Al arrancar el servidor',
     everyMinute: 'cada minuto',
