@@ -4,9 +4,14 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Added
+- German interface: pick Deutsch in Settings → General → Language; the first time, Davish follows a system set to German.
+
 ### Fixed
+- Linux: the archive now holds the icon and `install-desktop.sh`, which adds Davish to the application menu. On Wayland (KDE, GNOME) a window's icon comes from a desktop entry, so before this the window showed no icon (#305). Not tried on a Wayland desktop yet.
 - Control socket: a server reached through an OpenSSH control socket no longer shows "Connection lost" about 15 seconds after it connects (#301). Davish's keepalive request is not forwarded by OpenSSH's mux proxy, which dropped the connection that sent it. Davish now sends no keepalives over a control socket: the master looks after the server (`ServerAliveInterval`), and a master that exits closes the socket, which Davish still notices. Found by @PlayerFann14.
 - Settings: a setting with a long explanation and a row of buttons beside it squeezed the text into a narrow column (the "Dragging windows" row ran to 13 lines in Vietnamese). Dragging windows, When Davish opens, Scrollback, Alert hold and Sudo forget now put the buttons under the text, like the Performance level above (#304).
+- Docker: **‹ Containers** on a container's page goes back to the table again; the click did nothing (#310). The app menu read the page's container after going back had dropped it, and the error stopped the page from closing. Items an app adds to the menu bar now also leave it when their part of the window closes; before, they stayed behind.
 - All servers → Map: the map had no margin, so its cards touched the edge of the sidebar and the window. It now has the same margin as the list of servers. The title was shown twice and there were two refresh buttons; the title is now "name map" in the window's top bar, and that bar's refresh button reads the map again (before, it only reloaded the list of servers).
 - Deleting a server now names the other servers that go through it as a jump host and will connect directly afterwards, so that is seen before you confirm. The rest of the audit after #296 found nothing else to change in the script shortcuts, the updater (signed checksums, no downgrades) or the app lock reset.
 

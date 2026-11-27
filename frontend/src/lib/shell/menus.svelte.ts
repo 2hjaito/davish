@@ -68,14 +68,16 @@ interface Contribution {
 }
 
 class AppMenus {
-  #byWindow = $state<Record<string, Contribution[]>>({})
+  // Raw, replaced on each change: a deep $state would hand back proxies of
+  // the contributions, which removal could then never find by identity.
+  #byWindow = $state.raw<Record<string, Contribution[]>>({})
 
   add(winId: string, c: Contribution): () => void {
-    this.#byWindow[winId] = [...(this.#byWindow[winId] ?? []), c]
+    this.#byWindow = { ...this.#byWindow, [winId]: [...(this.#byWindow[winId] ?? []), c] }
     return () => {
-      const rest = (this.#byWindow[winId] ?? []).filter((x) => x !== c)
-      if (rest.length) this.#byWindow[winId] = rest
-      else delete this.#byWindow[winId]
+      const { [winId]: mine = [], ...others } = this.#byWindow
+      const rest = mine.filter((x) => x !== c)
+      this.#byWindow = rest.length ? { ...others, [winId]: rest } : others
     }
   }
 
@@ -97,10 +99,32 @@ class AppMenus {
 export const appMenus = new AppMenus()
 
 /**
+ * Adds items to winId's menu and returns what removes them. Call it while a
+ * component or an effect is being set up.
+ */
+export function trackAppMenu(
+  winId: string,
+  items: () => MenuEntry[],
+  refresh?: () => void,
+): () => void {
+  // The menu bar reads what this effect last worked out, never items itself.
+  // A parent can drop the props items read (Docker leaving a container's
+  // page) and the menu bar update before the parent removes this component;
+  // items would then throw on the missing props and stop the whole update,
+  // the parent's included. Svelte runs this effect only while its component
+  // stays, as it does the component's markup.
+  let entries = $state.raw<MenuEntry[]>([])
+  $effect.pre(() => {
+    entries = items()
+  })
+  return appMenus.add(winId, { items: () => entries, refresh })
+}
+
+/**
  * Adds commands to the menu bar while this component's window is focused.
  * Call it during component setup, inside a window.
  */
 export function useAppMenu(items: () => MenuEntry[], refresh?: () => void) {
   const { win } = getWindowContext()
-  onDestroy(appMenus.add(win.id, { items, refresh }))
+  onDestroy(trackAppMenu(win.id, items, refresh))
 }
