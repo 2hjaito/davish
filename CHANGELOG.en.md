@@ -5,6 +5,7 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Fixed
+- Settings: a setting with a long explanation and a row of buttons beside it squeezed the text into a narrow column (the "Dragging windows" row ran to 13 lines in Vietnamese). Dragging windows, When Davish opens, Scrollback, Alert hold and Sudo forget now put the buttons under the text, like the Performance level above (#304).
 - All servers → Map: the map had no margin, so its cards touched the edge of the sidebar and the window. It now has the same margin as the list of servers. The title was shown twice and there were two refresh buttons; the title is now "name map" in the window's top bar, and that bar's refresh button reads the map again (before, it only reloaded the list of servers).
 - Deleting a server now names the other servers that go through it as a jump host and will connect directly afterwards, so that is seen before you confirm. The rest of the audit after #296 found nothing else to change in the script shortcuts, the updater (signed checksums, no downgrades) or the app lock reset.
 
