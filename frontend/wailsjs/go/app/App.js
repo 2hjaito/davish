@@ -46,6 +46,10 @@ export function BrowserSites() {
   return window['go']['app']['App']['BrowserSites']();
 }
 
+export function ConfirmServerProxy(arg1, arg2) {
+  return window['go']['app']['App']['ConfirmServerProxy'](arg1, arg2);
+}
+
 export function Connect(arg1) {
   return window['go']['app']['App']['Connect'](arg1);
 }
@@ -712,6 +716,10 @@ export function SecurityPlan(arg1, arg2, arg3) {
 
 export function SecurityReport(arg1) {
   return window['go']['app']['App']['SecurityReport'](arg1);
+}
+
+export function ServerProxyPlan(arg1) {
+  return window['go']['app']['App']['ServerProxyPlan'](arg1);
 }
 
 export function ServicesAct(arg1, arg2, arg3) {

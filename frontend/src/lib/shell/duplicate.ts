@@ -40,6 +40,7 @@ export function duplicateDraft(source: ServerInfo, taken: readonly string[]): Se
     tag: source.tag ?? '',
     group: source.group ?? '',
     jumpID: source.jumpID ?? '',
+    proxyCommand: source.proxyCommand ?? '',
     controlPath: '',
     password: '',
     passphrase: '',

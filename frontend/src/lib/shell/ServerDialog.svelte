@@ -50,6 +50,7 @@
       tag: '',
       group: '',
       jumpID: '',
+      proxyCommand: '',
       controlPath: '',
       password: '',
       passphrase: '',
@@ -69,6 +70,7 @@
           tag: s.tag ?? '',
           group: s.group ?? '',
           jumpID: s.jumpID ?? '',
+          proxyCommand: s.proxyCommand ?? '',
           controlPath: s.controlPath ?? '',
           password: '',
           passphrase: '',
@@ -106,7 +108,12 @@
     busy = true
     error = ''
     try {
-      const saved = await servers.save($state.snapshot(draft))
+      // A command typed or changed here is the user's to run (ADR 0031); one
+      // left as it was keeps what it had, and an import never counts.
+      const was = (editing ?? source)?.proxyCommand ?? ''
+      const now = draft.proxyCommand.trim()
+      const proxyTyped = now !== '' && now !== was.trim()
+      const saved = await servers.save({ ...$state.snapshot(draft), proxyTyped })
       ui.closeServerDialog()
       // Reconnect so edited credentials take effect at once.
       if (editing) await servers.reconnect(saved.id)
@@ -242,6 +249,16 @@
     {/if}
 
     {#if !draft.jumpID}
+      <details class="field" open={draft.proxyCommand !== ''}>
+        <summary>{t.serverDialog.proxy}</summary>
+        <input
+          class="input mono"
+          spellcheck="false"
+          placeholder="websocat -b - ws://relay.example.com/tunnel"
+          bind:value={draft.proxyCommand}
+        />
+        <small>{t.serverDialog.proxyHint}</small>
+      </details>
       <details class="field" open={draft.controlPath !== ''}>
         <summary>{t.serverDialog.control}</summary>
         <input

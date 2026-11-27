@@ -1677,6 +1677,7 @@ const en = {
     empty: 'No specific hosts found in ~/.ssh/config.',
     exists: 'already added',
     via: (jump: string) => `via ${jump}`,
+    proxy: 'proxy command',
     selectAll: 'Select all',
     submit: (n: number) => (n > 0 ? `Import ${n} ${n === 1 ? 'server' : 'servers'}` : 'Import'),
     cancel: 'Cancel',
@@ -1744,6 +1745,9 @@ const en = {
     control: 'Advanced: use an ssh control socket',
     controlHint:
       'For logins that only work through OpenSSH, such as an agent that issues certificates (authentik). Replaces the authentication above. Start the master yourself: ssh -M -S <path> -fN user@host. Davish never sees your credentials. Linux and macOS only.',
+    proxy: 'Advanced: reach this server through a command (ProxyCommand)',
+    proxyHint:
+      'A shell command whose stdin and stdout carry the connection, like ssh’s ProxyCommand, for servers behind a relay such as websocat. Tokens %h, %p and %r become the host, port and user.',
     save: 'Save and connect',
     cancel: 'Cancel',
     delete: 'Delete server',
@@ -1774,6 +1778,12 @@ const en = {
     fingerprint: 'Fingerprint',
     accept: 'Trust and connect',
     reject: 'Cancel',
+  },
+  proxyConfirm: {
+    title: (name: string) => `Run this command to reach ${name}?`,
+    body: 'This server is reached through a command that runs on this computer, as ssh does with a ProxyCommand. It was not typed here (it came from an import, say), so Davish asks once. This is the line it will run:',
+    action: 'Run and remember',
+    note: 'Davish asks again if the command changes.',
   },
   notifications: {
     showDisk: 'Show disk',
@@ -3496,6 +3506,7 @@ const en = {
       'The saved passphrase does not open this private key. Edit the server and type it again.',
     CONN_NOT_CONNECTED: 'The server is not connected.',
     CONN_CONTROL_SOCKET: 'Control socket could not be used.',
+    CONN_PROXY_UNCONFIRMED: 'The proxy command has not been confirmed yet.',
     TERM_CLOSED: 'The terminal session is closed.',
     FS_PERMISSION_DENIED: 'Permission denied.',
     FS_EXISTS: 'A file or folder with that name already exists.',

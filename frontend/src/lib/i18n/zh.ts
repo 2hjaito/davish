@@ -1626,6 +1626,7 @@ const zh = {
     empty: '~/.ssh/config 中没有找到具体的主机。',
     exists: '已添加',
     via: (jump: string) => `经由 ${jump}`,
+    proxy: '代理命令',
     selectAll: '全选',
     submit: (n: number) => (n > 0 ? `导入 ${n} 台服务器` : '导入'),
     cancel: '取消',
@@ -1691,6 +1692,9 @@ const zh = {
     control: '高级：使用 ssh control socket',
     controlHint:
       '适用于只能通过 OpenSSH 登录的情况，例如签发证书的 agent（authentik）。会替代上面的认证方式。请自己先启动 master：ssh -M -S <path> -fN user@host。Davish 不会接触你的凭据。仅支持 Linux 和 macOS。',
+    proxy: '高级：经由命令连接（ProxyCommand）',
+    proxyHint:
+      '一条 shell 命令，用它的标准输入和输出承载连接，和 ssh 的 ProxyCommand 一样，适合经由 websocat 之类中转的服务器。占位符 %h、%p、%r 会替换为主机、端口和用户。',
     save: '保存并连接',
     cancel: '取消',
     delete: '删除服务器',
@@ -1721,6 +1725,12 @@ const zh = {
     fingerprint: '指纹',
     accept: '信任并连接',
     reject: '取消',
+  },
+  proxyConfirm: {
+    title: (name: string) => `运行此命令以连接 ${name}？`,
+    body: '此服务器通过一条在本机上运行的命令连接，和 ssh 处理 ProxyCommand 的方式一样。该命令不是在这里输入的（例如来自导入），所以 Davish 会先询问一次。将运行的命令行如下：',
+    action: '运行并记住',
+    note: '如果命令发生变化，Davish 会再次询问。',
   },
   notifications: {
     showDisk: '查看磁盘',
@@ -3378,6 +3388,7 @@ const zh = {
     CONN_PASSPHRASE_WRONG: '已保存的密码短语无法解开此私钥。请编辑服务器并重新输入。',
     CONN_NOT_CONNECTED: '服务器未连接。',
     CONN_CONTROL_SOCKET: '无法使用 control socket。',
+    CONN_PROXY_UNCONFIRMED: '代理命令尚未确认。',
     TERM_CLOSED: '终端会话已关闭。',
     FS_PERMISSION_DENIED: '权限不足。',
     FS_EXISTS: '已存在同名的文件或文件夹。',

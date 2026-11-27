@@ -85,6 +85,9 @@ func (im *importer) ensure(h Host, depth int) (string, error) {
 	}
 	jumpID := ""
 	if h.ProxyJump != "" {
+		// ssh lets ProxyJump win over ProxyCommand (it becomes one itself);
+		// a server saved with both would be refused.
+		h.ProxyCommand = ""
 		hops, err := ParseJump(h.ProxyJump)
 		if err != nil {
 			return "", apperr.Wrap(apperr.InvalidInput, "cannot read ProxyJump", err)
@@ -94,6 +97,7 @@ func (im *importer) ensure(h Host, depth int) (string, error) {
 			hh := im.hopHost(hop)
 			if jumpID != "" {
 				hh.ProxyJump = ""
+				hh.ProxyCommand = ""
 			}
 			id, err := im.ensureVia(hh, jumpID, depth+1)
 			if err != nil {
@@ -138,12 +142,13 @@ func (im *importer) hopHost(hop Hop) Host {
 
 func (im *importer) save(h Host, jumpID string) (string, error) {
 	srv := store.Server{
-		Name:   h.Alias,
-		Host:   h.HostName,
-		Port:   h.Port,
-		User:   h.User,
-		Auth:   store.AuthAgent,
-		JumpID: jumpID,
+		Name:         h.Alias,
+		Host:         h.HostName,
+		Port:         h.Port,
+		User:         h.User,
+		Auth:         store.AuthAgent,
+		JumpID:       jumpID,
+		ProxyCommand: h.ProxyCommand,
 	}
 	if h.IdentityFile != "" {
 		srv.Auth, srv.KeyPath = store.AuthKey, h.IdentityFile

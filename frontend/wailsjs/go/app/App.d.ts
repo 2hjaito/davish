@@ -21,6 +21,7 @@ import {nginx} from '../models';
 import {packages} from '../models';
 import {sshconfig} from '../models';
 import {security} from '../models';
+import {conn} from '../models';
 import {svc} from '../models';
 import {shortcut} from '../models';
 import {transfer} from '../models';
@@ -47,6 +48,8 @@ export function BenchReport(arg1:string):Promise<void>;
 export function BrowserOpen(arg1:string,arg2:number):Promise<ports.Site>;
 
 export function BrowserSites():Promise<Array<ports.Site>>;
+
+export function ConfirmServerProxy(arg1:string,arg2:string):Promise<void>;
 
 export function Connect(arg1:string):Promise<void>;
 
@@ -381,6 +384,8 @@ export function SecurityPasswordStatus(arg1:string):Promise<security.PasswordSta
 export function SecurityPlan(arg1:string,arg2:string,arg3:boolean):Promise<security.Plan>;
 
 export function SecurityReport(arg1:string):Promise<security.Report>;
+
+export function ServerProxyPlan(arg1:string):Promise<conn.ProxyPlan>;
 
 export function ServicesAct(arg1:string,arg2:string,arg3:string):Promise<void>;
 

@@ -700,7 +700,9 @@ func (m *Manager) dialVia(ctx context.Context, target, id string, depth int) (*s
 
 	var jump *ssh.Client
 	var nc net.Conn
-	if srv.JumpID != "" {
+	var proxy *proxyConn
+	switch {
+	case srv.JumpID != "":
 		if depth >= maxJumps {
 			return nil, apperr.New(apperr.InvalidInput, "jump chain is too long or loops")
 		}
@@ -711,7 +713,20 @@ func (m *Manager) dialVia(ctx context.Context, target, id string, depth int) (*s
 			jump.Close() //nolint:errcheck,gosec // unusable hop
 			return nil, apperr.Wrap(apperr.ConnUnreachable, "cannot reach the server through its jump host", err)
 		}
-	} else {
+	case srv.ProxyCommand != "":
+		// The command owns how the server is reached; the handshake that
+		// follows is the normal one, over its stdin and stdout.
+		if proxy, err = dialProxy(srv); err != nil {
+			// A refusal keeps its own code (unconfirmed, unsafe value); only
+			// a command that could not start is "unreachable".
+			var ae *apperr.Error
+			if errors.As(err, &ae) {
+				return nil, err
+			}
+			return nil, apperr.Wrap(apperr.ConnUnreachable, "cannot start the proxy command", err)
+		}
+		nc = proxy
+	default:
 		d := net.Dialer{Timeout: m.opts.DialTimeout}
 		if nc, err = d.DialContext(ctx, "tcp", addr); err != nil {
 			return nil, apperr.Wrap(apperr.ConnUnreachable, "cannot reach the server", err)
@@ -737,6 +752,13 @@ func (m *Manager) dialVia(ctx context.Context, target, id string, depth int) (*s
 		nc.Close() //nolint:errcheck,gosec // handshake failed
 		if jump != nil {
 			jump.Close() //nolint:errcheck,gosec // unusable hop
+		}
+		if proxy != nil {
+			// A tunnel that died takes the blame when it has something to
+			// confess; a live one stays out of the report.
+			if why := proxy.explain(); why != "" {
+				err = fmt.Errorf("%w (%s)", err, why)
+			}
 		}
 		return nil, m.handshakeError(target, addr, &res, err)
 	}

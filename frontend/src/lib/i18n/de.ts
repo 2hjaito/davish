@@ -1724,6 +1724,7 @@ const de = {
     empty: 'Keine konkreten Hosts in ~/.ssh/config gefunden.',
     exists: 'bereits hinzugefügt',
     via: (jump: string) => `über ${jump}`,
+    proxy: 'Proxy-Befehl',
     selectAll: 'Alle auswählen',
     submit: (n: number) =>
       n > 0 ? `${n} ${n === 1 ? 'Server' : 'Server'} importieren` : 'Importieren',
@@ -1793,6 +1794,9 @@ const de = {
     control: 'Erweitert: ssh-Control-Socket verwenden',
     controlHint:
       'Für Logins, die nur über OpenSSH funktionieren, etwa mit einem Agent, der Zertifikate ausstellt (authentik). Ersetzt die Authentifizierung oben. Starte den Master selbst: ssh -M -S <path> -fN user@host. Davish sieht deine Zugangsdaten nie. Nur Linux und macOS.',
+    proxy: 'Erweitert: über einen Befehl verbinden (ProxyCommand)',
+    proxyHint:
+      'Ein Shell-Befehl, dessen stdin und stdout die Verbindung tragen, wie ProxyCommand bei ssh – für Server hinter einem Relay wie websocat. Die Token %h, %p und %r stehen für Host, Port und Benutzer.',
     save: 'Speichern und verbinden',
     cancel: 'Abbrechen',
     delete: 'Server löschen',
@@ -1823,6 +1827,12 @@ const de = {
     fingerprint: 'Fingerabdruck',
     accept: 'Vertrauen und verbinden',
     reject: 'Abbrechen',
+  },
+  proxyConfirm: {
+    title: (name: string) => `Diesen Befehl ausführen, um ${name} zu erreichen?`,
+    body: 'Dieser Server wird über einen Befehl erreicht, der auf diesem Computer läuft, so wie ssh es mit einem ProxyCommand macht. Er wurde nicht hier eingegeben (zum Beispiel stammt er aus einem Import), deshalb fragt Davish einmal nach. Diese Zeile wird ausgeführt:',
+    action: 'Ausführen und merken',
+    note: 'Davish fragt erneut, wenn sich der Befehl ändert.',
   },
   notifications: {
     showDisk: 'Datenträger anzeigen',
@@ -3615,6 +3625,7 @@ const de = {
       'Die gespeicherte Passphrase öffnet diesen privaten Schlüssel nicht. Bearbeite den Server und gib sie erneut ein.',
     CONN_NOT_CONNECTED: 'Der Server ist nicht verbunden.',
     CONN_CONTROL_SOCKET: 'Der Control-Socket konnte nicht verwendet werden.',
+    CONN_PROXY_UNCONFIRMED: 'Der Proxy-Befehl wurde noch nicht bestätigt.',
     TERM_CLOSED: 'Die Terminal-Sitzung ist geschlossen.',
     FS_PERMISSION_DENIED: 'Zugriff verweigert.',
     FS_EXISTS: 'Eine Datei oder ein Ordner mit diesem Namen existiert bereits.',

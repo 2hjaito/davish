@@ -23,6 +23,8 @@ export interface ServerInfo {
   /** The folder it is listed under in All servers (one level). */
   group?: string
   jumpID?: string
+  /** ssh ProxyCommand: its stdin/stdout carry the connection, '' when none. */
+  proxyCommand?: string
   controlPath?: string
   /** Logo key of the system it runs, found when it connects (internal/platform/distro.go). */
   distro?: string
@@ -44,6 +46,9 @@ export interface ServerDraft {
   tag: string
   group: string
   jumpID: string
+  proxyCommand: string
+  /** The user typed or changed the proxy command here, which makes it theirs to run (ADR 0031). */
+  proxyTyped?: boolean
   controlPath: string
   password: string
   passphrase: string
@@ -69,6 +74,7 @@ export interface ConfigHost {
   port: number
   identityFile?: string
   proxyJump?: string
+  proxyCommand?: string
   exists: boolean
 }
 
@@ -127,6 +133,18 @@ export async function importInventoryHosts(path: string, names: string[]): Promi
 export const deleteServer = (id: string): Promise<void> => App.DeleteServer(id)
 export const reorderServers = (ids: string[]): Promise<void> => App.ReorderServers(ids)
 export const connect = (id: string): Promise<void> => App.Connect(id)
+
+/** What a server's proxy command will run, for the user to confirm (ADR 0031). */
+export interface ProxyPlan {
+  /** The line the shell gets, tokens expanded. */
+  command: string
+  /** What a confirmation covers: a command that changed is asked about again. */
+  hash: string
+}
+
+export const serverProxyPlan = (id: string): Promise<ProxyPlan> => App.ServerProxyPlan(id)
+export const confirmServerProxy = (id: string, hash: string): Promise<void> =>
+  App.ConfirmServerProxy(id, hash)
 export const disconnect = (id: string): Promise<void> => App.Disconnect(id)
 export const acceptHostKey = (id: string, fingerprint: string): Promise<void> =>
   App.AcceptHostKey(id, fingerprint)

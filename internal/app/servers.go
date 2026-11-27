@@ -20,6 +20,9 @@ type ServerInput struct {
 	store.Server
 	Password   string `json:"password"`
 	Passphrase string `json:"passphrase"`
+	// ProxyTyped is set when the user typed or changed the proxy command in
+	// the dialog, which makes it theirs to run (ADR 0031). Imports leave it unset.
+	ProxyTyped bool `json:"proxyTyped"`
 }
 
 // ListServers returns saved servers in display order with their state.
@@ -44,7 +47,7 @@ func (a *App) SaveServer(in ServerInput) (ServerView, error) {
 	if err := a.lock.Check(); err != nil {
 		return ServerView{}, err
 	}
-	srv, err := a.store.Save(a.ctx, in.Server)
+	srv, err := a.store.SaveWith(a.ctx, in.Server, store.SaveOptions{ProxyTyped: in.ProxyTyped})
 	if err != nil {
 		return ServerView{}, err
 	}
@@ -59,6 +62,25 @@ func (a *App) SaveServer(in ServerInput) (ServerView, error) {
 		}
 	}
 	return a.view(srv)
+}
+
+// ServerProxyPlan returns what the proxy command of server id will run, for
+// the user to confirm before it does (ADR 0031).
+func (a *App) ServerProxyPlan(id string) (conn.ProxyPlan, error) {
+	srv, err := a.store.Server(a.ctx, id)
+	if err != nil {
+		return conn.ProxyPlan{}, err
+	}
+	return conn.PlanProxy(srv)
+}
+
+// ConfirmServerProxy records that the user confirmed the command whose hash
+// ServerProxyPlan returned.
+func (a *App) ConfirmServerProxy(id, hash string) error {
+	if err := a.lock.Check(); err != nil {
+		return err
+	}
+	return a.store.ConfirmProxy(a.ctx, id, hash)
 }
 
 // DeleteServer disconnects and removes a server with its secrets.

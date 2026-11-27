@@ -200,6 +200,9 @@
               {:else if h.proxyJump}
                 <span class="tag">{d.via(h.proxyJump)}</span>
               {/if}
+              {#if h.proxyCommand && !h.proxyJump}
+                <span class="tag">{d.proxy}</span>
+              {/if}
             </label>
           </li>
         {/each}

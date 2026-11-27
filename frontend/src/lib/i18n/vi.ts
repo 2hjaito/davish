@@ -1658,6 +1658,7 @@ const vi = {
     empty: 'Không thấy host cụ thể nào trong ~/.ssh/config.',
     exists: 'đã có',
     via: (jump: string) => `qua ${jump}`,
+    proxy: 'lệnh proxy',
     selectAll: 'Chọn tất cả',
     submit: (n: number) => (n > 0 ? `Nhập ${n} server` : 'Nhập'),
     cancel: 'Hủy',
@@ -1724,6 +1725,9 @@ const vi = {
     control: 'Nâng cao: dùng ssh control socket',
     controlHint:
       'Dùng khi đăng nhập chỉ chạy được qua OpenSSH, như agent cấp chứng chỉ (authentik). Thay thế phần xác thực ở trên. Tự mở master: ssh -M -S <path> -fN user@host. Davish không bao giờ thấy thông tin đăng nhập của bạn. Chỉ có trên Linux và macOS.',
+    proxy: 'Nâng cao: kết nối qua một lệnh (ProxyCommand)',
+    proxyHint:
+      'Một lệnh shell mà stdin/stdout của nó mang kết nối, giống ProxyCommand của ssh, dành cho server sau một relay như websocat. Token %h, %p, %r được thay bằng host, port và user.',
     save: 'Lưu và kết nối',
     cancel: 'Hủy',
     delete: 'Xóa server',
@@ -1754,6 +1758,12 @@ const vi = {
     fingerprint: 'Fingerprint',
     accept: 'Tin tưởng và kết nối',
     reject: 'Hủy',
+  },
+  proxyConfirm: {
+    title: (name: string) => `Chạy lệnh này để kết nối tới ${name}?`,
+    body: 'Server này được kết nối qua một lệnh chạy trên máy này, như ssh làm với ProxyCommand. Lệnh không được gõ ở đây (ví dụ nhập từ file cấu hình), nên Davish hỏi một lần. Đây là dòng sẽ chạy:',
+    action: 'Chạy và nhớ',
+    note: 'Davish sẽ hỏi lại nếu lệnh thay đổi.',
   },
   notifications: {
     showDisk: 'Xem ổ đĩa',
@@ -3456,6 +3466,7 @@ const vi = {
       'Passphrase đã lưu không mở được private key này. Hãy sửa server và nhập lại.',
     CONN_NOT_CONNECTED: 'Server chưa được kết nối.',
     CONN_CONTROL_SOCKET: 'Không dùng được control socket.',
+    CONN_PROXY_UNCONFIRMED: 'Lệnh proxy chưa được xác nhận.',
     TERM_CLOSED: 'Phiên terminal đã đóng.',
     FS_PERMISSION_DENIED: 'Không có quyền truy cập.',
     FS_EXISTS: 'Đã có file hoặc thư mục trùng tên.',

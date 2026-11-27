@@ -198,10 +198,13 @@ export namespace app {
 	    tag?: string;
 	    group?: string;
 	    jumpID?: string;
+	    proxyCommand?: string;
+	    proxyTrust?: string;
 	    controlPath?: string;
 	    distro?: string;
 	    password: string;
 	    passphrase: string;
+	    proxyTyped: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new ServerInput(source);
@@ -220,10 +223,13 @@ export namespace app {
 	        this.tag = source["tag"];
 	        this.group = source["group"];
 	        this.jumpID = source["jumpID"];
+	        this.proxyCommand = source["proxyCommand"];
+	        this.proxyTrust = source["proxyTrust"];
 	        this.controlPath = source["controlPath"];
 	        this.distro = source["distro"];
 	        this.password = source["password"];
 	        this.passphrase = source["passphrase"];
+	        this.proxyTyped = source["proxyTyped"];
 	    }
 	}
 	export class ServerView {
@@ -238,6 +244,8 @@ export namespace app {
 	    tag?: string;
 	    group?: string;
 	    jumpID?: string;
+	    proxyCommand?: string;
+	    proxyTrust?: string;
 	    controlPath?: string;
 	    distro?: string;
 	    hasPassword: boolean;
@@ -261,6 +269,8 @@ export namespace app {
 	        this.tag = source["tag"];
 	        this.group = source["group"];
 	        this.jumpID = source["jumpID"];
+	        this.proxyCommand = source["proxyCommand"];
+	        this.proxyTrust = source["proxyTrust"];
 	        this.controlPath = source["controlPath"];
 	        this.distro = source["distro"];
 	        this.hasPassword = source["hasPassword"];
@@ -317,6 +327,25 @@ export namespace audit {
 	        this.durMs = source["durMs"];
 	        this.mutating = source["mutating"];
 	        this.input = source["input"];
+	    }
+	}
+
+}
+
+export namespace conn {
+	
+	export class ProxyPlan {
+	    command: string;
+	    hash: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ProxyPlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.command = source["command"];
+	        this.hash = source["hash"];
 	    }
 	}
 
@@ -3765,6 +3794,7 @@ export namespace sshconfig {
 	    port: number;
 	    identityFile?: string;
 	    proxyJump?: string;
+	    proxyCommand?: string;
 	    exists: boolean;
 	
 	    static createFrom(source: any = {}) {
@@ -3779,6 +3809,7 @@ export namespace sshconfig {
 	        this.port = source["port"];
 	        this.identityFile = source["identityFile"];
 	        this.proxyJump = source["proxyJump"];
+	        this.proxyCommand = source["proxyCommand"];
 	        this.exists = source["exists"];
 	    }
 	}

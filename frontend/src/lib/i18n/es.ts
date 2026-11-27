@@ -1705,6 +1705,7 @@ const es = {
     empty: 'No se han encontrado hosts concretos en ~/.ssh/config.',
     exists: 'ya añadido',
     via: (jump: string) => `vía ${jump}`,
+    proxy: 'comando proxy',
     selectAll: 'Seleccionar todo',
     submit: (n: number) =>
       n > 0 ? `Importar ${n} ${n === 1 ? 'servidor' : 'servidores'}` : 'Importar',
@@ -1773,6 +1774,9 @@ const es = {
     control: 'Avanzado: usar un control socket de ssh',
     controlHint:
       'Para inicios de sesión que solo funcionan con OpenSSH, como un agente que emite certificados (authentik). Sustituye a la autenticación de arriba. Inicia tú mismo el master: ssh -M -S <path> -fN user@host. Davish nunca ve tus credenciales. Solo en Linux y macOS.',
+    proxy: 'Avanzado: llegar a este servidor con un comando (ProxyCommand)',
+    proxyHint:
+      'Un comando de shell cuyo stdin y stdout transportan la conexión, como el ProxyCommand de ssh, para servidores detrás de un relé como websocat. Los tokens %h, %p y %r se sustituyen por host, puerto y usuario.',
     save: 'Guardar y conectar',
     cancel: 'Cancelar',
     delete: 'Eliminar servidor',
@@ -1803,6 +1807,12 @@ const es = {
     fingerprint: 'Huella',
     accept: 'Confiar y conectar',
     reject: 'Cancelar',
+  },
+  proxyConfirm: {
+    title: (name: string) => `¿Ejecutar este comando para llegar a ${name}?`,
+    body: 'A este servidor se llega mediante un comando que se ejecuta en este equipo, como hace ssh con un ProxyCommand. No se escribió aquí (por ejemplo, vino de una importación), así que Davish pregunta una vez. Esta es la línea que ejecutará:',
+    action: 'Ejecutar y recordar',
+    note: 'Davish vuelve a preguntar si el comando cambia.',
   },
   notifications: {
     showDisk: 'Mostrar disco',
@@ -3576,6 +3586,7 @@ const es = {
       'La frase de contraseña guardada no abre esta clave privada. Edita el servidor y escríbela de nuevo.',
     CONN_NOT_CONNECTED: 'El servidor no está conectado.',
     CONN_CONTROL_SOCKET: 'No se pudo usar el control socket.',
+    CONN_PROXY_UNCONFIRMED: 'El comando proxy aún no se ha confirmado.',
     TERM_CLOSED: 'La sesión de terminal está cerrada.',
     FS_PERMISSION_DENIED: 'Permiso denegado.',
     FS_EXISTS: 'Ya existe un archivo o carpeta con ese nombre.',

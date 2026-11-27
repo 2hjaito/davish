@@ -300,6 +300,7 @@
         tag: server.tag ?? '',
         group: server.group ?? '',
         jumpID: server.jumpID ?? '',
+        proxyCommand: server.proxyCommand ?? '',
         controlPath: server.controlPath ?? '',
         password: '',
         passphrase: pass,

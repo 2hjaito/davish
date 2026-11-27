@@ -23,6 +23,9 @@ type Host struct {
 	IdentityFile string `json:"identityFile,omitempty"`
 	// ProxyJump is kept as written: "a,b" or "user@host:port", "" for none.
 	ProxyJump string `json:"proxyJump,omitempty"`
+	// ProxyCommand is ssh's ProxyCommand, kept as written (tokens like %h
+	// and %p are expanded when the connection is dialed), "" for none.
+	ProxyCommand string `json:"proxyCommand,omitempty"`
 }
 
 // block is one Host section: its patterns and settings in file order.
@@ -164,6 +167,12 @@ func hostFor(alias string, blocks []block, home, user string) Host {
 	}
 	if pj := set["proxyjump"]; !strings.EqualFold(pj, "none") {
 		h.ProxyJump = pj
+	}
+	// Tokens other than the ones conn expands would need ssh's runtime
+	// state; the command is kept anyway, so an unsupported one fails loudly
+	// in the user's shell instead of the server being reached directly.
+	if pc := set["proxycommand"]; !strings.EqualFold(pc, "none") {
+		h.ProxyCommand = pc
 	}
 	return h
 }
