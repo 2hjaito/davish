@@ -40,7 +40,7 @@ describe('format', () => {
   })
 
   it('formats the menu bar clock', () => {
-    expect(formatClock(new Date(2026, 9, 26, 21, 54), t.menubar.weekdays)).toBe('Th 2 26/10  21:54')
+    expect(formatClock(new Date(2026, 9, 26, 21, 54), t.menubar)).toBe('Th 2 26/10  21:54')
   })
 
   it.each([

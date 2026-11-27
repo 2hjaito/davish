@@ -89,6 +89,8 @@ export function within(path: string, place: string): boolean {
 export interface DateWords {
   today: string
   yesterday: string
+  /** A day before yesterday; day and month are two digits. */
+  date: (day: string, month: string, year: number) => string
 }
 
 /** Like Finder: "Hôm nay, 14:03", "Hôm qua, 09:12", otherwise "12/10/2026". */
@@ -100,7 +102,7 @@ export function formatModTime(unix: number, now: Date, words: DateWords): string
   const days = Math.round((day(now) - day(d)) / 86_400_000)
   if (days === 0) return `${words.today}, ${time}`
   if (days === 1) return `${words.yesterday}, ${time}`
-  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`
+  return words.date(pad(d.getDate()), pad(d.getMonth() + 1), d.getFullYear())
 }
 
 export interface RowWindow {

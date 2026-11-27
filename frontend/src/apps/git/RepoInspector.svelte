@@ -7,7 +7,7 @@
 
 <script lang="ts">
   import type { Diff, Status } from '../../lib/api/git'
-  import { t } from '../../lib/i18n'
+  import { locale, t } from '../../lib/i18n'
   import Empty from '../../lib/ui/Empty.svelte'
   import Icon from '../../lib/ui/Icon.svelte'
   import { openFilesAt, openTerminalAt } from '../../lib/wm/intents.svelte'
@@ -28,7 +28,7 @@
 
   let { serverID, dir, status, sel, diff, diffError, onchanged }: Props = $props()
 
-  const dateTime = (s: number) => new Date(s * 1000).toLocaleString('vi-VN')
+  const dateTime = (s: number) => new Date(s * 1000).toLocaleString(locale)
 </script>
 
 {#if sel}

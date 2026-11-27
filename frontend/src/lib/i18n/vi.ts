@@ -962,6 +962,8 @@ const vi = {
       chartRange: '15 phút',
     },
     weekdays: ['CN', 'Th 2', 'Th 3', 'Th 4', 'Th 5', 'Th 6', 'Th 7'],
+    clock: (weekday: string, day: string, month: string, time: string) =>
+      `${weekday} ${day}/${month}  ${time}`,
   },
   menu: {
     addServer: 'Thêm server…',
@@ -1990,6 +1992,7 @@ const vi = {
     count: (n: number) => `${n.toLocaleString('vi')} mục`,
     today: 'Hôm nay',
     yesterday: 'Hôm qua',
+    date: (day: string, month: string, year: number) => `${day}/${month}/${year}`,
     upload: 'Tải lên',
     uploadFolder: 'Tải thư mục lên',
     download: 'Tải xuống',
@@ -3165,6 +3168,8 @@ const vi = {
     inMonths: (months: string) => `(tháng ${months})`,
     today: (time: string) => `Hôm nay, ${time}`,
     tomorrow: (time: string) => `Ngày mai, ${time}`,
+    runDate: (weekday: string, day: string, month: string, time: string) =>
+      `${weekday}, ${day}/${month} ${time}`,
     weekdayShort: ['CN', 'Th 2', 'Th 3', 'Th 4', 'Th 5', 'Th 6', 'Th 7'],
     sections: 'Bộ lọc tác vụ',
     filters: { mine: 'Của tôi', system: 'Hệ thống', disabled: 'Đã tắt' },

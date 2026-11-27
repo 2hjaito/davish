@@ -26,5 +26,5 @@ export function formatRun(unix: number, zone: string, now = Date.now()): string 
   const at = parts(unix * 1000)
   if (at.date === parts(now).date) return t.cron.today(at.time)
   if (at.date === parts(now + 86_400_000).date) return t.cron.tomorrow(at.time)
-  return `${t.cron.weekdayShort[at.weekday] ?? ''}, ${at.day}/${at.month} ${at.time}`
+  return t.cron.runDate(t.cron.weekdayShort[at.weekday] ?? '', at.day, at.month, at.time)
 }

@@ -35,10 +35,20 @@ export function formatGB(bytes: number): string {
   return num.format(bytes / 1024 ** 3)
 }
 
-export function formatClock(d: Date, weekdays: readonly string[]): string {
+export interface ClockWords {
+  weekdays: readonly string[]
+  /** Puts the parts in the language's order; day and month are two digits. */
+  clock: (weekday: string, day: string, month: string, time: string) => string
+}
+
+export function formatClock(d: Date, words: ClockWords): string {
   const pad = (n: number) => String(n).padStart(2, '0')
-  const day = weekdays[d.getDay()] ?? ''
-  return `${day} ${pad(d.getDate())}/${pad(d.getMonth() + 1)}  ${pad(d.getHours())}:${pad(d.getMinutes())}`
+  return words.clock(
+    words.weekdays[d.getDay()] ?? '',
+    pad(d.getDate()),
+    pad(d.getMonth() + 1),
+    `${pad(d.getHours())}:${pad(d.getMinutes())}`,
+  )
 }
 
 /** "23%", "2,5%": one decimal only below 10, where it still means something. */
