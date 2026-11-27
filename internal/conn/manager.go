@@ -754,16 +754,20 @@ func (m *Manager) dialVia(ctx context.Context, target, id string, depth int) (*s
 		err = errors.New("ssh handshake timed out")
 	}
 	if err != nil {
+		// Asked before the connection is closed: closing it ends the proxy,
+		// and what it did then is not what went wrong.
+		var why string
+		if proxy != nil {
+			why = proxy.explainAfter(err)
+		}
 		nc.Close() //nolint:errcheck,gosec // handshake failed
 		if jump != nil {
 			jump.Close() //nolint:errcheck,gosec // unusable hop
 		}
-		if proxy != nil {
+		if why != "" {
 			// A tunnel that died takes the blame when it has something to
 			// confess; a live one stays out of the report.
-			if why := proxy.explain(); why != "" {
-				err = fmt.Errorf("%w (%s)", err, why)
-			}
+			err = &proxyError{err: err, why: why}
 		}
 		if watch.timedOut() {
 			m.log.Warn("ssh agent did not sign in time", "server", target, "waited", signMax.String())
@@ -805,7 +809,7 @@ func (m *Manager) handshakeError(id, addr string, res *hostKeyResult, err error)
 	}
 	// Without this line a handshake that fails for any other reason leaves
 	// nothing in the log (#168).
-	m.log.Warn("ssh handshake failed", "server", id, "err", err)
+	m.log.Warn("ssh handshake failed", "server", id, "err", forLog(err, err.Error()))
 	return apperr.Wrap(apperr.ConnUnreachable, "ssh handshake failed", err)
 }
 
@@ -840,7 +844,7 @@ func (m *Manager) publish(id string, state State, err error) {
 		if st.Error.Code == apperr.ConnAuthFailed {
 			m.log.Info("connection state", "server", id, "state", state, "err", fmt.Sprint(st.Error.Code))
 		} else {
-			m.log.Warn("connection state", "server", id, "state", state, "err", fmt.Sprint(st.Error.Code), "detail", st.Detail)
+			m.log.Warn("connection state", "server", id, "state", state, "err", fmt.Sprint(st.Error.Code), "detail", forLog(err, st.Detail))
 		}
 	}
 	m.emit.Emit(events.ConnStatus, st)

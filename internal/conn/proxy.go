@@ -7,6 +7,7 @@ package conn
 
 import (
 	"errors"
+	"io"
 	"net"
 	"os"
 	"os/exec"
@@ -105,6 +106,32 @@ func ProxyConfirmed(srv store.Server) bool {
 	return srv.ProxyCommand == "" || srv.ProxyTrust == store.ProxyHash(srv.ProxyCommand)
 }
 
+// killProxyGroup is killGroup; tests replace it to see when it is called.
+var killProxyGroup = killGroup
+
+// proxyError is a handshake error with what the proxy command said about its
+// own death. The text is for the person looking at the error dialog; a proxy
+// may print an access token or a login URL there, so the log gets err alone
+// (see forLog).
+type proxyError struct {
+	err error
+	why string
+}
+
+func (e *proxyError) Error() string { return e.err.Error() + " (" + e.why + ")" }
+func (e *proxyError) Unwrap() error { return e.err }
+
+// forLog is text, which describes err, without what a proxy command printed.
+// The dialog and "Copy report" get the whole text; the log, which people send
+// for support, gets this.
+func forLog(err error, text string) string {
+	var pe *proxyError
+	if errors.As(err, &pe) {
+		return strings.ReplaceAll(text, " ("+pe.why+")", "")
+	}
+	return text
+}
+
 // maxStderr keeps a proxy's dying words small; tunnel clients rarely say
 // more than a line before exiting, and nothing is ever read after that.
 const maxStderr = 2048
@@ -126,7 +153,7 @@ func dialProxy(srv store.Server) (*proxyConn, error) {
 	}
 	name, flag := proxyShell()
 	cmd := exec.Command(name, flag, line) //nolint:gosec // the user's own or confirmed ProxyCommand, as ssh runs it
-	pc := &proxyConn{target: net.JoinHostPort(srv.Host, strconv.Itoa(srv.Port))}
+	pc := &proxyConn{target: net.JoinHostPort(srv.Host, strconv.Itoa(srv.Port)), done: make(chan struct{})}
 
 	// Handled pipes, not StdinPipe/StdoutPipe: those are closed by Wait,
 	// racing the reads of a proxy that is still alive.
@@ -141,6 +168,10 @@ func dialProxy(srv store.Server) (*proxyConn, error) {
 		return nil, err
 	}
 	cmd.Stdin, cmd.Stdout = inR, outW
+	detach(cmd)
+	// Wait also waits for stderr to be copied, which a program the shell left
+	// running keeps open; do not wait for that for ever.
+	cmd.WaitDelay = 2 * time.Second
 	pc.cmd, pc.w, pc.r, pc.errs = cmd, inW, outR, &stderrBuffer{}
 	cmd.Stderr = pc.errs
 	if err := cmd.Start(); err != nil {
@@ -150,6 +181,11 @@ func dialProxy(srv store.Server) (*proxyConn, error) {
 		outW.Close() //nolint:errcheck,gosec // already failing
 		return nil, err
 	}
+	// The command has its own copies of these two ends. Ours must go, or the
+	// proxy's death never reaches the reader as EOF (we would be holding the
+	// write end of its stdout) and each connection would leak two descriptors.
+	inR.Close()  //nolint:errcheck,gosec // the child's end
+	outW.Close() //nolint:errcheck,gosec // the child's end
 	go pc.wait()
 	return pc, nil
 }
@@ -167,7 +203,11 @@ type proxyConn struct {
 	mu      sync.Mutex
 	exited  bool
 	waitErr error
-	errs    *stderrBuffer
+	// groupGone: no process is left in the command's group; never signal it.
+	groupGone bool
+	// done is closed once the shell has been reaped and exited is set.
+	done chan struct{}
+	errs *stderrBuffer
 }
 
 // wait runs in its own goroutine: it reaps the process and remembers how it
@@ -176,7 +216,26 @@ func (pc *proxyConn) wait() {
 	err := pc.cmd.Wait()
 	pc.mu.Lock()
 	pc.exited, pc.waitErr = true, err
+	// The shell is reaped, so its number is free unless something it started
+	// still runs in its group. Decided here, a moment after the reaping, and
+	// not in Close, which may come much later (see groupEmpty).
+	pc.groupGone = groupEmpty(pc.cmd)
 	pc.mu.Unlock()
+	close(pc.done)
+}
+
+// explainAfter is explain for a handshake that failed with err. When the
+// connection ended (EOF), the proxy has most likely just exited and wait has
+// not recorded it yet, so it gets a moment to; any other error means the
+// proxy is alive and has nothing to say, and nothing is waited for.
+func (pc *proxyConn) explainAfter(err error) string {
+	if errors.Is(err, io.EOF) || errors.Is(err, io.ErrUnexpectedEOF) {
+		select {
+		case <-pc.done:
+		case <-time.After(time.Second):
+		}
+	}
+	return pc.explain()
 }
 
 // explain reports why a proxy that exited before answering cannot; a
@@ -205,11 +264,18 @@ func (pc *proxyConn) Write(b []byte) (int, error) { return pc.w.Write(b) }
 
 // Close ends the process and both pipes. Closing stdin first lets a proxy
 // that follows ssh's convention (exit on EOF) finish writing; the kill
-// then only collects one that ignored it.
+// then collects one that ignored it, with everything the shell started.
 func (pc *proxyConn) Close() error {
 	pc.closeOnce.Do(func() {
-		pc.w.Close()          //nolint:errcheck,gosec // the only writer
-		pc.r.Close()          //nolint:errcheck,gosec // the only reader
+		pc.w.Close() //nolint:errcheck,gosec // the only writer
+		pc.r.Close() //nolint:errcheck,gosec // the only reader
+		pc.mu.Lock()
+		if !pc.groupGone {
+			killProxyGroup(pc.cmd)
+		}
+		pc.mu.Unlock()
+		// Go knows whether the shell was reaped, so this one cannot hit a
+		// number that was given to someone else.
 		pc.cmd.Process.Kill() //nolint:errcheck,gosec // ErrProcessDone is fine
 	})
 	return nil
