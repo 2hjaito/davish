@@ -29,6 +29,8 @@ File `.zip` là bản portable: giải nén rồi chạy `Davish.exe`, không c�
 
 x86-64, có GTK 3 và WebKitGTK 4.1 (trên Debian và Ubuntu: `libgtk-3-0` và `libwebkit2gtk-4.1-0`). Giải nén `Davish-…-linux-amd64.tar.gz` rồi chạy `Davish`.
 
+Gói cũng có `davish.png` và `install-desktop.sh`. Chạy `./install-desktop.sh` một lần để thêm Davish vào menu ứng dụng cùng icon. Việc này cần thiết trên Wayland (KDE, GNOME), nơi icon của cửa sổ lấy từ một mục desktop chứ không phải từ chính chương trình: không có nó thì cửa sổ và thanh tác vụ không hiện icon. Sau đó hãy mở Davish từ menu. Script chỉ ghi một file, `~/.local/share/applications/Davish.desktop`, trỏ tới thư mục nơi bạn chạy nó (chạy lại nếu bạn dời thư mục), và `./install-desktop.sh --remove` gỡ nó đi. Không cần root.
+
 ## Cập nhật
 
 Davish tự kiểm tra bản mới. Có bản mới thì hiện thay đổi kèm **Cập nhật**, **Để sau** và **Bỏ qua bản này**; Davish tự tải, kiểm chữ ký rồi khởi động lại vào bản mới. Xem [Cập nhật](/vi/docs/the-desktop/updates/).

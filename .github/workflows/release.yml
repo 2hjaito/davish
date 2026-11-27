@@ -94,7 +94,15 @@ jobs:
                 --version "${GITHUB_REF_NAME#v}" \
                 "dist/$name.pkg"
               ditto -c -k --keepParent build/bin/Davish.app "dist/$name.zip" ;;
-            Linux) tar -C build/bin -czf "dist/$name.tar.gz" Davish ;;
+            Linux)
+              # The binary, its icon and a script that adds it to the application
+              # menu: Wayland takes a window's icon from a desktop entry (#305).
+              stage="$(mktemp -d)"
+              cp build/bin/Davish "$stage/Davish"
+              cp build/appicon.png "$stage/davish.png"
+              cp build/linux/install-desktop.sh "$stage/install-desktop.sh"
+              chmod 755 "$stage/Davish" "$stage/install-desktop.sh"
+              tar -C "$stage" -czf "dist/$name.tar.gz" Davish davish.png install-desktop.sh ;;
             *)
               cp build/bin/Davish-amd64-installer.exe "dist/$name-setup.exe"
               (cd build/bin && 7z a "../../dist/$name.zip" Davish.exe) ;;
