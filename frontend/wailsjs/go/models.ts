@@ -198,6 +198,7 @@ export namespace app {
 	    tag?: string;
 	    group?: string;
 	    jumpID?: string;
+	    proxyCommand?: string;
 	    controlPath?: string;
 	    distro?: string;
 	    password: string;
@@ -220,6 +221,7 @@ export namespace app {
 	        this.tag = source["tag"];
 	        this.group = source["group"];
 	        this.jumpID = source["jumpID"];
+	        this.proxyCommand = source["proxyCommand"];
 	        this.controlPath = source["controlPath"];
 	        this.distro = source["distro"];
 	        this.password = source["password"];
@@ -238,6 +240,7 @@ export namespace app {
 	    tag?: string;
 	    group?: string;
 	    jumpID?: string;
+	    proxyCommand?: string;
 	    controlPath?: string;
 	    distro?: string;
 	    hasPassword: boolean;
@@ -261,6 +264,7 @@ export namespace app {
 	        this.tag = source["tag"];
 	        this.group = source["group"];
 	        this.jumpID = source["jumpID"];
+	        this.proxyCommand = source["proxyCommand"];
 	        this.controlPath = source["controlPath"];
 	        this.distro = source["distro"];
 	        this.hasPassword = source["hasPassword"];
@@ -3765,6 +3769,7 @@ export namespace sshconfig {
 	    port: number;
 	    identityFile?: string;
 	    proxyJump?: string;
+	    proxyCommand?: string;
 	    exists: boolean;
 	
 	    static createFrom(source: any = {}) {
@@ -3779,6 +3784,7 @@ export namespace sshconfig {
 	        this.port = source["port"];
 	        this.identityFile = source["identityFile"];
 	        this.proxyJump = source["proxyJump"];
+	        this.proxyCommand = source["proxyCommand"];
 	        this.exists = source["exists"];
 	    }
 	}

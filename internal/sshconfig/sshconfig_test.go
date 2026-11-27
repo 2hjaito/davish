@@ -36,6 +36,14 @@ Host db
   HostName=db.internal
   Port 2222
   ProxyJump bastion
+Host sandbox
+  HostName 127.0.0.1
+  User admin
+  ProxyCommand websocat -b - ws://sandbox.stable.example.net:8080/arca/tunnel
+Host plain-relay
+  HostName=relay.example.net
+  ProxyCommand nc %h %p
+  ProxyCommand none
 Host *.example.com !skip.example.com
   User nobody
 Host *
@@ -53,6 +61,9 @@ Host *
 		{Alias: "web", HostName: "10.0.0.5", User: "deploy", Port: 22, IdentityFile: "~/.ssh/web_ed25519"},
 		{Alias: "web-alias", HostName: "10.0.0.5", User: "deploy", Port: 22, IdentityFile: "~/.ssh/web_ed25519"},
 		{Alias: "db", HostName: "db.internal", User: "fallback", Port: 2222, ProxyJump: "bastion"},
+		{Alias: "sandbox", HostName: "127.0.0.1", User: "admin", Port: 22,
+			ProxyCommand: "websocat -b - ws://sandbox.stable.example.net:8080/arca/tunnel"},
+		{Alias: "plain-relay", HostName: "relay.example.net", User: "fallback", Port: 22, ProxyCommand: "nc %h %p"},
 	}
 	if len(hosts) != len(want) {
 		t.Fatalf("got %d hosts: %+v", len(hosts), hosts)
@@ -140,5 +151,29 @@ func TestImportLoop(t *testing.T) {
 	}
 	if _, err := Import(context.Background(), &memSaver{}, hosts, []string{"a"}, "me"); err == nil {
 		t.Fatal("loop accepted")
+	}
+}
+
+func TestImportProxyCommand(t *testing.T) {
+	hosts := []Host{
+		{Alias: "sandbox", HostName: "127.0.0.1", User: "me", Port: 22,
+			ProxyCommand: "websocat -b - ws://relay.example.net/tunnel"},
+		{Alias: "via-bastion", HostName: "10.0.0.9", User: "me", Port: 22,
+			ProxyJump: "bastion", ProxyCommand: "nc %h %p"},
+		{Alias: "bastion", HostName: "b.dangth.dev", User: "me", Port: 22},
+	}
+	added, err := Import(context.Background(), &memSaver{}, hosts, []string{"sandbox", "via-bastion"}, "me")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(added) != 3 {
+		t.Fatalf("added %+v", added)
+	}
+	if added[0].ProxyCommand != hosts[0].ProxyCommand {
+		t.Errorf("saved proxy command = %q", added[0].ProxyCommand)
+	}
+	// As in ssh, ProxyJump wins: a server saved with both would be refused.
+	if added[2].ProxyCommand != "" || added[2].JumpID != added[1].ID {
+		t.Errorf("jumped server = %+v", added[2])
 	}
 }

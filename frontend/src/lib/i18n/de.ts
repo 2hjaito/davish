@@ -1724,6 +1724,7 @@ const de = {
     empty: 'Keine konkreten Hosts in ~/.ssh/config gefunden.',
     exists: 'bereits hinzugefügt',
     via: (jump: string) => `über ${jump}`,
+    proxy: 'Proxy-Befehl',
     selectAll: 'Alle auswählen',
     submit: (n: number) =>
       n > 0 ? `${n} ${n === 1 ? 'Server' : 'Server'} importieren` : 'Importieren',
@@ -1793,6 +1794,9 @@ const de = {
     control: 'Erweitert: ssh-Control-Socket verwenden',
     controlHint:
       'Für Logins, die nur über OpenSSH funktionieren, etwa mit einem Agent, der Zertifikate ausstellt (authentik). Ersetzt die Authentifizierung oben. Starte den Master selbst: ssh -M -S <path> -fN user@host. Davish sieht deine Zugangsdaten nie. Nur Linux und macOS.',
+    proxy: 'Erweitert: über einen Befehl verbinden (ProxyCommand)',
+    proxyHint:
+      'Ein Shell-Befehl, dessen stdin und stdout die Verbindung tragen, wie ProxyCommand bei ssh – für Server hinter einem Relay wie websocat. Die Token %h, %p und %r stehen für Host, Port und Benutzer.',
     save: 'Speichern und verbinden',
     cancel: 'Abbrechen',
     delete: 'Server löschen',

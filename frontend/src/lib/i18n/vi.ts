@@ -1658,6 +1658,7 @@ const vi = {
     empty: 'Không thấy host cụ thể nào trong ~/.ssh/config.',
     exists: 'đã có',
     via: (jump: string) => `qua ${jump}`,
+    proxy: 'lệnh proxy',
     selectAll: 'Chọn tất cả',
     submit: (n: number) => (n > 0 ? `Nhập ${n} server` : 'Nhập'),
     cancel: 'Hủy',
@@ -1724,6 +1725,9 @@ const vi = {
     control: 'Nâng cao: dùng ssh control socket',
     controlHint:
       'Dùng khi đăng nhập chỉ chạy được qua OpenSSH, như agent cấp chứng chỉ (authentik). Thay thế phần xác thực ở trên. Tự mở master: ssh -M -S <path> -fN user@host. Davish không bao giờ thấy thông tin đăng nhập của bạn. Chỉ có trên Linux và macOS.',
+    proxy: 'Nâng cao: kết nối qua một lệnh (ProxyCommand)',
+    proxyHint:
+      'Một lệnh shell mà stdin/stdout của nó mang kết nối, giống ProxyCommand của ssh, dành cho server sau một relay như websocat. Token %h, %p, %r được thay bằng host, port và user.',
     save: 'Lưu và kết nối',
     cancel: 'Hủy',
     delete: 'Xóa server',

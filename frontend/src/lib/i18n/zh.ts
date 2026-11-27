@@ -1626,6 +1626,7 @@ const zh = {
     empty: '~/.ssh/config 中没有找到具体的主机。',
     exists: '已添加',
     via: (jump: string) => `经由 ${jump}`,
+    proxy: '代理命令',
     selectAll: '全选',
     submit: (n: number) => (n > 0 ? `导入 ${n} 台服务器` : '导入'),
     cancel: '取消',
@@ -1691,6 +1692,9 @@ const zh = {
     control: '高级：使用 ssh control socket',
     controlHint:
       '适用于只能通过 OpenSSH 登录的情况，例如签发证书的 agent（authentik）。会替代上面的认证方式。请自己先启动 master：ssh -M -S <path> -fN user@host。Davish 不会接触你的凭据。仅支持 Linux 和 macOS。',
+    proxy: '高级：经由命令连接（ProxyCommand）',
+    proxyHint:
+      '一条 shell 命令，用它的标准输入和输出承载连接，和 ssh 的 ProxyCommand 一样，适合经由 websocat 之类中转的服务器。占位符 %h、%p、%r 会替换为主机、端口和用户。',
     save: '保存并连接',
     cancel: '取消',
     delete: '删除服务器',

@@ -35,7 +35,7 @@ Không cài gì lên server.
 - **Nhiều server, một desktop.** Mỗi server là một workspace (`⌘1`…`⌘9`) nhớ cửa sổ riêng của nó. Kéo file để copy giữa các server. Gắn nhãn (`prod`, `staging`…) và nhóm cho server, để chữ `prod` đỏ luôn hiện trên màn hình và server xếp theo thư mục.
 - **Tự cập nhật.** Có bản mới thì hiện thay đổi kèm Cập nhật, Để sau, Bỏ qua bản này; Davish tự tải, kiểm chữ ký rồi khởi động lại vào bản mới. Không phải cài lại.
 - **Tiếng Việt, tiếng Anh, tiếng Trung giản thể, tiếng Tây Ban Nha hoặc tiếng Đức.** Chọn ngôn ngữ trong Cài đặt; lần đầu Davish theo ngôn ngữ của máy.
-- **Dùng luôn `~/.ssh/config` và Ansible inventory.** Nhập host một lần, kèm key và `ProxyJump`, cả một group Ansible một lúc; Davish chỉ đọc file. Server sau bastion kết nối qua nó, mỗi bậc kiểm tra host key riêng, cả chuỗi tự kết nối lại.
+- **Dùng luôn `~/.ssh/config` và Ansible inventory.** Nhập host một lần, kèm key, `ProxyJump` và `ProxyCommand`, cả một group Ansible một lúc; Davish chỉ đọc file. Server sau bastion kết nối qua nó, mỗi bậc kiểm tra host key riêng, cả chuỗi tự kết nối lại.
 
 ## Tính năng
 

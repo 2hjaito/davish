@@ -1677,6 +1677,7 @@ const en = {
     empty: 'No specific hosts found in ~/.ssh/config.',
     exists: 'already added',
     via: (jump: string) => `via ${jump}`,
+    proxy: 'proxy command',
     selectAll: 'Select all',
     submit: (n: number) => (n > 0 ? `Import ${n} ${n === 1 ? 'server' : 'servers'}` : 'Import'),
     cancel: 'Cancel',
@@ -1744,6 +1745,9 @@ const en = {
     control: 'Advanced: use an ssh control socket',
     controlHint:
       'For logins that only work through OpenSSH, such as an agent that issues certificates (authentik). Replaces the authentication above. Start the master yourself: ssh -M -S <path> -fN user@host. Davish never sees your credentials. Linux and macOS only.',
+    proxy: 'Advanced: reach this server through a command (ProxyCommand)',
+    proxyHint:
+      'A shell command whose stdin and stdout carry the connection, like ssh’s ProxyCommand, for servers behind a relay such as websocat. Tokens %h, %p and %r become the host, port and user.',
     save: 'Save and connect',
     cancel: 'Cancel',
     delete: 'Delete server',

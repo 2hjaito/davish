@@ -54,6 +54,11 @@ type Server struct {
 	// JumpID is the saved server to connect through (ProxyJump); that
 	// server may jump through another, forming a chain.
 	JumpID string `json:"jumpID,omitempty"`
+	// ProxyCommand is ssh's ProxyCommand: a shell command whose stdin and
+	// stdout carry the SSH traffic instead of a TCP connection, for servers
+	// reached through a WebSocket, a jump with no direct route and the like.
+	// Davish runs it with the same %h/%p/%r token expansion as OpenSSH.
+	ProxyCommand string `json:"proxyCommand,omitempty"`
 	// ControlPath, when set, makes Davish attach to an OpenSSH ControlMaster
 	// socket the user started (ssh -M -S <path>) instead of logging in itself.
 	// OpenSSH then does the authentication and host key check. Empty is the
@@ -78,6 +83,9 @@ const (
 	defaultPort = 22
 	maxTagLen   = 24
 	maxGroupLen = 40
+	// maxProxyCommandLen keeps a typo or a paste from turning servers.json
+	// into a command dump; ssh's own commands stay far below this.
+	maxProxyCommandLen = 2048
 )
 
 // Store reads and writes servers.json in dir.
@@ -333,6 +341,7 @@ func normalize(srv Server) Server {
 	srv.User = strings.TrimSpace(srv.User)
 	srv.KeyPath = strings.TrimSpace(srv.KeyPath)
 	srv.JumpID = strings.TrimSpace(srv.JumpID)
+	srv.ProxyCommand = strings.TrimSpace(srv.ProxyCommand)
 	srv.ControlPath = strings.TrimSpace(srv.ControlPath)
 	srv.Tag = strings.Join(strings.Fields(srv.Tag), " ")
 	srv.Group = strings.Join(strings.Fields(srv.Group), " ")
@@ -378,6 +387,14 @@ func validate(srv Server) error {
 		return invalid("group must be at most 40 characters")
 	case srv.JumpID != "" && srv.JumpID == srv.ID:
 		return invalid("a server cannot jump through itself")
+	case srv.ProxyCommand != "" && len(srv.ProxyCommand) > maxProxyCommandLen:
+		return invalid("proxy command is too long")
+	case srv.ProxyCommand != "" && strings.ContainsFunc(srv.ProxyCommand, unicode.IsControl):
+		return invalid("proxy command must not contain control characters")
+	case srv.ProxyCommand != "" && srv.JumpID != "":
+		return invalid("a proxy command and a jump server cannot be combined")
+	case srv.ProxyCommand != "" && srv.ControlPath != "":
+		return invalid("a proxy command and a control socket cannot be combined")
 	case srv.ControlPath != "" && srv.JumpID != "":
 		return invalid("a control socket and a jump server cannot be combined")
 	case srv.ControlPath != "" && !strings.HasPrefix(srv.ControlPath, "/") && !strings.HasPrefix(srv.ControlPath, "~/"):

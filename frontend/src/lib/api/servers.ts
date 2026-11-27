@@ -23,6 +23,8 @@ export interface ServerInfo {
   /** The folder it is listed under in All servers (one level). */
   group?: string
   jumpID?: string
+  /** ssh ProxyCommand: its stdin/stdout carry the connection, '' when none. */
+  proxyCommand?: string
   controlPath?: string
   /** Logo key of the system it runs, found when it connects (internal/platform/distro.go). */
   distro?: string
@@ -44,6 +46,7 @@ export interface ServerDraft {
   tag: string
   group: string
   jumpID: string
+  proxyCommand: string
   controlPath: string
   password: string
   passphrase: string
@@ -69,6 +72,7 @@ export interface ConfigHost {
   port: number
   identityFile?: string
   proxyJump?: string
+  proxyCommand?: string
   exists: boolean
 }
 

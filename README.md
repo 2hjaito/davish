@@ -35,7 +35,7 @@ Nothing to install on the server.
 - **Many servers, one desktop.** Each server is a workspace (`⌘1`…`⌘9`) that remembers its own windows. Copy files between servers by dragging them. Give a server a tag (`prod`, `staging`…) and a group, so a red `prod` stays on screen and servers sit in folders.
 - **Updates itself.** A new version shows its changes with Update, Later and Skip this version; Davish downloads it, checks its signature and restarts into it. No reinstalling.
 - **English, Vietnamese, Simplified Chinese, Spanish or German.** Pick the language in Settings; the first time, Davish follows your system's. Spanish is new: corrections are welcome in [#124](https://github.com/2hjaito/davish/issues/124).
-- **Your `~/.ssh/config` works, and so does your Ansible inventory.** Import their hosts in one go, keys and `ProxyJump` included, a whole Ansible group at a time; Davish only reads the files. Servers behind a bastion connect through it, each hop with its own host key check, and the whole chain reconnects on its own.
+- **Your `~/.ssh/config` works, and so does your Ansible inventory.** Import their hosts in one go, keys, `ProxyJump` and `ProxyCommand` included, a whole Ansible group at a time; Davish only reads the files. Servers behind a bastion connect through it, each hop with its own host key check, and the whole chain reconnects on its own.
 
 ## Features
 

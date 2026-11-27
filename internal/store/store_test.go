@@ -123,6 +123,20 @@ func TestValidate(t *testing.T) {
 		{"bad color", func(s *Server) { s.Color = "red" }},
 		{"relative control path", func(s *Server) { s.ControlPath = "mux.sock" }},
 		{"control path with jump", func(s *Server) { s.ControlPath = "/tmp/m.sock"; s.JumpID = "other" }},
+		{"proxy command with jump", func(s *Server) {
+			s.ProxyCommand = "nc %h %p"
+			s.JumpID = "other"
+		}},
+		{"proxy command with control path", func(s *Server) {
+			s.ProxyCommand = "nc %h %p"
+			s.ControlPath = "/tmp/m.sock"
+		}},
+		{"proxy command too long", func(s *Server) {
+			s.ProxyCommand = strings.Repeat("a", 2049)
+		}},
+		{"proxy command with newline", func(s *Server) {
+			s.ProxyCommand = "nc %h %p\nrm -rf ~"
+		}},
 		{"group too long", func(s *Server) { s.Group = strings.Repeat("a", 41) }},
 		{"group with control char", func(s *Server) { s.Group = "my\x00app" }},
 		{"tag too long", func(s *Server) { s.Tag = strings.Repeat("a", 25) }},
@@ -153,6 +167,12 @@ func TestValidate(t *testing.T) {
 		if _, err := s.Save(context.Background(), srv); err != nil {
 			t.Errorf("host %q rejected: %v", host, err)
 		}
+	}
+
+	srv := vps()
+	srv.ProxyCommand = "websocat -b - ws://sandbox.stable.example.net:8080/arca/tunnel"
+	if _, err := s.Save(context.Background(), srv); err != nil {
+		t.Errorf("a websocat proxy command rejected: %v", err)
 	}
 }
 

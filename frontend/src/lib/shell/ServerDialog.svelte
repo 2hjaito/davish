@@ -50,6 +50,7 @@
       tag: '',
       group: '',
       jumpID: '',
+      proxyCommand: '',
       controlPath: '',
       password: '',
       passphrase: '',
@@ -69,6 +70,7 @@
           tag: s.tag ?? '',
           group: s.group ?? '',
           jumpID: s.jumpID ?? '',
+          proxyCommand: s.proxyCommand ?? '',
           controlPath: s.controlPath ?? '',
           password: '',
           passphrase: '',
@@ -242,6 +244,16 @@
     {/if}
 
     {#if !draft.jumpID}
+      <details class="field" open={draft.proxyCommand !== ''}>
+        <summary>{t.serverDialog.proxy}</summary>
+        <input
+          class="input mono"
+          spellcheck="false"
+          placeholder="websocat -b - ws://relay.example.com/tunnel"
+          bind:value={draft.proxyCommand}
+        />
+        <small>{t.serverDialog.proxyHint}</small>
+      </details>
       <details class="field" open={draft.controlPath !== ''}>
         <summary>{t.serverDialog.control}</summary>
         <input
