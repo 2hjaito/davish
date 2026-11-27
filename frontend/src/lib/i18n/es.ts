@@ -2265,6 +2265,7 @@ const es = {
       es: 'Español',
       de: 'Deutsch',
       ko: '한국어',
+      fr: 'Français',
     },
     langRestart:
       'Davish se reiniciará: los terminales y transferencias en curso se detienen, y los servidores se vuelven a conectar solos.',

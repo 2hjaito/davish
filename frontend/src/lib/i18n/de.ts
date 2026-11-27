@@ -2293,6 +2293,7 @@ const de = {
       es: 'Español',
       de: 'Deutsch',
       ko: '한국어',
+      fr: 'Français',
     },
     langRestart:
       'Davish wird neu gestartet: Laufende Terminals und Übertragungen werden beendet, und die Server verbinden sich von selbst neu.',

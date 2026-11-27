@@ -2227,6 +2227,7 @@ const ko = {
       es: 'Español',
       de: 'Deutsch',
       ko: '한국어',
+      fr: 'Français',
     },
     langRestart:
       'Davish가 다시 시작됩니다. 실행 중인 터미널과 전송은 중지되며 서버는 자동으로 다시 연결합니다.',

@@ -34,7 +34,7 @@ Không cài gì lên server.
 - **Tự khóa khi bạn rời máy.** Mật khẩu khóa riêng, Touch ID trên macOS; khóa khi máy ngủ dậy, sau thời gian không dùng, hoặc `⌘L`. Phiên SSH vẫn chạy sau màn khóa, nhưng không thao tác nào tới được server cho tới khi mở khóa.
 - **Nhiều server, một desktop.** Mỗi server là một workspace (`⌘1`…`⌘9`) nhớ cửa sổ riêng của nó. Kéo file để copy giữa các server. Gắn nhãn (`prod`, `staging`…) và nhóm cho server, để chữ `prod` đỏ luôn hiện trên màn hình và server xếp theo thư mục.
 - **Tự cập nhật.** Có bản mới thì hiện thay đổi kèm Cập nhật, Để sau, Bỏ qua bản này; Davish tự tải, kiểm chữ ký rồi khởi động lại vào bản mới. Không phải cài lại.
-- **Tiếng Việt, tiếng Anh, tiếng Trung giản thể, tiếng Tây Ban Nha hoặc tiếng Đức.** Chọn ngôn ngữ trong Cài đặt; lần đầu Davish theo ngôn ngữ của máy.
+- **Tiếng Việt, tiếng Anh, tiếng Trung giản thể, tiếng Tây Ban Nha, tiếng Đức, tiếng Hàn hoặc tiếng Pháp.** Chọn ngôn ngữ trong Cài đặt; lần đầu Davish theo ngôn ngữ của máy.
 - **Dùng luôn `~/.ssh/config` và Ansible inventory.** Nhập host một lần, kèm key, `ProxyJump` và `ProxyCommand`, cả một group Ansible một lúc; Davish chỉ đọc file. Server sau bastion kết nối qua nó, mỗi bậc kiểm tra host key riêng, cả chuỗi tự kết nối lại.
 
 ## Tính năng
@@ -77,7 +77,7 @@ Không cài gì lên server.
 - [Khóa app](FEATURES.vi.md#khóa-app): Touch ID hoặc mật khẩu, tự khóa khi máy dậy
 - [Cập nhật](FEATURES.vi.md#cập-nhật): một lần bấm lên bản mới, có kiểm chữ ký
 - [Sáng và tối](FEATURES.vi.md#sáng-và-tối): theo máy, hoặc tự chọn
-- [Ngôn ngữ](FEATURES.vi.md#ngôn-ngữ): tiếng Việt, tiếng Anh, tiếng Trung giản thể, tiếng Tây Ban Nha hoặc tiếng Đức
+- [Ngôn ngữ](FEATURES.vi.md#ngôn-ngữ): tiếng Việt, tiếng Anh, tiếng Trung giản thể, tiếng Tây Ban Nha, tiếng Đức, tiếng Hàn hoặc tiếng Pháp
 
 <table>
   <tr>

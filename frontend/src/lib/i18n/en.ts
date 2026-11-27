@@ -2228,6 +2228,7 @@ const en = {
       es: 'Español',
       de: 'Deutsch',
       ko: '한국어',
+      fr: 'Français',
     },
     langRestart:
       'Davish will restart: running terminals and transfers stop, and servers reconnect on their own.',
