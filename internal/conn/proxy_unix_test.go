@@ -6,7 +6,9 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 
@@ -134,4 +136,35 @@ func proxyCode(err error) apperr.Code {
 		return ae.Code
 	}
 	return ""
+}
+
+// What the shell started must end with it. A proxy command with two commands
+// keeps the shell as their parent on every system (dash does not exec even a
+// single one), so killing only the shell left the tunnel client running.
+func TestProxyConnCloseEndsWhatTheShellStarted(t *testing.T) {
+	pidFile := filepath.Join(t.TempDir(), "child.pid")
+	pc, err := dialProxy(typedProxy(store.Server{
+		Host: "h", User: "u", Port: 22,
+		ProxyCommand: "sleep 30 & echo $! > " + pidFile + "; wait",
+	}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var child int
+	waitFor(t, func() bool {
+		b, err := os.ReadFile(pidFile) //nolint:gosec // a file in the test's temp dir
+		if err != nil {
+			return false
+		}
+		child, err = strconv.Atoi(strings.TrimSpace(string(b)))
+		return err == nil && child > 0
+	})
+	if err := syscall.Kill(child, 0); err != nil {
+		t.Fatalf("the child is not running before Close: %v", err)
+	}
+
+	pc.Close() //nolint:errcheck,gosec // always nil
+	waitFor(t, func() bool { return syscall.Kill(child, 0) == syscall.ESRCH })
+	// And Wait returns, so the process is collected and explain has an answer.
+	waitFor(t, func() bool { return pc.explain() != "" })
 }

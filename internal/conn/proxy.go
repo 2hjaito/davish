@@ -141,6 +141,10 @@ func dialProxy(srv store.Server) (*proxyConn, error) {
 		return nil, err
 	}
 	cmd.Stdin, cmd.Stdout = inR, outW
+	inOwnGroup(cmd)
+	// Wait also waits for stderr to be copied, which a program the shell left
+	// running keeps open; do not wait for that for ever.
+	cmd.WaitDelay = 2 * time.Second
 	pc.cmd, pc.w, pc.r, pc.errs = cmd, inW, outR, &stderrBuffer{}
 	cmd.Stderr = pc.errs
 	if err := cmd.Start(); err != nil {
@@ -205,12 +209,12 @@ func (pc *proxyConn) Write(b []byte) (int, error) { return pc.w.Write(b) }
 
 // Close ends the process and both pipes. Closing stdin first lets a proxy
 // that follows ssh's convention (exit on EOF) finish writing; the kill
-// then only collects one that ignored it.
+// then collects one that ignored it, with everything the shell started.
 func (pc *proxyConn) Close() error {
 	pc.closeOnce.Do(func() {
-		pc.w.Close()          //nolint:errcheck,gosec // the only writer
-		pc.r.Close()          //nolint:errcheck,gosec // the only reader
-		pc.cmd.Process.Kill() //nolint:errcheck,gosec // ErrProcessDone is fine
+		pc.w.Close() //nolint:errcheck,gosec // the only writer
+		pc.r.Close() //nolint:errcheck,gosec // the only reader
+		killProxy(pc.cmd)
 	})
 	return nil
 }
