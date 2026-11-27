@@ -3586,6 +3586,8 @@ const es = {
       'La frase de contraseña guardada no abre esta clave privada. Edita el servidor y escríbela de nuevo.',
     CONN_NOT_CONNECTED: 'El servidor no está conectado.',
     CONN_CONTROL_SOCKET: 'No se pudo usar el control socket.',
+    CONN_AGENT_SIGN_TIMEOUT:
+      'El agente SSH no firmó el inicio de sesión a tiempo. Si te pide confirmar el uso de la clave (Bitwarden muestra "Confirm SSH key usage"), busca su ventana, apruébalo y vuelve a conectar.',
     CONN_PROXY_UNCONFIRMED: 'El comando proxy aún no se ha confirmado.',
     TERM_CLOSED: 'La sesión de terminal está cerrada.',
     FS_PERMISSION_DENIED: 'Permiso denegado.',

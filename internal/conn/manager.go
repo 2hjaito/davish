@@ -674,7 +674,8 @@ func (m *Manager) dialVia(ctx context.Context, target, id string, depth int) (*s
 	if srv.ControlPath != "" {
 		return m.dialControl(ctx, srv)
 	}
-	auth, release, err := m.authMethods(srv)
+	watch := &signWatch{}
+	auth, release, err := m.authMethods(srv, watch)
 	if err != nil {
 		return nil, err
 	}
@@ -742,9 +743,13 @@ func (m *Manager) dialVia(ctx context.Context, target, id string, depth int) (*s
 			handshakeTimeout = wait
 		}
 	}
-	timer := time.AfterFunc(handshakeTimeout, func() { nc.Close() }) //nolint:errcheck,gosec // aborting
+	// While the SSH agent signs the login the person may be answering its
+	// prompt (Bitwarden's "Confirm SSH key usage"), which takes longer than
+	// a server needs to answer: the clock waits for that (#168).
+	signMax := max(agentSignWait, handshakeTimeout)
+	stopTimer := watch.guard(handshakeTimeout, signMax, func() { nc.Close() }) //nolint:errcheck,gosec // aborting
 	c, chans, reqs, err := ssh.NewClientConn(nc, addr, cfg)
-	if !timer.Stop() && err == nil { // timed out just as the handshake finished
+	if !stopTimer() && err == nil { // timed out just as the handshake finished
 		c.Close() //nolint:errcheck,gosec // already closed underneath
 		err = errors.New("ssh handshake timed out")
 	}
@@ -759,6 +764,10 @@ func (m *Manager) dialVia(ctx context.Context, target, id string, depth int) (*s
 			if why := proxy.explain(); why != "" {
 				err = fmt.Errorf("%w (%s)", err, why)
 			}
+		}
+		if watch.timedOut() {
+			m.log.Warn("ssh agent did not sign in time", "server", target, "waited", signMax.String())
+			return nil, apperr.New(apperr.ConnAgentSignTimeout, "the SSH agent did not sign the login in time")
 		}
 		return nil, m.handshakeError(target, addr, &res, err)
 	}
@@ -794,6 +803,9 @@ func (m *Manager) handshakeError(id, addr string, res *hostKeyResult, err error)
 		m.log.Warn("auth failed", "server", id)
 		return apperr.Wrap(apperr.ConnAuthFailed, "authentication failed", err)
 	}
+	// Without this line a handshake that fails for any other reason leaves
+	// nothing in the log (#168).
+	m.log.Warn("ssh handshake failed", "server", id, "err", err)
 	return apperr.Wrap(apperr.ConnUnreachable, "ssh handshake failed", err)
 }
 

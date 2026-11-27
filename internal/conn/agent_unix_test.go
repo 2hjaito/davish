@@ -65,14 +65,14 @@ func TestAgentSignersFromSocket(t *testing.T) {
 	sock := startTestAgent(t, dir, priv)
 
 	t.Setenv("SSH_AUTH_SOCK", sock)
-	signers, release := (&Manager{}).agentSigners()
+	signers, release := (&Manager{}).agentSigners(nil)
 	defer release()
 	if len(signers) != 1 {
 		t.Fatalf("got %d signers, want 1", len(signers))
 	}
 
 	t.Setenv("SSH_AUTH_SOCK", "")
-	if signers, release := (&Manager{}).agentSigners(); len(signers) != 0 {
+	if signers, release := (&Manager{}).agentSigners(nil); len(signers) != 0 {
 		release()
 		t.Fatalf("no agent: got %d signers", len(signers))
 	}
@@ -92,7 +92,7 @@ func TestAgentSignersFromTildeSocket(t *testing.T) {
 
 	t.Setenv("HOME", dir)
 	t.Setenv("SSH_AUTH_SOCK", "~/s")
-	signers, release := (&Manager{}).agentSigners()
+	signers, release := (&Manager{}).agentSigners(nil)
 	defer release()
 	if len(signers) != 1 {
 		t.Fatalf("got %d signers from ~/s, want 1", len(signers))

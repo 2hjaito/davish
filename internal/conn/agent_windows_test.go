@@ -22,7 +22,7 @@ func TestIsPipe(t *testing.T) {
 // With no agent behind the pipe, there are no keys and no hang.
 func TestAgentSignersMissingPipe(t *testing.T) {
 	t.Setenv("SSH_AUTH_SOCK", `\\.\pipe\davish-test-no-agent`)
-	signers, release := (&Manager{}).agentSigners()
+	signers, release := (&Manager{}).agentSigners(nil)
 	defer release()
 	if len(signers) != 0 {
 		t.Fatalf("got %d signers", len(signers))

@@ -3466,6 +3466,8 @@ const vi = {
       'Passphrase đã lưu không mở được private key này. Hãy sửa server và nhập lại.',
     CONN_NOT_CONNECTED: 'Server chưa được kết nối.',
     CONN_CONTROL_SOCKET: 'Không dùng được control socket.',
+    CONN_AGENT_SIGN_TIMEOUT:
+      'SSH agent không ký đăng nhập kịp thời. Nếu nó hỏi bạn xác nhận dùng khóa (Bitwarden hiện "Confirm SSH key usage"), hãy tìm cửa sổ của nó, bấm đồng ý rồi kết nối lại.',
     CONN_PROXY_UNCONFIRMED: 'Lệnh proxy chưa được xác nhận.',
     TERM_CLOSED: 'Phiên terminal đã đóng.',
     FS_PERMISSION_DENIED: 'Không có quyền truy cập.',

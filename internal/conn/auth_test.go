@@ -91,7 +91,7 @@ func TestAgentSignersTimeout(t *testing.T) {
 	t.Cleanup(func() { agentDial, agentTimeout = oldDial, oldTimeout })
 
 	start := time.Now()
-	signers, release := (&Manager{}).agentSigners()
+	signers, release := (&Manager{}).agentSigners(nil)
 	release()
 	if len(signers) != 0 || time.Since(start) > 2*time.Second {
 		t.Fatalf("signers = %d after %v", len(signers), time.Since(start))
@@ -114,7 +114,7 @@ func TestAgentSignersLogsWhenUnreachable(t *testing.T) {
 
 	var buf bytes.Buffer
 	m := &Manager{log: slog.New(slog.NewJSONHandler(&buf, nil))}
-	signers, release := m.agentSigners()
+	signers, release := m.agentSigners(nil)
 	release()
 
 	if len(signers) != 0 {
@@ -125,7 +125,7 @@ func TestAgentSignersLogsWhenUnreachable(t *testing.T) {
 		t.Errorf("log = %q; want the line and the cause", out)
 	}
 	// And with no logger, as in other tests, it must not panic.
-	if _, release := (&Manager{}).agentSigners(); release != nil {
+	if _, release := (&Manager{}).agentSigners(nil); release != nil {
 		release()
 	}
 }

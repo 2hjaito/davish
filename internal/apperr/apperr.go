@@ -21,6 +21,9 @@ const (
 	ConnPassphraseWrong  Code = "CONN_PASSPHRASE_WRONG"
 	ConnNotConnected     Code = "CONN_NOT_CONNECTED"
 	ConnControlSocket    Code = "CONN_CONTROL_SOCKET"
+	// ConnAgentSignTimeout: the SSH agent did not sign the login in time, for
+	// instance because it waits for the person to confirm the key (#168).
+	ConnAgentSignTimeout Code = "CONN_AGENT_SIGN_TIMEOUT"
 	// ConnProxyUnconfirmed: the server reaches its host through a command
 	// that runs on this computer and the user has not confirmed it (ADR 0031).
 	ConnProxyUnconfirmed Code = "CONN_PROXY_UNCONFIRMED"
