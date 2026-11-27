@@ -1778,6 +1778,8 @@ const es = {
     delete: 'Eliminar servidor',
     confirmDelete: (name: string) =>
       `¿Quitar «${name}» de Davish? También se elimina su contraseña o frase de paso guardada. El servidor en sí no se ve afectado.`,
+    confirmDeleteJump: (names: string) =>
+      `Estos servidores llegan a través de este y pasarán a conectarse directamente: ${names}. Comprueba que siguen siendo accesibles.`,
     confirmDeleteButton: 'Eliminar',
   },
   connError: {

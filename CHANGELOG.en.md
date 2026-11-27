@@ -4,6 +4,12 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Fixed
+- All servers → Map: the map had no margin, so its cards touched the edge of the sidebar and the window. It now has the same margin as the list of servers. The title was shown twice and there were two refresh buttons; the title is now "name map" in the window's top bar, and that bar's refresh button reads the map again (before, it only reloaded the list of servers).
+- Deleting a server now names the other servers that go through it as a jump host and will connect directly afterwards, so that is seen before you confirm. The rest of the audit after #296 found nothing else to change in the script shortcuts, the updater (signed checksums, no downgrades) or the app lock reset.
+
+## [1.15.2] - 2026-11-26
+
 ### Added
 - **A picture as the desktop wallpaper** (M53): Settings → Appearance has **Picture** under the wallpaper color: choose a PNG, JPEG or WebP (under 50 MB) from your computer. It is scaled down to 2560 px and kept on this computer, never uploaded, and **Dim picture** darkens it (up to 70%) so icons and text stay readable. **Settings → Performance → Wallpaper picture** switches it off on its own: Beautiful and Balanced show it, Light does not, and without a picture nothing changes or costs anything. On the development Mac a picture added about 30 MB of memory and no measurable CPU or dropped frames (render bench, 3 runs: `scripts/bench.sh --wallpaper`, which anyone can run on their own machine).
 - **Dragging windows** (#262): Settings → Performance has a new setting for how a window follows the pointer while you drag it. **Live** is what it was. **Simple** moves the window too, but turns the glass off until you let go. **Outline** moves only an outline and puts the window there when you let go, for computers that paint the window on the CPU, where dragging a big translucent window is slow. Outline has a light tint inside, which **Fill the outline** turns off for the lightest drag. It is Live unless you change it, and the performance levels are unchanged.

@@ -1729,6 +1729,8 @@ const vi = {
     delete: 'Xóa server',
     confirmDelete: (name: string) =>
       `Xóa "${name}" khỏi Davish? Mật khẩu/passphrase đã lưu cũng bị xóa. Server không bị ảnh hưởng.`,
+    confirmDeleteJump: (names: string) =>
+      `Các server này đang đi qua server này và sẽ chuyển sang kết nối thẳng: ${names}. Hãy kiểm tra chúng vẫn kết nối được.`,
     confirmDeleteButton: 'Xóa',
   },
   connError: {
