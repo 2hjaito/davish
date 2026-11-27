@@ -4140,6 +4140,68 @@ export namespace sysmon {
 		    return a;
 		}
 	}
+	export class GPUProcess {
+	    gpu: number;
+	    pid: number;
+	    type: string;
+	    gpuUtil: number;
+	    gpuMem: number;
+	    gpuMemPct: number;
+	    user: string;
+	    name: string;
+	    command: string;
+	    cpu: number;
+	    mem: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new GPUProcess(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.gpu = source["gpu"];
+	        this.pid = source["pid"];
+	        this.type = source["type"];
+	        this.gpuUtil = source["gpuUtil"];
+	        this.gpuMem = source["gpuMem"];
+	        this.gpuMemPct = source["gpuMemPct"];
+	        this.user = source["user"];
+	        this.name = source["name"];
+	        this.command = source["command"];
+	        this.cpu = source["cpu"];
+	        this.mem = source["mem"];
+	    }
+	}
+	export class GPUProcessList {
+	    procs: GPUProcess[];
+	
+	    static createFrom(source: any = {}) {
+	        return new GPUProcessList(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.procs = this.convertValues(source["procs"], GPUProcess);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class Iface {
 	    name: string;
 	    up: boolean;

@@ -78,8 +78,9 @@ func main() {
 		Frameless: runtime.GOOS != "darwin",
 		Linux: &linux.Options{
 			Icon: appIcon,
-			// Matches the binary, so KDE and GNOME group the window with
-			// a .desktop file named after it.
+			// The window's app id on Wayland. Its icon comes from a desktop
+			// entry named Davish.desktop (build/linux/install-desktop.sh,
+			// shipped in the tarball), not from Icon above (#305).
 			ProgramName: "Davish",
 			// Always unless the user or the NVIDIA workaround says otherwise
 			// (perf.DecideGPU, docs/adr/0023).

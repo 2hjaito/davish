@@ -5,11 +5,14 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Thêm
+- **Tiến trình GPU, giống nvtop**: Monitor → GPU giờ liệt kê các tiến trình trên mỗi GPU NVIDIA bên dưới các thẻ: PID, người dùng, GPU, loại, mức sử dụng, bộ nhớ GPU và tỉ lệ trên card, CPU, bộ nhớ máy và lệnh, sắp xếp được theo mọi cột. Davish chạy `nvidia-smi` và đọc `/proc` của các tiến trình đó mỗi 3 giây, chỉ khi đang mở tab GPU. Driver không có `pmon` thì chỉ hiện tiến trình tính toán, không có mức sử dụng; Windows ở chế độ WDDM không có bộ nhớ GPU theo từng tiến trình.
 - Giao diện tiếng Đức: chọn Deutsch trong Cài đặt → Chung → Ngôn ngữ; lần đầu Davish theo máy đặt tiếng Đức.
 - **Sắp xếp lại Dock**: kéo một icon đã ghim dọc theo Dock để đổi chỗ, như macOS. Các icon khác dịch ra để cho thấy chỗ nó sẽ nằm, và thứ tự mới được giữ khi thả chuột. Icon chỉ đi trong khoảng giữa Launchpad và các app đang mở mà không ghim, nhấn Esc khi đang kéo để trả về chỗ cũ, còn bấm một cái vẫn mở app như trước. Các app được ghim nhưng chỉ có trên hệ điều hành của server khác vẫn giữ nguyên chỗ.
 
 ### Sửa
+- Linux: gói tải về giờ có icon và `install-desktop.sh`, thêm Davish vào menu ứng dụng. Trên Wayland (KDE, GNOME) icon của cửa sổ lấy từ một mục desktop, nên trước đây cửa sổ không có icon (#305). Chưa thử trên desktop Wayland thật.
 - Cài đặt: một mục có lời giải thích dài và hàng nút bên cạnh làm chữ bị ép thành cột hẹp (mục "Kéo cửa sổ" dài tới 13 dòng ở tiếng Việt). Kéo cửa sổ, Khi mở Davish, Số dòng cuộn, Giữ cảnh báo và Quên mật khẩu sudo giờ đặt nút bên dưới chữ, giống mục Mức hiệu năng phía trên (#304).
+- Docker: nút **‹ Container** trên trang của một container lại quay về bảng; trước đây bấm không có tác dụng (#310). Menu của app đọc container của trang sau khi việc quay lại đã bỏ nó đi, và lỗi đó chặn trang đóng lại. Các mục một app thêm vào menu bar giờ cũng biến mất khi phần cửa sổ của chúng đóng; trước đây chúng bị bỏ lại.
 - Tất cả server → Bản đồ: bản đồ không có lề nên các thẻ dính sát mép sidebar và mép cửa sổ. Giờ có lề giống danh sách server. Tiêu đề từng hiện hai lần và có hai nút làm mới; giờ tiêu đề là "tên map" ở thanh trên của cửa sổ, và nút làm mới ở đó đọc lại bản đồ (trước đây nó chỉ tải lại danh sách server).
 - Xóa một server giờ nêu tên các server khác đang đi qua nó (jump host) và sẽ chuyển sang kết nối thẳng, để thấy điều đó trước khi xác nhận. Phần rà soát còn lại sau #296 không thấy gì cần đổi ở lối tắt script, bộ cập nhật (checksum có chữ ký, không hạ phiên bản) hay đặt lại khóa app.
 

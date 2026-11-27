@@ -1,0 +1,19 @@
+@@gpus
+0, GPU-c0c0c0c0-0000-4000-8000-000000000000, 16376
+@@apps
+GPU-c0c0c0c0-0000-4000-8000-000000000000, 1234, [N/A], C:\app\infer.exe
+@@pmon
+@@uptime
+185627.06 0.00
+@@clk
+10000000
+@@pagesize
+1
+@@meminfo
+MemTotal: 33376128 kB
+@@passwd
+@@ps
+1234 - C:\app\infer.exe --serve
+@@stat
+1234 (infer.exe) S 900 0 0 0 0 0 0 0 0 0 5000000000 0 0 0 0 0 24 0 1000000000 0 2147483648
+@@end

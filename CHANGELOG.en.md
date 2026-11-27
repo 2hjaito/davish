@@ -5,11 +5,14 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Added
+- **GPU processes, like nvtop**: Monitor → GPU now lists the processes on each NVIDIA GPU below the cards: PID, user, GPU, type, utilization, GPU memory and its share of the card, CPU, host memory and the command, sorted by any column. It runs `nvidia-smi` and reads `/proc` for those processes every 3 seconds, only while the GPU tab is open. Where the driver has no `pmon` only compute processes show, without utilization; Windows in WDDM mode shows no GPU memory per process.
 - German interface: pick Deutsch in Settings → General → Language; the first time, Davish follows a system set to German.
 - **Reorder the Dock**: drag a pinned icon along the Dock to move it, as on macOS. The other icons step aside to show where it lands, and the new order is kept when you let go. It stays between Launchpad and the open apps that are not kept in the Dock, Escape while dragging puts it back, and a click still opens the app. Pins for apps another server's system has keep their places.
 
 ### Fixed
+- Linux: the archive now holds the icon and `install-desktop.sh`, which adds Davish to the application menu. On Wayland (KDE, GNOME) a window's icon comes from a desktop entry, so before this the window showed no icon (#305). Not tried on a Wayland desktop yet.
 - Settings: a setting with a long explanation and a row of buttons beside it squeezed the text into a narrow column (the "Dragging windows" row ran to 13 lines in Vietnamese). Dragging windows, When Davish opens, Scrollback, Alert hold and Sudo forget now put the buttons under the text, like the Performance level above (#304).
+- Docker: **‹ Containers** on a container's page goes back to the table again; the click did nothing (#310). The app menu read the page's container after going back had dropped it, and the error stopped the page from closing. Items an app adds to the menu bar now also leave it when their part of the window closes; before, they stayed behind.
 - All servers → Map: the map had no margin, so its cards touched the edge of the sidebar and the window. It now has the same margin as the list of servers. The title was shown twice and there were two refresh buttons; the title is now "name map" in the window's top bar, and that bar's refresh button reads the map again (before, it only reloaded the list of servers).
 - Deleting a server now names the other servers that go through it as a jump host and will connect directly afterwards, so that is seen before you confirm. The rest of the audit after #296 found nothing else to change in the script shortcuts, the updater (signed checksums, no downgrades) or the app lock reset.
 

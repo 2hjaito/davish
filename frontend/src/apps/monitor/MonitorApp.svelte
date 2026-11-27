@@ -168,7 +168,7 @@
         {:else if section === 'memory'}
           <MemoryView {...props} />
         {:else if section === 'gpu'}
-          <GpuView {...props} />
+          <GpuView {...props} serverID={win.serverID} paused={frozen !== null || !ctx.showing} />
         {:else if section === 'disk'}
           <DiskView {...props} />
         {:else if section === 'network'}
