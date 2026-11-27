@@ -97,12 +97,8 @@ jobs:
             Linux)
               # The binary, its icon and a script that adds it to the application
               # menu: Wayland takes a window's icon from a desktop entry (#305).
-              stage="$(mktemp -d)"
-              cp build/bin/Davish "$stage/Davish"
-              cp build/appicon.png "$stage/davish.png"
-              cp build/linux/install-desktop.sh "$stage/install-desktop.sh"
-              chmod 755 "$stage/Davish" "$stage/install-desktop.sh"
-              tar -C "$stage" -czf "dist/$name.tar.gz" Davish davish.png install-desktop.sh ;;
+              # The same script packs the CI artifact.
+              scripts/package-linux.sh "dist/$name.tar.gz" ;;
             *)
               cp build/bin/Davish-amd64-installer.exe "dist/$name-setup.exe"
               (cd build/bin && 7z a "../../dist/$name.zip" Davish.exe) ;;
