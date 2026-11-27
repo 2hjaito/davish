@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Commit, Ref } from '../../lib/api/git'
-  import { t } from '../../lib/i18n'
+  import { locale, t } from '../../lib/i18n'
   import Icon from '../../lib/ui/Icon.svelte'
   import Avatar from './Avatar.svelte'
   import { layout, type Segment } from './graph'
@@ -114,7 +114,7 @@
       role="option"
       aria-selected={c.hash === selected}
       tabindex="-1"
-      title="{c.short} · {c.author} · {new Date(c.time * 1000).toLocaleString('vi-VN')}"
+      title="{c.short} · {c.author} · {new Date(c.time * 1000).toLocaleString(locale)}"
       onclick={() => {
         scroller?.focus({ preventScroll: true })
         onselect(c.hash)
@@ -154,7 +154,7 @@
       {/each}
       <span class="name">{c.subject}</span>
       <Avatar name={c.author} email={c.email} />
-      <span class="sub">{new Date(c.time * 1000).toLocaleDateString('vi-VN')}</span>
+      <span class="sub">{new Date(c.time * 1000).toLocaleDateString(locale)}</span>
     </button>
   {:else}
     <p class="none">{empty}</p>

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { Entry } from '../../lib/api/files'
+import { t } from '../../lib/i18n'
 import {
   baseName,
   crumbs,
@@ -176,7 +177,7 @@ describe('paths', () => {
 })
 
 describe('formatModTime', () => {
-  const words = { today: 'Hôm nay', yesterday: 'Hôm qua' }
+  const words = t.files
   const now = new Date(2026, 9, 27, 10, 0)
   const at = (...args: [number, number, number, number, number]) =>
     new Date(...args).getTime() / 1000

@@ -981,6 +981,8 @@ const ko = {
       chartRange: '15분',
     },
     weekdays: ['일', '월', '화', '수', '목', '금', '토'],
+    clock: (weekday: string, day: string, month: string, time: string) =>
+      `${Number(month)}월 ${Number(day)}일 (${weekday}) ${time}`,
   },
   menu: {
     addServer: '서버 추가…',
@@ -2016,6 +2018,8 @@ const ko = {
     count: (n: number) => `${n.toLocaleString('ko-KR')}개 항목`,
     today: '오늘',
     yesterday: '어제',
+    date: (day: string, month: string, year: number) =>
+      `${year}. ${Number(month)}. ${Number(day)}.`,
     upload: '업로드',
     uploadFolder: '폴더 업로드',
     download: '다운로드',
@@ -3200,6 +3204,8 @@ const ko = {
     today: (time: string) => `오늘 ${time}`,
     tomorrow: (time: string) => `내일 ${time}`,
     weekdayShort: ['일', '월', '화', '수', '목', '금', '토'],
+    runDate: (weekday: string, day: string, month: string, time: string) =>
+      `${Number(month)}월 ${Number(day)}일 (${weekday}) ${time}`,
     sections: '작업 필터',
     filters: { mine: '내 작업', system: '시스템', disabled: '비활성' },
     search: '작업 검색',

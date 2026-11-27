@@ -942,6 +942,8 @@ const zh = {
       chartRange: '15 分钟',
     },
     weekdays: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'],
+    clock: (weekday: string, day: string, month: string, time: string) =>
+      `${weekday} ${day}/${month}  ${time}`,
   },
   menu: {
     addServer: '添加服务器…',
@@ -1953,6 +1955,7 @@ const zh = {
     count: (n: number) => `${n.toLocaleString('zh-CN')} 项`,
     today: '今天',
     yesterday: '昨天',
+    date: (day: string, month: string, year: number) => `${day}/${month}/${year}`,
     upload: '上传',
     uploadFolder: '上传文件夹',
     download: '下载',
@@ -3101,6 +3104,8 @@ const zh = {
     inMonths: (months: string) => `（月份：${months}）`,
     today: (time: string) => `今天 ${time}`,
     tomorrow: (time: string) => `明天 ${time}`,
+    runDate: (weekday: string, day: string, month: string, time: string) =>
+      `${weekday}, ${day}/${month} ${time}`,
     weekdayShort: ['日', '一', '二', '三', '四', '五', '六'],
     sections: '任务筛选',
     filters: { mine: '我的', system: '系统', disabled: '已停用' },

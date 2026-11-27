@@ -11,7 +11,7 @@
     type Repo,
     type Status,
   } from '../../lib/api/git'
-  import { t } from '../../lib/i18n'
+  import { locale, t } from '../../lib/i18n'
   import { load, save } from '../../lib/stores/persist'
   import { servers } from '../../lib/stores/servers.svelte'
   import Empty from '../../lib/ui/Empty.svelte'
@@ -105,8 +105,8 @@
     return c.index !== '.' && c.index !== '?' ? `${state} · ${t.git.staged}` : state
   }
 
-  const dateTime = (s: number) => new Date(s * 1000).toLocaleString('vi-VN')
-  const date = (s: number) => new Date(s * 1000).toLocaleDateString('vi-VN')
+  const dateTime = (s: number) => new Date(s * 1000).toLocaleString(locale)
+  const date = (s: number) => new Date(s * 1000).toLocaleDateString(locale)
 
   type Row = StatusItem & { sel: Selected; text: string }
 

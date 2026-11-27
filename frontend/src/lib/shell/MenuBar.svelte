@@ -91,7 +91,7 @@
       <Icon name="search" size={15} />
     </button>
     <NotificationMenu />
-    <span class="clock">{formatClock(now, t.menubar.weekdays)}</span>
+    <span class="clock">{formatClock(now, t.menubar)}</span>
     {#if needsWindowControls}<WindowControls />{/if}
   </div>
 </header>
