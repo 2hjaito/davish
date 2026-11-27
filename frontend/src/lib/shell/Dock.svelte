@@ -5,7 +5,8 @@
   import { DOCK_SIZES, settings } from '../stores/settings.svelte'
   import { ms } from '../motion'
   import AppIcon from '../ui/AppIcon.svelte'
-  import { approach, magnify, MAX_LIFT, MAX_SCALE } from './magnify'
+  import { moveItem } from './dockItems'
+  import { approach, magnify, MAX_LIFT, MAX_SCALE, nearestSlot, slotCenters } from './magnify'
 
   /** An app's tile, or Launchpad's. */
   interface Tile {
@@ -78,42 +79,70 @@
   let dock: HTMLElement
   let scales = $state<number[]>([])
   let targets: number[] = []
+  /** How far tiles that just changed places still are from their slots, in px along the Dock. */
+  let offsets = $state.raw<Record<string, number>>({})
   let frame = 0
   let last = 0
 
-  /** Distance between resting tile centers: tile width plus gap. */
-  function step(): number {
-    const tile = dock.querySelector<HTMLElement>('.tile')
+  /** Where the Dock's center is on its axis, its tile size and the distance between tiles. */
+  interface Geometry {
+    center: number
+    tile: number
+    step: number
+  }
+
+  function measure(): Geometry {
+    // The dock stays centered while it grows, so its center is a stable origin.
+    const r = dock.getBoundingClientRect()
+    const el = dock.querySelector<HTMLElement>('.tile')
+    const tile = (vertical ? el?.offsetHeight : el?.offsetWidth) ?? 0
     const gap = parseFloat(getComputedStyle(dock).getPropertyValue('--dock-gap')) || 0
-    return (vertical ? (tile?.offsetHeight ?? 0) : (tile?.offsetWidth ?? 0)) + gap
+    return {
+      center: vertical ? r.top + r.height / 2 : r.left + r.width / 2,
+      tile,
+      step: tile + gap,
+    }
   }
 
   /** Aims the tiles at a point along the Dock's axis; null relaxes them all back to 1. */
-  function aim(at: number | null) {
+  function aim(at: number | null, geometry?: Geometry) {
     if (at === null) {
       targets = apps.map(() => 1)
     } else {
-      // The dock stays centered while it grows, so its center is a stable origin.
-      const r = dock.getBoundingClientRect()
-      const center = vertical ? r.top + r.height / 2 : r.left + r.width / 2
-      targets = magnify(at - center, apps.length, step())
+      const g = geometry ?? measure()
+      targets = magnify(at - g.center, apps.length, g.step)
     }
     if (scales.length !== apps.length) scales = apps.map(() => 1)
     if (ms(1) === 0) {
       scales = targets
       return
     }
-    if (!frame) {
-      last = performance.now()
-      frame = requestAnimationFrame(tick)
-    }
+    run()
+  }
+
+  /** Starts the frame loop that eases the scales and offsets, unless it runs. */
+  function run() {
+    if (frame) return
+    last = performance.now()
+    frame = requestAnimationFrame(tick)
   }
 
   function tick(now: number) {
     const dt = Math.min(now - last, 50)
     last = now
     scales = scales.map((s, i) => approach(s, targets[i] ?? 1, dt))
-    frame = scales.some((s, i) => s !== (targets[i] ?? 1)) ? requestAnimationFrame(tick) : 0
+    let easing = false
+    if (Object.keys(offsets).length) {
+      const next: Record<string, number> = {}
+      for (const [id, o] of Object.entries(offsets)) {
+        const v = approach(o, 0, dt, 0.5)
+        if (v !== 0) next[id] = v
+      }
+      offsets = next
+      easing = Object.keys(next).length > 0
+    }
+    frame =
+      easing || scales.some((s, i) => s !== (targets[i] ?? 1)) ? requestAnimationFrame(tick) : 0
   }
 
   function aimAtTile(e: FocusEvent) {
@@ -125,12 +154,164 @@
 
   $effect(() => () => cancelAnimationFrame(frame))
 
+  // Reorder, as on macOS: drag a pinned tile along the Dock and the others
+  // part to show where it lands; letting go saves the new order. The drag
+  // stays among the pinned tiles, after Launchpad and before open apps
+  // that are not kept. Escape puts it back.
+  //
+  // Tiles that change places ease from where they were, in the frame loop
+  // above. Not animate:flip: that would measure every tile and restart
+  // every slide whenever the order changes. The pointer is followed on the
+  // window: Svelte moves the dragged tile's node, and that ends a pointer
+  // capture and takes its focus.
+
+  /** A press becomes a drag only after it moves this far, so clicks stay clicks. */
+  const DRAG_START = 6
+
+  interface Drag {
+    id: AppId
+    geometry: Geometry
+    /** The first and last pinned slots, which the drag stays between. */
+    min: number
+    max: number
+  }
+
+  /** The pressed tile, where it was pressed, and how far off its center. */
+  let press: (Drag & { at: number; grab: number }) | null = null
+  /** The dragged tile and the slot it would land in; replaced only when that slot changes. */
+  let drag = $state.raw<(Drag & { to: number }) | null>(null)
+  /** Where the dragged tile's center follows the pointer to, in px from the Dock's center. */
+  let dragAt = $state(0)
+  // Letting go of a drag also clicks the tile, even one Escape called off;
+  // that click must not launch it.
+  let dragged = false
+
+  /** apps with the dragged tile where it would land. */
+  function arranged(d: { id: AppId; to: number }): Tile[] {
+    const from = apps.findIndex((a) => a.id === d.id)
+    return from < 0 ? apps : moveItem(apps, from, d.to)
+  }
+
+  const tiles = $derived(drag ? arranged(drag) : apps)
+
+  /** The slot centers as laid out now, magnified, in px from the Dock's center. */
+  function centers(g: Geometry): number[] {
+    return slotCenters(apps.length, scales, g.step, g.tile)
+  }
+
+  /** How far the dragged tile is off its slot: under the pointer, however magnify moves the slot. */
+  const dragShift = $derived.by(() => {
+    if (!drag) return 0
+    const c = centers(drag.geometry)
+    const at = Math.min(Math.max(dragAt, c[drag.min] ?? 0), c[drag.max] ?? 0)
+    return at - (c[drag.to] ?? 0)
+  })
+
+  /** Tiles that changed places, but skip, start where they were and ease into their slots. */
+  function slide(prev: readonly Tile[], next: readonly Tile[], c: readonly number[], skip: string) {
+    if (ms(1) === 0) return
+    const moved = { ...offsets }
+    next.forEach((t, i) => {
+      const j = prev.findIndex((p) => p.id === t.id)
+      if (t.id === skip || j < 0 || j === i) return
+      moved[t.id] = (moved[t.id] ?? 0) + (c[j] ?? 0) - (c[i] ?? 0)
+    })
+    offsets = moved
+    run()
+  }
+
+  /** The dragged tile eases from under the pointer into the slot it ends in. */
+  function land(d: Drag & { to: number }, slot: number) {
+    if (ms(1) === 0) return
+    const c = centers(d.geometry)
+    offsets = { ...offsets, [d.id]: (c[d.to] ?? 0) + dragShift - (c[slot] ?? 0) }
+    run()
+  }
+
+  function along(e: PointerEvent): number {
+    return vertical ? e.clientY : e.clientX
+  }
+
+  function onPress(e: PointerEvent, app: Tile, i: number) {
+    press = null
+    dragged = false
+    if (e.button !== 0 || app.id === 'launchpad' || !dockPins.has(app.id)) return
+    // Pinned tiles come first, right after Launchpad, in one run.
+    const min = apps.findIndex((a) => dockPins.has(a.id))
+    const max = min + apps.filter((a) => dockPins.has(a.id)).length - 1
+    const geometry = measure()
+    const at = along(e)
+    // A tile still easing into place is grabbed where it is drawn.
+    const drawn = (centers(geometry)[i] ?? 0) + (offsets[app.id] ?? 0)
+    press = { id: app.id, geometry, min, max, at, grab: at - geometry.center - drawn }
+  }
+
+  function onDragMove(e: PointerEvent) {
+    const p = press
+    if (!p) return
+    // The release happened outside the window and never came: call it off.
+    if (!(e.buttons & 1)) {
+      cancelDrag()
+      return
+    }
+    const at = along(e)
+    if (!drag) {
+      if (Math.abs(at - p.at) < DRAG_START) return
+      dragged = true
+      // From here the pointer places the tile, not an ease.
+      offsets = Object.fromEntries(Object.entries(offsets).filter(([id]) => id !== p.id))
+    }
+    // Magnify follows the pointer even off the Dock, which stays where it was.
+    aim(at, p.geometry)
+    dragAt = at - p.geometry.center - p.grab
+    const c = centers(p.geometry)
+    const to = nearestSlot(c, dragAt, p.min, p.max)
+    if (drag?.to === to) return
+    const next = { id: p.id, geometry: p.geometry, min: p.min, max: p.max, to }
+    slide(tiles, arranged(next), c, p.id)
+    drag = next
+  }
+
+  function onRelease(e: PointerEvent) {
+    // The click comes right after the release, in the same task.
+    if (dragged) setTimeout(() => (dragged = false))
+    const d = drag
+    press = null
+    if (!d) return
+    land(d, d.to)
+    drag = null
+    // Let go off the Dock, which did not see the pointer leave while dragging.
+    if (!dock.contains(e.target as Node)) {
+      aim(null)
+      hideSoon()
+    }
+    // Dropped where it was, or it left the Dock (another server) on the way.
+    if (apps[d.to]?.id === d.id) return
+    const order = arranged(d)
+    if (order[d.to]?.id !== d.id) return
+    // Saved as "before the tile now after it", so pins this server does not
+    // show (apps of another system) keep their places.
+    const after = order[d.to + 1]
+    dockPins.move(d.id, after && dockPins.has(after.id) ? after.id : null)
+  }
+
+  /** Calls a drag off: every tile eases back to where it was. */
+  function cancelDrag() {
+    const d = drag
+    press = null
+    if (!d) return
+    const home = apps.findIndex((a) => a.id === d.id)
+    if (home >= 0) land(d, home)
+    slide(tiles, apps, centers(d.geometry), d.id)
+    drag = null
+  }
+
   // Autohide: the dock rests below the screen's edge and comes up while the
-  // pointer, keyboard focus or its menu is on it.
+  // pointer, keyboard focus, its menu or a drag is on it.
   const HIDE_DELAY = 300
   let shown = $state(false)
   let hideTimer = 0
-  const hidden = $derived(settings.dockAutohide && !shown && menu === null)
+  const hidden = $derived(settings.dockAutohide && !shown && menu === null && drag === null)
 
   function reveal() {
     clearTimeout(hideTimer)
@@ -144,6 +325,10 @@
 
   $effect(() => () => clearTimeout(hideTimer))
 
+  function onTileClick(app: Tile) {
+    if (!dragged) launch(app)
+  }
+
   function launch(app: Tile) {
     if (!onlaunch(app.id)) return
     bouncing = null
@@ -154,8 +339,18 @@
 
 <svelte:window
   onpointerdown={onWindowPointer}
-  onkeydown={(e) => menu && e.key === 'Escape' && (menu = null)}
-  onblur={() => (menu = null)}
+  onpointermove={onDragMove}
+  onpointerup={onRelease}
+  onpointercancel={cancelDrag}
+  onkeydown={(e) => {
+    if (e.key !== 'Escape') return
+    menu = null
+    cancelDrag()
+  }}
+  onblur={() => {
+    menu = null
+    cancelDrag()
+  }}
 />
 
 {#if settings.dockAutohide}
@@ -166,6 +361,7 @@
   class="dock glass"
   class:clear={settings.dockTransparent}
   class:menu-open={menu !== null}
+  class:dragging={drag !== null}
   class:hidden
   data-pos={pos}
   aria-label={t.dock.label}
@@ -175,8 +371,12 @@
   bind:offsetHeight={height}
   bind:offsetWidth={width}
   onpointerenter={reveal}
-  onpointermove={(e) => aim(vertical ? e.clientY : e.clientX)}
+  onpointermove={(e) => {
+    if (!drag) aim(along(e))
+  }}
   onpointerleave={() => {
+    // A drag goes on off the Dock; letting go settles it.
+    if (drag) return
     aim(null)
     hideSoon()
   }}
@@ -185,16 +385,22 @@
     aimAtTile(e)
   }}
   onfocusout={() => {
+    // Moving the dragged tile's node takes its focus; the drag goes on.
+    if (drag) return
     aim(null)
     hideSoon()
   }}
 >
-  {#each apps as app, i (app.id)}
+  {#each tiles as app, i (app.id)}
     {@const scale = scales[i] ?? 1}
+    {@const moving = drag?.id === app.id}
+    {@const shift = moving ? dragShift : (offsets[app.id] ?? 0)}
     <div
       class="slot"
+      class:moving
       style:--scale={scale}
       style:--lift="{(MAX_LIFT * (scale - 1)) / (MAX_SCALE - 1)}px"
+      style:translate={shift === 0 ? undefined : vertical ? `0 ${shift}px` : `${shift}px 0`}
     >
       <span class="tooltip glass glass-strong" aria-hidden="true">{app.label}</span>
       <button
@@ -203,9 +409,10 @@
         data-dock-app={app.id}
         data-own-tooltip
         aria-label={app.label}
-        onclick={() => launch(app)}
+        onclick={() => onTileClick(app)}
         oncontextmenu={(e) => openMenu(e, app)}
         onanimationend={() => (bouncing = null)}
+        onpointerdown={(e) => onPress(e, app, i)}
       >
         <AppIcon id={app.id} />
       </button>
@@ -245,8 +452,9 @@
 {/if}
 
 <style>
-  /* The label would show through under the menu. */
-  .dock.menu-open .slot .tooltip {
+  /* The label would show through under the menu, and trail a dragged tile. */
+  .dock.menu-open .slot .tooltip,
+  .dock.dragging .slot .tooltip {
     visibility: hidden;
   }
 
@@ -435,6 +643,11 @@
     gap: 4px;
     padding: 0 calc(var(--dock-gap) / 2);
     margin: 0 calc((var(--scale) - 1) * var(--dock-tile) / 2);
+  }
+
+  /* The dragged tile passes over its neighbours, not under them. */
+  .slot.moving {
+    z-index: 1;
   }
 
   /* The running dot stays on the screen-edge side of its tile. */

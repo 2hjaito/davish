@@ -7,6 +7,7 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 ### Added
 - **GPU processes, like nvtop**: Monitor → GPU now lists the processes on each NVIDIA GPU below the cards: PID, user, GPU, type, utilization, GPU memory and its share of the card, CPU, host memory and the command, sorted by any column. It runs `nvidia-smi` and reads `/proc` for those processes every 3 seconds, only while the GPU tab is open. Where the driver has no `pmon` only compute processes show, without utilization; Windows in WDDM mode shows no GPU memory per process.
 - German interface: pick Deutsch in Settings → General → Language; the first time, Davish follows a system set to German.
+- **Reorder the Dock**: drag a pinned icon along the Dock to move it, as on macOS. The other icons step aside to show where it lands, and the new order is kept when you let go. It stays between Launchpad and the open apps that are not kept in the Dock, Escape while dragging puts it back, and a click still opens the app. Pins for apps another server's system has keep their places.
 
 ### Fixed
 - Linux: the archive now holds the icon and `install-desktop.sh`, which adds Davish to the application menu. On Wayland (KDE, GNOME) a window's icon comes from a desktop entry, so before this the window showed no icon (#305). Not tried on a Wayland desktop yet.
