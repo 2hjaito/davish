@@ -112,3 +112,25 @@ group('in Korean', () => {
     [sched('0 12 * 1,7 *', { minute: [0], hour: [12], month: [1, 7] }), '매일 12:00에 (1 및 7월)'],
   ])('%s', (s, want) => expect(describe(s)).toBe(want))
 })
+
+group('in French', () => {
+  beforeAll(() => loadLang('fr'))
+  afterAll(() => loadLang('vi'))
+
+  it.each([
+    [sched('*/5 * * * *', { minute: range(0, 55, 5) }), 'Toutes les 5 minutes'],
+    [sched('0 9,18 * * *', { minute: [0], hour: [9, 18] }), 'Tous les jours à 09:00, 18:00'],
+    [
+      sched('30 9 * * 1-5', { minute: [30], hour: [9], dow: [1, 2, 3, 4, 5], dowAny: false }),
+      'Du lundi au vendredi à 09:30',
+    ],
+    [
+      sched('0 8 1,15 * *', { minute: [0], hour: [8], dom: [1, 15], domAny: false }),
+      'Le jour 1 et 15 du mois à 08:00',
+    ],
+    [
+      sched('0 12 * 1,7 *', { minute: [0], hour: [12], month: [1, 7] }),
+      'Tous les jours à 12:00 (mois\u00a0: 1 et 7)',
+    ],
+  ])('%s', (s, want) => expect(describe(s)).toBe(want))
+})

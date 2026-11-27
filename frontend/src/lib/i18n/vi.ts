@@ -2198,6 +2198,7 @@ const vi = {
       es: 'Español',
       de: 'Deutsch',
       ko: '한국어',
+      fr: 'Français',
     },
     langRestart:
       'Davish sẽ khởi động lại: terminal và chuyển file đang chạy sẽ dừng, server tự kết nối lại.',

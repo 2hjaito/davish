@@ -2155,6 +2155,7 @@ const zh = {
       es: 'Español',
       de: 'Deutsch',
       ko: '한국어',
+      fr: 'Français',
     },
     langRestart: 'Davish 会重启：正在运行的终端和传输会停止，服务器会自动重新连接。',
     langApply: '重启',

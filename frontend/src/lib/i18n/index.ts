@@ -8,9 +8,9 @@ import type vi from './vi'
 
 export type { AgoUnit } from './vi'
 
-export type Lang = 'vi' | 'en' | 'zh' | 'es' | 'de' | 'ko'
+export type Lang = 'vi' | 'en' | 'zh' | 'es' | 'de' | 'ko' | 'fr'
 
-export const LANGS: readonly Lang[] = ['vi', 'en', 'zh', 'es', 'de', 'ko']
+export const LANGS: readonly Lang[] = ['vi', 'en', 'zh', 'es', 'de', 'ko', 'fr']
 
 // vi.ts is `as const`; another language must match its shape, not its text.
 // Icon names stay literal since they are not translated.
@@ -37,6 +37,7 @@ const LOCALES: Record<Lang, string> = {
   es: 'es-ES',
   de: 'de-DE',
   ko: 'ko-KR',
+  fr: 'fr-FR',
 }
 
 /** Every user-facing string, in the current language. */
@@ -47,7 +48,9 @@ export let lang: Lang
 export let locale: string
 
 function isLang(v: unknown): v is Lang {
-  return v === 'vi' || v === 'en' || v === 'zh' || v === 'es' || v === 'de' || v === 'ko'
+  return (
+    v === 'vi' || v === 'en' || v === 'zh' || v === 'es' || v === 'de' || v === 'ko' || v === 'fr'
+  )
 }
 
 /** The saved choice; before one is made, the system's language. */
@@ -63,6 +66,7 @@ export function savedLang(): Lang {
   if (sys.startsWith('es')) return 'es'
   if (sys.startsWith('de')) return 'de'
   if (sys.startsWith('ko')) return 'ko'
+  if (sys.startsWith('fr')) return 'fr'
   return sys.startsWith('zh') ? 'zh' : 'en'
 }
 
@@ -79,7 +83,9 @@ export async function loadLang(pick: Lang = savedLang()): Promise<void> {
             ? await import('./de')
             : pick === 'ko'
               ? await import('./ko')
-              : await import('./vi')
+              : pick === 'fr'
+                ? await import('./fr')
+                : await import('./vi')
   t = mod.default
   lang = pick
   locale = LOCALES[pick]
