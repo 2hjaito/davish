@@ -5,6 +5,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Sửa
+- Linux: gói tải về giờ có icon và `install-desktop.sh`, thêm Davish vào menu ứng dụng. Trên Wayland (KDE, GNOME) icon của cửa sổ lấy từ một mục desktop, nên trước đây cửa sổ không có icon (#305). Chưa thử trên desktop Wayland thật.
 - Tất cả server → Bản đồ: bản đồ không có lề nên các thẻ dính sát mép sidebar và mép cửa sổ. Giờ có lề giống danh sách server. Tiêu đề từng hiện hai lần và có hai nút làm mới; giờ tiêu đề là "tên map" ở thanh trên của cửa sổ, và nút làm mới ở đó đọc lại bản đồ (trước đây nó chỉ tải lại danh sách server).
 - Xóa một server giờ nêu tên các server khác đang đi qua nó (jump host) và sẽ chuyển sang kết nối thẳng, để thấy điều đó trước khi xác nhận. Phần rà soát còn lại sau #296 không thấy gì cần đổi ở lối tắt script, bộ cập nhật (checksum có chữ ký, không hạ phiên bản) hay đặt lại khóa app.
 

@@ -409,3 +409,32 @@ func TestDownloadDoesNotRetryNotFound(t *testing.T) {
 		t.Errorf("github.com link tried %d times on 404, want 1", got)
 	}
 }
+
+// The Linux archive also holds the icon and the script that adds Davish to
+// the application menu (#305). An update swaps in the binary alone and writes
+// nothing else next to the app.
+func TestLinuxUpdateIgnoresTheFilesBesideTheBinary(t *testing.T) {
+	pub, priv, _ := ed25519.GenerateKey(rand.Reader)
+	name := "Davish-v1.2.0-linux-amd64.tar.gz"
+	archive := tarGz(t, map[string]string{
+		"Davish": "new binary", "davish.png": "icon", "install-desktop.sh": "#!/bin/sh\n",
+	})
+	srv := fakeGitHub(t, "1.2.0", name, archive, priv, false)
+	dir := t.TempDir()
+	exe := filepath.Join(dir, "Davish")
+	os.WriteFile(exe, []byte("old binary"), 0o755) //nolint:errcheck,gosec
+	s, _ := service(t, srv, pub, "linux", exe)
+
+	if err := s.Install(context.Background(), "1.2.0"); err != nil {
+		t.Fatal(err)
+	}
+	if b, _ := os.ReadFile(exe); string(b) != "new binary" { //nolint:gosec // test temp dir
+		t.Errorf("app = %q", b)
+	}
+	entries, _ := os.ReadDir(dir)
+	for _, e := range entries {
+		if n := e.Name(); n != "Davish" && n != "Davish.old" {
+			t.Errorf("the update left %q next to the app", n)
+		}
+	}
+}

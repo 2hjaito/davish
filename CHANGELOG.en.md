@@ -5,6 +5,7 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Fixed
+- Linux: the archive now holds the icon and `install-desktop.sh`, which adds Davish to the application menu. On Wayland (KDE, GNOME) a window's icon comes from a desktop entry, so before this the window showed no icon (#305). Not tried on a Wayland desktop yet.
 - All servers → Map: the map had no margin, so its cards touched the edge of the sidebar and the window. It now has the same margin as the list of servers. The title was shown twice and there were two refresh buttons; the title is now "name map" in the window's top bar, and that bar's refresh button reads the map again (before, it only reloaded the list of servers).
 - Deleting a server now names the other servers that go through it as a jump host and will connect directly afterwards, so that is seen before you confirm. The rest of the audit after #296 found nothing else to change in the script shortcuts, the updater (signed checksums, no downgrades) or the app lock reset.
 
