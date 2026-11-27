@@ -1017,6 +1017,8 @@ const de = {
       chartRange: '15 Minuten',
     },
     weekdays: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
+    clock: (weekday: string, day: string, month: string, time: string) =>
+      `${weekday} ${day}/${month}  ${time}`,
   },
   menu: {
     addServer: 'Server hinzufügen…',
@@ -2075,6 +2077,7 @@ const de = {
     count: (n: number) => `${n.toLocaleString('de-DE')} ${n === 1 ? 'Element' : 'Elemente'}`,
     today: 'Heute',
     yesterday: 'Gestern',
+    date: (day: string, month: string, year: number) => `${day}/${month}/${year}`,
     upload: 'Hochladen',
     uploadFolder: 'Ordner hochladen',
     download: 'Herunterladen',
@@ -3306,6 +3309,8 @@ const de = {
     inMonths: (months: string) => `(Monate: ${months})`,
     today: (time: string) => `Heute, ${time}`,
     tomorrow: (time: string) => `Morgen, ${time}`,
+    runDate: (weekday: string, day: string, month: string, time: string) =>
+      `${weekday}, ${day}/${month} ${time}`,
     weekdayShort: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
     sections: 'Job-Filter',
     filters: { mine: 'Meine', system: 'System', disabled: 'Deaktiviert' },
