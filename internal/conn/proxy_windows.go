@@ -8,10 +8,14 @@ import "os/exec"
 // command through cmd.exe, as Windows OpenSSH itself does.
 func proxyShell() (name, flag string) { return "cmd", "/c" }
 
-// inOwnGroup does nothing on Windows.
-func inOwnGroup(*exec.Cmd) {}
+// detach does nothing on Windows.
+func detach(*exec.Cmd) {}
 
-// killProxy ends the cmd.exe that runs the proxy command. A program it
-// started may outlive it: ending a whole tree on Windows needs a job object,
-// which is not done here and has not been tried.
-func killProxy(cmd *exec.Cmd) { cmd.Process.Kill() } //nolint:errcheck,gosec // ErrProcessDone is fine
+// killGroup does nothing on Windows: Close kills the cmd.exe that runs the
+// proxy command, and a program it started may outlive it. Ending a whole
+// tree there needs a job object, which is not done here and has not been
+// tried.
+func killGroup(*exec.Cmd) {}
+
+// groupEmpty is always true on Windows: there is no group to signal.
+func groupEmpty(*exec.Cmd) bool { return true }

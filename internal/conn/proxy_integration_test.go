@@ -3,12 +3,15 @@
 package conn_test
 
 import (
+	"bytes"
 	"context"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"golang.org/x/crypto/ssh/knownhosts"
 
@@ -110,5 +113,43 @@ func TestProxyCommandAsksBeforeItRuns(t *testing.T) {
 	}
 	if _, err := os.Stat(marker); err != nil {
 		t.Fatal("the confirmed command did not run")
+	}
+}
+
+// A proxy that dies must end the connection at once, with its own words in the
+// error for the person and none of them in the log (a proxy may print a token
+// or a login URL). Before, Davish held the write end of the proxy's stdout, so
+// the handshake waited for its whole timeout and Connect hung.
+func TestProxyDeathEndsConnectAtOnce(t *testing.T) {
+	dir := t.TempDir()
+	secrets := store.NewSecrets(proxyKeyring{})
+	st := store.New(dir, secrets)
+	srv, err := st.SaveWith(context.Background(), store.Server{
+		Name: "dies", Host: testsshd.Host, Port: testsshd.Port, User: testsshd.User,
+		Auth: store.AuthKey, KeyPath: testsshd.KeyPath(),
+		ProxyCommand: "echo relay-refused-token=SECRET123 >&2; exit 3",
+	}, store.SaveOptions{ProxyTyped: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var logs bytes.Buffer
+	m := conn.NewManager(st, secrets, conn.NewHostKeys(filepath.Join(dir, "known_hosts")),
+		proxyEmitter{}, slog.New(slog.NewTextHandler(&logs, nil)), conn.Options{DialTimeout: 8 * time.Second})
+	t.Cleanup(m.Close)
+
+	start := time.Now()
+	err = m.Connect(context.Background(), srv.ID)
+	took := time.Since(start)
+	if err == nil {
+		t.Fatal("connected through a proxy that exits")
+	}
+	if took > 3*time.Second {
+		t.Fatalf("Connect took %v after the proxy died; it waited for the handshake timeout", took)
+	}
+	if detail := apperr.Detail(err); !strings.Contains(detail, "SECRET123") || !strings.Contains(detail, "exit") && !strings.Contains(detail, "stderr") {
+		t.Errorf("the error does not say what the proxy said: %q", detail)
+	}
+	if strings.Contains(logs.String(), "SECRET123") {
+		t.Errorf("what the proxy printed reached the log:\n%s", logs.String())
 	}
 }

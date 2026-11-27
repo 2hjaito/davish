@@ -1,6 +1,9 @@
 package conn
 
 import (
+	"errors"
+	"fmt"
+	"strings"
 	"testing"
 
 	"davish/internal/store"
@@ -107,4 +110,25 @@ func TestPlanProxy(t *testing.T) {
 func typedProxy(srv store.Server) store.Server {
 	srv.ProxyTrust = store.ProxyHash(srv.ProxyCommand)
 	return srv
+}
+
+// What a proxy command printed is for the error dialog, not for the log: it
+// may hold an access token or a login URL.
+func TestForLogDropsWhatTheProxySaid(t *testing.T) {
+	base := errors.New("ssh: handshake failed: EOF")
+	err := error(&proxyError{err: base, why: "the proxy command said on stderr: token=SECRET123"})
+	if !strings.Contains(err.Error(), "SECRET123") {
+		t.Fatal("the error shown to the person must keep what the proxy said")
+	}
+	if got := forLog(err, err.Error()); strings.Contains(got, "SECRET123") || got != base.Error() {
+		t.Errorf("forLog = %q", got)
+	}
+	if got := forLog(base, base.Error()); got != base.Error() {
+		t.Errorf("an error without a proxy was changed: %q", got)
+	}
+	// Wrapped further (as apperr does), it is still found, and the rest stays.
+	wrapped := fmt.Errorf("ssh handshake failed: %w", err)
+	if got := forLog(wrapped, wrapped.Error()); strings.Contains(got, "SECRET123") || !strings.Contains(got, "ssh handshake failed") {
+		t.Errorf("wrapped: %q", got)
+	}
 }

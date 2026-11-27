@@ -4,7 +4,9 @@ package conn
 
 import (
 	"errors"
+	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -167,4 +169,154 @@ func TestProxyConnCloseEndsWhatTheShellStarted(t *testing.T) {
 	waitFor(t, func() bool { return syscall.Kill(child, 0) == syscall.ESRCH })
 	// And Wait returns, so the process is collected and explain has an answer.
 	waitFor(t, func() bool { return pc.explain() != "" })
+}
+
+// A proxy that dies must end the connection: the reader gets EOF at once,
+// not after the handshake timeout. That only happens when Davish itself does
+// not hold the write end of the proxy's stdout.
+func TestProxyConnReadEndsWhenTheProxyExits(t *testing.T) {
+	pc, err := dialProxy(typedProxy(store.Server{Host: "h", User: "u", Port: 22, ProxyCommand: "echo bye; exit 3"}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer pc.Close() //nolint:errcheck,gosec // always nil
+	done := make(chan error, 1)
+	go func() {
+		_, err := io.ReadAll(pc)
+		done <- err
+	}()
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatalf("read after the proxy exited: %v", err)
+		}
+	case <-time.After(3 * time.Second):
+		t.Fatal("Read did not end after the proxy exited: Davish holds the write end of its stdout")
+	}
+}
+
+// openFDs counts this process's open file descriptors.
+func openFDs(t *testing.T) int {
+	t.Helper()
+	for _, dir := range []string{"/proc/self/fd", "/dev/fd"} {
+		if ents, err := os.ReadDir(dir); err == nil {
+			return len(ents)
+		}
+	}
+	t.Skip("no way to count file descriptors here")
+	return 0
+}
+
+// Every connect and reconnect starts a proxy; none may leave descriptors
+// behind, or a long session ends with "too many open files".
+func TestProxyConnLeavesNoDescriptorsBehind(t *testing.T) {
+	cycle := func() {
+		pc, err := dialProxy(typedProxy(store.Server{Host: "h", User: "u", Port: 22, ProxyCommand: "cat"}))
+		if err != nil {
+			t.Fatal(err)
+		}
+		pc.Close() //nolint:errcheck,gosec // always nil
+		waitFor(t, func() bool { return pc.explain() != "" })
+	}
+	cycle() // warm up anything lazily opened
+	before := openFDs(t)
+	for range 20 {
+		cycle()
+	}
+	time.Sleep(200 * time.Millisecond)
+	if after := openFDs(t); after > before+2 {
+		t.Fatalf("descriptors grew from %d to %d over 20 proxies", before, after)
+	}
+}
+
+// Once nothing is left in the command's group its number is free for the
+// system to give to another process, so Close must not signal it: that could
+// kill an unrelated process of the user's.
+func TestCloseDoesNotSignalAnEmptyGroup(t *testing.T) {
+	var calls int
+	old := killProxyGroup
+	killProxyGroup = func(*exec.Cmd) { calls++ }
+	t.Cleanup(func() { killProxyGroup = old })
+
+	pc, err := dialProxy(typedProxy(store.Server{Host: "h", User: "u", Port: 22, ProxyCommand: "exit 0"}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	waitFor(t, func() bool { return pc.explain() != "" })
+	pc.mu.Lock()
+	gone := pc.groupGone
+	pc.mu.Unlock()
+	if !gone {
+		t.Fatal("a proxy that exited with nothing left behind did not mark its group gone")
+	}
+	pc.Close() //nolint:errcheck,gosec // always nil
+	if calls != 0 {
+		t.Fatalf("Close signalled a group with no process in it (%d times)", calls)
+	}
+
+	// A proxy that is still running does get the group signal.
+	pc2, err := dialProxy(typedProxy(store.Server{Host: "h", User: "u", Port: 22, ProxyCommand: "sleep 30"}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	pc2.Close() //nolint:errcheck,gosec // always nil
+	if calls != 1 {
+		t.Fatalf("a running proxy: the group was signalled %d times; want 1", calls)
+	}
+	waitFor(t, func() bool { return pc2.explain() != "" })
+}
+
+// Something the shell left running is still in the group after the shell is
+// gone: nothing kills it before Close (ssh would not either), and Close ends it.
+func TestCloseEndsWhatOutlivedTheShell(t *testing.T) {
+	pidFile := filepath.Join(t.TempDir(), "child.pid")
+	pc, err := dialProxy(typedProxy(store.Server{
+		Host: "h", User: "u", Port: 22,
+		ProxyCommand: "sleep 30 & echo $! > " + pidFile,
+	}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var child int
+	waitFor(t, func() bool {
+		b, err := os.ReadFile(pidFile) //nolint:gosec // a file in the test's temp dir
+		if err != nil {
+			return false
+		}
+		child, err = strconv.Atoi(strings.TrimSpace(string(b)))
+		return err == nil && child > 0
+	})
+	// The shell exits at once; Wait gives up on the orphan's pipes after WaitDelay.
+	waitFor(t, func() bool { return pc.explain() != "" })
+	pc.mu.Lock()
+	gone := pc.groupGone
+	pc.mu.Unlock()
+	if gone {
+		t.Fatal("the group was marked gone while the child still ran")
+	}
+	if err := syscall.Kill(child, 0); err != nil {
+		t.Fatalf("the child was ended before Close: %v", err)
+	}
+	pc.Close() //nolint:errcheck,gosec // always nil
+	waitFor(t, func() bool { return syscall.Kill(child, 0) == syscall.ESRCH })
+}
+
+// The proxy is a session leader with no controlling terminal: a proxy that
+// reads /dev/tty fails at once instead of being stopped by SIGTTIN (which
+// would hang the connection until the handshake timeout).
+func TestProxyRunsInASessionOfItsOwn(t *testing.T) {
+	pc, err := dialProxy(typedProxy(store.Server{Host: "h", User: "u", Port: 22, ProxyCommand: "sleep 30"}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer pc.Close() //nolint:errcheck,gosec // always nil
+	pid := pc.cmd.Process.Pid
+	sid, err := getsid(pid)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ours, _ := getsid(os.Getpid())
+	if sid != pid || sid == ours {
+		t.Fatalf("session of the proxy = %d (pid %d), ours = %d; want its own", sid, pid, ours)
+	}
 }
