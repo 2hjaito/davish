@@ -5,6 +5,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Thêm
+- **Tiến trình GPU, giống nvtop**: Monitor → GPU giờ liệt kê các tiến trình trên mỗi GPU NVIDIA bên dưới các thẻ: PID, người dùng, GPU, loại, mức sử dụng, bộ nhớ GPU và tỉ lệ trên card, CPU, bộ nhớ máy và lệnh, sắp xếp được theo mọi cột. Davish chạy `nvidia-smi` và đọc `/proc` của các tiến trình đó mỗi 3 giây, chỉ khi đang mở tab GPU. Driver không có `pmon` thì chỉ hiện tiến trình tính toán, không có mức sử dụng; Windows ở chế độ WDDM không có bộ nhớ GPU theo từng tiến trình.
 - Giao diện tiếng Đức: chọn Deutsch trong Cài đặt → Chung → Ngôn ngữ; lần đầu Davish theo máy đặt tiếng Đức.
 
 ### Sửa

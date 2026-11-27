@@ -298,6 +298,8 @@ export function LogsStartAsRoot(arg1:string,arg2:logs.Source):Promise<logs.Start
 
 export function LogsStop(arg1:string):Promise<void>;
 
+export function MonitorGPUProcesses(arg1:string):Promise<sysmon.GPUProcessList>;
+
 export function MonitorProcesses(arg1:string,arg2:string):Promise<sysmon.ProcessList>;
 
 export function MonitorSetIdle(arg1:boolean):Promise<void>;

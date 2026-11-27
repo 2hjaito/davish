@@ -253,6 +253,22 @@ func TestProcessesMatchTop(t *testing.T) {
 	}
 }
 
+// The test sshd has no NVIDIA driver: the GPU tab gets an empty list, not
+// an error.
+func TestGPUProcessesWithoutGPU(t *testing.T) {
+	m, id := connect(t)
+	svc := sysmon.New(m, discard{}, quiet(), sysmon.Options{})
+	t.Cleanup(svc.Close)
+
+	list, err := svc.GPUProcesses(context.Background(), id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if list.Procs == nil || len(list.Procs) != 0 {
+		t.Errorf("procs = %#v; want an empty list", list.Procs)
+	}
+}
+
 func TestSystemInfo(t *testing.T) {
 	m, id := connect(t)
 	svc := sysmon.New(m, discard{}, quiet(), sysmon.Options{})

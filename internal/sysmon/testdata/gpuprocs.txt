@@ -1,0 +1,37 @@
+@@gpus
+0, GPU-6b1c2f3e-0000-4000-8000-000000000000, 97887
+1, GPU-6b1c2f3e-1111-4000-8000-111111111111, 97887
+@@apps
+GPU-6b1c2f3e-0000-4000-8000-000000000000, 3324900, 21382, /usr/lib/ollama/llama-server
+GPU-6b1c2f3e-0000-4000-8000-000000000000, 2869697, 2932, python3
+GPU-6b1c2f3e-0000-4000-8000-000000000000, 3157412, 552, python3
+GPU-6b1c2f3e-1111-4000-8000-111111111111, 3324900, 1024, /usr/lib/ollama/llama-server
+@@pmon
+# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command
+# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name
+    0    3324900     C     12      3      -      -      -      -  21382      0    llama-server
+    0    2869697     C      -      -      -      -      -      -   2932      0    python3
+    0    3157412     C      0      0      -      -      -      -    552      0    python3
+    0       4242     G      1      0      -      -      -      -     45      0    Xorg
+    1    3324900     C      5      1      -      -      -      -   1024      0    llama-server
+@@uptime
+900000.00 3500000.00
+@@clk
+100
+@@pagesize
+4096
+@@meminfo
+MemTotal:       263840696 kB
+@@passwd
+root:0
+daemon:1
+rst:1000
+@@ps
+2869697     0 python3 /opt/src/api_server.py
+3157412     0 python3 -c import sys, os, logging from whisper_live
+3324900     0 /usr/lib/ollama/llama-server --model /root/.ollama/models/blobs/sha256-6a0746a1 --port 41117
+@@stat
+2869697 (python3) S 1 2869697 2869697 0 -1 4194560 0 0 0 0 9000 500 0 0 20 0 12 0 200000 0 377856 18446744073709551615 1 1 0 0 0 0 0 0 0 0 0 0 17 3 0 0 0 0 0
+3157412 (python3) S 1 3157412 3157412 0 -1 4194560 0 0 0 0 1500 100 0 0 20 0 8 0 300000 0 33280 18446744073709551615 1 1 0 0 0 0 0 0 0 0 0 0 17 5 0 0 0 0 0
+3324900 (llama-server) S 1 3324900 3324900 0 -1 4194560 0 0 0 0 50000 2000 0 0 20 0 40 0 100000 0 382208 18446744073709551615 1 1 0 0 0 0 0 0 0 0 0 0 17 7 0 0 0 0 0
+@@end

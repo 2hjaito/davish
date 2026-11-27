@@ -546,6 +546,10 @@ export function LogsStop(arg1) {
   return window['go']['app']['App']['LogsStop'](arg1);
 }
 
+export function MonitorGPUProcesses(arg1) {
+  return window['go']['app']['App']['MonitorGPUProcesses'](arg1);
+}
+
 export function MonitorProcesses(arg1, arg2) {
   return window['go']['app']['App']['MonitorProcesses'](arg1, arg2);
 }

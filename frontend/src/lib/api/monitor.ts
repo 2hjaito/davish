@@ -38,6 +38,37 @@ export interface ProcessList {
 export const monitorProcesses = (serverID: string, sortBy: ProcessSort): Promise<ProcessList> =>
   App.MonitorProcesses(serverID, sortBy)
 
+/** One process on one GPU, like a row of nvtop. A reading nobody reports is -1. */
+export interface GPUProcess {
+  /** nvidia-smi's index. */
+  gpu: number
+  pid: number
+  /** "C" compute, "G" graphics or "C+G", as nvidia-smi pmon prints it. */
+  type: string
+  /** Percent of the GPU's SMs. */
+  gpuUtil: number
+  /** Bytes. */
+  gpuMem: number
+  /** Percent of that GPU's memory. */
+  gpuMemPct: number
+  /** Empty when /proc does not show the process (nvidia-smi in a container). */
+  user: string
+  name: string
+  command: string
+  /** Percent of one core. */
+  cpu: number
+  /** Resident bytes. */
+  mem: number
+}
+
+export interface GPUProcessList {
+  procs: GPUProcess[]
+}
+
+/** Every process on the server's NVIDIA GPUs; CPU is measured since the previous call. */
+export const monitorGPUProcesses = (serverID: string): Promise<GPUProcessList> =>
+  App.MonitorGPUProcesses(serverID)
+
 /** Fields the server does not reveal are empty. */
 /** A block device and what is on it (internal/sysmon.Disk). */
 export interface Disk {

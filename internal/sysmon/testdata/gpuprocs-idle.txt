@@ -1,0 +1,20 @@
+@@gpus
+0, GPU-b0b0b0b0-0000-4000-8000-000000000000, 81920
+@@apps
+@@pmon
+# gpu         pid   type     sm    mem    enc    dec    jpg    ofa     fb   ccpm    command
+# Idx           #    C/G      %      %      %      %      %      %     MB     MB    name
+    0          -     -      -      -      -      -      -      -      -      -    -
+@@uptime
+1000.00 900.00
+@@clk
+100
+@@pagesize
+4096
+@@meminfo
+MemTotal:        8125796 kB
+@@passwd
+root:0
+@@ps
+@@stat
+@@end

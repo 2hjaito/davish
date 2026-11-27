@@ -211,7 +211,7 @@ func TestWindowsScriptsHaveNoScopeLikeVariables(t *testing.T) {
 	tg, _ := targetFor(platform.Windows)
 	bad := regexp.MustCompile(`\$([A-Za-z_][A-Za-z0-9_]*):`)
 	scopes := map[string]bool{"env": true, "script": true, "global": true, "local": true, "private": true}
-	for name, s := range map[string]string{"collect": tg.collect, "procs": tg.procs, "info": tg.info} {
+	for name, s := range map[string]string{"collect": tg.collect, "procs": tg.procs, "info": tg.info, "gpuprocs": tg.gpuProcs} {
 		for _, m := range bad.FindAllStringSubmatch(s, -1) {
 			if !scopes[strings.ToLower(m[1])] {
 				t.Errorf("%s.ps1: %s: is read as a scope; write ${%s}:", name, m[0], m[1])
@@ -225,7 +225,7 @@ func TestWindowsTarget(t *testing.T) {
 	if !ok {
 		t.Fatal("Windows must be supported")
 	}
-	for name, s := range map[string]string{"collect": tg.collect, "procs": tg.procs, "info": tg.info} {
+	for name, s := range map[string]string{"collect": tg.collect, "procs": tg.procs, "info": tg.info, "gpuprocs": tg.gpuProcs} {
 		if !strings.Contains(s, "@@end") {
 			t.Errorf("%s.ps1 never prints @@end", name)
 		}

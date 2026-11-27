@@ -1,5 +1,11 @@
 // Demo data for the plain browser preview (vite dev), where there is no Go side.
-import type { Process, ProcessList, ProcessSort, SystemInfo } from '../../lib/api/monitor'
+import type {
+  GPUProcessList,
+  Process,
+  ProcessList,
+  ProcessSort,
+  SystemInfo,
+} from '../../lib/api/monitor'
 
 const MB = 1024 ** 2
 
@@ -189,4 +195,48 @@ export const mockInfo: SystemInfo = {
   gateway: '172.31.1.1',
   gatewayDev: 'eth0',
   dns: ['127.0.0.53'],
+}
+
+const GPU_TOTAL = 97_887 * MB
+
+/** The GPU tab of the preview, after nvtop on a machine serving models. */
+export function mockGpuProcesses(): GPUProcessList {
+  const busy = () => Math.round(Math.random() * 30)
+  const row = (pid: number, type: string, gpuMem: number, rest: object) => ({
+    gpu: 0,
+    pid,
+    type,
+    gpuUtil: busy(),
+    gpuMem,
+    gpuMemPct: Math.round((gpuMem / GPU_TOTAL) * 1000) / 10,
+    user: 'root',
+    name: '',
+    command: '',
+    cpu: Math.round(Math.random() * 20) / 10,
+    mem: 0,
+    ...rest,
+  })
+  return {
+    procs: [
+      row(3324900, 'C', 21_382 * MB, {
+        name: 'llama-server',
+        command:
+          '/usr/lib/ollama/llama-server --model /root/.ollama/models/blobs/sha256-6a0746a1 --port 41117',
+        mem: 1493 * MB,
+      }),
+      row(2869697, 'C', 2932 * MB, {
+        name: 'python3',
+        command: 'python3 /opt/src/api_server.py',
+        mem: 1476 * MB,
+      }),
+      row(3157412, 'C', 552 * MB, {
+        name: 'python3',
+        command:
+          'python3 -c\nimport sys, os, logging\nfrom whisper_live.server import TranscriptionServer',
+        mem: 130 * MB,
+      }),
+      // A graphics process outside the login's view: nvidia-smi alone knows it.
+      row(4242, 'G', 45 * MB, { user: '', name: 'Xorg', command: 'Xorg', cpu: -1, mem: -1 }),
+    ],
+  }
 }

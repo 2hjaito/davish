@@ -5,6 +5,7 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Added
+- **GPU processes, like nvtop**: Monitor → GPU now lists the processes on each NVIDIA GPU below the cards: PID, user, GPU, type, utilization, GPU memory and its share of the card, CPU, host memory and the command, sorted by any column. It runs `nvidia-smi` and reads `/proc` for those processes every 3 seconds, only while the GPU tab is open. Where the driver has no `pmon` only compute processes show, without utilization; Windows in WDDM mode shows no GPU memory per process.
 - German interface: pick Deutsch in Settings → General → Language; the first time, Davish follows a system set to German.
 
 ### Fixed

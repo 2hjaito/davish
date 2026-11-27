@@ -13,9 +13,9 @@ type target struct {
 	launch func(script string) (command, stdin string)
 	// vars is the script's first lines: the pace, in the shell's syntax.
 	vars func(every, healthEvery int) string
-	// collect prints metric snapshots until it is stopped; procs and info
-	// print one answer and exit.
-	collect, procs, info string
+	// collect prints metric snapshots until it is stopped; procs, gpuProcs
+	// and info print one answer and exit.
+	collect, procs, gpuProcs, info string
 }
 
 // posixLaunch feeds the script to sh on stdin, so no command line is built
@@ -40,11 +40,11 @@ func powershellVars(every, healthEvery int) string {
 func targetFor(os platform.OS) (target, bool) {
 	switch os {
 	case platform.Linux, platform.Unknown, "":
-		return target{launch: posixLaunch, vars: posixVars, collect: collectScript, procs: procsScript, info: infoScript}, true
+		return target{launch: posixLaunch, vars: posixVars, collect: collectScript, procs: procsScript, gpuProcs: gpuProcsScript, info: infoScript}, true
 	case platform.Windows:
 		// The scripts print the same @@sections as the Linux ones (in the
 		// shapes of /proc/stat, /proc/meminfo, df -kP…), so one parser reads both.
-		return target{launch: platform.PowerShell, vars: powershellVars, collect: collectWinScript, procs: procsWinScript, info: infoWinScript}, true
+		return target{launch: platform.PowerShell, vars: powershellVars, collect: collectWinScript, procs: procsWinScript, gpuProcs: gpuProcsWinScript, info: infoWinScript}, true
 	}
 	return target{}, false
 }
