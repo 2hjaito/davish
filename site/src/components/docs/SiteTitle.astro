@@ -5,7 +5,7 @@ import logo from '../../assets/logo.svg'
 
 const locale = Astro.locals.starlightRoute.locale
 const home = locale ? `/${locale}/` : '/'
-const docs = { vi: 'Tài liệu', zh: '文档' }[locale ?? ''] ?? 'Docs'
+const docs = { vi: 'Tài liệu', zh: '文档', ko: '문서', fr: 'Docs' }[locale ?? ''] ?? 'Docs'
 ---
 
 <a href={home} class="title">

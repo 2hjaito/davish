@@ -4,7 +4,7 @@
 // before paint.
 import Icon from '../Icon.astro'
 
-const label = { vi: 'Sáng hoặc tối', zh: '浅色或深色' }[Astro.locals.starlightRoute.locale ?? ''] ?? 'Light or dark'
+const label = { vi: 'Sáng hoặc tối', zh: '浅色或深色', ko: '라이트 또는 다크', fr: 'Clair ou sombre' }[Astro.locals.starlightRoute.locale ?? ''] ?? 'Light or dark'
 ---
 
 <button class="nav-btn theme-btn" type="button" aria-label={label} title={label} data-theme-toggle>

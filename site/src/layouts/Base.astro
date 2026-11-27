@@ -24,7 +24,8 @@ const pageTitle = title ?? t.title
 const pageDescription = description ?? t.description
 const site = Astro.site ?? new URL('https://davish.app')
 const here = locales.find((l) => l.id === locale)!
-const image = new URL({ en: og, vi: ogVi, zh: ogZh }[locale].src, site).href
+const ogOwn: Partial<Record<Locale, typeof og>> = { vi: ogVi, zh: ogZh }
+const image = new URL((ogOwn[locale] ?? og).src, site).href
 ---
 
 <!doctype html>

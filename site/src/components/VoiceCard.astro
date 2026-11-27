@@ -12,14 +12,15 @@ interface Props {
 const { voice, locale } = Astro.props
 const from = voice.lang ?? 'en'
 const same = from === locale
-const own = same ? voice.text : (voice.tr[locale] ?? voice.text)
+const translated = same ? undefined : voice.tr[locale]
+const own = translated ?? voice.text
 const label = dicts[locale].voices.translated(from)
 ---
 
 <figure class="voice">
   <blockquote lang={locale === 'zh' ? 'zh-CN' : locale}>“{own}”</blockquote>
   {
-    !same && (
+    translated && (
       <details class="voice-tr">
         <summary>{label}</summary>
         <p lang={from === 'zh' ? 'zh-CN' : from}>“{voice.text}”</p>

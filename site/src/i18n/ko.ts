@@ -1,0 +1,201 @@
+import type { Dict } from "./en";
+
+export const ko: Dict = {
+  lang: "ko",
+  title: "Davish: 내 Linux 서버를 위한 데스크톱",
+  description:
+    "터미널, 파일, Docker, 로그, 데이터베이스까지 SSH만으로. macOS, Windows, Linux용 데스크톱 앱 하나면 충분해요. 서버에는 아무것도 설치하지 않아요.",
+  nav: {
+    features: "기능",
+    security: "보안",
+    download: "다운로드",
+    docs: "문서",
+    theme: "라이트 또는 다크",
+    changelog: "변경 기록",
+  },
+  hero: {
+    title: "내 Linux 서버를 위한 데스크톱.",
+    lead: "터미널, 파일, 서비스, Docker, 로그, 데이터베이스, git을 SSH만으로. 운영체제처럼 편하게 쓰는 하나의 공간이에요.",
+    tags: ["웹 패널 없음", "로그인 없음", "에이전트 없음"],
+    download: "다운로드:",
+    other: "다른 플랫폼",
+    github: "GitHub에서 보기",
+    version: (v: string) => `버전 ${v} · 무료 오픈 소스 (GPL-3.0)`,
+    shotAlt: "Davish 데스크톱: 한 서버에서 열린 Terminal, Files, Monitor",
+    badge: (v: string) => `${v}의 새로운 기능`,
+    docs: "문서 읽기",
+    platforms: "macOS, Windows, Linux에서 실행돼요",
+    hint: "앱을 골라 안을 들여다보세요",
+    tabs: {
+      desktop: "데스크톱",
+      servers: "모든 서버",
+      docker: "Docker",
+      database: "데이터베이스",
+      git: "Git",
+      security: "보안",
+    },
+  },
+  why: {
+    title: "Davish를 쓰는 이유",
+    items: [
+      {
+        title: "열면 바로 접속",
+        text: "로그인 화면도, 웹 패널도 없어요. Davish는 SSH 키로 연결해 서버의 데스크톱으로 바로 안내해요. 서버에 새로 열리는 포트도 없어요.",
+      },
+      {
+        title: "에이전트 불필요",
+        text: "sshd와 SFTP만 있으면 돼요. 모든 작업은 내 컴퓨터에서 실행되고, 서버에는 복사하거나 설치하거나 남기는 것이 없어요.",
+      },
+      {
+        title: "모든 명령을 미리 확인",
+        text: "되돌릴 수 없는 작업은 실행할 명령을 먼저 보여 줘요. 명령 기록에 모두 남고, 변경 사항을 스크립트로 내보낼 수 있어요.",
+      },
+      {
+        title: "서버는 여러 대, 데스크톱은 하나",
+        text: "서버마다 창 배치를 기억하는 워크스페이스가 돼요. 파일을 한 서버에서 다른 서버로 끌어다 놓으세요.",
+      },
+      {
+        title: "내 ssh config 그대로",
+        text: "~/.ssh/config나 Ansible 인벤토리에서 호스트를 가져와요. 키와 ProxyJump도 함께요.",
+      },
+      {
+        title: "알아서 업데이트",
+        text: "새 버전이 나오면 변경 내용을 보여 줘요. Davish가 직접 내려받고 서명을 확인한 뒤 다시 시작해요.",
+      },
+    ],
+  },
+  features: {
+    title: "서버에 필요한 모든 것, 익숙한 창 안에서",
+    lead: "스무 개가 넘는 앱이 하나의 데스크톱을 함께 써요. 내 컴퓨터에서처럼 끌고, 맞추고, 오갈 수 있어요.",
+    show: [
+      {
+        key: "servers",
+        title: "모든 서버를 한눈에",
+        text: "모든 서버의 상태와 알림을 한 창에서 확인하고, 각 서버가 무엇을 서비스하는지 지도로 봐요. 도메인, nginx, 포트, 컨테이너까지요.",
+      },
+      {
+        key: "multi-run",
+        title: "명령 하나, 서버 여러 대",
+        text: "여러 서버에서 명령을 동시에 실행해요. 서버마다 터미널 탭이 따로 열리고, 중지 버튼은 정말로 멈춰 줘요.",
+      },
+      {
+        key: "git",
+        title: "서버 위의 Git",
+        text: "서버에 있는 저장소의 상태, diff, 커밋 그래프를 보고 fetch와 pull도 할 수 있어요.",
+      },
+      {
+        key: "docker",
+        title: "한눈에 보이는 Docker",
+        text: "compose 프로젝트별 컨테이너, 이미지와 레이어, 볼륨, 로그를 보고 클릭 한 번으로 셸에 들어가요.",
+      },
+      {
+        key: "sqlite-rows",
+        title: "웹 패널 없는 데이터베이스",
+        text: "MariaDB, PostgreSQL, MongoDB, SQLite를 만들고, 덤프하고, 복원해요. SQLite 테이블은 페이지 단위로 읽을 수 있어요.",
+      },
+      {
+        key: "security",
+        title: "누가 문을 두드리나",
+        text: "시간대별, 주소별 로그인 실패, 열려 있는 세션, ufw와 fail2ban까지 데스크톱을 떠나지 않고 확인해요.",
+      },
+    ],
+    more: "이 밖에도",
+    list: [
+      "터미널",
+      "파일 (SFTP)",
+      "에디터",
+      "로그",
+      "모니터",
+      "서비스",
+      "Cron",
+      "Nginx",
+      "패키지",
+      "포트 및 터널",
+      "브라우저",
+      "디스크",
+      "SSH 키",
+      "저장된 명령",
+      "명령 기록",
+      "Spotlight 및 Launchpad",
+    ],
+    all: "모든 기능 보기",
+  },
+  security: {
+    title: "root 권한을 맡겨도 되도록 만들었어요",
+    items: [
+      "비밀번호와 패스프레이즈는 운영체제 키체인에만 저장돼요.",
+      "sudo 비밀번호는 저장하지 않아요. 세션마다 한 번만 묻고, 메모리에만 두었다가 15분 뒤에 지워요.",
+      "자리를 비우면 별도의 비밀번호나 Touch ID로 잠겨요.",
+      "업데이트는 검증해요. 설치하기 전에 업데이터가 릴리스 서명을 확인해요.",
+    ],
+    more: "보안 노트 읽기",
+  },
+  download: {
+    title: "Davish 다운로드",
+    lead: "macOS, Windows, Linux에서 무료로 쓸 수 있어요. 서버에는 SFTP가 포함된 OpenSSH만 있으면 돼요.",
+    platforms: {
+      macos: { name: "macOS", note: "macOS 12 이상, Apple 실리콘 및 Intel" },
+      windows: { name: "Windows", note: "Windows 10 이상, 64비트" },
+      linux: { name: "Linux", note: "GTK 3 및 WebKitGTK 4.1, x86-64" },
+    },
+    installer: "설치 프로그램",
+    archive: "포터블",
+    checksums: "체크섬",
+    notes: "릴리스 노트",
+    unsigned:
+      "Davish는 아직 코드 서명이 되어 있지 않아서 macOS와 Windows가 처음 실행할 때 경고를 보여 줘요. 여는 방법은 GitHub의 설치 가이드에 있어요.",
+    guide: "설치 가이드",
+  },
+  stats: {
+    downloads: "앱 다운로드",
+    apps: "하나의 데스크톱에 담긴 앱",
+    version: (date: string) => `최신 버전, ${date}`,
+    stars: "GitHub 스타",
+    free: "무료",
+    freeNote: "오픈 소스, GPL-3.0",
+  },
+  docs: {
+    title: "10분이면 충분해요",
+    lead: "앱마다 문서에 전용 페이지가 있어요. 무엇을 하는지, 서버에서 어떤 명령을 실행하는지, 내 데이터가 어디에 남는지 알려 드려요.",
+    start: "시작하기",
+    links: [
+      { label: "Davish 설치", href: "start/install/" },
+      { label: "첫 서버 연결하기", href: "start/first-server/" },
+      { label: "서버에 필요한 것", href: "start/requirements/" },
+      { label: "키보드 단축키", href: "start/shortcuts/" },
+    ],
+  },
+  changelog: {
+    title: "변경 기록 · Davish",
+    description: "Davish의 릴리스별 변경 내용을 최신순으로 보여 드려요.",
+    heading: "변경 기록",
+    lead: "릴리스별 변경 내용을 최신순으로 보여 드려요.",
+    englishOnly: "변경 기록은 영어로만 제공돼요.",
+  },
+  voices: {
+    title: "사용자 이야기",
+    note: "공개된 게시글과 이슈에서 가져왔어요.",
+    translated: (from: "en" | "zh") =>
+      from === "zh" ? "중국어에서 번역" : "영어에서 번역",
+    more: (n: number) => `${n}개 더 보기`,
+    less: "접기",
+  },
+  community: {
+    discord: "Discord에서 함께해요",
+    discordNote: "질문, 아이디어, 그리고 미리 써 보는 빌드.",
+  },
+  thanks: {
+    title: "쓰는 사람들과 함께 만들었어요",
+    lead: "코드, 버그 제보, 각자의 환경에서 해 준 테스트, 그리고 아이디어까지 모두 감사해요.",
+    code: "코드",
+    issue: "이슈",
+    discussion: "토론",
+    join: "GitHub에서 함께하기",
+  },
+  footer: {
+    license: "Davish는 GPL-3.0 라이선스의 자유 소프트웨어예요.",
+    changelog: "변경 기록",
+    issues: "문제 신고",
+    language: "언어",
+  },
+};

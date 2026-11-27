@@ -8,10 +8,12 @@ const langs = [
   { id: 'en', prefix: '', name: 'English', hreflang: 'en' },
   { id: 'vi', prefix: '/vi', name: 'Tiếng Việt', hreflang: 'vi' },
   { id: 'zh', prefix: '/zh', name: '简体中文', hreflang: 'zh-CN' },
+  { id: 'ko', prefix: '/ko', name: '한국어', hreflang: 'ko' },
+  { id: 'fr', prefix: '/fr', name: 'Français', hreflang: 'fr' },
 ] as const
 const current = Astro.locals.starlightRoute.locale ?? 'en'
 const here = langs.find((l) => l.id === current) ?? langs[0]
-const rest = Astro.url.pathname.replace(/^\/(vi|zh)(?=\/)/, '')
+const rest = Astro.url.pathname.replace(/^\/(vi|zh|ko|fr)(?=\/)/, '')
 ---
 
 <div class="lang">
