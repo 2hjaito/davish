@@ -538,3 +538,59 @@ func TestConnectThroughControlMaster(t *testing.T) {
 		t.Fatalf("master gone: err = %v; want CONN_CONTROL_SOCKET", err)
 	}
 }
+
+// Through a control socket, OpenSSH's mux proxy does not forward the
+// keepalive@openssh.com request and drops the connection that sent it, so
+// Davish saw "connection lost" about one keepalive interval after
+// attaching, every time (#301). The master looks after the server's
+// liveness (ServerAliveInterval); a master that dies closes the socket.
+func TestControlSocketIsNotDroppedByKeepalives(t *testing.T) {
+	if _, err := exec.LookPath("ssh"); err != nil {
+		t.Skip("no ssh on PATH")
+	}
+	dir, err := os.MkdirTemp("", "dvmux") // short path: unix socket paths are limited
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(dir) })
+	sock := filepath.Join(dir, "m")
+
+	master := exec.Command("ssh", "-M", "-S", sock, "-fN", //nolint:gosec // fixed ssh arguments against the test sshd
+		"-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile="+os.DevNull,
+		"-o", "IdentitiesOnly=yes", "-i", testsshd.KeyPath(),
+		"-p", strconv.Itoa(testsshd.Port), testsshd.User+"@"+testsshd.Host)
+	if out, err := master.CombinedOutput(); err != nil {
+		t.Skipf("cannot start a ControlMaster here: %v: %s", err, out)
+	}
+	t.Cleanup(func() { _ = exec.Command("ssh", "-S", sock, "-O", "exit", "x").Run() }) //nolint:gosec // fixed ssh arguments against the test sshd
+
+	srv := testServer()
+	srv.Auth = store.AuthAgent
+	srv.KeyPath = ""
+	srv.ControlPath = sock
+	e := setup(t, srv, conn.Options{KeepaliveInterval: 300 * time.Millisecond, KeepaliveMisses: 2})
+	t.Setenv("SSH_AUTH_SOCK", "")
+	t.Setenv("HOME", t.TempDir())
+	if err := e.m.Connect(context.Background(), e.id); err != nil {
+		t.Fatalf("connect through control socket: %v", err)
+	}
+
+	// Several keepalive intervals, and then some.
+	time.Sleep(2500 * time.Millisecond)
+	if e.rec.sawState(conn.StateReconnecting) {
+		t.Fatal("the connection through a control socket was dropped by a keepalive")
+	}
+	if got := strings.TrimSpace(run(t, e.m, e.id, "echo still-here")); got != "still-here" {
+		t.Fatalf("command output = %q", got)
+	}
+
+	// A master that goes away is still noticed: its socket closes.
+	_ = exec.Command("ssh", "-S", sock, "-O", "exit", "x").Run() //nolint:gosec // fixed ssh arguments against the test sshd
+	deadline := time.Now().Add(5 * time.Second)
+	for !e.rec.sawState(conn.StateReconnecting) && time.Now().Before(deadline) {
+		time.Sleep(100 * time.Millisecond)
+	}
+	if !e.rec.sawState(conn.StateReconnecting) {
+		t.Fatal("a master that exited was not noticed")
+	}
+}

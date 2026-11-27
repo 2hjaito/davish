@@ -497,7 +497,7 @@ func (m *Manager) Close() {
 // ctx is canceled or a reconnect fails in a way retrying cannot fix.
 func (m *Manager) supervise(ctx context.Context, id string, l *link, client *ssh.Client) {
 	for {
-		m.watch(ctx, client)
+		m.watch(ctx, client, !m.usesControl(ctx, id))
 		client.Close() //nolint:errcheck,gosec // already dead or unwanted
 		if ctx.Err() != nil {
 			return
@@ -539,29 +539,53 @@ func (m *Manager) supervise(ctx context.Context, id string, l *link, client *ssh
 	}
 }
 
+// usesControl reports whether server id connects through an ssh control
+// socket (#240).
+func (m *Manager) usesControl(ctx context.Context, id string) bool {
+	srv, err := m.servers.Server(ctx, id)
+	return err == nil && srv.ControlPath != ""
+}
+
 // watch returns when the client closes, misses too many keepalives, or ctx
-// is canceled.
-func (m *Manager) watch(ctx context.Context, client *ssh.Client) {
+// is canceled. With keepalives false it only waits for the client to close:
+// through a control socket OpenSSH's mux proxy does not forward
+// keepalive@openssh.com and drops the connection that sent it, so each
+// keepalive would end the connection (#301). The master looks after the
+// server's liveness (ServerAliveInterval), and one that goes away closes
+// the socket, which ends the client.
+func (m *Manager) watch(ctx context.Context, client *ssh.Client, keepalives bool) {
 	closed := make(chan struct{})
 	go func() {
 		client.Wait() //nolint:errcheck,gosec // only the end matters
 		close(closed)
 	}()
-	tick := time.NewTicker(m.opts.KeepaliveInterval)
-	defer tick.Stop()
-	misses := 0
+	watchLoop(ctx, closed, keepalives, m.opts.KeepaliveInterval, m.opts.KeepaliveMisses,
+		func() bool { return keepalive(client, m.opts.KeepaliveInterval) })
+}
+
+// watchLoop waits for closed or ctx, and, when keepalives is set, calls ping
+// every interval and returns after misses failures in a row.
+func watchLoop(ctx context.Context, closed <-chan struct{}, keepalives bool, interval time.Duration, misses int, ping func() bool) {
+	// A nil channel never fires: no keepalives.
+	var ticks <-chan time.Time
+	if keepalives {
+		tick := time.NewTicker(interval)
+		defer tick.Stop()
+		ticks = tick.C
+	}
+	missed := 0
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		case <-closed:
 			return
-		case <-tick.C:
-			if keepalive(client, m.opts.KeepaliveInterval) {
-				misses = 0
+		case <-ticks:
+			if ping() {
+				missed = 0
 				continue
 			}
-			if misses++; misses >= m.opts.KeepaliveMisses {
+			if missed++; missed >= misses {
 				return
 			}
 		}
