@@ -191,7 +191,7 @@ func (m *Manager) Connect(ctx context.Context, id string) error { //nolint:conte
 	// signing request in front of the agent while the first still waits
 	// (#332).
 	dctx, stopDial := context.WithCancel(ctx)
-	unhook := context.AfterFunc(lctx, stopDial)
+	unhook := context.AfterFunc(lctx, stopDial) //nolint:contextcheck // lctx is the link's, so Disconnect reaches the dial; ctx still bounds it through dctx
 	client, err := m.dial(dctx, id)
 	unhook()
 	stopDial()

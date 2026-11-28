@@ -59,7 +59,7 @@ type stallAgent struct {
 	once    sync.Once
 }
 
-func (a *stallAgent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signature, error) {
+func (a *stallAgent) Sign(ssh.PublicKey, []byte) (*ssh.Signature, error) {
 	a.once.Do(func() { close(a.signing) })
 	<-a.release
 	return nil, errors.New("released")

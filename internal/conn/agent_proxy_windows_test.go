@@ -88,7 +88,7 @@ func TestAgentPipeThroughRelay(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer c.Close()
+	defer c.Close() //nolint:errcheck,gosec // test cleanup
 	if _, ok := c.(*agentProxy); !ok {
 		t.Fatalf("pipe opened as %T, not through the relay", c)
 	}
@@ -116,13 +116,13 @@ func TestAgentRelayIsChild(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer c.Close()
+	defer c.Close() //nolint:errcheck,gosec // test cleanup
 	p := c.(*agentProxy)
 	snap, err := windows.CreateToolhelp32Snapshot(windows.TH32CS_SNAPPROCESS, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer windows.CloseHandle(snap)
+	defer windows.CloseHandle(snap) //nolint:errcheck // test cleanup
 	var e windows.ProcessEntry32
 	e.Size = uint32(unsafe.Sizeof(e))
 	for err = windows.Process32First(snap, &e); err == nil; err = windows.Process32Next(snap, &e) {
@@ -158,7 +158,7 @@ func TestAgentRelayFallback(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer c.Close()
+	defer c.Close() //nolint:errcheck,gosec // test cleanup
 	if _, ok := c.(*os.File); !ok {
 		t.Fatalf("got %T, want the pipe opened directly", c)
 	}
