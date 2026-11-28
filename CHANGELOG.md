@@ -4,6 +4,8 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 
 ## [Unreleased]
 
+## [1.15.3] - 2026-11-29
+
 ### Thêm
 - **Cài bằng Homebrew và Scoop**: `brew install --cask daeviz/davish/davish` trên macOS; `scoop bucket add davish https://github.com/daeviz/scoop-davish` rồi `scoop install davish` trên Windows. Workflow phát hành tự cập nhật hai repo đó sau mỗi bản (cần secret `TAP_TOKEN`).
 - **Gói `.deb` cho Linux** (Debian, Ubuntu và họ hàng, amd64): `sudo apt install ./Davish-…-linux-amd64.deb` kéo theo GTK và WebKitGTK và thêm Davish vào menu ứng dụng. Workflow phát hành dựng nó cạnh file `.tar.gz`; CI dựng một bản ở mỗi lượt chạy.

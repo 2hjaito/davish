@@ -4,6 +4,8 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [1.15.3] - 2026-11-29
+
 ### Added
 - **Install with Homebrew and Scoop**: `brew install --cask daeviz/davish/davish` on macOS; `scoop bucket add davish https://github.com/daeviz/scoop-davish`, then `scoop install davish` on Windows. The release workflow updates both repositories after each release (it needs the `TAP_TOKEN` secret).
 - **Linux `.deb` package** (Debian, Ubuntu and relatives, amd64): `sudo apt install ./Davish-…-linux-amd64.deb` pulls in GTK and WebKitGTK and adds Davish to the application menu. Built by the release workflow beside the `.tar.gz`; CI builds one on every run.
