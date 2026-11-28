@@ -40,7 +40,7 @@ export const monitorProcesses = (serverID: string, sortBy: ProcessSort): Promise
 
 /** One process on one GPU, like a row of nvtop. A reading nobody reports is -1. */
 export interface GPUProcess {
-  /** nvidia-smi's index. */
+  /** nvidia-smi's index; AMD and Intel cards follow, in the order of the GPU cards. */
   gpu: number
   pid: number
   /** "C" compute, "G" graphics or "C+G", as nvidia-smi pmon prints it. */
@@ -65,7 +65,7 @@ export interface GPUProcessList {
   procs: GPUProcess[]
 }
 
-/** Every process on the server's NVIDIA GPUs; CPU is measured since the previous call. */
+/** Every process on the server's GPUs; CPU is measured since the previous call. */
 export const monitorGPUProcesses = (serverID: string): Promise<GPUProcessList> =>
   App.MonitorGPUProcesses(serverID)
 

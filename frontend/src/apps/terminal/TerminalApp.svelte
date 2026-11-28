@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Terminal } from '@xterm/xterm'
-  import { untrack } from 'svelte'
+  import { tick, untrack } from 'svelte'
 
   import { onTermData, onTermExit } from '../../lib/api/events'
   import { filesHome } from '../../lib/api/files'
@@ -18,7 +18,7 @@
   import { mockHome } from '../files/mockFs'
   import type { AppProps } from '../types'
   import { belowContent } from './belowContent'
-  import { absoluteCwd, cwdFromTitle, parseOsc7 } from './cwd'
+  import { absoluteCwd, cwdFromTitle, lastFolder, parseOsc7 } from './cwd'
   import DeployProgress from './DeployProgress.svelte'
   import { MockShell } from './mockShell'
   import { schemeFor } from './schemes'
@@ -79,6 +79,14 @@
 
   function title(tab: Tab) {
     return tab.title || `${server?.user ?? ''}@${server?.name ?? ''}: ${tab.cwd}`
+  }
+
+  // Once the tabs do not fit and scroll, "root@host: ~/projects" on every tab
+  // says nothing: they all begin the same. Then a tab shows its last folder.
+  function label(tab: Tab) {
+    if (!compact) return title(tab)
+    const cwd = tab.title ? cwdFromTitle(tab.title) : tab.cwd
+    return cwd ? lastFolder(cwd) : title(tab)
   }
 
   function connect(tab: Tab, term: Terminal) {
@@ -265,6 +273,52 @@
     else wm.close(win.id)
   }
 
+  // The tabs scroll when they do not fit; the wheel moves them sideways, and
+  // the active tab is kept in view when it changes or one is added.
+  let strip: HTMLDivElement | undefined = $state()
+  let tabsBox: HTMLDivElement | undefined = $state()
+  let compact = $state(false)
+  // How wide the tabs were in full when they last overflowed: back to full once there is room for that.
+  let fullWidth = 0
+  function measure() {
+    if (!strip || !tabsBox) return
+    if (!compact) {
+      if (strip.scrollWidth > strip.clientWidth + 1) {
+        fullWidth = strip.scrollWidth
+        compact = true
+      }
+      return
+    }
+    const room =
+      tabsBox.clientWidth - (tabsBox.lastElementChild as HTMLElement | null)!.offsetWidth - 8
+    if (room >= fullWidth) compact = false
+  }
+  $effect(() => {
+    if (!tabsBox) return
+    const ro = new ResizeObserver(measure)
+    ro.observe(tabsBox)
+    return () => ro.disconnect()
+  })
+  // A tab added or retitled changes the width too; measure after the DOM follows.
+  $effect(() => {
+    void tabs.map(title)
+    void compact
+    void tick().then(measure)
+  })
+  function wheelToSide(e: WheelEvent) {
+    if (!strip || strip.scrollWidth <= strip.clientWidth || Math.abs(e.deltaX) > Math.abs(e.deltaY))
+      return
+    strip.scrollLeft += e.deltaY
+    e.preventDefault()
+  }
+  $effect(() => {
+    void activeId
+    void tabs.length
+    strip
+      ?.querySelector('[aria-selected="true"]')
+      ?.scrollIntoView({ inline: 'nearest', block: 'nearest' })
+  })
+
   // Typing should go to the terminal whenever its window comes to the front.
   $effect(() => {
     if (ctx.focused) views[activeId]?.focus()
@@ -272,24 +326,28 @@
 </script>
 
 <TitleBar>
-  <div class="tabs" role="tablist">
-    {#each tabs as tab (tab.id)}
-      <div class="tab" class:active={tab.id === activeId} class:closable={tabs.length > 1}>
-        <button
-          role="tab"
-          class="label"
-          aria-selected={tab.id === activeId}
-          onclick={() => (activeId = tab.id)}
-        >
-          {title(tab)}
-        </button>
-        {#if tabs.length > 1}
-          <button class="close" aria-label={t.terminal.closeTab} onclick={() => closeTab(tab.id)}>
-            <Icon name="close" size={10} strokeWidth={2.5} />
+  <div class="tabs" bind:this={tabsBox}>
+    <!-- Only the tabs scroll: the "+" and the run status beside them stay put. -->
+    <div class="strip" role="tablist" bind:this={strip} onwheel={wheelToSide}>
+      {#each tabs as tab (tab.id)}
+        <div class="tab" class:active={tab.id === activeId} class:closable={tabs.length > 1}>
+          <button
+            role="tab"
+            class="label"
+            title={title(tab)}
+            aria-selected={tab.id === activeId}
+            onclick={() => (activeId = tab.id)}
+          >
+            {label(tab)}
           </button>
-        {/if}
-      </div>
-    {/each}
+          {#if tabs.length > 1}
+            <button class="close" aria-label={t.terminal.closeTab} onclick={() => closeTab(tab.id)}>
+              <Icon name="close" size={10} strokeWidth={2.5} />
+            </button>
+          {/if}
+        </div>
+      {/each}
+    </div>
     <button class="add" aria-label={t.terminal.newTab} onclick={() => newTab()}>
       <Icon name="plus" size={12} strokeWidth={2.2} />
     </button>
@@ -339,8 +397,9 @@
 </div>
 
 <style>
+  /* The tabs give way first when the title bar is narrow: they scroll, the status does not shrink. */
   .tabs {
-    flex: 1;
+    flex: 1 1 0;
     min-width: 0;
     display: flex;
     justify-content: center;
@@ -349,11 +408,24 @@
     font-size: 12px;
   }
 
+  .strip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .strip::-webkit-scrollbar {
+    display: none;
+  }
+
   .tab {
     position: relative;
     display: flex;
+    flex: none;
     align-items: center;
-    min-width: 0;
     border-radius: var(--control-radius);
     color: var(--fg-on-dark-muted);
     transition: background var(--dur-fast) var(--ease-out);
@@ -372,6 +444,7 @@
     border: 0;
     background: none;
     padding: 4px 12px;
+    max-width: 200px;
     color: inherit;
     white-space: nowrap;
     overflow: hidden;
@@ -408,6 +481,7 @@
 
   .add {
     display: flex;
+    flex: none;
     border: 0;
     padding: 4px;
     border-radius: var(--control-radius);

@@ -76,6 +76,9 @@ type Service struct {
 	procsMu  sync.Mutex
 	procs    map[string]procSample
 	gpuProcs map[string]procSample
+	// gpuEngines is the same for the busy time AMD and Intel processes
+	// report, which is measured against the previous call as well.
+	gpuEngines map[string]engineSample
 
 	// alertsMu guards alerts and opts.Thresholds. Alerts outlive watchers
 	// so that watching a server again does not repeat a notification.
@@ -125,8 +128,9 @@ func New(clients ClientSource, emit Emitter, log *slog.Logger, opts Options) *Se
 	return &Service{
 		clients: clients, emit: emit, log: log, opts: opts,
 		watchers: map[string]*watcher{}, procs: map[string]procSample{},
-		gpuProcs: map[string]procSample{},
-		alerts:   map[string]*alerter{}, paced: make(chan struct{}),
+		gpuProcs:   map[string]procSample{},
+		gpuEngines: map[string]engineSample{},
+		alerts:     map[string]*alerter{}, paced: make(chan struct{}),
 	}
 }
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { absoluteCwd, cwdFromTitle, parseOsc7 } from './cwd'
+import { absoluteCwd, cwdFromTitle, lastFolder, parseOsc7 } from './cwd'
 
 describe('parseOsc7', () => {
   it('reads the path after the host', () => {
@@ -47,5 +47,14 @@ describe('absoluteCwd', () => {
   it('refuses what is not a path', () => {
     expect(absoluteCwd('~other/a', '/home/d')).toBeNull()
     expect(absoluteCwd('a/b', '/home/d')).toBeNull()
+  })
+})
+
+describe('lastFolder', () => {
+  it('keeps the folder that tells tabs apart', () => {
+    expect(lastFolder('~/projects')).toBe('projects')
+    expect(lastFolder('/var/log/nginx/')).toBe('nginx')
+    expect(lastFolder('~')).toBe('~')
+    expect(lastFolder('/')).toBe('/')
   })
 })

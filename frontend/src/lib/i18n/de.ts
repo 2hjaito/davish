@@ -1110,7 +1110,7 @@ const de = {
         ],
       },
       monitor: {
-        does: 'CPU pro Kern, RAM, Swap, Datenträger, Netzwerk, NVIDIA-GPUs, Prozesse.',
+        does: 'CPU pro Kern, RAM, Swap, Datenträger, Netzwerk, GPUs, Prozesse.',
         actions: [
           'Übersicht unter den Diagrammen: System, Hardware, Datenträger mit ihren Mountpoints, Netzwerkschnittstellen mit Gateway und DNS',
           'Prozesse nach CPU oder RAM sortieren',
@@ -2550,9 +2550,9 @@ const de = {
     memoryUsed: 'Belegter Arbeitsspeicher',
     swap: 'Swap',
     noSwap: 'Der Server hat keinen Swap.',
-    gpuNone: 'Keine NVIDIA-GPU gefunden',
+    gpuNone: 'Keine GPU gefunden',
     gpuNoneHint:
-      'Monitor liest GPUs über nvidia-smi aus. Der Server hat keine NVIDIA-GPU, oder der NVIDIA-Treiber ist nicht installiert.',
+      'Monitor liest NVIDIA-GPUs über nvidia-smi aus, AMD- und Intel-GPUs über das System. Der Server hat keine GPU, oder ihr Treiber ist nicht installiert.',
     gpuUtil: 'Auslastung',
     vram: 'GPU-Speicher',
     gpuProcsLoading: 'GPU-Prozesse werden gelesen…',

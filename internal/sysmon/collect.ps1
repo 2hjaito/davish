@@ -20,6 +20,61 @@ function N($v) { if ($null -eq $v) { return [int64]0 } else { return [int64]$v }
 $script:base = @{}
 
 function L($s) { [void]$script:o.Append("$s`n") }
+function Clean($s) { if ($null -eq $s) { return '' } else { return ($s -replace '[\r\n|]+', ' ').Trim() } }
+
+# The video adapters nvidia-smi does not cover (all of them when it is missing),
+# with the LUID the GPU performance counters name them by. Real adapters only:
+# a remote desktop or the basic display driver has no PCI ID.
+function GpuAdapters($skipNvidia) {
+	$out = @()
+	$pci = @(Get-CimInstance Win32_VideoController | Where-Object { $_.PNPDeviceID -like 'PCI*' })
+	$classKey = 'HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}'
+	$mask = [int64]4294967295
+	$i = 0
+	foreach ($vc in $pci) {
+		$i++
+		$ven = ''
+		if ($vc.PNPDeviceID -match 'VEN_([0-9A-Fa-f]{4})') { $ven = '0x' + $Matches[1].ToLower() }
+		if ($ven -eq '0x10de' -and $skipNvidia) { continue }
+		# The LUID is a device property (Windows 10 1709 and later). With a single adapter
+		# the counters can only be its own, so "*" stands for any LUID.
+		$luid = ''
+		$v = (Get-PnpDeviceProperty -InstanceId $vc.PNPDeviceID -KeyName 'DEVPKEY_Gpu_Luid' -ErrorAction SilentlyContinue).Data
+		if ($null -ne $v) {
+			$u = [int64]$v
+			$luid = 'luid_0x{0:X8}_0x{1:X8}' -f (($u -shr 32) -band $mask), ($u -band $mask)
+		} elseif ($pci.Count -eq 1) {
+			$luid = '*'
+		}
+		# AdapterRAM is 32 bits and shows 4 GB for a bigger card; the driver's own value does not.
+		$total = [int64](N $vc.AdapterRAM)
+		foreach ($k in @(Get-ChildItem $classKey -ErrorAction SilentlyContinue)) {
+			$p = Get-ItemProperty $k.PSPath -ErrorAction SilentlyContinue
+			if ($p.DriverDesc -eq $vc.Name -and $p.'HardwareInformation.qwMemorySize') {
+				$total = [int64]$p.'HardwareInformation.qwMemorySize'
+				break
+			}
+		}
+		$slot = $luid
+		if (-not $slot) { $slot = "vc$i" }
+		$out += [pscustomobject]@{ Slot = $slot; Luid = $luid; Vendor = $ven; Name = (Clean $vc.Name); Total = $total }
+	}
+	return $out
+}
+
+# The adapter an instance name such as "pid_4_luid_0x00000000_0x0000D3F2_phys_0..." belongs to.
+function AdapterFor($adapters, $inst) {
+	foreach ($a in $adapters) {
+		if ($a.Luid -eq '*' -or ($a.Luid -and $inst -like "*$($a.Luid)*")) { return $a }
+	}
+	return $null
+}
+
+# AMD, Intel and any card without nvidia-smi: Windows counts GPU time and memory
+# itself, for every vendor. Looked up once; the load needs the previous reading.
+$script:gpus = @(GpuAdapters ([bool]$nvidia))
+$script:gpuPrev = @{}
+$script:gpuPrevT = [int64]0
 
 function Snapshot($health) {
 	$script:o = New-Object System.Text.StringBuilder
@@ -129,6 +184,46 @@ function Snapshot($health) {
 	if ($nvidia) {
 		foreach ($g in @(& nvidia-smi.exe --query-gpu=index,name,utilization.gpu,memory.used,memory.total,temperature.gpu,power.draw --format=csv,noheader,nounits 2>$null)) { L $g }
 	}
+
+	# One line per card, as collect.sh prints them: slot|vendor|driver|busy %|vram used|vram total|temp|power|name
+	L '@@gpudrm'
+	if ($script:gpus.Count -gt 0) {
+		$cur = @{}
+		$t = [int64]0
+		foreach ($e in @(Get-CimInstance Win32_PerfRawData_GPUPerformanceCounters_GPUEngine)) {
+			if ($e.Name -match '(luid_0x[0-9A-Fa-f]+_0x[0-9A-Fa-f]+)_phys_\d+_eng_(\d+)_engtype_(\w+)') {
+				$k = "$($e.Name -replace '^pid_\d+_', '' -replace '_eng_.*$', '')/$($Matches[2])/$($Matches[3])"
+				$cur[$k] = [int64]($cur[$k]) + [int64](N $e.UtilizationPercentage)
+				$t = [Math]::Max($t, (N $e.Timestamp_Sys100NS))
+			}
+		}
+		$adapterMem = @(Get-CimInstance Win32_PerfRawData_GPUPerformanceCounters_GPUAdapterMemory)
+		foreach ($a in $script:gpus) {
+			# The busiest engine of the card, as Task Manager's GPU column shows it.
+			$busy = ''
+			if ($script:gpuPrevT -gt 0 -and $t -gt $script:gpuPrevT) {
+				$best = [double]0
+				foreach ($k in $cur.Keys) {
+					$mine = ($a.Luid -eq '*') -or ($a.Luid -and $k.StartsWith($a.Luid))
+					if ($mine -and $script:gpuPrev.ContainsKey($k)) {
+						$d = [double]($cur[$k] - $script:gpuPrev[$k]) / [double]($t - $script:gpuPrevT) * 100
+						if ($d -gt $best) { $best = $d }
+					}
+				}
+				$busy = [string][Math]::Round([Math]::Min($best, 100), 1, 'AwayFromZero')
+			}
+			$used = ''
+			foreach ($m in $adapterMem) {
+				if ((AdapterFor @($a) $m.Name)) { $used = [string](N $m.DedicatedUsage); break }
+			}
+			$total = ''
+			if ($a.Total -gt 0) { $total = [string]$a.Total }
+			L "$($a.Slot)|$($a.Vendor)|wddm|$($busy.Replace(',', '.'))|$used|$total|||$($a.Name)"
+		}
+		$script:gpuPrev = $cur
+		$script:gpuPrevT = $t
+	}
+	L '@@gpuname'
 
 	if ($health) {
 		# Services set to start by themselves that stopped with an error. 1077

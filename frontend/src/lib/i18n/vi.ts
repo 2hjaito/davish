@@ -1052,7 +1052,7 @@ const vi = {
         ],
       },
       monitor: {
-        does: 'CPU theo lõi, RAM, swap, ổ đĩa, mạng, GPU NVIDIA, tiến trình.',
+        does: 'CPU theo lõi, RAM, swap, ổ đĩa, mạng, GPU, tiến trình.',
         actions: [
           'Tổng quan, dưới biểu đồ: hệ thống, phần cứng, ổ đĩa kèm mount, interface mạng kèm gateway và DNS',
           'Sắp tiến trình theo CPU hoặc RAM',
@@ -2440,9 +2440,9 @@ const vi = {
     memoryUsed: 'Bộ nhớ đã dùng',
     swap: 'Swap',
     noSwap: 'Server không có swap.',
-    gpuNone: 'Không thấy GPU NVIDIA',
+    gpuNone: 'Không thấy GPU',
     gpuNoneHint:
-      'Monitor đọc GPU qua nvidia-smi. Server không có GPU NVIDIA hoặc chưa cài driver NVIDIA.',
+      'Monitor đọc GPU NVIDIA qua nvidia-smi, GPU AMD và Intel từ hệ điều hành. Server không có GPU hoặc chưa cài driver.',
     gpuUtil: 'Sử dụng',
     vram: 'Bộ nhớ GPU',
     gpuProcsLoading: 'Đang đọc tiến trình GPU…',

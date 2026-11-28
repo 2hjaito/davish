@@ -104,12 +104,14 @@
 <style>
   /*
    * It sits in the title bar, beside the tabs, so it never covers the output.
-   * The tabs and the step name give way first when the window is narrow.
+   * The tabs scroll and the step name is cut first when the window is narrow;
+   * the rest (state, time, Stop) keeps its place at the right.
    */
   .progress {
     flex: 0 1 auto;
     min-width: 0;
-    max-width: 60%;
+    max-width: 55%;
+    margin-left: 6px;
     display: flex;
     align-items: center;
     gap: 8px;

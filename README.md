@@ -47,7 +47,7 @@ Nothing to install on the server.
 - [Files](FEATURES.md#files): Finder-style SFTP, drag and drop, copy between servers, search names and contents on the server, hold a file for a ring of actions
 - [Editor](FEATURES.md#editor): CodeMirror with atomic saves, backups and options
 - [Logs](FEATURES.md#logs): journal, files and containers, live, and search their whole history on the server
-- [Monitor](FEATURES.md#monitor): CPU, memory, disks, network, GPUs, processes, on Linux and Windows servers
+- [Monitor](FEATURES.md#monitor): CPU, memory, disks, network, GPUs (NVIDIA, AMD, Intel), processes, on Linux and Windows servers
 - [All servers](FEATURES.md#all-servers): every server's health and alerts in one window, in folders by group and filtered by state, group or tag, a map of what each one serves, and one command run on several servers, a terminal tab each
 
 **Services and apps**
