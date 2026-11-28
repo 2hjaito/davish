@@ -1991,6 +1991,11 @@ const ko = {
     searchingContent: (dir: string) => `${dir}에서 내용을 검색하는 중…`,
     searchStop: '중지',
     searchStopped: '검색이 중지되었습니다',
+    openWithSudo: 'sudo로 열기…',
+    rootListTitle: (name: string) => `“${name}” 폴더를 root로 나열할까요?`,
+    rootReadBody:
+      'SSH 사용자가 이를 읽을 수 없습니다. Davish가 읽기만 하는 다음 명령으로 sudo를 통해 읽습니다:',
+    rootListAction: 'root로 나열',
     searchFound: (n: number) => `결과 ${n}개`,
     searchTruncated: '처음 500개만 표시',
     searchTimedOut: '30초 후 중지되어 결과가 완전하지 않을 수 있습니다',
@@ -2118,6 +2123,8 @@ const ko = {
     rootSaveBody:
       'Davish가 다음 명령으로 sudo를 통해 파일을 씁니다. 새 내용은 표준 입력으로 전달합니다:',
     rootSaveAction: 'root로 저장',
+    rootReadTitle: (name: string) => `“${name}” 파일을 root로 읽을까요?`,
+    rootReadAction: 'root로 읽기',
     rootSaveBackup: (path: string) => `현재 파일을 먼저 ${path} 위치에 복사합니다.`,
     rootSaveNoBackup: '백업하지 않습니다(설정 → 편집기에서 백업을 켤 수 있습니다).',
     sudo: '터미널에서 sudo로 열기',

@@ -33,12 +33,13 @@ export function petalsFor(e: Pick<Entry, 'dir'>): ActionId[] {
 
 /** What the right-click menu offers; null is a divider. */
 export type MenuId =
-  ActionId | 'open' | 'database' | 'download' | 'newFile' | 'newFolder' | 'refresh'
+  ActionId | 'open' | 'sudoOpen' | 'database' | 'download' | 'newFile' | 'newFolder' | 'refresh'
 
 /** A file named like a SQLite database also opens in Database. */
 export function menuFor(e?: Pick<Entry, 'dir' | 'name'>): (MenuId | null)[] {
   return [
     'open',
+    'sudoOpen',
     ...(e && !e.dir && looksLikeSQLite(e.name) ? (['database'] as const) : []),
     'terminal',
     null,

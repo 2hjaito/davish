@@ -1990,6 +1990,11 @@ const en = {
     searchingContent: (dir: string) => `Searching contents in ${dir}…`,
     searchStop: 'Stop',
     searchStopped: 'Search stopped',
+    openWithSudo: 'Open with sudo…',
+    rootListTitle: (name: string) => `List “${name}” as root?`,
+    rootReadBody:
+      'Your SSH user cannot read this. Davish will read it through sudo with this command, which only reads:',
+    rootListAction: 'List as root',
     searchFound: (n: number) => (n === 1 ? '1 result' : `${n} results`),
     searchTruncated: 'showing the first 500',
     searchTimedOut: 'stopped after 30 seconds, results may be incomplete',
@@ -2119,6 +2124,8 @@ const en = {
     rootSaveBody:
       'Davish will write the file through sudo with this command; the new text goes in on stdin:',
     rootSaveAction: 'Save as root',
+    rootReadTitle: (name: string) => `Read “${name}” as root?`,
+    rootReadAction: 'Read as root',
     rootSaveBackup: (path: string) => `The current file is copied to ${path} first.`,
     rootSaveNoBackup: 'No backup is made (turn backups on in Settings → Editor).',
     sudo: 'Open in Terminal with sudo',

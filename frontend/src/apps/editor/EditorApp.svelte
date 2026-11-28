@@ -6,10 +6,13 @@
     type Access,
     type FileContent,
     filesAccess,
+    filesPlanReadAsRoot,
     filesPlanSaveAsRoot,
     filesRead,
+    filesReadAsRoot,
     filesSave,
     filesSaveAsRoot,
+    type RootReadPlan,
     type RootSavePlan,
     type SaveOpts,
     type SaveResult,
@@ -41,6 +44,10 @@
     name: string
     state: 'loading' | 'ready' | 'error'
     error?: string
+    /** The read was refused for lack of rights: sudo may read it. */
+    denied?: boolean
+    /** Read through sudo, once the user saw the command. */
+    rootRead?: RootReadPlan
     /** Text as read; edits live in the editor until saved. */
     doc: string
     language: LanguageId
@@ -95,7 +102,34 @@
     }
     tabs.push(tab)
     activeId = tab.id
-    void load(tab.id)
+    if (req.asRoot) void askRootRead(tab.id)
+    else void load(tab.id)
+  }
+
+  /** A read through sudo waiting on its confirmation, which shows the exact command. */
+  let rootReadAsk = $state.raw<{ tab: Tab; plan: RootReadPlan } | null>(null)
+
+  async function askRootRead(id: number) {
+    const tab = tabs.find((x) => x.id === id)
+    if (!tab) return
+    try {
+      rootReadAsk = { tab, plan: await filesPlanReadAsRoot(tab.path) }
+    } catch (e) {
+      tab.error = toUserError(e).message
+      tab.state = 'error'
+    }
+  }
+
+  function answerRootRead(ok: boolean) {
+    const a = rootReadAsk
+    rootReadAsk = null
+    if (!a) return
+    if (ok) {
+      a.tab.rootRead = a.plan
+      void load(a.tab.id)
+    } else if (a.tab.state === 'loading') {
+      closeTab(a.tab.id)
+    }
   }
 
   async function load(id: number) {
@@ -114,8 +148,16 @@
       tab.version++
       tab.state = 'ready'
     } catch (e) {
-      tab.error =
-        e instanceof Error && e.message === 'binary' ? t.editor.binary : toUserError(e).message
+      const ue = toUserError(e)
+      if (e instanceof Error && e.message === 'canceled') {
+        // No sudo after all: back to the refusal that offered it, or nothing.
+        tab.rootRead = undefined
+        if (!tab.error) closeTab(id)
+        tab.state = 'error'
+        return
+      }
+      tab.error = e instanceof Error && e.message === 'binary' ? t.editor.binary : ue.message
+      tab.denied = ue.code === 'FS_PERMISSION_DENIED' && !tab.rootRead
       tab.state = 'error'
     }
   }
@@ -150,7 +192,15 @@
   }
 
   async function readText(tab: Tab): Promise<string> {
-    const { data, ...file } = await filesRead(win.serverID, tab.path)
+    const plan = tab.rootRead
+    let read: FileContent | null = null
+    if (plan) {
+      const run = async () => void (read = await filesReadAsRoot(win.serverID, tab.path))
+      if (!(await withSudo(win.serverID, plan.sudo, run)) || !read) throw new Error('canceled')
+    } else {
+      read = await filesRead(win.serverID, tab.path)
+    }
+    const { data, ...file } = read as FileContent
     const text = decodeText(data)
     if (text === null) throw new Error('binary')
     tab.file = file
@@ -337,6 +387,11 @@
         <div class="failed">
           <Empty icon="warning" title={tab.error ?? ''} />
           <button class="btn" onclick={() => void load(tab.id)}>{t.editor.retry}</button>
+          {#if tab.denied}
+            <button class="btn" onclick={() => void askRootRead(tab.id)}
+              >{t.files.openWithSudo}</button
+            >
+          {/if}
         </div>
       {:else}
         {#if readOnly(tab)}
@@ -441,6 +496,17 @@
     >
   {/snippet}
 </Dialog>
+
+<!-- A read as root shows the exact command first too; it only reads. -->
+<ConfirmCommand
+  command={rootReadAsk?.plan.sudo ?? null}
+  title={rootReadAsk ? t.editor.rootReadTitle(rootReadAsk.tab.name) : ''}
+  body={t.files.rootReadBody}
+  action={t.editor.rootReadAction}
+  tone="primary"
+  onclose={() => answerRootRead(false)}
+  onconfirm={() => answerRootRead(true)}
+/>
 
 <!-- A save as root shows the exact command first (.claude/docs/SECURITY.md). No
      Terminal button: the command reads the text on stdin. -->

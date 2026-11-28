@@ -99,6 +99,8 @@ export interface EditorRequest {
   path: string
   /** 1-based line to show, e.g. from a log line. */
   line?: number
+  /** Read it through sudo, after the user saw the command (issue #177). */
+  asRoot?: boolean
 }
 
 /** Files waiting to open in the Editor; the Editor app takes them. */
@@ -116,8 +118,8 @@ class EditorRequests {
 export const editorRequests = new EditorRequests()
 
 /** Opens path in serverID's Editor window, at line when given. */
-export function openFileInEditor(serverID: string, path: string, line?: number) {
-  editorRequests.list.push({ serverID, path, line })
+export function openFileInEditor(serverID: string, path: string, line?: number, asRoot?: boolean) {
+  editorRequests.list.push({ serverID, path, line, asRoot })
   wm.openOrFocus('editor', serverID, { title: t.apps.editor, size: EDITOR_SIZE })
 }
 

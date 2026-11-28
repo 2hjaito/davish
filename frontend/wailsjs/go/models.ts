@@ -2060,6 +2060,18 @@ export namespace fs {
 	        this.sudo = source["sudo"];
 	    }
 	}
+	export class RootReadPlan {
+	    sudo: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RootReadPlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sudo = source["sudo"];
+	    }
+	}
 	export class RootSavePlan {
 	    command: string;
 	    sudo: string;

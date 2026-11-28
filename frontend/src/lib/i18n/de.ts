@@ -2050,6 +2050,11 @@ const de = {
     searchingContent: (dir: string) => `Suche Inhalte in ${dir}…`,
     searchStop: 'Stoppen',
     searchStopped: 'Suche gestoppt',
+    openWithSudo: 'Mit sudo öffnen…',
+    rootListTitle: (name: string) => `„${name}“ als root auflisten?`,
+    rootReadBody:
+      'Dein SSH-Benutzer kann das nicht lesen. Davish liest es per sudo mit diesem Befehl, der nur liest:',
+    rootListAction: 'Als root auflisten',
     searchFound: (n: number) => (n === 1 ? '1 Treffer' : `${n} Treffer`),
     searchTruncated: 'die ersten 500 werden angezeigt',
     searchTimedOut: 'nach 30 Sekunden gestoppt, Ergebnisse sind eventuell unvollständig',
@@ -2183,6 +2188,8 @@ const de = {
     rootSaveBody:
       'Davish schreibt die Datei per sudo mit diesem Befehl; der neue Text wird über stdin übergeben:',
     rootSaveAction: 'Als root speichern',
+    rootReadTitle: (name: string) => `„${name}“ als root lesen?`,
+    rootReadAction: 'Als root lesen',
     rootSaveBackup: (path: string) => `Die aktuelle Datei wird zuerst nach ${path} kopiert.`,
     rootSaveNoBackup:
       'Es wird keine Sicherung angelegt (Sicherungen schaltest du unter Einstellungen → Editor ein).',

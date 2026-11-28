@@ -8,6 +8,9 @@
     filesCancelSearch,
     filesHome,
     filesList,
+    filesListAsRoot,
+    filesPlanListAsRoot,
+    type RootReadPlan,
     filesSearch,
     filesStat,
     type SearchHit,
@@ -15,6 +18,8 @@
     type SearchResult,
   } from '../../lib/api/files'
   import { hasRuntime } from '../../lib/api/runtime'
+  import { withSudo } from '../../lib/stores/sudoPrompt.svelte'
+  import ConfirmCommand from '../../lib/ui/ConfirmCommand.svelte'
   import {
     registerDropTarget,
     transferCopy,
@@ -89,6 +94,12 @@
   let fetchedAt = $state(new Date())
   let loading = $state(false)
   let error = $state('')
+  /** The folder whose listing was refused: sudo may be able to list it. */
+  let denied = $state<string | null>(null)
+  /** The folder listed through sudo, which reloads keep listing that way. */
+  let rootView = $state<string | null>(null)
+  /** Listing through sudo waits for the user to see the command. */
+  let rootAsk = $state.raw<{ dir: string; plan: RootReadPlan } | null>(null)
   let query = $state('')
   /** Where the search box looks; tree and content search the server on Enter. */
   let scope = $state<Scope>('here')
@@ -236,12 +247,19 @@
    * Lists path and shows it; false when it could not be listed. quiet keeps
    * a failure off screen, for guesses like the last folder of a past run.
    */
-  async function show(path: string, quiet = false): Promise<boolean> {
+  async function show(path: string, quiet = false, preloaded?: Entry[]): Promise<boolean> {
     const id = win.serverID
     const mine = ++seq
     loading = true
+    const viaSudo = preloaded !== undefined || (rootView === path && path === cwd)
     try {
-      const entries = hasRuntime ? await filesList(id, path) : mockList(path)
+      const entries =
+        preloaded ??
+        (!hasRuntime
+          ? mockList(path)
+          : viaSudo
+            ? await filesListAsRoot(id, path)
+            : await filesList(id, path))
       if (mine !== seq) return false
       const from = cwd
       const arriving = path !== from
@@ -259,6 +277,8 @@
       listing = entries
       fetchedAt = new Date()
       error = ''
+      denied = null
+      rootView = viaSudo ? path : null
       rememberDir(id, path)
       if (arriving) {
         await tick()
@@ -266,7 +286,17 @@
       }
       return true
     } catch (e) {
-      if (mine === seq && !quiet) error = toUserError(e).message
+      if (mine === seq && !quiet) {
+        const ue = toUserError(e)
+        error = ue.message
+        // Refused, or a sudo listing whose password is gone: offer it again.
+        const refused = [
+          'FS_PERMISSION_DENIED',
+          'SUDO_PASSWORD_REQUIRED',
+          'SUDO_PASSWORD_WRONG',
+        ].includes(ue.code)
+        denied = refused ? path : null
+      }
       return false
     } finally {
       if (mine === seq) loading = false
@@ -544,6 +574,37 @@
     else openFileInEditor(win.serverID, e.path)
   }
 
+  /** "Open with sudo": shows the command first; nothing runs before. */
+  async function askRootOpen(e: Pick<Entry, 'dir' | 'path'>) {
+    if (!e.dir) {
+      openFileInEditor(win.serverID, e.path, undefined, true)
+      return
+    }
+    try {
+      rootAsk = { dir: e.path, plan: await filesPlanListAsRoot(e.path) }
+    } catch (err) {
+      error = toUserError(err).message
+    }
+  }
+
+  async function confirmRootList() {
+    const ask = rootAsk
+    rootAsk = null
+    if (!ask) return
+    const from = cwd
+    try {
+      let entries: Entry[] | null = null
+      const run = async () => void (entries = await filesListAsRoot(win.serverID, ask.dir))
+      if (!(await withSudo(win.serverID, ask.plan.sudo, run))) return
+      if (entries && (await show(ask.dir, false, entries)) && from !== null && from !== ask.dir) {
+        back.push(from)
+        forward = []
+      }
+    } catch (err) {
+      error = toUserError(err).message
+    }
+  }
+
   function sortBy(key: SortKey) {
     order = nextOrder(order, key)
   }
@@ -755,6 +816,11 @@
       <div class="error" role="alert">
         <Icon name="warning" size={14} strokeWidth={2.2} />
         <span>{error}</span>
+        {#if denied !== null}
+          <button onclick={() => void askRootOpen({ dir: true, path: denied ?? '' })}
+            >{t.files.openWithSudo}</button
+          >
+        {/if}
         <button onclick={reload}>{t.files.retry}</button>
       </div>
     {/if}
@@ -826,8 +892,19 @@
   </div>
 </div>
 
+<ConfirmCommand
+  command={rootAsk?.plan.sudo ?? null}
+  title={rootAsk ? t.files.rootListTitle(baseName(rootAsk.dir) || '/') : ''}
+  body={t.files.rootReadBody}
+  action={t.files.rootListAction}
+  tone="primary"
+  onclose={() => (rootAsk = null)}
+  onconfirm={() => void confirmRootList()}
+/>
+
 <FileActions
   onopen={openEntry}
+  onopensudo={(e) => void askRootOpen(e)}
   ondownload={() => void download()}
   bind:this={actions}
   serverID={win.serverID}

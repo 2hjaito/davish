@@ -711,3 +711,59 @@ func TestRootRefusesAFolderOthersMayWrite(t *testing.T) {
 		t.Fatalf("file changed: %q", out)
 	}
 }
+
+func TestSudoerReadsRootOnlyFolderAndFileThroughSudo(t *testing.T) {
+	ctx := context.Background()
+	s, k, id := asSudoer(t)
+	dir := "/opt/davish-asroot"
+	q := shellx.Quote(dir)
+
+	// Made by a keeper that already has the password.
+	_, setup, sid := asSudoer(t)
+	if err := setup.SetPassword(ctx, sid, []byte(testsshd.SudoPassword)); err != nil {
+		t.Fatal(err)
+	}
+	rootRun(t, setup, sid, "rm -rf "+q+" && mkdir -p "+q+"/'sub dir' && chmod 700 "+q+
+		" && printf 'secret\\n' > "+q+"/'it'\"'\"'s.conf' && chmod 600 "+q+"/'it'\"'\"'s.conf'"+
+		" && ln -s /etc "+q+"/etclink && printf 'x' > "+q+"/'a\tb'")
+	t.Cleanup(func() { _, _ = setup.Run(ctx, sid, "test", "rm -rf "+q, nil) })
+
+	// The login user cannot see in.
+	if _, err := s.List(ctx, id, dir); errCode(err) != apperr.FSPermissionDenied {
+		t.Fatalf("plain list: %v", err)
+	}
+	if _, err := s.ListAsRoot(ctx, id, dir); errCode(err) != apperr.SudoPasswordRequired {
+		t.Fatalf("before the password: %v", err)
+	}
+	if err := k.SetPassword(ctx, id, []byte(testsshd.SudoPassword)); err != nil {
+		t.Fatal(err)
+	}
+	list, err := s.ListAsRoot(ctx, id, dir)
+	if err != nil {
+		t.Fatalf("list as root: %v", err)
+	}
+	got := map[string]fs.Entry{}
+	for _, e := range list {
+		got[e.Name] = e
+	}
+	if len(got) != 4 || !got["sub dir"].Dir || got["etclink"].Target != "/etc" || !got["etclink"].Dir ||
+		got["it's.conf"].Mode != "-rw-------" || got["it's.conf"].Size != 7 || got["a\tb"].Size != 1 {
+		t.Errorf("listing: %+v", list)
+	}
+
+	f, err := s.ReadAsRoot(ctx, id, dir+"/it's.conf")
+	if err != nil || string(f.Data) != "secret\n" || f.Size != 7 || f.Perm != 0o600 || f.UID != 0 {
+		t.Fatalf("read as root: %+v, %v", f, err)
+	}
+	// A folder is not a file; a missing one is not found.
+	if _, err := s.ReadAsRoot(ctx, id, dir+"/sub dir"); errCode(err) != apperr.InvalidInput {
+		t.Errorf("read a folder: %v", err)
+	}
+	if _, err := s.ListAsRoot(ctx, id, dir+"/missing"); errCode(err) != apperr.NotFound {
+		t.Errorf("list a missing folder: %v", err)
+	}
+	// Reading changed nothing.
+	if out := rootRun(t, k, id, "ls -A "+q+" | wc -l"); strings.TrimSpace(out) != "4" {
+		t.Errorf("entries after reading: %s", out)
+	}
+}
