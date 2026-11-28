@@ -96,7 +96,13 @@ Nothing to install on the server.
 
 ## Install
 
-Prebuilt apps for macOS (universal), Windows and Linux are attached to each [release](https://github.com/2hjaito/davish/releases).
+Prebuilt apps for macOS (universal), Windows and Linux are attached to each [release](https://github.com/2hjaito/davish/releases). Or from a package manager:
+
+```sh
+brew install --cask daeviz/davish/davish      # macOS
+scoop bucket add davish https://github.com/daeviz/scoop-davish && scoop install davish   # Windows
+sudo apt install ./Davish-…-linux-amd64.deb   # Debian, Ubuntu (download the .deb first)
+```
 
 - **macOS 12 or later.** Open `Davish-…-macos-universal.pkg` to install into Applications. The app is not signed yet, so macOS blocks it the first time: click **Done**, open **System Settings → Privacy & Security** and click **Open Anyway** next to the line about Davish (again for `Davish.app` if it is blocked). Or run `xattr -dr com.apple.quarantine` on the file.
 - **Windows 10 or later.** Run `Davish-…-windows-amd64-setup.exe`; it installs the WebView2 runtime if it is missing. Windows SmartScreen may warn about an unknown publisher: choose **More info** → **Run anyway**.
