@@ -30,6 +30,10 @@ var (
 	agentEnvDone atomic.Pointer[chan struct{}]
 )
 
+// RunAgentProxy is only for Windows, where the agent's pipe is opened by a
+// child Davish (agent_windows.go); elsewhere it never takes over main.
+func RunAgentProxy([]string) bool { return false }
+
 // InitAgentEnv resolves SSH_AUTH_SOCK from the user's login shell when Davish
 // is launched as a desktop GUI app outside a terminal (for example, Davish.app
 // from Finder or Spotlight on macOS, where launchd sets its own default socket
