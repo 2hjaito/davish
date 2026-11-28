@@ -23,3 +23,10 @@ export function absoluteCwd(cwd: string, home: string): string | null {
   if (cwd.startsWith('~/')) return home + cwd.slice(1)
   return cwd.startsWith('/') ? cwd : null
 }
+
+/** The last folder of a path, what tells tabs apart when they get narrow: "~/a/projects" is "projects". */
+export function lastFolder(cwd: string): string {
+  if (cwd === '~' || cwd === '/') return cwd
+  const parts = cwd.split('/').filter(Boolean)
+  return parts[parts.length - 1] ?? cwd
+}
