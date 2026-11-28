@@ -265,6 +265,23 @@
     else wm.close(win.id)
   }
 
+  // The tabs scroll when they do not fit; the wheel moves them sideways, and
+  // the active tab is kept in view when it changes or one is added.
+  let strip: HTMLDivElement | undefined = $state()
+  function wheelToSide(e: WheelEvent) {
+    if (!strip || strip.scrollWidth <= strip.clientWidth || Math.abs(e.deltaX) > Math.abs(e.deltaY))
+      return
+    strip.scrollLeft += e.deltaY
+    e.preventDefault()
+  }
+  $effect(() => {
+    void activeId
+    void tabs.length
+    strip
+      ?.querySelector('[aria-selected="true"]')
+      ?.scrollIntoView({ inline: 'nearest', block: 'nearest' })
+  })
+
   // Typing should go to the terminal whenever its window comes to the front.
   $effect(() => {
     if (ctx.focused) views[activeId]?.focus()
@@ -272,24 +289,27 @@
 </script>
 
 <TitleBar>
-  <div class="tabs" role="tablist">
-    {#each tabs as tab (tab.id)}
-      <div class="tab" class:active={tab.id === activeId} class:closable={tabs.length > 1}>
-        <button
-          role="tab"
-          class="label"
-          aria-selected={tab.id === activeId}
-          onclick={() => (activeId = tab.id)}
-        >
-          {title(tab)}
-        </button>
-        {#if tabs.length > 1}
-          <button class="close" aria-label={t.terminal.closeTab} onclick={() => closeTab(tab.id)}>
-            <Icon name="close" size={10} strokeWidth={2.5} />
+  <div class="tabs">
+    <!-- Only the tabs scroll: the "+" and the run status beside them stay put. -->
+    <div class="strip" role="tablist" bind:this={strip} onwheel={wheelToSide}>
+      {#each tabs as tab (tab.id)}
+        <div class="tab" class:active={tab.id === activeId} class:closable={tabs.length > 1}>
+          <button
+            role="tab"
+            class="label"
+            aria-selected={tab.id === activeId}
+            onclick={() => (activeId = tab.id)}
+          >
+            {title(tab)}
           </button>
-        {/if}
-      </div>
-    {/each}
+          {#if tabs.length > 1}
+            <button class="close" aria-label={t.terminal.closeTab} onclick={() => closeTab(tab.id)}>
+              <Icon name="close" size={10} strokeWidth={2.5} />
+            </button>
+          {/if}
+        </div>
+      {/each}
+    </div>
     <button class="add" aria-label={t.terminal.newTab} onclick={() => newTab()}>
       <Icon name="plus" size={12} strokeWidth={2.2} />
     </button>
@@ -339,8 +359,9 @@
 </div>
 
 <style>
+  /* The tabs give way first when the title bar is narrow: they scroll, the status does not shrink. */
   .tabs {
-    flex: 1;
+    flex: 1 1 0;
     min-width: 0;
     display: flex;
     justify-content: center;
@@ -349,11 +370,24 @@
     font-size: 12px;
   }
 
+  .strip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .strip::-webkit-scrollbar {
+    display: none;
+  }
+
   .tab {
     position: relative;
     display: flex;
+    flex: none;
     align-items: center;
-    min-width: 0;
     border-radius: var(--control-radius);
     color: var(--fg-on-dark-muted);
     transition: background var(--dur-fast) var(--ease-out);
@@ -372,6 +406,7 @@
     border: 0;
     background: none;
     padding: 4px 12px;
+    max-width: 200px;
     color: inherit;
     white-space: nowrap;
     overflow: hidden;
@@ -408,6 +443,7 @@
 
   .add {
     display: flex;
+    flex: none;
     border: 0;
     padding: 4px;
     border-radius: var(--control-radius);
