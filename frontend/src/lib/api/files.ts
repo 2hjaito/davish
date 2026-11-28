@@ -48,6 +48,27 @@ export const filesHome = (serverID: string): Promise<string> => App.FilesHome(se
 export const filesList = (serverID: string, dir: string): Promise<Entry[]> =>
   App.FilesList(serverID, dir) as Promise<Entry[]>
 
+/** What a read as root runs, with sudo, for the confirmation (issue #177). */
+export interface RootReadPlan {
+  sudo: string
+}
+
+export const filesPlanListAsRoot = (dir: string): Promise<RootReadPlan> =>
+  App.FilesPlanListAsRoot(dir) as Promise<RootReadPlan>
+
+/** Lists a folder the login user cannot read, through sudo. */
+export const filesListAsRoot = (serverID: string, dir: string): Promise<Entry[]> =>
+  App.FilesListAsRoot(serverID, dir) as Promise<Entry[]>
+
+export const filesPlanReadAsRoot = (path: string): Promise<RootReadPlan> =>
+  App.FilesPlanReadAsRoot(path) as Promise<RootReadPlan>
+
+/** Reads a file the login user cannot read, through sudo. */
+export async function filesReadAsRoot(serverID: string, path: string): Promise<FileContent> {
+  const raw = (await App.FilesReadAsRoot(serverID, path)) as unknown as RawFile
+  return { ...raw, data: decodeBase64(raw.data) }
+}
+
 export const filesStat = (serverID: string, path: string): Promise<Entry> =>
   App.FilesStat(serverID, path) as Promise<Entry>
 

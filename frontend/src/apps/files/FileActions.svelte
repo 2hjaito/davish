@@ -52,6 +52,8 @@
     ondropcopy?: (entry: Entry, target: DropTarget) => void
     /** Opens the entry, as a double-click does. */
     onopen: (entry: Entry) => void
+    /** Opens the entry through sudo, after showing the command. */
+    onopensudo: (entry: Entry) => void
     /** Downloads the selection, which the right-click menu just set. */
     ondownload: () => void
   }
@@ -66,6 +68,7 @@
     onhover,
     ondropcopy,
     onopen,
+    onopensudo,
     ondownload,
   }: Props = $props()
 
@@ -128,6 +131,7 @@
 
   function menuAction(id: MenuId, entry: Entry): Action {
     if (id === 'open') return { label: t.files.open, run: () => onopen(entry) }
+    if (id === 'sudoOpen') return { label: t.files.openWithSudo, run: () => onopensudo(entry) }
     if (id === 'download') return { label: t.files.download, run: ondownload }
     if (id === 'database')
       return { label: t.files.openInDatabase, run: () => openSQLite(serverID, entry.path) }

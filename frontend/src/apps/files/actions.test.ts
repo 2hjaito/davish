@@ -19,6 +19,14 @@ describe('menuFor', () => {
   })
 })
 
+describe('menuFor sudo', () => {
+  it('offers Open with sudo for files and folders, right after Open', () => {
+    expect(menuFor({ dir: false, name: 'a' }).slice(0, 2)).toEqual(['open', 'sudoOpen'])
+    expect(menuFor({ dir: true, name: 'a' }).slice(0, 2)).toEqual(['open', 'sudoOpen'])
+    expect(blankMenu()).not.toContain('sudoOpen')
+  })
+})
+
 describe('menuFor a SQLite file', () => {
   it('opens it in Database, and only a file named like one', () => {
     expect(menuFor({ dir: false, name: 'app.sqlite3' })).toContain('database')

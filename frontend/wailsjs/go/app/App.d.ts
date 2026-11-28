@@ -187,15 +187,23 @@ export function FilesHome(arg1:string):Promise<string>;
 
 export function FilesList(arg1:string,arg2:string):Promise<Array<fs.Entry>>;
 
+export function FilesListAsRoot(arg1:string,arg2:string):Promise<Array<fs.Entry>>;
+
 export function FilesMkdir(arg1:string,arg2:string):Promise<void>;
 
 export function FilesPlanCompress(arg1:string,arg2:string,arg3:string):Promise<fs.CompressPlan>;
+
+export function FilesPlanListAsRoot(arg1:string):Promise<fs.RootReadPlan>;
+
+export function FilesPlanReadAsRoot(arg1:string):Promise<fs.RootReadPlan>;
 
 export function FilesPlanRemove(arg1:string,arg2:string):Promise<fs.RemovePlan>;
 
 export function FilesPlanSaveAsRoot(arg1:string,arg2:string,arg3:fs.SaveOptions):Promise<fs.RootSavePlan>;
 
 export function FilesRead(arg1:string,arg2:string):Promise<fs.File>;
+
+export function FilesReadAsRoot(arg1:string,arg2:string):Promise<fs.File>;
 
 export function FilesRemove(arg1:string,arg2:string,arg3:string):Promise<void>;
 

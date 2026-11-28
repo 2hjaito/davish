@@ -128,3 +128,30 @@ func (a *App) FilesSearch(serverID string, q fs.SearchQuery, token string) (fs.S
 func (a *App) FilesCancelSearch(token string) {
 	a.files.CancelSearch(token)
 }
+
+// FilesPlanListAsRoot gives the sudo command FilesListAsRoot runs, for the
+// confirmation (issue #177).
+func (a *App) FilesPlanListAsRoot(dir string) (fs.RootReadPlan, error) {
+	return a.files.PlanListAsRoot(dir)
+}
+
+// FilesListAsRoot lists dir through sudo, for a folder the user cannot read.
+func (a *App) FilesListAsRoot(serverID, dir string) ([]fs.Entry, error) {
+	if err := a.lock.Check(); err != nil {
+		return nil, err
+	}
+	return a.files.ListAsRoot(a.ctx, serverID, dir)
+}
+
+// FilesPlanReadAsRoot gives the sudo command FilesReadAsRoot runs.
+func (a *App) FilesPlanReadAsRoot(path string) (fs.RootReadPlan, error) {
+	return a.files.PlanReadAsRoot(path)
+}
+
+// FilesReadAsRoot reads a file through sudo, for one the user cannot read.
+func (a *App) FilesReadAsRoot(serverID, path string) (fs.File, error) {
+	if err := a.lock.Check(); err != nil {
+		return fs.File{}, err
+	}
+	return a.files.ReadAsRoot(a.ctx, serverID, path)
+}

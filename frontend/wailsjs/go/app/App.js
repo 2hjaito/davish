@@ -322,12 +322,24 @@ export function FilesList(arg1, arg2) {
   return window['go']['app']['App']['FilesList'](arg1, arg2);
 }
 
+export function FilesListAsRoot(arg1, arg2) {
+  return window['go']['app']['App']['FilesListAsRoot'](arg1, arg2);
+}
+
 export function FilesMkdir(arg1, arg2) {
   return window['go']['app']['App']['FilesMkdir'](arg1, arg2);
 }
 
 export function FilesPlanCompress(arg1, arg2, arg3) {
   return window['go']['app']['App']['FilesPlanCompress'](arg1, arg2, arg3);
+}
+
+export function FilesPlanListAsRoot(arg1) {
+  return window['go']['app']['App']['FilesPlanListAsRoot'](arg1);
+}
+
+export function FilesPlanReadAsRoot(arg1) {
+  return window['go']['app']['App']['FilesPlanReadAsRoot'](arg1);
 }
 
 export function FilesPlanRemove(arg1, arg2) {
@@ -340,6 +352,10 @@ export function FilesPlanSaveAsRoot(arg1, arg2, arg3) {
 
 export function FilesRead(arg1, arg2) {
   return window['go']['app']['App']['FilesRead'](arg1, arg2);
+}
+
+export function FilesReadAsRoot(arg1, arg2) {
+  return window['go']['app']['App']['FilesReadAsRoot'](arg1, arg2);
 }
 
 export function FilesRemove(arg1, arg2, arg3) {
