@@ -96,7 +96,13 @@
 
 ## 安装
 
-每个 [Release](https://github.com/2hjaito/davish/releases) 都附带 macOS（通用版）、Windows 和 Linux 的安装包。
+每个 [Release](https://github.com/2hjaito/davish/releases) 都附带 macOS（通用版）、Windows 和 Linux 的安装包。也可以用包管理器安装：
+
+```sh
+brew install --cask daeviz/davish/davish      # macOS（Homebrew 7：若先执行 `brew tap`，还需 `brew trust daeviz/davish`）
+scoop bucket add davish https://github.com/daeviz/scoop-davish && scoop install davish   # Windows
+sudo apt install ./Davish-…-linux-amd64.deb   # Debian、Ubuntu（先下载 .deb）
+```
 
 - **macOS 12 或更高版本。** 打开 `Davish-…-macos-universal.pkg` 安装到"应用程序"。应用暂未签名，首次打开会被 macOS 拦截：点击 **完成**，然后打开 **系统设置 → 隐私与安全性**，在关于 Davish 的那一行点击 **仍要打开**（如果 `Davish.app` 也被拦截，再操作一次）。也可以对文件执行 `xattr -dr com.apple.quarantine`。
 - **Windows 10 或更高版本。** 运行 `Davish-…-windows-amd64-setup.exe`；如果缺少 WebView2 运行时会自动安装。Windows SmartScreen 可能提示未知发布者：选择 **更多信息** → **仍要运行**。

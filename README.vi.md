@@ -96,7 +96,13 @@ Không cài gì lên server.
 
 ## Cài đặt
 
-Bản build sẵn cho macOS (universal), Windows và Linux nằm trong từng [release](https://github.com/2hjaito/davish/releases).
+Bản build sẵn cho macOS (universal), Windows và Linux nằm trong từng [release](https://github.com/2hjaito/davish/releases). Hoặc cài bằng trình quản lý gói:
+
+```sh
+brew install --cask daeviz/davish/davish      # macOS (Homebrew 7: nếu chạy `brew tap` trước thì cần `brew trust daeviz/davish`)
+scoop bucket add davish https://github.com/daeviz/scoop-davish && scoop install davish   # Windows
+sudo apt install ./Davish-…-linux-amd64.deb   # Debian, Ubuntu (tải file .deb trước)
+```
 
 - **macOS 12 trở lên.** Mở `Davish-…-macos-universal.pkg` để cài vào Applications. App chưa được ký nên macOS sẽ chặn lần đầu: bấm **Done**, mở **Cài đặt hệ thống → Quyền riêng tư & Bảo mật**, bấm **Vẫn mở** ở dòng nhắc tới Davish (làm lại cho `Davish.app` nếu bị chặn). Hoặc chạy `xattr -dr com.apple.quarantine` trên file đó.
 - **Windows 10 trở lên.** Chạy `Davish-…-windows-amd64-setup.exe`; bộ cài tự cài WebView2 runtime nếu máy chưa có. SmartScreen có thể cảnh báo nhà phát hành không xác định: chọn **More info** → **Run anyway**.

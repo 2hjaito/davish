@@ -7,6 +7,17 @@ sidebar:
 
 Prebuilt apps for macOS (universal), Windows and Linux are attached to each [release](https://github.com/2hjaito/davish/releases), or use the buttons on the [home page](/#download). Davish is free and open source (GPL-3.0).
 
+## Package managers
+
+```sh
+brew install --cask daeviz/davish/davish      # macOS
+scoop bucket add davish https://github.com/daeviz/scoop-davish
+scoop install davish                          # Windows
+sudo apt install ./Davish-…-linux-amd64.deb   # Debian, Ubuntu: download the .deb first
+```
+
+Homebrew 7 refuses a cask from a third-party tap you have only tapped. The one-line command above trusts it as it installs; if you ran `brew tap daeviz/davish` first, also run `brew trust daeviz/davish`. The tap and the bucket follow each release. Homebrew also removes macOS's block on the unsigned app. The `.deb` is owned by apt, so install the next version the same way.
+
 ## macOS
 
 macOS 12 or later, Apple silicon or Intel. Open `Davish-…-macos-universal.pkg` to install into Applications.
