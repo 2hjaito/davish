@@ -99,7 +99,7 @@ Nothing to install on the server.
 Prebuilt apps for macOS (universal), Windows and Linux are attached to each [release](https://github.com/2hjaito/davish/releases). Or from a package manager:
 
 ```sh
-brew install --cask daeviz/davish/davish      # macOS
+brew install --cask daeviz/davish/davish      # macOS (Homebrew 7 asks you to trust a third-party tap when you tap it first: `brew trust daeviz/davish`)
 scoop bucket add davish https://github.com/daeviz/scoop-davish && scoop install davish   # Windows
 sudo apt install ./Davish-…-linux-amd64.deb   # Debian, Ubuntu (download the .deb first)
 ```

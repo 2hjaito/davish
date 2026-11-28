@@ -7,6 +7,17 @@ sidebar:
 
 Bản build sẵn cho macOS (universal), Windows và Linux nằm trong từng [release](https://github.com/2hjaito/davish/releases), hoặc dùng các nút ở [trang chủ](/vi/#download). Davish miễn phí và mã nguồn mở (GPL-3.0).
 
+## Trình quản lý gói
+
+```sh
+brew install --cask daeviz/davish/davish      # macOS
+scoop bucket add davish https://github.com/daeviz/scoop-davish
+scoop install davish                          # Windows
+sudo apt install ./Davish-…-linux-amd64.deb   # Debian, Ubuntu: tải file .deb trước
+```
+
+Homebrew 7 từ chối cask của tap bên thứ ba nếu bạn mới chỉ chạy `brew tap`. Lệnh một dòng ở trên tự tin cậy nó khi cài; nếu đã chạy `brew tap daeviz/davish` trước thì chạy thêm `brew trust daeviz/davish`. Tap và bucket được cập nhật theo từng bản phát hành. Homebrew cũng gỡ chặn của macOS cho app chưa ký. File `.deb` do apt quản lý nên bản sau hãy cài theo cùng cách.
+
 ## macOS
 
 macOS 12 trở lên, Apple silicon hoặc Intel. Mở `Davish-…-macos-universal.pkg` để cài vào Applications.
