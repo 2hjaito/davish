@@ -3590,7 +3590,7 @@ const es = {
     CONN_UNREACHABLE: 'No se pudo llegar al servidor. Comprueba el host, el puerto y la red.',
     CONN_SECRET_MISSING: 'No hay ninguna contraseña ni frase de paso guardada para este servidor.',
     CONN_AGENT_UNAVAILABLE:
-      'No se ha encontrado ninguna clave: el agente SSH está vacío o no se está ejecutando, y no hay clave por defecto en ~/.ssh. En Windows, inicia el servicio “OpenSSH Authentication Agent” y añade tu clave con ssh-add, o elige Clave privada. Los agentes que solo emiten un certificado durante la conexión (como authentik) aún no son compatibles.',
+      'No se ha encontrado ninguna clave: el agente SSH está vacío o no se está ejecutando, y no hay clave por defecto en ~/.ssh. Si tu clave está en 1Password o Bitwarden, desbloquéalo y vuelve a conectar. Si no, en Windows, inicia el servicio “OpenSSH Authentication Agent” y añade tu clave con ssh-add, o elige Clave privada. Los agentes que solo emiten un certificado durante la conexión (como authentik) aún no son compatibles.',
     CONN_KEY_UNREADABLE: 'No se pudo leer el archivo de la clave privada.',
     CONN_KEY_PPK:
       'Esta es una clave .ppk de PuTTY, que Davish no puede leer. En PuTTYgen elige Conversions → Export OpenSSH key y usa el archivo exportado.',

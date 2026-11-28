@@ -8,6 +8,7 @@ import (
 	"errors"
 	"io"
 	"log/slog"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,6 +16,7 @@ import (
 	"time"
 
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
 
 	"davish/internal/apperr"
 	"davish/internal/store"
@@ -100,6 +102,39 @@ func TestAgentSignersTimeout(t *testing.T) {
 	case <-agent.closed:
 	case <-time.After(2 * time.Second):
 		t.Fatal("the stuck agent was not closed")
+	}
+}
+
+// An agent that lists no keys is asked once more: 1Password on Windows lists
+// none the first time while its vault is locked, then its keys (#332).
+func TestAgentSignersAsksAgainWhenEmpty(t *testing.T) {
+	_, priv, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	full := agent.NewKeyring()
+	if err := full.Add(agent.AddedKey{PrivateKey: priv}); err != nil {
+		t.Fatal(err)
+	}
+	asked := 0
+	oldDial, oldRetry := agentDial, agentEmptyRetry
+	agentDial = func() (io.ReadWriteCloser, error) {
+		asked++
+		kr := agent.NewKeyring() // empty the first time
+		if asked > 1 {
+			kr = full
+		}
+		app, ag := net.Pipe()
+		go func() { _ = agent.ServeAgent(kr, ag) }()
+		return app, nil
+	}
+	agentEmptyRetry = time.Millisecond
+	t.Cleanup(func() { agentDial, agentEmptyRetry = oldDial, oldRetry })
+
+	signers, release := (&Manager{}).agentSigners(nil)
+	defer release()
+	if asked != 2 || len(signers) != 1 {
+		t.Fatalf("asked %d times, got %d keys; want 2 and 1", asked, len(signers))
 	}
 }
 

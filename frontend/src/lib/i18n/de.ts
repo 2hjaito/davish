@@ -3629,7 +3629,7 @@ const de = {
     CONN_UNREACHABLE: 'Der Server ist nicht erreichbar. Prüfe Host, Port und Netzwerk.',
     CONN_SECRET_MISSING: 'Für diesen Server ist kein Passwort und keine Passphrase gespeichert.',
     CONN_AGENT_UNAVAILABLE:
-      'Kein Schlüssel gefunden: Der SSH-Agent ist leer oder läuft nicht, und in ~/.ssh gibt es keinen Standardschlüssel. Starte unter Windows den Dienst „OpenSSH Authentication Agent“ und füge deinen Schlüssel mit ssh-add hinzu, oder wähle „Privater Schlüssel“. Agents, die erst während der Verbindung ein Zertifikat ausstellen (etwa authentik), werden noch nicht unterstützt.',
+      'Kein Schlüssel gefunden: Der SSH-Agent ist leer oder läuft nicht, und in ~/.ssh gibt es keinen Standardschlüssel. Liegt dein Schlüssel in 1Password oder Bitwarden, entsperre die App und verbinde dich erneut. Sonst starte unter Windows den Dienst „OpenSSH Authentication Agent“ und füge deinen Schlüssel mit ssh-add hinzu, oder wähle „Privater Schlüssel“. Agents, die erst während der Verbindung ein Zertifikat ausstellen (etwa authentik), werden noch nicht unterstützt.',
     CONN_KEY_UNREADABLE: 'Die Datei mit dem privaten Schlüssel konnte nicht gelesen werden.',
     CONN_KEY_PPK:
       'Das ist ein PuTTY-Schlüssel (.ppk), den Davish nicht lesen kann. Wähle in PuTTYgen Conversions → Export OpenSSH key und verwende dann die exportierte Datei.',

@@ -3500,7 +3500,7 @@ const ko = {
     CONN_UNREACHABLE: '서버에 접속하지 못했습니다. 호스트, 포트, 네트워크를 확인하세요.',
     CONN_SECRET_MISSING: '이 서버에 저장한 비밀번호나 암호문구가 없습니다.',
     CONN_AGENT_UNAVAILABLE:
-      '키를 찾지 못했습니다. SSH 에이전트가 비어 있거나 실행 중이 아니고, ~/.ssh에 기본 키도 없습니다. Windows에서는 “OpenSSH Authentication Agent” 서비스를 시작하고 ssh-add로 키를 추가하거나, 개인 키를 선택하세요. 연결 중에 인증서만 발급하는 에이전트(authentik 등)는 아직 지원하지 않습니다.',
+      '키를 찾지 못했습니다. SSH 에이전트가 비어 있거나 실행 중이 아니고, ~/.ssh에 기본 키도 없습니다. 키가 1Password나 Bitwarden에 있다면 잠금을 해제하고 다시 연결하세요. 그렇지 않다면 Windows에서는 “OpenSSH Authentication Agent” 서비스를 시작하고 ssh-add로 키를 추가하거나, 개인 키를 선택하세요. 연결 중에 인증서만 발급하는 에이전트(authentik 등)는 아직 지원하지 않습니다.',
     CONN_KEY_UNREADABLE: '개인 키 파일을 읽지 못했습니다.',
     CONN_KEY_PPK:
       'Davish가 읽을 수 없는 PuTTY .ppk 키입니다. PuTTYgen에서 Conversions → Export OpenSSH key를 선택한 뒤 내보낸 파일을 사용하세요.',

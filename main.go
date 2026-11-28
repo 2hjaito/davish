@@ -19,6 +19,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
 
 	"davish/internal/app"
+	"davish/internal/conn"
 	"davish/internal/perf"
 	"davish/internal/store"
 )
@@ -39,6 +40,12 @@ var wailsJSON []byte
 var appIcon []byte
 
 func main() {
+	// On Windows Davish also runs as its own relay to the SSH agent's pipe,
+	// so 1Password can name the app asking for a key (#332). That run has
+	// no window and exits when the relay ends.
+	if conn.RunAgentProxy(os.Args) {
+		return
+	}
 	// WebKit reads these while creating the webview, so they have to be set
 	// before wails.Run. A missing config dir just leaves the defaults.
 	if dir, err := store.DefaultDir(); err == nil {
