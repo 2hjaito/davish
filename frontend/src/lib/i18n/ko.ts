@@ -3510,6 +3510,8 @@ const ko = {
     CONN_CONTROL_SOCKET: '컨트롤 소켓을 사용할 수 없습니다.',
     CONN_AGENT_SIGN_TIMEOUT:
       'SSH 에이전트가 시간 안에 로그인에 서명하지 않았습니다. 키 사용 확인을 요청하는 경우(Bitwarden은 "Confirm SSH key usage"를 표시) 해당 창에서 승인한 뒤 다시 연결하세요.',
+    CONN_AGENT_SIGN_FAILED:
+      'SSH 에이전트가 로그인에 서명하지 않았습니다. 거부했거나, 키 확인을 기다리는 동안 연결을 닫았습니다. 확인 요청을 찾아보고(나타나지 않으면 에이전트가 Davish를 인식하지 못했을 수 있습니다) 에이전트 자체 로그를 확인한 뒤 다시 연결하세요.',
     CONN_PROXY_UNCONFIRMED: '프록시 명령을 아직 확인하지 않았습니다.',
     TERM_CLOSED: '터미널 세션이 닫혔습니다.',
     FS_PERMISSION_DENIED: '권한이 거부되었습니다.',

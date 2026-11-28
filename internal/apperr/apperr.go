@@ -24,6 +24,9 @@ const (
 	// ConnAgentSignTimeout: the SSH agent did not sign the login in time, for
 	// instance because it waits for the person to confirm the key (#168).
 	ConnAgentSignTimeout Code = "CONN_AGENT_SIGN_TIMEOUT"
+	// ConnAgentSignFailed: the SSH agent was asked to sign the login and did
+	// not: it refused, or it closed the connection while waiting (#332).
+	ConnAgentSignFailed Code = "CONN_AGENT_SIGN_FAILED"
 	// ConnProxyUnconfirmed: the server reaches its host through a command
 	// that runs on this computer and the user has not confirmed it (ADR 0031).
 	ConnProxyUnconfirmed Code = "CONN_PROXY_UNCONFIRMED"

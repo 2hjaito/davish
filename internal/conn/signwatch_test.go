@@ -161,6 +161,22 @@ func TestLoggedSignerLogsHowSigningEnded(t *testing.T) {
 			t.Errorf("the log lacks %q:\n%s", want, log)
 		}
 	}
+	// A refused signing is remembered, so the failed login is not blamed on the network (#332).
+	w := &signWatch{}
+	signers := m.logSigning([]ssh.Signer{failingSigner{good}}, w)
+	if w.signFailed() {
+		t.Fatal("nothing has been signed yet")
+	}
+	if _, err := signers[0].Sign(rand.Reader, []byte("x")); err == nil {
+		t.Fatal("the failing signer signed")
+	}
+	if !w.signFailed() {
+		t.Error("a refused signing must be remembered")
+	}
+	w2 := &signWatch{}
+	if _, err := m.logSigning([]ssh.Signer{good}, w2)[0].Sign(rand.Reader, []byte("x")); err != nil || w2.signFailed() {
+		t.Errorf("a signing that worked is not a failure: %v", err)
+	}
 	// A fingerprint is public; nothing of the key itself may reach the log.
 	if strings.Contains(log, string(priv)) {
 		t.Error("key material in the log")

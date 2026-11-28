@@ -3480,6 +3480,8 @@ const vi = {
     CONN_CONTROL_SOCKET: 'Không dùng được control socket.',
     CONN_AGENT_SIGN_TIMEOUT:
       'SSH agent không ký đăng nhập kịp thời. Nếu nó hỏi bạn xác nhận dùng khóa (Bitwarden hiện "Confirm SSH key usage"), hãy tìm cửa sổ của nó, bấm đồng ý rồi kết nối lại.',
+    CONN_AGENT_SIGN_FAILED:
+      'SSH agent không ký đăng nhập: nó từ chối, hoặc đóng kết nối trong lúc chờ bạn xác nhận khóa. Hãy tìm hộp xác nhận của nó (nếu không hiện gì, có thể agent không nhận ra Davish), xem log của chính agent, rồi kết nối lại.',
     CONN_PROXY_UNCONFIRMED: 'Lệnh proxy chưa được xác nhận.',
     TERM_CLOSED: 'Phiên terminal đã đóng.',
     FS_PERMISSION_DENIED: 'Không có quyền truy cập.',

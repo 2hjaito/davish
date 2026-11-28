@@ -3600,6 +3600,8 @@ const es = {
     CONN_CONTROL_SOCKET: 'No se pudo usar el control socket.',
     CONN_AGENT_SIGN_TIMEOUT:
       'El agente SSH no firmó el inicio de sesión a tiempo. Si te pide confirmar el uso de la clave (Bitwarden muestra "Confirm SSH key usage"), busca su ventana, apruébalo y vuelve a conectar.',
+    CONN_AGENT_SIGN_FAILED:
+      'El agente SSH no firmó el inicio de sesión: lo rechazó, o cerró la conexión mientras esperaba que confirmaras la clave. Busca su aviso de confirmación (si no aparece, puede que el agente no reconozca a Davish), revisa el registro del propio agente y vuelve a conectar.',
     CONN_PROXY_UNCONFIRMED: 'El comando proxy aún no se ha confirmado.',
     TERM_CLOSED: 'La sesión de terminal está cerrada.',
     FS_PERMISSION_DENIED: 'Permiso denegado.',

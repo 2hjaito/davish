@@ -773,6 +773,13 @@ func (m *Manager) dialVia(ctx context.Context, target, id string, depth int) (*s
 			m.log.Warn("ssh agent did not sign in time", "server", target, "waited", signMax.String())
 			return nil, apperr.New(apperr.ConnAgentSignTimeout, "the SSH agent did not sign the login in time")
 		}
+		if watch.signFailed() && !res.changed && res.unknown == nil {
+			// The agent was asked to sign and did not: a login the person
+			// refused, or a prompt that never appeared. "Unreachable" would
+			// send them looking at the network (#332).
+			m.log.Warn("ssh agent did not sign the login", "server", target)
+			return nil, apperr.Wrap(apperr.ConnAgentSignFailed, "the SSH agent did not sign the login", err)
+		}
 		return nil, m.handshakeError(target, addr, &res, err)
 	}
 	client := ssh.NewClient(c, chans, reqs)

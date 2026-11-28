@@ -27,6 +27,7 @@ type signWatch struct {
 	pending atomic.Int32
 	until   atomic.Int64 // unix nano: when the handshake runs out while nothing signs
 	expired atomic.Bool  // the cap ran out while the agent was still signing
+	failed  atomic.Bool  // the agent answered a signing request with an error
 }
 
 func (w *signWatch) begin() {
@@ -46,6 +47,10 @@ func (w *signWatch) end() {
 // timedOut reports whether the handshake was ended because the agent had
 // not signed within the cap.
 func (w *signWatch) timedOut() bool { return w != nil && w.expired.Load() }
+
+// signFailed reports whether the agent was asked to sign and did not: it
+// refused, or it closed the connection while waiting for the person.
+func (w *signWatch) signFailed() bool { return w != nil && w.failed.Load() }
 
 // guard calls closeConn when the handshake takes too long. The budget is
 // base, for dialing, the key exchange and a server that says nothing. While
@@ -107,6 +112,9 @@ func (s loggedSigner) sign(do func() (*ssh.Signature, error)) (*ssh.Signature, e
 	start := time.Now()
 	sig, err := do()
 	took := time.Since(start).Round(time.Millisecond).String()
+	if err != nil && s.watch != nil {
+		s.watch.failed.Store(true)
+	}
 	if s.log != nil {
 		if err != nil {
 			s.log.Warn("ssh agent did not sign", "key", key, "took", took, "err", err)

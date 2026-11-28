@@ -3639,6 +3639,8 @@ const de = {
     CONN_CONTROL_SOCKET: 'Der Control-Socket konnte nicht verwendet werden.',
     CONN_AGENT_SIGN_TIMEOUT:
       'Der SSH-Agent hat die Anmeldung nicht rechtzeitig signiert. Fragt er, ob der Schlüssel verwendet werden darf (Bitwarden zeigt „Confirm SSH key usage“), such sein Fenster, bestätige und verbinde dich erneut.',
+    CONN_AGENT_SIGN_FAILED:
+      'Der SSH-Agent hat die Anmeldung nicht signiert: Er hat sie abgelehnt oder die Verbindung geschlossen, während er auf deine Bestätigung des Schlüssels wartete. Such seine Bestätigungsabfrage (erscheint keine, erkennt der Agent Davish möglicherweise nicht), sieh im eigenen Log des Agenten nach und verbinde dich erneut.',
     CONN_PROXY_UNCONFIRMED: 'Der Proxy-Befehl wurde noch nicht bestätigt.',
     TERM_CLOSED: 'Die Terminal-Sitzung ist geschlossen.',
     FS_PERMISSION_DENIED: 'Zugriff verweigert.',
