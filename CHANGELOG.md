@@ -5,6 +5,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Thêm
+- **Khóa PuTTY `.ppk`**: chọn thẳng file `.ppk` (puttygen, định dạng phiên bản 2 và 3; RSA, ECDSA, Ed25519, có hoặc không có passphrase) làm khóa của server, không cần xuất sang OpenSSH nữa. Davish tự đọc, kiểm tra MAC của file để phân biệt passphrase sai với file hỏng, và không ghi gì ra đĩa. Định dạng phiên bản 1 và Argon2d vẫn báo cách chuyển bằng PuTTYgen. Tham khảo cách làm của [motty](https://github.com/t8y2/motty) (Apache-2.0), mã tự viết.
 - **Tiến trình GPU, giống nvtop**: Monitor → GPU giờ liệt kê các tiến trình trên mỗi GPU NVIDIA bên dưới các thẻ: PID, người dùng, GPU, loại, mức sử dụng, bộ nhớ GPU và tỉ lệ trên card, CPU, bộ nhớ máy và lệnh, sắp xếp được theo mọi cột. Davish chạy `nvidia-smi` và đọc `/proc` của các tiến trình đó mỗi 3 giây, chỉ khi đang mở tab GPU. Driver không có `pmon` thì chỉ hiện tiến trình tính toán, không có mức sử dụng; Windows ở chế độ WDDM không có bộ nhớ GPU theo từng tiến trình.
 - Giao diện tiếng Đức: chọn Deutsch trong Cài đặt → Chung → Ngôn ngữ; lần đầu Davish theo máy đặt tiếng Đức.
 - **Giao diện tiếng Hàn** (#327, của @wbg1991): chọn 한국어 trong Cài đặt → Chung → Ngôn ngữ; lần đầu Davish theo máy đặt tiếng Hàn. Mô tả cron giờ cũng đọc đúng với những ngôn ngữ đặt giờ sau chữ "lúc".

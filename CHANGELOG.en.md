@@ -5,6 +5,7 @@ Notable changes to Davish, in English. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Added
+- **PuTTY `.ppk` keys**: choose a `.ppk` file (from puttygen, format versions 2 and 3; RSA, ECDSA and Ed25519, with or without a passphrase) as a server's key directly, with no export to OpenSSH first. Davish reads it itself and checks the file's MAC, which tells a wrong passphrase from a damaged file, and writes nothing to disk. Version 1 files and Argon2d still say how to convert them in PuTTYgen. Approach learned from [motty](https://github.com/t8y2/motty) (Apache-2.0); the code is our own.
 - **GPU processes, like nvtop**: Monitor → GPU now lists the processes on each NVIDIA GPU below the cards: PID, user, GPU, type, utilization, GPU memory and its share of the card, CPU, host memory and the command, sorted by any column. It runs `nvidia-smi` and reads `/proc` for those processes every 3 seconds, only while the GPU tab is open. Where the driver has no `pmon` only compute processes show, without utilization; Windows in WDDM mode shows no GPU memory per process.
 - German interface: pick Deutsch in Settings → General → Language; the first time, Davish follows a system set to German.
 - **Korean interface** (#327, from @wbg1991): pick 한국어 in Settings → General → Language; the first time, Davish follows a system set to Korean. The cron description now also reads right in languages that put the time after its word.

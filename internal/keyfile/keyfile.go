@@ -1,4 +1,4 @@
-// Package keyfile reads SSH private key files. It adds to x/crypto/ssh the
+// Package keyfile reads SSH private key files, OpenSSH and PuTTY .ppk. It adds to x/crypto/ssh the
 // ciphers OpenSSH may encrypt a key with that x/crypto refuses: it only
 // decrypts aes256-ctr and aes256-cbc, while ssh-keygen -Z, Termix and other
 // tools also write aes128/192-ctr, aes128/192-cbc, aes128/256-gcm and
@@ -25,9 +25,10 @@ const magic = "openssh-key-v1\x00"
 // ErrWrongPassphrase means the passphrase does not open the key.
 var ErrWrongPassphrase = x509.IncorrectPasswordError
 
-// ErrPPK means the file is a PuTTY private key (.ppk), a format x/crypto/ssh
-// does not read. It is told apart from a broken key so the person is told how
-// to convert it (#264).
+// ErrPPK means the file is a PuTTY private key (.ppk) of a kind Parse does not
+// read: format version 1, Argon2d, or an unknown key type. Versions 2 and 3
+// with Argon2id or Argon2i are read. It is told apart from a broken key so the
+// person is told how to convert it (#264).
 var ErrPPK = errors.New("PuTTY .ppk key")
 
 // ppkHeader starts every PuTTY private key file ("PuTTY-User-Key-File-2:" or "-3:").
@@ -72,8 +73,8 @@ var ciphers = map[string]spec{
 func Parse(data, passphrase []byte) (ssh.Signer, error) {
 	// Notepad saves with a byte order mark, which the PEM reader rejects.
 	data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
-	if bytes.HasPrefix(bytes.TrimSpace(data), []byte(ppkHeader)) {
-		return nil, ErrPPK
+	if trimmed := bytes.TrimSpace(data); bytes.HasPrefix(trimmed, []byte(ppkHeader)) {
+		return parsePPK(trimmed, passphrase)
 	}
 	if passphrase == nil {
 		return ssh.ParsePrivateKey(data)

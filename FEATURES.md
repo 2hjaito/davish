@@ -82,6 +82,8 @@ Every server in one window, from the server menu, Launchpad or Spotlight: connec
 
 **Duplicate** (the copy icon on a card or a row) opens the add dialog filled in from that server: host, port, user, how it logs in, key path, jump server, group, tag and color, with the name as `name (copy)`. Change what differs and save; nothing is created until you do. Passwords and key passphrases are not copied, and neither is an ssh control socket, which belongs to one server. Each server shows the logo of the system it runs (Ubuntu, Debian, Fedora, Arch, Windows, macOS and more) beside its name, in the cards, the list and the server menu. Davish reads it from `/etc/os-release` when the server connects and remembers it, so it is there before the next connection; until then, and for a system without its own logo, the name has a plain server glyph.
 
+**PuTTY keys.** A `.ppk` file works as the key of a server like any OpenSSH key (puttygen format versions 2 and 3; RSA, ECDSA and Ed25519; with or without a passphrase). Version 1 files and Argon2d keys are not read; in PuTTYgen use Conversions → Export OpenSSH key for those.
+
 <img src="assets/screenshots/en/servers.jpg" alt="All servers in folders by group, with tags" width="100%">
 
 <img src="assets/screenshots/en/server-menu.jpg" alt="The server menu, grouped, with tags and the ⌘1…⌘9 numbers" width="100%">

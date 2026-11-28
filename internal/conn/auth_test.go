@@ -153,10 +153,22 @@ func TestAgentWait(t *testing.T) {
 	}
 }
 
-// A PuTTY key file gets its own error code and says how to convert it (#264).
+// A PuTTY key file Davish reads (versions 2 and 3) logs in like any other key.
+func TestLoadKeyPPKReadable(t *testing.T) {
+	for file, pass := range map[string]string{"ed25519-v3.ppk.txt": "", "rsa-v2-enc.ppk.txt": "test pass"} {
+		path := filepath.Join("..", "keyfile", "testdata", file)
+		signer, err := (&Manager{secrets: passphraseOnly(pass)}).loadKey(store.Server{KeyPath: path})
+		if err != nil || signer == nil {
+			t.Errorf("%s: signer = %v, err = %v", file, signer, err)
+		}
+	}
+}
+
+// A PuTTY key file of a kind Davish does not read gets its own error code and
+// says how to convert it (#264).
 func TestLoadKeyPPK(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "test.ppk")
-	if err := os.WriteFile(path, []byte("PuTTY-User-Key-File-3: ssh-ed25519\nEncryption: none\n"), 0o600); err != nil {
+	if err := os.WriteFile(path, []byte("PuTTY-User-Key-File-1: ssh-rsa\nEncryption: none\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	_, err := (&Manager{secrets: passphraseOnly("")}).loadKey(store.Server{KeyPath: path})
