@@ -98,7 +98,9 @@ jobs:
               # The binary, its icon and a script that adds it to the application
               # menu: Wayland takes a window's icon from a desktop entry (#305).
               # The same script packs the CI artifact.
-              scripts/package-linux.sh "dist/$name.tar.gz" ;;
+              scripts/package-linux.sh "dist/$name.tar.gz"
+              # The same build as a .deb: apt pulls GTK and WebKitGTK in.
+              scripts/package-deb.sh "${GITHUB_REF_NAME#v}" "dist/$name.deb" ;;
             *)
               cp build/bin/Davish-amd64-installer.exe "dist/$name-setup.exe"
               (cd build/bin && 7z a "../../dist/$name.zip" Davish.exe) ;;
@@ -179,3 +181,39 @@ jobs:
             --title "Davish ${GITHUB_REF_NAME}" \
             --notes-file notes.md \
             --verify-tag
+
+  # Points the Homebrew tap and the Scoop bucket at this release. It runs after
+  # the release is public, so a failure here never holds the release back; run
+  # the job again, or scripts/write-manifests.sh by hand, to catch up.
+  manifests:
+    needs: release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update the tap and the bucket
+        env:
+          # A fine-grained token with Contents: write on the two repos below.
+          # GITHUB_TOKEN cannot write to another organization.
+          TAP_TOKEN: ${{ secrets.TAP_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -z "$TAP_TOKEN" ]; then
+            echo "::warning::secret TAP_TOKEN is missing; the tap and the bucket stay on the previous version"
+            exit 0
+          fi
+          version="${GITHUB_REF_NAME#v}"
+          gh release download "$GITHUB_REF_NAME" -p SHA256SUMS.txt
+          git clone --depth 1 "https://x-access-token:${TAP_TOKEN}@github.com/daeviz/homebrew-davish.git" tap
+          git clone --depth 1 "https://x-access-token:${TAP_TOKEN}@github.com/daeviz/scoop-davish.git" bucket
+          scripts/write-manifests.sh "$version" SHA256SUMS.txt tap bucket
+          for repo in tap bucket; do
+            (
+              cd "$repo"
+              git config user.name "davish release"
+              git config user.email "noreply@users.noreply.github.com"
+              git add -A
+              git diff --cached --quiet || { git commit -m "davish $version" && git push; }
+            )
+          done

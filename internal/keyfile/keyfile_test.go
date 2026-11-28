@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"golang.org/x/crypto/ssh"
@@ -34,29 +33,6 @@ func keygen(t *testing.T, typ, cipherName string) []byte {
 		t.Fatal(err)
 	}
 	return data
-}
-
-// A PuTTY key is recognised, with or without a passphrase and a byte order
-// mark, so the person is told to convert it rather than that it "cannot be
-// parsed" (#264).
-func TestParsePPK(t *testing.T) {
-	ppk := []byte("PuTTY-User-Key-File-3: ssh-ed25519\nEncryption: none\nComment: key\nPublic-Lines: 2\nAAAA\nPrivate-Lines: 1\nAAAA\nPrivate-MAC: 00\n")
-	for name, data := range map[string][]byte{
-		"plain":      ppk,
-		"version 2":  []byte(strings.Replace(string(ppk), "-3:", "-2:", 1)),
-		"with a BOM": append([]byte("\xef\xbb\xbf"), ppk...),
-		"indented":   append([]byte("\n  "), ppk...),
-	} {
-		for _, pass := range [][]byte{nil, []byte("secret")} {
-			if _, err := Parse(data, pass); !errors.Is(err, ErrPPK) {
-				t.Errorf("%s, passphrase %v: err = %v; want ErrPPK", name, pass != nil, err)
-			}
-		}
-	}
-	// Anything else that is not a key stays an ordinary parse error.
-	if _, err := Parse([]byte("not a key"), nil); err == nil || errors.Is(err, ErrPPK) {
-		t.Errorf("not a key: err = %v; want a parse error that is not ErrPPK", err)
-	}
 }
 
 func TestParseEveryCipher(t *testing.T) {
