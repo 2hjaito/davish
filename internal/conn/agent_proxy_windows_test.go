@@ -162,9 +162,11 @@ func TestAgentRelayFallback(t *testing.T) {
 	if _, ok := c.(*os.File); !ok {
 		t.Fatalf("got %T, want the pipe opened directly", c)
 	}
-	if _, err := agent.NewClient(c).List(); err != nil {
-		t.Fatal(err)
-	}
+	// No agent round trip here: x/crypto's client reads and writes the one
+	// *os.File from two goroutines, which Go's race detector reports inside
+	// internal/poll (it updates a file offset a pipe does not use) and made
+	// this test fail now and then on CI. The round trip over a pipe is
+	// covered by the relay tests.
 }
 
 func TestRunAgentProxyIgnoresOtherArgs(t *testing.T) {
