@@ -3402,6 +3402,8 @@ const zh = {
     CONN_CONTROL_SOCKET: '无法使用 control socket。',
     CONN_AGENT_SIGN_TIMEOUT:
       'SSH 代理未能及时为登录签名。如果它请你确认使用密钥（Bitwarden 会显示“Confirm SSH key usage”），请找到它的窗口，批准后再重新连接。',
+    CONN_AGENT_SIGN_FAILED:
+      'SSH 代理没有为登录签名：它拒绝了，或在等待你确认密钥时关闭了连接。请查看它的确认提示（如果没有出现，可能是代理无法识别 Davish），检查代理自己的日志，然后重新连接。',
     CONN_PROXY_UNCONFIRMED: '代理命令尚未确认。',
     TERM_CLOSED: '终端会话已关闭。',
     FS_PERMISSION_DENIED: '权限不足。',
