@@ -3394,7 +3394,7 @@ const zh = {
     CONN_UNREACHABLE: '无法连接到服务器。请检查主机、端口和网络。',
     CONN_SECRET_MISSING: '这台服务器没有保存密码或口令。',
     CONN_AGENT_UNAVAILABLE:
-      '没有找到密钥：SSH agent 是空的或未运行，~/.ssh 中也没有默认密钥。在 Windows 上，请启动“OpenSSH Authentication Agent”服务并用 ssh-add 添加密钥，或选择“私钥”。仅在连接过程中才签发证书的 agent（例如 authentik）暂不支持。',
+      '没有找到密钥：SSH agent 是空的或未运行，~/.ssh 中也没有默认密钥。如果密钥保存在 1Password 或 Bitwarden 中，请先解锁再重新连接。否则在 Windows 上，请启动“OpenSSH Authentication Agent”服务并用 ssh-add 添加密钥，或选择“私钥”。仅在连接过程中才签发证书的 agent（例如 authentik）暂不支持。',
     CONN_KEY_UNREADABLE: '无法读取私钥文件。',
     CONN_KEY_PPK:
       '这是 PuTTY 的 .ppk 密钥，Davish 暂时无法读取。请在 PuTTYgen 中选择 Conversions → Export OpenSSH key，然后使用导出的文件。',

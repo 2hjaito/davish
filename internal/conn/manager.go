@@ -186,10 +186,20 @@ func (m *Manager) Connect(ctx context.Context, id string) error { //nolint:conte
 	m.mu.Unlock()
 	m.publish(id, StateConnecting, nil)
 
-	client, err := m.dial(ctx, id)
+	// Disconnect cancels lctx, and that also ends a handshake still waiting
+	// on the agent: otherwise a Connect right after would put a second
+	// signing request in front of the agent while the first still waits
+	// (#332).
+	dctx, stopDial := context.WithCancel(ctx)
+	unhook := context.AfterFunc(lctx, stopDial)
+	client, err := m.dial(dctx, id)
+	unhook()
+	stopDial()
 	if err != nil {
 		cancel()
-		m.setFailed(id, l, err)
+		if !m.setFailed(id, l, err) {
+			return apperr.New(apperr.ConnNotConnected, "disconnected while connecting")
+		}
 		return err
 	}
 
@@ -465,6 +475,14 @@ func (m *Manager) State(id string) State {
 // AcceptHostKey pins the key the user approved and connects. fingerprint
 // must match the prompt, so a key swapped in the meantime is not trusted.
 func (m *Manager) AcceptHostKey(ctx context.Context, id, fingerprint string) error {
+	if err := m.TrustHostKey(id, fingerprint); err != nil {
+		return err
+	}
+	return m.Connect(ctx, id)
+}
+
+// TrustHostKey pins the key the user approved, without connecting.
+func (m *Manager) TrustHostKey(id, fingerprint string) error {
 	m.mu.Lock()
 	p, ok := m.pending[id]
 	delete(m.pending, id)
@@ -476,7 +494,7 @@ func (m *Manager) AcceptHostKey(ctx context.Context, id, fingerprint string) err
 		return err
 	}
 	m.log.Info("host key accepted", "server", id)
-	return m.Connect(ctx, id)
+	return nil
 }
 
 // Close disconnects everything and waits for background work to stop.
@@ -748,7 +766,18 @@ func (m *Manager) dialVia(ctx context.Context, target, id string, depth int) (*s
 	// a server needs to answer: the clock waits for that (#168).
 	signMax := max(agentSignWait, handshakeTimeout)
 	stopTimer := watch.guard(handshakeTimeout, signMax, func() { nc.Close() }) //nolint:errcheck,gosec // aborting
+	// A canceled ctx (Disconnect) ends the handshake, agent prompt and all:
+	// a signature the agent is still waiting on holds the handshake until
+	// the agent's connection is closed too, not just the server's.
+	stopCancel := context.AfterFunc(ctx, func() {
+		nc.Close() //nolint:errcheck,gosec // aborting
+		release()
+	})
 	c, chans, reqs, err := ssh.NewClientConn(nc, addr, cfg)
+	if !stopCancel() && err == nil { // canceled just as the handshake finished
+		c.Close() //nolint:errcheck,gosec // already closed underneath
+		err = ctx.Err()
+	}
 	if !stopTimer() && err == nil { // timed out just as the handshake finished
 		c.Close() //nolint:errcheck,gosec // already closed underneath
 		err = errors.New("ssh handshake timed out")
@@ -768,6 +797,10 @@ func (m *Manager) dialVia(ctx context.Context, target, id string, depth int) (*s
 			// A tunnel that died takes the blame when it has something to
 			// confess; a live one stays out of the report.
 			err = &proxyError{err: err, why: why}
+		}
+		if ctx.Err() != nil {
+			// Disconnected or shut down: not the agent's or the server's fault.
+			return nil, apperr.Wrap(apperr.ConnNotConnected, "connecting was canceled", ctx.Err())
 		}
 		if watch.timedOut() {
 			m.log.Warn("ssh agent did not sign in time", "server", target, "waited", signMax.String())
@@ -820,13 +853,21 @@ func (m *Manager) handshakeError(id, addr string, res *hostKeyResult, err error)
 	return apperr.Wrap(apperr.ConnUnreachable, "ssh handshake failed", err)
 }
 
-func (m *Manager) setFailed(id string, l *link, err error) {
+// setFailed marks l failed and says so, unless l is no longer the server's
+// link (disconnected, or replaced by a newer Connect): then the failure is
+// old news and must not overwrite the newer state. It reports whether l was
+// current.
+func (m *Manager) setFailed(id string, l *link, err error) bool {
 	m.mu.Lock()
-	if m.conns[id] == l {
+	current := m.conns[id] == l
+	if current {
 		l.state, l.client, l.sftp = StateFailed, nil, nil
 	}
 	m.mu.Unlock()
-	m.publish(id, StateFailed, err)
+	if current {
+		m.publish(id, StateFailed, err)
+	}
+	return current
 }
 
 func (m *Manager) publish(id string, state State, err error) {

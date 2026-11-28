@@ -3617,7 +3617,7 @@ const fr = {
     CONN_UNREACHABLE: 'Impossible de joindre le serveur. Vérifiez l’hôte, le port et le réseau.',
     CONN_SECRET_MISSING: 'Aucun mot de passe ni phrase secrète enregistré pour ce serveur.',
     CONN_AGENT_UNAVAILABLE:
-      'Aucune clé trouvée\u00a0: l’agent SSH est vide ou ne fonctionne pas, et il n’y a pas de clé par défaut dans ~/.ssh. Sous Windows, démarrez le service «\u00a0OpenSSH Authentication Agent\u00a0» et ajoutez votre clé avec ssh-add, ou choisissez Clé privée. Les agents qui n’émettent un certificat que pendant la connexion (comme authentik) ne sont pas encore pris en charge.',
+      'Aucune clé trouvée\u00a0: l’agent SSH est vide ou ne fonctionne pas, et il n’y a pas de clé par défaut dans ~/.ssh. Si votre clé est dans 1Password ou Bitwarden, déverrouillez-le et reconnectez-vous. Sinon, sous Windows, démarrez le service «\u00a0OpenSSH Authentication Agent\u00a0» et ajoutez votre clé avec ssh-add, ou choisissez Clé privée. Les agents qui n’émettent un certificat que pendant la connexion (comme authentik) ne sont pas encore pris en charge.',
     CONN_KEY_UNREADABLE: 'Impossible de lire le fichier de clé privée.',
     CONN_KEY_PPK:
       'Il s’agit d’une clé PuTTY .ppk, que Davish ne peut pas lire. Dans PuTTYgen, choisissez Conversions → Export OpenSSH key, puis utilisez le fichier exporté.',

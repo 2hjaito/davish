@@ -118,7 +118,15 @@ func (a *App) AcceptHostKey(id, fingerprint string) error {
 	if err := a.lock.Check(); err != nil {
 		return err
 	}
-	return a.conns.AcceptHostKey(a.ctx, id, fingerprint)
+	if err := a.conns.TrustHostKey(id, fingerprint); err != nil {
+		return err
+	}
+	// The key is trusted now. A connect that then fails (an agent with no
+	// keys, a refused login) shows in the server's own error dialog through
+	// conn:status; returning it here put it in the host key dialog too, as
+	// "Something went wrong" over a step that had worked.
+	_ = a.conns.Connect(a.ctx, id) //nolint:errcheck // reported through conn:status
+	return nil
 }
 
 func (a *App) view(s store.Server) (ServerView, error) {

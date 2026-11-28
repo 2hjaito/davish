@@ -100,9 +100,26 @@ func agentWait() time.Duration {
 	return agentTimeout
 }
 
+// agentEmptyRetry is how long to wait before asking an agent that listed no
+// keys once more. 1Password on Windows lists none the first time it is asked
+// while its vault is locked, and its keys a second later (#332).
+var agentEmptyRetry = time.Second
+
 // agentSigners returns the keys loaded in the SSH agent, if one is running
 // and answers in time.
 func (m *Manager) agentSigners(w *signWatch) ([]ssh.Signer, func()) {
+	signers, release, empty := m.agentSignersOnce(w)
+	if !empty {
+		return signers, release
+	}
+	time.Sleep(agentEmptyRetry)
+	signers, release, _ = m.agentSignersOnce(w)
+	return signers, release
+}
+
+// agentSignersOnce asks the agent once; empty is true when it answered with
+// no keys.
+func (m *Manager) agentSignersOnce(w *signWatch) (signers []ssh.Signer, release func(), empty bool) {
 	c, err := agentDial()
 	if err != nil {
 		// Without this line a pipe that cannot be opened (busy, no right to it,
@@ -111,11 +128,11 @@ func (m *Manager) agentSigners(w *signWatch) ([]ssh.Signer, func()) {
 		if m.log != nil {
 			m.log.Info("ssh agent not reachable", "err", err)
 		}
-		return nil, func() {}
+		return nil, func() {}, false
 	}
 	// Closing may block while a read is pending on a Windows pipe, so it
 	// never runs on the caller's goroutine.
-	release := func() { go c.Close() } //nolint:errcheck // best effort
+	release = func() { go c.Close() } //nolint:errcheck // best effort
 	type listed struct {
 		signers []ssh.Signer
 		err     error
@@ -137,7 +154,7 @@ func (m *Manager) agentSigners(w *signWatch) ([]ssh.Signer, func()) {
 			if m.log != nil {
 				m.log.Warn("ssh agent did not list its keys", "err", l.err)
 			}
-			return nil, release
+			return nil, release, false
 		}
 		if len(l.signers) == 0 {
 			if m.log != nil {
@@ -146,15 +163,15 @@ func (m *Manager) agentSigners(w *signWatch) ([]ssh.Signer, func()) {
 				m.log.Info("ssh agent is running but lists no keys")
 			}
 			release()
-			return nil, func() {}
+			return nil, func() {}, true
 		}
-		return m.logSigning(l.signers, w), release
+		return m.logSigning(l.signers, w), release, false
 	case <-time.After(wait):
 		if m.log != nil {
 			m.log.Warn("ssh agent did not answer in time; trying key files", "waited", wait.String())
 		}
 		release()
-		return nil, func() {}
+		return nil, func() {}, false
 	}
 }
 

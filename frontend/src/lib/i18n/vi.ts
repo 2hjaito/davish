@@ -3470,7 +3470,7 @@ const vi = {
     CONN_UNREACHABLE: 'Không kết nối được tới server. Kiểm tra host, port và mạng.',
     CONN_SECRET_MISSING: 'Chưa lưu mật khẩu hoặc passphrase cho server này.',
     CONN_AGENT_UNAVAILABLE:
-      'Không tìm thấy key nào: SSH agent trống hoặc chưa chạy, và không có key mặc định trong ~/.ssh. Trên Windows, hãy bật dịch vụ “OpenSSH Authentication Agent” rồi nạp key bằng ssh-add, hoặc chọn Private key. Các agent chỉ cấp chứng chỉ trong lúc kết nối (như authentik) chưa được hỗ trợ.',
+      'Không tìm thấy key nào: SSH agent trống hoặc chưa chạy, và không có key mặc định trong ~/.ssh. Nếu key nằm trong 1Password hoặc Bitwarden, hãy mở khoá ứng dụng đó rồi kết nối lại. Nếu không, trên Windows hãy bật dịch vụ “OpenSSH Authentication Agent” rồi nạp key bằng ssh-add, hoặc chọn Private key. Các agent chỉ cấp chứng chỉ trong lúc kết nối (như authentik) chưa được hỗ trợ.',
     CONN_KEY_UNREADABLE: 'Không đọc được file private key.',
     CONN_KEY_PPK:
       'Đây là key .ppk của PuTTY, Davish chưa đọc được. Trong PuTTYgen chọn Conversions → Export OpenSSH key rồi dùng file vừa xuất.',
