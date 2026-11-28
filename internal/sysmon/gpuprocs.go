@@ -23,8 +23,9 @@ var gpuProcsScript string
 const gpuProcsTimeout = 30 * time.Second
 
 // GPUProcess is one row of the Monitor's GPU process table, like a row of
-// nvtop: a process on one GPU, as nvidia-smi sees it, with what /proc says
-// about it. A reading nobody reports is -1.
+// nvtop: a process on one GPU, as nvidia-smi (NVIDIA), the kernel's DRM
+// descriptors (AMD and Intel on Linux) or Windows' GPU counters see it, with
+// what /proc says about it. A reading nobody reports is -1.
 type GPUProcess struct {
 	GPU       int     `json:"gpu"` // nvidia-smi's index
 	PID       int     `json:"pid"`
@@ -39,16 +40,18 @@ type GPUProcess struct {
 	Mem       float64 `json:"mem"` // resident bytes
 }
 
-// GPUProcessList is every process on the server's NVIDIA GPUs, the most GPU
+// GPUProcessList is every process on the server's GPUs, the most GPU
 // memory first. A process on two GPUs has a row on each.
 type GPUProcessList struct {
 	Procs []GPUProcess `json:"procs"`
 }
 
-// GPUProcesses lists the processes on the server's NVIDIA GPUs, as nvtop
-// does. CPU load is measured since the previous call for the server, apart
-// from the Processes tab's; the first call falls back to each process's
-// average over its life. A server without nvidia-smi has an empty list.
+// GPUProcesses lists the processes on the server's GPUs, as nvtop does. CPU
+// load, and the GPU load of AMD and Intel processes, are measured since the
+// previous call for the server, apart from the Processes tab's; the first
+// call falls back to each process's average over its life (CPU) or shows
+// nothing (GPU). A server without a GPU has an empty list. Without root,
+// Linux shows only the user's own AMD and Intel processes.
 func (s *Service) GPUProcesses(ctx context.Context, serverID string) (GPUProcessList, error) {
 	ctx, cancel := context.WithTimeout(ctx, gpuProcsTimeout)
 	defer cancel()
@@ -73,9 +76,11 @@ func (s *Service) GPUProcesses(ctx context.Context, serverID string) (GPUProcess
 	s.procsMu.Lock()
 	prev := s.gpuProcs[serverID]
 	s.gpuProcs[serverID] = snap.sample()
+	prevEng := s.gpuEngines[serverID]
+	s.gpuEngines[serverID] = snap.engines()
 	s.procsMu.Unlock()
 
-	return snap.list(prev), nil
+	return snap.withEngineLoad(snap.list(prev), prevEng), nil
 }
 
 // gpuProcSnapshot is one parsed run of gpuprocs.sh: the rows nvidia-smi
@@ -84,6 +89,10 @@ type gpuProcSnapshot struct {
 	host    procSnapshot
 	hasHost bool
 	rows    []GPUProcess
+	// drm is what AMD and Intel processes hold on their cards, and uptime the
+	// clock their busy time is measured against.
+	drm    map[engineKey]*drmUse
+	uptime float64
 }
 
 const bytesPerMiB = 1024 * 1024
@@ -134,6 +143,23 @@ func parseGPUProcs(s map[string][]string) (gpuProcSnapshot, error) {
 		}
 	}
 
+	cards := parseDRMCards(s["drmcards"], nextIndex(index))
+	g.drm = parseDRMFD(s["drmfd"], cards)
+	if len(s["uptime"]) > 0 {
+		g.uptime, _ = firstNumber(s["uptime"][0])
+	}
+	for _, c := range cards {
+		total[c.index] = c.total
+	}
+	for k, u := range g.drm {
+		r := row(k.gpu, k.pid)
+		r.Type = "C"
+		if u.render {
+			r.Type = "G"
+		}
+		r.GPUMem = u.mem
+	}
+
 	for _, r := range rows {
 		if t := total[r.GPU]; r.GPUMem >= 0 && t > 0 {
 			r.GPUMemPct = round1(100 * r.GPUMem / t)
@@ -175,12 +201,43 @@ func (g gpuProcSnapshot) list(prev procSample) GPUProcessList {
 	return GPUProcessList{Procs: out}
 }
 
+// engines is what the next call needs to measure the GPU load of
+// AMD and Intel processes.
+func (g gpuProcSnapshot) engines() engineSample {
+	s := engineSample{uptime: g.uptime, ns: map[engineKey]map[string]float64{}}
+	for k, u := range g.drm {
+		s.ns[k] = u.engines
+	}
+	return s
+}
+
+// withEngineLoad fills the GPU load of AMD and Intel rows from their busy
+// time since prev.
+func (g gpuProcSnapshot) withEngineLoad(list GPUProcessList, prev engineSample) GPUProcessList {
+	for i, r := range list.Procs {
+		k := engineKey{gpu: r.GPU, pid: r.PID}
+		if u, ok := g.drm[k]; ok {
+			list.Procs[i].GPUUtil = engineLoad(u.engines, prev.ns[k], g.uptime-prev.uptime)
+		}
+	}
+	return list
+}
+
 // sample is what the next call needs to measure CPU load.
 func (g gpuProcSnapshot) sample() procSample {
 	if !g.hasHost {
 		return procSample{}
 	}
 	return g.host.sample()
+}
+
+// nextIndex is the index after the highest one nvidia-smi gave.
+func nextIndex(index map[string]int) int {
+	next := 0
+	for _, i := range index {
+		next = max(next, i+1)
+	}
+	return next
 }
 
 // parseGPUList reads "index, uuid, memory.total" lines into UUID → index

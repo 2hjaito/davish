@@ -97,7 +97,7 @@
       [m.memory, formatBytes(info.memTotal || latest.memTotal)],
       [m.swap, swap > 0 ? `${formatBytes(latest.swapUsed)} / ${formatBytes(swap)}` : si.noSwap],
     ]
-    // A GPU only when there is one: nvidia-smi answered.
+    // A GPU only when there is one: nvidia-smi, the kernel or Windows reported it.
     for (const g of latest.gpus)
       out.push([
         latest.gpus.length > 1 ? `${m.gpu} ${g.index}` : m.gpu,

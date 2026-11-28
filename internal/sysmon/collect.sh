@@ -4,6 +4,12 @@ export LC_ALL=C
 # Asking for GPUs only makes sense where the NVIDIA driver tools exist.
 gpu=
 command -v nvidia-smi >/dev/null 2>&1 && gpu=1
+# AMD and Intel GPUs have no tool to ask: the kernel shows them under sysfs.
+# DAVISH_DRM is for the tests, which point it at a fake tree.
+drm=${DAVISH_DRM:-/sys/class/drm}
+# Marketing names come from lspci when it is there; one call, not one per snapshot.
+pcinames=
+command -v lspci >/dev/null 2>&1 && pcinames=$(lspci -D -mm 2>/dev/null | grep -E '"(VGA compatible|3D|Display)')
 docker=
 command -v docker >/dev/null 2>&1 && docker=1
 # Failed services and container restarts change slowly: every healthEvery-th
@@ -29,6 +35,32 @@ while :; do
 	echo '@@gpu'
 	[ -n "$gpu" ] && nvidia-smi --query-gpu=index,name,utilization.gpu,memory.used,memory.total,temperature.gpu,power.draw \
 		--format=csv,noheader,nounits 2>/dev/null
+	# One line per card: slot|vendor|driver|busy %|vram used|vram total|temp m°C|power µW|product name
+	echo '@@gpudrm'
+	for c in "$drm"/card[0-9]*; do
+		case "$c" in *-*) continue ;; esac # card0-DP-1 and the like are connectors
+		d=$c/device
+		[ -r "$d/vendor" ] || continue
+		vendor= slot= driver= busy= used= total= temp= power= pname=
+		{ read -r vendor < "$d/vendor"; } 2>/dev/null
+		# NVIDIA cards are nvidia-smi's, unless it is missing.
+		[ "$vendor" = 0x10de ] && [ -n "$gpu" ] && continue
+		while IFS='=' read -r k v; do
+			case $k in PCI_SLOT_NAME) slot=$v ;; DRIVER) driver=$v ;; esac
+		done < "$d/uevent" 2>/dev/null
+		{ read -r busy < "$d/gpu_busy_percent"; } 2>/dev/null
+		{ read -r used < "$d/mem_info_vram_used"; } 2>/dev/null
+		{ read -r total < "$d/mem_info_vram_total"; } 2>/dev/null
+		{ read -r pname < "$d/product_name"; } 2>/dev/null
+		for h in "$d"/hwmon/hwmon*; do
+			{ read -r temp < "$h/temp1_input"; } 2>/dev/null
+			{ read -r power < "$h/power1_average" || read -r power < "$h/power1_input"; } 2>/dev/null
+			break
+		done
+		echo "$slot|$vendor|$driver|$busy|$used|$total|$temp|$power|$pname"
+	done
+	echo '@@gpuname'
+	[ -n "$pcinames" ] && printf '%s\n' "$pcinames"
 	if [ $((n % healthEvery)) -eq 0 ]; then
 		echo '@@failed'
 		systemctl list-units --type=service --state=failed --no-legend --plain 2>/dev/null | cut -d' ' -f1

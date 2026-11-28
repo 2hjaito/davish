@@ -1106,7 +1106,7 @@ const fr = {
         ],
       },
       monitor: {
-        does: 'CPU par cœur, RAM, swap, disques, réseau, GPU NVIDIA, processus.',
+        does: 'CPU par cœur, RAM, swap, disques, réseau, GPU, processus.',
         actions: [
           'Vue d’ensemble, sous les graphiques\u00a0: système, matériel, disques avec leurs points de montage, interfaces réseau avec passerelle et DNS',
           'Trier les processus par CPU ou RAM',
@@ -2541,9 +2541,9 @@ const fr = {
     memoryUsed: 'Mémoire utilisée',
     swap: 'Swap',
     noSwap: 'Le serveur n’a pas de swap.',
-    gpuNone: 'Aucun GPU NVIDIA détecté',
+    gpuNone: 'Aucun GPU détecté',
     gpuNoneHint:
-      'Le Moniteur lit les GPU via nvidia-smi. Le serveur n’a pas de GPU NVIDIA, ou le pilote NVIDIA n’est pas installé.',
+      'Le Moniteur lit les GPU NVIDIA via nvidia-smi, et les GPU AMD et Intel via le système. Le serveur n’a pas de GPU, ou son pilote n’est pas installé.',
     gpuUtil: 'Utilisation',
     vram: 'Mémoire GPU',
     gpuProcsLoading: 'Lecture des processus GPU…',

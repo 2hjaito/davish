@@ -92,7 +92,8 @@ func TestGPUProcsScriptWithoutNvidiaSMI(t *testing.T) {
 	}
 	cmd := exec.Command("sh", "-s")
 	cmd.Stdin = strings.NewReader(gpuProcsScript)
-	cmd.Env = append(os.Environ(), "PATH=/usr/bin:/bin")
+	// A machine with an AMD or Intel card would list its processes: look at an empty tree.
+	cmd.Env = append(os.Environ(), "PATH=/usr/bin:/bin", "DAVISH_DRM="+t.TempDir())
 	out, err := cmd.Output()
 	if err != nil {
 		t.Fatal(err)

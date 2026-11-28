@@ -1032,7 +1032,7 @@ const zh = {
         ],
       },
       monitor: {
-        does: '每个核心的 CPU、内存、swap、磁盘、网络、NVIDIA GPU、进程。',
+        does: '每个核心的 CPU、内存、swap、磁盘、网络、GPU、进程。',
         actions: [
           '概览图表下方：系统、硬件、磁盘及挂载点、网络接口及网关和 DNS',
           '按 CPU 或内存排序进程',
@@ -2384,8 +2384,9 @@ const zh = {
     memoryUsed: '已用内存',
     swap: 'Swap',
     noSwap: '服务器没有 swap。',
-    gpuNone: '没有找到 NVIDIA GPU',
-    gpuNoneHint: '监控通过 nvidia-smi 读取 GPU。服务器没有 NVIDIA GPU，或未安装 NVIDIA 驱动。',
+    gpuNone: '没有找到 GPU',
+    gpuNoneHint:
+      '监控通过 nvidia-smi 读取 NVIDIA GPU，AMD 和 Intel GPU 则从系统读取。服务器没有 GPU，或未安装驱动。',
     gpuUtil: '利用率',
     vram: '显存',
     gpuProcsLoading: '正在读取 GPU 进程…',

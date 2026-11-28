@@ -1071,7 +1071,7 @@ const ko = {
         ],
       },
       monitor: {
-        does: '코어별 CPU, RAM, 스왑, 디스크, 네트워크, NVIDIA GPU, 프로세스를 보여줍니다.',
+        does: '코어별 CPU, RAM, 스왑, 디스크, 네트워크, GPU, 프로세스를 보여줍니다.',
         actions: [
           '차트 아래의 개요: 시스템, 하드웨어, 디스크와 마운트, 네트워크 인터페이스와 게이트웨이, DNS',
           'CPU 또는 RAM으로 프로세스 정렬',
@@ -2466,9 +2466,9 @@ const ko = {
     memoryUsed: '메모리 사용량',
     swap: '스왑',
     noSwap: '서버에 스왑이 없습니다.',
-    gpuNone: 'NVIDIA GPU를 찾지 못했습니다',
+    gpuNone: 'GPU를 찾지 못했습니다',
     gpuNoneHint:
-      '모니터는 nvidia-smi로 GPU를 읽습니다. 서버에 NVIDIA GPU가 없거나 NVIDIA 드라이버가 설치되지 않았습니다.',
+      '모니터는 NVIDIA GPU는 nvidia-smi로, AMD와 Intel GPU는 시스템에서 읽습니다. 서버에 GPU가 없거나 드라이버가 설치되지 않았습니다.',
     gpuUtil: '사용률',
     vram: 'GPU 메모리',
     gpuProcsLoading: 'GPU 프로세스를 읽는 중…',

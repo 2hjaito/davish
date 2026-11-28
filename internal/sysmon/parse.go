@@ -54,7 +54,8 @@ type Mount struct {
 	Pct    float64 `json:"pct"` // rounded up like df's Capacity
 }
 
-// GPU is one NVIDIA GPU from nvidia-smi. Readings the driver does not
+// GPU is one GPU, from nvidia-smi, from sysfs (AMD, Intel) or from Windows
+// performance counters. Readings the driver does not
 // report are -1.
 type GPU struct {
 	Index    int     `json:"index"`
@@ -183,6 +184,7 @@ func parseSections(s map[string][]string) (Snapshot, error) {
 	// driver without a reading must not cost the whole snapshot.
 	snap.Disks = parseDiskstats(s["diskstats"], s["block"])
 	snap.GPUs = parseGPUs(s["gpu"])
+	snap.GPUs = append(snap.GPUs, parseDRMGPUs(s["gpudrm"], s["gpuname"], nextGPUIndex(snap.GPUs))...)
 	if failed, ok := s["failed"]; ok {
 		snap.Health = parseHealth(failed, s["containers"])
 	}
@@ -498,6 +500,16 @@ func parseGPUs(lines []string) []GPU {
 		out = append(out, g)
 	}
 	return out
+}
+
+// nextGPUIndex is where AMD and Intel cards start counting: after the
+// highest index nvidia-smi gave.
+func nextGPUIndex(gpus []GPU) int {
+	next := 0
+	for _, g := range gpus {
+		next = max(next, g.Index+1)
+	}
+	return next
 }
 
 // gpuValue is -1 for "[N/A]", "[Not Supported]" and the like.
