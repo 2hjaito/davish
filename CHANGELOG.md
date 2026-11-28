@@ -5,6 +5,7 @@ Mọi thay đổi đáng chú ý của Davish. Định dạng theo [Keep a Chang
 ## [Unreleased]
 
 ### Thêm
+- **Gói `.deb` cho Linux** (Debian, Ubuntu và họ hàng, amd64): `sudo apt install ./Davish-…-linux-amd64.deb` kéo theo GTK và WebKitGTK và thêm Davish vào menu ứng dụng. Workflow phát hành dựng nó cạnh file `.tar.gz`; CI dựng một bản ở mỗi lượt chạy.
 - **Khóa PuTTY `.ppk`**: chọn thẳng file `.ppk` (puttygen, định dạng phiên bản 2 và 3; RSA, ECDSA, Ed25519, có hoặc không có passphrase) làm khóa của server, không cần xuất sang OpenSSH nữa. Davish tự đọc, kiểm tra MAC của file để phân biệt passphrase sai với file hỏng, và không ghi gì ra đĩa. Định dạng phiên bản 1 và Argon2d vẫn báo cách chuyển bằng PuTTYgen. Tham khảo cách làm của [motty](https://github.com/t8y2/motty) (Apache-2.0), mã tự viết.
 - **Tiến trình GPU, giống nvtop**: Monitor → GPU giờ liệt kê các tiến trình trên mỗi GPU NVIDIA bên dưới các thẻ: PID, người dùng, GPU, loại, mức sử dụng, bộ nhớ GPU và tỉ lệ trên card, CPU, bộ nhớ máy và lệnh, sắp xếp được theo mọi cột. Davish chạy `nvidia-smi` và đọc `/proc` của các tiến trình đó mỗi 3 giây, chỉ khi đang mở tab GPU. Driver không có `pmon` thì chỉ hiện tiến trình tính toán, không có mức sử dụng; Windows ở chế độ WDDM không có bộ nhớ GPU theo từng tiến trình.
 - Giao diện tiếng Đức: chọn Deutsch trong Cài đặt → Chung → Ngôn ngữ; lần đầu Davish theo máy đặt tiếng Đức.

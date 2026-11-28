@@ -94,7 +94,9 @@ jobs:
       # tried from a CI build (#305). The other systems upload what wails built.
       - name: Package (Linux)
         if: runner.os == 'Linux'
-        run: scripts/package-linux.sh dist/Davish-ci-linux-amd64.tar.gz
+        run: |
+          scripts/package-linux.sh dist/Davish-ci-linux-amd64.tar.gz
+          scripts/package-deb.sh 0.0.0 dist/Davish-ci-linux-amd64.deb
 
       - uses: actions/upload-artifact@v4
         with:

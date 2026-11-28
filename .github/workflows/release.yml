@@ -98,7 +98,9 @@ jobs:
               # The binary, its icon and a script that adds it to the application
               # menu: Wayland takes a window's icon from a desktop entry (#305).
               # The same script packs the CI artifact.
-              scripts/package-linux.sh "dist/$name.tar.gz" ;;
+              scripts/package-linux.sh "dist/$name.tar.gz"
+              # The same build as a .deb: apt pulls GTK and WebKitGTK in.
+              scripts/package-deb.sh "${GITHUB_REF_NAME#v}" "dist/$name.deb" ;;
             *)
               cp build/bin/Davish-amd64-installer.exe "dist/$name-setup.exe"
               (cd build/bin && 7z a "../../dist/$name.zip" Davish.exe) ;;
