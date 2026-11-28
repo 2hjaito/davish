@@ -15,6 +15,7 @@
     type WidgetItem,
     type WidgetSize,
   } from '../widgets/layout'
+  import { endPress, holdPress, HOLD_MS, movePress, type Press, startPress } from '../widgets/press'
   import { widgetDefs } from '../widgets/registry'
   import { wm } from '../wm/windowManager.svelte'
   import { CELL_H, CELL_W, cellAt, gridOf, slackX } from './iconGrid'
@@ -25,9 +26,6 @@
   }
 
   let { onopen }: Props = $props()
-
-  /** The pointer must move this far before a press is a drag. */
-  const DRAG_START = 5
 
   const serverID = $derived(servers.activeId)
   const grid = $derived(gridOf(wm.area))
@@ -46,22 +44,45 @@
 
   let press = $state<{
     id: string
-    x: number
-    y: number
     /** Where the widget's box was when pressed. */
     boxX: number
     boxY: number
+    gesture: Press
   } | null>(null)
   let drag = $state<{ id: string; dx: number; dy: number } | null>(null)
 
-  /** Set for the moment after a drag ends: the click that follows it is not a click on the widget. */
-  let justDragged = false
+  /**
+   * Set for the moment after a drag or a hold ends: the click that follows it
+   * is not a click on the widget.
+   */
+  let swallowClick = false
+
+  /** Turns on editing once a press has been held still for HOLD_MS. */
+  let holdTimer: ReturnType<typeof setTimeout> | undefined
+
+  function clearHold() {
+    clearTimeout(holdTimer)
+    holdTimer = undefined
+  }
+
+  // A hold still pending when the layer goes away must not turn on editing.
+  $effect(() => clearHold)
 
   function onPointerDown(ev: PointerEvent, item: WidgetItem, box: { x: number; y: number }) {
     // A widget drags as a desktop icon does, in or out of edit mode: a press that
-    // moves a few pixels is a drag, one that does not is a click.
+    // moves a few pixels is a drag, one that does not is a click, and one held
+    // still turns on editing.
     if (ev.button !== 0) return
-    press = { id: item.id, x: ev.clientX, y: ev.clientY, boxX: box.x, boxY: box.y }
+    clearHold()
+    press = { id: item.id, boxX: box.x, boxY: box.y, gesture: startPress(ev.clientX, ev.clientY) }
+    if (!editing) holdTimer = setTimeout(onHold, HOLD_MS)
+  }
+
+  function onHold() {
+    holdTimer = undefined
+    if (!press || press.gesture.dragging) return
+    press.gesture = holdPress(press.gesture)
+    ui.widgetEdit = true
   }
 
   // The move and the release are heard on the window, not on the widget: the
@@ -69,28 +90,35 @@
   // something every input path honours.
   function onPointerMove(ev: PointerEvent) {
     if (!press) return
-    const dx = ev.clientX - press.x
-    const dy = ev.clientY - press.y
-    if (!drag && Math.hypot(dx, dy) < DRAG_START) return
-    drag = { id: press.id, dx, dy }
+    press.gesture = movePress(press.gesture, ev.clientX, ev.clientY)
+    if (!press.gesture.dragging) return
+    clearHold()
+    drag = { id: press.id, dx: ev.clientX - press.gesture.x, dy: ev.clientY - press.gesture.y }
   }
 
   function onPointerUp() {
-    const item =
-      press && drag?.id === press.id
-        ? widgets.of(serverID).find((w) => w.id === press!.id)
-        : undefined
-    if (item && press && drag) {
-      const cell = dropCell(press.boxX, press.boxY, drag.dx, drag.dy)
-      widgets.move(serverID, item.id, wantFor(cell, item.size, grid), grid)
-      justDragged = true
-      setTimeout(() => (justDragged = false), 0)
+    clearHold()
+    if (press) {
+      const outcome = endPress(press.gesture)
+      const item =
+        outcome === 'drop' && drag
+          ? widgets.of(serverID).find((w) => w.id === press!.id)
+          : undefined
+      if (item && drag) {
+        const cell = dropCell(press.boxX, press.boxY, drag.dx, drag.dy)
+        widgets.move(serverID, item.id, wantFor(cell, item.size, grid), grid)
+      }
+      if (outcome !== 'click') {
+        swallowClick = true
+        setTimeout(() => (swallowClick = false), 0)
+      }
     }
     drag = null
     press = null
   }
 
   function cancelDrag() {
+    clearHold()
     drag = null
     press = null
   }
@@ -155,7 +183,7 @@
           onpointerdown={(ev) => onPointerDown(ev, p.item, box)}
         >
           {#if def.opens && !editing}
-            <button class="body" onclick={() => !justDragged && def.opens && onopen(def.opens)}>
+            <button class="body" onclick={() => !swallowClick && def.opens && onopen(def.opens)}>
               {#await def.load() then W}<W.default {serverID} size={p.item.size} />{/await}
             </button>
           {:else}
